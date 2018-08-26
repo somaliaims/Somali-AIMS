@@ -10,33 +10,50 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        // GET api/values
+        /// <summary>
+        /// Retrieves the values
+        /// </summary>
+        /// <returns>Returns a string array</returns>
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
             return new string[] { "value1", "value2" };
         }
 
-        // GET api/values/5
+        /// <summary>
+        /// Get the string
+        /// </summary>
+        /// <param name="id">Id to be passed as integer</param>
+        /// <returns>Returns a string</returns>
         [HttpGet("{id}")]
         public ActionResult<string> Get(int id)
         {
             return "value";
         }
 
-        // POST api/values
+        /// <summary>
+        /// Post
+        /// </summary>
+        /// <param name="value">Input string</param>
         [HttpPost]
         public void Post([FromBody] string value)
         {
         }
 
-        // PUT api/values/5
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="id">input id</param>
+        /// <param name="value">Object</param>
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)
         {
         }
 
-        // DELETE api/values/5
+        /// <summary>
+        /// Delete
+        /// </summary>
+        /// <param name="id">Pass id to delete</param>
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
