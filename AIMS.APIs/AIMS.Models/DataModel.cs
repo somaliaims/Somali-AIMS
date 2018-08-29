@@ -32,10 +32,6 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string Title { get; set; }
-        [EmailAddress]
-        public string Email { get; set; }
-        [Phone]
-        public string PhoneNumber { get; set; }
     }
 
     public class EFUser
@@ -53,17 +49,17 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        public string Code { get; set; }
         public string Name { get; set; }
-        public ICollection<EFSectorCodes> CodesList { get; set; }
     }
 
-    public class EFSectorCodes
+    public class EFProjectSectors
     {
-        [Key]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
         public int SectorId { get; set; }
         public EFSector Sector { get; set; }
-        public string MappingCode { get; set; }
+        public decimal ContributedAmount { get; set; }
+        public decimal ExchangeRate { get; set; }
     }
 
     public class EFLocation
@@ -103,12 +99,25 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
+    }
+
+    public class EFProjectImplementers
+    {
+        [ForeignKey("Funder")]
+        public int FunderId { get; set; }
+        public EFOrganization Funder { get; set; }
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
+    }
+
+    public class EFProjectFundings
+    {
         [Column(TypeName = "decimal(9 ,2)")]
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
-        public decimal AmountInUSD { get; set; }
-        public int FinancialYear { get; set; }
+        public decimal ExchangeRate { get; set; }
     }
 
     public class EFUserSubscriptions
@@ -179,5 +188,10 @@ namespace AIMS.Models
         public string FieldTitle { get; set; }
         public FieldTypes FieldType { get; set; }
     }
+
+    /*public class EFEntity
+    {
+
+    }*/
 
 }

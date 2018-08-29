@@ -12,6 +12,11 @@
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>C:\Users\Rashid Ahmad\Desktop\AIMSSetup\AIMS.APIs.xml</DocumentationFile>
+    <OutputPath>C:\Users\Rashid Ahmad\Desktop\AIMSSetup\</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
