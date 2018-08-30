@@ -29,8 +29,8 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFProjectFunders>()
                 .HasKey(f => new { f.ProjectId, f.FunderId });
 
-            modelBuilder.Entity<EFOrganizationUsers>()
-                .HasKey(ou => new { ou.OrganizationId, ou.UserId });
+            modelBuilder.Entity<EFProjectImplementers>()
+                .HasKey(i => new { i.ProjectId, i.ImplementerId });
 
             modelBuilder.Entity<EFUserSubscriptions>()
                 .HasKey(s => new { s.UserId, s.ReportId });
@@ -45,12 +45,12 @@ namespace AIMS.DAL.EF
         public DbSet<EFOrganization> Organizations { get; set; }
         public DbSet<EFUser> Users { get; set; }
         public DbSet<EFSector> Sectors { get; set; }
-        public DbSet<EFSectorCodes> SectorCodes { get; set; }
         public DbSet<EFLocation> Locations { get; set; }
         public DbSet<EFProject> Projects { get; set; }
         public DbSet<EFProjectFunders> ProjectFunders { get; set; }
+        public DbSet<EFProjectImplementers> ProjectImplementers { get; set; }
+        public DbSet<EFProjectFundings> ProjectFundings { get; set; }
         public DbSet<EFUserSubscriptions> UserSubscriptions { get; set; }
-        public DbSet<EFOrganizationUsers> OrganizationUsers { get; set; }
         public DbSet<EFUserNotifications> UserNotifications { get; set; }
         public DbSet<EFProjectLogs> ProjectLogs { get; set; }
         public DbSet<EFProjectCustomFields> ProjectCustomFields { get; set; }

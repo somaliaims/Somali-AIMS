@@ -4,14 +4,16 @@ using AIMS.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    partial class AIMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180830064608_Fixes_First_Round")]
+    partial class Fixes_First_Round
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,29 +117,6 @@ namespace AIMS.DAL.Migrations
                     b.ToTable("ProjectFunders");
                 });
 
-            modelBuilder.Entity("AIMS.Models.EFProjectFundings", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(9 ,2)");
-
-                    b.Property<string>("Currency");
-
-                    b.Property<decimal>("ExchangeRate")
-                        .HasColumnType("decimal(9, 2)");
-
-                    b.Property<int>("ProjectId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("ProjectFundings");
-                });
-
             modelBuilder.Entity("AIMS.Models.EFProjectImplementers", b =>
                 {
                     b.Property<int>("ProjectId");
@@ -148,7 +127,7 @@ namespace AIMS.DAL.Migrations
 
                     b.HasIndex("ImplementerId");
 
-                    b.ToTable("ProjectImplementers");
+                    b.ToTable("EFProjectImplementers");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFProjectLogs", b =>
@@ -325,14 +304,6 @@ namespace AIMS.DAL.Migrations
                         .HasForeignKey("FunderId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("AIMS.Models.EFProject", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("AIMS.Models.EFProjectFundings", b =>
-                {
                     b.HasOne("AIMS.Models.EFProject", "Project")
                         .WithMany()
                         .HasForeignKey("ProjectId")

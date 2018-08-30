@@ -1,4 +1,6 @@
 ﻿using AIMS.DAL.EF;
+using AIMS.DAL.Repository;
+using AIMS.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,10 +12,87 @@ namespace AIMS.DAL.UnitOfWork
     public class UnitOfWork : IDisposable
     {
         private AIMSDbContext context = null;
+        public GenericRepository<EFSector> sectorRepository;
+        public GenericRepository<EFOrganization> organizationRepository;
+        public GenericRepository<EFProject> projectRepository;
+        public GenericRepository<EFProjectFunders> fundersRepository;
+        public GenericRepository<EFProjectImplementers> implementersRepository;
+        public GenericRepository<EFProjectFundings> fundingsRepository;
+        public GenericRepository<EFUser> userRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
             context = dbContext;
+        }
+
+        public GenericRepository<EFOrganization> OrganizationRepository
+        {
+            get
+            {
+                if (this.organizationRepository == null)
+                    this.organizationRepository = new GenericRepository<EFOrganization>(context);
+                return this.organizationRepository;
+            }
+        }
+
+        public GenericRepository<EFSector> SectorRepository
+        {
+            get
+            {
+                if (this.sectorRepository == null)
+                    this.sectorRepository = new GenericRepository<EFSector>(context);
+                return this.sectorRepository;
+            }
+        }
+
+        public GenericRepository<EFProject> ProjectRepository
+        {
+            get
+            {
+                if (this.projectRepository == null)
+                    this.projectRepository = new GenericRepository<EFProject>(context);
+                return this.projectRepository;
+            }
+        }
+
+        public GenericRepository<EFProjectFunders> ProjectFundersRepository
+        {
+            get
+            {
+                if (this.fundersRepository == null)
+                    this.fundersRepository = new GenericRepository<EFProjectFunders>(context);
+                return this.fundersRepository;
+            }
+        }
+
+        public GenericRepository<EFProjectImplementers> ProjectImplementersRepository
+        {
+            get
+            {
+                if (this.implementersRepository == null)
+                    this.implementersRepository = new GenericRepository<EFProjectImplementers>(context);
+                return this.implementersRepository;
+            }
+        }
+
+        public GenericRepository<EFProjectFundings> ProjectFundingsRepository
+        {
+            get
+            {
+                if (this.fundingsRepository == null)
+                    this.fundingsRepository = new GenericRepository<EFProjectFundings>(context);
+                return this.fundingsRepository;
+            }
+        }
+
+        public GenericRepository<EFUser> UserRepository
+        {
+            get
+            {
+                if (this.userRepository == null)
+                    this.userRepository = new GenericRepository<EFUser>(context);
+                return this.userRepository;
+            }
         }
 
         /// <summary>

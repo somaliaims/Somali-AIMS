@@ -44,8 +44,8 @@ namespace AIMS.APIs
                 c.SwaggerDoc("v1", new Info
                 {
                     Version = "v1",
-                    Title = "APIs for AIMS, FGS Somalia",
-                    Description = "APIs for AIMS, FGS Somalia",
+                    Title = "APIs for AIMS, FG of Somalia",
+                    Description = "APIs for AIMS, Federal Govt of Somalia",
                     TermsOfService = "None",
                     Contact = new Contact() { Name = "UNDP Somalia", Email = "raashid.ahmad@gmail.com", Url = "www.google.com.pk" }
                 });
@@ -76,7 +76,7 @@ namespace AIMS.APIs
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "AIMS APIs Version 1, FGS Somalia");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "AIMS APIs Version 1, FG of Somalia");
             });
 
             app.UseHttpsRedirection();

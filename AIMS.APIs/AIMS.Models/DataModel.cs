@@ -31,7 +31,7 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        public string Title { get; set; }
+        public string Name { get; set; }
     }
 
     public class EFUser
@@ -43,13 +43,24 @@ namespace AIMS.Models
         public string Email { get; set; }
         public string Password { get; set; }
         public UserTypes UserType { get; set; }
+        [ForeignKey("Organization")]
+        public int OrganizationId { get; set; }
+        public EFOrganization Organization { get; set; }
+        public bool IsApproved { get; set; }
+        public DateTime RegistrationDate { get; set; }
     }
 
+    /*
+     * The idea to adjust new sector is that for any open projects, if sector name
+     * is updated, create a new sector for updated name and reference the open projects
+     * with the name and update the old sector id reference
+     */
     public class EFSector
     {
         [Key]
         public int Id { get; set; }
         public string Name { get; set; }
+        public DateTime DateCreated { get; set; }
     }
 
     public class EFProjectSectors
@@ -103,9 +114,9 @@ namespace AIMS.Models
 
     public class EFProjectImplementers
     {
-        [ForeignKey("Funder")]
-        public int FunderId { get; set; }
-        public EFOrganization Funder { get; set; }
+        [ForeignKey("Implementer")]
+        public int ImplementerId { get; set; }
+        public EFOrganization Implementer { get; set; }
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
@@ -113,6 +124,11 @@ namespace AIMS.Models
 
     public class EFProjectFundings
     {
+        [Key]
+        public int Id { get; set; }
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
         [Column(TypeName = "decimal(9 ,2)")]
         public decimal Amount { get; set; }
         public string Currency { get; set; }
@@ -136,7 +152,7 @@ namespace AIMS.Models
         public bool IsActive { get; set; }
     }    
     
-    public class EFOrganizationUsers
+    /*public class EFOrganizationUsers
     {
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }
@@ -145,7 +161,7 @@ namespace AIMS.Models
         public int UserId { get; set; }
         public EFUser User { get; set; }
         public DateTime RegistrationDate { get; set; }
-    }
+    }*/
 
     public class EFUserNotifications
     {
