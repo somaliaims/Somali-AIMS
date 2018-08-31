@@ -73,7 +73,8 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    unitWork.SectorRepository.Insert(new EFSector() { Name = sector.Name, DateCreated = DateTime.Now });
+                    var newSector = unitWork.SectorRepository.Insert(new EFSector() { Name = sector.Name, DateCreated = DateTime.Now });
+                    response.ReturnedId = newSector.Id;
                     unitWork.Save();
                 }
                 catch(Exception ex)
@@ -101,12 +102,22 @@ namespace AIMS.Services
 
 
                 var linkedProjects = unitWork.ProjectRepository.GetWithInclude(p => p.SectorId == sector.Id && p.DateEnded == null, new string[] { "Sector" });
-                List<int> projectIds = new List<int>();
+                EFSector newSector = null;
+                if (linkedProjects != null)
+                {
+                    newSector = unitWork.sectorRepository.Insert(new EFSector()
+                    {
+                        Name = sector.Name,
+                        DateCreated = DateTime.Now
+                    });
+                }
+                
                 foreach (var project in linkedProjects)
                 {
-                    projectIds.Add(project.Id);
+                    project.Sector = newSector;           
                 }
 
+                unitWork.Save();
                 return response;
             }
         }

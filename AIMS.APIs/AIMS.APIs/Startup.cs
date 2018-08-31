@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using AIMS.DAL.EF;
+using AutoMapper;
+using AIMS.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -14,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using AIMS.APIs.AutoMapper;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace AIMS.APIs
@@ -58,6 +61,8 @@ namespace AIMS.APIs
                 c.IncludeXmlComments(xmlPath);
             });
 
+            services.AddAutoMapper(a => a.AddProfile(new MappingProfile()));
+            services.AddScoped<ISectorService, SectorService>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 

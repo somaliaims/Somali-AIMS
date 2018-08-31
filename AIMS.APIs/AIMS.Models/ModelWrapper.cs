@@ -20,6 +20,7 @@ namespace AIMS.Models
 
     public class NewOrganization
     {
+        [Required]
         public string Name { get; set; }
     }
 
@@ -38,7 +39,9 @@ namespace AIMS.Models
 
     public class UpdateSector
     {
+        [Required]
         public int Id { get; set; }
+        [Required]
         public string Name { get; set; }
     }
 }
