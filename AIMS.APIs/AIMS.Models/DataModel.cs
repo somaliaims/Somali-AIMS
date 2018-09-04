@@ -9,7 +9,7 @@ namespace AIMS.Models
     public enum UserTypes
     {
         Manager = 1,
-        User = 2
+        Standard = 2
     }
 
     public enum FieldTypes
@@ -17,6 +17,13 @@ namespace AIMS.Models
         DropDown = 1,
         CheckBox = 2,
         Text = 3,
+    }
+
+    public class EFProjectTypes
+    {
+        [Key]
+        public int Id { get; set; }
+        public string ProjectType { get; set; }
     }
 
     public class EFTimeIntervals
@@ -31,17 +38,17 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string OrganizationName { get; set; }
     }
 
     public class EFUser
     {
         [Key]
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string UserName { get; set; }
         [EmailAddress]
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public string UserEmail { get; set; }
+        public string UserPassword { get; set; }
         public UserTypes UserType { get; set; }
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }
@@ -59,19 +66,10 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        public string Name { get; set; }
-        public DateTime DateCreated { get; set; }
+        public string SectorName { get; set; }
     }
 
-    public class EFProjectSectors
-    {
-        public int ProjectId { get; set; }
-        public EFProject Project { get; set; }
-        public int SectorId { get; set; }
-        public EFSector Sector { get; set; }
-        public decimal ContributedAmount { get; set; }
-        public decimal ExchangeRate { get; set; }
-    }
+    
 
     public class EFLocation
     {
@@ -89,17 +87,59 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        public string Code { get; set; }
         [MaxLength(100)]
         public string Title { get; set; }
         public string Objective { get; set; }
-        [ForeignKey("Sector")]
-        public int SectorId { get; set; }
-        public EFSector Sector { get; set; }
-        public int LocationId { get; set; }
-        public EFLocation Location { get; set; }
         public DateTime DateStarted { get; set; }
         public DateTime DateEnded { get; set; }
+        public EFProjectTypes ProjectType { get; set; } 
+        public ICollection<EFLocation> Locations { get; set; }
+    }
+
+    public class EFProjectSectors
+    {
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
+        public int SectorId { get; set; }
+        public EFSector Sector { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
+        public decimal ContributedAmount { get; set; }
+        public decimal ExchangeRate { get; set; }
+    }
+
+    public class EFProjectMarkers
+    {
+        [Key]
+        public int Id { get; set; }
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
+        public string Marker { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
+        public decimal Percentage { get; set; }
+    }
+
+    public class EFProjectDocuments
+    {
+        [Key]
+        public int Id { get; set; }
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
+        public string DocumentTitle { get; set; }
+        public string DocumentUrl { get; set; }
+    }
+
+    public class EFProjectLocations
+    {
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
+        [ForeignKey("Location")]
+        public int LocationId { get; set; }
+        public EFLocation Location { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
+        public decimal Percentage { get; set; }
     }
 
     public class EFProjectFunders
@@ -195,14 +235,19 @@ namespace AIMS.Models
         public string Title { get; set; }
     }
 
+    public class EFCustomFields
+    {
+        [Key]
+        public int Id { get; set; }
+        public string FieldTitle { get; set; }
+        public FieldTypes FieldType { get; set; }
+    }
+
     public class EFProjectCustomFields
     {
         [Key]
         public int Id { get; set; }
-        public EFProject Project { get; set; }
-        public EFSector Sector { get; set; }
-        public string FieldTitle { get; set; }
-        public FieldTypes FieldType { get; set; }
+        public int ProjectId { get; set; }
     }
 
     /*public class EFEntity
