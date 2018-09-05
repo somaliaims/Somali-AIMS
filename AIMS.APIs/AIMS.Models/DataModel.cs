@@ -19,6 +19,13 @@ namespace AIMS.Models
         Text = 3,
     }
 
+    public enum DataTransactions
+    {
+        Inserted = 1,
+        Updated = 2,
+        Deleted = 3
+    }
+
     public class EFProjectTypes
     {
         [Key]
@@ -26,12 +33,11 @@ namespace AIMS.Models
         public string ProjectType { get; set; }
     }
 
-    public class EFTimeIntervals
+    public class EFOrganizationTypes
     {
         [Key]
         public int Id { get; set; }
-        public string Title { get; set; }
-        public int DurationInMonths { get; set; }
+        public string Type { get; set; }
     }
 
     public class EFOrganization
@@ -39,6 +45,7 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string OrganizationName { get; set; }
+        public EFOrganizationTypes OrganizationType { get; set; }
     }
 
     public class EFUser
@@ -47,8 +54,8 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string UserName { get; set; }
         [EmailAddress]
-        public string UserEmail { get; set; }
-        public string UserPassword { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
         public UserTypes UserType { get; set; }
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }
@@ -69,7 +76,6 @@ namespace AIMS.Models
         public string SectorName { get; set; }
     }
 
-    
 
     public class EFLocation
     {
@@ -94,6 +100,20 @@ namespace AIMS.Models
         public DateTime DateEnded { get; set; }
         public EFProjectTypes ProjectType { get; set; } 
         public ICollection<EFLocation> Locations { get; set; }
+        public ICollection<EFProjectDisbursements> Disbursements { get; set; }
+        public ICollection<EFProjectFunders> Funders { get; set; }
+        public ICollection<EFProjectImplementers> Implementers { get; set; }
+        public ICollection<EFProjectDocuments> Documents { get; set; }
+    }
+
+    public class EFProjectDisbursements
+    {
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
+        public DateTime FinancialYear { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
+        public decimal Percentage { get; set; }
     }
 
     public class EFProjectSectors
@@ -160,12 +180,18 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
+        [Column(TypeName = "decimal(9 ,2)")]
+        public decimal Amount { get; set; }
+        public string Currency { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
+        public decimal ExchangeRate { get; set; }
     }
 
     public class EFProjectFundings
     {
-        [Key]
-        public int Id { get; set; }
+        [ForeignKey("Funder")]
+        public int FunderId { get; set; }
+        public EFOrganization Funder { get; set; }
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
@@ -176,7 +202,7 @@ namespace AIMS.Models
         public decimal ExchangeRate { get; set; }
     }
 
-    public class EFUserSubscriptions
+    public class EFReportSubscriptions
     {
         [ForeignKey("User")]
         public int UserId { get; set; }
@@ -184,29 +210,13 @@ namespace AIMS.Models
         [ForeignKey("Report")]
         public int ReportId { get; set; }
         public EFStaticReports Report { get; set; }
-        [ForeignKey("TimeInterval")]
-        public int IntervalId { get; set; }
-        public EFTimeIntervals TimeInterval { get; set; }
-        public DateTime DateSubscribed { get; set; }
-        public DateTime ReportSentOn { get; set; }
-        public bool IsActive { get; set; }
     }    
-    
-    /*public class EFOrganizationUsers
-    {
-        [ForeignKey("Organization")]
-        public int OrganizationId { get; set; }
-        public EFOrganization Organization { get; set; }
-        [ForeignKey("User")]
-        public int UserId { get; set; }
-        public EFUser User { get; set; }
-        public DateTime RegistrationDate { get; set; }
-    }*/
 
     public class EFUserNotifications
     {
         [Key]
         public int Id { get; set; }
+        public UserTypes UserType { get; set; }
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }
         public EFOrganization Organization { get; set; }
@@ -215,7 +225,7 @@ namespace AIMS.Models
         public bool IsSeen { get; set; }
     }
 
-    public class EFProjectLogs
+    public class EFLogs
     {
         [Key]
         public int Id { get; set; }
@@ -225,6 +235,7 @@ namespace AIMS.Models
         public string OldValues { get; set; }
         public string NewValues { get; set; }
         public EFUser UpdatedBy { get; set; }
+        public DataTransactions ActionPerformed { get; set; }
         public DateTime Dated { get; set; }
     }
 
@@ -241,13 +252,15 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string FieldTitle { get; set; }
         public FieldTypes FieldType { get; set; }
+        public DateTime ActiveFrom { get; set; }
+        public DateTime ActiveUpto { get; set; }
+        public ICollection<EFProjectCustomFields> Projects { get; set; }
     }
 
     public class EFProjectCustomFields
     {
-        [Key]
-        public int Id { get; set; }
         public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
     }
 
     /*public class EFEntity

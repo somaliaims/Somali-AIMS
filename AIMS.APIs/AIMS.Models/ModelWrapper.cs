@@ -27,8 +27,7 @@ namespace AIMS.Models
     public class SectorView
     {
         public int Id { get; set; }
-        public string Name { get; set; }
-        public string DateCreated { get; set; }
+        public string SectorName { get; set; }
     }
 
     public class NewSector

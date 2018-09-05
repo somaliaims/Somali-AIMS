@@ -32,8 +32,6 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFProjectImplementers>()
                 .HasKey(i => new { i.ProjectId, i.ImplementerId });
 
-            modelBuilder.Entity<EFUserSubscriptions>()
-                .HasKey(s => new { s.UserId, s.ReportId });
 
             modelBuilder.Entity<EFUser>()
                 .HasIndex(u => u.Email)
@@ -41,19 +39,24 @@ namespace AIMS.DAL.EF
         }
 
         //Creating DB Tables for the Objects
-        public DbSet<EFTimeIntervals> TimeIntervals { get; set; }
         public DbSet<EFOrganization> Organizations { get; set; }
         public DbSet<EFUser> Users { get; set; }
         public DbSet<EFSector> Sectors { get; set; }
         public DbSet<EFLocation> Locations { get; set; }
+        public DbSet<EFCustomFields> CustomFields { get; set; }
         public DbSet<EFProject> Projects { get; set; }
         public DbSet<EFProjectFunders> ProjectFunders { get; set; }
         public DbSet<EFProjectImplementers> ProjectImplementers { get; set; }
         public DbSet<EFProjectFundings> ProjectFundings { get; set; }
-        public DbSet<EFUserSubscriptions> UserSubscriptions { get; set; }
-        public DbSet<EFUserNotifications> UserNotifications { get; set; }
-        public DbSet<EFProjectLogs> ProjectLogs { get; set; }
+        public DbSet<EFProjectLocations> ProjectLocations { get; set; }
+        public DbSet<EFProjectSectors> ProjectSectors { get; set; }
+        public DbSet<EFProjectDisbursements> ProjectDisbursements { get; set; }
+        public DbSet<EFProjectDocuments> ProjectDocuments { get; set; }
+        public DbSet<EFProjectMarkers> ProjectMarkers { get; set; }
         public DbSet<EFProjectCustomFields> ProjectCustomFields { get; set; }
+        public DbSet<EFReportSubscriptions> ReportSubscriptions { get; set; }
+        public DbSet<EFUserNotifications> UserNotifications { get; set; }
+        public DbSet<EFLogs> Logs { get; set; }
         public DbSet<EFStaticReports> StaticReports { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
