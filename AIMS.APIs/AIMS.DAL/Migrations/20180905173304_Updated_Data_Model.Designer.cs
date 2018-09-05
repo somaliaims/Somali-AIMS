@@ -4,14 +4,16 @@ using AIMS.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    partial class AIMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180905173304_Updated_Data_Model")]
+    partial class Updated_Data_Model
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -113,7 +115,7 @@ namespace AIMS.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OrganizationTypes");
+                    b.ToTable("EFOrganizationTypes");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFProject", b =>
@@ -294,8 +296,7 @@ namespace AIMS.DAL.Migrations
                     b.Property<decimal>("ContributedAmount")
                         .HasColumnType("decimal(9, 2)");
 
-                    b.Property<decimal>("ExchangeRate")
-                        .HasColumnType("decimal(9, 2)");
+                    b.Property<decimal>("ExchangeRate");
 
                     b.HasKey("ProjectId", "SectorId");
 
@@ -310,11 +311,11 @@ namespace AIMS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Type");
+                    b.Property<string>("ProjectType");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProjectTypes");
+                    b.ToTable("EFProjectTypes");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFReportSubscriptions", b =>

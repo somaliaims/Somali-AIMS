@@ -32,6 +32,23 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFProjectImplementers>()
                 .HasKey(i => new { i.ProjectId, i.ImplementerId });
 
+            modelBuilder.Entity<EFProjectDisbursements>()
+                .HasKey(d => new { d.ProjectId, d.StartingYear });
+
+            modelBuilder.Entity<EFProjectSectors>()
+                .HasKey(s => new { s.ProjectId, s.SectorId });
+
+            modelBuilder.Entity<EFProjectLocations>()
+                .HasKey(l => new { l.ProjectId, l.LocationId });
+
+            modelBuilder.Entity<EFProjectFundings>()
+                .HasKey(fu => new { fu.ProjectId, fu.FunderId });
+
+            modelBuilder.Entity<EFReportSubscriptions>()
+                .HasKey(r => new { r.UserId, r.ReportId });
+
+            modelBuilder.Entity<EFProjectCustomFields>()
+                .HasKey(c => new { c.ProjectId, c.CustomFieldId });
 
             modelBuilder.Entity<EFUser>()
                 .HasIndex(u => u.Email)
@@ -39,6 +56,8 @@ namespace AIMS.DAL.EF
         }
 
         //Creating DB Tables for the Objects
+        public DbSet<EFOrganizationTypes> OrganizationTypes { get; set; }
+        public DbSet<EFProjectTypes> ProjectTypes { get; set; }
         public DbSet<EFOrganization> Organizations { get; set; }
         public DbSet<EFUser> Users { get; set; }
         public DbSet<EFSector> Sectors { get; set; }

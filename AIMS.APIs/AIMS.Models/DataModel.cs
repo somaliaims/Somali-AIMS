@@ -30,7 +30,7 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        public string ProjectType { get; set; }
+        public string Type { get; set; }
     }
 
     public class EFOrganizationTypes
@@ -111,7 +111,10 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
-        public DateTime FinancialYear { get; set; }
+        public int StartingYear { get; set; }
+        public int StartingMonth { get; set; }
+        public int EndingYear { get; set; }
+        public int EndingMonth { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal Percentage { get; set; }
     }
@@ -124,6 +127,7 @@ namespace AIMS.Models
         public EFSector Sector { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ContributedAmount { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; }
     }
 
@@ -254,13 +258,17 @@ namespace AIMS.Models
         public FieldTypes FieldType { get; set; }
         public DateTime ActiveFrom { get; set; }
         public DateTime ActiveUpto { get; set; }
-        public ICollection<EFProjectCustomFields> Projects { get; set; }
+        public ICollection<EFProjectCustomFields> ProjectFieldsList { get; set; }
     }
 
     public class EFProjectCustomFields
     {
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
+        [ForeignKey("CustomField")]
+        public int CustomFieldId { get; set; }
+        public EFCustomFields CustomField { get; set; }
+        public string Value { get; set; }
     }
 
     /*public class EFEntity
