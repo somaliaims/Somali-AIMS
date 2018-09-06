@@ -63,6 +63,7 @@ namespace AIMS.APIs
 
             services.AddAutoMapper(a => a.AddProfile(new MappingProfile()));
             services.AddScoped<ISectorService, SectorService>();
+            
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 

@@ -12,6 +12,7 @@ namespace AIMS.APIs.AutoMapper
         public MappingProfile()
         {
             CreateMap<EFSector, SectorView>().ReverseMap();
+            CreateMap<EFOrganizationTypes, OrganizationTypeView>();
         }
     }
 }

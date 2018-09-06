@@ -24,7 +24,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] NewSector sector)
+        public IActionResult Post([FromBody] SectorModel sector)
         {
             if (!ModelState.IsValid)
             {
@@ -39,15 +39,15 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
-        [HttpPut]
-        public IActionResult Put([FromBody] UpdateSector sector)
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] SectorModel sector)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = sectorService.Update(sector);
+            var response = sectorService.Update(id, sector);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

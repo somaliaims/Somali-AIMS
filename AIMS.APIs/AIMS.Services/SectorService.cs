@@ -27,14 +27,14 @@ namespace AIMS.Services
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(NewSector sector);
+        ActionResponse Add(SectorModel sector);
 
         /// <summary>
         /// Updates a sector
         /// </summary>
         /// <param name="sector"></param>
         /// <returns></returns>
-        ActionResponse Update(UpdateSector sector);
+        ActionResponse Update(int id, SectorModel sector);
     }
 
     public class SectorService : ISectorService
@@ -66,14 +66,14 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Add(NewSector sector)
+        public ActionResponse Add(SectorModel sector)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var newSector = unitWork.SectorRepository.Insert(new EFSector() { SectorName = sector.Name });
+                    var newSector = unitWork.SectorRepository.Insert(new EFSector() { SectorName = sector.Name, TimeStamp = DateTime.Now });
                     response.ReturnedId = newSector.Id;
                     unitWork.Save();
                 }
@@ -86,12 +86,12 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Update(UpdateSector sector)
+        public ActionResponse Update(int id, SectorModel sector)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var sectorObj = unitWork.SectorRepository.GetByID(sector.Id);
+                var sectorObj = unitWork.SectorRepository.GetByID(id);
                 if (sectorObj == null)
                 {
                     IMessageHelper mHelper = new MessageHelper();
@@ -100,20 +100,26 @@ namespace AIMS.Services
                     return response;
                 }
 
+                if (!sectorObj.SectorName.Equals(sector.Name))
+                {
+                    var linkedProjects = unitWork.ProjectSectorsRepository
+                        .GetWithInclude(p => p.SectorId == id && p.Project.DateEnded == null, new string[] { "Project", "Sector" });
+                    EFSector newSector = null;
 
-               /* var linkedProjects = unitWork.ProjectRepository.GetWithInclude(p => p.SectorId == sector.Id && p.DateEnded == null, new string[] { "Sector" });
-                EFSector newSector = null;
-                if (linkedProjects != null)
-                {
-                    newSector = unitWork.sectorRepository.Insert(new EFSector()
+                    if (linkedProjects != null)
                     {
-                        SectorName = sector.Name,
-                    });
+                        newSector = unitWork.sectorRepository.Insert(new EFSector()
+                        {
+                            SectorName = sector.Name,
+                            TimeStamp = DateTime.Now
+                        });
+
+                        foreach (var project in linkedProjects)
+                        {
+                            project.Sector = newSector;
+                        }
+                    }
                 }
-                
-                foreach (var project in linkedProjects)
-                {
-                }*/
 
                 unitWork.Save();
                 return response;

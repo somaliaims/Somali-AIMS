@@ -14,7 +14,9 @@ namespace AIMS.DAL.UnitOfWork
         private AIMSDbContext context = null;
         public GenericRepository<EFSector> sectorRepository;
         public GenericRepository<EFOrganization> organizationRepository;
+        public GenericRepository<EFOrganizationTypes> organizationTypesRepository;
         public GenericRepository<EFProject> projectRepository;
+        public GenericRepository<EFProjectSectors> projectSectorsRepository;
         public GenericRepository<EFProjectFunders> fundersRepository;
         public GenericRepository<EFProjectImplementers> implementersRepository;
         public GenericRepository<EFProjectFundings> fundingsRepository;
@@ -35,6 +37,16 @@ namespace AIMS.DAL.UnitOfWork
             }
         }
 
+        public GenericRepository<EFOrganizationTypes> OrganizationTypesRepository
+        {
+            get
+            {
+                if (this.organizationTypesRepository == null)
+                    this.organizationTypesRepository = new GenericRepository<EFOrganizationTypes>(context);
+                return this.organizationTypesRepository;
+            }
+        }
+
         public GenericRepository<EFSector> SectorRepository
         {
             get
@@ -52,6 +64,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.projectRepository == null)
                     this.projectRepository = new GenericRepository<EFProject>(context);
                 return this.projectRepository;
+            }
+        }
+
+        public GenericRepository<EFProjectSectors> ProjectSectorsRepository
+        {
+            get
+            {
+                if (this.projectSectorsRepository == null)
+                    this.projectSectorsRepository = new GenericRepository<EFProjectSectors>(context);
+                return this.projectSectorsRepository;
             }
         }
 

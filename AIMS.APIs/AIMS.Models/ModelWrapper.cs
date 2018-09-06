@@ -12,6 +12,9 @@ namespace AIMS.Models
         public bool Success { get; set; } = true;
     }
 
+    /// <summary>
+    /// Organization models
+    /// </summary>
     public class OrganizationView
     {
         public int Id { get; set; }
@@ -24,23 +27,34 @@ namespace AIMS.Models
         public string Name { get; set; }
     }
 
+    /// <summary>
+    /// Sector models
+    /// </summary>
     public class SectorView
     {
         public int Id { get; set; }
         public string SectorName { get; set; }
     }
 
-    public class NewSector
+    public class SectorModel
     {
         [Required]
         public string Name { get; set; }
     }
 
-    public class UpdateSector
+    /// <summary>
+    /// Organization type models
+    /// </summary>
+    public class OrganizationTypeView
+    {
+        public int Id { get; set; }
+        public string TypeName { get; set; }
+    }
+
+    public class OrganizationTypeModel
     {
         [Required]
-        public int Id { get; set; }
-        [Required]
-        public string Name { get; set; }
+        public string TypeName { get; set; }
     }
+
 }
