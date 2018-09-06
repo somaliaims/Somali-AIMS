@@ -110,6 +110,7 @@ namespace AIMS.Services
 
                 organizationTypeObj.TypeName = organizationType.TypeName;
                 unitWork.Save();
+                response.Message = "1";
                 return response;
             }
         }

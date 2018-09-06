@@ -122,6 +122,7 @@ namespace AIMS.Services
                 }
 
                 unitWork.Save();
+                response.Message = "1";
                 return response;
             }
         }

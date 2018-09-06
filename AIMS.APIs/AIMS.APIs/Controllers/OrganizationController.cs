@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AIMS.DAL.EF;
+using AIMS.Models;
+using AIMS.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,9 +14,13 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class OrganizationController : ControllerBase
     {
-        public OrganizationController()
-        {
+        AIMSDbContext context;
+        IOrganizationService organizationService;
 
+        public OrganizationController(AIMSDbContext cntxt, IOrganizationService service)
+        {
+            this.context = cntxt;
+            this.organizationService = service;
         }
 
         /// <summary>
@@ -23,13 +30,24 @@ namespace AIMS.APIs.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok();
+            var organizations = organizationService.GetAll();
+            return Ok(organizations);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] string test)
+        public IActionResult Post([FromBody] OrganizationModel model)
         {
-            return Ok();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = organizationService.Add(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.ReturnedId);
         }
     }
 }

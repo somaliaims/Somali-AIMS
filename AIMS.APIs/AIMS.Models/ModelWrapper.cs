@@ -19,12 +19,15 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string TypeName { get; set; }
     }
 
-    public class NewOrganization
+    public class OrganizationModel
     {
         [Required]
         public string Name { get; set; }
+        [Required]
+        public int TypeId { get; set; }
     }
 
     /// <summary>
