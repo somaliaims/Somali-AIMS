@@ -133,6 +133,7 @@ namespace AIMS.Services
                 organizationObj.OrganizationName = organization.Name;
                 organizationObj.OrganizationType = organizationType;
 
+                unitWork.OrganizationRepository.Update(organizationObj);
                 unitWork.Save();
                 response.Message = "1";
                 return response;
