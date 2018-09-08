@@ -83,8 +83,10 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string Location { get; set; }
-        public int Latitude { get; set; }
-        public int Longitude { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
+        public decimal Latitude { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
+        public decimal Longitude { get; set; }
     }
 
     /*

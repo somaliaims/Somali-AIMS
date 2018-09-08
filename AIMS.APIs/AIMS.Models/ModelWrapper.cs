@@ -89,4 +89,34 @@ namespace AIMS.Models
         public int OrganizationId { get; set; }
     }
 
+    public class EditUserOrganization
+    {
+        public int UserId { get; set; }
+        public int OrganizationId { get; set; }
+    }
+
+    public class EditUserPassword
+    {
+        public int UserId { get; set; }
+        public string Password { get; set; }
+    }
+
+    /// <summary>
+    /// Location models
+    /// </summary>
+    public class LocationView
+    {
+        public int Id { get; set; }
+        public string Location { get; set; }
+        public decimal Latitude { get; set; }
+        public decimal Longitude { get; set; }
+    }
+
+    public class LocationModel
+    {
+        public string Location { get; set; }
+        public decimal Latitude { get; set; }
+        public decimal Longitude { get; set; }
+    }
+
 }

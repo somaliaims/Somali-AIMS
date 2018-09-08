@@ -12,15 +12,16 @@ namespace AIMS.DAL.UnitOfWork
     public class UnitOfWork : IDisposable
     {
         private AIMSDbContext context = null;
-        public GenericRepository<EFSector> sectorRepository;
-        public GenericRepository<EFOrganization> organizationRepository;
-        public GenericRepository<EFOrganizationTypes> organizationTypesRepository;
-        public GenericRepository<EFProject> projectRepository;
-        public GenericRepository<EFProjectSectors> projectSectorsRepository;
-        public GenericRepository<EFProjectFunders> fundersRepository;
-        public GenericRepository<EFProjectImplementers> implementersRepository;
-        public GenericRepository<EFProjectFundings> fundingsRepository;
-        public GenericRepository<EFUser> userRepository;
+        private GenericRepository<EFSector> sectorRepository;
+        private GenericRepository<EFLocation> locationRepository;
+        private GenericRepository<EFOrganization> organizationRepository;
+        private GenericRepository<EFOrganizationTypes> organizationTypesRepository;
+        private GenericRepository<EFProject> projectRepository;
+        private GenericRepository<EFProjectSectors> projectSectorsRepository;
+        private GenericRepository<EFProjectFunders> fundersRepository;
+        private GenericRepository<EFProjectImplementers> implementersRepository;
+        private GenericRepository<EFProjectFundings> fundingsRepository;
+        private GenericRepository<EFUser> userRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -104,6 +105,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.fundingsRepository == null)
                     this.fundingsRepository = new GenericRepository<EFProjectFundings>(context);
                 return this.fundingsRepository;
+            }
+        }
+
+        public GenericRepository<EFLocation> LocationRepository
+        {
+            get
+            {
+                if (this.locationRepository == null)
+                    this.locationRepository = new GenericRepository<EFLocation>(context);
+                return this.locationRepository;
             }
         }
 

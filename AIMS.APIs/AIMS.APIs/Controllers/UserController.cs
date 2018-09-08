@@ -38,5 +38,37 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(response.ReturnedId);
         }
+
+        [HttpPost]
+        public IActionResult EditOrganization([FromBody] EditUserOrganization model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = userService.UpdateOrganization(model.UserId, model.OrganizationId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.Success);
+        }
+
+        [HttpPost]
+        public IActionResult EditPassword([FromBody] EditUserPassword model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = userService.UpdatePassword(model.UserId, model.Password);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.Success);
+        }
     }
 }
