@@ -108,7 +108,7 @@ namespace AIMS.Services
 
                     if (linkedProjects != null)
                     {
-                        newSector = unitWork.sectorRepository.Insert(new EFSector()
+                        newSector = unitWork.SectorRepository.Insert(new EFSector()
                         {
                             SectorName = sector.Name,
                             TimeStamp = DateTime.Now

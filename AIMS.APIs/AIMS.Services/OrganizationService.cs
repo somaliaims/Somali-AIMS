@@ -122,7 +122,7 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var organizationType = unitWork.organizationTypesRepository.GetByID(organization.TypeId);
+                var organizationType = unitWork.OrganizationTypesRepository.GetByID(organization.TypeId);
                 if (organizationType == null)
                 {
                     response.Success = false;

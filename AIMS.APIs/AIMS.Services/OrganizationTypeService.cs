@@ -129,7 +129,7 @@ namespace AIMS.Services
                     return response;
                 }
 
-                unitWork.organizationTypesRepository.Delete(organizationTypeObj);
+                unitWork.OrganizationTypesRepository.Delete(organizationTypeObj);
                 unitWork.Save();
                 return response;
             }
