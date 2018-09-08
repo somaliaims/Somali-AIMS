@@ -10,77 +10,78 @@ using System.Threading.Tasks;
 
 namespace AIMS.Services
 {
-    public interface ILocationService
+    public interface IProjectService
     {
         /// <summary>
-        /// Gets all locations
+        /// Gets all projects
         /// </summary>
         /// <returns></returns>
-        IEnumerable<LocationView> GetAll();
+        IEnumerable<ProjectView> GetAll();
 
         /// <summary>
-        /// Gets all locations async
+        /// Gets all projects async
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<LocationView>> GetAllAsync();
+        Task<IEnumerable<ProjectView>> GetAllAsync();
 
         /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(LocationModel location);
+        ActionResponse Add(ProjectModel project);
 
         /// <summary>
-        /// Updates a location
+        /// Updates a project
         /// </summary>
-        /// <param name="location"></param>
+        /// <param name="project"></param>
         /// <returns></returns>
-        ActionResponse Update(int id, LocationModel location);
+        ActionResponse Update(int id, ProjectModel project);
     }
 
-    public class LocationService : ILocationService
+    public class ProjectService
     {
         AIMSDbContext context;
         IMapper mapper;
 
-        public LocationService(AIMSDbContext cntxt, IMapper autoMapper)
+        public ProjectService(AIMSDbContext cntxt, IMapper autoMapper)
         {
             context = cntxt;
             mapper = autoMapper;
         }
 
-        public IEnumerable<LocationView> GetAll()
+        public IEnumerable<ProjectView> GetAll()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var locations = unitWork.LocationRepository.GetAll();
-                return mapper.Map<List<LocationView>>(locations);
+                var projects = unitWork.ProjectRepository.GetAll();
+                return mapper.Map<List<ProjectView>>(projects);
             }
         }
 
-        public async Task<IEnumerable<LocationView>> GetAllAsync()
+        public async Task<IEnumerable<ProjectView>> GetAllAsync()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var locations = await unitWork.LocationRepository.GetAllAsync();
-                return await Task<IEnumerable<LocationView>>.Run(() => mapper.Map<List<LocationView>>(locations)).ConfigureAwait(false);
+                var projects = await unitWork.ProjectRepository.GetAllAsync();
+                return await Task<IEnumerable<ProjectView>>.Run(() => mapper.Map<List<ProjectView>>(projects)).ConfigureAwait(false);
             }
         }
 
-        public ActionResponse Add(LocationModel model)
+        public ActionResponse Add(ProjectModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var newLocation = unitWork.LocationRepository.Insert(new EFLocation()
+                    var newProject = unitWork.ProjectRepository.Insert(new EFProject()
                     {
-                        Location = model.Location,
-                        Latitude = model.Latitude,
-                        Longitude = model.Longitude
+                        Title = model.Title,
+                        Objective = model.Objective,
+                        StartDate = model.StartDate,
+                        EndDate = model.EndDate
                     });
-                    response.ReturnedId = newLocation.Id;
+                    response.ReturnedId = newProject.Id;
                     unitWork.Save();
                 }
                 catch (Exception ex)
@@ -92,25 +93,26 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Update(int id, LocationModel model)
+        public ActionResponse Update(int id, ProjectModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var locationObj = unitWork.LocationRepository.GetByID(id);
-                if (locationObj == null)
+                var projectObj = unitWork.ProjectRepository.GetByID(id);
+                if (projectObj == null)
                 {
                     IMessageHelper mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("Location");
+                    response.Message = mHelper.GetNotFound("Project");
                     return response;
                 }
 
-                locationObj.Location = model.Location;
-                locationObj.Latitude = model.Latitude;
-                locationObj.Longitude = model.Longitude;
+                projectObj.Title = model.Title;
+                projectObj.Objective = model.Objective;
+                projectObj.StartDate = model.StartDate;
+                projectObj.EndDate = model.EndDate;
 
-                unitWork.LocationRepository.Update(locationObj);
+                unitWork.ProjectRepository.Update(projectObj);
                 unitWork.Save();
                 response.Message = "1";
                 return response;

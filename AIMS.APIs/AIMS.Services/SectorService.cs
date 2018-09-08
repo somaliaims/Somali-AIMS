@@ -103,7 +103,7 @@ namespace AIMS.Services
                 if (!sectorObj.SectorName.Equals(sector.Name))
                 {
                     var linkedProjects = unitWork.ProjectSectorsRepository
-                        .GetWithInclude(p => p.SectorId == id && p.Project.DateEnded == null, new string[] { "Project", "Sector" });
+                        .GetWithInclude(p => p.SectorId == id && p.Project.EndDate == null, new string[] { "Project", "Sector" });
                     EFSector newSector = null;
 
                     if (linkedProjects != null)

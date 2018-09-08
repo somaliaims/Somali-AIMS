@@ -99,8 +99,8 @@ namespace AIMS.Models
         [MaxLength(100)]
         public string Title { get; set; }
         public string Objective { get; set; }
-        public DateTime DateStarted { get; set; }
-        public DateTime DateEnded { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public EFProjectTypes ProjectType { get; set; } 
         public ICollection<EFLocation> Locations { get; set; }
         public ICollection<EFProjectDisbursements> Disbursements { get; set; }

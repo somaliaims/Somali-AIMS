@@ -2,6 +2,7 @@
 using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -37,13 +38,15 @@ namespace AIMS.Services
         ActionResponse Update(int id, OrganizationModel organization);
     }
 
-    public class OrganizationService
+    public class OrganizationService : IOrganizationService
     {
         AIMSDbContext context;
+        IMapper mapper;
 
-        public OrganizationService(AIMSDbContext cntxt)
+        public OrganizationService(AIMSDbContext cntxt, IMapper mappr)
         {
             context = cntxt;
+            this.mapper = mappr;
         }
 
         public IEnumerable<OrganizationView> GetAll()
@@ -52,11 +55,7 @@ namespace AIMS.Services
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
                 var organizations = unitWork.OrganizationRepository.GetAll();
-                foreach(var organization in organizations)
-                {
-
-                }
-                return organizationsList;
+                return mapper.Map<List<OrganizationView>>(organizations);
             }
         }
 

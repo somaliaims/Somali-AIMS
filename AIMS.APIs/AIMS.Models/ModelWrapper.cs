@@ -119,4 +119,29 @@ namespace AIMS.Models
         public decimal Longitude { get; set; }
     }
 
+
+    /// <summary>
+    /// Project models
+    /// </summary>
+    public class ProjectView
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Objective { get; set; }
+        public string DateStarted { get; set; }
+        public string DateEnded { get; set; }
+        public string ProjectType { get; set; }
+    }
+
+    public class ProjectModel
+    {
+        [Required]
+        public string Title { get; set; }
+        [Required]
+        public string Objective { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public int ProjectTypeId { get; set; }
+    }
+
 }

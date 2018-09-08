@@ -23,6 +23,12 @@ namespace AIMS.APIs.Controllers
             this.sectorService = service;
         }
 
+        [HttpGet]
+        public IActionResult Get()
+        {
+
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] SectorModel sector)
         {
