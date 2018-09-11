@@ -4,11 +4,11 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 
-namespace AIMS.APIs.Helpers
+namespace AIMS.Services.Helpers
 {
     public class EmailHelper
     {
-        public void SendEmail(List<string> sendTo, string body, string subject)
+        public void SendEmail()
         {
             SmtpClient client = this.GetEmailClient();
             MailMessage mailMessage = new MailMessage();
