@@ -26,7 +26,7 @@ namespace AIMS.APIs.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-
+            return Ok();
         }
 
         [HttpPost]

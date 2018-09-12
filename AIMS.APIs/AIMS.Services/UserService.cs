@@ -25,6 +25,14 @@ namespace AIMS.Services
         Task<IEnumerable<UserView>> GetAllAsync();
 
         /// <summary>
+        /// Authenticates a user
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        UserView AuthenticateUser(string userName, string password);
+
+        /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
@@ -75,6 +83,28 @@ namespace AIMS.Services
                 var users = await unitWork.UserRepository.GetAllAsync();
                 usersList = mapper.Map<List<UserView>>(users);
                 return await Task<IEnumerable<UserView>>.Run(() => usersList).ConfigureAwait(false);
+            }
+        }
+
+        public UserView AuthenticateUser(string userName, string password)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                UserView foundUser = new UserView();
+                var findUser = unitWork.UserRepository.GetWithInclude(u => u.UserName.Equals(userName) && u.Password.Equals(password),
+                    new string[] { "Organization" });
+
+                if (findUser != null)
+                {
+                    foreach (var user in findUser)
+                    {
+                        foundUser.UserName = user.UserName;
+                        foundUser.UserType = user.UserType;
+                        foundUser.Organization = user.Organization.OrganizationName;
+                        break;
+                    }
+                }
+                return foundUser;
             }
         }
 

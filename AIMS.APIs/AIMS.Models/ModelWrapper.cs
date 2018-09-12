@@ -75,6 +75,14 @@ namespace AIMS.Models
         public string RegistrationDate { get; set; }
     }
 
+    public class AuthenticateModel
+    {
+        [Required]
+        public string UserName { get; set; }
+        [Required]
+        public string Password { get; set; }
+    }
+
     public class UserModel
     {
         [Required]

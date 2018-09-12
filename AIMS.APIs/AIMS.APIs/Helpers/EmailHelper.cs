@@ -8,9 +8,13 @@ namespace AIMS.Services.Helpers
 {
     public class EmailHelper
     {
+        SmtpClient client;
+        public EmailHelper(SmtpClient sClient)
+        {
+            client = sClient;
+        }
         public void SendEmail()
         {
-            SmtpClient client = this.GetEmailClient();
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = new MailAddress("whoever@me.com");
             mailMessage.To.Add("receiver@me.com");
@@ -19,12 +23,5 @@ namespace AIMS.Services.Helpers
             client.Send(mailMessage);
         }
 
-        private SmtpClient GetEmailClient()
-        {
-            SmtpClient client = new SmtpClient("mysmtpserver");
-            client.UseDefaultCredentials = false;
-            client.Credentials = new NetworkCredential("username", "password");
-            return client;
-        }
     }
 }

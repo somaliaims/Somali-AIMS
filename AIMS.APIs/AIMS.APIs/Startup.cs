@@ -18,6 +18,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using AIMS.APIs.AutoMapper;
 using Swashbuckle.AspNetCore.Swagger;
+using System.Net.Mail;
+using System.Net;
 
 namespace AIMS.APIs
 {
@@ -59,6 +61,21 @@ namespace AIMS.APIs
 
                 //... and tell Swagger to use those XML comments.
                 c.IncludeXmlComments(xmlPath);
+            });
+
+            //Configure Email Settings
+            services.AddTransient<SmtpClient>((serviceProvider) =>
+            {
+                var config = serviceProvider.GetRequiredService<IConfiguration>();
+                return new SmtpClient()
+                {
+                    Host = config.GetValue<String>("Email:Smtp:Host"),
+                    Port = config.GetValue<int>("Email:Smtp:Port"),
+                    Credentials = new NetworkCredential(
+                            config.GetValue<String>("Email:Smtp:Username"),
+                            config.GetValue<String>("Email:Smtp:Password")
+                        )
+                };
             });
 
             services.AddAutoMapper(a => a.AddProfile(new MappingProfile()));
