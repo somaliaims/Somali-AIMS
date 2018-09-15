@@ -52,10 +52,10 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        public string UserName { get; set; }
         [EmailAddress]
         public string Email { get; set; }
         public string Password { get; set; }
+        public string DisplayName { get; set; }
         public UserTypes UserType { get; set; }
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }

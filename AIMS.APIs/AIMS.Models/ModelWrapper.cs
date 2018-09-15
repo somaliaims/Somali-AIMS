@@ -66,7 +66,7 @@ namespace AIMS.Models
     public class UserView
     {
         public int Id { get; set; }
-        public string UserName { get; set; }
+        public string DisplayName { get; set; }
         public string Email { get; set; }
         public UserTypes UserType { get; set; }
         public int OrganizationId { get; set; }
@@ -78,7 +78,8 @@ namespace AIMS.Models
     public class AuthenticateModel
     {
         [Required]
-        public string UserName { get; set; }
+        [EmailAddress]
+        public string Email { get; set; }
         [Required]
         public string Password { get; set; }
     }
@@ -86,7 +87,7 @@ namespace AIMS.Models
     public class UserModel
     {
         [Required]
-        public string UserName { get; set; }
+        public string DisplayName { get; set; }
         [Required]
         [EmailAddress]
         public string Email { get; set; }

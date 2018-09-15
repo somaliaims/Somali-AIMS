@@ -33,6 +33,13 @@ namespace AIMS.Services
         UserView AuthenticateUser(string userName, string password);
 
         /// <summary>
+        /// Checks availability of email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        ActionResponse CheckEmailAvailability(string email);
+
+        /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
@@ -91,20 +98,35 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 UserView foundUser = new UserView();
-                var findUser = unitWork.UserRepository.GetWithInclude(u => u.UserName.Equals(userName) && u.Password.Equals(password),
+                var findUser = unitWork.UserRepository.GetWithInclude(u => u.DisplayName.Equals(userName) && u.Password.Equals(password),
                     new string[] { "Organization" });
 
                 if (findUser != null)
                 {
                     foreach (var user in findUser)
                     {
-                        foundUser.UserName = user.UserName;
+                        foundUser.DisplayName = user.DisplayName;
                         foundUser.UserType = user.UserType;
                         foundUser.Organization = user.Organization.OrganizationName;
                         break;
                     }
                 }
                 return foundUser;
+            }
+        }
+
+        public ActionResponse CheckEmailAvailability(string email)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var user = unitWork.UserRepository.Get(u => u.Email.Equals(email));
+                if (user != null)
+                {
+                    response.Success = false;
+                    return response;
+                }
+                return response;
             }
         }
 
@@ -129,7 +151,7 @@ namespace AIMS.Services
                     string passwordHash = sHelper.GetPasswordHash(model.Password);
                     var newUser = unitWork.UserRepository.Insert(new EFUser()
                     {
-                        UserName = model.UserName,
+                        DisplayName = model.DisplayName,
                         Email = model.Email,
                         UserType = model.UserType,
                         Organization = organization,

@@ -26,6 +26,18 @@ namespace AIMS.APIs.Controllers
             this.userService = service;
         }
 
+        [HttpGet]
+        public IActionResult Get()
+        {
+            return Ok();
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult Get(string id)
+        {
+            return Ok();
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] UserModel user)
         {
@@ -44,6 +56,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
+        [Route("Token")]
         public IActionResult Token([FromBody] AuthenticateModel model)
         {
             if (!ModelState.IsValid)
@@ -53,16 +66,29 @@ namespace AIMS.APIs.Controllers
 
             SecurityHelper sHelper = new SecurityHelper();
             model.Password = sHelper.GetPasswordHash(model.Password);
-            var foundUser = userService.AuthenticateUser(model.UserName, model.Password);
+            var foundUser = userService.AuthenticateUser(model.Email, model.Password);
 
-            if (!string.IsNullOrEmpty(foundUser.UserName))
+            if (!string.IsNullOrEmpty(foundUser.DisplayName))
             {
                 return Ok(foundUser);
             }
             return Unauthorized();
         }
 
+        [Route("[action]/{email}")]
+        [HttpGet]
+        public IActionResult CheckEmailAvailability(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Email value cannot be null");
+            }
+            var response = userService.CheckEmailAvailability(email);
+            return Ok(response.Success);
+        }
+
         [HttpPost]
+        [Route("EditUserOrganization")]
         public IActionResult EditUserOrganization([FromBody] EditUserOrganization model)
         {
             if (!ModelState.IsValid)
@@ -79,6 +105,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
+        [Route("EditPassword")]
         public IActionResult EditPassword([FromBody] EditUserPassword model)
         {
             if (!ModelState.IsValid)
