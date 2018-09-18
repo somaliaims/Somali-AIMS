@@ -20,6 +20,10 @@ using AIMS.APIs.AutoMapper;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Net.Mail;
 using System.Net;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace AIMS.APIs
 {
@@ -61,6 +65,29 @@ namespace AIMS.APIs
 
                 //... and tell Swagger to use those XML comments.
                 c.IncludeXmlComments(xmlPath);
+            });
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<AIMSDbContext>()
+                .AddDefaultTokenProviders();
+
+
+            // ===== Add Jwt Authentication ========
+            //JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = "AIMS",
+                    ValidAudience = "AIMS",
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(Configuration["JwtKey"]))
+                };
             });
 
             //Configure Email Settings

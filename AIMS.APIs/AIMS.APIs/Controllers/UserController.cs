@@ -74,9 +74,9 @@ namespace AIMS.APIs.Controllers
             }
             return Unauthorized();
         }
-
-        [Route("[action]/{email}")]
+        
         [HttpGet]
+        [Route("[action]/{email}")]
         public IActionResult CheckEmailAvailability(string email)
         {
             if (string.IsNullOrEmpty(email))
