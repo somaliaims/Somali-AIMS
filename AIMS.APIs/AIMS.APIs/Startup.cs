@@ -126,12 +126,14 @@ namespace AIMS.APIs
                 app.UseHsts();
             }
 
+            
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "AIMS APIs Version 1, FG of Somalia");
             });
 
+            app.UseCors();
             app.UseHttpsRedirection();
             app.UseMvc();
         }
