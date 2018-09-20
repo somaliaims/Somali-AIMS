@@ -107,6 +107,9 @@ namespace AIMS.APIs
 
             services.AddAutoMapper(a => a.AddProfile(new MappingProfile()));
             services.AddScoped<ISectorService, SectorService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IOrganizationTypeService, OrganizationTypeService>();
+            services.AddScoped<IOrganizationService, OrganizationService>();
             
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

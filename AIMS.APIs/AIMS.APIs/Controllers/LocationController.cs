@@ -14,7 +14,7 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class LocationController : ControllerBase
     {
-        AIMSDbContext context;
+        /*AIMSDbContext context;
         ILocationService locationService;
 
         public LocationController(AIMSDbContext cntxt, ILocationService service)
@@ -65,6 +65,6 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(response.Message);
             }
             return Ok(response.ReturnedId);
-        }
+        }*/
     }
 }
