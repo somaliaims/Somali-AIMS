@@ -153,4 +153,23 @@ namespace AIMS.Models
         public int ProjectTypeId { get; set; }
     }
 
+    /// <summary>
+    /// Project funders models
+    /// </summary>
+    public class ProjectFunderView
+    {
+        public int FunderId { get; set; }
+        public string Funder { get; set; }
+        public int ProjectId { get; set; }
+        public string Project { get; set; }
+    }
+
+    public class ProjectFunderModel
+    {
+        [Required]
+        public int ProjectId { get; set; }
+        [Required]
+        public int FunderId { get; set; }
+    }
+
 }
