@@ -19,7 +19,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFProject> projectRepository;
         private GenericRepository<EFProjectSectors> projectSectorsRepository;
         private GenericRepository<EFProjectFunders> fundersRepository;
-        private GenericRepository<EFProjectImplementers> implementersRepository;
+        private GenericRepository<EFProjectImplementors> implementorsRepository;
         private GenericRepository<EFProjectFundings> fundingsRepository;
         private GenericRepository<EFUser> userRepository;
 
@@ -88,13 +88,13 @@ namespace AIMS.DAL.UnitOfWork
             }
         }
 
-        public GenericRepository<EFProjectImplementers> ProjectImplementersRepository
+        public GenericRepository<EFProjectImplementors> ProjectImplementorsRepository
         {
             get
             {
-                if (this.implementersRepository == null)
-                    this.implementersRepository = new GenericRepository<EFProjectImplementers>(context);
-                return this.implementersRepository;
+                if (this.implementorsRepository == null)
+                    this.implementorsRepository = new GenericRepository<EFProjectImplementors>(context);
+                return this.implementorsRepository;
             }
         }
 

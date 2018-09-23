@@ -8,30 +8,30 @@ namespace AIMS.DAL.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_EFProjectImplementers_Organizations_ImplementerId",
-                table: "EFProjectImplementers");
+                name: "FK_EFProjectImplementors_Organizations_ImplementorId",
+                table: "EFProjectImplementors");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_EFProjectImplementers_Projects_ProjectId",
-                table: "EFProjectImplementers");
+                name: "FK_EFProjectImplementors_Projects_ProjectId",
+                table: "EFProjectImplementors");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_EFProjectImplementers",
-                table: "EFProjectImplementers");
+                name: "PK_EFProjectImplementors",
+                table: "EFProjectImplementors");
 
             migrationBuilder.RenameTable(
-                name: "EFProjectImplementers",
-                newName: "ProjectImplementers");
+                name: "EFProjectImplementors",
+                newName: "ProjectImplementors");
 
             migrationBuilder.RenameIndex(
-                name: "IX_EFProjectImplementers_ImplementerId",
-                table: "ProjectImplementers",
-                newName: "IX_ProjectImplementers_ImplementerId");
+                name: "IX_EFProjectImplementors_ImplementorId",
+                table: "ProjectImplementors",
+                newName: "IX_ProjectImplementors_ImplementorId");
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_ProjectImplementers",
-                table: "ProjectImplementers",
-                columns: new[] { "ProjectId", "ImplementerId" });
+                name: "PK_ProjectImplementors",
+                table: "ProjectImplementors",
+                columns: new[] { "ProjectId", "ImplementorId" });
 
             migrationBuilder.CreateTable(
                 name: "ProjectFundings",
@@ -61,16 +61,16 @@ namespace AIMS.DAL.Migrations
                 column: "ProjectId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_ProjectImplementers_Organizations_ImplementerId",
-                table: "ProjectImplementers",
-                column: "ImplementerId",
+                name: "FK_ProjectImplementors_Organizations_ImplementorId",
+                table: "ProjectImplementors",
+                column: "ImplementorId",
                 principalTable: "Organizations",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_ProjectImplementers_Projects_ProjectId",
-                table: "ProjectImplementers",
+                name: "FK_ProjectImplementors_Projects_ProjectId",
+                table: "ProjectImplementors",
                 column: "ProjectId",
                 principalTable: "Projects",
                 principalColumn: "Id",
@@ -80,45 +80,45 @@ namespace AIMS.DAL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_ProjectImplementers_Organizations_ImplementerId",
-                table: "ProjectImplementers");
+                name: "FK_ProjectImplementors_Organizations_ImplementorId",
+                table: "ProjectImplementors");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_ProjectImplementers_Projects_ProjectId",
-                table: "ProjectImplementers");
+                name: "FK_ProjectImplementors_Projects_ProjectId",
+                table: "ProjectImplementors");
 
             migrationBuilder.DropTable(
                 name: "ProjectFundings");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_ProjectImplementers",
-                table: "ProjectImplementers");
+                name: "PK_ProjectImplementors",
+                table: "ProjectImplementors");
 
             migrationBuilder.RenameTable(
-                name: "ProjectImplementers",
-                newName: "EFProjectImplementers");
+                name: "ProjectImplementors",
+                newName: "EFProjectImplementors");
 
             migrationBuilder.RenameIndex(
-                name: "IX_ProjectImplementers_ImplementerId",
-                table: "EFProjectImplementers",
-                newName: "IX_EFProjectImplementers_ImplementerId");
+                name: "IX_ProjectImplementors_ImplementorId",
+                table: "EFProjectImplementors",
+                newName: "IX_EFProjectImplementors_ImplementorId");
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_EFProjectImplementers",
-                table: "EFProjectImplementers",
-                columns: new[] { "ProjectId", "ImplementerId" });
+                name: "PK_EFProjectImplementors",
+                table: "EFProjectImplementors",
+                columns: new[] { "ProjectId", "ImplementorId" });
 
             migrationBuilder.AddForeignKey(
-                name: "FK_EFProjectImplementers_Organizations_ImplementerId",
-                table: "EFProjectImplementers",
-                column: "ImplementerId",
+                name: "FK_EFProjectImplementors_Organizations_ImplementorId",
+                table: "EFProjectImplementors",
+                column: "ImplementorId",
                 principalTable: "Organizations",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_EFProjectImplementers_Projects_ProjectId",
-                table: "EFProjectImplementers",
+                name: "FK_EFProjectImplementors_Projects_ProjectId",
+                table: "EFProjectImplementors",
                 column: "ProjectId",
                 principalTable: "Projects",
                 principalColumn: "Id",

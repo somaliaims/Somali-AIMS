@@ -72,23 +72,23 @@ namespace AIMS.DAL.Migrations
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
             migrationBuilder.CreateTable(
-                name: "EFProjectImplementers",
+                name: "EFProjectImplementors",
                 columns: table => new
                 {
-                    ImplementerId = table.Column<int>(nullable: false),
+                    ImplementorId = table.Column<int>(nullable: false),
                     ProjectId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EFProjectImplementers", x => new { x.ProjectId, x.ImplementerId });
+                    table.PrimaryKey("PK_EFProjectImplementors", x => new { x.ProjectId, x.ImplementorId });
                     table.ForeignKey(
-                        name: "FK_EFProjectImplementers_Organizations_ImplementerId",
-                        column: x => x.ImplementerId,
+                        name: "FK_EFProjectImplementors_Organizations_ImplementorId",
+                        column: x => x.ImplementorId,
                         principalTable: "Organizations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_EFProjectImplementers_Projects_ProjectId",
+                        name: "FK_EFProjectImplementors_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -101,9 +101,9 @@ namespace AIMS.DAL.Migrations
                 column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EFProjectImplementers_ImplementerId",
-                table: "EFProjectImplementers",
-                column: "ImplementerId");
+                name: "IX_EFProjectImplementors_ImplementorId",
+                table: "EFProjectImplementors",
+                column: "ImplementorId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Users_Organizations_OrganizationId",
@@ -121,7 +121,7 @@ namespace AIMS.DAL.Migrations
                 table: "Users");
 
             migrationBuilder.DropTable(
-                name: "EFProjectImplementers");
+                name: "EFProjectImplementors");
 
             migrationBuilder.DropIndex(
                 name: "IX_Users_OrganizationId",

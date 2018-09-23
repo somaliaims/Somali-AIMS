@@ -10,32 +10,32 @@ using System.Threading.Tasks;
 
 namespace AIMS.Services
 {
-    public interface IProjectFundersService
+    public interface IProjectImplementorService
     {
         /// <summary>
-        /// Gets all projectFunders
+        /// Gets all projectImplementors
         /// </summary>
         /// <returns></returns>
-        IEnumerable<ProjectFunderView> GetAll();
+        IEnumerable<ProjectImplementorView> GetAll();
 
         /// <summary>
-        /// Gets all projectFunders async
+        /// Gets all projectImplementors async
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<ProjectFunderView>> GetAllAsync();
+        Task<IEnumerable<ProjectImplementorView>> GetAllAsync();
 
         /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(ProjectFunderModel projectFunder);
+        ActionResponse Add(ProjectImplementorModel projectImplementor);
 
         /// <summary>
-        /// Updates a projectFunder
+        /// Updates a projectImplementor
         /// </summary>
-        /// <param name="projectFunder"></param>
+        /// <param name="projectImplementor"></param>
         /// <returns></returns>
-        ActionResponse RemoveFunder(ProjectFunderModel model);
+        ActionResponse RemoveImplementor(ProjectImplementorModel model);
 
         /// <summary>
         /// Deletes organization type by id
@@ -45,36 +45,36 @@ namespace AIMS.Services
         ActionResponse Delete(int id);
     }
 
-    public class ProjectFundersService : IProjectFundersService
+    public class ProjectImplementorService
     {
         AIMSDbContext context;
         IMapper mapper;
 
-        public ProjectFundersService(AIMSDbContext cntxt, IMapper autoMapper)
+        public ProjectImplementorService(AIMSDbContext cntxt, IMapper autoMapper)
         {
             context = cntxt;
             mapper = autoMapper;
         }
 
-        public IEnumerable<ProjectFunderView> GetAll()
+        public IEnumerable<ProjectImplementorView> GetAll()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectFunders = unitWork.ProjectFundersRepository.GetAll();
-                return mapper.Map<List<ProjectFunderView>>(projectFunders);
+                var projectImplementors = unitWork.ProjectImplementorsRepository.GetAll();
+                return mapper.Map<List<ProjectImplementorView>>(projectImplementors);
             }
         }
 
-        public async Task<IEnumerable<ProjectFunderView>> GetAllAsync()
+        public async Task<IEnumerable<ProjectImplementorView>> GetAllAsync()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectFunders = await unitWork.ProjectFundersRepository.GetAllAsync();
-                return await Task<IEnumerable<ProjectFunderView>>.Run(() => mapper.Map<List<ProjectFunderView>>(projectFunders)).ConfigureAwait(false);
+                var projectImplementors = await unitWork.ProjectImplementorsRepository.GetAllAsync();
+                return await Task<IEnumerable<ProjectImplementorView>>.Run(() => mapper.Map<List<ProjectImplementorView>>(projectImplementors)).ConfigureAwait(false);
             }
         }
 
-        public ActionResponse Add(ProjectFunderModel model)
+        public ActionResponse Add(ProjectImplementorModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -90,20 +90,20 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var funder = unitWork.OrganizationRepository.GetByID(model.FunderId);
-                    if (funder == null)
+                    var implementor = unitWork.OrganizationRepository.GetByID(model.ImplementorId);
+                    if (implementor == null)
                     {
                         response.Success = false;
-                        response.Message = mHelper.GetNotFound("Organization/Funder");
+                        response.Message = mHelper.GetNotFound("Organization/Implementor");
                         return response;
                     }
 
-                    var newProjectFunder = unitWork.ProjectFundersRepository.Insert(new EFProjectFunders()
+                    var newProjectImplementor = unitWork.ProjectImplementorsRepository.Insert(new EFProjectImplementors()
                     {
                         Project = project,
-                        Funder = funder
+                        Implementor = implementor,
                     });
-                    response.ReturnedId = newProjectFunder.FunderId;
+                    response.ReturnedId = newProjectImplementor.ImplementorId;
                     unitWork.Save();
                 }
                 catch (Exception ex)
@@ -115,21 +115,21 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse RemoveFunder(ProjectFunderModel model)
+        public ActionResponse RemoveImplementor(ProjectImplementorModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectFunder = unitWork.ProjectFundersRepository.Get(pf => pf.FunderId.Equals(model.FunderId) && pf.ProjectId.Equals(model.ProjectId));
-                if (projectFunder == null)
+                var projectImplementor = unitWork.ProjectImplementorsRepository.Get(pf => pf.ImplementorId.Equals(model.ImplementorId) && pf.ProjectId.Equals(model.ProjectId));
+                if (projectImplementor == null)
                 {
                     IMessageHelper mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("Project Funder");
+                    response.Message = mHelper.GetNotFound("Project Implementor");
                     return response;
                 }
 
-                unitWork.ProjectFundersRepository.Delete(projectFunder);
+                unitWork.ProjectImplementorsRepository.Delete(projectImplementor);
                 unitWork.Save();
                 response.Message = "1";
                 return response;
@@ -141,16 +141,16 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectFunderObj = unitWork.ProjectFundersRepository.GetByID(id);
-                if (projectFunderObj == null)
+                var projectImplementorObj = unitWork.ProjectImplementorsRepository.GetByID(id);
+                if (projectImplementorObj == null)
                 {
                     IMessageHelper mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("Project Funder");
+                    response.Message = mHelper.GetNotFound("Project Implementor");
                     return response;
                 }
 
-                unitWork.ProjectFundersRepository.Delete(projectFunderObj);
+                unitWork.ProjectImplementorsRepository.Delete(projectImplementorObj);
                 unitWork.Save();
                 return response;
             }

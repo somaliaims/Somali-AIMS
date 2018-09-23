@@ -127,19 +127,19 @@ namespace AIMS.DAL.Migrations
 
             migrationBuilder.AddColumn<decimal>(
                 name: "Amount",
-                table: "ProjectImplementers",
+                table: "ProjectImplementors",
                 type: "decimal(9 ,2)",
                 nullable: false,
                 defaultValue: 0m);
 
             migrationBuilder.AddColumn<string>(
                 name: "Currency",
-                table: "ProjectImplementers",
+                table: "ProjectImplementors",
                 nullable: true);
 
             migrationBuilder.AddColumn<decimal>(
                 name: "ExchangeRate",
-                table: "ProjectImplementers",
+                table: "ProjectImplementors",
                 type: "decimal(9, 2)",
                 nullable: false,
                 defaultValue: 0m);
@@ -591,15 +591,15 @@ namespace AIMS.DAL.Migrations
 
             migrationBuilder.DropColumn(
                 name: "Amount",
-                table: "ProjectImplementers");
+                table: "ProjectImplementors");
 
             migrationBuilder.DropColumn(
                 name: "Currency",
-                table: "ProjectImplementers");
+                table: "ProjectImplementors");
 
             migrationBuilder.DropColumn(
                 name: "ExchangeRate",
-                table: "ProjectImplementers");
+                table: "ProjectImplementors");
 
             migrationBuilder.DropColumn(
                 name: "FunderId",

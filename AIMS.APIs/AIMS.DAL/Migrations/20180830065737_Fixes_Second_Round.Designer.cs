@@ -140,17 +140,17 @@ namespace AIMS.DAL.Migrations
                     b.ToTable("ProjectFundings");
                 });
 
-            modelBuilder.Entity("AIMS.Models.EFProjectImplementers", b =>
+            modelBuilder.Entity("AIMS.Models.EFProjectImplementors", b =>
                 {
                     b.Property<int>("ProjectId");
 
-                    b.Property<int>("ImplementerId");
+                    b.Property<int>("ImplementorId");
 
-                    b.HasKey("ProjectId", "ImplementerId");
+                    b.HasKey("ProjectId", "ImplementorId");
 
-                    b.HasIndex("ImplementerId");
+                    b.HasIndex("ImplementorId");
 
-                    b.ToTable("ProjectImplementers");
+                    b.ToTable("ProjectImplementors");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFProjectLogs", b =>
@@ -341,11 +341,11 @@ namespace AIMS.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("AIMS.Models.EFProjectImplementers", b =>
+            modelBuilder.Entity("AIMS.Models.EFProjectImplementors", b =>
                 {
-                    b.HasOne("AIMS.Models.EFOrganization", "Implementer")
+                    b.HasOne("AIMS.Models.EFOrganization", "Implementor")
                         .WithMany()
-                        .HasForeignKey("ImplementerId")
+                        .HasForeignKey("ImplementorId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("AIMS.Models.EFProject", "Project")

@@ -105,7 +105,7 @@ namespace AIMS.Models
         public ICollection<EFLocation> Locations { get; set; }
         public ICollection<EFProjectDisbursements> Disbursements { get; set; }
         public ICollection<EFProjectFunders> Funders { get; set; }
-        public ICollection<EFProjectImplementers> Implementers { get; set; }
+        public ICollection<EFProjectImplementors> Implementors { get; set; }
         public ICollection<EFProjectDocuments> Documents { get; set; }
     }
 
@@ -177,21 +177,22 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
-    }
-
-    public class EFProjectImplementers
-    {
-        [ForeignKey("Implementer")]
-        public int ImplementerId { get; set; }
-        public EFOrganization Implementer { get; set; }
-        [ForeignKey("Project")]
-        public int ProjectId { get; set; }
-        public EFProject Project { get; set; }
         [Column(TypeName = "decimal(9 ,2)")]
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; }
+    }
+
+    public class EFProjectImplementors
+    {
+        [ForeignKey("Implementor")]
+        public int ImplementorId { get; set; }
+        public EFOrganization Implementor { get; set; }
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
+        
     }
 
     public class EFProjectFundings
