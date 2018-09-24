@@ -202,6 +202,14 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("FunderId");
 
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(9 ,2)");
+
+                    b.Property<string>("Currency");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasColumnType("decimal(9, 2)");
+
                     b.HasKey("ProjectId", "FunderId");
 
                     b.HasIndex("FunderId");
@@ -211,9 +219,9 @@ namespace AIMS.DAL.Migrations
 
             modelBuilder.Entity("AIMS.Models.EFProjectFundings", b =>
                 {
-                    b.Property<int>("ProjectId");
-
-                    b.Property<int>("FunderId");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(9 ,2)");
@@ -223,9 +231,15 @@ namespace AIMS.DAL.Migrations
                     b.Property<decimal>("ExchangeRate")
                         .HasColumnType("decimal(9, 2)");
 
-                    b.HasKey("ProjectId", "FunderId");
+                    b.Property<int>("FunderId");
+
+                    b.Property<int>("ProjectId");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("FunderId");
+
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("ProjectFundings");
                 });
@@ -235,14 +249,6 @@ namespace AIMS.DAL.Migrations
                     b.Property<int>("ProjectId");
 
                     b.Property<int>("ImplementorId");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(9 ,2)");
-
-                    b.Property<string>("Currency");
-
-                    b.Property<decimal>("ExchangeRate")
-                        .HasColumnType("decimal(9, 2)");
 
                     b.HasKey("ProjectId", "ImplementorId");
 

@@ -41,8 +41,8 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFProjectLocations>()
                 .HasKey(l => new { l.ProjectId, l.LocationId });
 
-            modelBuilder.Entity<EFProjectFundings>()
-                .HasKey(fu => new { fu.ProjectId, fu.FunderId });
+            /*modelBuilder.Entity<EFProjectFundings>()
+                .HasKey(fu => new { fu.ProjectId, fu.FunderId });*/
 
             modelBuilder.Entity<EFReportSubscriptions>()
                 .HasKey(r => new { r.UserId, r.ReportId });

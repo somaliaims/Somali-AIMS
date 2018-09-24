@@ -28,14 +28,14 @@ namespace AIMS.Services
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(ProjectFundsModel projectFunding);
+        ActionResponse Add(ProjectFundsModel model);
 
         /// <summary>
         /// Updates a projectFunding
         /// </summary>
         /// <param name="projectFunding"></param>
         /// <returns></returns>
-        ActionResponse Update(ProjectFundsModel projectFunding);
+        ActionResponse Update(int id, ProjectFundsModel model);
     }
 
     public class ProjectFundsService : IProjectFundsService
@@ -113,12 +113,12 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Update(ProjectFundsModel model)
+        public ActionResponse Update(int id, ProjectFundsModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectFundingObj = unitWork.ProjectFundsRepository.Get(f => f.ProjectId.Equals(model.ProjectId) && (f.FunderId.Equals(model.FunderId)));
+                var projectFundingObj = unitWork.ProjectFundsRepository.Get(f => f.Id.Equals(model.ProjectId));
                 if (projectFundingObj == null)
                 {
                     IMessageHelper mHelper = new MessageHelper();

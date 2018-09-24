@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
-using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,39 +12,37 @@ namespace AIMS.APIs.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProjectFundController : ControllerBase
+    public class ProjectImplementorController : ControllerBase
     {
         AIMSDbContext context;
-        IProjectFundsService projectFundService;
+        IProjectImplementorService projectImplementorService;
 
-        public ProjectFundController(AIMSDbContext cntxt, IProjectFundsService service)
+        public ProjectImplementorController(AIMSDbContext cntxt, IProjectImplementorService service)
         {
             this.context = cntxt;
-            this.projectFundService = service;
+            this.projectImplementorService = service;
         }
 
-
         /// <summary>
-        /// Gets fundings for the provided project id
+        /// Gets list of organizations
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        /// <returns>Will return an array or json objects</returns>
+        [HttpGet]
+        public IActionResult Get()
         {
-            var projectFunds = projectFundService.GetAll(id);
-            return Ok(projectFunds);
+            var organizations = projectImplementorService.GetAll();
+            return Ok(organizations);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] ProjectFundsModel model)
+        public IActionResult Post([FromBody] ProjectImplementorModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = projectFundService.Add(model);
+            var response = projectImplementorService.Add(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -53,15 +50,16 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
-        [HttpPut]
-        public IActionResult Update(int id, [FromBody] ProjectFundsModel model)
+        [HttpPost]
+        [Route("RemoveImplementor")]
+        public IActionResult RemoveImplementor([FromBody] ProjectImplementorModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = projectFundService.Update(id, model);
+            var response = projectImplementorService.RemoveImplementor(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

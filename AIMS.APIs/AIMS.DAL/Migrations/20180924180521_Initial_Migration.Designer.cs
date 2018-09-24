@@ -10,14 +10,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    [Migration("20180905173304_Updated_Data_Model")]
-    partial class Updated_Data_Model
+    [Migration("20180924180521_Initial_Migration")]
+    partial class Initial_Migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.1-rtm-30846")
+                .HasAnnotation("ProductVersion", "2.1.3-rtm-32065")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -48,11 +48,13 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int?>("EFProjectId");
 
-                    b.Property<int>("Latitude");
+                    b.Property<decimal>("Latitude")
+                        .HasColumnType("decimal(9, 2)");
 
                     b.Property<string>("Location");
 
-                    b.Property<int>("Longitude");
+                    b.Property<decimal>("Longitude")
+                        .HasColumnType("decimal(9, 2)");
 
                     b.HasKey("Id");
 
@@ -111,11 +113,11 @@ namespace AIMS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Type");
+                    b.Property<string>("TypeName");
 
                     b.HasKey("Id");
 
-                    b.ToTable("EFOrganizationTypes");
+                    b.ToTable("OrganizationTypes");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFProject", b =>
@@ -124,13 +126,13 @@ namespace AIMS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("DateEnded");
-
-                    b.Property<DateTime>("DateStarted");
+                    b.Property<DateTime>("EndDate");
 
                     b.Property<string>("Objective");
 
                     b.Property<int?>("ProjectTypeId");
+
+                    b.Property<DateTime>("StartDate");
 
                     b.Property<string>("Title")
                         .HasMaxLength(100);
@@ -202,6 +204,14 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("FunderId");
 
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(9 ,2)");
+
+                    b.Property<string>("Currency");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasColumnType("decimal(9, 2)");
+
                     b.HasKey("ProjectId", "FunderId");
 
                     b.HasIndex("FunderId");
@@ -211,9 +221,9 @@ namespace AIMS.DAL.Migrations
 
             modelBuilder.Entity("AIMS.Models.EFProjectFundings", b =>
                 {
-                    b.Property<int>("ProjectId");
-
-                    b.Property<int>("FunderId");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(9 ,2)");
@@ -223,9 +233,15 @@ namespace AIMS.DAL.Migrations
                     b.Property<decimal>("ExchangeRate")
                         .HasColumnType("decimal(9, 2)");
 
-                    b.HasKey("ProjectId", "FunderId");
+                    b.Property<int>("FunderId");
+
+                    b.Property<int>("ProjectId");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("FunderId");
+
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("ProjectFundings");
                 });
@@ -235,14 +251,6 @@ namespace AIMS.DAL.Migrations
                     b.Property<int>("ProjectId");
 
                     b.Property<int>("ImplementorId");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(9 ,2)");
-
-                    b.Property<string>("Currency");
-
-                    b.Property<decimal>("ExchangeRate")
-                        .HasColumnType("decimal(9, 2)");
 
                     b.HasKey("ProjectId", "ImplementorId");
 
@@ -296,7 +304,8 @@ namespace AIMS.DAL.Migrations
                     b.Property<decimal>("ContributedAmount")
                         .HasColumnType("decimal(9, 2)");
 
-                    b.Property<decimal>("ExchangeRate");
+                    b.Property<decimal>("ExchangeRate")
+                        .HasColumnType("decimal(9, 2)");
 
                     b.HasKey("ProjectId", "SectorId");
 
@@ -311,11 +320,11 @@ namespace AIMS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("ProjectType");
+                    b.Property<string>("Type");
 
                     b.HasKey("Id");
 
-                    b.ToTable("EFProjectTypes");
+                    b.ToTable("ProjectTypes");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFReportSubscriptions", b =>
@@ -338,6 +347,8 @@ namespace AIMS.DAL.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("SectorName");
+
+                    b.Property<DateTime>("TimeStamp");
 
                     b.HasKey("Id");
 
@@ -363,6 +374,8 @@ namespace AIMS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("DisplayName");
+
                     b.Property<string>("Email");
 
                     b.Property<bool>("IsApproved");
@@ -372,8 +385,6 @@ namespace AIMS.DAL.Migrations
                     b.Property<string>("Password");
 
                     b.Property<DateTime>("RegistrationDate");
-
-                    b.Property<string>("UserName");
 
                     b.Property<int>("UserType");
 

@@ -197,6 +197,7 @@ namespace AIMS.Models
 
     public class EFProjectFundings
     {
+        public int Id { get; set; }
         [ForeignKey("Funder")]
         public int FunderId { get; set; }
         public EFOrganization Funder { get; set; }
