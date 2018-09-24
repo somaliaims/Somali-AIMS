@@ -184,8 +184,8 @@ namespace AIMS.Models
     /// </summary>
     public class ProjectImplementorView
     {
-        public int FunderId { get; set; }
-        public string Funder { get; set; }
+        public int ImplementorId { get; set; }
+        public string Implementor { get; set; }
         public int ProjectId { get; set; }
         public string Project { get; set; }
     }
@@ -196,6 +196,29 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         [Required]
         public int ImplementorId { get; set; }
+    }
+
+
+    /// <summary>
+    /// Project funding models
+    /// </summary>
+    public class ProjectFundsView
+    {
+        public int FunderId { get; set; }
+        public string Funder { get; set; }
+        public string Project { get; set; }
+        public decimal Amount { get; set; }
+        public string Currency { get; set; }
+        public decimal ExchangeRate { get; set; }
+    }
+
+    public class ProjectFundsModel
+    {
+        public int FunderId { get; set; }
+        public int ProjectId { get; set; }
+        public decimal Amount { get; set; }
+        public string Currency { get; set; }
+        public decimal ExchangeRate { get; set; }
     }
 
 }

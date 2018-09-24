@@ -98,7 +98,7 @@ namespace AIMS.DAL.UnitOfWork
             }
         }
 
-        public GenericRepository<EFProjectFundings> ProjectFundingsRepository
+        public GenericRepository<EFProjectFundings> ProjectFundsRepository
         {
             get
             {
