@@ -221,4 +221,50 @@ namespace AIMS.Models
         public decimal ExchangeRate { get; set; }
     }
 
+    /// <summary>
+    /// Project document model
+    /// </summary>
+    public class ProjectDocumentView
+    {
+        public int Id { get; set; }
+        public int ProjectId { get; set; }
+        public string Project { get; set; }
+        public string DocumentTitle { get; set; }
+        public string DocumentUrl { get; set; }
+    }
+
+    public class ProjectDocumentModel
+    {
+        public int Id { get; set; }
+        public int ProjectId { get; set; }
+        public string Project { get; set; }
+        public string DocumentTitle { get; set; }
+        public string DocumentUrl { get; set; }
+    }
+
+    /// <summary>
+    /// Project disbursements models
+    /// </summary>
+    public class ProjectDisbursementView
+    {
+        public int ProjectId { get; set; }
+        public string Project { get; set; }
+        public int StartingYear { get; set; }
+        public int StartingMonth { get; set; }
+        public int EndingYear { get; set; }
+        public int EndingMonth { get; set; }
+        public decimal Percentage { get; set; }
+    }
+
+    public class ProjectDisbursementModel
+    {
+        public int ProjectId { get; set; }
+        public int StartingYear { get; set; }
+        public int StartingMonth { get; set; }
+        public int EndingYear { get; set; }
+        public int EndingMonth { get; set; }
+        public decimal Percentage { get; set; }
+    }
+
+
 }

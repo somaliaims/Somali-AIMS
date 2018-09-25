@@ -22,6 +22,8 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFProjectImplementors> implementorsRepository;
         private GenericRepository<EFProjectFundings> fundingsRepository;
         private GenericRepository<EFUser> userRepository;
+        private GenericRepository<EFProjectDocuments> projectDocumentsRepository;
+        private GenericRepository<EFProjectDisbursements> projectDisbursementsRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -125,6 +127,26 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.userRepository == null)
                     this.userRepository = new GenericRepository<EFUser>(context);
                 return this.userRepository;
+            }
+        }
+
+        public GenericRepository<EFProjectDocuments> ProjectDocumentRepository
+        {
+            get
+            {
+                if (this.projectDocumentsRepository == null)
+                    this.projectDocumentsRepository = new GenericRepository<EFProjectDocuments>(context);
+                return this.projectDocumentsRepository;
+            }
+        }
+
+        public GenericRepository<EFProjectDisbursements> ProjectDisbursementsRepository
+        {
+            get
+            {
+                if (this.projectDisbursementsRepository == null)
+                    this.projectDisbursementsRepository = new GenericRepository<EFProjectDisbursements>(context);
+                return this.projectDisbursementsRepository;
             }
         }
 
