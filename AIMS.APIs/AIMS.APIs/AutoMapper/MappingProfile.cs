@@ -31,6 +31,9 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(f => f.Funder, opts => opts.MapFrom(source => source.Funder.OrganizationName))
                 .ForMember(f => f.Project, opts => opts.MapFrom(source => source.Project.Title));
 
+            CreateMap<EFProjectDisbursements, ProjectDisbursementView>()
+                .ForMember(d => d.Project, opts => opts.MapFrom(source => source.Project.Title));
+
             CreateMap<EFOrganization, OrganizationView>()
                 .ForMember(o => o.TypeName, opts => opts.MapFrom(source => source.OrganizationType.TypeName));
         }

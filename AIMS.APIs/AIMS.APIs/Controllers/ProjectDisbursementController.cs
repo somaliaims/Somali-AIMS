@@ -12,33 +12,39 @@ namespace AIMS.APIs.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LocationController : ControllerBase
+    public class ProjectDisbursementController : ControllerBase
     {
         AIMSDbContext context;
-        ILocationService locationService;
+        IProjectDisbursementService projectDisbursementService;
 
-        public LocationController(AIMSDbContext cntxt, ILocationService service)
+        public ProjectDisbursementController(AIMSDbContext cntxt, IProjectDisbursementService service)
         {
             this.context = cntxt;
-            this.locationService = service;
+            this.projectDisbursementService = service;
         }
 
-        [HttpGet]
-        public IActionResult Get()
+
+        /// <summary>
+        /// Gets disbursements for the provided project id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
         {
-            var locations = locationService.GetAll();
-            return Ok(locations);
+            var projectDisbursements = projectDisbursementService.GetAll(id);
+            return Ok(projectDisbursements);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] LocationModel model)
+        public IActionResult Post([FromBody] ProjectDisbursementModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = locationService.Add(model);
+            var response = projectDisbursementService.Add(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -47,24 +53,19 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPut]
-        public IActionResult Put(int id, [FromBody] LocationModel model)
+        public IActionResult Update(int id, [FromBody] ProjectDisbursementModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id <= 0)
-            {
-                return BadRequest("Invalid id provided");
-            }
-
-            var response = locationService.Update(id, model);
+            var response = projectDisbursementService.Update(id, model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
             }
-            return Ok(response.ReturnedId);
+            return Ok("1");
         }
     }
 }

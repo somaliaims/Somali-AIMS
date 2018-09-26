@@ -14,7 +14,7 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class SectorController : ControllerBase
     {
-        /*AIMSDbContext context;
+        AIMSDbContext context;
         ISectorService sectorService;
 
         public SectorController(AIMSDbContext cntxt, ISectorService service)
@@ -59,6 +59,6 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(response.Message);
             }
             return Ok(response.Message);
-        }*/
+        }
     }
 }
