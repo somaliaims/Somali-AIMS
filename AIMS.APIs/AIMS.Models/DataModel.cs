@@ -80,7 +80,8 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        public int TypeName { get; set; }
+        public string TypeName { get; set; }
+        public ICollection<EFSectorCategory> SectorCategories { get; set; }
     }
 
     public class EFSectorCategory

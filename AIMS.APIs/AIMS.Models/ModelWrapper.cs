@@ -33,6 +33,19 @@ namespace AIMS.Models
     /// <summary>
     /// Sector models
     /// </summary>
+    
+    public class SectorTypesView
+    {
+        public int Id { get; set; }
+        public string TypeName { get; set; }
+    }
+
+    public class SectorTypesModel
+    {
+        [Required]
+        public string TypeName { get; set; }
+    }
+
     public class SectorView
     {
         public int Id { get; set; }
