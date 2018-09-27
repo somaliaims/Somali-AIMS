@@ -137,7 +137,9 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    EFOrganization organization = unitWork.OrganizationRepository.GetByID(model.OrganizationId);
+                    //EFOrganization organization = unitWork.OrganizationRepository.GetByID(model.OrganizationId);
+                    //For testing only, need to retain the one above again after testing
+                    EFOrganization organization = unitWork.OrganizationRepository.GetByID(1);
                     ISecurityHelper sHelper = new SecurityHelper();
                     IMessageHelper mHelper;
                     if (organization == null)
@@ -160,8 +162,8 @@ namespace AIMS.Services
                         RegistrationDate = DateTime.Now
 
                     });
-                    response.ReturnedId = newUser.Id;
                     unitWork.Save();
+                    response.ReturnedId = newUser.Id;
                 }
                 catch (Exception ex)
                 {

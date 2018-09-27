@@ -13,7 +13,7 @@ namespace AIMS.DAL.UnitOfWork
     {
         private AIMSDbContext context = null;
         private GenericRepository<EFSectorTypes> sectorTypesRepository;
-        private GenericRepository<EFSectorMappings> sectorMappingRepository;
+        //private GenericRepository<EFSectorMappings> sectorMappingRepository;
         private GenericRepository<EFSector> sectorRepository;
         private GenericRepository<EFLocation> locationRepository;
         private GenericRepository<EFOrganization> organizationRepository;
@@ -26,7 +26,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFUser> userRepository;
         private GenericRepository<EFProjectDocuments> projectDocumentsRepository;
         private GenericRepository<EFProjectDisbursements> projectDisbursementsRepository;
-        private GenericRepository<EFSectorCategory> sectorCategoryRepository;
+        //private GenericRepository<EFSectorCategory> sectorCategoryRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
