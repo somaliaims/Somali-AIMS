@@ -9,6 +9,7 @@ using AIMS.Services;
 using AIMS.Services.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AIMS.APIs.Controllers
@@ -46,12 +47,15 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = userService.Add(user);
+            string adminEmail = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
+                .GetValue<String>("Email:Smtp:AdminEmail");
+
+            var configuredSmtpClient = HttpContext.RequestServices.GetRequiredService<SmtpClient>();
+            var response = userService.Add(user, configuredSmtpClient, adminEmail);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
             }
-            var configuredSmtpClient = HttpContext.RequestServices.GetRequiredService<SmtpClient>();
             return Ok(response.ReturnedId);
         }
 

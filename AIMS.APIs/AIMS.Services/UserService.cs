@@ -6,6 +6,7 @@ using AutoMapper;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -44,7 +45,7 @@ namespace AIMS.Services
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(UserModel user);
+        ActionResponse Add(UserModel user, SmtpClient smtp, string adminEmail);
 
         /// <summary>
         /// Updates a user's organization
@@ -139,7 +140,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Add(UserModel model)
+        public ActionResponse Add(UserModel model, SmtpClient smtp, string adminEmail)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -176,16 +177,18 @@ namespace AIMS.Services
                     //Get emails for all the users
                     var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) || u.UserType.Equals(UserTypes.Manager));
                     List<EmailsModel> usersEmailList = new List<EmailsModel>();
-
                     foreach (var user in users)
                     {
                         usersEmailList.Add(new EmailsModel()
                         {
                             Email = user.Email,
+                            UserName = user.DisplayName,
                             UserType = user.UserType
                         });
                     }
-                    response.Message = JsonConvert.SerializeObject(usersEmailList);
+                    //Send emails
+                    IEmailHelper emailHelper = new EmailHelper(smtp, adminEmail);
+                    emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName);
                     response.ReturnedId = newUser.Id;
                 }
                 catch (Exception ex)

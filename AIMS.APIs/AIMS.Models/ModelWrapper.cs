@@ -91,6 +91,7 @@ namespace AIMS.Models
     public class EmailsModel
     {
         public string Email { get; set; }
+        public string UserName { get; set; }
         public UserTypes UserType { get; set; }
     }
 
