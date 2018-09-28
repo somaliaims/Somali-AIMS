@@ -8,8 +8,9 @@ namespace AIMS.Models
 {
     public enum UserTypes
     {
-        Manager = 1,
-        Standard = 2
+        SuperAdmin = 1,
+        Manager = 2,
+        Standard = 3
     }
 
     public enum FieldTypes

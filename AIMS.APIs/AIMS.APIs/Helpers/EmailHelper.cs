@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AIMS.Models;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Mail;
@@ -6,6 +7,16 @@ using System.Text;
 
 namespace AIMS.Services.Helpers
 {
+    public interface IEmailHelper
+    {
+        /// <summary>
+        /// Sends email to the other users of the organization, plus manager group
+        /// </summary>
+        /// <param name="emails"></param>
+        /// <returns></returns>
+        ActionResponse SendNewRegistrationEmail(List<string> emails);
+    }
+
     public class EmailHelper
     {
         SmtpClient client;
@@ -13,7 +24,8 @@ namespace AIMS.Services.Helpers
         {
             client = sClient;
         }
-        public void SendEmail()
+
+        public void SendNewRegistrationEmail()
         {
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = new MailAddress("whoever@me.com");

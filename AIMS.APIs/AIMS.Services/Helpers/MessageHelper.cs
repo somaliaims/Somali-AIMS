@@ -33,6 +33,12 @@ namespace AIMS.Services.Helpers
         /// <param name="entity"></param>
         /// <returns></returns>
         string NewRecord(string entity);
+
+        /// <summary>
+        /// Show message for attempting the deletion of super admin account
+        /// </summary>
+        /// <returns></returns>
+        string InvalidAccountDeletionAttempt();
     }
 
     public class MessageHelper : IMessageHelper
@@ -42,6 +48,7 @@ namespace AIMS.Services.Helpers
         private readonly string NEW_RECORD = " added successfully.";
         private readonly string NEW = "New ";
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
+        private readonly string INVALID_ACCOUNT_DELETION_ATTEMPT = "A super admin account cannot be deleted";
 
         public string GetNotFound(string entity)
         {
@@ -61,6 +68,11 @@ namespace AIMS.Services.Helpers
         public string GetInvalidAttempt(string entity)
         {
             return (entity + INVALID_ATTEMPT);
+        }
+
+        public string InvalidAccountDeletionAttempt()
+        {
+            return INVALID_ACCOUNT_DELETION_ATTEMPT;
         }
     }
 }

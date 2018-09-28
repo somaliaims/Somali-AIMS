@@ -88,6 +88,12 @@ namespace AIMS.Models
         public string RegistrationDate { get; set; }
     }
 
+    public class EmailsModel
+    {
+        public string Email { get; set; }
+        public UserTypes UserType { get; set; }
+    }
+
     public class AuthenticateModel
     {
         [Required]

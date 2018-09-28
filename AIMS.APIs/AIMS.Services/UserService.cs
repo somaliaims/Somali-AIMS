@@ -3,6 +3,7 @@ using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -58,6 +59,14 @@ namespace AIMS.Services
         /// <param name="user"></param>
         /// <returns></returns>
         ActionResponse UpdatePassword(int userId, string newPassword);
+
+        /// <summary>
+        /// Deletes the account for the provided user
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        ActionResponse Delete(string email, string password);
     }
 
     public class UserService : IUserService
@@ -163,6 +172,20 @@ namespace AIMS.Services
 
                     });
                     unitWork.Save();
+
+                    //Get emails for all the users
+                    var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) || u.UserType.Equals(UserTypes.Manager));
+                    List<EmailsModel> usersEmailList = new List<EmailsModel>();
+
+                    foreach (var user in users)
+                    {
+                        usersEmailList.Add(new EmailsModel()
+                        {
+                            Email = user.Email,
+                            UserType = user.UserType
+                        });
+                    }
+                    response.Message = JsonConvert.SerializeObject(usersEmailList);
                     response.ReturnedId = newUser.Id;
                 }
                 catch (Exception ex)
@@ -226,6 +249,38 @@ namespace AIMS.Services
                 unitWork.UserRepository.Update(user);
                 unitWork.Save();
                 response.Message = "1";
+                return response;
+            }
+        }
+
+        public ActionResponse Delete(string email, string password)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                ISecurityHelper sHelper = new SecurityHelper();
+                string passwordHash = sHelper.GetPasswordHash(password);
+                var user = unitWork.UserRepository.Get(u => u.Email.Equals(email) && u.Password.Equals(password));
+
+                IMessageHelper mHelper;
+                if (user == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("User");
+                    return response;
+                }
+
+                if (user.UserType == UserTypes.SuperAdmin)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.InvalidAccountDeletionAttempt();
+                    return response;
+                }
+
+                unitWork.UserRepository.Delete(user);
+                unitWork.Save();
                 return response;
             }
         }
