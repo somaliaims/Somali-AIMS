@@ -170,7 +170,6 @@ namespace AIMS.Services
                         Password = passwordHash,
                         IsApproved = false,
                         RegistrationDate = DateTime.Now
-
                     });
                     unitWork.Save();
 

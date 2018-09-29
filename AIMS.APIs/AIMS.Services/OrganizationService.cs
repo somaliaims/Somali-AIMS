@@ -54,7 +54,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
-                var organizations = unitWork.OrganizationRepository.GetAll();
+                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.Id != 0, new string[] { "OrganizationType" });
                 return mapper.Map<List<OrganizationView>>(organizations);
             }
         }
@@ -63,14 +63,8 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                List<OrganizationView> organizationsList = new List<OrganizationView>();
-                var organizations = await unitWork.OrganizationRepository.GetAllAsync();
-                
-                foreach (var organization in organizations)
-                {
-
-                }
-                return await Task<IEnumerable<OrganizationView>>.Run(() => organizationsList).ConfigureAwait(false);
+                var organizations = await unitWork.OrganizationRepository.GetWithIncludeAsync(o => o.Id != 0, new string[] { "OrganizationType" });
+                return await Task<IEnumerable<OrganizationView>>.Run(() => mapper.Map<List<OrganizationView>>(organizations)).ConfigureAwait(false);
             }
         }
 
