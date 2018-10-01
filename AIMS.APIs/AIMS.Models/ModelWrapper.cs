@@ -117,7 +117,7 @@ namespace AIMS.Models
         public UserTypes UserType { get; set; }
         public int OrganizationId { get; set; }
         public string NewOrganizationName { get; set; }
-        public int NewOrganizationTypeId { get; set; }
+        public int OrganizationTypeId { get; set; }
         public bool IsNewOrganization { get; set; }
     }
 

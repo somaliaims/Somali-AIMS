@@ -167,7 +167,7 @@ namespace AIMS.Services
                         EFOrganizationTypes organizationType = null;
                         if (model.IsNewOrganization)
                         {
-                            organizationType = unitWork.OrganizationTypesRepository.Get(o => o.Id.Equals(model.NewOrganizationTypeId));
+                            organizationType = unitWork.OrganizationTypesRepository.Get(o => o.Id.Equals(model.OrganizationTypeId));
                             if (organizationType == null)
                             {
                                 mHelper = new MessageHelper();
