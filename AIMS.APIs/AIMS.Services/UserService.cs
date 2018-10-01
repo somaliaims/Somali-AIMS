@@ -147,17 +147,44 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    //EFOrganization organization = unitWork.OrganizationRepository.GetByID(model.OrganizationId);
-                    //For testing only, need to retain the one above again after testing
-                    EFOrganization organization = unitWork.OrganizationRepository.GetByID(1);
+                    EFOrganization organization = null;
                     ISecurityHelper sHelper = new SecurityHelper();
                     IMessageHelper mHelper;
-                    if (organization == null)
+
+                    if (!model.IsNewOrganization)
                     {
-                        mHelper = new MessageHelper();
-                        response.Success = false;
-                        response.Message = mHelper.GetNotFound("Organization");
-                        return response;
+                        organization = unitWork.OrganizationRepository.GetByID(model.OrganizationId);
+                        if (organization == null)
+                        {
+                            mHelper = new MessageHelper();
+                            response.Success = false;
+                            response.Message = mHelper.GetNotFound("Organization");
+                            return response;
+                        }
+                    }
+                    else
+                    {
+                        EFOrganizationTypes organizationType = null;
+                        if (model.IsNewOrganization)
+                        {
+                            organizationType = unitWork.OrganizationTypesRepository.Get(o => o.Id.Equals(model.NewOrganizationTypeId));
+                            if (organizationType == null)
+                            {
+                                mHelper = new MessageHelper();
+                                response.Success = false;
+                                response.Message = mHelper.GetNotFound("Organization Type");
+                                return response;
+                            }
+
+                            organization = new EFOrganization()
+                            {
+                                OrganizationName = model.NewOrganizationName,
+                                OrganizationType = organizationType
+                            };
+
+                            unitWork.Save();
+                            model.OrganizationId = organization.Id;
+                        }
                     }
 
                     string passwordHash = sHelper.GetPasswordHash(model.Password);
@@ -172,32 +199,8 @@ namespace AIMS.Services
                         RegistrationDate = DateTime.Now
                     });
                     unitWork.Save();
-
-                    EFOrganization newOrganization = null;
-                    EFOrganizationTypes organizationType = null;
-                    if (model.IsNewOrganization)
-                    {
-                        organizationType = unitWork.OrganizationTypesRepository.Get(o => o.Id.Equals(model.OrganizationId));
-                        if (organizationType == null)
-                        {
-                            mHelper = new MessageHelper();
-                            response.Success = false;
-                            response.Message = mHelper.GetNotFound("Organization Type");
-                            return response;
-                        }
-                        
-                        newOrganization = new EFOrganization()
-                        {
-                            OrganizationName = model.NewOrganizationName,
-                            OrganizationType = organizationType
-                        };
-
-                        unitWork.Save();
-                        model.OrganizationId = newOrganization.Id;
-                    }
-
                     //Get emails for all the users
-                    var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) || u.UserType.Equals(UserTypes.Manager));
+                   /* var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) || u.UserType.Equals(UserTypes.Manager));
                     List<EmailsModel> usersEmailList = new List<EmailsModel>();
                     foreach (var user in users)
                     {
@@ -210,7 +213,7 @@ namespace AIMS.Services
                     }
                     //Send emails
                     IEmailHelper emailHelper = new EmailHelper(smtp, adminEmail);
-                    emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName);
+                    emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName);*/
                     response.ReturnedId = newUser.Id;
                 }
                 catch (Exception ex)
