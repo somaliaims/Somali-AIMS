@@ -173,6 +173,29 @@ namespace AIMS.Services
                     });
                     unitWork.Save();
 
+                    EFOrganization newOrganization = null;
+                    EFOrganizationTypes organizationType = null;
+                    if (model.IsNewOrganization)
+                    {
+                        organizationType = unitWork.OrganizationTypesRepository.Get(o => o.Id.Equals(model.OrganizationId));
+                        if (organizationType == null)
+                        {
+                            mHelper = new MessageHelper();
+                            response.Success = false;
+                            response.Message = mHelper.GetNotFound("Organization Type");
+                            return response;
+                        }
+                        
+                        newOrganization = new EFOrganization()
+                        {
+                            OrganizationName = model.NewOrganizationName,
+                            OrganizationType = organizationType
+                        };
+
+                        unitWork.Save();
+                        model.OrganizationId = newOrganization.Id;
+                    }
+
                     //Get emails for all the users
                     var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) || u.UserType.Equals(UserTypes.Manager));
                     List<EmailsModel> usersEmailList = new List<EmailsModel>();
