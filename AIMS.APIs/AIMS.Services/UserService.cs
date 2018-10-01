@@ -178,7 +178,7 @@ namespace AIMS.Services
 
                             organization = new EFOrganization()
                             {
-                                OrganizationName = model.NewOrganizationName,
+                                OrganizationName = model.OrganizationName,
                                 OrganizationType = organizationType
                             };
 
