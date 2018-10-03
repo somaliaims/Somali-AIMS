@@ -13,6 +13,20 @@ namespace AIMS.Models
     }
 
     /// <summary>
+    /// Token models
+    /// </summary>
+    public class TokenModel
+    {
+        public string Email { get; set; }
+        public string OrganizationId { get; set; }
+        public string UserType { get; set; }
+        public string JwtKey { get; set; }
+        public string JwtAudience { get; set; }
+        public string JwtIssuer { get; set; }
+        public string TokenExpirationDays { get; set; }
+    }
+
+    /// <summary>
     /// Organization models
     /// </summary>
     public class OrganizationView
@@ -86,6 +100,23 @@ namespace AIMS.Models
         public string Organization { get; set; }
         public bool IsApproved { get; set; }
         public string RegistrationDate { get; set; }
+    }
+
+    public class UserAuthenticationView
+    {
+        public int Id { get; set; }
+        public string DisplayName { get; set; }
+        public string Email { get; set; }
+        public int OrganizationId { get; set; }
+        public UserTypes UserType { get; set; }
+    }
+
+    public class UserReturnView
+    {
+        public string DisplayName { get; set; }
+        public string Token { get; set; }
+        public int OrganizationId { get; set; }
+        public UserTypes UserType { get; set; }
     }
 
     public class EmailsModel

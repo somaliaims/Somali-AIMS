@@ -32,7 +32,7 @@ namespace AIMS.Services
         /// <param name="email"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        UserView AuthenticateUser(string email, string password);
+        UserAuthenticationView AuthenticateUser(string email, string password);
 
         /// <summary>
         /// Checks availability of email
@@ -103,11 +103,11 @@ namespace AIMS.Services
             }
         }
 
-        public UserView AuthenticateUser(string email, string password)
+        public UserAuthenticationView AuthenticateUser(string email, string password)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                UserView foundUser = new UserView();
+                UserAuthenticationView foundUser = new UserAuthenticationView();
                 var findUser = unitWork.UserRepository.GetWithInclude(u => u.Email.Equals(email) && u.Password.Equals(password),
                     new string[] { "Organization" });
 
@@ -115,9 +115,11 @@ namespace AIMS.Services
                 {
                     foreach (var user in findUser)
                     {
+                        foundUser.Id = user.Id;
+                        foundUser.Email = user.Email;
                         foundUser.DisplayName = user.DisplayName;
                         foundUser.UserType = user.UserType;
-                        foundUser.Organization = user.Organization.OrganizationName;
+                        foundUser.OrganizationId = user.Organization.Id;
                         break;
                     }
                 }

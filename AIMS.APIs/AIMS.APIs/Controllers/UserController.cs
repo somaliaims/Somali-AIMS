@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using AIMS.APIs.Utilities;
 using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
@@ -20,11 +21,13 @@ namespace AIMS.APIs.Controllers
     {
         AIMSDbContext context;
         IUserService userService;
+        IConfiguration configuration;
 
-        public UserController(AIMSDbContext cntxt, IUserService service)
+        public UserController(AIMSDbContext cntxt, IUserService service, IConfiguration config)
         {
             this.context = cntxt;
             this.userService = service;
+            this.configuration = config;
         }
 
         [HttpGet]
@@ -74,7 +77,25 @@ namespace AIMS.APIs.Controllers
 
             if (!string.IsNullOrEmpty(foundUser.DisplayName))
             {
-                return Ok(foundUser);
+                TokenModel tModel = new TokenModel()
+                {
+                    JwtKey = configuration["JwtKey"],
+                    JwtAudience = configuration["JwtAudience"],
+                    JwtIssuer = configuration["JwtIssuer"],
+                    TokenExpirationDays = configuration["JwtExpireDays"],
+                    OrganizationId = foundUser.OrganizationId.ToString(),
+                    UserType = foundUser.UserType.ToString(),
+                    Email = foundUser.Email
+                };
+                TokenUtility tManager = new TokenUtility();
+                var jwtToken = tManager.GenerateToken(tModel);
+                UserReturnView uView = new UserReturnView()
+                {
+                    Token = jwtToken,
+                    DisplayName = foundUser.DisplayName,
+                    UserType = foundUser.UserType
+                };
+                return Ok(uView);
             }
             return Unauthorized();
         }
