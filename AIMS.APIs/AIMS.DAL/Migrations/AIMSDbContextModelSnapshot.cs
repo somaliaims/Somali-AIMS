@@ -379,7 +379,7 @@ namespace AIMS.DAL.Migrations
 
                     b.HasIndex("SectorTypeId");
 
-                    b.ToTable("EFSectorCategory");
+                    b.ToTable("SectorCategories");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFSectorSubCategory", b =>
@@ -396,7 +396,7 @@ namespace AIMS.DAL.Migrations
 
                     b.HasIndex("SectorCategoryId");
 
-                    b.ToTable("EFSectorSubCategory");
+                    b.ToTable("SectorSubCategories");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFSectorTypes", b =>
@@ -409,7 +409,7 @@ namespace AIMS.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EFSectorTypes");
+                    b.ToTable("SectorTypes");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFStaticReports", b =>

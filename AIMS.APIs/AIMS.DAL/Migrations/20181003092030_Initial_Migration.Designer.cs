@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    [Migration("20180927072741_Updated_Sectors_For_Mapping")]
-    partial class Updated_Sectors_For_Mapping
+    [Migration("20181003092030_Initial_Migration")]
+    partial class Initial_Migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -237,6 +237,8 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("FunderId");
 
+                    b.Property<int>("GrantType");
+
                     b.Property<int>("ProjectId");
 
                     b.HasKey("Id");
@@ -379,7 +381,7 @@ namespace AIMS.DAL.Migrations
 
                     b.HasIndex("SectorTypeId");
 
-                    b.ToTable("EFSectorCategory");
+                    b.ToTable("SectorCategories");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFSectorSubCategory", b =>
@@ -396,7 +398,7 @@ namespace AIMS.DAL.Migrations
 
                     b.HasIndex("SectorCategoryId");
 
-                    b.ToTable("EFSectorSubCategory");
+                    b.ToTable("SectorSubCategories");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFSectorTypes", b =>
@@ -405,11 +407,11 @@ namespace AIMS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("TypeName");
+                    b.Property<string>("TypeName");
 
                     b.HasKey("Id");
 
-                    b.ToTable("EFSectorTypes");
+                    b.ToTable("SectorTypes");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFStaticReports", b =>
@@ -641,7 +643,7 @@ namespace AIMS.DAL.Migrations
             modelBuilder.Entity("AIMS.Models.EFSectorCategory", b =>
                 {
                     b.HasOne("AIMS.Models.EFSectorTypes", "SectorType")
-                        .WithMany()
+                        .WithMany("SectorCategories")
                         .HasForeignKey("SectorTypeId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

@@ -51,17 +51,16 @@ namespace AIMS.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Sectors",
+                name: "SectorTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    SectorName = table.Column<string>(nullable: true),
-                    TimeStamp = table.Column<DateTime>(nullable: false)
+                    TypeName = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Sectors", x => x.Id);
+                    table.PrimaryKey("PK_SectorTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -118,6 +117,26 @@ namespace AIMS.DAL.Migrations
                         principalTable: "ProjectTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SectorCategories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Category = table.Column<string>(nullable: true),
+                    SectorTypeId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SectorCategories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SectorCategories_SectorTypes_SectorTypeId",
+                        column: x => x.SectorTypeId,
+                        principalTable: "SectorTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -219,6 +238,7 @@ namespace AIMS.DAL.Migrations
                 name: "ProjectDisbursements",
                 columns: table => new
                 {
+                    Id = table.Column<int>(nullable: false),
                     ProjectId = table.Column<int>(nullable: false),
                     StartingYear = table.Column<int>(nullable: false),
                     StartingMonth = table.Column<int>(nullable: false),
@@ -293,6 +313,7 @@ namespace AIMS.DAL.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     FunderId = table.Column<int>(nullable: false),
                     ProjectId = table.Column<int>(nullable: false),
+                    GrantType = table.Column<int>(nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(9 ,2)", nullable: false),
                     Currency = table.Column<string>(nullable: true),
                     ExchangeRate = table.Column<decimal>(type: "decimal(9, 2)", nullable: false)
@@ -360,27 +381,21 @@ namespace AIMS.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProjectSectors",
+                name: "SectorSubCategories",
                 columns: table => new
                 {
-                    ProjectId = table.Column<int>(nullable: false),
-                    SectorId = table.Column<int>(nullable: false),
-                    ContributedAmount = table.Column<decimal>(type: "decimal(9, 2)", nullable: false),
-                    ExchangeRate = table.Column<decimal>(type: "decimal(9, 2)", nullable: false)
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    SectorCategoryId = table.Column<int>(nullable: false),
+                    SubCategory = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProjectSectors", x => new { x.ProjectId, x.SectorId });
+                    table.PrimaryKey("PK_SectorSubCategories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProjectSectors_Projects_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ProjectSectors_Sectors_SectorId",
-                        column: x => x.SectorId,
-                        principalTable: "Sectors",
+                        name: "FK_SectorSubCategories_SectorCategories_SectorCategoryId",
+                        column: x => x.SectorCategoryId,
+                        principalTable: "SectorCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -464,6 +479,60 @@ namespace AIMS.DAL.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Sectors",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    SectorName = table.Column<string>(nullable: true),
+                    CategoryId = table.Column<int>(nullable: true),
+                    SubCategoryId = table.Column<int>(nullable: true),
+                    TimeStamp = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Sectors", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Sectors_SectorCategories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "SectorCategories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Sectors_SectorSubCategories_SubCategoryId",
+                        column: x => x.SubCategoryId,
+                        principalTable: "SectorSubCategories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectSectors",
+                columns: table => new
+                {
+                    ProjectId = table.Column<int>(nullable: false),
+                    SectorId = table.Column<int>(nullable: false),
+                    ContributedAmount = table.Column<decimal>(type: "decimal(9, 2)", nullable: false),
+                    ExchangeRate = table.Column<decimal>(type: "decimal(9, 2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectSectors", x => new { x.ProjectId, x.SectorId });
+                    table.ForeignKey(
+                        name: "FK_ProjectSectors_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProjectSectors_Sectors_SectorId",
+                        column: x => x.SectorId,
+                        principalTable: "Sectors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Locations_EFProjectId",
                 table: "Locations",
@@ -540,6 +609,26 @@ namespace AIMS.DAL.Migrations
                 column: "ReportId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SectorCategories_SectorTypeId",
+                table: "SectorCategories",
+                column: "SectorTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sectors_CategoryId",
+                table: "Sectors",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sectors_SubCategoryId",
+                table: "Sectors",
+                column: "SubCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SectorSubCategories_SectorCategoryId",
+                table: "SectorSubCategories",
+                column: "SectorCategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserNotifications_OrganizationId",
                 table: "UserNotifications",
                 column: "OrganizationId");
@@ -614,13 +703,22 @@ namespace AIMS.DAL.Migrations
                 name: "Projects");
 
             migrationBuilder.DropTable(
+                name: "SectorSubCategories");
+
+            migrationBuilder.DropTable(
                 name: "Organizations");
 
             migrationBuilder.DropTable(
                 name: "ProjectTypes");
 
             migrationBuilder.DropTable(
+                name: "SectorCategories");
+
+            migrationBuilder.DropTable(
                 name: "OrganizationTypes");
+
+            migrationBuilder.DropTable(
+                name: "SectorTypes");
         }
     }
 }

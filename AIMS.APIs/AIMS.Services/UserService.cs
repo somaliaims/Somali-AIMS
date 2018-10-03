@@ -29,10 +29,10 @@ namespace AIMS.Services
         /// <summary>
         /// Authenticates a user
         /// </summary>
-        /// <param name="userName"></param>
+        /// <param name="email"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        UserView AuthenticateUser(string userName, string password);
+        UserView AuthenticateUser(string email, string password);
 
         /// <summary>
         /// Checks availability of email
@@ -103,12 +103,12 @@ namespace AIMS.Services
             }
         }
 
-        public UserView AuthenticateUser(string userName, string password)
+        public UserView AuthenticateUser(string email, string password)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 UserView foundUser = new UserView();
-                var findUser = unitWork.UserRepository.GetWithInclude(u => u.DisplayName.Equals(userName) && u.Password.Equals(password),
+                var findUser = unitWork.UserRepository.GetWithInclude(u => u.Email.Equals(email) && u.Password.Equals(password),
                     new string[] { "Organization" });
 
                 if (findUser != null)
