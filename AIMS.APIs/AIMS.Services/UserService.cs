@@ -202,7 +202,7 @@ namespace AIMS.Services
                     });
                     unitWork.Save();
                     //Get emails for all the users
-                   /* var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) || u.UserType.Equals(UserTypes.Manager));
+                    var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id));
                     List<EmailsModel> usersEmailList = new List<EmailsModel>();
                     foreach (var user in users)
                     {
@@ -213,9 +213,27 @@ namespace AIMS.Services
                             UserType = user.UserType
                         });
                     }
-                    //Send emails
-                    IEmailHelper emailHelper = new EmailHelper(smtp, adminEmail);
-                    emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName);*/
+
+                    if (usersEmailList.Count == 0)
+                    {
+                        var managerUsers = unitWork.UserRepository.GetMany(u => u.UserType == UserTypes.Manager);
+                        foreach (var user in managerUsers)
+                        {
+                            usersEmailList.Add(new EmailsModel()
+                            {
+                                Email = user.Email,
+                                UserName = user.DisplayName,
+                                UserType = user.UserType
+                            });
+                        }
+                    }
+
+                    if (usersEmailList.Count > 0)
+                    {
+                        //Send emails
+                        IEmailHelper emailHelper = new EmailHelper(smtp, adminEmail);
+                        emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName);
+                    }
                     response.ReturnedId = newUser.Id;
                 }
                 catch (Exception ex)

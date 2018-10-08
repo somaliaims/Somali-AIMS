@@ -117,6 +117,7 @@ namespace AIMS.Models
 
     public class EFSectorMappings
     {
+        public int Id { get; set; }
         public int NativeSectorId { get; set; }
         public int MappedSectorId { get; set; }
         public int SectorTypeId { get; set; }

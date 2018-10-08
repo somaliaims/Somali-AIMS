@@ -65,8 +65,6 @@ namespace AIMS.Services.Helpers
                 mailMessage.Subject = "New User Registration for " + organizationName;
                 client.Send(mailMessage);
             }
-
-
             return response;
         }
 
