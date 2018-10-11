@@ -34,6 +34,9 @@ namespace AIMS.Services.Helpers
         {
             ActionResponse response = new ActionResponse();
             MailMessage mailMessage = new MailMessage();
+            mailMessage.IsBodyHtml = true;
+            mailMessage.From = new MailAddress(this.emailFrom);
+
             var managersEmailList = (from user in emailList
                                      where user.UserType == UserTypes.Manager
                                      || user.UserType == UserTypes.SuperAdmin
@@ -44,8 +47,6 @@ namespace AIMS.Services.Helpers
                                   where user.UserType == UserTypes.Standard
                                   select user.Email);
             string usersEmailString = String.Join(',', usersEmailList);
-
-            mailMessage.From = new MailAddress(this.emailFrom);
 
             //Sending bulk email to Managers
             if (managersEmailList.Count() > 0)

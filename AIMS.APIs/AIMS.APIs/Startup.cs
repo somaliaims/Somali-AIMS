@@ -101,7 +101,8 @@ namespace AIMS.APIs
                     Credentials = new NetworkCredential(
                             config.GetValue<String>("Email:Smtp:Username"),
                             config.GetValue<String>("Email:Smtp:Password")
-                        )
+                        ),
+                    EnableSsl = true
                 };
             });
 
