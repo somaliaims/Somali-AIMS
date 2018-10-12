@@ -164,6 +164,14 @@ namespace AIMS.Models
         public string Password { get; set; }
     }
 
+    public class UserApprovalModel
+    {
+        [Required]
+        public int ApprovedById { get; set; }
+        [Required]
+        public int UserId { get; set; }
+    }
+
     /// <summary>
     /// Location models
     /// </summary>

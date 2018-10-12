@@ -68,6 +68,13 @@ namespace AIMS.Services
         /// <param name="password"></param>
         /// <returns></returns>
         ActionResponse Delete(string email, string password);
+
+        /// <summary>
+        /// Activates account for the provided user
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse ActivateUserAccount(UserApprovalModel model);
     }
 
     public class UserService : IUserService
@@ -198,11 +205,12 @@ namespace AIMS.Services
                         Organization = organization,
                         Password = passwordHash,
                         IsApproved = false,
+                        IsActive = true,
                         RegistrationDate = DateTime.Now
                     });
                     unitWork.Save();
                     //Get emails for all the users
-                    var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id));
+                    var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) && u.IsApproved == true);
                     List<EmailsModel> usersEmailList = new List<EmailsModel>();
                     foreach (var user in users)
                     {
@@ -216,7 +224,7 @@ namespace AIMS.Services
 
                     if (usersEmailList.Count == 0)
                     {
-                        var managerUsers = unitWork.UserRepository.GetMany(u => u.UserType == UserTypes.Manager);
+                        var managerUsers = unitWork.UserRepository.GetMany(u => u.UserType == UserTypes.Manager && u.IsApproved == true);
                         foreach (var user in managerUsers)
                         {
                             usersEmailList.Add(new EmailsModel()
@@ -241,6 +249,53 @@ namespace AIMS.Services
                     response.Success = false;
                     response.Message = ex.Message;
                 }
+                return response;
+            }
+        }
+
+        public ActionResponse ActivateUserAccount(UserApprovalModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                EFUser userAccount = null;
+                EFUser approvedByAccount = null;
+
+                var userAccounts = unitWork.UserRepository.GetMany(u => u.Id.Equals(model.ApprovedById) || u.Id.Equals(model.UserId));
+                foreach(var user in userAccounts)
+                {
+                    if (user.Id.Equals(model.ApprovedById))
+                    {
+                        approvedByAccount = user;
+                    }
+                    else if (user.Id.Equals(model.UserId))
+                    {
+                        userAccount = user;
+                    }
+                }
+                if (approvedByAccount == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Approved By");
+                    response.Success = false;
+                    return response;
+                }
+                if (userAccount == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("User");
+                    response.Success = false;
+                    return response;
+                }
+
+                userAccount.IsApproved = true;
+                userAccount.ApprovedBy = approvedByAccount;
+                userAccount.ApprovedOn = DateTime.Now;
+
+                unitWork.UserRepository.Update(userAccount);
+                unitWork.Save();
+                response.ReturnedId = userAccount.Id;
                 return response;
             }
         }

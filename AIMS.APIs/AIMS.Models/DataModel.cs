@@ -68,8 +68,14 @@ namespace AIMS.Models
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }
         public EFOrganization Organization { get; set; }
+        [ForeignKey("ApprovedById")]
+        public int? ApprovedById { get; set; }
+        public EFUser ApprovedBy { get; set; }
         public bool IsApproved { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime? ApprovedOn { get; set; }
         public DateTime RegistrationDate { get; set; }
+        public DateTime? DeActivatedOn { get; set; }
     }
 
     /*

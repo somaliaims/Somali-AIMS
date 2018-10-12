@@ -99,6 +99,22 @@ namespace AIMS.APIs.Controllers
             }
             return Unauthorized();
         }
+
+        [HttpPost]
+        [Route("Activate")]
+        public IActionResult Activate([FromBody] UserApprovalModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = userService.ActivateUserAccount(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.ReturnedId);
+        }
         
         [HttpGet]
         [Route("[action]/{email}")]
