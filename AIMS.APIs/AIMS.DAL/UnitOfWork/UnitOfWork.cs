@@ -27,6 +27,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFProjectDocuments> projectDocumentsRepository;
         private GenericRepository<EFProjectDisbursements> projectDisbursementsRepository;
         //private GenericRepository<EFSectorCategory> sectorCategoryRepository;
+        private GenericRepository<EFUserNotifications> notificationsRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -160,6 +161,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.projectDisbursementsRepository == null)
                     this.projectDisbursementsRepository = new GenericRepository<EFProjectDisbursements>(context);
                 return this.projectDisbursementsRepository;
+            }
+        }
+
+        public GenericRepository<EFUserNotifications> NotificationsRepository
+        {
+            get
+            {
+                if (this.notificationsRepository == null)
+                    this.notificationsRepository = new GenericRepository<EFUserNotifications>(context);
+                return this.notificationsRepository;
             }
         }
 

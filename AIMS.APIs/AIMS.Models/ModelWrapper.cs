@@ -329,4 +329,15 @@ namespace AIMS.Models
     }
 
 
+    /// <summary>
+    /// Notifications models
+    /// </summary>
+    public class NotificationView
+    {
+        public int Id { get; set; }
+        public string Message { get; set; }
+        public DateTime Dated { get; set; }
+    }
+
+
 }

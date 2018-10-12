@@ -83,8 +83,8 @@ namespace AIMS.APIs
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = "AIMS",
-                    ValidAudience = "AIMS",
+                    ValidIssuer = Configuration["JwtIssuer"],
+                    ValidAudience = Configuration["JwtAudience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(Configuration["JwtKey"]))
                 };
@@ -111,7 +111,6 @@ namespace AIMS.APIs
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IOrganizationTypeService, OrganizationTypeService>();
             services.AddScoped<IOrganizationService, OrganizationService>();
-            
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 

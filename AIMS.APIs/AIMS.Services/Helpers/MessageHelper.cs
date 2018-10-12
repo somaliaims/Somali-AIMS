@@ -39,6 +39,14 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string InvalidAccountDeletionAttempt();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="organization"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        string NewUserForOrganization(string organization, string user);
     }
 
     public class MessageHelper : IMessageHelper
@@ -73,6 +81,11 @@ namespace AIMS.Services.Helpers
         public string InvalidAccountDeletionAttempt()
         {
             return INVALID_ACCOUNT_DELETION_ATTEMPT;
+        }
+
+        public string NewUserForOrganization(string organization, string user)
+        {
+            return ("A new user (" + user + ") has submitted the request to register for the organization " +  organization);
         }
     }
 }

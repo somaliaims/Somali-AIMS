@@ -210,7 +210,10 @@ namespace AIMS.Services
                     });
                     unitWork.Save();
                     //Get emails for all the users
-                    var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) && u.IsApproved == true);
+                    /*
+                     * TODO: Need to put is approved condition here
+                     */
+                    var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id));
                     List<EmailsModel> usersEmailList = new List<EmailsModel>();
                     foreach (var user in users)
                     {
@@ -224,7 +227,7 @@ namespace AIMS.Services
 
                     if (usersEmailList.Count == 0)
                     {
-                        var managerUsers = unitWork.UserRepository.GetMany(u => u.UserType == UserTypes.Manager && u.IsApproved == true);
+                        var managerUsers = unitWork.UserRepository.GetMany(u => u.UserType == UserTypes.Manager || u.UserType == UserTypes.SuperAdmin);
                         foreach (var user in managerUsers)
                         {
                             usersEmailList.Add(new EmailsModel()
@@ -241,6 +244,19 @@ namespace AIMS.Services
                         //Send emails
                         IEmailHelper emailHelper = new EmailHelper(smtp, adminEmail);
                         emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName);
+                        mHelper = new MessageHelper();
+                        string notificationMessage = mHelper.NewUserForOrganization(organization.OrganizationName, model.DisplayName);
+
+                        //Add notification
+                        unitWork.NotificationsRepository.Insert(new EFUserNotifications()
+                        {
+                            UserType = model.UserType,
+                            Organization = organization,
+                            Message = notificationMessage,
+                            Dated = DateTime.Now,
+                            IsSeen = false,
+                        });
+                        unitWork.Save();
                     }
                     response.ReturnedId = newUser.Id;
                 }

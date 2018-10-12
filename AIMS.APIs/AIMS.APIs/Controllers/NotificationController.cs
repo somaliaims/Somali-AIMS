@@ -1,0 +1,43 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using AIMS.DAL.EF;
+using AIMS.Models;
+using AIMS.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AIMS.APIs.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class NotificationController : ControllerBase
+    {
+        AIMSDbContext context;
+        INotificationService notificationService;
+
+        public NotificationController(AIMSDbContext cntxt, INotificationService service)
+        {
+            this.context = cntxt;
+            this.notificationService = service;
+        }
+
+        [HttpGet]
+        public IActionResult Get()
+        {
+            var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            var userTypeVal = User.FindFirst(ClaimTypes.Role)?.Value;
+            if (string.IsNullOrEmpty(organizationIdVal) || string.IsNullOrEmpty(userTypeVal))
+            {
+                return Ok(null);
+            }
+
+            UserTypes userType = (UserTypes)Convert.ToInt32(userTypeVal);
+            int organizationId = Convert.ToInt32(organizationIdVal);
+            var notifications = notificationService.Get(userType, organizationId);
+            return Ok(notifications);
+        }
+    }
+}
