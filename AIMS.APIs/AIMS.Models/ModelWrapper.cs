@@ -19,7 +19,7 @@ namespace AIMS.Models
     {
         public string Email { get; set; }
         public string OrganizationId { get; set; }
-        public string UserType { get; set; }
+        public int UserType { get; set; }
         public string JwtKey { get; set; }
         public string JwtAudience { get; set; }
         public string JwtIssuer { get; set; }

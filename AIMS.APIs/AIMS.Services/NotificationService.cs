@@ -13,7 +13,7 @@ namespace AIMS.Services
         IEnumerable<NotificationView> Get(UserTypes uType, int organizationId);
     }
 
-    public class NotificationService
+    public class NotificationService : INotificationService
     {
         AIMSDbContext context;
         IMapper mapper;

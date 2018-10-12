@@ -84,7 +84,7 @@ namespace AIMS.APIs.Controllers
                     JwtIssuer = configuration["JwtIssuer"],
                     TokenExpirationDays = configuration["JwtExpireDays"],
                     OrganizationId = foundUser.OrganizationId.ToString(),
-                    UserType = foundUser.UserType.ToString(),
+                    UserType = Convert.ToInt32(foundUser.UserType),
                     Email = foundUser.Email
                 };
                 TokenUtility tManager = new TokenUtility();

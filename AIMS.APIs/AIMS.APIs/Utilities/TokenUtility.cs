@@ -17,7 +17,7 @@ namespace AIMS.APIs.Utilities
             var claims = new[]
             {
                 new Claim(ClaimTypes.Email, model.Email),
-                new Claim(ClaimTypes.Role, model.UserType),
+                new Claim(ClaimTypes.Role, model.UserType.ToString()),
                 new Claim(ClaimTypes.Country, model.OrganizationId),
                 new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()),
             };

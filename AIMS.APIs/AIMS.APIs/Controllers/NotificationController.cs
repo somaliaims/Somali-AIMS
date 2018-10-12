@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AIMS.APIs.Controllers
 {
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     [ApiController]
     public class NotificationController : ControllerBase
