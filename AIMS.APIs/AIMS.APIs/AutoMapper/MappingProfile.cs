@@ -36,6 +36,9 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFOrganization, OrganizationView>()
                 .ForMember(o => o.TypeName, opts => opts.MapFrom(source => source.OrganizationType.TypeName));
+
+            CreateMap<EFUserNotifications, NotificationView>()
+                .ForMember(n => n.Dated, opts => opts.MapFrom(source => source.Dated.Date.ToLongDateString()));
         }
     }
 }

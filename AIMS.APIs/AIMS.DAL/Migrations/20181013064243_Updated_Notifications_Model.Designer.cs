@@ -4,14 +4,16 @@ using AIMS.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    partial class AIMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181013064243_Updated_Notifications_Model")]
+    partial class Updated_Notifications_Model
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -498,8 +500,6 @@ namespace AIMS.DAL.Migrations
                     b.Property<int>("NotificationType");
 
                     b.Property<int>("OrganizationId");
-
-                    b.Property<int>("TreatmentId");
 
                     b.Property<int>("UserType");
 

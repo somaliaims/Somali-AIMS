@@ -10,7 +10,7 @@ namespace AIMS.Services
 {
     public interface INotificationService
     {
-        IEnumerable<NotificationView> Get(UserTypes uType, int organizationId);
+        IEnumerable<NotificationView> Get(int userId, UserTypes uType, int organizationId);
     }
 
     public class NotificationService : INotificationService
@@ -24,11 +24,11 @@ namespace AIMS.Services
             mapper = autoMapper;
         }
 
-        public IEnumerable<NotificationView> Get(UserTypes uType, int organizationId)
+        public IEnumerable<NotificationView> Get(int userId, UserTypes uType, int organizationId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var notifications = unitWork.NotificationsRepository.GetMany(n => n.OrganizationId == organizationId && n.UserType == uType);
+                var notifications = unitWork.NotificationsRepository.GetMany(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin));
                 return mapper.Map<List<NotificationView>>(notifications);
             }
         }

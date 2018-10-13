@@ -16,6 +16,7 @@ namespace AIMS.APIs.Utilities
         {
             var claims = new[]
             {
+                new Claim(ClaimTypes.NameIdentifier, model.Id),
                 new Claim(ClaimTypes.Email, model.Email),
                 new Claim(ClaimTypes.Role, model.UserType.ToString()),
                 new Claim(ClaimTypes.Country, model.OrganizationId),

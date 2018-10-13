@@ -31,14 +31,17 @@ namespace AIMS.APIs.Controllers
         {
             var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
             var userTypeVal = User.FindFirst(ClaimTypes.Role)?.Value;
-            if (string.IsNullOrEmpty(organizationIdVal) || string.IsNullOrEmpty(userTypeVal))
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(organizationIdVal) || string.IsNullOrEmpty(userTypeVal) || string.IsNullOrEmpty(userIdVal))
             {
-                return Ok(null);
+                return Ok("[]");
             }
 
             UserTypes userType = (UserTypes)Convert.ToInt32(userTypeVal);
             int organizationId = Convert.ToInt32(organizationIdVal);
-            var notifications = notificationService.Get(userType, organizationId);
+            int userId = Convert.ToInt32(userIdVal);
+            var notifications = notificationService.Get(userId, userType, organizationId);
             return Ok(notifications);
         }
     }

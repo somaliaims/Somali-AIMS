@@ -17,6 +17,7 @@ namespace AIMS.Models
     /// </summary>
     public class TokenModel
     {
+        public string Id { get; set; }
         public string Email { get; set; }
         public string OrganizationId { get; set; }
         public int UserType { get; set; }
@@ -337,6 +338,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Message { get; set; }
         public DateTime Dated { get; set; }
+        public NotificationTypes NotificationType { get; set; }
     }
 
 

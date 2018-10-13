@@ -213,7 +213,7 @@ namespace AIMS.Services
                     /*
                      * TODO: Need to put is approved condition here
                      */
-                    var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id));
+                    var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) && u.IsApproved == true);
                     List<EmailsModel> usersEmailList = new List<EmailsModel>();
                     foreach (var user in users)
                     {
@@ -253,8 +253,10 @@ namespace AIMS.Services
                             UserType = model.UserType,
                             Organization = organization,
                             Message = notificationMessage,
+                            TreatmentId = newUser.Id,
                             Dated = DateTime.Now,
                             IsSeen = false,
+                            NotificationType = NotificationTypes.NewUser
                         });
                         unitWork.Save();
                     }

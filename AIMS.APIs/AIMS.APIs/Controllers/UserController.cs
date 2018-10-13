@@ -79,6 +79,7 @@ namespace AIMS.APIs.Controllers
             {
                 TokenModel tModel = new TokenModel()
                 {
+                    Id = foundUser.Id.ToString(),
                     JwtKey = configuration["JwtKey"],
                     JwtAudience = configuration["JwtAudience"],
                     JwtIssuer = configuration["JwtIssuer"],

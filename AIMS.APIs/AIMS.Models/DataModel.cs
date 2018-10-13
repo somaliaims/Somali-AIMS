@@ -20,6 +20,15 @@ namespace AIMS.Models
         Text = 3,
     }
 
+    public enum NotificationTypes
+    {
+        NewUser = 1,
+        NewProjectToOrg = 2,
+        NewIATIToProject = 3,
+        UserInactive = 4,
+        ChangedMappingEffectedProject = 5
+    }
+
     public enum DataTransactions
     {
         Inserted = 1,
@@ -282,10 +291,12 @@ namespace AIMS.Models
         public UserTypes UserType { get; set; }
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }
+        public int TreatmentId { get; set; }
         public EFOrganization Organization { get; set; }
         public string Message { get; set; }
         public DateTime Dated { get; set; }
         public bool IsSeen { get; set; }
+        public NotificationTypes NotificationType { get; set; }
     }
 
     public class EFLogs
