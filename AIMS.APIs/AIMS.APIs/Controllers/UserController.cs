@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AIMS.APIs.Utilities;
 using AIMS.DAL.EF;
@@ -156,6 +157,34 @@ namespace AIMS.APIs.Controllers
             }
 
             var response = userService.UpdatePassword(model.UserId, model.Password);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.Success);
+        }
+
+        [HttpPost]
+        [Route("ActivateAccount/{id}")]
+        public IActionResult ActivateAccount(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid id provided");
+            }
+
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdVal))
+            {
+                return BadRequest("Invalid attempt");
+            }
+            int userId = Convert.ToInt32(userIdVal);
+            UserApprovalModel model = new UserApprovalModel()
+            {
+                UserId = id,
+                ApprovedById = userId,
+            };
+            var response = userService.ActivateUserAccount(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

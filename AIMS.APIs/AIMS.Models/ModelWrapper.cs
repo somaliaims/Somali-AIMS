@@ -337,7 +337,8 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string Message { get; set; }
-        public DateTime Dated { get; set; }
+        public int TreatmentId { get; set; }
+        public string Dated { get; set; }
         public NotificationTypes NotificationType { get; set; }
     }
 

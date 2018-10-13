@@ -38,7 +38,7 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(o => o.TypeName, opts => opts.MapFrom(source => source.OrganizationType.TypeName));
 
             CreateMap<EFUserNotifications, NotificationView>()
-                .ForMember(n => n.Dated, opts => opts.MapFrom(source => source.Dated.Date.ToLongDateString()));
+                .ForMember(n => n.Dated, opts => opts.MapFrom(source => source.Dated.ToShortDateString()));
         }
     }
 }
