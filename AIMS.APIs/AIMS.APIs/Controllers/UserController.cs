@@ -166,11 +166,11 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("ActivateAccount/{id}")]
-        public IActionResult ActivateAccount(int id)
+        public IActionResult ActivateAccount([FromBody] UserApprovalModel model)
         {
-            if (id <= 0)
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid id provided");
+                return BadRequest(ModelState);
             }
 
             var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -178,12 +178,9 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Invalid attempt");
             }
+
             int userId = Convert.ToInt32(userIdVal);
-            UserApprovalModel model = new UserApprovalModel()
-            {
-                UserId = id,
-                ApprovedById = userId,
-            };
+            model.UserId = userId;
             var response = userService.ActivateUserAccount(model);
             if (!response.Success)
             {

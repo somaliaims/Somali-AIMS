@@ -307,11 +307,22 @@ namespace AIMS.Services
                     return response;
                 }
 
+                var notification = unitWork.NotificationsRepository.GetByID(model.NotificationId);
+                if (notification == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Notification");
+                    return response;
+                }
+
                 userAccount.IsApproved = true;
                 userAccount.ApprovedBy = approvedByAccount;
                 userAccount.ApprovedOn = DateTime.Now;
 
                 unitWork.UserRepository.Update(userAccount);
+                unitWork.NotificationsRepository.Delete(notification);
+
                 unitWork.Save();
                 response.ReturnedId = userAccount.Id;
                 return response;

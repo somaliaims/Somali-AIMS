@@ -167,10 +167,11 @@ namespace AIMS.Models
 
     public class UserApprovalModel
     {
-        [Required]
         public int ApprovedById { get; set; }
         [Required]
         public int UserId { get; set; }
+        [Required]
+        public int NotificationId { get; set; }
     }
 
     /// <summary>
