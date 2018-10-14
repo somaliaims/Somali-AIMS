@@ -165,7 +165,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
-        [Route("ActivateAccount/{id}")]
+        [Route("ActivateAccount")]
         public IActionResult ActivateAccount([FromBody] UserApprovalModel model)
         {
             if (!ModelState.IsValid)
@@ -179,8 +179,8 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid attempt");
             }
 
-            int userId = Convert.ToInt32(userIdVal);
-            model.UserId = userId;
+            int approvedById = Convert.ToInt32(userIdVal);
+            model.ApprovedById = approvedById;
             var response = userService.ActivateUserAccount(model);
             if (!response.Success)
             {

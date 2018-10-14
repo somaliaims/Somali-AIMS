@@ -210,9 +210,6 @@ namespace AIMS.Services
                     });
                     unitWork.Save();
                     //Get emails for all the users
-                    /*
-                     * TODO: Need to put is approved condition here
-                     */
                     var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) && u.IsApproved == true);
                     List<EmailsModel> usersEmailList = new List<EmailsModel>();
                     foreach (var user in users)
