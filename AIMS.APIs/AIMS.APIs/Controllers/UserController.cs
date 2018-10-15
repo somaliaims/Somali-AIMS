@@ -99,7 +99,8 @@ namespace AIMS.APIs.Controllers
                 };
                 return Ok(uView);
             }
-            return Unauthorized();
+            ErrorModel errModel = new ErrorModel() { Error = "Username/Password provided is invalid" };
+            return Ok(errModel);
         }
 
         [HttpPost]
@@ -115,7 +116,8 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(response.Message);
             }
-            return Ok(response.ReturnedId);
+            SuccessModel successModel = new SuccessModel() { Message = response.ReturnedId.ToString() };
+            return Ok(successModel);
         }
         
         [HttpGet]

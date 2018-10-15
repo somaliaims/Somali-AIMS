@@ -343,5 +343,20 @@ namespace AIMS.Models
         public NotificationTypes NotificationType { get; set; }
     }
 
+    /// <summary>
+    /// Error models
+    /// </summary>
+    public class ErrorModel
+    {
+        public string Error { get; set; }
+    }
+
+    /// <summary>
+    /// Success models
+    /// </summary>
+    public class SuccessModel
+    {
+        public string Message { get; set; }
+    }
 
 }
