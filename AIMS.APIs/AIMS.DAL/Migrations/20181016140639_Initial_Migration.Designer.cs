@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    [Migration("20181012052048_Updated_User_Model")]
-    partial class Updated_User_Model
+    [Migration("20181016140639_Initial_Migration")]
+    partial class Initial_Migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -452,9 +452,9 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int?>("ApprovedById");
 
-                    b.Property<DateTime>("ApprovedOn");
+                    b.Property<DateTime?>("ApprovedOn");
 
-                    b.Property<DateTime>("DeActivatedOn");
+                    b.Property<DateTime?>("DeActivatedOn");
 
                     b.Property<string>("DisplayName");
 
@@ -497,7 +497,11 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<string>("Message");
 
+                    b.Property<int>("NotificationType");
+
                     b.Property<int>("OrganizationId");
+
+                    b.Property<int>("TreatmentId");
 
                     b.Property<int>("UserType");
 

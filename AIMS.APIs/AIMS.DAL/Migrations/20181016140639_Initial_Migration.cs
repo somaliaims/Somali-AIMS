@@ -51,6 +51,21 @@ namespace AIMS.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SectorMappings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    NativeSectorId = table.Column<int>(nullable: false),
+                    MappedSectorId = table.Column<int>(nullable: false),
+                    SectorTypeId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SectorMappings", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SectorTypes",
                 columns: table => new
                 {
@@ -147,9 +162,11 @@ namespace AIMS.DAL.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     UserType = table.Column<int>(nullable: false),
                     OrganizationId = table.Column<int>(nullable: false),
+                    TreatmentId = table.Column<int>(nullable: false),
                     Message = table.Column<string>(nullable: true),
                     Dated = table.Column<DateTime>(nullable: false),
-                    IsSeen = table.Column<bool>(nullable: false)
+                    IsSeen = table.Column<bool>(nullable: false),
+                    NotificationType = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -173,12 +190,22 @@ namespace AIMS.DAL.Migrations
                     DisplayName = table.Column<string>(nullable: true),
                     UserType = table.Column<int>(nullable: false),
                     OrganizationId = table.Column<int>(nullable: false),
+                    ApprovedById = table.Column<int>(nullable: true),
                     IsApproved = table.Column<bool>(nullable: false),
-                    RegistrationDate = table.Column<DateTime>(nullable: false)
+                    IsActive = table.Column<bool>(nullable: false),
+                    ApprovedOn = table.Column<DateTime>(nullable: true),
+                    RegistrationDate = table.Column<DateTime>(nullable: false),
+                    DeActivatedOn = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Users_ApprovedById",
+                        column: x => x.ApprovedById,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Users_Organizations_OrganizationId",
                         column: x => x.OrganizationId,
@@ -634,6 +661,11 @@ namespace AIMS.DAL.Migrations
                 column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_ApprovedById",
+                table: "Users",
+                column: "ApprovedById");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
                 table: "Users",
                 column: "Email",
@@ -680,6 +712,9 @@ namespace AIMS.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "ReportSubscriptions");
+
+            migrationBuilder.DropTable(
+                name: "SectorMappings");
 
             migrationBuilder.DropTable(
                 name: "UserNotifications");

@@ -16,7 +16,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile></DocumentationFile>
-    <OutputPath>E:\WebApps\AIMS.APIs\AIMS.APIs\bin\Release\netcoreapp2.1\</OutputPath>
+    <OutputPath></OutputPath>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
