@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <DockerTargetOS>Windows</DockerTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -14,8 +15,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>C:\Users\Rashid Ahmad\Desktop\AIMSSetup\AIMS.APIs.xml</DocumentationFile>
-    <OutputPath>C:\Users\Rashid Ahmad\Desktop\AIMSSetup\</OutputPath>
+    <DocumentationFile></DocumentationFile>
+    <OutputPath>E:\WebApps\AIMS.APIs\AIMS.APIs\bin\Release\netcoreapp2.1\</OutputPath>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
