@@ -34,6 +34,13 @@ namespace AIMS.APIs.Controllers
             return Ok(organizations);
         }
 
+        [HttpGet("{criteria}")]
+        public IActionResult Get(string criteria)
+        {
+            var organizations = organizationService.GetMatching(criteria);
+            return Ok(organizations);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] OrganizationModel model)
         {
@@ -49,5 +56,22 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(response.ReturnedId);
         }
+
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] OrganizationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = organizationService.Update(id, model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.ReturnedId);
+        }
+
     }
 }

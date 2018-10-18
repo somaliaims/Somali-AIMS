@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AIMS.APIs</name>
+    </assembly>
+    <members>
+        <member name="M:AIMS.APIs.Controllers.OrganizationController.Get">
+            <summary>
+            Gets list of organizations
+            </summary>
+            <returns>Will return an array or json objects</returns>
+        </member>
+        <member name="M:AIMS.APIs.Controllers.ProjectDisbursementController.Get(System.Int32)">
+            <summary>
+            Gets disbursements for the provided project id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AIMS.APIs.Controllers.ProjectFundController.Get(System.Int32)">
+            <summary>
+            Gets fundings for the provided project id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:AIMS.APIs.Controllers.ProjectFunderController.Get">
+            <summary>
+            Gets list of organizations
+            </summary>
+            <returns>Will return an array or json objects</returns>
+        </member>
+        <member name="M:AIMS.APIs.Controllers.ProjectImplementorController.Get">
+            <summary>
+            Gets list of organizations
+            </summary>
+            <returns>Will return an array or json objects</returns>
+        </member>
+    </members>
+</doc>

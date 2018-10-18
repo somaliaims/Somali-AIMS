@@ -19,6 +19,13 @@ namespace AIMS.Services
         IEnumerable<OrganizationView> GetAll();
 
         /// <summary>
+        /// Gets all organizations matching the name with criteria
+        /// </summary>
+        /// <param name="criteria"></param>
+        /// <returns></returns>
+        IEnumerable<OrganizationView> GetMatching(string criteria);
+
+        /// <summary>
         /// Gets all organizations async
         /// </summary>
         /// <returns></returns>
@@ -55,6 +62,16 @@ namespace AIMS.Services
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
                 var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.Id != 0, new string[] { "OrganizationType" });
+                return mapper.Map<List<OrganizationView>>(organizations);
+            }
+        }
+
+        public IEnumerable<OrganizationView> GetMatching(string criteria)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<OrganizationView> organizationsList = new List<OrganizationView>();
+                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.OrganizationName.Contains(criteria), new string[] { "OrganizationType" });
                 return mapper.Map<List<OrganizationView>>(organizations);
             }
         }

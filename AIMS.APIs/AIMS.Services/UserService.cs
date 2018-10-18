@@ -197,6 +197,7 @@ namespace AIMS.Services
                     }
 
                     string passwordHash = sHelper.GetPasswordHash(model.Password);
+                    //TODO: Set approved to false to make it approved through notification
                     var newUser = unitWork.UserRepository.Insert(new EFUser()
                     {
                         DisplayName = model.DisplayName,
@@ -204,13 +205,14 @@ namespace AIMS.Services
                         UserType = model.UserType,
                         Organization = organization,
                         Password = passwordHash,
-                        IsApproved = false,
+                        IsApproved = true,
                         IsActive = true,
                         RegistrationDate = DateTime.Now
                     });
                     unitWork.Save();
                     //Get emails for all the users
-                    var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) && u.IsApproved == true);
+                    //TODO: To bind the email and notifications with user account creation
+                    /*var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) && u.IsApproved == true);
                     List<EmailsModel> usersEmailList = new List<EmailsModel>();
                     foreach (var user in users)
                     {
@@ -256,7 +258,7 @@ namespace AIMS.Services
                             NotificationType = NotificationTypes.NewUser
                         });
                         unitWork.Save();
-                    }
+                    }*/
                     response.ReturnedId = newUser.Id;
                 }
                 catch (Exception ex)
