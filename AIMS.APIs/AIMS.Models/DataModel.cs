@@ -72,7 +72,7 @@ namespace AIMS.Models
         [EmailAddress]
         public string Email { get; set; }
         public string Password { get; set; }
-        public string DisplayName { get; set; }
+        public string Name { get; set; }
         public UserTypes UserType { get; set; }
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }

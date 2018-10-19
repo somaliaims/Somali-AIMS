@@ -19,6 +19,13 @@ namespace AIMS.Services
         IEnumerable<OrganizationView> GetAll();
 
         /// <summary>
+        /// Gets organization by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        OrganizationViewModel Get(int id);
+
+        /// <summary>
         /// Gets all organizations matching the name with criteria
         /// </summary>
         /// <param name="criteria"></param>
@@ -63,6 +70,15 @@ namespace AIMS.Services
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
                 var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.Id != 0, new string[] { "OrganizationType" });
                 return mapper.Map<List<OrganizationView>>(organizations);
+            }
+        }
+
+        public OrganizationViewModel Get(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var organization = unitWork.OrganizationRepository.GetByID(id);
+                return mapper.Map<OrganizationViewModel>(organization);
             }
         }
 

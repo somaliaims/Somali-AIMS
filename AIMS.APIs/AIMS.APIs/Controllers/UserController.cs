@@ -76,7 +76,7 @@ namespace AIMS.APIs.Controllers
             model.Password = sHelper.GetPasswordHash(model.Password);
             var foundUser = userService.AuthenticateUser(model.Email, model.Password);
 
-            if (!string.IsNullOrEmpty(foundUser.DisplayName))
+            if (!string.IsNullOrEmpty(foundUser.Name))
             {
                 TokenModel tModel = new TokenModel()
                 {
@@ -94,7 +94,7 @@ namespace AIMS.APIs.Controllers
                 UserReturnView uView = new UserReturnView()
                 {
                     Token = jwtToken,
-                    DisplayName = foundUser.DisplayName,
+                    Name = foundUser.Name,
                     UserType = foundUser.UserType
                 };
                 return Ok(uView);

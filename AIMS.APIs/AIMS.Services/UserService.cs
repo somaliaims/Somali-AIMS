@@ -124,7 +124,7 @@ namespace AIMS.Services
                     {
                         foundUser.Id = user.Id;
                         foundUser.Email = user.Email;
-                        foundUser.DisplayName = user.DisplayName;
+                        foundUser.Name = user.Name;
                         foundUser.UserType = user.UserType;
                         foundUser.OrganizationId = user.Organization.Id;
                         break;
@@ -176,7 +176,7 @@ namespace AIMS.Services
                         EFOrganizationTypes organizationType = null;
                         if (model.IsNewOrganization)
                         {
-                            organizationType = unitWork.OrganizationTypesRepository.Get(o => o.Id.Equals(model.OrganizationTypeId));
+                            organizationType = unitWork.OrganizationTypesRepository.Get(o => o.TypeName.Equals("Default"));
                             if (organizationType == null)
                             {
                                 mHelper = new MessageHelper();
@@ -200,9 +200,9 @@ namespace AIMS.Services
                     //TODO: Set approved to false to make it approved through notification
                     var newUser = unitWork.UserRepository.Insert(new EFUser()
                     {
-                        DisplayName = model.DisplayName,
+                        Name = model.Name,
                         Email = model.Email,
-                        UserType = model.UserType,
+                        UserType = UserTypes.Standard,
                         Organization = organization,
                         Password = passwordHash,
                         IsApproved = true,
@@ -219,7 +219,7 @@ namespace AIMS.Services
                         usersEmailList.Add(new EmailsModel()
                         {
                             Email = user.Email,
-                            UserName = user.DisplayName,
+                            UserName = user.Name,
                             UserType = user.UserType
                         });
                     }
@@ -232,7 +232,7 @@ namespace AIMS.Services
                             usersEmailList.Add(new EmailsModel()
                             {
                                 Email = user.Email,
-                                UserName = user.DisplayName,
+                                UserName = user.Name,
                                 UserType = user.UserType
                             });
                         }
@@ -244,7 +244,7 @@ namespace AIMS.Services
                         IEmailHelper emailHelper = new EmailHelper(smtp, adminEmail);
                         emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName);
                         mHelper = new MessageHelper();
-                        string notificationMessage = mHelper.NewUserForOrganization(organization.OrganizationName, model.DisplayName);
+                        string notificationMessage = mHelper.NewUserForOrganization(organization.OrganizationName, model.Name);
 
                         //Add notification
                         unitWork.NotificationsRepository.Insert(new EFUserNotifications()

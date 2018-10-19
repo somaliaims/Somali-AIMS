@@ -41,8 +41,14 @@ namespace AIMS.Models
     {
         [Required]
         public string Name { get; set; }
-        [Required]
         public int TypeId { get; set; }
+    }
+
+    public class OrganizationViewModel
+    {
+        public int Id { get; set; }
+        public string OrganizationName { get; set; }
+        public int OrganizationTypeId { get; set; }
     }
 
     /// <summary>
@@ -94,7 +100,7 @@ namespace AIMS.Models
     public class UserView
     {
         public int Id { get; set; }
-        public string DisplayName { get; set; }
+        public string Name { get; set; }
         public string Email { get; set; }
         public UserTypes UserType { get; set; }
         public int OrganizationId { get; set; }
@@ -106,7 +112,7 @@ namespace AIMS.Models
     public class UserAuthenticationView
     {
         public int Id { get; set; }
-        public string DisplayName { get; set; }
+        public string Name { get; set; }
         public string Email { get; set; }
         public int OrganizationId { get; set; }
         public UserTypes UserType { get; set; }
@@ -114,7 +120,7 @@ namespace AIMS.Models
 
     public class UserReturnView
     {
-        public string DisplayName { get; set; }
+        public string Name { get; set; }
         public string Token { get; set; }
         public int OrganizationId { get; set; }
         public UserTypes UserType { get; set; }
@@ -139,7 +145,7 @@ namespace AIMS.Models
     public class UserModel
     {
         [Required]
-        public string DisplayName { get; set; }
+        public string Name { get; set; }
         [Required]
         [EmailAddress]
         public string Email { get; set; }
@@ -149,7 +155,7 @@ namespace AIMS.Models
         public UserTypes UserType { get; set; }
         public int OrganizationId { get; set; }
         public string OrganizationName { get; set; }
-        public int OrganizationTypeId { get; set; }
+        //public int OrganizationTypeId { get; set; }
         public bool IsNewOrganization { get; set; }
     }
 
