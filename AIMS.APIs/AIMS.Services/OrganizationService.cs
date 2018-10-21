@@ -50,6 +50,13 @@ namespace AIMS.Services
         /// <param name="organization"></param>
         /// <returns></returns>
         ActionResponse Update(int id, OrganizationModel organization);
+
+        /// <summary>
+        /// Approves an organization with the provided id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ActionResponse Approve(int id);
     }
 
     public class OrganizationService : IOrganizationService
@@ -162,6 +169,36 @@ namespace AIMS.Services
                 unitWork.OrganizationRepository.Update(organizationObj);
                 unitWork.Save();
                 response.Message = "1";
+                return response;
+            }
+        }
+
+        public ActionResponse Approve(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                var organization = unitWork.OrganizationRepository.GetByID(id);
+                if (organization == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Organization");
+                    response.Success = false;
+                    return response;
+                }
+
+                try
+                {
+                    organization.IsApproved = true;
+                    unitWork.OrganizationRepository.Update(organization);
+                    unitWork.Save();
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
                 return response;
             }
         }

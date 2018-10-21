@@ -81,5 +81,22 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [HttpPost]
+        [Route("Approve/{id}")]
+        public IActionResult Post(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid organization id provided");
+            }
+
+            var response = organizationService.Approve(id);
+            if (response.Success)
+            {
+                return Ok(true);
+            }
+            return BadRequest(response.Message);
+        }
+
     }
 }
