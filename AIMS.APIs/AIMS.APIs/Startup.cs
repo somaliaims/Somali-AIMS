@@ -9,6 +9,7 @@ using AutoMapper;
 using AIMS.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AIMS.APIs.Scheduler;
 
 namespace AIMS.APIs
 {
@@ -110,6 +112,7 @@ namespace AIMS.APIs
                 };
             });
 
+            //services.AddSingleton<IHostedService, ScheduleTask>();
             services.AddAutoMapper(a => a.AddProfile(new MappingProfile()));
             services.AddScoped<ISectorService, SectorService>();
             services.AddScoped<IUserService, UserService>();
@@ -120,7 +123,8 @@ namespace AIMS.APIs
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        // Included full qualified for Ihosting environment because of ambiguity for same name with other namespace
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
