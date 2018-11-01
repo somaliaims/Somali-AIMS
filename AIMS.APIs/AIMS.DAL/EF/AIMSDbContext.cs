@@ -81,6 +81,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFUserNotifications> UserNotifications { get; set; }
         public DbSet<EFLogs> Logs { get; set; }
         public DbSet<EFStaticReports> StaticReports { get; set; }
+        public DbSet<EFIATIData> IATIData { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime

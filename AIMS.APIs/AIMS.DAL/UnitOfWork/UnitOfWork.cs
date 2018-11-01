@@ -28,6 +28,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFProjectDisbursements> projectDisbursementsRepository;
         //private GenericRepository<EFSectorCategory> sectorCategoryRepository;
         private GenericRepository<EFUserNotifications> notificationsRepository;
+        private GenericRepository<EFIATIData> iatiDataRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -171,6 +172,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.notificationsRepository == null)
                     this.notificationsRepository = new GenericRepository<EFUserNotifications>(context);
                 return this.notificationsRepository;
+            }
+        }
+
+        public GenericRepository<EFIATIData> IATIDataRepository
+        {
+            get
+            {
+                if (this.iatiDataRepository == null)
+                    this.iatiDataRepository = new GenericRepository<EFIATIData>(context);
+                return this.iatiDataRepository;
             }
         }
 

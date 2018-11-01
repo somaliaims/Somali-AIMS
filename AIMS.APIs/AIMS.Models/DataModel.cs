@@ -343,5 +343,11 @@ namespace AIMS.Models
         public string Value { get; set; }
     }
 
+    public class EFIATIData
+    {
+        public int Id { get; set; }
+        public string Data { get; set; }
+        public DateTime Dated { get; set; }
+    }
 
 }

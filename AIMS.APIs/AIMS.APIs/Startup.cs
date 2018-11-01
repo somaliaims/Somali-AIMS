@@ -111,14 +111,16 @@ namespace AIMS.APIs
                     EnableSsl = true
                 };
             });
-
-            //services.AddSingleton<IHostedService, ScheduleTask>();
+            
             services.AddAutoMapper(a => a.AddProfile(new MappingProfile()));
             services.AddScoped<ISectorService, SectorService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IOrganizationTypeService, OrganizationTypeService>();
             services.AddScoped<IOrganizationService, OrganizationService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IIATIService, IATIService>();
+            services.AddSingleton<IConfiguration>(Configuration);
+            services.AddSingleton<IHostedService, ScheduleTask>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
