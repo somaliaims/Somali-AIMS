@@ -1,7 +1,11 @@
 ﻿using AIMS.APIs.IATILib.Parsers;
+using AIMS.DAL.EF;
 using AIMS.Models;
+using AIMS.Services;
+using AutoMapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,50 +19,56 @@ namespace AIMS.APIs.Scheduler
     public class ScheduleTask : ScheduledProcessor
     {
         IConfiguration configuration;
-        public ScheduleTask(IServiceScopeFactory serviceScopeFactory, IConfiguration config) : base(serviceScopeFactory)
+        AIMSDbContext dbContext;
+        IMapper mapper;
+        public ScheduleTask(IServiceScopeFactory serviceScopeFactory, IConfiguration config, AIMSDbContext context, IMapper mapperObj) : base(serviceScopeFactory)
         {
             configuration = config;
+            dbContext = context;
+            mapper = mapperObj;
         }
 
         protected override string Schedule => "*/1 * * * *";
 
         public override Task ProcessInScope(IServiceProvider serviceProvider)
         {
-            // Create an XmlNamespaceManager to resolve namespaces.
-            /*NameTable nameTable = new NameTable();
-            XmlNamespaceManager nsmgr = new XmlNamespaceManager(nameTable);
-            nsmgr.AddNamespace("iati-extra", "");
-            // Create an XmlParserContext.  The XmlParserContext contains all the information
-            // required to parse the XML fragment, including the entity information and the
-            // XmlNamespaceManager to use for namespace resolution.
-            XmlParserContext xmlParserContext = new XmlParserContext(nameTable, nsmgr, null, XmlSpace.None);
-            XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
-            xmlReaderSettings.NameTable = nameTable;
-            string url = "http://datastore.iatistandard.org/api/1/access/activity.xml?recipient-country=" + countryCode;*/
-            //XmlReader xReader = XmlReader.Create(url, xmlReaderSettings, xmlParserContext);
-            string url = "http://datastore.iatistandard.org/api/1/access/activity.xml?recipient-country=SOM";
-            XmlReader xReader = XmlReader.Create(url);
-            XDocument xDoc = XDocument.Load(xReader);
-            var activity = (from el in xDoc.Descendants("iati-activity")
-                            select el.FirstAttribute).FirstOrDefault();
-
-            IParser parser;
-            ICollection<IATIActivity> activityList = new List<IATIActivity>();
-            string version = "";
-            version = activity.Value;
-            switch (version)
+            try
             {
-                case "1.03":
-                    parser = new ParserIATIVersion13();
-                    activityList = parser.ExtractAcitivities(xDoc);
-                    break;
+                string country = configuration.GetValue<string>("IATI:Country");
+                string url = "http://datastore.iatistandard.org/api/1/access/activity.xml?recipient-country=" + country;
+                XmlReader xReader = XmlReader.Create(url);
+                XDocument xDoc = XDocument.Load(xReader);
+                var activity = (from el in xDoc.Descendants("iati-activity")
+                                select el.FirstAttribute).FirstOrDefault();
 
-                case "2.01":
-                    parser = new ParserIATIVersion21(configuration);
-                    activityList = parser.ExtractAcitivities(xDoc);
-                    break;
+                IParser parser;
+                ICollection<IATIActivity> activityList = new List<IATIActivity>();
+                string version = "";
+                version = activity.Value;
+                switch (version)
+                {
+                    case "1.03":
+                        parser = new ParserIATIVersion13();
+                        activityList = parser.ExtractAcitivities(xDoc);
+                        break;
+
+                    case "2.01":
+                        parser = new ParserIATIVersion21(configuration);
+                        activityList = parser.ExtractAcitivities(xDoc);
+                        break;
+                }
+
+                IATIService service = new IATIService(dbContext, mapper);
+                IATIModel model = new IATIModel()
+                {
+                    Data = JsonConvert.SerializeObject(activityList),
+                };
+                service.Add(model);
             }
-            Debug.WriteLine("IATI Parsed");
+            catch(Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
             return Task.CompletedTask;
         }
     }

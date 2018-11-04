@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AIMS.APIs.Scheduler;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace AIMS.APIs
 {
@@ -121,12 +122,15 @@ namespace AIMS.APIs
             services.AddScoped<IIATIService, IATIService>();
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddSingleton<IHostedService, ScheduleTask>();
+
+            services.AddDistributedMemoryCache();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         // Included full qualified for Ihosting environment because of ambiguity for same name with other namespace
-        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env,
+            Microsoft.AspNetCore.Hosting.IApplicationLifetime lifetime, IDistributedCache cache)
         {
             if (env.IsDevelopment())
             {
@@ -151,6 +155,19 @@ namespace AIMS.APIs
 
             app.UseHttpsRedirection();
             app.UseAuthentication();
+
+            /*Enabling cache and setting expiration time*/
+            string expirationTimeInSecondsStr = Configuration.GetSection("Caching:ExpirationTimeInSeconds").Value;
+            double seconds = 300;
+            if (!string.IsNullOrEmpty(expirationTimeInSecondsStr))
+            {
+                seconds = Convert.ToDouble(expirationTimeInSecondsStr);
+            }
+            lifetime.ApplicationStarted.Register(() =>
+            {
+                var options = new DistributedCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromSeconds(seconds));
+            });
             app.UseMvc();
         }
     }

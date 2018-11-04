@@ -26,6 +26,12 @@ namespace AIMS.Services
         ICollection<IATIActivity> GetAll();
 
         /// <summary>
+        /// Gets all the organizations
+        /// </summary>
+        /// <returns></returns>
+        ICollection<Organization> GetOrganizations();
+
+        /// <summary>
         /// Deletes all the data less than the specified date
         /// </summary>
         /// <param name="datedLessThan"></param>
@@ -58,6 +64,15 @@ namespace AIMS.Services
                     }
                 }
                 return activityList;
+            }
+        }
+
+        public ICollection<Organization> GetOrganizations()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<Organization> organizations = new List<Organization>();
+                return organizations;
             }
         }
 
