@@ -42,12 +42,10 @@ namespace AIMS.Services
     public class IATIService : IIATIService
     {
         AIMSDbContext context;
-        IMapper mapper;
 
-        public IATIService(AIMSDbContext cntxt, IMapper autoMapper)
+        public IATIService(AIMSDbContext cntxt)
         {
             this.context = cntxt;
-            this.mapper = autoMapper;
         }
 
         public ICollection<IATIActivity> GetAll()

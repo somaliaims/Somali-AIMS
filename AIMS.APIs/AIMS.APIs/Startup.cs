@@ -121,7 +121,8 @@ namespace AIMS.APIs
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IIATIService, IATIService>();
             services.AddSingleton<IConfiguration>(Configuration);
-            services.AddSingleton<IHostedService, ScheduleTask>();
+            //Need to work on this scheduled task in future
+            //services.AddSingleton<IHostedService, ScheduleTask>();
 
             services.AddDistributedMemoryCache();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);

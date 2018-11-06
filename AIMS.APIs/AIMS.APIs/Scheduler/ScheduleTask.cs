@@ -19,13 +19,13 @@ namespace AIMS.APIs.Scheduler
     public class ScheduleTask : ScheduledProcessor
     {
         IConfiguration configuration;
-        AIMSDbContext dbContext;
-        IMapper mapper;
-        public ScheduleTask(IServiceScopeFactory serviceScopeFactory, IConfiguration config, AIMSDbContext context, IMapper mapperObj) : base(serviceScopeFactory)
+        private readonly IServiceScopeFactory scopeFactory;
+
+        public ScheduleTask(IServiceScopeFactory serviceScopeFactory, IConfiguration config, 
+            IServiceScopeFactory _scopeFactory) : base(serviceScopeFactory)
         {
             configuration = config;
-            dbContext = context;
-            mapper = mapperObj;
+            scopeFactory = _scopeFactory;
         }
 
         protected override string Schedule => "*/1 * * * *";
@@ -34,6 +34,7 @@ namespace AIMS.APIs.Scheduler
         {
             try
             {
+                string message = "IATI updated successfully at: " + DateTime.Now.ToLongDateString();
                 string country = configuration.GetValue<string>("IATI:Country");
                 string url = "http://datastore.iatistandard.org/api/1/access/activity.xml?recipient-country=" + country;
                 XmlReader xReader = XmlReader.Create(url);
@@ -58,12 +59,26 @@ namespace AIMS.APIs.Scheduler
                         break;
                 }
 
-                IATIService service = new IATIService(dbContext, mapper);
+                Debug.WriteLine("Executed");
+                /*IATIService service = new IATIService(dbContext, mapper);
                 IATIModel model = new IATIModel()
                 {
                     Data = JsonConvert.SerializeObject(activityList),
                 };
                 service.Add(model);
+                Debug.WriteLine(message);*/
+                using (var scope = scopeFactory.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
+                    IATIService service = new IATIService(dbContext);
+                    IATIModel model = new IATIModel()
+                    {
+                        Data = JsonConvert.SerializeObject(activityList),
+                    };
+                    service.Add(model);
+                    Debug.WriteLine(message);
+                }
+
             }
             catch(Exception ex)
             {

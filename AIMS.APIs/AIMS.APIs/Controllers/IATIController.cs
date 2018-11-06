@@ -53,7 +53,6 @@ namespace AIMS.APIs.Controllers
                 string activitiesStr = Encoding.UTF8.GetString(encodedActivities);
                 iatiActivities = (List<IATIActivity>)JsonConvert.DeserializeObject(activitiesStr);
             }
-            
             return Ok(iatiActivities);
         }
     }
