@@ -55,6 +55,32 @@ namespace AIMS.Models
     /// Sector models
     /// </summary>
     
+    public class SectorCategoryModel
+    {
+        public int SectorTypeId { get; set; }
+        public string Category { get; set; }
+    }
+
+    public class SectorCategoryView
+    {
+        public int Id { get; set; }
+        public string SectorType { get; set; }
+        public string Category { get; set; }
+    }
+
+    public class SectorSubCategoryModel
+    {
+        public int CategoryId { get; set; }
+        public string SubCategory { get; set; }
+    }
+
+    public class SectorSubCategoryView
+    {
+        public int Id { get; set; }
+        public string Category { get; set; }
+        public string SubCategory { get; set; }
+    }
+
     public class SectorTypesView
     {
         public int Id { get; set; }

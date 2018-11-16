@@ -84,7 +84,12 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var organization = unitWork.OrganizationRepository.GetByID(id);
+                var organizationList = unitWork.OrganizationRepository.GetWithInclude(o => o.Id.Equals(id), new string[] { "OrganizationType" });
+                EFOrganization organization = null;
+                foreach(var org in organizationList)
+                {
+                    organization = org;
+                }
                 return mapper.Map<OrganizationViewModel>(organization);
             }
         }

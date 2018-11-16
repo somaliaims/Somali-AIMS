@@ -13,6 +13,8 @@ namespace AIMS.DAL.UnitOfWork
     {
         private AIMSDbContext context = null;
         private GenericRepository<EFSectorTypes> sectorTypesRepository;
+        private GenericRepository<EFSectorCategory> sectorCategoryRepository;
+        private GenericRepository<EFSectorSubCategory> sectorSubCategoryRepository;
         //private GenericRepository<EFSectorMappings> sectorMappingRepository;
         private GenericRepository<EFSector> sectorRepository;
         private GenericRepository<EFLocation> locationRepository;
@@ -26,7 +28,6 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFUser> userRepository;
         private GenericRepository<EFProjectDocuments> projectDocumentsRepository;
         private GenericRepository<EFProjectDisbursements> projectDisbursementsRepository;
-        //private GenericRepository<EFSectorCategory> sectorCategoryRepository;
         private GenericRepository<EFUserNotifications> notificationsRepository;
         private GenericRepository<EFIATIData> iatiDataRepository;
 
@@ -62,6 +63,26 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.sectorTypesRepository == null)
                     this.sectorTypesRepository = new GenericRepository<EFSectorTypes>(context);
                 return this.sectorTypesRepository;
+            }
+        }
+
+        public GenericRepository<EFSectorCategory> SectorCategoryRepository
+        {
+            get
+            {
+                if (this.sectorCategoryRepository == null)
+                    this.sectorCategoryRepository = new GenericRepository<EFSectorCategory>(context);
+                return this.sectorCategoryRepository;
+            }
+        }
+
+        public GenericRepository<EFSectorSubCategory> SectorSubCategoryRepository
+        {
+            get
+            {
+                if (this.sectorSubCategoryRepository == null)
+                    this.sectorSubCategoryRepository = new GenericRepository<EFSectorSubCategory>(context);
+                return this.sectorSubCategoryRepository;
             }
         }
 
