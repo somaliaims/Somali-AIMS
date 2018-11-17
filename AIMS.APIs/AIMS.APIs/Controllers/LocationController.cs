@@ -30,6 +30,26 @@ namespace AIMS.APIs.Controllers
             return Ok(locations);
         }
 
+        [HttpGet]
+        [Route("GetById/{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid id provided");
+            }
+
+            var location = locationService.Get(id);
+            return Ok(location);
+        }
+
+        [HttpGet("{criteria}")]
+        public IActionResult Get(string criteria)
+        {
+            var locations = locationService.GetMatching(criteria);
+            return Ok(locations);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] LocationModel model)
         {

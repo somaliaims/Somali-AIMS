@@ -19,6 +19,20 @@ namespace AIMS.Services
         IEnumerable<LocationView> GetAll();
 
         /// <summary>
+        /// Get matching locations for the criteria
+        /// </summary>
+        /// <param name="criteria"></param>
+        /// <returns></returns>
+        IEnumerable<LocationView> GetMatching(string criteria);
+
+        /// <summary>
+        /// Gets the location for the provided id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+
+        LocationView Get(int id);
+        /// <summary>
         /// Gets all locations async
         /// </summary>
         /// <returns></returns>
@@ -64,6 +78,25 @@ namespace AIMS.Services
             {
                 var locations = await unitWork.LocationRepository.GetAllAsync();
                 return await Task<IEnumerable<LocationView>>.Run(() => mapper.Map<List<LocationView>>(locations)).ConfigureAwait(false);
+            }
+        }
+
+        public LocationView Get(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var location = unitWork.LocationRepository.GetByID(id);
+                return mapper.Map<LocationView>(location);
+            }
+        }
+
+        public IEnumerable<LocationView> GetMatching(string criteria)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<LocationView> locationsList = new List<LocationView>();
+                var locations = unitWork.LocationRepository.GetWithInclude(o => o.Location.Contains(criteria), new string[] { "OrganizationType" });
+                return mapper.Map<List<LocationView>>(locations);
             }
         }
 

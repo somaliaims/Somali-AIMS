@@ -118,6 +118,7 @@ namespace AIMS.APIs
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IOrganizationTypeService, OrganizationTypeService>();
             services.AddScoped<IOrganizationService, OrganizationService>();
+            services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IIATIService, IATIService>();
             services.AddSingleton<IConfiguration>(Configuration);
