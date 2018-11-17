@@ -471,8 +471,8 @@ namespace AIMS.Models
     public class IATIModel
     {
         [Required]
-        [MinLength(50)]
         public string Data { get; set; }
+        public string Organizations { get; set; }
     }
 
     public class IATIView

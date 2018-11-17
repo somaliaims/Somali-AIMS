@@ -347,14 +347,7 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string Data { get; set; }
+        public string Organizations { get; set; }
         public DateTime Dated { get; set; }
     }
-
-    public class EFSettings
-    {
-        public string SMTPServer { get; set; }
-        public string AdminEmail { get; set; }
-        public string SMTPPort { get; set; }
-    }
-
 }

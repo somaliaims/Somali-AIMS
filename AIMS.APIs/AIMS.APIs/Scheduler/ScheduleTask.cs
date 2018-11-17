@@ -44,6 +44,7 @@ namespace AIMS.APIs.Scheduler
 
                 IParser parser;
                 ICollection<IATIActivity> activityList = new List<IATIActivity>();
+                ICollection<Organization> organizations = new List<Organization>();
                 string version = "";
                 version = activity.Value;
                 switch (version)
@@ -59,14 +60,42 @@ namespace AIMS.APIs.Scheduler
                         break;
                 }
 
-                Debug.WriteLine("Executed");
-                /*IATIService service = new IATIService(dbContext, mapper);
-                IATIModel model = new IATIModel()
+                //Extract organizations for future use
+                if (activityList.Count > 0)
                 {
-                    Data = JsonConvert.SerializeObject(activityList),
-                };
-                service.Add(model);
-                Debug.WriteLine(message);*/
+                    if (activityList != null)
+                    {
+                        var organizationList = from a in activityList
+                                               select a.ParticipatingOrganizations;
+
+                        if (organizationList.Count() > 0)
+                        {
+                            foreach (var orgCollection in organizationList)
+                            {
+                                var orgList = from list in orgCollection
+                                              select list;
+
+                                foreach (var org in orgList)
+                                {
+                                    var orgExists = (from o in organizations
+                                                     where o.Name.ToLower().Equals(org.Name.ToLower())
+                                                     select o).FirstOrDefault();
+
+                                    if (orgExists == null)
+                                    {
+                                        organizations.Add(new Organization()
+                                        {
+                                            Name = org.Name,
+                                            Role = org.Role
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Debug.WriteLine("IATI Data updated at: " + DateTime.Now.ToLongDateString());
                 using (var scope = scopeFactory.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
@@ -74,11 +103,11 @@ namespace AIMS.APIs.Scheduler
                     IATIModel model = new IATIModel()
                     {
                         Data = JsonConvert.SerializeObject(activityList),
+                        Organizations = JsonConvert.SerializeObject(organizations)
                     };
                     service.Add(model);
                     Debug.WriteLine(message);
                 }
-
             }
             catch(Exception ex)
             {

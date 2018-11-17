@@ -5,6 +5,7 @@ using AutoMapper;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace AIMS.Services
@@ -53,7 +54,8 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<IATIActivity> activityList = new List<IATIActivity>();
-                var iatiData = unitWork.IATIDataRepository.GetFirst(d => d.Dated.Date == d.Dated.Date);
+                DateTime dated = DateTime.Now;
+                var iatiData = unitWork.IATIDataRepository.GetFirst(d => d.Dated.Date == dated.Date);
                 if (iatiData != null)
                 {
                     if (iatiData.Data.Length > 0)
@@ -70,6 +72,16 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<Organization> organizations = new List<Organization>();
+                DateTime dated = DateTime.Now;
+                var iatiData = unitWork.IATIDataRepository.GetFirst(d => d.Dated.Date == dated.Date);
+                if (iatiData != null)
+                {
+                    var organizationStr = iatiData.Organizations;
+                    if (!string.IsNullOrEmpty(organizationStr))
+                    {
+                        organizations = JsonConvert.DeserializeObject<List<Organization>>(organizationStr);
+                    }
+                }
                 return organizations;
             }
         }
@@ -82,6 +94,7 @@ namespace AIMS.Services
                 unitWork.IATIDataRepository.Insert(new EFIATIData()
                 {
                     Data = model.Data,
+                    Organizations = model.Organizations,
                     Dated = DateTime.Now
                 });
                 unitWork.Save();

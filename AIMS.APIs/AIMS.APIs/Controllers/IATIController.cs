@@ -35,7 +35,8 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        [Route("GetActivities")]
+        public async Task<IActionResult> GetActivities()
         {
             var cachedActivities = await cache.GetAsync("iati-activities");
             ICollection<IATIActivity> iatiActivities = new List<IATIActivity>();
@@ -54,6 +55,14 @@ namespace AIMS.APIs.Controllers
                 iatiActivities = (List<IATIActivity>)JsonConvert.DeserializeObject(activitiesStr);
             }
             return Ok(iatiActivities);
+        }
+
+        [HttpGet]
+        [Route("GetOrganizations")]
+        public IActionResult GetOrganizations()
+        {
+            var organizations = iatiService.GetOrganizations();
+            return Ok(organizations);
         }
     }
 }
