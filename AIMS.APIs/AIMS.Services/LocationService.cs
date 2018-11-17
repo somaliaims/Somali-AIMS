@@ -95,7 +95,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<LocationView> locationsList = new List<LocationView>();
-                var locations = unitWork.LocationRepository.GetWithInclude(o => o.Location.Contains(criteria), new string[] { "OrganizationType" });
+                var locations = unitWork.LocationRepository.GetMany(o => o.Location.Contains(criteria));
                 return mapper.Map<List<LocationView>>(locations);
             }
         }

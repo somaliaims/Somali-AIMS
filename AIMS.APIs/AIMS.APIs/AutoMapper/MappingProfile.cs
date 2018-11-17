@@ -42,6 +42,8 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFUserNotifications, NotificationView>()
                 .ForMember(n => n.Dated, opts => opts.MapFrom(source => source.Dated.ToShortDateString()));
+
+            CreateMap<EFLocation, LocationView>();
         }
     }
 }

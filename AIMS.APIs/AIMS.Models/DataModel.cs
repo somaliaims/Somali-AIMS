@@ -146,9 +146,9 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string Location { get; set; }
-        [Column(TypeName = "decimal(9, 2)")]
+        [Column(TypeName = "decimal(9, 5)")]
         public decimal Latitude { get; set; }
-        [Column(TypeName = "decimal(9, 2)")]
+        [Column(TypeName = "decimal(9, 5)")]
         public decimal Longitude { get; set; }
     }
 

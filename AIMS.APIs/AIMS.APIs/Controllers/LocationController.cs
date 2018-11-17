@@ -66,7 +66,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] LocationModel model)
         {
             if (!ModelState.IsValid)
