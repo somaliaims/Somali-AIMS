@@ -4,18 +4,19 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <DockerTargetOS>Windows</DockerTargetOS>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
-    <DocumentationFile>bin\Debug\netcoreapp2.1\AIMS.APIs.xml</DocumentationFile>
+    <DocumentationFile></DocumentationFile>
     <OutputPath>bin\Debug\netcoreapp2.1\</OutputPath>
     <WarningsAsErrors>NU1605</WarningsAsErrors>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>E:\WebApps\Somali-AIMS\AIMS.APIs\AIMS.APIs\AIMS.APIs.xml</DocumentationFile>
+    <DocumentationFile></DocumentationFile>
     <OutputPath></OutputPath>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>

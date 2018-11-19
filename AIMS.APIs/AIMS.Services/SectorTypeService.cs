@@ -19,6 +19,20 @@ namespace AIMS.Services
         IEnumerable<SectorTypesView> GetAll();
 
         /// <summary>
+        /// Gets sector type for the provided id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        SectorTypesView Get(int id);
+
+        /// <summary>
+        /// Gets matching sector types for the provided criteria
+        /// </summary>
+        /// <param name="criteria"></param>
+        /// <returns></returns>
+        IEnumerable<SectorTypesView> GetMatching(string criteria);
+
+        /// <summary>
         /// Gets all sectorTypes async
         /// </summary>
         /// <returns></returns>
@@ -58,12 +72,31 @@ namespace AIMS.Services
             }
         }
 
+        public SectorTypesView Get(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var sectorType = unitWork.SectorTypesRepository.GetByID(id);
+                return mapper.Map<SectorTypesView>(sectorType);
+            }
+        }
+
         public async Task<IEnumerable<SectorTypesView>> GetAllAsync()
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 var sectorTypes = await unitWork.SectorTypesRepository.GetAllAsync();
                 return await Task<IEnumerable<SectorTypesView>>.Run(() => mapper.Map<List<SectorTypesView>>(sectorTypes)).ConfigureAwait(false);
+            }
+        }
+
+        public IEnumerable<SectorTypesView> GetMatching(string criteria)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<SectorTypesView> sectorTypesList = new List<SectorTypesView>();
+                var sectorTypes = unitWork.SectorTypesRepository.GetMany(o => o.TypeName.Contains(criteria));
+                return mapper.Map<List<SectorTypesView>>(sectorTypes);
             }
         }
 
