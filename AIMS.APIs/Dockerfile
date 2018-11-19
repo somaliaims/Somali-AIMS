@@ -5,7 +5,7 @@ FROM microsoft/dotnet:1.0.13-runtime-nanoserver-sac2016 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM microsoft/dotnet:2.1-sdk-nanoserver-1803 AS build
+FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
 COPY ["AIMS.APIs/AIMS.APIs.csproj", "AIMS.APIs/"]
 COPY ["AIMS.Models/AIMS.Models.csproj", "AIMS.Models/"]
