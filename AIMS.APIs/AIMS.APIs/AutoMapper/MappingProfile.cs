@@ -43,7 +43,10 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFUserNotifications, NotificationView>()
                 .ForMember(n => n.Dated, opts => opts.MapFrom(source => source.Dated.ToShortDateString()));
 
-            CreateMap<EFLocation, LocationView>();
+            CreateMap<EFLocation, LocationView>().ReverseMap();
+
+            CreateMap<EFSectorCategory, SectorCategoryView>()
+                .ForMember(c => c.SectorType, opts => opts.MapFrom(source => source.SectorType.TypeName));
         }
     }
 }

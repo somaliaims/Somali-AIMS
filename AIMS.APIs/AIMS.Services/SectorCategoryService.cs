@@ -25,6 +25,13 @@ namespace AIMS.Services
         Task<IEnumerable<SectorCategoryView>> GetAllAsync();
 
         /// <summary>
+        /// Gets the matching categories for the provided criteria
+        /// </summary>
+        /// <param name="criteria"></param>
+        /// <returns></returns>
+        IEnumerable<SectorCategoryView> GetMatching(string criteria);
+
+        /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
@@ -64,6 +71,16 @@ namespace AIMS.Services
             {
                 var sectorCategories = await unitWork.SectorCategoryRepository.GetAllAsync();
                 return await Task<IEnumerable<SectorCategoryView>>.Run(() => mapper.Map<List<SectorCategoryView>>(sectorCategories)).ConfigureAwait(false);
+            }
+        }
+
+        public IEnumerable<SectorCategoryView> GetMatching(string criteria)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<SectorCategoryView> sectorTypesList = new List<SectorCategoryView>();
+                var sectorTypes = unitWork.SectorCategoryRepository.GetWithInclude(c => c.Category.Contains(criteria), new string[] { "SectorType" });
+                return mapper.Map<List<SectorCategoryView>>(sectorTypes);
             }
         }
 
