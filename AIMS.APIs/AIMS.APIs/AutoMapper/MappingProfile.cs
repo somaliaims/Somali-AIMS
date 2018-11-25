@@ -47,6 +47,9 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFSectorCategory, SectorCategoryView>()
                 .ForMember(c => c.SectorType, opts => opts.MapFrom(source => source.SectorType.TypeName));
+
+            CreateMap<EFSectorSubCategory, SectorSubCategoryView>()
+                .ForMember(s => s.Category, opts => opts.MapFrom(source => source.SectorCategory.Category));
         }
     }
 }

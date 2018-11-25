@@ -122,6 +122,8 @@ namespace AIMS.APIs
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IIATIService, IATIService>();
             services.AddScoped<ISectorTypesService, SectorTypesService>();
+            services.AddScoped<ISectorCategoryService, SectorCategoryService>();
+            services.AddScoped<ISectorSubcategoryService, SectorSubcategoryService>();
             services.AddSingleton<IConfiguration>(Configuration);
             //Need to work on this scheduled task in future
             //services.AddSingleton<IHostedService, ScheduleTask>();

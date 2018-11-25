@@ -25,6 +25,20 @@ namespace AIMS.Services
         Task<IEnumerable<SectorSubCategoryView>> GetAllAsync();
 
         /// <summary>
+        /// Gets sub category view for the provided id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        SectorSubCategoryView Get(int id);
+
+        /// <summary>
+        /// Gets matching sub categories for the provided criteria
+        /// </summary>
+        /// <param name="criteria"></param>
+        /// <returns></returns>
+        IEnumerable<SectorSubCategoryView> GetMatching(string criteria);
+
+        /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
@@ -38,7 +52,7 @@ namespace AIMS.Services
         ActionResponse Update(int id, SectorSubCategoryModel sectorCategory);
     }
 
-    public class SectorSubcategoryService
+    public class SectorSubcategoryService : ISectorSubcategoryService
     {
         AIMSDbContext context;
         IMapper mapper;
@@ -58,12 +72,31 @@ namespace AIMS.Services
             }
         }
 
+        public SectorSubCategoryView Get(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var sectorSubCategory = unitWork.SectorSubCategoryRepository.GetByID(id);
+                return mapper.Map<SectorSubCategoryView>(sectorSubCategory);
+            }
+        }
+
         public async Task<IEnumerable<SectorSubCategoryView>> GetAllAsync()
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 var sectorCategories = await unitWork.SectorSubCategoryRepository.GetAllAsync();
                 return await Task<IEnumerable<SectorSubCategoryView>>.Run(() => mapper.Map<List<SectorSubCategoryView>>(sectorCategories)).ConfigureAwait(false);
+            }
+        }
+
+        public IEnumerable<SectorSubCategoryView> GetMatching(string criteria)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<SectorSubCategoryView> sectorSubcategoryList = new List<SectorSubCategoryView>();
+                var sectorTypes = unitWork.SectorSubCategoryRepository.GetWithInclude(c => c.SubCategory.Contains(criteria), new string[] { "Category" });
+                return mapper.Map<List<SectorSubCategoryView>>(sectorTypes);
             }
         }
 
