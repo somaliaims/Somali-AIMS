@@ -68,6 +68,13 @@ namespace AIMS.Models
         public string Category { get; set; }
     }
 
+    public class SectorCategoryViewModel
+    {
+        public int Id { get; set; }
+        public int SectorTypeId { get; set; }
+        public string Category { get; set; }
+    }
+
     public class SectorSubCategoryModel
     {
         public int CategoryId { get; set; }

@@ -29,7 +29,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        SectorCategoryView Get(int id);
+        SectorCategoryViewModel Get(int id);
 
         /// <summary>
         /// Gets the matching categories for the provided criteria
@@ -67,7 +67,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorCategories = unitWork.SectorCategoryRepository.GetAll();
+                var sectorCategories = unitWork.SectorCategoryRepository.GetWithInclude(c => c.Id != 0, new string[] { "SectorType" });
                 return mapper.Map<List<SectorCategoryView>>(sectorCategories);
             }
         }
@@ -81,12 +81,17 @@ namespace AIMS.Services
             }
         }
 
-        public SectorCategoryView Get(int id)
+        public SectorCategoryViewModel Get(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorCategory = unitWork.SectorCategoryRepository.GetByID(id);
-                return mapper.Map<SectorCategoryView>(sectorCategory);
+                var sectorCategoryObj = unitWork.SectorCategoryRepository.GetWithInclude(c => c.Id == id, new string[] { "SectorType" });
+                EFSectorCategory sectorCategory = null;
+                foreach(var category in sectorCategoryObj)
+                {
+                    sectorCategory = category;
+                }
+                return mapper.Map<SectorCategoryViewModel>(sectorCategory);
             }
         }
 
@@ -114,7 +119,9 @@ namespace AIMS.Services
                         msgHelper = new MessageHelper();
                         response.Success = false;
                         response.Message = msgHelper.GetNotFound("Sector Type");
+                        return response;
                     }
+
                     var newSectorCategory = unitWork.SectorCategoryRepository.Insert(new EFSectorCategory()
                     {
                         SectorType = sectorType,

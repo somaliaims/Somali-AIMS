@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AIMS.DAL.EF;
+using AIMS.Models;
 using AIMS.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,53 @@ namespace AIMS.APIs.Controllers
         {
             var categories = sectorCategoryService.GetAll();
             return Ok(categories);
+        }
+
+        [HttpGet]
+        [Route("GetById/{id}")]
+        public IActionResult Get(int id)
+        {
+            var sectorCategory = sectorCategoryService.Get(id);
+            return Ok(sectorCategory);
+        }
+
+        [HttpGet("{criteria}")]
+        public IActionResult Get(string criteria)
+        {
+            var sectorCategorys = sectorCategoryService.GetMatching(criteria);
+            return Ok(sectorCategorys);
+        }
+
+        [HttpPost]
+        public IActionResult Post([FromBody] SectorCategoryModel sectorCategory)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = sectorCategoryService.Add(sectorCategory);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.ReturnedId);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] SectorCategoryModel sectorCategory)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = sectorCategoryService.Update(id, sectorCategory);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.Message);
         }
     }
 }
