@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AIMS.Services
 {
-    public interface ISectorSubcategoryService
+    public interface ISectorSubCategoryService
     {
         /// <summary>
         /// Gets all sectorCategories
@@ -52,12 +52,12 @@ namespace AIMS.Services
         ActionResponse Update(int id, SectorSubCategoryModel sectorCategory);
     }
 
-    public class SectorSubcategoryService : ISectorSubcategoryService
+    public class SectorSubCategoryService : ISectorSubCategoryService
     {
         AIMSDbContext context;
         IMapper mapper;
 
-        public SectorSubcategoryService(AIMSDbContext cntxt, IMapper autoMapper)
+        public SectorSubCategoryService(AIMSDbContext cntxt, IMapper autoMapper)
         {
             context = cntxt;
             mapper = autoMapper;
@@ -67,7 +67,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorCategories = unitWork.SectorSubCategoryRepository.GetAll();
+                var sectorCategories = unitWork.SectorSubCategoryRepository.GetWithInclude(c => c.Id != 0, new string[] { "SectorCategory" });
                 return mapper.Map<List<SectorSubCategoryView>>(sectorCategories);
             }
         }
@@ -76,7 +76,12 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorSubCategory = unitWork.SectorSubCategoryRepository.GetByID(id);
+                var sectorSubCategoryObj = unitWork.SectorSubCategoryRepository.GetWithInclude(s => s.Id == id, new string[] { "SectorCategory" });
+                EFSectorSubCategory sectorSubCategory = null;
+                foreach(var sCategory in sectorSubCategoryObj)
+                {
+                    sectorSubCategory = sCategory;
+                }
                 return mapper.Map<SectorSubCategoryView>(sectorSubCategory);
             }
         }

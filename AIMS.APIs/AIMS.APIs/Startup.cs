@@ -123,7 +123,7 @@ namespace AIMS.APIs
             services.AddScoped<IIATIService, IATIService>();
             services.AddScoped<ISectorTypesService, SectorTypesService>();
             services.AddScoped<ISectorCategoryService, SectorCategoryService>();
-            services.AddScoped<ISectorSubcategoryService, SectorSubcategoryService>();
+            services.AddScoped<ISectorSubCategoryService, SectorSubCategoryService>();
             services.AddSingleton<IConfiguration>(Configuration);
             //Need to work on this scheduled task in future
             //services.AddSingleton<IHostedService, ScheduleTask>();
