@@ -29,7 +29,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        SectorSubCategoryView Get(int id);
+        SectorSubCategoryViewModel Get(int id);
 
         /// <summary>
         /// Gets matching sub categories for the provided criteria
@@ -72,7 +72,7 @@ namespace AIMS.Services
             }
         }
 
-        public SectorSubCategoryView Get(int id)
+        public SectorSubCategoryViewModel Get(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -82,7 +82,7 @@ namespace AIMS.Services
                 {
                     sectorSubCategory = sCategory;
                 }
-                return mapper.Map<SectorSubCategoryView>(sectorSubCategory);
+                return mapper.Map<SectorSubCategoryViewModel>(sectorSubCategory);
             }
         }
 
