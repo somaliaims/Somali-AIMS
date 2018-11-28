@@ -5,6 +5,7 @@ using AIMS.Services.Helpers;
 using AutoMapper;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace AIMS.Services
@@ -12,16 +13,30 @@ namespace AIMS.Services
     public interface ISectorService
     {
         /// <summary>
-        /// Gets all sectors
+        /// Gets all sectorCategories
         /// </summary>
         /// <returns></returns>
         IEnumerable<SectorView> GetAll();
 
         /// <summary>
-        /// Gets all sectors async
+        /// Gets all sectorCategories async
         /// </summary>
         /// <returns></returns>
         Task<IEnumerable<SectorView>> GetAllAsync();
+
+        /// <summary>
+        /// Gets sector category view for the provided id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        SectorViewModel Get(int id);
+
+        /// <summary>
+        /// Gets the matching categories for the provided criteria
+        /// </summary>
+        /// <param name="criteria"></param>
+        /// <returns></returns>
+        IEnumerable<SectorView> GetMatching(string criteria);
 
         /// <summary>
         /// Adds a new section
@@ -52,8 +67,8 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectors = unitWork.SectorRepository.GetAll();
-                return mapper.Map<List<SectorView>>(sectors);
+                var sectorCategories = unitWork.SectorRepository.GetWithInclude(c => c.Id != 0, new string[] { "SectorType", "Category", "SubCategory" });
+                return mapper.Map<List<SectorView>>(sectorCategories);
             }
         }
 
@@ -61,23 +76,72 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectors = await unitWork.SectorRepository.GetAllAsync();
-                return await Task<IEnumerable<SectorView>>.Run(() => mapper.Map<List<SectorView>>(sectors)).ConfigureAwait(false);
+                var sectorCategories = await unitWork.SectorRepository.GetWithIncludeAsync(c => c.Id != 0, new string[] { "SectorType", "Category", "SubCategory" });
+                return await Task<IEnumerable<SectorView>>.Run(() => mapper.Map<List<SectorView>>(sectorCategories)).ConfigureAwait(false);
             }
         }
 
-        public ActionResponse Add(SectorModel sector)
+        public SectorViewModel Get(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var sectorObj = unitWork.SectorRepository.GetWithInclude(c => c.Id == id, new string[] { "SectorType", "Category", "SubCategory" });
+                EFSector sector = null;
+                foreach (var category in sectorObj)
+                {
+                    sector = category;
+                }
+                return mapper.Map<SectorViewModel>(sector);
+            }
+        }
+
+        public IEnumerable<SectorView> GetMatching(string criteria)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<SectorView> sectorTypesList = new List<SectorView>();
+                var sectorTypes = unitWork.SectorRepository.GetWithInclude(c => c.SectorName.Contains(criteria), new string[] { "SectorType", "Category", "SubCategory" });
+                return mapper.Map<List<SectorView>>(sectorTypes);
+            }
+        }
+
+        public ActionResponse Add(SectorModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
                 try
                 {
-                    var newSector = unitWork.SectorRepository.Insert(new EFSector() { SectorName = sector.Name, TimeStamp = DateTime.Now });
+                    var sectorCategory = unitWork.SectorCategoryRepository.GetByID(model.CategoryId);
+                    if (sectorCategory == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Sector Category");
+                        response.Success = false;
+                        return response;
+                    }
+
+                    var sectorSubCategory = unitWork.SectorSubCategoryRepository.GetByID(model.SubCategoryId);
+                    if (sectorSubCategory == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Sector Sub-Category");
+                        response.Success = false;
+                        return response;
+                    }
+
+                    var newSector = unitWork.SectorRepository.Insert(new EFSector()
+                    {
+                        Category = sectorCategory,
+                        SubCategory = sectorSubCategory,
+                        SectorName = model.SectorName,
+                        TimeStamp = DateTime.Now
+                    });
                     response.ReturnedId = newSector.Id;
                     unitWork.Save();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
@@ -86,43 +150,52 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Update(int id, SectorModel sector)
+        public ActionResponse Update(int id, SectorModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+
+                var sectorCategory = unitWork.SectorCategoryRepository.GetByID(model.CategoryId);
+                if (sectorCategory == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Sector Category");
+                    response.Success = false;
+                    return response;
+                }
+
+                var sectorSubCategory = unitWork.SectorSubCategoryRepository.GetByID(model.SubCategoryId);
+                if (sectorSubCategory == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Sector Sub-Category");
+                    response.Success = false;
+                    return response;
+                }
                 var sectorObj = unitWork.SectorRepository.GetByID(id);
                 if (sectorObj == null)
                 {
-                    IMessageHelper mHelper = new MessageHelper();
+                    mHelper = new MessageHelper();
                     response.Success = false;
                     response.Message = mHelper.GetNotFound("Sector");
                     return response;
                 }
 
-                if (!sectorObj.SectorName.Equals(sector.Name))
+                try
                 {
-                    var linkedProjects = unitWork.ProjectSectorsRepository
-                        .GetWithInclude(p => p.SectorId == id && p.Project.EndDate == null, new string[] { "Project", "Sector" });
-                    EFSector newSector = null;
-
-                    if (linkedProjects != null)
-                    {
-                        newSector = unitWork.SectorRepository.Insert(new EFSector()
-                        {
-                            SectorName = sector.Name,
-                            TimeStamp = DateTime.Now
-                        });
-
-                        foreach (var project in linkedProjects)
-                        {
-                            project.Sector = newSector;
-                        }
-                    }
+                    sectorObj.Category = sectorCategory;
+                    sectorObj.SubCategory = sectorSubCategory;
+                    sectorObj.SectorName = model.SectorName;
+                    unitWork.SectorRepository.Update(sectorObj);
+                    unitWork.Save();
                 }
-
-                unitWork.Save();
-                response.Message = "1";
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
                 return response;
             }
         }

@@ -25,6 +25,13 @@ namespace AIMS.Services
         Task<IEnumerable<ProjectImplementorView>> GetAllAsync();
 
         /// <summary>
+        /// Gets list of implementors for the provided project id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<ProjectImplementorView> GetProjectImplementors(int id);
+
+        /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
@@ -71,6 +78,15 @@ namespace AIMS.Services
             {
                 var projectImplementors = await unitWork.ProjectImplementorsRepository.GetAllAsync();
                 return await Task<IEnumerable<ProjectImplementorView>>.Run(() => mapper.Map<List<ProjectImplementorView>>(projectImplementors)).ConfigureAwait(false);
+            }
+        }
+
+        public IEnumerable<ProjectImplementorView> GetProjectImplementors(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var projectImplementors = unitWork.ProjectImplementorsRepository.GetMany(i => i.ProjectId == id);
+                return mapper.Map<List<ProjectImplementorView>>(projectImplementors);
             }
         }
 

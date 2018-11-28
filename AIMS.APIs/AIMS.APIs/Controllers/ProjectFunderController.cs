@@ -34,6 +34,18 @@ namespace AIMS.APIs.Controllers
             return Ok(organizations);
         }
 
+        [HttpGet]
+        [Route("GetProjectFunders/{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid funder id provided");
+            }
+            var funders = projectFunderService.GetProjectFunders(id);
+            return Ok(funders);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] ProjectFunderModel model)
         {

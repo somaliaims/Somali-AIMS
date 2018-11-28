@@ -54,7 +54,7 @@ namespace AIMS.Models
     /// <summary>
     /// Sector models
     /// </summary>
-    
+
     public class SectorCategoryModel
     {
         public int SectorTypeId { get; set; }
@@ -110,13 +110,30 @@ namespace AIMS.Models
     public class SectorView
     {
         public int Id { get; set; }
+        public string SectorType { get; set; }
+        public string Category { get; set; }
+        public string SubCategory { get; set; }
+        public string SectorName { get; set; }
+    }
+
+    public class SectorViewModel
+    {
+        public int SectorTypeId { get; set; }
+        public int CategoryId { get; set; }
+        public int SubCategoryId { get; set; }
         public string SectorName { get; set; }
     }
 
     public class SectorModel
     {
         [Required]
-        public string Name { get; set; }
+        public int SectorTypeId { get; set; }
+        [Required]
+        public int CategoryId { get; set; }
+        [Required]
+        public int SubCategoryId { get; set; }
+        [Required]
+        public string SectorName { get; set; }
     }
 
     /// <summary>
@@ -252,6 +269,22 @@ namespace AIMS.Models
         public string ProjectType { get; set; }
     }
 
+    public class ProjectModelView
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Objective { get; set; }
+        public string DateStarted { get; set; }
+        public string DateEnded { get; set; }
+        public string ProjectType { get; set; }
+        public ICollection<ProjectFunderView> Funders { get; set; }
+        public ICollection<ProjectImplementorView> Implementers { get; set; }
+        public ICollection<SectorView> Sectors { get; set; }
+        public ICollection<LocationView> Locations { get; set; }
+        public ICollection<ProjectDisbursementView> Disbursements { get; set; }
+        public ICollection<ProjectDocumentView> Documents { get; set; }
+    }
+
     public class ProjectModel
     {
         [Required]
@@ -270,8 +303,6 @@ namespace AIMS.Models
     {
         public int FunderId { get; set; }
         public string Funder { get; set; }
-        public int ProjectId { get; set; }
-        public string Project { get; set; }
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRate { get; set; }
@@ -296,8 +327,6 @@ namespace AIMS.Models
     {
         public int ImplementorId { get; set; }
         public string Implementor { get; set; }
-        public int ProjectId { get; set; }
-        public string Project { get; set; }
     }
 
     public class ProjectImplementorModel
@@ -316,7 +345,6 @@ namespace AIMS.Models
     {
         public int FunderId { get; set; }
         public string Funder { get; set; }
-        public string Project { get; set; }
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRate { get; set; }
@@ -337,7 +365,6 @@ namespace AIMS.Models
     public class ProjectDocumentView
     {
         public int Id { get; set; }
-        public int ProjectId { get; set; }
         public string Project { get; set; }
         public string DocumentTitle { get; set; }
         public string DocumentUrl { get; set; }
@@ -357,8 +384,6 @@ namespace AIMS.Models
     /// </summary>
     public class ProjectDisbursementView
     {
-        public int ProjectId { get; set; }
-        public string Project { get; set; }
         public int StartingYear { get; set; }
         public int StartingMonth { get; set; }
         public int EndingYear { get; set; }

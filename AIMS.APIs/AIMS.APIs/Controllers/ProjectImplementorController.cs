@@ -34,6 +34,18 @@ namespace AIMS.APIs.Controllers
             return Ok(organizations);
         }
 
+        [HttpGet]
+        [Route("GetProjectImplementors/{id}")]
+        public IActionResult GetProjectImplementors(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid Implementor id provided");
+            }
+            var implementors = projectImplementorService.GetProjectImplementors(id);
+            return Ok(implementors);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] ProjectImplementorModel model)
         {

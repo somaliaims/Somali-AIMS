@@ -26,7 +26,23 @@ namespace AIMS.APIs.Controllers
         [HttpGet]
         public IActionResult Get()
         {
+            var sectors = sectorService.GetAll();
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetById/{id}")]
+        public IActionResult Get(int id)
+        {
+            var sector = sectorService.Get(id);
+            return Ok();
+        }
+
+        [HttpGet("{criteria}")]
+        public IActionResult Get(string criteria)
+        {
+            var sectors = sectorService.GetMatching(criteria);
+            return Ok(sectors);
         }
 
         [HttpPost]

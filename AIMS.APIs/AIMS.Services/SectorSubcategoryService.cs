@@ -100,7 +100,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<SectorSubCategoryView> sectorSubcategoryList = new List<SectorSubCategoryView>();
-                var sectorTypes = unitWork.SectorSubCategoryRepository.GetWithInclude(c => c.SubCategory.Contains(criteria), new string[] { "Category" });
+                var sectorTypes = unitWork.SectorSubCategoryRepository.GetWithInclude(c => c.SubCategory.Contains(criteria), new string[] { "SectorCategory" });
                 return mapper.Map<List<SectorSubCategoryView>>(sectorTypes);
             }
         }

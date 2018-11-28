@@ -25,6 +25,13 @@ namespace AIMS.Services
         Task<IEnumerable<ProjectFunderView>> GetAllAsync();
 
         /// <summary>
+        /// Gets funders list for the provided project id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<ProjectFunderView> GetProjectFunders(int id);
+
+        /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
@@ -71,6 +78,15 @@ namespace AIMS.Services
             {
                 var projectFunders = await unitWork.ProjectFundersRepository.GetAllAsync();
                 return await Task<IEnumerable<ProjectFunderView>>.Run(() => mapper.Map<List<ProjectFunderView>>(projectFunders)).ConfigureAwait(false);
+            }
+        }
+
+        public IEnumerable<ProjectFunderView> GetProjectFunders(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var projectFunders = unitWork.ProjectFundersRepository.GetMany(f => f.ProjectId == id);
+                return mapper.Map<List<ProjectFunderView>>(projectFunders);
             }
         }
 

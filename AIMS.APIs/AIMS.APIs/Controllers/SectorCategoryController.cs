@@ -41,8 +41,8 @@ namespace AIMS.APIs.Controllers
         [HttpGet("{criteria}")]
         public IActionResult Get(string criteria)
         {
-            var sectorCategorys = sectorCategoryService.GetMatching(criteria);
-            return Ok(sectorCategorys);
+            var sectorCategories = sectorCategoryService.GetMatching(criteria);
+            return Ok(sectorCategories);
         }
 
         [HttpPost]
