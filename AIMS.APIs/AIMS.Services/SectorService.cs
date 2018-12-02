@@ -67,7 +67,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorCategories = unitWork.SectorRepository.GetWithInclude(c => c.Id != 0, new string[] { "SectorType", "Category", "SubCategory" });
+                var sectorCategories = unitWork.SectorRepository.GetWithInclude(c => c.Id != 0, new string[] { "Category", "SubCategory" });
                 return mapper.Map<List<SectorView>>(sectorCategories);
             }
         }
@@ -76,7 +76,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorCategories = await unitWork.SectorRepository.GetWithIncludeAsync(c => c.Id != 0, new string[] { "SectorType", "Category", "SubCategory" });
+                var sectorCategories = await unitWork.SectorRepository.GetWithIncludeAsync(c => c.Id != 0, new string[] { "Category", "SubCategory" });
                 return await Task<IEnumerable<SectorView>>.Run(() => mapper.Map<List<SectorView>>(sectorCategories)).ConfigureAwait(false);
             }
         }
@@ -113,6 +113,15 @@ namespace AIMS.Services
                 IMessageHelper mHelper;
                 try
                 {
+                    var sectorType = unitWork.SectorTypesRepository.GetByID(model.SectorTypeId);
+                    if (sectorType == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Sector Type");
+                        response.Success = false;
+                        return response;
+                    }
+
                     var sectorCategory = unitWork.SectorCategoryRepository.GetByID(model.CategoryId);
                     if (sectorCategory == null)
                     {
@@ -133,6 +142,7 @@ namespace AIMS.Services
 
                     var newSector = unitWork.SectorRepository.Insert(new EFSector()
                     {
+                        SectorType = sectorType,
                         Category = sectorCategory,
                         SubCategory = sectorSubCategory,
                         SectorName = model.SectorName,
@@ -156,6 +166,15 @@ namespace AIMS.Services
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
+
+                var sectorType = unitWork.SectorTypesRepository.GetByID(model.SectorTypeId);
+                if (sectorType == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Sector Type");
+                    response.Success = false;
+                    return response;
+                }
 
                 var sectorCategory = unitWork.SectorCategoryRepository.GetByID(model.CategoryId);
                 if (sectorCategory == null)
@@ -185,6 +204,7 @@ namespace AIMS.Services
 
                 try
                 {
+                    sectorObj.SectorType = sectorType;
                     sectorObj.Category = sectorCategory;
                     sectorObj.SubCategory = sectorSubCategory;
                     sectorObj.SectorName = model.SectorName;

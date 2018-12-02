@@ -150,7 +150,7 @@ namespace AIMS.Services
                 {
                     mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("SectorCategory");
+                    response.Message = mHelper.GetNotFound("Sector Category");
                     return response;
                 }
                 var sectoryType = unitWork.SectorTypesRepository.GetByID(model.SectorTypeId);

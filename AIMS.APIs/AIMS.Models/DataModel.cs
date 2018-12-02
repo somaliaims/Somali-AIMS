@@ -127,6 +127,7 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string SectorName { get; set; }
+        public EFSectorTypes SectorType { get; set; }
         public EFSectorCategory Category { get; set; }
         public EFSectorSubCategory SubCategory { get; set; }
         public DateTime TimeStamp { get; set; }
@@ -349,5 +350,16 @@ namespace AIMS.Models
         public string Data { get; set; }
         public string Organizations { get; set; }
         public DateTime Dated { get; set; }
+    }
+
+    public class EFSMTPSettings
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Host { get; set; }
+        public string Port { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string AdminEmail { get; set; }
     }
 }

@@ -64,6 +64,7 @@ namespace AIMS.Models
     public class SectorCategoryView
     {
         public int Id { get; set; }
+        public int SectorTypeId { get; set; }
         public string SectorType { get; set; }
         public string Category { get; set; }
     }
@@ -91,6 +92,7 @@ namespace AIMS.Models
     public class SectorSubCategoryView
     {
         public int Id { get; set; }
+        public int CategoryId { get; set; }
         public string SectorCategory { get; set; }
         public string SubCategory { get; set; }
     }
@@ -118,6 +120,7 @@ namespace AIMS.Models
 
     public class SectorViewModel
     {
+        public int Id { get; set; }
         public int SectorTypeId { get; set; }
         public int CategoryId { get; set; }
         public int SubCategoryId { get; set; }

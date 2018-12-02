@@ -11,7 +11,14 @@ namespace AIMS.APIs.AutoMapper
     {
         public MappingProfile()
         {
-            CreateMap<EFSector, SectorView>().ReverseMap();
+            CreateMap<EFSector, SectorView>()
+                .ForMember(s => s.Category, opts => opts.MapFrom(source => source.Category.Category))
+                .ForMember(s => s.SubCategory, opts => opts.MapFrom(source => source.SubCategory.SubCategory));
+
+            CreateMap<EFSector, SectorViewModel>()
+                .ForMember(s => s.SectorTypeId, opts => opts.MapFrom(source => source.SectorType.Id))
+                .ForMember(s => s.CategoryId, opts => opts.MapFrom(source => source.Category.Id))
+                .ForMember(s => s.SubCategoryId, opts => opts.MapFrom(source => source.SubCategory.Id));
 
             CreateMap<EFOrganizationTypes, OrganizationTypeView>();
 
@@ -31,13 +38,15 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFLocation, LocationView>().ReverseMap();
 
             CreateMap<EFSectorCategory, SectorCategoryView>()
-                .ForMember(c => c.SectorType, opts => opts.MapFrom(source => source.SectorType.TypeName));
+                .ForMember(c => c.SectorType, opts => opts.MapFrom(source => source.SectorType.TypeName))
+                .ForMember(c => c.SectorTypeId, opts => opts.MapFrom(source => source.SectorType.Id));
 
             CreateMap<EFSectorCategory, SectorCategoryViewModel>()
                 .ForMember(s => s.SectorTypeId, opts => opts.MapFrom(source => source.SectorType.Id));
 
             CreateMap<EFSectorSubCategory, SectorSubCategoryView>()
-                .ForMember(s => s.SectorCategory, opts => opts.MapFrom(source => source.SectorCategory.Category));
+                .ForMember(s => s.SectorCategory, opts => opts.MapFrom(source => source.SectorCategory.Category))
+                .ForMember(s => s.CategoryId, opts => opts.MapFrom(source => source.SectorCategory.Id));
 
             CreateMap<EFSectorSubCategory, SectorSubCategoryViewModel>()
                 .ForMember(s => s.CategoryId, opts => opts.MapFrom(source => source.SectorCategory.Id));

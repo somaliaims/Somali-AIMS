@@ -27,7 +27,7 @@ namespace AIMS.APIs.Controllers
         public IActionResult Get()
         {
             var sectors = sectorService.GetAll();
-            return Ok();
+            return Ok(sectors);
         }
 
         [HttpGet]
@@ -35,7 +35,7 @@ namespace AIMS.APIs.Controllers
         public IActionResult Get(int id)
         {
             var sector = sectorService.Get(id);
-            return Ok();
+            return Ok(sector);
         }
 
         [HttpGet("{criteria}")]

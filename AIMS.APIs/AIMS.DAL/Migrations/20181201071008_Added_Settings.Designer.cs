@@ -4,14 +4,16 @@ using AIMS.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    partial class AIMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181201071008_Added_Settings")]
+    partial class Added_Settings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -373,8 +375,6 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<string>("SectorName");
 
-                    b.Property<int?>("SectorTypeId");
-
                     b.Property<int?>("SubCategoryId");
 
                     b.Property<DateTime>("TimeStamp");
@@ -382,8 +382,6 @@ namespace AIMS.DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
-
-                    b.HasIndex("SectorTypeId");
 
                     b.HasIndex("SubCategoryId");
 
@@ -709,10 +707,6 @@ namespace AIMS.DAL.Migrations
                     b.HasOne("AIMS.Models.EFSectorCategory", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId");
-
-                    b.HasOne("AIMS.Models.EFSectorTypes", "SectorType")
-                        .WithMany()
-                        .HasForeignKey("SectorTypeId");
 
                     b.HasOne("AIMS.Models.EFSectorSubCategory", "SubCategory")
                         .WithMany()
