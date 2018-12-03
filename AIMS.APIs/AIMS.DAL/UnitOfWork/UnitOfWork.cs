@@ -20,6 +20,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFLocation> locationRepository;
         private GenericRepository<EFOrganization> organizationRepository;
         private GenericRepository<EFOrganizationTypes> organizationTypesRepository;
+        private GenericRepository<EFProjectTypes> projectTypesRepository;
         private GenericRepository<EFProject> projectRepository;
         private GenericRepository<EFProjectSectors> projectSectorsRepository;
         private GenericRepository<EFProjectFunders> fundersRepository;
@@ -93,6 +94,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.sectorRepository == null)
                     this.sectorRepository = new GenericRepository<EFSector>(context);
                 return this.sectorRepository;
+            }
+        }
+
+        public GenericRepository<EFProjectTypes> ProjectTypesRepository
+        {
+            get
+            {
+                if (this.projectTypesRepository == null)
+                    this.projectTypesRepository = new GenericRepository<EFProjectTypes>(context);
+                return this.projectTypesRepository;
             }
         }
 

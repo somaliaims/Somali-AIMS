@@ -19,6 +19,20 @@ namespace AIMS.Services
         IEnumerable<ProjectView> GetAll();
 
         /// <summary>
+        /// Gets project details for the provided id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ProjectModelView Get(int id);
+
+        /// <summary>
+        /// Gets matching project titles list
+        /// </summary>
+        /// <param name="criteria"></param>
+        /// <returns></returns>
+        IEnumerable<ProjectView> GetMatching(string criteria);
+
+        /// <summary>
         /// Gets all projects async
         /// </summary>
         /// <returns></returns>
@@ -38,7 +52,7 @@ namespace AIMS.Services
         ActionResponse Update(int id, ProjectModel project);
     }
 
-    public class ProjectService
+    public class ProjectService : IProjectService
     {
         AIMSDbContext context;
         IMapper mapper;
@@ -64,6 +78,25 @@ namespace AIMS.Services
             {
                 var projects = await unitWork.ProjectRepository.GetAllAsync();
                 return await Task<IEnumerable<ProjectView>>.Run(() => mapper.Map<List<ProjectView>>(projects)).ConfigureAwait(false);
+            }
+        }
+
+        public ProjectModelView Get(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var project = unitWork.ProjectRepository.GetByID(id);
+                return mapper.Map<ProjectModelView>(project);
+            }
+        }
+
+        public IEnumerable<ProjectView> GetMatching(string criteria)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<ProjectView> sectorTypesList = new List<ProjectView>();
+                var projects = unitWork.ProjectRepository.GetMany(p => p.Title.Contains(criteria));
+                return mapper.Map<List<ProjectView>>(projects);
             }
         }
 

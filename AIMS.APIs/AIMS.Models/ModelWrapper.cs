@@ -258,6 +258,20 @@ namespace AIMS.Models
         public decimal Longitude { get; set; }
     }
 
+    /// <summary>
+    /// Project type models
+    /// </summary>
+    public class ProjectTypesView
+    {
+        public int Id { get; set; }
+        public string TypeName { get; set; }
+    }
+
+    public class ProjectTypesModel
+    {
+        [Required]
+        public string TypeName { get; set; }
+    }
 
     /// <summary>
     /// Project models
