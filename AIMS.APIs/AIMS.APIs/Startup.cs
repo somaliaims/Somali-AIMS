@@ -124,6 +124,7 @@ namespace AIMS.APIs
             services.AddScoped<ISectorTypesService, SectorTypesService>();
             services.AddScoped<ISectorCategoryService, SectorCategoryService>();
             services.AddScoped<ISectorSubCategoryService, SectorSubCategoryService>();
+            services.AddScoped<IProjectTypesService, ProjectTypesService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddSingleton<IConfiguration>(Configuration);
             //Need to work on this scheduled task in future
