@@ -281,8 +281,8 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Objective { get; set; }
-        public string DateStarted { get; set; }
-        public string DateEnded { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
         public string ProjectType { get; set; }
     }
 
@@ -291,9 +291,9 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Objective { get; set; }
-        public string DateStarted { get; set; }
-        public string DateEnded { get; set; }
-        public string ProjectType { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public int ProjectTypeId { get; set; }
         public ICollection<ProjectFunderView> Funders { get; set; }
         public ICollection<ProjectImplementorView> Implementers { get; set; }
         public ICollection<SectorView> Sectors { get; set; }

@@ -67,7 +67,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projects = unitWork.ProjectRepository.GetAll();
+                var projects = unitWork.ProjectRepository.GetWithInclude(p => p.Id != 0, new string[] { "ProjectType" });
                 return mapper.Map<List<ProjectView>>(projects);
             }
         }
@@ -85,7 +85,12 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var project = unitWork.ProjectRepository.GetByID(id);
+                var projectObj = unitWork.ProjectRepository.GetWithInclude(p => p.Id != 0, new string[] { "ProjectType" });
+                EFProject project = null;
+                foreach(var p in projectObj)
+                {
+                    project = p;
+                }
                 return mapper.Map<ProjectModelView>(project);
             }
         }
@@ -107,8 +112,19 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
+                    IMessageHelper mHelper;
+                    var projectType = unitWork.ProjectTypesRepository.GetByID(model.ProjectTypeId);
+                    if (projectType == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Project Type");
+                        response.Success = false;
+                        return response;
+                    }
+
                     var newProject = unitWork.ProjectRepository.Insert(new EFProject()
                     {
+                        ProjectType = projectType,
                         Title = model.Title,
                         Objective = model.Objective,
                         StartDate = model.StartDate,
@@ -130,16 +146,27 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                IMessageHelper mHelper;
                 ActionResponse response = new ActionResponse();
                 var projectObj = unitWork.ProjectRepository.GetByID(id);
                 if (projectObj == null)
                 {
-                    IMessageHelper mHelper = new MessageHelper();
+                    mHelper = new MessageHelper();
                     response.Success = false;
                     response.Message = mHelper.GetNotFound("Project");
                     return response;
                 }
+                
+                var projectType = unitWork.ProjectTypesRepository.GetByID(model.ProjectTypeId);
+                if (projectType == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project Type");
+                    response.Success = false;
+                    return response;
+                }
 
+                projectObj.ProjectType = projectType;
                 projectObj.Title = model.Title;
                 projectObj.Objective = model.Objective;
                 projectObj.StartDate = model.StartDate;
@@ -147,7 +174,7 @@ namespace AIMS.Services
 
                 unitWork.ProjectRepository.Update(projectObj);
                 unitWork.Save();
-                response.Message = "1";
+                response.Message = true.ToString();
                 return response;
             }
         }

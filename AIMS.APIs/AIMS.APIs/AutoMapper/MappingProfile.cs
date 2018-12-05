@@ -50,6 +50,16 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFSectorSubCategory, SectorSubCategoryViewModel>()
                 .ForMember(s => s.CategoryId, opts => opts.MapFrom(source => source.SectorCategory.Id));
+
+            CreateMap<EFProject, ProjectView>()
+                .ForMember(p => p.ProjectType, opts => opts.MapFrom(source => source.ProjectType.TypeName))
+                .ForMember(p => p.StartDate, opts => opts.MapFrom(source => source.StartDate.ToShortDateString()))
+                .ForMember(p => p.EndDate, opts => opts.MapFrom(source => source.EndDate.ToShortDateString()));
+
+            CreateMap<EFProject, ProjectModelView>()
+                .ForMember(p => p.ProjectTypeId, opts => opts.MapFrom(source => source.ProjectType.Id))
+                .ForMember(p => p.StartDate, opts => opts.MapFrom(source => source.StartDate.ToShortDateString()))
+                .ForMember(p => p.EndDate, opts => opts.MapFrom(source => source.EndDate.ToShortDateString()));
         }
     }
 }
