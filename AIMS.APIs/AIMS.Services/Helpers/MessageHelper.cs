@@ -41,6 +41,13 @@ namespace AIMS.Services.Helpers
         string InvalidAccountDeletionAttempt();
 
         /// <summary>
+        /// Show a message for email not found
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        string EmailNotFound(string email);
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="organization"></param>
@@ -57,6 +64,7 @@ namespace AIMS.Services.Helpers
         private readonly string NEW = "New ";
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
         private readonly string INVALID_ACCOUNT_DELETION_ATTEMPT = "A super admin account cannot be deleted";
+        private readonly string EMAIL_NOT_FOUND = " did not match any of our records for registered users.";
 
         public string GetNotFound(string entity)
         {
@@ -86,6 +94,11 @@ namespace AIMS.Services.Helpers
         public string NewUserForOrganization(string organization, string user)
         {
             return ("A new user (" + user + ") has submitted the request to register for the organization " +  organization);
+        }
+
+        public string EmailNotFound(string email)
+        {
+            return (email + EMAIL_NOT_FOUND);
         }
     }
 }

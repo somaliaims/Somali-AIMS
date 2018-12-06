@@ -64,6 +64,19 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
+        [Route("ResetPasswordRequest")]
+        public IActionResult ResetPasswordRequest([FromBody] PasswordResetModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Valid email address is required");
+            }
+
+            var foundUser = userService.GetUserByEmail(model.Email);
+            return Ok();
+        }
+
+        [HttpPost]
         [Route("Token")]
         public IActionResult Token([FromBody] AuthenticateModel model)
         {

@@ -193,6 +193,13 @@ namespace AIMS.Models
         public UserTypes UserType { get; set; }
     }
 
+    public class PasswordResetModel
+    {
+        [EmailAddress]
+        [Required]
+        public string Email { get; set; }
+    }
+
     public class AuthenticateModel
     {
         [Required]

@@ -35,11 +35,25 @@ namespace AIMS.Services
         UserAuthenticationView AuthenticateUser(string email, string password);
 
         /// <summary>
+        /// Gets user information for the provided email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        UserAuthenticationView GetUserByEmail(string email);
+
+        /// <summary>
         /// Checks availability of email
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
         ActionResponse CheckEmailAvailability(string email);
+
+        /// <summary>
+        /// Sends an email for password recovery for the provided email address
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse ResetPasswordRequest(PasswordResetModel model);
 
         /// <summary>
         /// Adds a new section
@@ -134,6 +148,30 @@ namespace AIMS.Services
             }
         }
 
+        public UserAuthenticationView GetUserByEmail(string email)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                UserAuthenticationView foundUser = new UserAuthenticationView();
+                var findUser = unitWork.UserRepository.GetWithInclude(u => u.Email.Equals(email),
+                    new string[] { "Organization" });
+
+                if (findUser != null)
+                {
+                    foreach (var user in findUser)
+                    {
+                        foundUser.Id = user.Id;
+                        foundUser.Email = user.Email;
+                        foundUser.Name = user.Name;
+                        foundUser.UserType = user.UserType;
+                        foundUser.OrganizationId = user.Organization.Id;
+                        break;
+                    }
+                }
+                return foundUser;
+            }
+        }
+
         public ActionResponse CheckEmailAvailability(string email)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -145,6 +183,25 @@ namespace AIMS.Services
                     response.Success = false;
                     return response;
                 }
+                return response;
+            }
+        }
+
+        public ActionResponse ResetPasswordRequest(PasswordResetModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var user = unitWork.UserRepository.Get(u => u.Email.Equals(model.Email));
+                IMessageHelper mHelper;
+                if (user == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.EmailNotFound(model.Email);
+                    response.Success = false;
+                    return response;
+                }
+
                 return response;
             }
         }

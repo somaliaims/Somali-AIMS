@@ -35,5 +35,29 @@ namespace AIMS.APIs.Utilities
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        public string GeneratePasswordResetToken(TokenModel model)
+        {
+            var claims = new[]
+           {
+                new Claim(ClaimTypes.NameIdentifier, model.Id),
+                new Claim(ClaimTypes.Email, model.Email),
+                new Claim(ClaimTypes.Role, model.UserType.ToString()),
+                new Claim(ClaimTypes.Country, model.OrganizationId),
+                new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()),
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(model.JwtKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: model.JwtIssuer,
+                audience: model.JwtAudience,
+                claims: claims,
+                expires: DateTime.Now.AddHours(2),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
     }
 }
