@@ -64,5 +64,13 @@ namespace AIMS.APIs.Controllers
             var organizations = iatiService.GetOrganizations();
             return Ok(organizations);
         }
+
+        [HttpGet]
+        [Route("GetMatching/{keywords}")]
+        public IActionResult GetMatchingActivities(string keywords)
+        {
+            var activities = iatiService.GetMatchingTitleDescriptions(keywords);
+            return Ok(activities);
+        }
     }
 }

@@ -27,6 +27,13 @@ namespace AIMS.Services
         ICollection<IATIActivity> GetAll();
 
         /// <summary>
+        /// Gets matching list of activities for the provided keywords agains titles and descriptions
+        /// </summary>
+        /// <param name="keywords"></param>
+        /// <returns></returns>
+        ICollection<IATIActivity> GetMatchingTitleDescriptions(string keywords);
+
+        /// <summary>
         /// Gets all the organizations
         /// </summary>
         /// <returns></returns>
@@ -83,6 +90,30 @@ namespace AIMS.Services
                     }
                 }
                 return organizations;
+            }
+        }
+
+        public ICollection<IATIActivity> GetMatchingTitleDescriptions(string keywords)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<IATIActivity> iATIActivities = new List<IATIActivity>();
+                var iatiDataList = unitWork.IATIDataRepository.GetMany(d => d.Dated != null);
+                var iatiData = (from data in iatiDataList
+                                orderby data.Dated descending
+                                select data).FirstOrDefault();
+
+                string activitiesStr = "";
+                if (iatiData != null)
+                {
+                    var allActivities = JsonConvert.DeserializeObject<List<IATIActivity>>(activitiesStr);
+                    iATIActivities = (from activity in allActivities
+                                     where activity.Title.Contains(keywords) ||
+                                     activity.Description.Contains(keywords)
+                                     select activity).ToList();
+
+                }
+                return iATIActivities;
             }
         }
 
