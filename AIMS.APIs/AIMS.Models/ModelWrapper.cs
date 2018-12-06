@@ -307,7 +307,7 @@ namespace AIMS.Models
         [Required]
         public string Title { get; set; }
         [Required]
-        public string Objective { get; set; }
+        public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int ProjectTypeId { get; set; }

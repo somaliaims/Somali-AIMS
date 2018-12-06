@@ -36,18 +36,11 @@ namespace AIMS.Models
         Deleted = 3
     }
 
-    public enum GranTypes
+    public enum GrantTypes
     {
         Grant = 1,
         Loan = 2,
         MutuallyExclusive = 3
-    }
-
-    public class EFProjectTypes
-    {
-        [Key]
-        public int Id { get; set; }
-        public string TypeName { get; set; }
     }
 
     public class EFOrganizationTypes
@@ -162,10 +155,10 @@ namespace AIMS.Models
         public int Id { get; set; }
         [MaxLength(100)]
         public string Title { get; set; }
-        public string Objective { get; set; }
+        [MaxLength(800)]
+        public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public EFProjectTypes ProjectType { get; set; } 
         public ICollection<EFLocation> Locations { get; set; }
         public ICollection<EFProjectDisbursements> Disbursements { get; set; }
         public ICollection<EFProjectFunders> Funders { get; set; }
@@ -269,7 +262,7 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
-        public GranTypes GrantType { get; set; }
+        public GrantTypes GrantType { get; set; }
         [Column(TypeName = "decimal(9 ,2)")]
         public decimal Amount { get; set; }
         public string Currency { get; set; }

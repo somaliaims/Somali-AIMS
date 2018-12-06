@@ -57,7 +57,6 @@ namespace AIMS.DAL.EF
 
         //Creating DB Tables for the Objects
         public DbSet<EFOrganizationTypes> OrganizationTypes { get; set; }
-        public DbSet<EFProjectTypes> ProjectTypes { get; set; }
         public DbSet<EFOrganization> Organizations { get; set; }
         public DbSet<EFUser> Users { get; set; }
         public DbSet<EFSectorTypes> SectorTypes { get; set; }
