@@ -200,6 +200,20 @@ namespace AIMS.Models
         public string Email { get; set; }
     }
 
+    public class PasswordResetEmailModel
+    {
+        [EmailAddress]
+        [Required]
+        public string Email { get; set; }
+        [Required]
+        public string FullName { get; set; }
+        [Required]
+        public string Token { get; set; }
+        [Url]
+        [Required]
+        public string Url { get; set; }
+    }
+
     public class AuthenticateModel
     {
         [Required]

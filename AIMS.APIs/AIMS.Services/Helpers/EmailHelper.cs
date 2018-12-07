@@ -23,7 +23,7 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        ActionResponse SendPasswordRecoveryEmail(string email, string fullName, string token, string url);
+        ActionResponse SendPasswordRecoveryEmail(PasswordResetEmailModel model);
     }
 
     public class EmailHelper : IEmailHelper
@@ -76,7 +76,7 @@ namespace AIMS.Services.Helpers
             return response;
         }
 
-        public ActionResponse SendPasswordRecoveryEmail(string email, string fullName, string token, string url)
+        public ActionResponse SendPasswordRecoveryEmail(PasswordResetEmailModel model)
         {
             ActionResponse response = new ActionResponse();
             try
@@ -84,8 +84,8 @@ namespace AIMS.Services.Helpers
                 MailMessage mailMessage = new MailMessage();
                 mailMessage.IsBodyHtml = true;
                 mailMessage.From = new MailAddress(this.emailFrom);
-                string emailMessage = this.GetPasswordResetMessage(email, fullName, token, url);
-                mailMessage.To.Add(email);
+                string emailMessage = this.GetPasswordResetMessage(model.Email, model.FullName, model.Token, model.Url);
+                mailMessage.To.Add(model.Email);
                 mailMessage.Body = emailMessage;
                 mailMessage.Subject = "Password Reset Request AIMS Somalia";
                 client.Send(mailMessage);
@@ -126,7 +126,7 @@ namespace AIMS.Services.Helpers
             messageList.Add("<h1>Dear AIMS User (" + fullName + ")</h1>");
             messageList.Add("<p>We have received a password reset request for your email. If it was not you, please ignore this email.</p>");
             messageList.Add("<p>Click on the link below and follow the instructions to reset password. This link will expire in two hours</p>");
-            messageList.Add("<p><a href='" + url + "?token=" + token + "'>Password Reset Link</a></p>");
+            messageList.Add("<p><a target='_blank' href='" + url + token + "'>Password Reset Link</a></p>");
             messageList.Add("<b>AIMS Support Team</b>");
             return (String.Join(string.Empty, messageList));
         }

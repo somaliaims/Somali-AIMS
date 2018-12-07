@@ -53,7 +53,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse ResetPasswordRequest(PasswordResetModel model);
+        ActionResponse ResetPasswordRequest(PasswordResetEmailModel model, SmtpClient smtp, string adminEmail);
 
         /// <summary>
         /// Adds a new section
@@ -187,21 +187,13 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ResetPasswordRequest(PasswordResetModel model)
+        public ActionResponse ResetPasswordRequest(PasswordResetEmailModel model, SmtpClient smtp, string adminEmail)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var user = unitWork.UserRepository.Get(u => u.Email.Equals(model.Email));
-                IMessageHelper mHelper;
-                if (user == null)
-                {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.EmailNotFound(model.Email);
-                    response.Success = false;
-                    return response;
-                }
-
+                IEmailHelper emailHelper = new EmailHelper(smtp, adminEmail);
+                response = emailHelper.SendPasswordRecoveryEmail(model);
                 return response;
             }
         }

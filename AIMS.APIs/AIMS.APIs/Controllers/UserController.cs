@@ -73,7 +73,42 @@ namespace AIMS.APIs.Controllers
             }
 
             var foundUser = userService.GetUserByEmail(model.Email);
-            return Ok();
+            if (foundUser != null)
+            {
+                string adminEmail = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
+                .GetValue<String>("Email:Smtp:AdminEmail");
+                string resetPasswordUrl = configuration["ResetPasswordUrl"];
+                var configuredSmtpClient = HttpContext.RequestServices.GetRequiredService<SmtpClient>();
+
+                TokenModel tModel = new TokenModel()
+                {
+                    Id = foundUser.Id.ToString(),
+                    JwtKey = configuration["JwtKey"],
+                    JwtAudience = configuration["JwtAudience"],
+                    JwtIssuer = configuration["JwtIssuer"],
+                    TokenExpirationDays = configuration["JwtExpireDays"],
+                    OrganizationId = foundUser.OrganizationId.ToString(),
+                    UserType = Convert.ToInt32(foundUser.UserType),
+                    Email = foundUser.Email
+                };
+
+                TokenUtility utility = new TokenUtility();
+                string token = utility.GeneratePasswordResetToken(tModel);
+                PasswordResetEmailModel resetModel = new PasswordResetEmailModel()
+                {
+                    FullName = foundUser.Name,
+                    Email = foundUser.Email,
+                    Token = token,
+                    Url = resetPasswordUrl
+                };
+
+                var response = userService.ResetPasswordRequest(resetModel, configuredSmtpClient, adminEmail);
+                if (!response.Success)
+                {
+                    return BadRequest(response.Message);
+                }
+            }
+            return Ok(true);
         }
 
         [HttpPost]
