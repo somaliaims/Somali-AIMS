@@ -30,10 +30,21 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFProjectDisbursements> projectDisbursementsRepository;
         private GenericRepository<EFUserNotifications> notificationsRepository;
         private GenericRepository<EFIATIData> iatiDataRepository;
+        private GenericRepository<EFSMTPSettings> smtpSettingsRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
             context = dbContext;
+        }
+
+        public GenericRepository<EFSMTPSettings> SMTPSettingsRepository
+        {
+            get
+            {
+                if (this.smtpSettingsRepository == null)
+                    this.smtpSettingsRepository = new GenericRepository<EFSMTPSettings>(context);
+                return this.smtpSettingsRepository;
+            }
         }
 
         public GenericRepository<EFOrganization> OrganizationRepository

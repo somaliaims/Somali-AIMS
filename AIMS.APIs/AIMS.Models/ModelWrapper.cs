@@ -558,4 +558,36 @@ namespace AIMS.Models
         public string Dated { get; set; }
     }
 
+    /// <summary>
+    /// SMTP settings model
+    /// </summary>
+    public class SMTPSettingsView
+    {
+        public int Id { get; set; }
+        public string Host { get; set; }
+        public string Port { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string AdminEmail { get; set; }
+    }
+
+    public class SMTPSettingsModelView
+    {
+        public int Id { get; set; }
+        public string Host { get; set; }
+        public string Port { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string AdminEmail { get; set; }
+    }
+
+    public class SMTPSettingsModel
+    {
+        public string Host { get; set; }
+        public string Port { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string AdminEmail { get; set; }
+    }
+
 }
