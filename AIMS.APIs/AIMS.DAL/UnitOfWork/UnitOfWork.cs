@@ -15,7 +15,6 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFSectorTypes> sectorTypesRepository;
         private GenericRepository<EFSectorCategory> sectorCategoryRepository;
         private GenericRepository<EFSectorSubCategory> sectorSubCategoryRepository;
-        //private GenericRepository<EFSectorMappings> sectorMappingRepository;
         private GenericRepository<EFSector> sectorRepository;
         private GenericRepository<EFLocation> locationRepository;
         private GenericRepository<EFOrganization> organizationRepository;
@@ -31,6 +30,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFUserNotifications> notificationsRepository;
         private GenericRepository<EFIATIData> iatiDataRepository;
         private GenericRepository<EFSMTPSettings> smtpSettingsRepository;
+        private GenericRepository<EFPasswordRecoveryRequests> passwordRecoveryRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -174,6 +174,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.userRepository == null)
                     this.userRepository = new GenericRepository<EFUser>(context);
                 return this.userRepository;
+            }
+        }
+
+        public GenericRepository<EFPasswordRecoveryRequests> PasswordRecoveryRepository
+        {
+            get
+            {
+                if (this.passwordRecoveryRepository == null)
+                    this.passwordRecoveryRepository = new GenericRepository<EFPasswordRecoveryRequests>(context);
+                return this.passwordRecoveryRepository;
             }
         }
 

@@ -12,6 +12,11 @@ namespace AIMS.Models
         public bool Success { get; set; } = true;
     }
 
+    public class ViewModel
+    {
+        public string Title { get; set; }
+    }
+
     /// <summary>
     /// Token models
     /// </summary>
@@ -25,6 +30,12 @@ namespace AIMS.Models
         public string JwtAudience { get; set; }
         public string JwtIssuer { get; set; }
         public string TokenExpirationDays { get; set; }
+    }
+
+    public class PasswordTokenModel
+    {
+        public string Email { get; set; }
+        public DateTime TokenDate { get; set; }
     }
 
     /// <summary>
@@ -193,11 +204,19 @@ namespace AIMS.Models
         public UserTypes UserType { get; set; }
     }
 
-    public class PasswordResetModel
+    public class PasswordResetRequest
     {
         [EmailAddress]
         [Required]
         public string Email { get; set; }
+    }
+
+    public class PasswordResetModel
+    {
+        [Required]
+        public string Token { get; set; }
+        [Required]
+        public string NewPassword { get; set; }
     }
 
     public class PasswordResetEmailModel

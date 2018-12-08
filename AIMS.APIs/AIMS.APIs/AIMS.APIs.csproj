@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <Folder Include="Helpers\" />
+    <Folder Include="Views\Reports\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

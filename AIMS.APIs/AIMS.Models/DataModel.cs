@@ -355,4 +355,12 @@ namespace AIMS.Models
         public string Password { get; set; }
         public string AdminEmail { get; set; }
     }
+
+    public class EFPasswordRecoveryRequests
+    {
+        public int Id { get; set; }
+        public string Email { get; set; }
+        public string Token { get; set; }
+        public DateTime Dated { get; set; }
+    }
 }

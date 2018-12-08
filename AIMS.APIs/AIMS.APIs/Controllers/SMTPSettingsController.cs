@@ -23,7 +23,6 @@ namespace AIMS.APIs.Controllers
             this.smtpSettingsService = service;
         }
 
-
         [HttpGet]
         public IActionResult Get()
         {

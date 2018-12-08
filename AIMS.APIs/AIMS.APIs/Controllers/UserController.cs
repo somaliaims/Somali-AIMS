@@ -65,7 +65,7 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("ResetPasswordRequest")]
-        public IActionResult ResetPasswordRequest([FromBody] PasswordResetModel model)
+        public IActionResult ResetPasswordRequest([FromBody] PasswordResetRequest model)
         {
             if (!ModelState.IsValid)
             {
@@ -79,17 +79,11 @@ namespace AIMS.APIs.Controllers
                 .GetValue<String>("Email:Smtp:AdminEmail");
                 string resetPasswordUrl = configuration["ResetPasswordUrl"];
                 var configuredSmtpClient = HttpContext.RequestServices.GetRequiredService<SmtpClient>();
-
-                TokenModel tModel = new TokenModel()
+                DateTime datedTime = DateTime.Now;
+                PasswordTokenModel tModel = new PasswordTokenModel()
                 {
-                    Id = foundUser.Id.ToString(),
-                    JwtKey = configuration["JwtKey"],
-                    JwtAudience = configuration["JwtAudience"],
-                    JwtIssuer = configuration["JwtIssuer"],
-                    TokenExpirationDays = configuration["JwtExpireDays"],
-                    OrganizationId = foundUser.OrganizationId.ToString(),
-                    UserType = Convert.ToInt32(foundUser.UserType),
-                    Email = foundUser.Email
+                    Email = foundUser.Email,
+                    TokenDate = datedTime
                 };
 
                 TokenUtility utility = new TokenUtility();
@@ -102,7 +96,7 @@ namespace AIMS.APIs.Controllers
                     Url = resetPasswordUrl
                 };
 
-                var response = userService.ResetPasswordRequest(resetModel, configuredSmtpClient, adminEmail);
+                var response = userService.ResetPasswordRequest(resetModel, datedTime, configuredSmtpClient, adminEmail);
                 if (!response.Success)
                 {
                     return BadRequest(response.Message);
@@ -194,6 +188,18 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(response.Message);
             }
+            return Ok(response.Success);
+        }
+
+        [HttpPost]
+        [Route("ResetPassword")]
+        public IActionResult ResetPassword([FromBody] PasswordResetModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = userService.ResetPassword(model);
             return Ok(response.Success);
         }
 

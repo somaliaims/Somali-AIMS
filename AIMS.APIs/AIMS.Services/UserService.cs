@@ -53,7 +53,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse ResetPasswordRequest(PasswordResetEmailModel model, SmtpClient smtp, string adminEmail);
+        ActionResponse ResetPasswordRequest(PasswordResetEmailModel model, DateTime dated, SmtpClient smtp, string adminEmail);
 
         /// <summary>
         /// Adds a new section
@@ -74,6 +74,13 @@ namespace AIMS.Services
         /// <param name="user"></param>
         /// <returns></returns>
         ActionResponse UpdatePassword(int userId, string newPassword);
+
+        /// <summary>
+        /// Resets password for the user provided token
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse ResetPassword(PasswordResetModel model);
 
         /// <summary>
         /// Deletes the account for the provided user
@@ -187,13 +194,36 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ResetPasswordRequest(PasswordResetEmailModel model, SmtpClient smtp, string adminEmail)
+        public ActionResponse ResetPasswordRequest(PasswordResetEmailModel model, DateTime dated, SmtpClient smtp, string adminEmail)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                IEmailHelper emailHelper = new EmailHelper(smtp, adminEmail);
-                response = emailHelper.SendPasswordRecoveryEmail(model);
+                try
+                {
+                    IEmailHelper emailHelper = new EmailHelper(smtp, adminEmail);
+                    response = emailHelper.SendPasswordRecoveryEmail(model);
+                    if (!response.Success)
+                    {
+                        response.Message = response.Message;
+                        response.Success = false;
+                    }
+                    else
+                    {
+                        unitWork.PasswordRecoveryRepository.Insert(new EFPasswordRecoveryRequests()
+                        {
+                            Email = model.Email,
+                            Token = model.Token,
+                            Dated = dated
+                        });
+                        unitWork.Save();
+                    }
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
                 return response;
             }
         }
@@ -429,6 +459,16 @@ namespace AIMS.Services
                 unitWork.UserRepository.Update(user);
                 unitWork.Save();
                 response.Message = "1";
+                return response;
+            }
+        }
+
+        public ActionResponse ResetPassword(PasswordResetModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+
                 return response;
             }
         }

@@ -36,28 +36,23 @@ namespace AIMS.APIs.Utilities
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public string GeneratePasswordResetToken(TokenModel model)
+        public string GeneratePasswordResetToken(PasswordTokenModel model)
         {
-            var claims = new[]
-           {
-                new Claim(ClaimTypes.NameIdentifier, model.Id),
-                new Claim(ClaimTypes.Email, model.Email),
-                new Claim(ClaimTypes.Role, model.UserType.ToString()),
-                new Claim(ClaimTypes.Country, model.OrganizationId),
-                new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()),
-            };
+            byte[] email = BitConverter.GetBytes(model.TokenDate.ToBinary());
+            byte[] time = BitConverter.GetBytes(DateTime.UtcNow.ToBinary());
+            byte[] key = Guid.NewGuid().ToByteArray();
+            string token = Convert.ToBase64String(time.Concat(key).Concat(email).ToArray());
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(model.JwtKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            return token;
+        }
 
-            var token = new JwtSecurityToken(
-                issuer: model.JwtIssuer,
-                audience: model.JwtAudience,
-                claims: claims,
-                expires: DateTime.Now.AddHours(2),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+        public PasswordTokenModel GetDecodedResetToken(string token)
+        {
+            byte[] data = Convert.FromBase64String(token);
+            PasswordTokenModel model = new PasswordTokenModel();
+            model.TokenDate = DateTime.FromBinary(BitConverter.ToInt64(data, 0));
+            model.Email = BitConverter.ToInt64(data, 2).ToString();
+            return model;
         }
     }
 }
