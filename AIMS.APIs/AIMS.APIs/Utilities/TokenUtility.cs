@@ -38,21 +38,18 @@ namespace AIMS.APIs.Utilities
 
         public string GeneratePasswordResetToken(PasswordTokenModel model)
         {
-            byte[] email = BitConverter.GetBytes(model.TokenDate.ToBinary());
             byte[] time = BitConverter.GetBytes(DateTime.UtcNow.ToBinary());
             byte[] key = Guid.NewGuid().ToByteArray();
-            string token = Convert.ToBase64String(time.Concat(key).Concat(email).ToArray());
-
+            string token = Convert.ToBase64String(time.Concat(key).ToArray());
             return token;
         }
 
-        public PasswordTokenModel GetDecodedResetToken(string token)
+        public DateTime GetDecodedResetToken(string token)
         {
             byte[] data = Convert.FromBase64String(token);
             PasswordTokenModel model = new PasswordTokenModel();
-            model.TokenDate = DateTime.FromBinary(BitConverter.ToInt64(data, 0));
-            model.Email = BitConverter.ToInt64(data, 2).ToString();
-            return model;
+            DateTime tokenTime = DateTime.FromBinary(BitConverter.ToInt64(data, 0));
+            return tokenTime;
         }
     }
 }

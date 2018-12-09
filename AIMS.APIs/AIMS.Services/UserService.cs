@@ -80,7 +80,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse ResetPassword(PasswordResetModel model, PasswordTokenModel tModel);
+        ActionResponse ResetPassword(PasswordResetModel model, DateTime tokenTime);
 
         /// <summary>
         /// Deletes the account for the provided user
@@ -463,18 +463,18 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ResetPassword(PasswordResetModel model, PasswordTokenModel tModel)
+        public ActionResponse ResetPassword(PasswordResetModel model, DateTime tokenTime)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var isTokenExists = unitWork.PasswordRecoveryRepository.GetOne(r => r.Token == model.Token && r.Dated == tModel.TokenDate);
+                var isTokenExists = unitWork.PasswordRecoveryRepository.GetOne(r => r.Token == model.Token && r.Dated.Date == tokenTime.Date);
                 if (isTokenExists != null)
                 {
                     DateTime expirationTime =isTokenExists.Dated.AddHours(2);
                     if (expirationTime >= DateTime.Now)
                     {
-                        var user = unitWork.UserRepository.GetOne(u => u.Email == tModel.Email);
+                        var user = unitWork.UserRepository.GetOne(u => u.Email == isTokenExists.Email);
                         if (user != null)
                         {
                             ISecurityHelper sHelper = new SecurityHelper();

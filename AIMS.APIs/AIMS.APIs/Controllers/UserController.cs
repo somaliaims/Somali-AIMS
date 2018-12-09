@@ -200,8 +200,8 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
             TokenUtility utility = new TokenUtility();
-            var tokenModel = utility.GetDecodedResetToken(model.Token);
-            var response = userService.ResetPassword(model, tokenModel);
+            var tokenTime = utility.GetDecodedResetToken(model.Token);
+            var response = userService.ResetPassword(model, tokenTime);
             return Ok(response.Success);
         }
 
