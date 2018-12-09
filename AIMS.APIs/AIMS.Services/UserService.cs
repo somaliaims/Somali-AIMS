@@ -80,7 +80,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse ResetPassword(PasswordResetModel model);
+        ActionResponse ResetPassword(PasswordResetModel model, PasswordTokenModel tModel);
 
         /// <summary>
         /// Deletes the account for the provided user
@@ -157,8 +157,8 @@ namespace AIMS.Services
 
         public UserAuthenticationView GetUserByEmail(string email)
         {
-            using (var unitWork = new UnitOfWork(context))
-            {
+            var unitWork = new UnitOfWork(context);
+            //{
                 UserAuthenticationView foundUser = new UserAuthenticationView();
                 var findUser = unitWork.UserRepository.GetWithInclude(u => u.Email.Equals(email),
                     new string[] { "Organization" });
@@ -176,7 +176,7 @@ namespace AIMS.Services
                     }
                 }
                 return foundUser;
-            }
+            //}
         }
 
         public ActionResponse CheckEmailAvailability(string email)
@@ -463,12 +463,41 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ResetPassword(PasswordResetModel model)
+        public ActionResponse ResetPassword(PasswordResetModel model, PasswordTokenModel tModel)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
+                var isTokenExists = unitWork.PasswordRecoveryRepository.GetOne(r => r.Token == model.Token && r.Dated == tModel.TokenDate);
+                if (isTokenExists != null)
+                {
+                    DateTime expirationTime =isTokenExists.Dated.AddHours(2);
+                    if (expirationTime >= DateTime.Now)
+                    {
+                        var user = unitWork.UserRepository.GetOne(u => u.Email == tModel.Email);
+                        if (user != null)
+                        {
+                            ISecurityHelper sHelper = new SecurityHelper();
+                            var passwordHash = sHelper.GetPasswordHash(model.NewPassword);
+                            user.Password = passwordHash;
 
+                            unitWork.UserRepository.Update(user);
+                            unitWork.PasswordRecoveryRepository.Delete(isTokenExists);
+
+                            unitWork.Save();
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.Message = "User not found for the provided email";
+                        }
+                    }
+                    else
+                    {
+                        response.Success = false;
+                        response.Message = "Token is expired";
+                    }
+                }
                 return response;
             }
         }
