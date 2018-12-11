@@ -58,6 +58,12 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFProject, ProjectModelView>()
                 .ForMember(p => p.StartDate, opts => opts.MapFrom(source => source.StartDate.ToShortDateString()))
                 .ForMember(p => p.EndDate, opts => opts.MapFrom(source => source.EndDate.ToShortDateString()));
+
+            CreateMap<EFProjectLocations, LocationView>()
+                .ForMember(l => l.Id, opts => opts.MapFrom(source => source.Location.Id))
+                .ForMember(l => l.Location, opts => opts.MapFrom(source => source.Location.Location))
+                .ForMember(l => l.Latitude, opts => opts.MapFrom(source => source.Location.Latitude))
+                .ForMember(l => l.Longitude, opts => opts.MapFrom(source => source.Location.Longitude));
         }
     }
 }

@@ -50,6 +50,13 @@ namespace AIMS.Services
         /// <param name="project"></param>
         /// <returns></returns>
         ActionResponse Update(int id, ProjectModel project);
+
+        /// <summary>
+        /// Gets locations for the project
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<LocationView> GetProjectLocations(int id);
     }
 
     public class ProjectService : IProjectService
@@ -97,6 +104,15 @@ namespace AIMS.Services
                 List<ProjectView> sectorTypesList = new List<ProjectView>();
                 var projects = unitWork.ProjectRepository.GetWithInclude(p => p.Title.Contains(criteria), new string[] { "ProjectType" });
                 return mapper.Map<List<ProjectView>>(projects);
+            }
+        }
+
+        public IEnumerable<LocationView> GetProjectLocations(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var locations = unitWork.ProjectLocationsRepository.GetWithInclude(l => l.ProjectId == id, new string[] { "Location" });
+                return mapper.Map<List<LocationView>>(locations);
             }
         }
 

@@ -31,6 +31,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFIATIData> iatiDataRepository;
         private GenericRepository<EFSMTPSettings> smtpSettingsRepository;
         private GenericRepository<EFPasswordRecoveryRequests> passwordRecoveryRepository;
+        private GenericRepository<EFProjectLocations> projectLocationsRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -124,6 +125,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.projectSectorsRepository == null)
                     this.projectSectorsRepository = new GenericRepository<EFProjectSectors>(context);
                 return this.projectSectorsRepository;
+            }
+        }
+
+        public GenericRepository<EFProjectLocations> ProjectLocationsRepository
+        {
+            get
+            {
+                if (this.projectLocationsRepository == null)
+                    this.projectLocationsRepository = new GenericRepository<EFProjectLocations>(context);
+                return this.projectLocationsRepository;
             }
         }
 
