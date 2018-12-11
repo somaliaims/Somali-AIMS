@@ -376,7 +376,17 @@ namespace AIMS.Models
         public decimal ExchangeRate { get; set; }
     }
 
-
+    /// <summary>
+    /// project sectors models
+    /// </summary>
+    public class ProjectSectorView
+    {
+        public int SectorId { get; set; }
+        public string Sector { get; set; }
+        public decimal Amount { get; set; }
+        public string Currency { get; set; }
+        public decimal ExchangeRate { get; set; }
+    }
     /// <summary>
     /// Project implementors models
     /// </summary>

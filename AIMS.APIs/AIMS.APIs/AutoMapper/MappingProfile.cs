@@ -64,6 +64,12 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(l => l.Location, opts => opts.MapFrom(source => source.Location.Location))
                 .ForMember(l => l.Latitude, opts => opts.MapFrom(source => source.Location.Latitude))
                 .ForMember(l => l.Longitude, opts => opts.MapFrom(source => source.Location.Longitude));
+
+            CreateMap<EFProjectSectors, ProjectSectorView>()
+                .ForMember(s => s.SectorId, opts => opts.MapFrom(source => source.Sector.Id))
+                .ForMember(s => s.Sector, opts => opts.MapFrom(source => source.Sector.SectorName))
+                .ForMember(s => s.Amount, opts => opts.MapFrom(source => source.ContributedAmount))
+                .ForMember(s => s.Currency, opts => opts.MapFrom(source => source.ExchangeRate));
         }
     }
 }

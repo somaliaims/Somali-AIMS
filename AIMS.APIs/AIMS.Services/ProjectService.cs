@@ -52,11 +52,32 @@ namespace AIMS.Services
         ActionResponse Update(int id, ProjectModel project);
 
         /// <summary>
-        /// Gets locations for the project
+        /// Gets locations for the provided project id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         IEnumerable<LocationView> GetProjectLocations(int id);
+
+        /// <summary>
+        /// Gets sectors for the provided project id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<SectorView> GetProjectSectors(int id);
+
+        /// <summary>
+        /// Gets funders for the provided project id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<ProjectFunderView> GetProjectFunders(int id);
+
+        /// <summary>
+        /// Gets implementors for the provided project id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<ProjectImplementorView> GetProjectImplementors(int id);
     }
 
     public class ProjectService : IProjectService
@@ -113,6 +134,33 @@ namespace AIMS.Services
             {
                 var locations = unitWork.ProjectLocationsRepository.GetWithInclude(l => l.ProjectId == id, new string[] { "Location" });
                 return mapper.Map<List<LocationView>>(locations);
+            }
+        }
+
+        public IEnumerable<SectorView> GetProjectSectors(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var sectors = unitWork.ProjectSectorsRepository.GetWithInclude(s => s.ProjectId == id, new string[] { "Sector" });
+                return mapper.Map<List<SectorView>>(sectors);
+            }
+        }
+
+        public IEnumerable<ProjectFunderView> GetProjectFunders(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var funders = unitWork.ProjectFundersRepository.GetWithInclude(s => s.ProjectId == id, new string[] { "Funder" });
+                return mapper.Map<List<ProjectFunderView>>(funders);
+            }
+        }
+
+        public IEnumerable<ProjectImplementorView> GetProjectImplementors(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var implementors = unitWork.ProjectImplementorsRepository.GetWithInclude(s => s.ProjectId == id, new string[] { "Implementor" });
+                return mapper.Map<List<ProjectImplementorView>>(implementors);
             }
         }
 
