@@ -38,6 +38,22 @@ namespace AIMS.APIs.Controllers
             return Ok(project);
         }
 
+        [HttpGet]
+        [Route("GetLocations/{id}")]
+        public IActionResult GetLocations(int id)
+        {
+            var locations = projectService.GetProjectLocations(id);
+            return Ok(locations);
+        }
+
+        [HttpGet]
+        [Route("GetSectors/{id}")]
+        public IActionResult GetSectors(int id)
+        {
+            var sectors = projectService.GetProjectSectors(id);
+            return Ok(sectors);
+        }
+
         [HttpGet("{criteria}")]
         public IActionResult Get(string criteria)
         {
@@ -59,6 +75,40 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(response.Message);
             }
             return Ok(response.ReturnedId);
+        }
+
+        [HttpPost]
+        [Route("AddProjectLocation")]
+        public IActionResult AddProjectLocation([FromBody] ProjectLocationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = projectService.AddProjectLocation(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost]
+        [Route("AddProjectSector")]
+        public IActionResult AddProjectSector([FromBody] ProjectSectorModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = projectService.AddProjectSector(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
         }
 
         [HttpPut("{id}")]

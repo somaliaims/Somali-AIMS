@@ -389,8 +389,11 @@ namespace AIMS.Models
 
     public class ProjectLocationModel
     {
+        [Required]
         public int ProjectId { get; set; }
+        [Required]
         public int LocationId { get; set; }
+        [Required]
         public decimal Percentage { get; set; }
     }
 
