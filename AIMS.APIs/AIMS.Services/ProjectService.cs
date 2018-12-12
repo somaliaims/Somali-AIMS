@@ -49,8 +49,15 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="project"></param>
         /// <returns></returns>
-        ActionResponse Update(int id, ProjectModel project);
+        ActionResponse Update(int id, ProjectModel model);
 
+        /// <summary>
+        /// Adds location to a project
+        /// </summary>
+        /// <param name=""></param>
+        /// <returns></returns>
+        ActionResponse AddProjectLocation(ProjectLocationModel model);
+        
         /// <summary>
         /// Gets locations for the provided project id
         /// </summary>
@@ -64,6 +71,13 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         IEnumerable<SectorView> GetProjectSectors(int id);
+
+        /// <summary>
+        /// Adds sector to a project
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddProjectSector(ProjectSectorModel model);
 
         /// <summary>
         /// Gets funders for the provided project id
@@ -179,6 +193,92 @@ namespace AIMS.Services
                         EndDate = model.EndDate
                     });
                     response.ReturnedId = newProject.Id;
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddProjectLocation(ProjectLocationModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+
+                try
+                {
+                    var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
+                    if (project == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                    }
+                    var location = unitWork.LocationRepository.GetByID(model.LocationId);
+                    if (location == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Location");
+                        response.Success = false;
+                    }
+
+                    unitWork.ProjectLocationsRepository.Insert(new EFProjectLocations()
+                    {
+                        Project = project,
+                        Location = location,
+                        Percentage = model.Percentage,
+                    });
+
+                    unitWork.Save();
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddProjectSector(ProjectSectorModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+
+                try
+                {
+                    var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
+                    if (project == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                    }
+                    var sector = unitWork.SectorRepository.GetByID(model.SectorId);
+                    if (sector == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Sector");
+                        response.Success = false;
+                    }
+
+                    unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
+                    {
+                        Project = project,
+                        Sector = sector,
+                        AllocatedAmount = model.AllocatedAmount,
+                        Currency = model.Currency,
+                        ExchangeRate = model.ExchangeRate
+                    });
+
                     unitWork.Save();
                 }
                 catch (Exception ex)

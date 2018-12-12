@@ -187,7 +187,8 @@ namespace AIMS.Models
         public int SectorId { get; set; }
         public EFSector Sector { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
-        public decimal ContributedAmount { get; set; }
+        public decimal AllocatedAmount { get; set; }
+        public string Currency { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; }
     }

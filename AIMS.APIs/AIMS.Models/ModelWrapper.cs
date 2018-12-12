@@ -377,16 +377,44 @@ namespace AIMS.Models
     }
 
     /// <summary>
+    /// Project locations models
+    /// </summary>
+    public class ProjectLocationView
+    {
+        public int Id { get; set; }
+        public string Project { get; set; }
+        public string Location { get; set; }
+        public decimal Percentage { get; set; }
+    }
+
+    public class ProjectLocationModel
+    {
+        public int ProjectId { get; set; }
+        public int LocationId { get; set; }
+        public decimal Percentage { get; set; }
+    }
+
+    /// <summary>
     /// project sectors models
     /// </summary>
     public class ProjectSectorView
     {
         public int SectorId { get; set; }
         public string Sector { get; set; }
-        public decimal Amount { get; set; }
+        public decimal AllocatedAmount { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRate { get; set; }
     }
+
+    public class ProjectSectorModel
+    {
+        public int ProjectId { get; set; }
+        public int SectorId { get; set; }
+        public decimal AllocatedAmount { get; set; }
+        public string Currency { get; set; }
+        public decimal ExchangeRate { get; set; }
+    }
+
     /// <summary>
     /// Project implementors models
     /// </summary>
