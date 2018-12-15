@@ -92,6 +92,14 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         IEnumerable<ProjectImplementorView> GetProjectImplementors(int id);
+
+        /// <summary>
+        /// Deletes project location
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="locationId"></param>
+        /// <returns></returns>
+        ActionResponse DeleteProjectLocation(int projectId, int locationId);
     }
 
     public class ProjectService : IProjectService
@@ -313,6 +321,27 @@ namespace AIMS.Services
                 unitWork.ProjectRepository.Update(projectObj);
                 unitWork.Save();
                 response.Message = true.ToString();
+                return response;
+            }
+        }
+
+        public ActionResponse DeleteProjectLocation(int projectId, int locationId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var projectLocation = unitWork.ProjectLocationsRepository.Get(p => p.ProjectId == projectId && p.LocationId == locationId);
+                IMessageHelper mHelper;
+                if (projectLocation == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project Location");
+                    response.Success = false;
+                    return response;
+                }
+
+                unitWork.ProjectLocationsRepository.Delete(projectLocation);
+                unitWork.Save();
                 return response;
             }
         }

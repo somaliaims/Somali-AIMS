@@ -126,5 +126,18 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(response.Message);
         }
+
+        [HttpDelete]
+        [Route("DeleteProjectLocation/{projectId}/{locationId}")]
+        public IActionResult DeleteProjectLocation(int projectId, int locationId)
+        {
+            if (projectId <= 0 || locationId <= 0)
+            {
+                return BadRequest("Invalid Ids provided");
+            }
+
+            projectService.DeleteProjectLocation(projectId, locationId);
+            return Ok();
+        }
     }
 }
