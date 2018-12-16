@@ -100,6 +100,14 @@ namespace AIMS.Services
         /// <param name="locationId"></param>
         /// <returns></returns>
         ActionResponse DeleteProjectLocation(int projectId, int locationId);
+
+        /// <summary>
+        /// Deletes project sector
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="locationId"></param>
+        /// <returns></returns>
+        ActionResponse DeleteProjectSector(int projectId, int locationId);
     }
 
     public class ProjectService : IProjectService
@@ -341,6 +349,27 @@ namespace AIMS.Services
                 }
 
                 unitWork.ProjectLocationsRepository.Delete(projectLocation);
+                unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse DeleteProjectSector(int projectId, int sectorId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var projectSector = unitWork.ProjectSectorsRepository.Get(p => p.ProjectId == projectId && p.SectorId == sectorId);
+                IMessageHelper mHelper;
+                if (projectSector == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project Sector");
+                    response.Success = false;
+                    return response;
+                }
+
+                unitWork.ProjectSectorsRepository.Delete(projectSector);
                 unitWork.Save();
                 return response;
             }
