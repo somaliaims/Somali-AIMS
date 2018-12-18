@@ -70,7 +70,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        IEnumerable<SectorView> GetProjectSectors(int id);
+        IEnumerable<ProjectSectorView> GetProjectSectors(int id);
 
         /// <summary>
         /// Adds sector to a project
@@ -167,12 +167,12 @@ namespace AIMS.Services
             }
         }
 
-        public IEnumerable<SectorView> GetProjectSectors(int id)
+        public IEnumerable<ProjectSectorView> GetProjectSectors(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 var sectors = unitWork.ProjectSectorsRepository.GetWithInclude(s => s.ProjectId == id, new string[] { "Sector" });
-                return mapper.Map<List<SectorView>>(sectors);
+                return mapper.Map<List<ProjectSectorView>>(sectors);
             }
         }
 
@@ -248,7 +248,7 @@ namespace AIMS.Services
                     {
                         Project = project,
                         Location = location,
-                        Percentage = model.Percentage,
+                        FundsPercentage = model.FundsPercentage,
                     });
 
                     unitWork.Save();
@@ -290,7 +290,7 @@ namespace AIMS.Services
                     {
                         Project = project,
                         Sector = sector,
-                        AllocatedAmount = model.AllocatedAmount,
+                        FundsPercentage = model.FundsPercentage,
                         Currency = model.Currency,
                         ExchangeRate = model.ExchangeRate
                     });

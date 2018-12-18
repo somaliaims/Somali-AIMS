@@ -187,7 +187,7 @@ namespace AIMS.Models
         public int SectorId { get; set; }
         public EFSector Sector { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
-        public decimal AllocatedAmount { get; set; }
+        public decimal FundsPercentage { get; set; }
         public string Currency { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; }
@@ -225,7 +225,7 @@ namespace AIMS.Models
         public int LocationId { get; set; }
         public EFLocation Location { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
-        public decimal Percentage { get; set; }
+        public decimal FundsPercentage { get; set; }
     }
 
     public class EFProjectFunders

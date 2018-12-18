@@ -68,7 +68,8 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFProjectSectors, ProjectSectorView>()
                 .ForMember(s => s.SectorId, opts => opts.MapFrom(source => source.Sector.Id))
                 .ForMember(s => s.Sector, opts => opts.MapFrom(source => source.Sector.SectorName))
-                .ForMember(s => s.AllocatedAmount, opts => opts.MapFrom(source => source.AllocatedAmount))
+                .ForMember(s => s.FundsPercentage, opts => opts.MapFrom(source => source.FundsPercentage))
+                .ForMember(s => s.Currency, opts => opts.MapFrom(source => source.Currency))
                 .ForMember(s => s.Currency, opts => opts.MapFrom(source => source.ExchangeRate));
         }
     }
