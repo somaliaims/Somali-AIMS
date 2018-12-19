@@ -50,13 +50,6 @@ namespace AIMS.Services
         /// <param name="project"></param>
         /// <returns></returns>
         ActionResponse Update(int id, ProjectModel model);
-
-        /// <summary>
-        /// Adds location to a project
-        /// </summary>
-        /// <param name=""></param>
-        /// <returns></returns>
-        ActionResponse AddProjectLocation(ProjectLocationModel model);
         
         /// <summary>
         /// Gets locations for the provided project id
@@ -73,11 +66,32 @@ namespace AIMS.Services
         IEnumerable<ProjectSectorView> GetProjectSectors(int id);
 
         /// <summary>
+        /// Gets funds for the provided project id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<ProjectFundsView> GetProjectFunds(int id);
+
+        /// <summary>
+        /// Adds location to a project
+        /// </summary>
+        /// <param name=""></param>
+        /// <returns></returns>
+        ActionResponse AddProjectLocation(ProjectLocationModel model);
+
+        /// <summary>
         /// Adds sector to a project
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
         ActionResponse AddProjectSector(ProjectSectorModel model);
+
+        /// <summary>
+        /// Adds funder to a project
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddProjectFunder(ProjectFunderModel model);
 
         /// <summary>
         /// Gets funders for the provided project id
@@ -108,6 +122,14 @@ namespace AIMS.Services
         /// <param name="locationId"></param>
         /// <returns></returns>
         ActionResponse DeleteProjectSector(int projectId, int locationId);
+
+        /// <summary>
+        /// Deletes project funder
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="funderId"></param>
+        /// <returns></returns>
+        ActionResponse DeleteProjectFunder(int projectId, int funderId);
     }
 
     public class ProjectService : IProjectService
@@ -173,6 +195,15 @@ namespace AIMS.Services
             {
                 var sectors = unitWork.ProjectSectorsRepository.GetWithInclude(s => s.ProjectId == id, new string[] { "Sector" });
                 return mapper.Map<List<ProjectSectorView>>(sectors);
+            }
+        }
+
+        public IEnumerable<ProjectFundsView> GetProjectFunds(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var funds = unitWork.ProjectFundsRepository.GetWithInclude(f => f.ProjectId == id, new string[] { "Funder" });
+                return mapper.Map<List<ProjectFundsView>>(funds);
             }
         }
 
@@ -306,6 +337,50 @@ namespace AIMS.Services
             }
         }
 
+        public ActionResponse AddProjectFunder(ProjectFunderModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+
+                try
+                {
+                    var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
+                    if (project == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                    }
+                    var funder = unitWork.OrganizationRepository.GetByID(model.FunderId);
+                    if (funder == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Funder");
+                        response.Success = false;
+                    }
+
+                    unitWork.ProjectFundersRepository.Insert(new EFProjectFunders()
+                    {
+                        Project = project,
+                        Funder = funder,
+                        Amount = model.Amount,
+                        Currency = model.Currency,
+                        ExchangeRate = model.ExchangeRate
+                    });
+
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
         public ActionResponse Update(int id, ProjectModel model)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -370,6 +445,27 @@ namespace AIMS.Services
                 }
 
                 unitWork.ProjectSectorsRepository.Delete(projectSector);
+                unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse DeleteProjectFunder(int projectId, int funderId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var projectFunder = unitWork.ProjectFundersRepository.Get(f => f.ProjectId == projectId && f.FunderId == funderId);
+                IMessageHelper mHelper;
+                if (projectFunder == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project Funder");
+                    response.Success = false;
+                    return response;
+                }
+
+                unitWork.ProjectFundersRepository.Delete(projectFunder);
                 unitWork.Save();
                 return response;
             }

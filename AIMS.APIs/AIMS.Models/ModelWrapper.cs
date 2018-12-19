@@ -418,6 +418,7 @@ namespace AIMS.Models
         public decimal ExchangeRate { get; set; }
     }
 
+
     /// <summary>
     /// Project implementors models
     /// </summary>

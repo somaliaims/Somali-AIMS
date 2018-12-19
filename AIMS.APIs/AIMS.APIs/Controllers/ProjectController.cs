@@ -54,6 +54,14 @@ namespace AIMS.APIs.Controllers
             return Ok(sectors);
         }
 
+        [HttpGet]
+        [Route("GetFunders/{id}")]
+        public IActionResult GetFunders(int id)
+        {
+            var funders = projectService.GetProjectFunders(id);
+            return Ok(funders);
+        }
+
         [HttpGet("{criteria}")]
         public IActionResult Get(string criteria)
         {
@@ -111,6 +119,23 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [HttpPost]
+        [Route("AddProjectFunder")]
+        public IActionResult AddProjectFunder([FromBody] ProjectFunderModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = projectService.AddProjectFunder(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] ProjectModel project)
         {
@@ -150,6 +175,19 @@ namespace AIMS.APIs.Controllers
             }
 
             projectService.DeleteProjectSector(projectId, sectorId);
+            return Ok();
+        }
+
+        [HttpDelete]
+        [Route("DeleteProjectFunder/{projectId}/{funderId}")]
+        public IActionResult DeleteProjectFunder(int projectId, int funderId)
+        {
+            if (projectId <= 0 || funderId <= 0)
+            {
+                return BadRequest("Invalid Ids provided");
+            }
+
+            projectService.DeleteProjectFunder(projectId, funderId);
             return Ok();
         }
     }

@@ -70,7 +70,7 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(s => s.Sector, opts => opts.MapFrom(source => source.Sector.SectorName))
                 .ForMember(s => s.FundsPercentage, opts => opts.MapFrom(source => source.FundsPercentage))
                 .ForMember(s => s.Currency, opts => opts.MapFrom(source => source.Currency))
-                .ForMember(s => s.Currency, opts => opts.MapFrom(source => source.ExchangeRate));
+                .ForMember(s => s.ExchangeRate, opts => opts.MapFrom(source => source.ExchangeRate));
         }
     }
 }
