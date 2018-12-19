@@ -23,7 +23,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFProjectSectors> projectSectorsRepository;
         private GenericRepository<EFProjectFunders> fundersRepository;
         private GenericRepository<EFProjectImplementors> implementorsRepository;
-        private GenericRepository<EFProjectFundings> fundingsRepository;
+        //private GenericRepository<EFProjectFundings> fundingsRepository;
         private GenericRepository<EFUser> userRepository;
         private GenericRepository<EFProjectDocuments> projectDocumentsRepository;
         private GenericRepository<EFProjectDisbursements> projectDisbursementsRepository;
@@ -158,7 +158,7 @@ namespace AIMS.DAL.UnitOfWork
             }
         }
 
-        public GenericRepository<EFProjectFundings> ProjectFundsRepository
+        /*public GenericRepository<EFProjectFundings> ProjectFundsRepository
         {
             get
             {
@@ -166,7 +166,7 @@ namespace AIMS.DAL.UnitOfWork
                     this.fundingsRepository = new GenericRepository<EFProjectFundings>(context);
                 return this.fundingsRepository;
             }
-        }
+        }*/
 
         public GenericRepository<EFLocation> LocationRepository
         {

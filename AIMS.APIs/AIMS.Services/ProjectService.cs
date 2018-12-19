@@ -202,7 +202,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var funds = unitWork.ProjectFundsRepository.GetWithInclude(f => f.ProjectId == id, new string[] { "Funder" });
+                var funds = unitWork.ProjectFundersRepository.GetWithInclude(f => f.ProjectId == id, new string[] { "Funder" });
                 return mapper.Map<List<ProjectFundsView>>(funds);
             }
         }

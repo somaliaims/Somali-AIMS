@@ -254,7 +254,7 @@ namespace AIMS.Models
         
     }
 
-    public class EFProjectFundings
+    /*public class EFProjectFundings
     {
         [ForeignKey("Funder")]
         public int FunderId { get; set; }
@@ -268,7 +268,7 @@ namespace AIMS.Models
         public string Currency { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; }
-    }
+    }*/
 
     public class EFReportSubscriptions
     {
