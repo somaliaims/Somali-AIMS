@@ -55,7 +55,6 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string OrganizationName { get; set; }
-        public EFOrganizationTypes OrganizationType { get; set; }
         public bool IsApproved { get; set; }
         public DateTime RegisteredOn { get; set; }
     }

@@ -52,14 +52,12 @@ namespace AIMS.Models
     {
         [Required]
         public string Name { get; set; }
-        public int TypeId { get; set; }
     }
 
     public class OrganizationViewModel
     {
         public int Id { get; set; }
         public string OrganizationName { get; set; }
-        public int OrganizationTypeId { get; set; }
     }
 
     /// <summary>

@@ -101,6 +101,13 @@ namespace AIMS.Services
         ActionResponse AddProjectImplementor(ProjectImplementorModel model);
 
         /// <summary>
+        /// Adds disbursement to a project
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddProjectDisbursement(ProjectDisbursementModel model);
+
+        /// <summary>
         /// Gets funders for the provided project id
         /// </summary>
         /// <param name="id"></param>
@@ -113,6 +120,13 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         IEnumerable<ProjectImplementorView> GetProjectImplementors(int id);
+
+        /// <summary>
+        /// Gets project disbursements
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<ProjectDisbursementView> GetProjectDisbursements(int id);
 
         /// <summary>
         /// Deletes project location
@@ -145,6 +159,13 @@ namespace AIMS.Services
         /// <param name="implementorId"></param>
         /// <returns></returns>
         ActionResponse DeleteProjectImplementor(int projectId, int implementorId);
+
+        /// <summary>
+        /// Deletes the disbursement with the provided id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ActionResponse DeleteProjectDisbursement(int id);
     }
 
     public class ProjectService : IProjectService
@@ -237,6 +258,15 @@ namespace AIMS.Services
             {
                 var implementors = unitWork.ProjectImplementorsRepository.GetWithInclude(s => s.ProjectId == id, new string[] { "Implementor" });
                 return mapper.Map<List<ProjectImplementorView>>(implementors);
+            }
+        }
+
+        public IEnumerable<ProjectDisbursementView> GetProjectDisbursements(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var disbursements = unitWork.ProjectDisbursementsRepository.GetMany(s => s.ProjectId == id);
+                return mapper.Map<List<ProjectDisbursementView>>(disbursements);
             }
         }
 
@@ -436,6 +466,43 @@ namespace AIMS.Services
             }
         }
 
+        public ActionResponse AddProjectDisbursement(ProjectDisbursementModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+
+                try
+                {
+                    var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
+                    if (project == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                    }
+
+                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                    {
+                        Project = project,
+                        StartingYear = model.StartingYear,
+                        StartingMonth = model.StartingMonth,
+                        EndingYear = model.EndingYear,
+                        EndingMonth = model.EndingMonth,
+                        Percentage = model.Percentage,
+                    });
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
         public ActionResponse Update(int id, ProjectModel model)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -542,6 +609,27 @@ namespace AIMS.Services
                 }
 
                 unitWork.ProjectImplementorsRepository.Delete(projectImplementor);
+                unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse DeleteProjectDisbursement(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetByID(id);
+                IMessageHelper mHelper;
+                if (projectDisbursement == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project Disbursement");
+                    response.Success = false;
+                    return response;
+                }
+
+                unitWork.ProjectDisbursementsRepository.Delete(projectDisbursement);
                 unitWork.Save();
                 return response;
             }

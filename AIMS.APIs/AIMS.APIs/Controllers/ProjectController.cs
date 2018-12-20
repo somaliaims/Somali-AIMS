@@ -70,6 +70,14 @@ namespace AIMS.APIs.Controllers
             return Ok(funders);
         }
 
+        [HttpGet]
+        [Route("GetDisbursements/{id}")]
+        public IActionResult GetDisbursements(int id)
+        {
+            var disbursements = projectService.GetProjectDisbursements(id);
+            return Ok(disbursements);
+        }
+
         [HttpGet("{criteria}")]
         public IActionResult Get(string criteria)
         {
@@ -161,6 +169,23 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [HttpPost]
+        [Route("AddProjectDisbursement")]
+        public IActionResult AddProjectDisbursement([FromBody] ProjectDisbursementModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = projectService.AddProjectDisbursement(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] ProjectModel project)
         {
@@ -187,7 +212,7 @@ namespace AIMS.APIs.Controllers
             }
 
             projectService.DeleteProjectLocation(projectId, locationId);
-            return Ok();
+            return Ok(true);
         }
 
         [HttpDelete]
@@ -200,7 +225,7 @@ namespace AIMS.APIs.Controllers
             }
 
             projectService.DeleteProjectSector(projectId, sectorId);
-            return Ok();
+            return Ok(true);
         }
 
         [HttpDelete]
@@ -213,7 +238,7 @@ namespace AIMS.APIs.Controllers
             }
 
             projectService.DeleteProjectFunder(projectId, funderId);
-            return Ok();
+            return Ok(true);
         }
 
         [HttpDelete]
@@ -224,9 +249,20 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Invalid Ids provided");
             }
-
             projectService.DeleteProjectImplementor(projectId, implementorId);
-            return Ok();
+            return Ok(true);
+        }
+
+        [HttpDelete]
+        [Route("DeleteProjectDisbursement/{id}")]
+        public IActionResult DeleteProjectDisbursement(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid Ids provided");
+            }
+            projectService.DeleteProjectDisbursement(id);
+            return Ok(true);
         }
     }
 }

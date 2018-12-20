@@ -120,18 +120,9 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    IMessageHelper mHelper;
-                    var organizationType = unitWork.OrganizationTypesRepository.GetByID(model.TypeId);
-                    if (organizationType == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Organization Type");
-                        return response;
-                    }
                     var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
                     {
                         OrganizationName = model.Name,
-                        OrganizationType = organizationType
                     });
                     response.ReturnedId = newOrganization.Id;
                     unitWork.Save();
@@ -160,17 +151,7 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var organizationType = unitWork.OrganizationTypesRepository.GetByID(organization.TypeId);
-                if (organizationType == null)
-                {
-                    response.Success = false;
-                    response.Message = mHelper.GetNotFound("Organization Type");
-                    return response;
-                }
-
                 organizationObj.OrganizationName = organization.Name;
-                organizationObj.OrganizationType = organizationType;
-
                 unitWork.OrganizationRepository.Update(organizationObj);
                 unitWork.Save();
                 response.Message = "1";

@@ -252,22 +252,11 @@ namespace AIMS.Services
                     }
                     else
                     {
-                        EFOrganizationTypes organizationType = null;
                         if (model.IsNewOrganization)
                         {
-                            organizationType = unitWork.OrganizationTypesRepository.Get(o => o.TypeName.Equals("Default"));
-                            if (organizationType == null)
-                            {
-                                mHelper = new MessageHelper();
-                                response.Success = false;
-                                response.Message = mHelper.GetNotFound("Organization Type");
-                                return response;
-                            }
-
                             organization = new EFOrganization()
                             {
                                 OrganizationName = model.OrganizationName,
-                                OrganizationType = organizationType
                             };
 
                             unitWork.Save();
