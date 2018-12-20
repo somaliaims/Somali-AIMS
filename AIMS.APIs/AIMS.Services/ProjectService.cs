@@ -165,7 +165,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ActionResponse DeleteProjectDisbursement(int id);
+        ActionResponse DeleteProjectDisbursement(int id, int startingYear);
     }
 
     public class ProjectService : IProjectService
@@ -614,12 +614,12 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse DeleteProjectDisbursement(int id)
+        public ActionResponse DeleteProjectDisbursement(int projectId, int startingYear)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetByID(id);
+                var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetSingle(d => d.ProjectId == projectId && d.StartingYear == startingYear);
                 IMessageHelper mHelper;
                 if (projectDisbursement == null)
                 {

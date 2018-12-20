@@ -73,6 +73,7 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFProjectImplementors, ProjectImplementorView>()
                 .ForMember(i => i.ImplementorId, opts => opts.MapFrom(source => source.Implementor.Id))
                 .ForMember(i => i.Implementor, opts => opts.MapFrom(source => source.Implementor.OrganizationName));
+
         }
     }
 }

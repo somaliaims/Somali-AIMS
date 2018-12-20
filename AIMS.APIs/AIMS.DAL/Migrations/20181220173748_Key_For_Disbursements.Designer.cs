@@ -4,14 +4,16 @@ using AIMS.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    partial class AIMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181220173748_Key_For_Disbursements")]
+    partial class Key_For_Disbursements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -198,12 +200,16 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("EndingYear");
 
+                    b.Property<int>("Id");
+
                     b.Property<decimal>("Percentage")
                         .HasColumnType("decimal(9, 2)");
 
                     b.Property<int>("StartingMonth");
 
                     b.HasKey("ProjectId", "StartingYear");
+
+                    b.HasAlternateKey("Id");
 
                     b.ToTable("ProjectDisbursements");
                 });

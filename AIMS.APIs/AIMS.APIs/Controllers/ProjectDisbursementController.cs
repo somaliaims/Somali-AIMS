@@ -52,20 +52,5 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
-        [HttpPut]
-        public IActionResult Update(int id, [FromBody] ProjectDisbursementModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var response = projectDisbursementService.Update(id, model);
-            if (!response.Success)
-            {
-                return BadRequest(response.Message);
-            }
-            return Ok("1");
-        }
     }
 }

@@ -29,13 +29,6 @@ namespace AIMS.Services
         /// </summary>
         /// <returns>Response with success/failure details</returns>
         ActionResponse Add(ProjectDisbursementModel model);
-
-        /// <summary>
-        /// Updates a projectDisbursement
-        /// </summary>
-        /// <param name="projectDisbursement"></param>
-        /// <returns></returns>
-        ActionResponse Update(int id, ProjectDisbursementModel model);
     }
 
     public class ProjectDisbursementService
@@ -101,25 +94,6 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Update(int id, ProjectDisbursementModel model)
-        {
-            using (var unitWork = new UnitOfWork(context))
-            {
-                ActionResponse response = new ActionResponse();
-                var projectDisbursementObj = unitWork.ProjectDisbursementsRepository.Get(d => d.Id.Equals(id));
-                if (projectDisbursementObj == null)
-                {
-                    IMessageHelper mHelper = new MessageHelper();
-                    response.Success = false;
-                    response.Message = mHelper.GetNotFound("Project Disbursement");
-                    return response;
-                }
-
-                unitWork.ProjectDisbursementsRepository.Update(projectDisbursementObj);
-                unitWork.Save();
-                response.Message = "1";
-                return response;
-            }
-        }
+        
     }
 }
