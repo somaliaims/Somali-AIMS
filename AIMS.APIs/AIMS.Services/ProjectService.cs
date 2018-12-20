@@ -94,6 +94,13 @@ namespace AIMS.Services
         ActionResponse AddProjectFunder(ProjectFunderModel model);
 
         /// <summary>
+        /// Adds implementor to a project
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddProjectImplementor(ProjectImplementorModel model);
+
+        /// <summary>
         /// Gets funders for the provided project id
         /// </summary>
         /// <param name="id"></param>
@@ -130,6 +137,14 @@ namespace AIMS.Services
         /// <param name="funderId"></param>
         /// <returns></returns>
         ActionResponse DeleteProjectFunder(int projectId, int funderId);
+
+        /// <summary>
+        /// Deletes project implementor
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="implementorId"></param>
+        /// <returns></returns>
+        ActionResponse DeleteProjectImplementor(int projectId, int implementorId);
     }
 
     public class ProjectService : IProjectService
@@ -381,6 +396,46 @@ namespace AIMS.Services
             }
         }
 
+        public ActionResponse AddProjectImplementor(ProjectImplementorModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+
+                try
+                {
+                    var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
+                    if (project == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                    }
+                    var implementor = unitWork.OrganizationRepository.GetByID(model.ImplementorId);
+                    if (implementor == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Implementor");
+                        response.Success = false;
+                    }
+
+                    unitWork.ProjectImplementorsRepository.Insert(new EFProjectImplementors()
+                    {
+                        Project = project,
+                        Implementor = implementor,
+                    });
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
         public ActionResponse Update(int id, ProjectModel model)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -466,6 +521,27 @@ namespace AIMS.Services
                 }
 
                 unitWork.ProjectFundersRepository.Delete(projectFunder);
+                unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse DeleteProjectImplementor(int projectId, int implementorId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var projectImplementor = unitWork.ProjectImplementorsRepository.Get(i => i.ProjectId == projectId && i.ImplementorId == implementorId);
+                IMessageHelper mHelper;
+                if (projectImplementor == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project Implementor");
+                    response.Success = false;
+                    return response;
+                }
+
+                unitWork.ProjectImplementorsRepository.Delete(projectImplementor);
                 unitWork.Save();
                 return response;
             }

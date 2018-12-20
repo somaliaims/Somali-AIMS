@@ -62,6 +62,14 @@ namespace AIMS.APIs.Controllers
             return Ok(funders);
         }
 
+        [HttpGet]
+        [Route("GetImplementors/{id}")]
+        public IActionResult GetImplementors(int id)
+        {
+            var funders = projectService.GetProjectImplementors(id);
+            return Ok(funders);
+        }
+
         [HttpGet("{criteria}")]
         public IActionResult Get(string criteria)
         {
@@ -136,6 +144,23 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [HttpPost]
+        [Route("AddProjectImplementor")]
+        public IActionResult AddProjectImplementor([FromBody] ProjectImplementorModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = projectService.AddProjectImplementor(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] ProjectModel project)
         {
@@ -188,6 +213,19 @@ namespace AIMS.APIs.Controllers
             }
 
             projectService.DeleteProjectFunder(projectId, funderId);
+            return Ok();
+        }
+
+        [HttpDelete]
+        [Route("DeleteProjectImplementor/{projectId}/{implementorId}")]
+        public IActionResult DeleteProjectImplementor(int projectId, int implementorId)
+        {
+            if (projectId <= 0 || implementorId <= 0)
+            {
+                return BadRequest("Invalid Ids provided");
+            }
+
+            projectService.DeleteProjectImplementor(projectId, implementorId);
             return Ok();
         }
     }
