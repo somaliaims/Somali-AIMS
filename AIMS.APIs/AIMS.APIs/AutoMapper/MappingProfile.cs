@@ -71,6 +71,10 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(s => s.FundsPercentage, opts => opts.MapFrom(source => source.FundsPercentage))
                 .ForMember(s => s.Currency, opts => opts.MapFrom(source => source.Currency))
                 .ForMember(s => s.ExchangeRate, opts => opts.MapFrom(source => source.ExchangeRate));
+
+            CreateMap<EFProjectFunders, ProjectFunderView>()
+                .ForMember(f => f.FunderId, opts => opts.MapFrom(source => source.Funder.Id))
+                .ForMember(f => f.Funder, opts => opts.MapFrom(source => source.Funder.OrganizationName));
         }
     }
 }
