@@ -78,6 +78,14 @@ namespace AIMS.APIs.Controllers
             return Ok(disbursements);
         }
 
+        [HttpGet]
+        [Route("GetDocuments/{id}")]
+        public IActionResult GetDocuments(int id)
+        {
+            var documents = projectService.GetProjectDocuments(id);
+            return Ok(documents);
+        }
+
         [HttpGet("{criteria}")]
         public IActionResult Get(string criteria)
         {
@@ -186,6 +194,23 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [HttpPost]
+        [Route("AddProjectDocument")]
+        public IActionResult AddProjectDocument([FromBody] ProjectDocumentModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = projectService.AddProjectDocument(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] ProjectModel project)
         {
@@ -262,6 +287,18 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid Ids provided");
             }
             projectService.DeleteProjectDisbursement(projectId, startingYear);
+            return Ok(true);
+        }
+
+        [HttpDelete]
+        [Route("DeleteProjectDocument/{id}")]
+        public IActionResult DeleteProjectDocument(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid Id provided");
+            }
+            projectService.DeleteProjectDocument(id);
             return Ok(true);
         }
     }

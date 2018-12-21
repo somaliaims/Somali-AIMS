@@ -108,6 +108,13 @@ namespace AIMS.Services
         ActionResponse AddProjectDisbursement(ProjectDisbursementModel model);
 
         /// <summary>
+        /// Adds document to a project
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddProjectDocument(ProjectDocumentModel model);
+
+        /// <summary>
         /// Gets funders for the provided project id
         /// </summary>
         /// <param name="id"></param>
@@ -127,6 +134,13 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         IEnumerable<ProjectDisbursementView> GetProjectDisbursements(int id);
+
+        /// <summary>
+        /// Gets project documents
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<ProjectDocumentView> GetProjectDocuments(int id);
 
         /// <summary>
         /// Deletes project location
@@ -166,6 +180,13 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         ActionResponse DeleteProjectDisbursement(int id, int startingYear);
+
+        /// <summary>
+        /// Deletes a document for the provided id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ActionResponse DeleteProjectDocument(int id);
     }
 
     public class ProjectService : IProjectService
@@ -267,6 +288,15 @@ namespace AIMS.Services
             {
                 var disbursements = unitWork.ProjectDisbursementsRepository.GetMany(s => s.ProjectId == id);
                 return mapper.Map<List<ProjectDisbursementView>>(disbursements);
+            }
+        }
+
+        public IEnumerable<ProjectDocumentView> GetProjectDocuments(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var documents = unitWork.ProjectDocumentRepository.GetMany(d => d.ProjectId == id);
+                return mapper.Map<List<ProjectDocumentView>>(documents);
             }
         }
 
@@ -503,6 +533,40 @@ namespace AIMS.Services
             }
         }
 
+        public ActionResponse AddProjectDocument(ProjectDocumentModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+
+                try
+                {
+                    var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
+                    if (project == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                    }
+
+                    unitWork.ProjectDocumentRepository.Insert(new EFProjectDocuments()
+                    {
+                        Project = project,
+                        DocumentTitle = model.DocumentTitle,
+                        DocumentUrl = model.DocumentUrl
+                    });
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
         public ActionResponse Update(int id, ProjectModel model)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -630,6 +694,27 @@ namespace AIMS.Services
                 }
 
                 unitWork.ProjectDisbursementsRepository.Delete(projectDisbursement);
+                unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse DeleteProjectDocument(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var projectDocument = unitWork.ProjectDocumentRepository.GetByID(id);
+                IMessageHelper mHelper;
+                if (projectDocument == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project Document");
+                    response.Success = false;
+                    return response;
+                }
+
+                unitWork.ProjectDocumentRepository.Delete(projectDocument);
                 unitWork.Save();
                 return response;
             }
