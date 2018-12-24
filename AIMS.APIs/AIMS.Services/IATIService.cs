@@ -24,7 +24,7 @@ namespace AIMS.Services
         /// Gets all the activities
         /// </summary>
         /// <returns></returns>
-        ICollection<IATIActivity> GetAll();
+        IEnumerable<IATIActivity> GetAll();
 
         /// <summary>
         /// Gets matching list of activities for the provided keywords agains titles and descriptions
@@ -56,19 +56,17 @@ namespace AIMS.Services
             this.context = cntxt;
         }
 
-        public ICollection<IATIActivity> GetAll()
+        public IEnumerable<IATIActivity> GetAll()
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 List<IATIActivity> activityList = new List<IATIActivity>();
                 DateTime dated = DateTime.Now;
-                var iatiData = unitWork.IATIDataRepository.GetFirst(d => d.Dated.Date == dated.Date);
+                IATIActivity activityData = new IATIActivity();
+                var iatiData = unitWork.IATIDataRepository.GetFirst(i => i.Id != 0);
                 if (iatiData != null)
                 {
-                    if (iatiData.Data.Length > 0)
-                    {
-                        activityList = JsonConvert.DeserializeObject<List<IATIActivity>>(iatiData.Data);
-                    }
+                    activityList = JsonConvert.DeserializeObject<List<IATIActivity>>(iatiData.Data);
                 }
                 return activityList;
             }
@@ -80,7 +78,7 @@ namespace AIMS.Services
             {
                 List<Organization> organizations = new List<Organization>();
                 DateTime dated = DateTime.Now;
-                var iatiData = unitWork.IATIDataRepository.GetFirst(d => d.Dated.Date == dated.Date);
+                var iatiData = unitWork.IATIDataRepository.GetFirst(i => i.Id != 0);
                 if (iatiData != null)
                 {
                     var organizationStr = iatiData.Organizations;

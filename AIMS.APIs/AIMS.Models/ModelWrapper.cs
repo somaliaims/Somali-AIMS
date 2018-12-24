@@ -501,6 +501,25 @@ namespace AIMS.Models
 
 
     /// <summary>
+    /// Project markers models
+    /// </summary>
+    public class ProjectMarkersView
+    {
+        public int Id { get; set; }
+        public string Project { get; set; }
+        public string Marker { get; set; }
+        public decimal Percentage { get; set; }
+    }
+
+    public class ProjectMarkersModel
+    {
+        public int ProjectId { get; set; }
+        public string Marker { get; set; }
+        public decimal Percentage { get; set; }
+    }
+
+
+    /// <summary>
     /// Notifications models
     /// </summary>
     public class NotificationView
@@ -571,6 +590,7 @@ namespace AIMS.Models
 
     public class IATIActivity
     {
+        public int Id { get; set; }
         public string Identifier { get; set; }
         public string DefaultCurrency { get; set; }
         public string Title { get; set; }

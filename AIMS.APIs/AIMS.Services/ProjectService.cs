@@ -115,6 +115,13 @@ namespace AIMS.Services
         ActionResponse AddProjectDocument(ProjectDocumentModel model);
 
         /// <summary>
+        /// Adds marker to a project
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddProjectMarker(ProjectMarkersModel model);
+
+        /// <summary>
         /// Gets funders for the provided project id
         /// </summary>
         /// <param name="id"></param>
@@ -141,6 +148,13 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         IEnumerable<ProjectDocumentView> GetProjectDocuments(int id);
+
+        /// <summary>
+        /// Gets project markers
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<ProjectMarkersView> GetProjectMarkers(int id);
 
         /// <summary>
         /// Deletes project location
@@ -187,6 +201,13 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         ActionResponse DeleteProjectDocument(int id);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ActionResponse DeleteProjectMarker(int id);
     }
 
     public class ProjectService : IProjectService
@@ -297,6 +318,15 @@ namespace AIMS.Services
             {
                 var documents = unitWork.ProjectDocumentRepository.GetMany(d => d.ProjectId == id);
                 return mapper.Map<List<ProjectDocumentView>>(documents);
+            }
+        }
+
+        public IEnumerable<ProjectMarkersView> GetProjectMarkers(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var markers = unitWork.ProjectMarkersRepository.GetMany(d => d.ProjectId == id);
+                return mapper.Map<List<ProjectMarkersView>>(markers);
             }
         }
 
@@ -567,6 +597,40 @@ namespace AIMS.Services
             }
         }
 
+        public ActionResponse AddProjectMarker(ProjectMarkersModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+
+                try
+                {
+                    var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
+                    if (project == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                    }
+
+                    unitWork.ProjectMarkersRepository.Insert(new EFProjectMarkers()
+                    {
+                        Project = project,
+                        Marker = model.Marker,
+                        Percentage = model.Percentage
+                    });
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
         public ActionResponse Update(int id, ProjectModel model)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -715,6 +779,27 @@ namespace AIMS.Services
                 }
 
                 unitWork.ProjectDocumentRepository.Delete(projectDocument);
+                unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse DeleteProjectMarker(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var projectMarker = unitWork.ProjectMarkersRepository.GetByID(id);
+                IMessageHelper mHelper;
+                if (projectMarker == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project Marker");
+                    response.Success = false;
+                    return response;
+                }
+
+                unitWork.ProjectMarkersRepository.Delete(projectMarker);
                 unitWork.Save();
                 return response;
             }

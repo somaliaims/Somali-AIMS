@@ -32,6 +32,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFSMTPSettings> smtpSettingsRepository;
         private GenericRepository<EFPasswordRecoveryRequests> passwordRecoveryRepository;
         private GenericRepository<EFProjectLocations> projectLocationsRepository;
+        private GenericRepository<EFProjectMarkers> projectMarkersRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -155,6 +156,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.implementorsRepository == null)
                     this.implementorsRepository = new GenericRepository<EFProjectImplementors>(context);
                 return this.implementorsRepository;
+            }
+        }
+
+        public GenericRepository<EFProjectMarkers> ProjectMarkersRepository
+        {
+            get
+            {
+                if (this.projectMarkersRepository == null)
+                    this.projectMarkersRepository = new GenericRepository<EFProjectMarkers>(context);
+                return this.projectMarkersRepository;
             }
         }
 

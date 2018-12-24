@@ -36,24 +36,30 @@ namespace AIMS.APIs.Controllers
 
         [HttpGet]
         [Route("GetActivities")]
-        public async Task<IActionResult> GetActivities()
+        public IActionResult GetActivities()
         {
-            var cachedActivities = await cache.GetAsync("iati-activities");
-            ICollection<IATIActivity> iatiActivities = new List<IATIActivity>();
-            if (cachedActivities == null)
+            //var cachedActivities = await cache.GetAsync("iati-activities");
+            IEnumerable<IATIActivity> iatiActivities = new List<IATIActivity>();
+            //if (cachedActivities == null)
+            //{
+            iatiActivities = iatiService.GetAll();
+            int counter = 1;
+            foreach(var activity in iatiActivities)
             {
-                iatiActivities = iatiService.GetAll();
-                var options = new DistributedCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(cacheIntervalInSeconds));
-                string activitiesStr = JsonConvert.SerializeObject(iatiActivities);
-                byte[] encodedActivities = Encoding.UTF8.GetBytes(activitiesStr);
-                await cache.SetAsync("iati-activities", encodedActivities, options);
+                activity.Id = counter;
+                ++counter;
             }
+            //var options = new DistributedCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(cacheIntervalInSeconds));
+            //string activitiesStr = JsonConvert.SerializeObject(iatiActivities);
+            //byte[] encodedActivities = Encoding.UTF8.GetBytes(activitiesStr);
+            //await cache.SetAsync("iati-activities", encodedActivities, options);
+            /*}
             else
             {
                 byte[] encodedActivities = await cache.GetAsync("iati-activities");
                 string activitiesStr = Encoding.UTF8.GetString(encodedActivities);
                 iatiActivities = (List<IATIActivity>)JsonConvert.DeserializeObject(activitiesStr);
-            }
+            }*/
             return Ok(iatiActivities);
         }
 
@@ -66,7 +72,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
-        [Route("GetMatching/{keywords}")]
+        [Route("GetMatchingActivities/{keywords}")]
         public IActionResult GetMatchingActivities(string keywords)
         {
             var activities = iatiService.GetMatchingTitleDescriptions(keywords);
