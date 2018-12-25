@@ -2,7 +2,6 @@
 using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
-using AutoMapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;

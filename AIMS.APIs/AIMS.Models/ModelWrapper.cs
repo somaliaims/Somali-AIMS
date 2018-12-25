@@ -611,6 +611,7 @@ namespace AIMS.Models
 
     public class Organization
     {
+        public string Project { get; set; }
         public string Name { get; set; }
         public string Role { get; set; }
     }

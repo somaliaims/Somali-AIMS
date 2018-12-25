@@ -120,6 +120,13 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
+                var iatiList = unitWork.IATIDataRepository.GetMany(i => i.Id != 0);
+                foreach(var iati in iatiList)
+                {
+                    unitWork.IATIDataRepository.Delete(iati);
+                }
+                unitWork.Save();
+
                 unitWork.IATIDataRepository.Insert(new EFIATIData()
                 {
                     Data = model.Data,
