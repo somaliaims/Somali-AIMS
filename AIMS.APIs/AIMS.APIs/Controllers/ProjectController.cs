@@ -93,6 +93,14 @@ namespace AIMS.APIs.Controllers
             return Ok(projects);
         }
 
+        [HttpGet]
+        [Route("GetTitle/{id}")]
+        public IActionResult GetTitle(int id)
+        {
+            var projectInfo = projectService.GetTitle(id);
+            return Ok(projectInfo);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] ProjectModel project)
         {

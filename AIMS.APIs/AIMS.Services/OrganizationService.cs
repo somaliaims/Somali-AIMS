@@ -75,7 +75,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
-                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.Id != 0, new string[] { "OrganizationType" });
+                var organizations = unitWork.OrganizationRepository.GetMany(o => o.Id != 0);
                 return mapper.Map<List<OrganizationView>>(organizations);
             }
         }
@@ -84,7 +84,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var organizationList = unitWork.OrganizationRepository.GetWithInclude(o => o.Id.Equals(id), new string[] { "OrganizationType" });
+                var organizationList = unitWork.OrganizationRepository.GetMany(o => o.Id.Equals(id));
                 EFOrganization organization = null;
                 foreach(var org in organizationList)
                 {
@@ -99,7 +99,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
-                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.OrganizationName.Contains(criteria), new string[] { "OrganizationType" });
+                var organizations = unitWork.OrganizationRepository.GetMany(o => o.OrganizationName.Contains(criteria));
                 return mapper.Map<List<OrganizationView>>(organizations);
             }
         }
@@ -108,7 +108,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var organizations = await unitWork.OrganizationRepository.GetWithIncludeAsync(o => o.Id != 0, new string[] { "OrganizationType" });
+                var organizations = await unitWork.OrganizationRepository.GetAsync(o => o.Id != 0);
                 return await Task<IEnumerable<OrganizationView>>.Run(() => mapper.Map<List<OrganizationView>>(organizations)).ConfigureAwait(false);
             }
         }

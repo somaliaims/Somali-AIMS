@@ -45,7 +45,6 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string OrganizationName { get; set; }
-        public string TypeName { get; set; }
     }
 
     public class OrganizationModel
@@ -562,6 +561,11 @@ namespace AIMS.Models
     {
         public string Code { get; set; }
         public string Name { get; set; }
+    }
+
+    public class ProjectInfo
+    {
+        public string ProjectTitle { get; set; }
     }
 
     public class TransactionTypes

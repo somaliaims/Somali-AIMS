@@ -84,6 +84,7 @@ namespace AIMS.APIs.Scheduler
                                     {
                                         organizations.Add(new Organization()
                                         {
+                                            Project = org.Project,
                                             Name = org.Name,
                                             Role = org.Role
                                         });

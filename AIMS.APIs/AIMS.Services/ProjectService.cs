@@ -26,6 +26,13 @@ namespace AIMS.Services
         ProjectModelView Get(int id);
 
         /// <summary>
+        /// Gets project title
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ProjectInfo GetTitle(int id);
+
+        /// <summary>
         /// Gets matching project titles list
         /// </summary>
         /// <param name="criteria"></param>
@@ -245,6 +252,20 @@ namespace AIMS.Services
             {
                 var project = unitWork.ProjectRepository.GetByID(id);
                 return mapper.Map<ProjectModelView>(project);
+            }
+        }
+
+        public ProjectInfo GetTitle(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ProjectInfo info = new ProjectInfo();
+                var project = unitWork.ProjectRepository.GetByID(id);
+                if (project != null)
+                {
+                    info.ProjectTitle = project.Title;
+                }
+                return info;
             }
         }
 
