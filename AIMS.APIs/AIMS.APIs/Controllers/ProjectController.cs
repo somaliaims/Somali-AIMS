@@ -39,6 +39,14 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("GetProjectsReport")]
+        public IActionResult GetProjectsReport()
+        {
+            var projects = projectService.GetProjectsReport();
+            return Ok(projects);
+        }
+
+        [HttpGet]
         [Route("GetLocations/{id}")]
         public IActionResult GetLocations(int id)
         {

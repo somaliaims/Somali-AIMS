@@ -27,7 +27,7 @@ namespace AIMS.APIs.Scheduler
             scopeFactory = _scopeFactory;
         }
 
-        protected override string Schedule => "*/1 * * * *";
+        protected override string Schedule => "*/5 * * * *";
 
         public override Task ProcessInScope(IServiceProvider serviceProvider)
         {
@@ -35,7 +35,7 @@ namespace AIMS.APIs.Scheduler
             {
                 string message = "IATI updated successfully at: " + DateTime.Now.ToLongDateString();
                 string country = configuration.GetValue<string>("IATI:Country");
-                string url = "http://datastore.iatistandard.org/api/1/access/activity.xml?recipient-country=" + country;
+                string url = "http://datastore.iatistandard.org/api/1/access/activity.xml?recipient-country=" + country + "&stream=true";
                 XmlReader xReader = XmlReader.Create(url);
                 XDocument xDoc = XDocument.Load(xReader);
                 var activity = (from el in xDoc.Descendants("iati-activity")

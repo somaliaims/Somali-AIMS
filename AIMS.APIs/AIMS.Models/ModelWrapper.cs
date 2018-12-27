@@ -320,7 +320,6 @@ namespace AIMS.Models
         public string Description { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
-        public string ProjectType { get; set; }
     }
 
     public class ProjectModelView
@@ -674,5 +673,30 @@ namespace AIMS.Models
         public string Password { get; set; }
         public string AdminEmail { get; set; }
     }
+
+    /// <summary>
+    /// Models for Reports
+    /// </summary>
+    public class Report
+    {
+        public string Title { get; set; }
+        public string SubTitle { get; set; }
+        public string Dated { get; set; }
+        public string Footer { get; set; }
+    }
+
+    public class ProjectReport
+    {
+        public Report ReportSettings { get; set; }
+        public List<ProjectView> Projects { get; set; }
+    }
+
+    public class ProjectProfileReport
+    {
+        public Report ReportSettings { get; set; }
+        public ProjectModelView ProjectProfile { get; set; }
+    }
+
+
 
 }

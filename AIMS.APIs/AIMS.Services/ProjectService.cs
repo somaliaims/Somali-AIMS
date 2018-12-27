@@ -26,6 +26,19 @@ namespace AIMS.Services
         ProjectModelView Get(int id);
 
         /// <summary>
+        /// Gets project report
+        /// </summary>
+        /// <returns></returns>
+        ProjectReport GetProjectsReport();
+
+        /// <summary>
+        /// Gets report for the provided project id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ProjectReport GetProjectReport(int id);
+
+        /// <summary>
         /// Gets project title
         /// </summary>
         /// <param name="id"></param>
@@ -269,12 +282,39 @@ namespace AIMS.Services
             }
         }
 
+        public ProjectReport GetProjectsReport()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ProjectReport report = new ProjectReport();
+                var projects = unitWork.ProjectRepository.GetAll();
+                var projectsList = mapper.Map<List<ProjectView>>(projects);
+                report.ReportSettings = new Report()
+                {
+                    Title = ReportConstants.PROJECTS_LIST_TITLE,
+                    Dated = DateTime.Now.ToLongDateString(),
+                    Footer = ReportConstants.PROJECTS_LIST_FOOTER
+                };
+                report.Projects = projectsList;
+                return report;
+            }
+        }
+
+        public ProjectReport GetProjectReport(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ProjectReport report = new ProjectReport();
+                return report;
+            }
+        }
+
         public IEnumerable<ProjectView> GetMatching(string criteria)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 List<ProjectView> sectorTypesList = new List<ProjectView>();
-                var projects = unitWork.ProjectRepository.GetWithInclude(p => p.Title.Contains(criteria), new string[] { "ProjectType" });
+                var projects = unitWork.ProjectRepository.GetMany(p => p.Title.Contains(criteria));
                 return mapper.Map<List<ProjectView>>(projects);
             }
         }
