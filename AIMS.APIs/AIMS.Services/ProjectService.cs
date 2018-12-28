@@ -322,7 +322,6 @@ namespace AIMS.Services
                         profileView.Description = project.Description;
                         profileView.StartDate = project.StartDate.ToLongDateString();
                         profileView.EndDate = project.EndDate.ToLongDateString();
-
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
                         profileView.Locations = mapper.Map<List<ProjectLocationView>>(project.Locations);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);

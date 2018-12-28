@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,9 +17,11 @@ namespace AIMS.APIs.Controllers
     {
         AIMSDbContext context;
         IProjectService projectService;
+        IHostingEnvironment hostingEnvironment;
 
-        public ProjectController(AIMSDbContext cntxt, IProjectService service)
+        public ProjectController(AIMSDbContext cntxt, IProjectService service, IHostingEnvironment _hostingEnvironment)
         {
+            this.hostingEnvironment = _hostingEnvironment;
             this.context = cntxt;
             this.projectService = service;
         }
@@ -40,9 +43,11 @@ namespace AIMS.APIs.Controllers
 
         [HttpGet]
         [Route("GetProjectsReport")]
-        public IActionResult GetProjectsReport()
+        public async Task<IActionResult> GetProjectsReport()
         {
             var projects = projectService.GetProjectsReport();
+            ExcelGeneratorService eService = new ExcelGeneratorService(this.hostingEnvironment);
+            var response = await eService.GenerateProjectsReportAsync();
             return Ok(projects);
         }
 
