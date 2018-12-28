@@ -32,6 +32,13 @@ namespace AIMS.Services
         ProjectReport GetProjectsReport();
 
         /// <summary>
+        /// Get project full profile report for the provided id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<ProjectProfileReport> GetProjectProfileReportAsync(int id);
+
+        /// <summary>
         /// Gets report for the provided project id
         /// </summary>
         /// <param name="id"></param>
@@ -297,6 +304,29 @@ namespace AIMS.Services
                 };
                 report.Projects = projectsList;
                 return report;
+            }
+        }
+
+        public async Task<ProjectProfileReport> GetProjectProfileReportAsync(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ProjectProfileReport projectProfileReport = new ProjectProfileReport();
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Locations", "Disbursements", "Funders", "Implementors", "Documents" });
+                if (projectProfileList != null)
+                {
+                    ProjectModelView modelView = new ProjectModelView();
+                    foreach(var project in projectProfileList)
+                    {
+                        modelView.Id = project.Id;
+                        modelView.Description = project.Description;
+                        modelView.StartDate = project.StartDate.ToLongDateString();
+                        modelView.EndDate = project.EndDate.ToLongDateString();
+
+                        modelView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
+                    }
+                }
+                return await Task<ProjectProfileReport>.Run(() => projectProfileReport).ConfigureAwait(false);
             }
         }
 

@@ -158,6 +158,7 @@ namespace AIMS.Models
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public ICollection<EFSector> Sectors { get; set; }
         public ICollection<EFLocation> Locations { get; set; }
         public ICollection<EFProjectDisbursements> Disbursements { get; set; }
         public ICollection<EFProjectFunders> Funders { get; set; }

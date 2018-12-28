@@ -47,6 +47,14 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("GetProjectProfileReport/{id}")]
+        public async Task<IActionResult> GetProjectProfileReport(int id)
+        {
+            var projects = await projectService.GetProjectProfileReportAsync(id);
+            return Ok(projects);
+        }
+
+        [HttpGet]
         [Route("GetLocations/{id}")]
         public IActionResult GetLocations(int id)
         {

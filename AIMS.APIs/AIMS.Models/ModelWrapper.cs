@@ -697,6 +697,4 @@ namespace AIMS.Models
         public ProjectModelView ProjectProfile { get; set; }
     }
 
-
-
 }
