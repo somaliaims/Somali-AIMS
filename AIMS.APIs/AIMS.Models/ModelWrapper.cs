@@ -338,6 +338,22 @@ namespace AIMS.Models
         public ICollection<ProjectDocumentView> Documents { get; set; }
     }
 
+    public class ProjectProfileView
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public int ProjectTypeId { get; set; }
+        public ICollection<ProjectFunderView> Funders { get; set; }
+        public ICollection<ProjectImplementorView> Implementers { get; set; }
+        public ICollection<ProjectSectorView> Sectors { get; set; }
+        public ICollection<ProjectLocationView> Locations { get; set; }
+        public ICollection<ProjectDisbursementView> Disbursements { get; set; }
+        public ICollection<ProjectDocumentView> Documents { get; set; }
+    }
+
     public class ProjectModel
     {
         [Required]
@@ -694,7 +710,7 @@ namespace AIMS.Models
     public class ProjectProfileReport
     {
         public Report ReportSettings { get; set; }
-        public ProjectModelView ProjectProfile { get; set; }
+        public ProjectProfileView ProjectProfile { get; set; }
     }
 
 }

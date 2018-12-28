@@ -311,21 +311,37 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                ProjectProfileReport projectProfileReport = new ProjectProfileReport();
                 var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Locations", "Disbursements", "Funders", "Implementors", "Documents" });
+                ProjectProfileView profileView = new ProjectProfileView();
+
                 if (projectProfileList != null)
                 {
-                    ProjectModelView modelView = new ProjectModelView();
                     foreach(var project in projectProfileList)
                     {
-                        modelView.Id = project.Id;
-                        modelView.Description = project.Description;
-                        modelView.StartDate = project.StartDate.ToLongDateString();
-                        modelView.EndDate = project.EndDate.ToLongDateString();
+                        profileView.Id = project.Id;
+                        profileView.Description = project.Description;
+                        profileView.StartDate = project.StartDate.ToLongDateString();
+                        profileView.EndDate = project.EndDate.ToLongDateString();
 
-                        modelView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
+                        profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
+                        profileView.Locations = mapper.Map<List<ProjectLocationView>>(project.Locations);
+                        profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
+                        profileView.Implementers = mapper.Map<List<ProjectImplementorView>>(project.Implementors);
+                        profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);
+                        profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
                     }
                 }
+                ProjectProfileReport projectProfileReport = new ProjectProfileReport()
+                {
+                    ReportSettings = new Report()
+                    {
+                        Title = ReportConstants.PROJECTS_PROFILE_TITLE,
+                        SubTitle = ReportConstants.PROJECTS_PROFILE_SUBTITLE,
+                        Footer = ReportConstants.PROJECTS_PROFILE_FOOTER,
+                        Dated = DateTime.Now.ToLongDateString()
+                    },
+                    ProjectProfile = profileView
+                };
                 return await Task<ProjectProfileReport>.Run(() => projectProfileReport).ConfigureAwait(false);
             }
         }
