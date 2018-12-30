@@ -101,13 +101,32 @@ namespace AIMS.APIs
             services.AddTransient<SmtpClient>((serviceProvider) =>
             {
                 var config = serviceProvider.GetRequiredService<IConfiguration>();
+                var smtpService = serviceProvider.GetRequiredService<ISMTPSettingsService>();
+                var smtpSettings = smtpService.Get();
+                string host = "", userName = "", password = "";
+                int port = 0;
+
+                if (smtpSettings != null)
+                {
+                    host = smtpSettings.Host;
+                    port = Convert.ToInt32(smtpSettings.Port);
+                    userName = smtpSettings.Username;
+                    password = smtpSettings.Password;
+                }
+
                 return new SmtpClient()
                 {
-                    Host = config.GetValue<String>("Email:Smtp:Host"),
+                    /*Host = config.GetValue<String>("Email:Smtp:Host"),
                     Port = config.GetValue<int>("Email:Smtp:Port"),
                     Credentials = new NetworkCredential(
                             config.GetValue<String>("Email:Smtp:Username"),
                             config.GetValue<String>("Email:Smtp:Password")
+                        )*/
+                    Host = host,
+                    Port = port,
+                    Credentials = new NetworkCredential(
+                            userName,
+                            password
                         ),
                     EnableSsl = true
                 };
