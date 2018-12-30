@@ -2,12 +2,14 @@
 using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
@@ -18,16 +20,18 @@ namespace AIMS.APIs.Scheduler
     public class ScheduleTask : ScheduledProcessor
     {
         IConfiguration configuration;
+        IHostingEnvironment hostingEnvironment;
         private readonly IServiceScopeFactory scopeFactory;
 
         public ScheduleTask(IServiceScopeFactory serviceScopeFactory, IConfiguration config, 
-            IServiceScopeFactory _scopeFactory) : base(serviceScopeFactory)
+            IServiceScopeFactory _scopeFactory, IHostingEnvironment _hostingEnvironment) : base(serviceScopeFactory)
         {
             configuration = config;
             scopeFactory = _scopeFactory;
+            hostingEnvironment = _hostingEnvironment;
         }
 
-        protected override string Schedule => "*/5 * * * *";
+        protected override string Schedule => "*/1 * * * *";
 
         public override Task ProcessInScope(IServiceProvider serviceProvider)
         {
@@ -107,6 +111,22 @@ namespace AIMS.APIs.Scheduler
                     };
                     service.Add(model);
                     Debug.WriteLine(message);
+                }
+
+                //Delete obsolete files
+                string sWebRootFolder = hostingEnvironment.WebRootPath;
+                string[] files = Directory.GetFiles(sWebRootFolder);
+
+                if (files.Length > 0)
+                {
+                    foreach (string file in files)
+                    {
+                        FileInfo fi = new FileInfo(file);
+                        if (fi.LastAccessTime < DateTime.Now.AddMinutes(-120))
+                        {
+                            fi.Delete();
+                        }
+                    }
                 }
             }
             catch(Exception ex)
