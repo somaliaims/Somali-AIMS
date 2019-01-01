@@ -1,5 +1,6 @@
 ﻿using AIMS.DAL.EF;
 using AIMS.DAL.UnitOfWork;
+using AIMS.IATILib.Parsers;
 using AIMS.Models;
 using AutoMapper;
 using Newtonsoft.Json;
@@ -7,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace AIMS.Services
 {
@@ -19,6 +22,12 @@ namespace AIMS.Services
         /// <returns></returns>
         ActionResponse Add(IATIModel model);
 
+        /// <summary>
+        /// Loads latest IATI
+        /// </summary>
+        /// <param name="countryCode"></param>
+        /// <returns></returns>
+        ActionResponse LoadLatestIATI(string countryCode, string dataFilePath);
 
         /// <summary>
         /// Gets all the activities
@@ -37,7 +46,7 @@ namespace AIMS.Services
         /// Gets all the organizations
         /// </summary>
         /// <returns></returns>
-        ICollection<Organization> GetOrganizations();
+        ICollection<IATIOrganization> GetOrganizations();
 
         /// <summary>
         /// Deletes all the data less than the specified date
@@ -56,6 +65,81 @@ namespace AIMS.Services
             this.context = cntxt;
         }
 
+        public ActionResponse LoadLatestIATI(string countryCode, string dataFilePath)
+        {
+            ActionResponse response = new ActionResponse();
+
+            //string url = "http://datastore.iatistandard.org/api/1/access/activity.xml?recipient-country=" + countryCode + "&stream=true";
+            string url = dataFilePath;
+            XmlReader xReader = XmlReader.Create(url);
+            XDocument xDoc = XDocument.Load(xReader);
+            var activity = (from el in xDoc.Descendants("iati-activity")
+                            select el.FirstAttribute).FirstOrDefault();
+
+            IParser parser;
+            ICollection<IATIActivity> activityList = new List<IATIActivity>();
+            ICollection<IATIOrganization> organizations = new List<IATIOrganization>();
+            string version = "";
+            version = activity.Value;
+            switch (version)
+            {
+                case "1.03":
+                    parser = new ParserIATIVersion13();
+                    activityList = parser.ExtractAcitivities(xDoc);
+                    break;
+
+                case "2.01":
+                    parser = new ParserIATIVersion21();
+                    activityList = parser.ExtractAcitivities(xDoc);
+                    break;
+            }
+
+            //Extract organizations for future use
+            if (activityList.Count > 0)
+            {
+                if (activityList != null)
+                {
+                    var organizationList = from a in activityList
+                                           select a.ParticipatingOrganizations;
+
+                    if (organizationList.Count() > 0)
+                    {
+                        foreach (var orgCollection in organizationList)
+                        {
+                            var orgList = from list in orgCollection
+                                          select list;
+
+                            foreach (var org in orgList)
+                            {
+                                var orgExists = (from o in organizations
+                                                 where o.Name.ToLower().Equals(org.Name.ToLower())
+                                                 select o).FirstOrDefault();
+
+                                if (orgExists == null)
+                                {
+                                    organizations.Add(new IATIOrganization()
+                                    {
+                                        Project = org.Project,
+                                        Name = org.Name,
+                                        Role = org.Role
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            IATIModel model = new IATIModel()
+            {
+                Data = JsonConvert.SerializeObject(activityList),
+                Organizations = JsonConvert.SerializeObject(organizations)
+            };
+
+            this.Add(model);
+            return response;
+        }
+
         public IEnumerable<IATIActivity> GetAll()
         {
             using (var unitWork = new UnitOfWork(context))
@@ -72,11 +156,11 @@ namespace AIMS.Services
             }
         }
 
-        public ICollection<Organization> GetOrganizations()
+        public ICollection<IATIOrganization> GetOrganizations()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                List<Organization> organizations = new List<Organization>();
+                List<IATIOrganization> organizations = new List<IATIOrganization>();
                 DateTime dated = DateTime.Now;
                 var iatiData = unitWork.IATIDataRepository.GetFirst(i => i.Id != 0);
                 if (iatiData != null)
@@ -84,7 +168,7 @@ namespace AIMS.Services
                     var organizationStr = iatiData.Organizations;
                     if (!string.IsNullOrEmpty(organizationStr))
                     {
-                        organizations = JsonConvert.DeserializeObject<List<Organization>>(organizationStr);
+                        organizations = JsonConvert.DeserializeObject<List<IATIOrganization>>(organizationStr);
                     }
                 }
                 return organizations;

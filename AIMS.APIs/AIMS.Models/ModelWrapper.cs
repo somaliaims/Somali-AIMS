@@ -589,53 +589,54 @@ namespace AIMS.Models
         public string Name { get; set; }
     }
 
-    public class Country
+    /*public class IATIDBCountry
     {
         public string Code { get; set; }
         public string ContributionPercentage { get; set; }
     }
 
-    public class Region
+    public class IATIDBRegion
     {
         public string Code { get; set; }
         public string ContributionPercentage { get; set; }
     }
 
-    public class Sector
+    public class IATIDBSector
     {
         public string Code { get; set; }
+        public string SectorName { get; set; }
         public string FundPercentage { get; set; }
     }
 
-    public class IATIActivity
+    public class IATIDBActivity
     {
         public int Id { get; set; }
         public string Identifier { get; set; }
         public string DefaultCurrency { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public ICollection<Sector> Sectors { get; set; }
-        public ICollection<Country> Countries { get; set; }
-        public ICollection<Region> Regions { get; set; }
-        public ICollection<Organization> ParticipatingOrganizations { get; set; }
-        public ICollection<IATITransaction> Transactions { get; set; }
+        public ICollection<IATIDBSector> Sectors { get; set; }
+        public ICollection<IATIDBCountry> Countries { get; set; }
+        public ICollection<IATIDBRegion> Regions { get; set; }
+        public ICollection<IATIDBOrganization> ParticipatingOrganizations { get; set; }
+        public ICollection<IATIDBTransaction> Transactions { get; set; }
     }
 
-    public class Budget
+    public class IATIDBBudget
     {
         public string PeriodStart { get; set; }
         public string PeriodEnd { get; set; }
         public string PlannedAmount { get; set; }
     }
 
-    public class Organization
+    public class IATIDBOrganization
     {
         public string Project { get; set; }
         public string Name { get; set; }
         public string Role { get; set; }
     }
 
-    public class IATITransaction
+    public class IATIDBTransaction
     {
         public string AidType { get; set; }
         public string TransactionType { get; set; }
@@ -645,18 +646,12 @@ namespace AIMS.Models
         public string Description { get; set; }
     }
 
-    public class IATIModel
+    public class IATIDBModel
     {
         [Required]
         public string Data { get; set; }
         public string Organizations { get; set; }
-    }
-
-    public class IATIView
-    {
-        public ICollection<IATIActivity> Activities { get; set; }
-        public string Dated { get; set; }
-    }
+    }*/
 
     /// <summary>
     /// SMTP settings model

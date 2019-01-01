@@ -9,9 +9,9 @@ using System.Xml.Linq;
 
 namespace AIMS.APIs.IATILib.Parsers
 {
-    public class ParserIATIVersion21 : IParser
+    public class ParserIATIVersion21Old : IParserOld
     {
-        IConfiguration configuration;
+        /*IConfiguration configuration;
         ICollection<AidTypes> aidTypes;
         ICollection<TransactionTypes> transactionTypes;
         public ParserIATIVersion21(IConfiguration config)
@@ -25,7 +25,13 @@ namespace AIMS.APIs.IATILib.Parsers
 
         public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc)
         {
-            List<IATIActivity> activityList = new List<IATIActivity>();
+            //Extract meta data for translating activity parts
+            /*var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri("http://api.github.com");
+            string result = await client.GetStringAsync("/");
+            return Ok(result);*/
+
+            /*List<IATIActivity> activityList = new List<IATIActivity>();
             var activities = from activity in xmlDoc.Descendants("iati-activity")
                              select activity;
 
@@ -189,7 +195,7 @@ namespace AIMS.APIs.IATILib.Parsers
                 });
             }
             return list;
-        }
+        }*/
 
     }
 }

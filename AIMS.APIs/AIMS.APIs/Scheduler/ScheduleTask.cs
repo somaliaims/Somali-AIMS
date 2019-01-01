@@ -1,5 +1,6 @@
 ﻿using AIMS.APIs.IATILib.Parsers;
 using AIMS.DAL.EF;
+using AIMS.IATILib.Parsers;
 using AIMS.Models;
 using AIMS.Services;
 using Microsoft.AspNetCore.Hosting;
@@ -31,7 +32,7 @@ namespace AIMS.APIs.Scheduler
             hostingEnvironment = _hostingEnvironment;
         }
 
-        protected override string Schedule => "*/1 * * * *";
+        protected override string Schedule => "*/20 * * * *";
 
         public override Task ProcessInScope(IServiceProvider serviceProvider)
         {
@@ -47,7 +48,7 @@ namespace AIMS.APIs.Scheduler
 
                 IParser parser;
                 ICollection<IATIActivity> activityList = new List<IATIActivity>();
-                ICollection<Organization> organizations = new List<Organization>();
+                ICollection<IATIOrganization> organizations = new List<IATIOrganization>();
                 string version = "";
                 version = activity.Value;
                 switch (version)
@@ -58,7 +59,7 @@ namespace AIMS.APIs.Scheduler
                         break;
 
                     case "2.01":
-                        parser = new ParserIATIVersion21(configuration);
+                        parser = new ParserIATIVersion21();
                         activityList = parser.ExtractAcitivities(xDoc);
                         break;
                 }
@@ -86,7 +87,7 @@ namespace AIMS.APIs.Scheduler
 
                                     if (orgExists == null)
                                     {
-                                        organizations.Add(new Organization()
+                                        organizations.Add(new IATIOrganization()
                                         {
                                             Project = org.Project,
                                             Name = org.Name,

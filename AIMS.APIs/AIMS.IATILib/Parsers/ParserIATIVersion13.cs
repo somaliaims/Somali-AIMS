@@ -1,11 +1,10 @@
-﻿using AIMS.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace AIMS.APIs.IATILib.Parsers
+namespace AIMS.IATILib.Parsers
 {
     public class ParserIATIVersion13 : IParser
     {
@@ -38,10 +37,10 @@ namespace AIMS.APIs.IATILib.Parsers
 
                 //Extracting participating organizations
                 var organizations = activity.Elements("participating-org");
-                List<Organization> organizationList = new List<Organization>();
+                List<IATIOrganization> organizationList = new List<IATIOrganization>();
                 foreach(var organization in organizations)
                 {
-                    organizationList.Add(new Organization()
+                    organizationList.Add(new IATIOrganization()
                     {
                         Project = projectTitle,
                         Name = organization?.Value,
@@ -68,7 +67,7 @@ namespace AIMS.APIs.IATILib.Parsers
                 //Extracting Receipient Countries
                 decimal percentage = 100;
                 var recipientCountries = activity.Elements("recipient-country");
-                List<Country> countries = new List<Country>();
+                List<IATICountry> countries = new List<IATICountry>();
                 if (recipientCountries.Count() > 1)
                 {
                     percentage = (100 / recipientCountries.Count());
@@ -76,7 +75,7 @@ namespace AIMS.APIs.IATILib.Parsers
                     
                 foreach(var country in recipientCountries)
                 {
-                    countries.Add(new Country()
+                    countries.Add(new IATICountry()
                     {
                         Code = country.Attribute("code")?.Value,
                         ContributionPercentage = percentage.ToString()
@@ -85,7 +84,7 @@ namespace AIMS.APIs.IATILib.Parsers
 
                 //Extracting Receipient Regions
                 var recipientRegions = activity.Elements("recipient-region");
-                List<Region> regions = new List<Region>();
+                List<IATIRegion> regions = new List<IATIRegion>();
                 decimal regionPercentage = 100;
                 if (recipientRegions.Count() > 1)
                 {
@@ -94,7 +93,7 @@ namespace AIMS.APIs.IATILib.Parsers
                 
                 foreach (var region in recipientRegions)
                 {
-                    regions.Add(new Region()
+                    regions.Add(new IATIRegion()
                     {
                         Code = region.Attribute("code")?.Value,
                         ContributionPercentage = regionPercentage.ToString()
@@ -103,11 +102,11 @@ namespace AIMS.APIs.IATILib.Parsers
 
                 //Extracting Sectors
                 var aSectors = activity.Elements("sector");
-                List<Sector> sectors = new List<Sector>();
+                List<IATISector> sectors = new List<IATISector>();
                 var sectorPercentage = (100 / aSectors.Count());
                 foreach (var sector in aSectors)
                 {
-                    sectors.Add(new Sector()
+                    sectors.Add(new IATISector()
                     {
                         Code = sector.Value,
                         FundPercentage = sectorPercentage.ToString()

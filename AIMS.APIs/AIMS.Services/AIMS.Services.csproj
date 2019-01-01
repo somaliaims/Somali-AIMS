@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AIMS.DAL\AIMS.DAL.csproj" />
+    <ProjectReference Include="..\AIMS.IATILib\AIMS.IATILib.csproj" />
     <ProjectReference Include="..\AIMS.Models\AIMS.Models.csproj" />
   </ItemGroup>
 

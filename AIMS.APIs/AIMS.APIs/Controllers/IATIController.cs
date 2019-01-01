@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AIMS.IATILib.Parsers;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
@@ -18,20 +20,22 @@ namespace AIMS.APIs.Controllers
     public class IATIController : ControllerBase
     {
         IIATIService iatiService;
-        IDistributedCache cache;
+        //IDistributedCache cache;
         IConfiguration configuration;
-        double cacheIntervalInSeconds = 300;
+        //double cacheIntervalInSeconds = 300;
+        IHostingEnvironment hostingEnvironment;
 
-        public IATIController(IIATIService service, IDistributedCache distributedCache, IConfiguration config)
+        public IATIController(IIATIService service, IConfiguration config, IHostingEnvironment _hostingEnvironment)
         {
             iatiService = service;
-            cache = distributedCache;
+            hostingEnvironment = _hostingEnvironment;
+            //cache = distributedCache;
             configuration = config;
-            string expirationTimeInSecondsStr = configuration.GetSection("Caching:ExpirationTimeInSeconds").Value;
+            /*string expirationTimeInSecondsStr = configuration.GetSection("Caching:ExpirationTimeInSeconds").Value;
             if (!string.IsNullOrEmpty(expirationTimeInSecondsStr))
             {
                 cacheIntervalInSeconds = Convert.ToDouble(expirationTimeInSecondsStr);
-            }
+            }*/
         }
 
         [HttpGet]
@@ -61,6 +65,16 @@ namespace AIMS.APIs.Controllers
                 iatiActivities = (List<IATIActivity>)JsonConvert.DeserializeObject(activitiesStr);
             }*/
             return Ok(iatiActivities);
+        }
+
+        [HttpGet]
+        [Route("LoadLatestIATI")]
+        public IActionResult LoadLatestIATI()
+        {
+            string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
+            string country = configuration.GetValue<string>("IATI:Country");
+            var response = iatiService.LoadLatestIATI(country, iatiFilePath);
+            return Ok(response);
         }
 
         [HttpGet]
