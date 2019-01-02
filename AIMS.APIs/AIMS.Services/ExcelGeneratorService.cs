@@ -34,7 +34,7 @@ namespace AIMS.Services
             ActionResponse response = new ActionResponse();
             try
             {
-                string sWebRootFolder = hostingEnvironment.WebRootPath;
+                string sWebRootFolder = hostingEnvironment.WebRootPath + "/ExcelFiles/";
                 string sFileName = @"demo.xlsx";
                 FileInfo file = new FileInfo(Path.Combine(sWebRootFolder, sFileName));
                 var memory = new MemoryStream();

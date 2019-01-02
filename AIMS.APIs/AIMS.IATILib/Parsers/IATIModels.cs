@@ -32,6 +32,13 @@ namespace AIMS.IATILib.Parsers
         public string FundPercentage { get; set; }
     }
 
+    public class IATILocation
+    {
+        public string Name { get; set; }
+        public string Latitude { get; set; }
+        public string Longitude { get; set; }
+    }
+
     public class IATIOrganization
     {
         public string Project { get; set; }
@@ -56,6 +63,7 @@ namespace AIMS.IATILib.Parsers
         public string DefaultCurrency { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public ICollection<IATILocation> Locations { get; set; }
         public ICollection<IATISector> Sectors { get; set; }
         public ICollection<IATICountry> Countries { get; set; }
         public ICollection<IATIRegion> Regions { get; set; }

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -38,8 +39,17 @@ namespace AIMS.APIs.Scheduler
         {
             try
             {
-                string message = "IATI updated successfully at: " + DateTime.Now.ToLongDateString();
-                string country = configuration.GetValue<string>("IATI:Country");
+                string sWebRootFolder = hostingEnvironment.WebRootPath;
+                string url = configuration.GetValue<string>("IATI:Url");
+                string fileToWrite = sWebRootFolder + "/IATISomali.xml";
+                string xml = "";
+
+                using (var client = new WebClient())
+                {
+                    xml = client.DownloadString(url);
+                }
+                File.WriteAllText(fileToWrite, xml);
+                /*string country = configuration.GetValue<string>("IATI:Url");
                 string url = "http://datastore.iatistandard.org/api/1/access/activity.xml?recipient-country=" + country + "&stream=true";
                 XmlReader xReader = XmlReader.Create(url);
                 XDocument xDoc = XDocument.Load(xReader);
@@ -112,23 +122,27 @@ namespace AIMS.APIs.Scheduler
                     };
                     service.Add(model);
                     Debug.WriteLine(message);
-                }
+                }*/
 
-                //Delete obsolete files
-                string sWebRootFolder = hostingEnvironment.WebRootPath;
-                string[] files = Directory.GetFiles(sWebRootFolder);
-
-                if (files.Length > 0)
+                //File cleanup
+                string excelFiles = sWebRootFolder + "/ExcelSheets";
+                if (Directory.Exists(excelFiles))
                 {
-                    foreach (string file in files)
+                    string[] files = Directory.GetFiles(excelFiles);
+
+                    if (files.Length > 0)
                     {
-                        FileInfo fi = new FileInfo(file);
-                        if (fi.LastAccessTime < DateTime.Now.AddMinutes(-120))
+                        foreach (string file in files)
                         {
-                            fi.Delete();
+                            FileInfo fi = new FileInfo(file);
+                            if (fi.LastAccessTime < DateTime.Now.AddMinutes(-120))
+                            {
+                                fi.Delete();
+                            }
                         }
                     }
                 }
+                
             }
             catch(Exception ex)
             {

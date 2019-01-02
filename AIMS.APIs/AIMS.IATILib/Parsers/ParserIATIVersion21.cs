@@ -45,7 +45,6 @@ namespace AIMS.IATILib.Parsers
 
                         //Extracting dates
                         var dates = activity.Elements("activity-date");
-
                         if (dates != null)
                         {
                             foreach (var date in dates)
@@ -145,7 +144,6 @@ namespace AIMS.IATILib.Parsers
 
                         var recipientCountries = activity.Elements("recipient-country");
                         List<IATICountry> countries = new List<IATICountry>();
-
                         if (recipientCountries != null)
                         {
                             foreach (var country in recipientCountries)
@@ -188,10 +186,49 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
+                        var aLocations = activity.Elements("location");
+                        List<IATILocation> locations = new List<IATILocation>();
+                        if (aLocations != null)
+                        {
+                            foreach(var location in aLocations)
+                            {
+                                string locationName = "", latitude = "", longitude = "";
+                                var nameElement = location.Element("name");
+                                if (nameElement != null)
+                                {
+                                    if (nameElement.Element("narrative") != null)
+                                    {
+                                        locationName = nameElement.Element("narrative")?.Value;
+                                    }
+                                    else
+                                    {
+                                        locationName = nameElement?.Value;
+                                    }
+                                }
+
+                                if (location.Element("coordinates") != null && location.Element("coordinates").HasAttributes)
+                                {
+                                    if (location.Element("coordinates").Attribute("latitude") != null)
+                                        latitude = location.Element("coordinates").Attribute("latitude")?.Value;
+
+                                    if (location.Element("coordinates").Attribute("longitude") != null)
+                                        longitude = location.Element("coordinates").Attribute("longitude")?.Value;
+                                }
+
+                                locations.Add(new IATILocation()
+                                {
+                                    Name = locationName,
+                                    Latitude = latitude,
+                                    Longitude = longitude
+                                });
+                            }
+                        }
+
                         activityList.Add(new IATIActivity()
                         {
                             Identifier = activity.Element("iati-identifier")?.Value,
                             Title = projectTitle,
+                            Locations = locations,
                             Countries = countries,
                             Regions = regions,
                             Description = activity.Element("description")?.Value,
