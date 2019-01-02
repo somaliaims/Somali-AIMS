@@ -206,13 +206,31 @@ namespace AIMS.IATILib.Parsers
                                     }
                                 }
 
-                                if (location.Element("coordinates") != null && location.Element("coordinates").HasAttributes)
-                                {
-                                    if (location.Element("coordinates").Attribute("latitude") != null)
-                                        latitude = location.Element("coordinates").Attribute("latitude")?.Value;
+                                var locationPoint = location.Element("point");
+                                var locationCoordinates = location.Element("coordinates");
 
-                                    if (location.Element("coordinates").Attribute("longitude") != null)
-                                        longitude = location.Element("coordinates").Attribute("longitude")?.Value;
+                                if (locationPoint != null)
+                                {
+                                    var position = locationPoint.Element("pos");
+                                    if (position != null)
+                                    {
+                                        if (position.HasAttributes)
+                                        {
+                                            if (position.Attribute("latitude") != null)
+                                                latitude = position.Attribute("latitude")?.Value;
+
+                                            if (position.Attribute("longitude") != null)
+                                                longitude = position.Attribute("longitude")?.Value;
+                                        }
+                                    }
+                                }
+                                else if (locationCoordinates != null && locationCoordinates.HasAttributes)
+                                {
+                                    if (locationCoordinates.Attribute("latitude") != null)
+                                        latitude = locationCoordinates.Attribute("latitude")?.Value;
+
+                                    if (locationCoordinates.Attribute("longitude") != null)
+                                        longitude = locationCoordinates.Attribute("longitude")?.Value;
                                 }
 
                                 locations.Add(new IATILocation()
