@@ -8,6 +8,6 @@ namespace AIMS.IATILib.Parsers
 {
     public interface IParser
     {
-        ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc);
+        ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria);
     }
 }

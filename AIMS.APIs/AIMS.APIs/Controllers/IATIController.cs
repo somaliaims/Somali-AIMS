@@ -69,11 +69,12 @@ namespace AIMS.APIs.Controllers
 
         [HttpGet]
         [Route("LoadLatestIATI")]
-        public IActionResult LoadLatestIATI()
+        public async Task<IActionResult> LoadLatestIATI()
         {
             string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
-            string country = configuration.GetValue<string>("IATI:Country");
-            var response = iatiService.LoadLatestIATI(country, iatiFilePath);
+            string iatiUrl = configuration.GetValue<string>("IATI:Url");
+            var response = await iatiService.DownloadIATIFromUrl(iatiUrl, iatiFilePath);
+            //var response = iatiService.LoadLatestIATI(iatiFilePath);
             return Ok(response);
         }
 
@@ -89,7 +90,8 @@ namespace AIMS.APIs.Controllers
         [Route("GetMatchingActivities/{keywords}")]
         public IActionResult GetMatchingActivities(string keywords)
         {
-            var activities = iatiService.GetMatchingTitleDescriptions(keywords);
+            string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
+            var activities = iatiService.GetMatchingIATIActivities(iatiFilePath, keywords);
             return Ok(activities);
         }
     }

@@ -13,13 +13,14 @@ namespace AIMS.IATILib.Parsers
         {
         }
 
-        public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc)
+        public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria)
         {
             List<IATIActivity> activityList = new List<IATIActivity>();
             var activities = from activity in xmlDoc.Descendants("iati-activity")
                              where activity.Element("title").Element("narrative") != null && 
-                             activity.Element("title").Element("narrative").Value.Contains("Integrated emergency response")
+                             activity.Element("title").Element("narrative").Value.Contains(criteria)
                              select activity;
+
             string message = "";
             try
             {

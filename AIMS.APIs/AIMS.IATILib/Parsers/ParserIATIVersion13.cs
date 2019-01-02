@@ -8,10 +8,11 @@ namespace AIMS.IATILib.Parsers
 {
     public class ParserIATIVersion13 : IParser
     {
-        public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc)
+        public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria)
         {
             List<IATIActivity> activityList = new List<IATIActivity>();
             var activities = from activity in xmlDoc.Descendants("iati-activity")
+                             where activity.Element("title") != null && activity.Element("title").Value.Contains(criteria)
                              select activity;
 
             string currency = "";

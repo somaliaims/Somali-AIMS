@@ -55,12 +55,12 @@ namespace AIMS.APIs.Scheduler
                 {
                     case "1.03":
                         parser = new ParserIATIVersion13();
-                        activityList = parser.ExtractAcitivities(xDoc);
+                        activityList = parser.ExtractAcitivities(xDoc, "");
                         break;
 
                     case "2.01":
                         parser = new ParserIATIVersion21();
-                        activityList = parser.ExtractAcitivities(xDoc);
+                        activityList = parser.ExtractAcitivities(xDoc, "");
                         break;
                 }
 

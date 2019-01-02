@@ -6,8 +6,11 @@ using AutoMapper;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -23,11 +26,18 @@ namespace AIMS.Services
         ActionResponse Add(IATIModel model);
 
         /// <summary>
+        /// Downloads the latest IATI into a file
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        Task<ActionResponse> DownloadIATIFromUrl(string url, string fileToWrite);
+
+        /// <summary>
         /// Loads latest IATI
         /// </summary>
         /// <param name="countryCode"></param>
         /// <returns></returns>
-        ActionResponse LoadLatestIATI(string countryCode, string dataFilePath);
+        ICollection<IATIActivity> GetMatchingIATIActivities(string dataFilePath, string criteria);
 
         /// <summary>
         /// Gets all the activities
@@ -65,10 +75,8 @@ namespace AIMS.Services
             this.context = cntxt;
         }
 
-        public ActionResponse LoadLatestIATI(string countryCode, string dataFilePath)
+        public ICollection<IATIActivity> GetMatchingIATIActivities(string dataFilePath, string criteria)
         {
-            ActionResponse response = new ActionResponse();
-
             //string url = "http://datastore.iatistandard.org/api/1/access/activity.xml?recipient-country=" + countryCode + "&stream=true";
             string url = dataFilePath;
             XmlReader xReader = XmlReader.Create(url);
@@ -85,12 +93,12 @@ namespace AIMS.Services
             {
                 case "1.03":
                     parser = new ParserIATIVersion13();
-                    activityList = parser.ExtractAcitivities(xDoc);
+                    activityList = parser.ExtractAcitivities(xDoc, criteria);
                     break;
 
                 case "2.01":
                     parser = new ParserIATIVersion21();
-                    activityList = parser.ExtractAcitivities(xDoc);
+                    activityList = parser.ExtractAcitivities(xDoc, criteria);
                     break;
             }
 
@@ -129,15 +137,33 @@ namespace AIMS.Services
                     }
                 }
             }
-
-            IATIModel model = new IATIModel()
+            /*IATIModel model = new IATIModel()
             {
                 Data = JsonConvert.SerializeObject(activityList),
                 Organizations = JsonConvert.SerializeObject(organizations)
             };
+            this.Add(model);*/
+            return activityList;
+        }
 
-            this.Add(model);
-            return response;
+        public async Task<ActionResponse> DownloadIATIFromUrl(string url, string fileToWrite)
+        {
+            ActionResponse response = new ActionResponse();
+            try
+            {
+                string xml;
+                using (var client = new WebClient())
+                {
+                    xml = client.DownloadString(url);
+                }
+                File.WriteAllText(fileToWrite, xml);
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
         }
 
         public IEnumerable<IATIActivity> GetAll()
