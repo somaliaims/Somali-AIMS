@@ -16,11 +16,24 @@ namespace AIMS.IATILib.Parsers
         public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria)
         {
             List<IATIActivity> activityList = new List<IATIActivity>();
+            //Pick up all narratives
             var activities = from activity in xmlDoc.Descendants("iati-activity")
                              where activity.Element("title").Element("narrative") != null && 
                              activity.Element("title").Element("narrative").Value.Contains(criteria)
                              select activity;
+            this.ParseIATIAndFillList(activities, activityList);
 
+            //Pick up all titles
+            var titleActivities = from activity in xmlDoc.Descendants("iati-activity")
+                                  where activity.Element("title") != null &&
+                                  activity.Element("title").Value.Contains(criteria)
+                                  select activity;
+            this.ParseIATIAndFillList(titleActivities, activityList);
+            return activityList;
+        }
+
+        private void ParseIATIAndFillList(IEnumerable<XElement> activities, List<IATIActivity> activityList)
+        {
             string message = "";
             try
             {
@@ -36,7 +49,7 @@ namespace AIMS.IATILib.Parsers
                             {
                                 currency = activity.Attribute("default-currency").Value;
                             }
-                            
+
                             if (activity.Element("title") != null && activity.Element("title").Element("narrative") != null)
                             {
                                 projectTitle = activity.Element("title").Element("narrative")?.Value;
@@ -190,15 +203,20 @@ namespace AIMS.IATILib.Parsers
                         List<IATILocation> locations = new List<IATILocation>();
                         if (aLocations != null)
                         {
-                            foreach(var location in aLocations)
+                            foreach (var location in aLocations)
                             {
                                 string locationName = "", latitude = "", longitude = "";
-                                var nameElement = location.Element("name");
+                                XElement nameElement = (from name in location.Descendants("name")
+                                                        select name).FirstOrDefault();
+
                                 if (nameElement != null)
                                 {
-                                    if (nameElement.Element("narrative") != null)
+                                    XElement narrative = (from narr in nameElement.Descendants("narrative")
+                                                          select narr).FirstOrDefault();
+
+                                    if (narrative != null)
                                     {
-                                        locationName = nameElement.Element("narrative")?.Value;
+                                        locationName = narrative?.Value;
                                     }
                                     else
                                     {
@@ -206,13 +224,17 @@ namespace AIMS.IATILib.Parsers
                                     }
                                 }
 
-                                var locationPoint = location.Element("point");
-                                var locationCoordinates = location.Element("coordinates");
+                                XElement locationPoint = (from point in location.Descendants("point")
+                                                          select point).FirstOrDefault();
+
+                                XElement locationCoordinates = (from coordinate in location.Descendants("coordinates")
+                                                                select coordinate).FirstOrDefault();
 
                                 if (locationPoint != null)
                                 {
-                                    var position = locationPoint.Element("pos");
-                                    if (position != null)
+                                    var position = locationPoint.Element("pos")?.Value;
+
+                                    /*if (position != null)
                                     {
                                         if (position.HasAttributes)
                                         {
@@ -222,15 +244,25 @@ namespace AIMS.IATILib.Parsers
                                             if (position.Attribute("longitude") != null)
                                                 longitude = position.Attribute("longitude")?.Value;
                                         }
+                                    }*/
+                                    if (position != null)
+                                    {
+                                        string[] arr = position.Split();
+                                        latitude = arr[0];
+                                        longitude = arr[1];
                                     }
                                 }
-                                else if (locationCoordinates != null && locationCoordinates.HasAttributes)
-                                {
-                                    if (locationCoordinates.Attribute("latitude") != null)
-                                        latitude = locationCoordinates.Attribute("latitude")?.Value;
 
-                                    if (locationCoordinates.Attribute("longitude") != null)
-                                        longitude = locationCoordinates.Attribute("longitude")?.Value;
+                                if (locationCoordinates != null)
+                                {
+                                    if (locationCoordinates.HasAttributes)
+                                    {
+                                        if (locationCoordinates.Attribute("latitude") != null)
+                                            latitude = locationCoordinates.Attribute("latitude")?.Value;
+
+                                        if (locationCoordinates.Attribute("longitude") != null)
+                                            longitude = locationCoordinates.Attribute("longitude")?.Value;
+                                    }
                                 }
 
                                 locations.Add(new IATILocation()
@@ -258,12 +290,10 @@ namespace AIMS.IATILib.Parsers
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 message = ex.Message;
-                Debug.WriteLine(ex.Message);
             }
-            return activityList;
         }
 
         /*public List<AidTypes> FillAidTypes(IEnumerable<IConfigurationSection> dataArray)
