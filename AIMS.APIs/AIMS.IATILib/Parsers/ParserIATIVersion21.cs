@@ -19,14 +19,14 @@ namespace AIMS.IATILib.Parsers
             //Pick up all narratives
             var activities = from activity in xmlDoc.Descendants("iati-activity")
                              where activity.Element("title").Element("narrative") != null && 
-                             activity.Element("title").Element("narrative").Value.Contains(criteria)
+                             activity.Element("title").Element("narrative").Value.IndexOf(criteria, 0, StringComparison.OrdinalIgnoreCase) >= 0
                              select activity;
             this.ParseIATIAndFillList(activities, activityList);
 
             //Pick up all titles
             var titleActivities = from activity in xmlDoc.Descendants("iati-activity")
                                   where activity.Element("title") != null &&
-                                  activity.Element("title").Value.Contains(criteria)
+                                  activity.Element("title").Value.IndexOf(criteria, 0, StringComparison.OrdinalIgnoreCase) >= 0
                                   select activity;
             this.ParseIATIAndFillList(titleActivities, activityList);
             return activityList;

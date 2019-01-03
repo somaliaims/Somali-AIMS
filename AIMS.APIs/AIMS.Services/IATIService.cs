@@ -119,9 +119,13 @@ namespace AIMS.Services
 
                             foreach (var org in orgList)
                             {
-                                var orgExists = (from o in organizations
+                                IATIOrganization orgExists = null;
+                                if (organizations.Count > 0 && org != null && org.Name != null)
+                                {
+                                    orgExists = (from o in organizations
                                                  where o.Name.ToLower().Equals(org.Name.ToLower())
                                                  select o).FirstOrDefault();
+                                }
 
                                 if (orgExists == null)
                                 {
