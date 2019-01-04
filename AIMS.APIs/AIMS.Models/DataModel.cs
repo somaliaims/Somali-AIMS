@@ -355,6 +355,14 @@ namespace AIMS.Models
         public string AdminEmail { get; set; }
     }
 
+    public class EFIATISettings
+    {
+        [Key]
+        public int Id { get; set; }
+        public string BaseUrl { get; set; }
+        public string CountryCode { get; set; }
+    }
+
     public class EFPasswordRecoveryRequests
     {
         public int Id { get; set; }

@@ -81,6 +81,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFStaticReports> StaticReports { get; set; }
         public DbSet<EFIATIData> IATIData { get; set; }
         public DbSet<EFSMTPSettings> SMTPSettings { get; set; }
+        public DbSet<EFIATISettings> IATISettings { get; set; }
         public DbSet<EFPasswordRecoveryRequests> PasswordRecoveryRequests { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
