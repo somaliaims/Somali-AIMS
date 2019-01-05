@@ -685,6 +685,12 @@ namespace AIMS.Models
         public string AdminEmail { get; set; }
     }
 
+    public class IATISettings
+    {
+        public string BaseUrl { get; set; }
+        public string CountryCode { get; set; }
+    }
+
     /// <summary>
     /// Models for Reports
     /// </summary>

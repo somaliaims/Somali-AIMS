@@ -74,6 +74,8 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(i => i.ImplementorId, opts => opts.MapFrom(source => source.Implementor.Id))
                 .ForMember(i => i.Implementor, opts => opts.MapFrom(source => source.Implementor.OrganizationName));
 
+            CreateMap<EFIATISettings, IATISettings>().ReverseMap();
+
         }
     }
 }

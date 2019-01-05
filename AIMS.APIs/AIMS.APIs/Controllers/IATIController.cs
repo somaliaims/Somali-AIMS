@@ -94,5 +94,29 @@ namespace AIMS.APIs.Controllers
             var activities = iatiService.GetMatchingIATIActivities(iatiFilePath, keywords);
             return Ok(activities);
         }
+
+        [HttpGet]
+        [Route("GetIATISettings")]
+        public IActionResult GetIATISettings()
+        {
+            var settings = iatiService.GetIATISettings();
+            return Ok(settings);
+        }
+
+        [HttpPost]
+        [Route("SetIATISettings")]
+        public IActionResult SetIATISettings([FromBody] IATISettings model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = iatiService.SaveIATISettings(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.Success);
+        }
     }
 }

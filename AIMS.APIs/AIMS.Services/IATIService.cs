@@ -26,6 +26,19 @@ namespace AIMS.Services
         ActionResponse Add(IATIModel model);
 
         /// <summary>
+        /// Saves iati settings
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse SaveIATISettings(IATISettings model);
+
+        /// <summary>
+        /// Gets IATI Settings
+        /// </summary>
+        /// <returns></returns>
+        IATISettings GetIATISettings();
+
+        /// <summary>
         /// Downloads the latest IATI into a file
         /// </summary>
         /// <param name="url"></param>
@@ -186,6 +199,21 @@ namespace AIMS.Services
             }
         }
 
+        public IATISettings GetIATISettings()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IATISettings settings = new IATISettings();
+                var iatiSettings = unitWork.IATISettingsRepository.GetFirst(i => i.Id != 0);
+                if (iatiSettings != null)
+                {
+                    settings.BaseUrl = iatiSettings.BaseUrl;
+                    settings.CountryCode = iatiSettings.CountryCode;
+                }
+                return settings;
+            }
+        }
+
         public ICollection<IATIOrganization> GetOrganizations()
         {
             using (var unitWork = new UnitOfWork(context))
@@ -248,6 +276,39 @@ namespace AIMS.Services
                     Dated = DateTime.Now
                 });
                 unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse SaveIATISettings(IATISettings model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var iatiSettings = unitWork.IATISettingsRepository.GetFirst(i => i.Id != 0);
+                    if (iatiSettings != null)
+                    {
+                        iatiSettings.BaseUrl = model.BaseUrl;
+                        iatiSettings.CountryCode = model.CountryCode;
+                        unitWork.Save();
+                    }
+                    else
+                    {
+                        unitWork.IATISettingsRepository.Insert(new EFIATISettings()
+                        {
+                            BaseUrl = model.BaseUrl,
+                            CountryCode = model.CountryCode
+                        });
+                        unitWork.Save();
+                    }
+                }
+                catch(Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.Success = false;
+                }
                 return response;
             }
         }
