@@ -40,6 +40,7 @@ namespace AIMS.IATILib.Parsers
                 string currency = "";
                 if (activities != null)
                 {
+                    int activityCounter = 1;
                     foreach (var activity in activities)
                     {
                         string startDate, endDate, projectTitle = "";
@@ -276,6 +277,7 @@ namespace AIMS.IATILib.Parsers
 
                         activityList.Add(new IATIActivity()
                         {
+                            Id = activityCounter,
                             Identifier = activity.Element("iati-identifier")?.Value,
                             Title = projectTitle,
                             Locations = locations,
@@ -287,6 +289,7 @@ namespace AIMS.IATILib.Parsers
                             Transactions = transactionsList,
                             ParticipatingOrganizations = organizationList
                         });
+                        ++activityCounter;
                     }
                 }
             }
