@@ -110,18 +110,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                //IMessageHelper mHelper;
                 try
                 {
                     var parentSector = unitWork.SectorRepository.GetByID(model.ParentId);
-                    /*if (parentSector == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Parent Sector");
-                        response.Success = false;
-                        return response;
-                    }*/
-
                     var newSector = unitWork.SectorRepository.Insert(new EFSector()
                     {
                         ParentSector = parentSector,
@@ -148,13 +139,6 @@ namespace AIMS.Services
                 IMessageHelper mHelper;
 
                 var parentSector = unitWork.SectorRepository.GetByID(model.ParentId);
-                /*if (parentSector == null)
-                {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.GetNotFound("Parent Sector");
-                    response.Success = false;
-                    return response;
-                }*/
                 var sectorObj = unitWork.SectorRepository.GetByID(id);
                 if (sectorObj == null)
                 {

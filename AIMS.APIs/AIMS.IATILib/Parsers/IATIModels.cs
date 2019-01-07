@@ -84,4 +84,15 @@ namespace AIMS.IATILib.Parsers
         public string Organizations { get; set; }
     }
 
+    public class IATIProject
+    {
+        public int Id { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public string IATIIdentifier { get; set; }
+        public string Title { get; set; }
+        public string DefaultCurrency { get; set; }
+        public string Description { get; set; }
+    }
+
 }

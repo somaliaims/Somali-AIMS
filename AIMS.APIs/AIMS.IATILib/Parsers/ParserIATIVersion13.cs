@@ -129,5 +129,57 @@ namespace AIMS.IATILib.Parsers
             }
             return activityList;
         }
+
+        public ICollection<IATIProject> ExtractProjects(XDocument xmlDoc)
+        {
+            List<IATIProject> projectsList = new List<IATIProject>();
+            string message = "";
+            try
+            {
+                var activities = from activity in xmlDoc.Descendants("iati-activity")
+                                 where activity.Element("title") != null
+                                 select activity;
+
+                string currency = "";
+                int activityCounter = 1;
+                foreach (var activity in activities)
+                {
+                    string startDate = "", endDate = "", projectTitle = "";
+                    currency = activity.Attribute("default-currency").Value;
+                    projectTitle = activity.Element("title")?.Value;
+
+                    //Extracting dates
+                    var dates = activity.Elements("activity-date");
+                    foreach (var date in dates)
+                    {
+                        if (date.Attribute("type").Value.Equals("start-actual"))
+                        {
+                            startDate = date.FirstAttribute?.Value;
+                        }
+                        else if (date.Attribute("type").Value.Equals("end-planned"))
+                        {
+                            endDate = date.FirstAttribute?.Value;
+                        }
+                    }
+
+                    projectsList.Add(new IATIProject()
+                    {
+                        Id = activityCounter,
+                        IATIIdentifier = activity.Element("iati-identifier")?.Value,
+                        Title = projectTitle,
+                        Description = activity.Element("description")?.Value,
+                        DefaultCurrency = currency,
+                        StartDate = startDate,
+                        EndDate = endDate
+                    });
+                    ++activityCounter;
+                }
+            }
+            catch(Exception ex)
+            {
+                message = ex.Message;
+            }
+            return projectsList;
+        }
     }
 }

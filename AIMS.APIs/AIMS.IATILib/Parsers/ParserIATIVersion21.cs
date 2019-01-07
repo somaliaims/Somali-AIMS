@@ -32,6 +32,19 @@ namespace AIMS.IATILib.Parsers
             return activityList;
         }
 
+        public ICollection<IATIProject> ExtractProjects(XDocument xmlDoc)
+        {
+            List<IATIProject> projectsList = new List<IATIProject>();
+            //Pick up all narratives
+            var activities = from activity in xmlDoc.Descendants("iati-activity")
+                             where activity.Element("title").Element("narrative") != null ||
+                             activity.Element("title") != null
+                             select activity;
+
+            this.ParseAndFillProjects(activities, projectsList);
+            return projectsList;
+        }
+
         private void ParseIATIAndFillList(IEnumerable<XElement> activities, List<IATIActivity> activityList)
         {
             string message = "";
@@ -288,6 +301,70 @@ namespace AIMS.IATILib.Parsers
                             DefaultCurrency = currency,
                             Transactions = transactionsList,
                             ParticipatingOrganizations = organizationList
+                        });
+                        ++activityCounter;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+        }
+
+        private void ParseAndFillProjects(IEnumerable<XElement> activities, List<IATIProject> projectsList)
+        {
+            string message = "";
+            try
+            {
+                string currency = "";
+                if (activities != null)
+                {
+                    int activityCounter = 1;
+                    foreach (var activity in activities)
+                    {
+                        string startDate = "", endDate = "", projectTitle = "";
+                        if (activity.HasAttributes)
+                        {
+                            if (activity.Attribute("default-currency") != null)
+                            {
+                                currency = activity.Attribute("default-currency").Value;
+                            }
+
+                            if (activity.Element("title") != null && activity.Element("title").Element("narrative") != null)
+                            {
+                                projectTitle = activity.Element("title").Element("narrative")?.Value;
+                            }
+                        }
+
+                        //Extracting dates
+                        var dates = activity.Elements("activity-date");
+                        if (dates != null)
+                        {
+                            foreach (var date in dates)
+                            {
+                                if (date.HasAttributes && date.Attribute("type") != null)
+                                {
+                                    if (date.Attribute("type").Value.Equals("start-actual"))
+                                    {
+                                        startDate = date.FirstAttribute?.Value;
+                                    }
+                                    else if (date.Attribute("type").Value.Equals("end-planned"))
+                                    {
+                                        endDate = date.FirstAttribute?.Value;
+                                    }
+                                }
+                            }
+                        }
+
+                        projectsList.Add(new IATIProject()
+                        {
+                            Id = activityCounter,
+                            IATIIdentifier = activity.Element("iati-identifier")?.Value,
+                            Title = projectTitle,
+                            Description = activity.Element("description")?.Value,
+                            StartDate = startDate,
+                            EndDate = endDate
                         });
                         ++activityCounter;
                     }

@@ -53,6 +53,12 @@ namespace AIMS.Services
         ICollection<IATIActivity> GetMatchingIATIActivities(string dataFilePath, string criteria);
 
         /// <summary>
+        /// Gets small version of the projects list
+        /// </summary>
+        /// <returns></returns>
+        ICollection<IATIProject> GetProjects(string dataFilePath);
+
+        /// <summary>
         /// Gets all the activities
         /// </summary>
         /// <returns></returns>
@@ -154,13 +160,34 @@ namespace AIMS.Services
                     }
                 }
             }
-            /*IATIModel model = new IATIModel()
-            {
-                Data = JsonConvert.SerializeObject(activityList),
-                Organizations = JsonConvert.SerializeObject(organizations)
-            };
-            this.Add(model);*/
             return activityList;
+        }
+
+        public ICollection<IATIProject> GetProjects(string dataFilePath)
+        {
+            ICollection<IATIProject> iatiProjects = new List<IATIProject>();
+            string url = dataFilePath;
+            XmlReader xReader = XmlReader.Create(url);
+            XDocument xDoc = XDocument.Load(xReader);
+            var activity = (from el in xDoc.Descendants("iati-activity")
+                            select el.FirstAttribute).FirstOrDefault();
+
+            IParser parser;
+            string version = "";
+            version = activity.Value;
+            switch (version)
+            {
+                case "1.03":
+                    parser = new ParserIATIVersion13();
+                    iatiProjects = parser.ExtractProjects(xDoc);
+                    break;
+
+                case "2.01":
+                    parser = new ParserIATIVersion21();
+                    iatiProjects = parser.ExtractProjects(xDoc);
+                    break;
+            }
+            return iatiProjects;
         }
 
         public async Task<ActionResponse> DownloadIATIFromUrl(string url, string fileToWrite)
