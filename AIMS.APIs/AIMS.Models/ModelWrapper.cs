@@ -120,29 +120,20 @@ namespace AIMS.Models
     public class SectorView
     {
         public int Id { get; set; }
-        public string SectorType { get; set; }
-        public string Category { get; set; }
-        public string SubCategory { get; set; }
+        public string ParentSector { get; set; }
         public string SectorName { get; set; }
     }
 
     public class SectorViewModel
     {
         public int Id { get; set; }
-        public int SectorTypeId { get; set; }
-        public int CategoryId { get; set; }
-        public int SubCategoryId { get; set; }
+        public int ParentId { get; set; }
         public string SectorName { get; set; }
     }
 
     public class SectorModel
     {
-        [Required]
-        public int SectorTypeId { get; set; }
-        [Required]
-        public int CategoryId { get; set; }
-        [Required]
-        public int SubCategoryId { get; set; }
+        public int? ParentId { get; set; }
         [Required]
         public string SectorName { get; set; }
     }

@@ -67,7 +67,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorCategories = unitWork.SectorRepository.GetWithInclude(c => c.Id != 0, new string[] { "Category", "SubCategory" });
+                var sectorCategories = unitWork.SectorRepository.GetWithInclude(c => c.Id != 0, new string[] { "ParentSector" });
                 return mapper.Map<List<SectorView>>(sectorCategories);
             }
         }
@@ -76,7 +76,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorCategories = await unitWork.SectorRepository.GetWithIncludeAsync(c => c.Id != 0, new string[] { "Category", "SubCategory" });
+                var sectorCategories = await unitWork.SectorRepository.GetWithIncludeAsync(c => c.Id != 0, new string[] { "ParentSector"});
                 return await Task<IEnumerable<SectorView>>.Run(() => mapper.Map<List<SectorView>>(sectorCategories)).ConfigureAwait(false);
             }
         }
@@ -85,7 +85,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorObj = unitWork.SectorRepository.GetWithInclude(c => c.Id == id, new string[] { "SectorType", "Category", "SubCategory" });
+                var sectorObj = unitWork.SectorRepository.GetWithInclude(c => c.Id == id, new string[] { "ParentSector" });
                 EFSector sector = null;
                 foreach (var category in sectorObj)
                 {
@@ -100,7 +100,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<SectorView> sectorTypesList = new List<SectorView>();
-                var sectorTypes = unitWork.SectorRepository.GetWithInclude(c => c.SectorName.Contains(criteria), new string[] { "SectorType", "Category", "SubCategory" });
+                var sectorTypes = unitWork.SectorRepository.GetWithInclude(c => c.SectorName.Contains(criteria), new string[] { "ParentSector" });
                 return mapper.Map<List<SectorView>>(sectorTypes);
             }
         }
@@ -110,41 +110,21 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                IMessageHelper mHelper;
+                //IMessageHelper mHelper;
                 try
                 {
-                    var sectorType = unitWork.SectorTypesRepository.GetByID(model.SectorTypeId);
-                    if (sectorType == null)
+                    var parentSector = unitWork.SectorRepository.GetByID(model.ParentId);
+                    /*if (parentSector == null)
                     {
                         mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Sector Type");
+                        response.Message = mHelper.GetNotFound("Parent Sector");
                         response.Success = false;
                         return response;
-                    }
-
-                    var sectorCategory = unitWork.SectorCategoryRepository.GetByID(model.CategoryId);
-                    if (sectorCategory == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Sector Category");
-                        response.Success = false;
-                        return response;
-                    }
-
-                    var sectorSubCategory = unitWork.SectorSubCategoryRepository.GetByID(model.SubCategoryId);
-                    if (sectorSubCategory == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Sector Sub-Category");
-                        response.Success = false;
-                        return response;
-                    }
+                    }*/
 
                     var newSector = unitWork.SectorRepository.Insert(new EFSector()
                     {
-                        SectorType = sectorType,
-                        Category = sectorCategory,
-                        SubCategory = sectorSubCategory,
+                        ParentSector = parentSector,
                         SectorName = model.SectorName,
                         TimeStamp = DateTime.Now
                     });
@@ -167,32 +147,14 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
 
-                var sectorType = unitWork.SectorTypesRepository.GetByID(model.SectorTypeId);
-                if (sectorType == null)
+                var parentSector = unitWork.SectorRepository.GetByID(model.ParentId);
+                /*if (parentSector == null)
                 {
                     mHelper = new MessageHelper();
-                    response.Message = mHelper.GetNotFound("Sector Type");
+                    response.Message = mHelper.GetNotFound("Parent Sector");
                     response.Success = false;
                     return response;
-                }
-
-                var sectorCategory = unitWork.SectorCategoryRepository.GetByID(model.CategoryId);
-                if (sectorCategory == null)
-                {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.GetNotFound("Sector Category");
-                    response.Success = false;
-                    return response;
-                }
-
-                var sectorSubCategory = unitWork.SectorSubCategoryRepository.GetByID(model.SubCategoryId);
-                if (sectorSubCategory == null)
-                {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.GetNotFound("Sector Sub-Category");
-                    response.Success = false;
-                    return response;
-                }
+                }*/
                 var sectorObj = unitWork.SectorRepository.GetByID(id);
                 if (sectorObj == null)
                 {
@@ -204,9 +166,7 @@ namespace AIMS.Services
 
                 try
                 {
-                    sectorObj.SectorType = sectorType;
-                    sectorObj.Category = sectorCategory;
-                    sectorObj.SubCategory = sectorSubCategory;
+                    sectorObj.ParentSector = parentSector;
                     sectorObj.SectorName = model.SectorName;
                     unitWork.SectorRepository.Update(sectorObj);
                     unitWork.Save();

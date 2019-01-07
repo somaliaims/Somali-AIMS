@@ -12,13 +12,10 @@ namespace AIMS.APIs.AutoMapper
         public MappingProfile()
         {
             CreateMap<EFSector, SectorView>()
-                .ForMember(s => s.Category, opts => opts.MapFrom(source => source.Category.Category))
-                .ForMember(s => s.SubCategory, opts => opts.MapFrom(source => source.SubCategory.SubCategory));
+                .ForMember(s => s.ParentSector, opts => opts.MapFrom(source => source.ParentSector.SectorName));
 
             CreateMap<EFSector, SectorViewModel>()
-                .ForMember(s => s.SectorTypeId, opts => opts.MapFrom(source => source.SectorType.Id))
-                .ForMember(s => s.CategoryId, opts => opts.MapFrom(source => source.Category.Id))
-                .ForMember(s => s.SubCategoryId, opts => opts.MapFrom(source => source.SubCategory.Id));
+                .ForMember(s => s.ParentId, opts => opts.MapFrom(source => source.ParentSector.Id));
 
             CreateMap<EFOrganizationTypes, OrganizationTypeView>();
 

@@ -352,27 +352,19 @@ namespace AIMS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("CategoryId");
-
                     b.Property<int?>("EFProjectId");
 
+                    b.Property<int?>("ParentSectorId");
+
                     b.Property<string>("SectorName");
-
-                    b.Property<int?>("SectorTypeId");
-
-                    b.Property<int?>("SubCategoryId");
 
                     b.Property<DateTime>("TimeStamp");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
                     b.HasIndex("EFProjectId");
 
-                    b.HasIndex("SectorTypeId");
-
-                    b.HasIndex("SubCategoryId");
+                    b.HasIndex("ParentSectorId");
 
                     b.ToTable("Sectors");
                 });
@@ -666,21 +658,13 @@ namespace AIMS.DAL.Migrations
 
             modelBuilder.Entity("AIMS.Models.EFSector", b =>
                 {
-                    b.HasOne("AIMS.Models.EFSectorCategory", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId");
-
                     b.HasOne("AIMS.Models.EFProject")
                         .WithMany("Sectors")
                         .HasForeignKey("EFProjectId");
 
-                    b.HasOne("AIMS.Models.EFSectorTypes", "SectorType")
+                    b.HasOne("AIMS.Models.EFSector", "ParentSector")
                         .WithMany()
-                        .HasForeignKey("SectorTypeId");
-
-                    b.HasOne("AIMS.Models.EFSectorSubCategory", "SubCategory")
-                        .WithMany()
-                        .HasForeignKey("SubCategoryId");
+                        .HasForeignKey("ParentSectorId");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFSectorCategory", b =>

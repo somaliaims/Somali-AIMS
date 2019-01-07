@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    [Migration("20181220173748_Key_For_Disbursements")]
-    partial class Key_For_Disbursements
+    [Migration("20190107072649_Initial_Migration")]
+    partial class Initial_Migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -55,6 +55,21 @@ namespace AIMS.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("IATIData");
+                });
+
+            modelBuilder.Entity("AIMS.Models.EFIATISettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("BaseUrl");
+
+                    b.Property<string>("CountryCode");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IATISettings");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFLocation", b =>
@@ -200,16 +215,12 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("EndingYear");
 
-                    b.Property<int>("Id");
-
                     b.Property<decimal>("Percentage")
                         .HasColumnType("decimal(9, 2)");
 
                     b.Property<int>("StartingMonth");
 
                     b.HasKey("ProjectId", "StartingYear");
-
-                    b.HasAlternateKey("Id");
 
                     b.ToTable("ProjectDisbursements");
                 });
@@ -343,23 +354,19 @@ namespace AIMS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("CategoryId");
+                    b.Property<int?>("EFProjectId");
+
+                    b.Property<int?>("ParentSectorId");
 
                     b.Property<string>("SectorName");
-
-                    b.Property<int?>("SectorTypeId");
-
-                    b.Property<int?>("SubCategoryId");
 
                     b.Property<DateTime>("TimeStamp");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("EFProjectId");
 
-                    b.HasIndex("SectorTypeId");
-
-                    b.HasIndex("SubCategoryId");
+                    b.HasIndex("ParentSectorId");
 
                     b.ToTable("Sectors");
                 });
@@ -653,17 +660,13 @@ namespace AIMS.DAL.Migrations
 
             modelBuilder.Entity("AIMS.Models.EFSector", b =>
                 {
-                    b.HasOne("AIMS.Models.EFSectorCategory", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId");
+                    b.HasOne("AIMS.Models.EFProject")
+                        .WithMany("Sectors")
+                        .HasForeignKey("EFProjectId");
 
-                    b.HasOne("AIMS.Models.EFSectorTypes", "SectorType")
+                    b.HasOne("AIMS.Models.EFSector", "ParentSector")
                         .WithMany()
-                        .HasForeignKey("SectorTypeId");
-
-                    b.HasOne("AIMS.Models.EFSectorSubCategory", "SubCategory")
-                        .WithMany()
-                        .HasForeignKey("SubCategoryId");
+                        .HasForeignKey("ParentSectorId");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFSectorCategory", b =>

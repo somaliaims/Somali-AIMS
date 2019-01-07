@@ -119,9 +119,9 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string SectorName { get; set; }
-        public EFSectorTypes SectorType { get; set; }
-        public EFSectorCategory Category { get; set; }
-        public EFSectorSubCategory SubCategory { get; set; }
+        [ForeignKey("ParentSector")]
+        public int? ParentSectorId { get; set; }
+        public EFSector ParentSector { get; set; }
         public DateTime TimeStamp { get; set; }
     }
 
