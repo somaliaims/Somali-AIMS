@@ -357,9 +357,14 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
+                        if (string.IsNullOrEmpty(startDate))
+                        {
+                            startDate = "N/A";
+                        }
                         projectsList.Add(new IATIProject()
                         {
                             Id = activityCounter,
+                            DefaultCurrency = currency,
                             IATIIdentifier = activity.Element("iati-identifier")?.Value,
                             Title = projectTitle,
                             Description = activity.Element("description")?.Value,
