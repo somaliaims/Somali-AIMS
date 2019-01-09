@@ -359,7 +359,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<ProjectView> sectorTypesList = new List<ProjectView>();
-                var projects = unitWork.ProjectRepository.GetMany(p => p.Title.Contains(criteria));
+                var projects = unitWork.ProjectRepository.GetMany(p => p.Title.Contains(criteria, StringComparison.OrdinalIgnoreCase));
                 return mapper.Map<List<ProjectView>>(projects);
             }
         }
