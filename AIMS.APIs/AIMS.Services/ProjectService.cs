@@ -39,6 +39,13 @@ namespace AIMS.Services
         Task<ProjectProfileReport> GetProjectProfileReportAsync(int id);
 
         /// <summary>
+        /// Get project reports filtered through sector id
+        /// </summary>
+        /// <param name="sectorId"></param>
+        /// <returns></returns>
+        Task<FilteredProjectProfileReport> GetProjectsReportForSectorAsync(int sectorId);
+
+        /// <summary>
         /// Gets report for the provided project id
         /// </summary>
         /// <param name="id"></param>
@@ -342,6 +349,52 @@ namespace AIMS.Services
                     ProjectProfile = profileView
                 };
                 return await Task<ProjectProfileReport>.Run(() => projectProfileReport).ConfigureAwait(false);
+            }
+        }
+
+        public async Task<FilteredProjectProfileReport> GetProjectsReportForSectorAsync(int sectorId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<ProjectProfileView> projectsList = new List<ProjectProfileView>();
+                FilteredProjectProfileReport projectProfileReport = new FilteredProjectProfileReport()
+                {
+                    ReportSettings = new Report()
+                    {
+                        Title = ReportConstants.PROJECTS_PROFILE_TITLE,
+                        SubTitle = ReportConstants.PROJECTS_PROFILE_SUBTITLE,
+                        Footer = ReportConstants.PROJECTS_PROFILE_FOOTER,
+                        Dated = DateTime.Now.ToLongDateString()
+                    },
+                    ProjectsList = projectsList
+                };
+
+                var sector = unitWork.SectorRepository.GetByID(sectorId);
+                if (sector != null)
+                {
+                    var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Sectors.Contains(sector), new string[] { "Sectors", "Locations", "Disbursements", "Funders", "Implementors", "Documents" });
+                    if (projectProfileList != null)
+                    {
+                        foreach (var project in projectProfileList)
+                        {
+                            ProjectProfileView profileView = new ProjectProfileView();
+                            profileView.Id = project.Id;
+                            profileView.Description = project.Description;
+                            profileView.StartDate = project.StartDate.ToLongDateString();
+                            profileView.EndDate = project.EndDate.ToLongDateString();
+                            profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
+                            profileView.Locations = mapper.Map<List<ProjectLocationView>>(project.Locations);
+                            profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
+                            profileView.Implementers = mapper.Map<List<ProjectImplementorView>>(project.Implementors);
+                            profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);
+                            profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
+                            projectsList.Add(profileView);
+                        }
+                    }
+                    projectProfileReport.ProjectsList = projectsList;
+                }
+                
+                return await Task<FilteredProjectProfileReport>.Run(() => projectProfileReport).ConfigureAwait(false);
             }
         }
 

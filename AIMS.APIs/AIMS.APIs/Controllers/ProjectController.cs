@@ -60,6 +60,14 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("GetProjectProfileReportBySector/{id}")]
+        public async Task<IActionResult> GetProjectProfileReportBySector(int id)
+        {
+            var projects = await projectService.GetProjectsReportForSectorAsync(id);
+            return Ok(projects);
+        }
+
+        [HttpGet]
         [Route("GetLocations/{id}")]
         public IActionResult GetLocations(int id)
         {

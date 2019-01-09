@@ -705,4 +705,10 @@ namespace AIMS.Models
         public ProjectProfileView ProjectProfile { get; set; }
     }
 
+    public class FilteredProjectProfileReport
+    {
+        public Report ReportSettings { get; set; }
+        public ICollection<ProjectProfileView> ProjectsList { get; set; }
+    }
+
 }
