@@ -14,12 +14,10 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class OrganizationTypeController : ControllerBase
     {
-        AIMSDbContext context;
         IOrganizationTypeService organizationTypeService;
 
-        public OrganizationTypeController(AIMSDbContext cntxt, IOrganizationTypeService service)
+        public OrganizationTypeController(IOrganizationTypeService service)
         {
-            this.context = cntxt;
             this.organizationTypeService = service;
         }
 

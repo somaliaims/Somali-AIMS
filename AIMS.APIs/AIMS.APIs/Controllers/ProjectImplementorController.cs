@@ -14,12 +14,10 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class ProjectImplementorController : ControllerBase
     {
-        AIMSDbContext context;
         IProjectImplementorService projectImplementorService;
 
-        public ProjectImplementorController(AIMSDbContext cntxt, IProjectImplementorService service)
+        public ProjectImplementorController(IProjectImplementorService service)
         {
-            this.context = cntxt;
             this.projectImplementorService = service;
         }
 

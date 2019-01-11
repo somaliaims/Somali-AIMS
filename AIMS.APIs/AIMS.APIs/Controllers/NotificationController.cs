@@ -17,12 +17,10 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class NotificationController : ControllerBase
     {
-        AIMSDbContext context;
         INotificationService notificationService;
 
-        public NotificationController(AIMSDbContext cntxt, INotificationService service)
+        public NotificationController(INotificationService service)
         {
-            this.context = cntxt;
             this.notificationService = service;
         }
 

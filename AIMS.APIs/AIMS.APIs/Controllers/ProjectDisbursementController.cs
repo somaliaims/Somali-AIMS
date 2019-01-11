@@ -14,12 +14,10 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class ProjectDisbursementController : ControllerBase
     {
-        AIMSDbContext context;
         IProjectDisbursementService projectDisbursementService;
 
-        public ProjectDisbursementController(AIMSDbContext cntxt, IProjectDisbursementService service)
+        public ProjectDisbursementController(IProjectDisbursementService service)
         {
-            this.context = cntxt;
             this.projectDisbursementService = service;
         }
 

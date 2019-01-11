@@ -14,12 +14,10 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class SMTPSettingsController : ControllerBase
     {
-        AIMSDbContext context;
         ISMTPSettingsService smtpSettingsService;
 
-        public SMTPSettingsController(AIMSDbContext cntxt, ISMTPSettingsService service)
+        public SMTPSettingsController(ISMTPSettingsService service)
         {
-            this.context = cntxt;
             this.smtpSettingsService = service;
         }
 

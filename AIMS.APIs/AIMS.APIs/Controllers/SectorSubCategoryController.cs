@@ -14,12 +14,10 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class SectorSubCategoryController : ControllerBase
     {
-        AIMSDbContext context;
         ISectorSubCategoryService sectorSubCategoryService;
 
-        public SectorSubCategoryController(AIMSDbContext cntxt, ISectorSubCategoryService categoryService)
+        public SectorSubCategoryController(ISectorSubCategoryService categoryService)
         {
-            context = cntxt;
             sectorSubCategoryService = categoryService;
         }
 

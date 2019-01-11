@@ -14,12 +14,10 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class ProjectFunderController : ControllerBase
     {
-        AIMSDbContext context;
         IProjectFunderService projectFunderService;
 
-        public ProjectFunderController(AIMSDbContext cntxt, IProjectFunderService service)
+        public ProjectFunderController(IProjectFunderService service)
         {
-            this.context = cntxt;
             this.projectFunderService = service;
         }
 

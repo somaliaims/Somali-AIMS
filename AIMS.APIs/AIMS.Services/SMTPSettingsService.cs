@@ -17,7 +17,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        SMTPSettingsModel Get();
+        SMTPSettingsModelView Get();
 
         /// <summary>
         /// Adds a new section
@@ -33,15 +33,15 @@ namespace AIMS.Services
         ActionResponse Update(int id, SMTPSettingsModel settings);
     }
 
-    public class SMTPSettingsService
+    public class SMTPSettingsService : ISMTPSettingsService
     {
         AIMSDbContext context;
-        IMapper mapper;
+        //IMapper mapper;
 
-        public SMTPSettingsService(AIMSDbContext cntxt, IMapper autoMapper)
+        public SMTPSettingsService(AIMSDbContext cntxt)
         {
             context = cntxt;
-            mapper = autoMapper;
+            //mapper = new AutoMapper();
         }
 
         public SMTPSettingsModelView Get()
@@ -49,7 +49,16 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var settings = unitWork.SMTPSettingsRepository.GetFirst(s => s.Host != null);
-                return mapper.Map<SMTPSettingsModelView>(settings);
+                SMTPSettingsModelView view = new SMTPSettingsModelView();
+                if (settings != null)
+                {
+                    view.Id = settings.Id;
+                    view.AdminEmail = settings.AdminEmail;
+                    view.Host = settings.Host;
+                    view.Port = settings.Port;
+                    view.Username = settings.Username;
+                }
+                return view;
             }
         }
 

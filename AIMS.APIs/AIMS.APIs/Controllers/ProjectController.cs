@@ -15,14 +15,12 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class ProjectController : ControllerBase
     {
-        AIMSDbContext context;
         IProjectService projectService;
         IHostingEnvironment hostingEnvironment;
 
-        public ProjectController(AIMSDbContext cntxt, IProjectService service, IHostingEnvironment _hostingEnvironment)
+        public ProjectController(IProjectService service, IHostingEnvironment _hostingEnvironment)
         {
             this.hostingEnvironment = _hostingEnvironment;
-            this.context = cntxt;
             this.projectService = service;
         }
 

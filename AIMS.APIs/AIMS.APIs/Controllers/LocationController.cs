@@ -14,12 +14,10 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class LocationController : ControllerBase
     {
-        AIMSDbContext context;
         ILocationService locationService;
 
-        public LocationController(AIMSDbContext cntxt, ILocationService service)
+        public LocationController(ILocationService service)
         {
-            this.context = cntxt;
             this.locationService = service;
         }
 

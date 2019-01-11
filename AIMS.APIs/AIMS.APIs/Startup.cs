@@ -97,40 +97,7 @@ namespace AIMS.APIs
                 };
             });
 
-            //Configure Email Settings
-            services.AddTransient<SmtpClient>((serviceProvider) =>
-            {
-                var config = serviceProvider.GetRequiredService<IConfiguration>();
-                var smtpService = serviceProvider.GetRequiredService<ISMTPSettingsService>();
-                var smtpSettings = smtpService.Get();
-                string host = "", userName = "", password = "";
-                int port = 0;
-
-                if (smtpSettings != null)
-                {
-                    host = smtpSettings.Host;
-                    port = Convert.ToInt32(smtpSettings.Port);
-                    userName = smtpSettings.Username;
-                    password = smtpSettings.Password;
-                }
-
-                return new SmtpClient()
-                {
-                    /*Host = config.GetValue<String>("Email:Smtp:Host"),
-                    Port = config.GetValue<int>("Email:Smtp:Port"),
-                    Credentials = new NetworkCredential(
-                            config.GetValue<String>("Email:Smtp:Username"),
-                            config.GetValue<String>("Email:Smtp:Password")
-                        )*/
-                    Host = host,
-                    Port = port,
-                    Credentials = new NetworkCredential(
-                            userName,
-                            password
-                        ),
-                    EnableSsl = true
-                };
-            });
+            
             
             services.AddAutoMapper(a => a.AddProfile(new MappingProfile()));
             services.AddScoped<ISectorService, SectorService>();
@@ -146,11 +113,31 @@ namespace AIMS.APIs
             services.AddScoped<IProjectService, ProjectService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
+            //Configure Email Settings
+            //string host = "", userName = "", password = "";
+            //int port = 0;
+            services.AddTransient<SmtpClient>((serviceProvider) =>
+            {
+                var config = serviceProvider.GetRequiredService<IConfiguration>();
+                //services.AddSingleton<ISMTPSettingsService, SMTPSettingsService>();
+                //var smtpService = serviceProvider.GetRequiredService<ISMTPSettingsService>();
+                return new SmtpClient()
+                {
+                    Host = config.GetValue<String>("Email:Smtp:Host"),
+                    Port = config.GetValue<int>("Email:Smtp:Port"),
+                    Credentials = new NetworkCredential(
+                            config.GetValue<String>("Email:Smtp:Username"),
+                            config.GetValue<String>("Email:Smtp:Password")
+                        ),
+                    EnableSsl = true
+                };
+            });
+
             services.AddHttpClient();
             //Need to work on this scheduled task in future
             //services.AddSingleton<IHostedService, ScheduleTask>();
             services.AddScoped<IViewRenderService, ViewRenderService>();
-            services.AddDistributedMemoryCache();
+            //services.AddDistributedMemoryCache();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 

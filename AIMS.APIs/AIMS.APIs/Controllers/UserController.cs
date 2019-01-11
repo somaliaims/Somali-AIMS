@@ -20,13 +20,11 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        AIMSDbContext context;
         IUserService userService;
         IConfiguration configuration;
 
-        public UserController(AIMSDbContext cntxt, IUserService service, IConfiguration config)
+        public UserController(IUserService service, IConfiguration config)
         {
-            this.context = cntxt;
             this.userService = service;
             this.configuration = config;
         }
@@ -52,10 +50,10 @@ namespace AIMS.APIs.Controllers
             }
 
             string adminEmail = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
-                .GetValue<String>("Email:Smtp:AdminEmail");
+                                .GetValue<String>("Email:Smtp:AdminEmail");
 
-            var configuredSmtpClient = HttpContext.RequestServices.GetRequiredService<SmtpClient>();
-            var response = userService.Add(user, configuredSmtpClient, adminEmail);
+            var smtpClient = HttpContext.RequestServices.GetRequiredService<SmtpClient>();
+            var response = userService.Add(user, smtpClient, adminEmail);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
