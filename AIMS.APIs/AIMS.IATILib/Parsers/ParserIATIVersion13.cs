@@ -15,118 +15,19 @@ namespace AIMS.IATILib.Parsers
                              where activity.Element("title") != null && activity.Element("title").Value.Contains(criteria)
                              select activity;
 
-            string currency = "";
-            foreach(var activity in activities)
-            {
-                string startDate, endDate, projectTitle = "";
-                currency = activity.Attribute("default-currency").Value;
-                projectTitle = activity.Element("title")?.Value;
+            this.ExtractAndFillActivities(activities, activityList);
+            return activityList;
+        }
 
-                //Extracting dates
-                var dates = activity.Elements("activity-date");
-                foreach(var date in dates)
-                {
-                    if(date.Attribute("type").Value.Equals("start-actual"))
-                    {
-                        startDate = date.FirstAttribute?.Value;
-                    }
-                    else if(date.Attribute("type").Value.Equals("end-planned"))
-                    {
-                        endDate = date.FirstAttribute?.Value;
-                    }
-                }
+        public ICollection<IATIActivity> ExtractAcitivitiesForIds(XDocument xmlDoc, IEnumerable<string> Ids)
+        {
+            List<IATIActivity> activityList = new List<IATIActivity>();
+            var activities = from activity in xmlDoc.Descendants("iati-activity")
+                             where activity.Element("title") != null &&
+                             Ids.Contains(activity.Element("iati-identifier").Value)
+                             select activity;
 
-                //Extracting participating organizations
-                var organizations = activity.Elements("participating-org");
-                List<IATIOrganization> organizationList = new List<IATIOrganization>();
-                foreach(var organization in organizations)
-                {
-                    organizationList.Add(new IATIOrganization()
-                    {
-                        Project = projectTitle,
-                        Name = organization?.Value,
-                        Role = organization.Attribute("role")?.Value
-                    });
-                }
-
-                //Extracting transactions
-                var transactions = activity.Elements("transaction");
-                List<IATITransaction> transactionsList = new List<IATITransaction>();
-                foreach(var transaction in transactions)
-                {
-                    transactionsList.Add(new IATITransaction()
-                    {
-                        Amount = transaction.Element("value")?.Value,
-                        Currency = transaction.Element("value")?.FirstAttribute.Value,
-                        Dated = transaction.Element("transaction-date")?.Attribute("iso-date").Value,
-                        AidType = transaction.Element("aid-type")?.Value,
-                        TransactionType = transaction.Element("transaction-type")?.Value,
-                        Description = transaction.Element("description")?.Value
-                    });
-                }
-
-                //Extracting Receipient Countries
-                decimal percentage = 100;
-                var recipientCountries = activity.Elements("recipient-country");
-                List<IATICountry> countries = new List<IATICountry>();
-                if (recipientCountries.Count() > 1)
-                {
-                    percentage = (100 / recipientCountries.Count());
-                }
-                    
-                foreach(var country in recipientCountries)
-                {
-                    countries.Add(new IATICountry()
-                    {
-                        Code = country.Attribute("code")?.Value,
-                        ContributionPercentage = percentage.ToString()
-                    });
-                }
-
-                //Extracting Receipient Regions
-                var recipientRegions = activity.Elements("recipient-region");
-                List<IATIRegion> regions = new List<IATIRegion>();
-                decimal regionPercentage = 100;
-                if (recipientRegions.Count() > 1)
-                {
-                    regionPercentage = (100 / recipientRegions.Count());
-                }
-                
-                foreach (var region in recipientRegions)
-                {
-                    regions.Add(new IATIRegion()
-                    {
-                        Code = region.Attribute("code")?.Value,
-                        ContributionPercentage = regionPercentage.ToString()
-                    });
-                }
-
-                //Extracting Sectors
-                var aSectors = activity.Elements("sector");
-                List<IATISector> sectors = new List<IATISector>();
-                var sectorPercentage = (100 / aSectors.Count());
-                foreach (var sector in aSectors)
-                {
-                    sectors.Add(new IATISector()
-                    {
-                        Code = sector.Value,
-                        FundPercentage = sectorPercentage.ToString()
-                    });
-                }
-
-                activityList.Add(new IATIActivity()
-                {
-                    Identifier = activity.Element("iati-identifier")?.Value,
-                    Title = projectTitle,
-                    Countries = countries,
-                    Regions = regions,
-                    Description = activity.Element("description")?.Value,
-                    Sectors = sectors,
-                    DefaultCurrency = currency,
-                    Transactions = transactionsList,
-                    ParticipatingOrganizations = organizationList
-                });
-            }
+            this.ExtractAndFillActivities(activities, activityList);
             return activityList;
         }
 
@@ -180,6 +81,122 @@ namespace AIMS.IATILib.Parsers
                 message = ex.Message;
             }
             return projectsList;
+        }
+
+        private void ExtractAndFillActivities(IEnumerable<XElement> activities, List<IATIActivity> activityList)
+        {
+            string currency = "";
+            foreach (var activity in activities)
+            {
+                string startDate, endDate, projectTitle = "";
+                currency = activity.Attribute("default-currency").Value;
+                projectTitle = activity.Element("title")?.Value;
+
+                //Extracting dates
+                var dates = activity.Elements("activity-date");
+                foreach (var date in dates)
+                {
+                    if (date.Attribute("type").Value.Equals("start-actual"))
+                    {
+                        startDate = date.FirstAttribute?.Value;
+                    }
+                    else if (date.Attribute("type").Value.Equals("end-planned"))
+                    {
+                        endDate = date.FirstAttribute?.Value;
+                    }
+                }
+
+                //Extracting participating organizations
+                var organizations = activity.Elements("participating-org");
+                List<IATIOrganization> organizationList = new List<IATIOrganization>();
+                foreach (var organization in organizations)
+                {
+                    organizationList.Add(new IATIOrganization()
+                    {
+                        Project = projectTitle,
+                        Name = organization?.Value,
+                        Role = organization.Attribute("role")?.Value
+                    });
+                }
+
+                //Extracting transactions
+                var transactions = activity.Elements("transaction");
+                List<IATITransaction> transactionsList = new List<IATITransaction>();
+                foreach (var transaction in transactions)
+                {
+                    transactionsList.Add(new IATITransaction()
+                    {
+                        Amount = transaction.Element("value")?.Value,
+                        Currency = transaction.Element("value")?.FirstAttribute.Value,
+                        Dated = transaction.Element("transaction-date")?.Attribute("iso-date").Value,
+                        AidType = transaction.Element("aid-type")?.Value,
+                        TransactionType = transaction.Element("transaction-type")?.Value,
+                        Description = transaction.Element("description")?.Value
+                    });
+                }
+
+                //Extracting Receipient Countries
+                decimal percentage = 100;
+                var recipientCountries = activity.Elements("recipient-country");
+                List<IATICountry> countries = new List<IATICountry>();
+                if (recipientCountries.Count() > 1)
+                {
+                    percentage = (100 / recipientCountries.Count());
+                }
+
+                foreach (var country in recipientCountries)
+                {
+                    countries.Add(new IATICountry()
+                    {
+                        Code = country.Attribute("code")?.Value,
+                        ContributionPercentage = percentage.ToString()
+                    });
+                }
+
+                //Extracting Receipient Regions
+                var recipientRegions = activity.Elements("recipient-region");
+                List<IATIRegion> regions = new List<IATIRegion>();
+                decimal regionPercentage = 100;
+                if (recipientRegions.Count() > 1)
+                {
+                    regionPercentage = (100 / recipientRegions.Count());
+                }
+
+                foreach (var region in recipientRegions)
+                {
+                    regions.Add(new IATIRegion()
+                    {
+                        Code = region.Attribute("code")?.Value,
+                        ContributionPercentage = regionPercentage.ToString()
+                    });
+                }
+
+                //Extracting Sectors
+                var aSectors = activity.Elements("sector");
+                List<IATISector> sectors = new List<IATISector>();
+                var sectorPercentage = (100 / aSectors.Count());
+                foreach (var sector in aSectors)
+                {
+                    sectors.Add(new IATISector()
+                    {
+                        Code = sector.Value,
+                        FundPercentage = sectorPercentage.ToString()
+                    });
+                }
+
+                activityList.Add(new IATIActivity()
+                {
+                    Identifier = activity.Element("iati-identifier")?.Value,
+                    Title = projectTitle,
+                    Countries = countries,
+                    Regions = regions,
+                    Description = activity.Element("description")?.Value,
+                    Sectors = sectors,
+                    DefaultCurrency = currency,
+                    Transactions = transactionsList,
+                    ParticipatingOrganizations = organizationList
+                });
+            }
         }
     }
 }

@@ -32,6 +32,25 @@ namespace AIMS.IATILib.Parsers
             return activityList;
         }
 
+        public ICollection<IATIActivity> ExtractAcitivitiesForIds(XDocument xmlDoc, IEnumerable<string> Ids)
+        {
+            List<IATIActivity> activityList = new List<IATIActivity>();
+            //Pick up all narratives
+            var activities = from activity in xmlDoc.Descendants("iati-activity")
+                             where activity.Element("title").Element("narrative") != null &&
+                             Ids.Contains(activity.Element("iati-identifier").Value)
+                             select activity;
+            this.ParseIATIAndFillList(activities, activityList);
+
+            //Pick up all titles
+            var titleActivities = from activity in xmlDoc.Descendants("iati-activity")
+                                  where activity.Element("title") != null &&
+                                  Ids.Contains(activity.Element("iati-identifier").Value)
+                                  select activity;
+            this.ParseIATIAndFillList(titleActivities, activityList);
+            return activityList;
+        }
+
         public ICollection<IATIProject> ExtractProjects(XDocument xmlDoc)
         {
             List<IATIProject> projectsList = new List<IATIProject>();

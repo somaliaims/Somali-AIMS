@@ -59,6 +59,13 @@ namespace AIMS.Services
         ICollection<IATIProject> GetProjects(string dataFilePath);
 
         /// <summary>
+        /// Get activities by provided Ids
+        /// </summary>
+        /// <param name="IdsModel"></param>
+        /// <returns></returns>
+        ICollection<IATIActivity> GetActivitiesByIds(string dataFilePath, List<IATIByIdModel> IdsModel);
+
+        /// <summary>
         /// Gets all the activities
         /// </summary>
         /// <returns></returns>
@@ -96,7 +103,6 @@ namespace AIMS.Services
 
         public ICollection<IATIActivity> GetMatchingIATIActivities(string dataFilePath, string criteria)
         {
-            //string url = "http://datastore.iatistandard.org/api/1/access/activity.xml?recipient-country=" + countryCode + "&stream=true";
             string url = dataFilePath;
             XmlReader xReader = XmlReader.Create(url);
             XDocument xDoc = XDocument.Load(xReader);
@@ -118,6 +124,76 @@ namespace AIMS.Services
                 case "2.01":
                     parser = new ParserIATIVersion21();
                     activityList = parser.ExtractAcitivities(xDoc, criteria);
+                    break;
+            }
+
+            //Extract organizations for future use
+            if (activityList.Count > 0)
+            {
+                if (activityList != null)
+                {
+                    var organizationList = from a in activityList
+                                           select a.ParticipatingOrganizations;
+
+                    if (organizationList.Count() > 0)
+                    {
+                        foreach (var orgCollection in organizationList)
+                        {
+                            var orgList = from list in orgCollection
+                                          select list;
+
+                            foreach (var org in orgList)
+                            {
+                                IATIOrganization orgExists = null;
+                                if (organizations.Count > 0 && org != null && org.Name != null)
+                                {
+                                    orgExists = (from o in organizations
+                                                 where o.Name.ToLower().Equals(org.Name.ToLower())
+                                                 select o).FirstOrDefault();
+                                }
+
+                                if (orgExists == null)
+                                {
+                                    organizations.Add(new IATIOrganization()
+                                    {
+                                        Project = org.Project,
+                                        Name = org.Name,
+                                        Role = org.Role
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return activityList;
+        }
+
+        public ICollection<IATIActivity> GetActivitiesByIds(string dataFilePath, List<IATIByIdModel> IdsModel)
+        {
+            string url = dataFilePath;
+            XmlReader xReader = XmlReader.Create(url);
+            XDocument xDoc = XDocument.Load(xReader);
+            var activity = (from el in xDoc.Descendants("iati-activity")
+                            select el.FirstAttribute).FirstOrDefault();
+
+            IEnumerable<string> ids = (from id in IdsModel
+                            select id.identifier);
+            IParser parser;
+            ICollection<IATIActivity> activityList = new List<IATIActivity>();
+            ICollection<IATIOrganization> organizations = new List<IATIOrganization>();
+            string version = "";
+            version = activity.Value;
+            switch (version)
+            {
+                case "1.03":
+                    parser = new ParserIATIVersion13();
+                    activityList = parser.ExtractAcitivitiesForIds(xDoc, ids);
+                    break;
+
+                case "2.01":
+                    parser = new ParserIATIVersion21();
+                    activityList = parser.ExtractAcitivitiesForIds(xDoc, ids);
                     break;
             }
 

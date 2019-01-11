@@ -711,4 +711,9 @@ namespace AIMS.Models
         public ICollection<ProjectProfileView> ProjectsList { get; set; }
     }
 
+    public class IATIByIdModel
+    {
+        public string identifier { get; set; }
+    }
+
 }

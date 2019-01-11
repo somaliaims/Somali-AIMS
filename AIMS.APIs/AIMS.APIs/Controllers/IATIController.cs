@@ -103,5 +103,19 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(response.Success);
         }
+
+        [HttpPost]
+        [Route("ExtractProjectsByIds")]
+        public IActionResult ExtractProjectsByIds([FromBody] List<IATIByIdModel> Ids)
+        {
+            if (Ids.Count() == 0)
+            {
+                return Ok("[]");
+            }
+
+            string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
+            var activities = iatiService.GetActivitiesByIds(iatiFilePath, Ids);
+            return Ok(activities);
+        }
     }
 }

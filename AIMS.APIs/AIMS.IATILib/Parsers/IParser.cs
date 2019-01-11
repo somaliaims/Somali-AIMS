@@ -17,6 +17,14 @@ namespace AIMS.IATILib.Parsers
         ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria);
 
         /// <summary>
+        /// Extract activities for ids
+        /// </summary>
+        /// <param name="xmlDoc"></param>
+        /// <param name="Ids"></param>
+        /// <returns></returns>
+        ICollection<IATIActivity> ExtractAcitivitiesForIds(XDocument xmlDoc, IEnumerable<string> Ids);
+
+        /// <summary>
         /// Parses short version of projects
         /// </summary>
         /// <param name="xmlDoc"></param>
