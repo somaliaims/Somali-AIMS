@@ -67,6 +67,13 @@ namespace AIMS.Services
         IEnumerable<ProjectView> GetMatching(string criteria);
 
         /// <summary>
+        /// Gets project profiles for the provided project ids
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        Task<IEnumerable<ProjectProfileView>> GetProjectsByIdsAsync(List<int> ids);
+
+        /// <summary>
         /// Gets all projects async
         /// </summary>
         /// <returns></returns>
@@ -349,6 +356,37 @@ namespace AIMS.Services
                     ProjectProfile = profileView
                 };
                 return await Task<ProjectProfileReport>.Run(() => projectProfileReport).ConfigureAwait(false);
+            }
+        }
+
+        public async Task<IEnumerable<ProjectProfileView>> GetProjectsByIdsAsync(List<int> ids)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id) , new string[] { "Sectors", "Locations", "Disbursements", "Funders", "Implementors", "Documents" });
+                List<ProjectProfileView> profileViewList = new List<ProjectProfileView>();
+
+                if (projectProfileList != null)
+                {
+                    foreach (var project in projectProfileList)
+                    {
+                        profileViewList.Add(new ProjectProfileView()
+                        {
+                            Id = project.Id,
+                            Description = project.Description,
+                            StartDate = project.StartDate.ToLongDateString(),
+                            EndDate = project.EndDate.ToLongDateString(),
+                            Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors),
+                            Locations = mapper.Map<List<ProjectLocationView>>(project.Locations),
+                            Funders = mapper.Map<List<ProjectFunderView>>(project.Funders),
+                            Implementers = mapper.Map<List<ProjectImplementorView>>(project.Implementors),
+                            Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements),
+                            Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents)
+                        });
+                    }
+                }
+
+                return await Task<IEnumerable<ProjectProfileView>>.Run(() => profileViewList).ConfigureAwait(false);
             }
         }
 

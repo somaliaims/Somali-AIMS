@@ -178,7 +178,7 @@ namespace AIMS.Services
                             select el.FirstAttribute).FirstOrDefault();
 
             IEnumerable<string> ids = (from id in IdsModel
-                            select id.identifier);
+                            select id.Identifier);
             IParser parser;
             ICollection<IATIActivity> activityList = new List<IATIActivity>();
             ICollection<IATIOrganization> organizations = new List<IATIOrganization>();

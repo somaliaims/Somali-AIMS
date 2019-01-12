@@ -713,7 +713,7 @@ namespace AIMS.Models
 
     public class IATIByIdModel
     {
-        public string identifier { get; set; }
+        public string Identifier { get; set; }
     }
 
 }
