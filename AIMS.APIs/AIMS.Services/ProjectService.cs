@@ -373,6 +373,7 @@ namespace AIMS.Services
                         profileViewList.Add(new ProjectProfileView()
                         {
                             Id = project.Id,
+                            Title = project.Title,
                             Description = project.Description,
                             StartDate = project.StartDate.ToLongDateString(),
                             EndDate = project.EndDate.ToLongDateString(),

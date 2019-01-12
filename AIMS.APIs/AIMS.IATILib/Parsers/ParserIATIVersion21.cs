@@ -43,11 +43,11 @@ namespace AIMS.IATILib.Parsers
             this.ParseIATIAndFillList(activities, activityList);
 
             //Pick up all titles
-            var titleActivities = from activity in xmlDoc.Descendants("iati-activity")
+            /*var titleActivities = from activity in xmlDoc.Descendants("iati-activity")
                                   where activity.Element("title") != null &&
                                   Ids.Contains(activity.Element("iati-identifier").Value)
                                   select activity;
-            this.ParseIATIAndFillList(titleActivities, activityList);
+            this.ParseIATIAndFillList(titleActivities, activityList);*/
             return activityList;
         }
 

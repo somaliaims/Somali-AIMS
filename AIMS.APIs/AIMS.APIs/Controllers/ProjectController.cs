@@ -145,6 +145,19 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
+        [Route("ExtractProjectsByIds")]
+        public async Task<IActionResult> ExtractProjectsByIds([FromBody] int[] ids)
+        {
+            if (ids.Count() == 0)
+            {
+                return Ok("[]");
+            }
+            var idsList = ids.ToList<int>();
+            var projects = await projectService.GetProjectsByIdsAsync(idsList);
+            return Ok(projects);
+        }
+
+        [HttpPost]
         [Route("AddProjectLocation")]
         public IActionResult AddProjectLocation([FromBody] ProjectLocationModel model)
         {
