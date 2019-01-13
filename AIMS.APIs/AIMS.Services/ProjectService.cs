@@ -542,8 +542,8 @@ namespace AIMS.Services
                         StartDate = model.StartDate,
                         EndDate = model.EndDate
                     });
-                    response.ReturnedId = newProject.Id;
                     unitWork.Save();
+                    response.ReturnedId = newProject.Id;
                 }
                 catch (Exception ex)
                 {

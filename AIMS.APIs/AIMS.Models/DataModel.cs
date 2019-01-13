@@ -152,9 +152,8 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        [MaxLength(100)]
+        [MaxLength(1000)]
         public string Title { get; set; }
-        [MaxLength(800)]
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

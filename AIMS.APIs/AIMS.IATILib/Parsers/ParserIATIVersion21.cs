@@ -41,13 +41,6 @@ namespace AIMS.IATILib.Parsers
                              Ids.Contains(activity.Element("iati-identifier").Value)
                              select activity;
             this.ParseIATIAndFillList(activities, activityList);
-
-            //Pick up all titles
-            /*var titleActivities = from activity in xmlDoc.Descendants("iati-activity")
-                                  where activity.Element("title") != null &&
-                                  Ids.Contains(activity.Element("iati-identifier").Value)
-                                  select activity;
-            this.ParseIATIAndFillList(titleActivities, activityList);*/
             return activityList;
         }
 
@@ -224,9 +217,16 @@ namespace AIMS.IATILib.Parsers
                         {
                             foreach (var sector in aSectors)
                             {
+                                string sectorName = "";
+                                var setorNarrative = sector.Element("narrative");
+                                if (setorNarrative != null)
+                                {
+                                    sectorName = sector.Element("narrative").Value;
+                                }
                                 sectors.Add(new IATISector()
                                 {
                                     Code = sector.Attribute("code")?.Value,
+                                    SectorName = sectorName,
                                     FundPercentage = sector.Attribute("percentage")?.Value
                                 });
                             }
