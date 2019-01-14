@@ -86,7 +86,7 @@ namespace AIMS.Models
      * is updated, create a new sector for updated name and reference the open projects
      * with the name and update the old sector id reference
      */
-    public class EFSectorTypes
+    /*public class EFSectorTypes
     {
         [Key]
         public int Id { get; set; }
@@ -112,14 +112,13 @@ namespace AIMS.Models
         public int SectorCategoryId { get; set; }
         public EFSectorCategory SectorCategory { get; set; }
         public string SubCategory { get; set; }
-    }
+    }*/
 
     public class EFSector
     {
         [Key]
         public int Id { get; set; }
         public string SectorName { get; set; }
-        [ForeignKey("ParentSector")]
         public int? ParentSectorId { get; set; }
         public EFSector ParentSector { get; set; }
         public DateTime TimeStamp { get; set; }

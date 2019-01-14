@@ -107,9 +107,9 @@ namespace AIMS.APIs
             services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IIATIService, IATIService>();
-            services.AddScoped<ISectorTypesService, SectorTypesService>();
+            /*services.AddScoped<ISectorTypesService, SectorTypesService>();
             services.AddScoped<ISectorCategoryService, SectorCategoryService>();
-            services.AddScoped<ISectorSubCategoryService, SectorSubCategoryService>();
+            services.AddScoped<ISectorSubCategoryService, SectorSubCategoryService>();*/
             services.AddScoped<IProjectService, ProjectService>();
             services.AddSingleton<IConfiguration>(Configuration);
 

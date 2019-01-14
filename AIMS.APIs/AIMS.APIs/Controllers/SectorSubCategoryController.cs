@@ -14,7 +14,7 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class SectorSubCategoryController : ControllerBase
     {
-        ISectorSubCategoryService sectorSubCategoryService;
+        /*ISectorSubCategoryService sectorSubCategoryService;
 
         public SectorSubCategoryController(ISectorSubCategoryService categoryService)
         {
@@ -73,6 +73,6 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(response.Message);
             }
             return Ok(response.Message);
-        }
+        }*/
     }
 }

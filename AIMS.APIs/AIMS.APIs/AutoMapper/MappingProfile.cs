@@ -28,7 +28,7 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFLocation, LocationView>().ReverseMap();
 
-            CreateMap<EFSectorCategory, SectorCategoryView>()
+            /*CreateMap<EFSectorCategory, SectorCategoryView>()
                 .ForMember(c => c.SectorType, opts => opts.MapFrom(source => source.SectorType.TypeName))
                 .ForMember(c => c.SectorTypeId, opts => opts.MapFrom(source => source.SectorType.Id));
 
@@ -40,7 +40,7 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(s => s.CategoryId, opts => opts.MapFrom(source => source.SectorCategory.Id));
 
             CreateMap<EFSectorSubCategory, SectorSubCategoryViewModel>()
-                .ForMember(s => s.CategoryId, opts => opts.MapFrom(source => source.SectorCategory.Id));
+                .ForMember(s => s.CategoryId, opts => opts.MapFrom(source => source.SectorCategory.Id));*/
 
             CreateMap<EFProject, ProjectView>()
                 .ForMember(p => p.StartDate, opts => opts.MapFrom(source => source.StartDate.ToShortDateString()))

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AIMS.Services
 {
-    public interface ISectorSubCategoryService
+    /*public interface ISectorSubCategoryService
     {
         /// <summary>
         /// Gets all sectorCategories
@@ -167,5 +167,5 @@ namespace AIMS.Services
                 return response;
             }
         }
-    }
+    }*/
 }

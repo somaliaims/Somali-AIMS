@@ -59,9 +59,9 @@ namespace AIMS.DAL.EF
         public DbSet<EFOrganizationTypes> OrganizationTypes { get; set; }
         public DbSet<EFOrganization> Organizations { get; set; }
         public DbSet<EFUser> Users { get; set; }
-        public DbSet<EFSectorTypes> SectorTypes { get; set; }
-        public DbSet<EFSectorCategory> SectorCategories { get; set; }
-        public DbSet<EFSectorSubCategory> SectorSubCategories { get; set; }
+        //public DbSet<EFSectorTypes> SectorTypes { get; set; }
+        //public DbSet<EFSectorCategory> SectorCategories { get; set; }
+        //public DbSet<EFSectorSubCategory> SectorSubCategories { get; set; }
         public DbSet<EFSectorMappings> SectorMappings { get; set; }
         public DbSet<EFSector> Sectors { get; set; }
         public DbSet<EFLocation> Locations { get; set; }
