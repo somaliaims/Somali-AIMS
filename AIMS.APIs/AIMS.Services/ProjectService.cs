@@ -325,7 +325,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Locations", "Disbursements", "Funders", "Implementors", "Documents" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementors", "Implementors.Implementor" , "Documents" });
                 ProjectProfileView profileView = new ProjectProfileView();
 
                 if (projectProfileList != null)
@@ -363,7 +363,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id) , new string[] { "Sectors", "Locations", "Disbursements", "Funders", "Implementors", "Documents" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id) , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementors", "Implementors.Implementor", "Documents" });
                 List<ProjectProfileView> profileViewList = new List<ProjectProfileView>();
 
                 if (projectProfileList != null)
@@ -408,7 +408,7 @@ namespace AIMS.Services
                     ProjectsList = projectsList
                 };
 
-                var sector = unitWork.SectorRepository.GetByID(sectorId);
+                var sector = unitWork.ProjectSectorsRepository.GetByID(sectorId);
                 if (sector != null)
                 {
                     var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Sectors.Contains(sector), new string[] { "Sectors", "Locations", "Disbursements", "Funders", "Implementors", "Documents" });

@@ -320,7 +320,6 @@ namespace AIMS.Models
         public string Description { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
-        public int ProjectTypeId { get; set; }
         public ICollection<ProjectFunderView> Funders { get; set; }
         public ICollection<ProjectImplementorView> Implementers { get; set; }
         public ICollection<SectorView> Sectors { get; set; }

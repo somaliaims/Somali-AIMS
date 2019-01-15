@@ -119,8 +119,8 @@ namespace AIMS.Services
                         SectorName = model.SectorName,
                         TimeStamp = DateTime.Now
                     });
-                    response.ReturnedId = newSector.Id;
                     unitWork.Save();
+                    response.ReturnedId = newSector.Id;
                 }
                 catch (Exception ex)
                 {
