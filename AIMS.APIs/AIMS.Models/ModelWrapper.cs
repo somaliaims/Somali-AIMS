@@ -386,7 +386,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Project { get; set; }
         public string Location { get; set; }
-        public decimal FundPercentage { get; set; }
+        public decimal FundsPercentage { get; set; }
     }
 
     public class ProjectLocationModel
@@ -413,10 +413,15 @@ namespace AIMS.Models
 
     public class ProjectSectorModel
     {
+        [Required]
         public int ProjectId { get; set; }
+        [Required]
         public int SectorId { get; set; }
+        [Required]
         public decimal FundsPercentage { get; set; }
+        [Required]
         public string Currency { get; set; }
+        [Required]
         public decimal ExchangeRate { get; set; }
     }
 
@@ -595,7 +600,7 @@ namespace AIMS.Models
     {
         public string Code { get; set; }
         public string SectorName { get; set; }
-        public string FundPercentage { get; set; }
+        public string FundsPercentage { get; set; }
     }
 
     public class IATIDBActivity

@@ -180,7 +180,7 @@ namespace AIMS.IATILib.Parsers
                     sectors.Add(new IATISector()
                     {
                         Code = sector.Value,
-                        FundPercentage = sectorPercentage.ToString()
+                        FundsPercentage = sectorPercentage.ToString()
                     });
                 }
 

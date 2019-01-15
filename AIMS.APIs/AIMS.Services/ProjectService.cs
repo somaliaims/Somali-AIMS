@@ -333,6 +333,7 @@ namespace AIMS.Services
                     foreach(var project in projectProfileList)
                     {
                         profileView.Id = project.Id;
+                        profileView.Title = project.Title;
                         profileView.Description = project.Description;
                         profileView.StartDate = project.StartDate.ToLongDateString();
                         profileView.EndDate = project.EndDate.ToLongDateString();
@@ -418,6 +419,7 @@ namespace AIMS.Services
                         {
                             ProjectProfileView profileView = new ProjectProfileView();
                             profileView.Id = project.Id;
+                            profileView.Title = project.Title;
                             profileView.Description = project.Description;
                             profileView.StartDate = project.StartDate.ToLongDateString();
                             profileView.EndDate = project.EndDate.ToLongDateString();

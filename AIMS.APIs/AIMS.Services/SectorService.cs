@@ -113,12 +113,25 @@ namespace AIMS.Services
                 try
                 {
                     var parentSector = unitWork.SectorRepository.GetByID(model.ParentId);
-                    var newSector = unitWork.SectorRepository.Insert(new EFSector()
+                    EFSector newSector = null;
+
+                    if (parentSector != null)
                     {
-                        ParentSector = parentSector,
-                        SectorName = model.SectorName,
-                        TimeStamp = DateTime.Now
-                    });
+                        newSector = unitWork.SectorRepository.Insert(new EFSector()
+                        {
+                            ParentSector = parentSector,
+                            SectorName = model.SectorName,
+                            TimeStamp = DateTime.Now
+                        });
+                    }
+                    else
+                    {
+                        newSector = unitWork.SectorRepository.Insert(new EFSector()
+                        {
+                            SectorName = model.SectorName,
+                            TimeStamp = DateTime.Now
+                        });
+                    }
                     unitWork.Save();
                     response.ReturnedId = newSector.Id;
                 }

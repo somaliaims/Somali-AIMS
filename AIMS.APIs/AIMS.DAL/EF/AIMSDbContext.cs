@@ -29,6 +29,9 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFProjectFunders>()
                 .HasKey(f => new { f.ProjectId, f.FunderId });
 
+            modelBuilder.Entity<EFSector>()
+                .HasOne(s => s.ParentSector);
+
             modelBuilder.Entity<EFProjectImplementors>()
                 .HasKey(i => new { i.ProjectId, i.ImplementorId });
 

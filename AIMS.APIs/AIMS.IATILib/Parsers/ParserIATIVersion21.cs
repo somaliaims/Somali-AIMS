@@ -227,7 +227,7 @@ namespace AIMS.IATILib.Parsers
                                 {
                                     Code = sector.Attribute("code")?.Value,
                                     SectorName = sectorName,
-                                    FundPercentage = sector.Attribute("percentage")?.Value
+                                    FundsPercentage = sector.Attribute("percentage")?.Value
                                 });
                             }
                         }

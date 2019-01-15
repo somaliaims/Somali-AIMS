@@ -29,7 +29,7 @@ namespace AIMS.IATILib.Parsers
     {
         public string Code { get; set; }
         public string SectorName { get; set; }
-        public string FundPercentage { get; set; }
+        public string FundsPercentage { get; set; }
     }
 
     public class IATILocation

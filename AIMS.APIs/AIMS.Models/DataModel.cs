@@ -119,6 +119,7 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string SectorName { get; set; }
+        [ForeignKey("ParentSector")]
         public int? ParentSectorId { get; set; }
         public EFSector ParentSector { get; set; }
         public DateTime TimeStamp { get; set; }
@@ -181,6 +182,7 @@ namespace AIMS.Models
     {
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
+        [ForeignKey("Sector")]
         public int SectorId { get; set; }
         public EFSector Sector { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
