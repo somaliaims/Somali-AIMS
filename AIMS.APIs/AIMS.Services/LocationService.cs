@@ -113,8 +113,8 @@ namespace AIMS.Services
                         Latitude = model.Latitude,
                         Longitude = model.Longitude
                     });
-                    response.ReturnedId = newLocation.Id;
                     unitWork.Save();
+                    response.ReturnedId = newLocation.Id;
                 }
                 catch (Exception ex)
                 {
