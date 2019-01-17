@@ -338,7 +338,7 @@ namespace AIMS.Services
                         profileView.StartDate = project.StartDate.ToLongDateString();
                         profileView.EndDate = project.EndDate.ToLongDateString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
-                        profileView.Locations = mapper.Map<List<ProjectLocationView>>(project.Locations);
+                        profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                         profileView.Implementers = mapper.Map<List<ProjectImplementorView>>(project.Implementors);
                         profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);
@@ -379,7 +379,7 @@ namespace AIMS.Services
                             StartDate = project.StartDate.ToLongDateString(),
                             EndDate = project.EndDate.ToLongDateString(),
                             Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors),
-                            Locations = mapper.Map<List<ProjectLocationView>>(project.Locations),
+                            Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations),
                             Funders = mapper.Map<List<ProjectFunderView>>(project.Funders),
                             Implementers = mapper.Map<List<ProjectImplementorView>>(project.Implementors),
                             Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements),
@@ -424,7 +424,7 @@ namespace AIMS.Services
                             profileView.StartDate = project.StartDate.ToLongDateString();
                             profileView.EndDate = project.EndDate.ToLongDateString();
                             profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
-                            profileView.Locations = mapper.Map<List<ProjectLocationView>>(project.Locations);
+                            profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                             profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                             profileView.Implementers = mapper.Map<List<ProjectImplementorView>>(project.Implementors);
                             profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);

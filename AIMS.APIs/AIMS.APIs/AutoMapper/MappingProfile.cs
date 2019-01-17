@@ -56,6 +56,13 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(l => l.Latitude, opts => opts.MapFrom(source => source.Location.Latitude))
                 .ForMember(l => l.Longitude, opts => opts.MapFrom(source => source.Location.Longitude));
 
+            CreateMap<EFProjectLocations, ProjectLocationDetailView>()
+                .ForMember(l => l.Id, opts => opts.MapFrom(source => source.Location.Id))
+                .ForMember(l => l.Location, opts => opts.MapFrom(source => source.Location.Location))
+                .ForMember(l => l.Latitude, opts => opts.MapFrom(source => source.Location.Latitude))
+                .ForMember(l => l.Longitude, opts => opts.MapFrom(source => source.Location.Longitude))
+                .ForMember(l => l.FundsPercentage, opts => opts.MapFrom(source => source.FundsPercentage));
+
             CreateMap<EFProjectSectors, ProjectSectorView>()
                 .ForMember(s => s.SectorId, opts => opts.MapFrom(source => source.Sector.Id))
                 .ForMember(s => s.Sector, opts => opts.MapFrom(source => source.Sector.SectorName))

@@ -339,7 +339,7 @@ namespace AIMS.Models
         public ICollection<ProjectFunderView> Funders { get; set; }
         public ICollection<ProjectImplementorView> Implementers { get; set; }
         public ICollection<ProjectSectorView> Sectors { get; set; }
-        public ICollection<ProjectLocationView> Locations { get; set; }
+        public ICollection<ProjectLocationDetailView> Locations { get; set; }
         public ICollection<ProjectDisbursementView> Disbursements { get; set; }
         public ICollection<ProjectDocumentView> Documents { get; set; }
     }
@@ -386,6 +386,15 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Project { get; set; }
         public string Location { get; set; }
+        public decimal FundsPercentage { get; set; }
+    }
+
+    public class ProjectLocationDetailView
+    {
+        public int Id { get; set; }
+        public string Location { get; set; }
+        public decimal Latitude { get; set; }
+        public decimal Longitude { get; set; }
         public decimal FundsPercentage { get; set; }
     }
 
