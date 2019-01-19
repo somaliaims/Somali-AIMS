@@ -56,6 +56,13 @@ namespace AIMS.IATILib.Parsers
         public string Description { get; set; }
     }
 
+    public class IATIDocument
+    {
+        public int Id { get; set; }
+        public string DocumentTitle { get; set; }
+        public string DocumentUrl { get; set; }
+    }
+
     public class IATIActivity
     {
         public int Id { get; set; }
@@ -69,6 +76,7 @@ namespace AIMS.IATILib.Parsers
         public ICollection<IATIRegion> Regions { get; set; }
         public ICollection<IATIOrganization> ParticipatingOrganizations { get; set; }
         public ICollection<IATITransaction> Transactions { get; set; }
+        public ICollection<IATIDocument> Documents { get; set; }
     }
 
     public class IATIView

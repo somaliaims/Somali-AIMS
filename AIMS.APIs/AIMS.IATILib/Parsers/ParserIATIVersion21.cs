@@ -155,6 +155,39 @@ namespace AIMS.IATILib.Parsers
                                        select t.Name).FirstOrDefault();*/
                         }
 
+                        //Extracting documents
+                        var documents = activity.Elements("document-link");
+                        List<IATIDocument> documentsList = new List<IATIDocument>();
+
+                        if (documents != null)
+                        {
+                            int dCounter = 1;
+                            foreach (var document in documents)
+                            {
+                                string url = "";
+                                string title = "";
+                                if (document.HasAttributes)
+                                {
+                                    url = document.Attribute("url")?.Value;
+                                }
+                                if (document.Element("title") != null && document.Element("title").Element("narrative") != null)
+                                {
+                                    title = document.Element("title").Element("narrative")?.Value;
+                                }
+
+                                if (!string.IsNullOrEmpty(title) || !string.IsNullOrEmpty(url))
+                                {
+                                    documentsList.Add(new IATIDocument()
+                                    {
+                                        Id = dCounter,
+                                        DocumentTitle = title,
+                                        DocumentUrl = url
+                                    });
+                                    ++dCounter;
+                                }
+                            }
+                        }
+
                         //Extracting transactions
                         var transactions = activity.Elements("transaction");
                         List<IATITransaction> transactionsList = new List<IATITransaction>();
@@ -315,6 +348,7 @@ namespace AIMS.IATILib.Parsers
                             Locations = locations,
                             Countries = countries,
                             Regions = regions,
+                            Documents = documentsList,
                             Description = activity.Element("description")?.Value,
                             Sectors = sectors,
                             DefaultCurrency = currency,
