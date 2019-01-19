@@ -41,6 +41,7 @@ namespace AIMS.IATILib.Parsers
 
     public class IATIOrganization
     {
+        public int Id { get; set; }
         public string Project { get; set; }
         public string Name { get; set; }
         public string Role { get; set; }

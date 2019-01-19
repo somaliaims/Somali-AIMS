@@ -66,6 +66,8 @@ namespace AIMS.IATILib.Parsers
                 if (activities != null)
                 {
                     int activityCounter = 1;
+                    int orgCounter = 1;
+                    int documentCounter = 1;
                     foreach (var activity in activities)
                     {
                         string startDate, endDate, projectTitle = "";
@@ -137,10 +139,12 @@ namespace AIMS.IATILib.Parsers
 
                                     organizationList.Add(new IATIOrganization()
                                     {
+                                        Id = orgCounter,
                                         Project = projectTitle,
                                         Name = organizationName,
                                         Role = role.ToString()
                                     });
+                                    ++orgCounter;
                                 }
                             }
                         }
@@ -161,7 +165,6 @@ namespace AIMS.IATILib.Parsers
 
                         if (documents != null)
                         {
-                            int dCounter = 1;
                             foreach (var document in documents)
                             {
                                 string url = "";
@@ -179,11 +182,11 @@ namespace AIMS.IATILib.Parsers
                                 {
                                     documentsList.Add(new IATIDocument()
                                     {
-                                        Id = dCounter,
+                                        Id = documentCounter,
                                         DocumentTitle = title,
                                         DocumentUrl = url
                                     });
-                                    ++dCounter;
+                                    ++documentCounter;
                                 }
                             }
                         }
@@ -299,18 +302,6 @@ namespace AIMS.IATILib.Parsers
                                 if (locationPoint != null)
                                 {
                                     var position = locationPoint.Element("pos")?.Value;
-
-                                    /*if (position != null)
-                                    {
-                                        if (position.HasAttributes)
-                                        {
-                                            if (position.Attribute("latitude") != null)
-                                                latitude = position.Attribute("latitude")?.Value;
-
-                                            if (position.Attribute("longitude") != null)
-                                                longitude = position.Attribute("longitude")?.Value;
-                                        }
-                                    }*/
                                     if (position != null)
                                     {
                                         string[] arr = position.Split();
