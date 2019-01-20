@@ -107,14 +107,27 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var newLocation = unitWork.LocationRepository.Insert(new EFLocation()
+                    var isLocationCreated = unitWork.LocationRepository.GetOne(l => l.Location.ToLower() == model.Location.ToLower());
+                    if (isLocationCreated != null)
                     {
-                        Location = model.Location,
-                        Latitude = model.Latitude,
-                        Longitude = model.Longitude
-                    });
-                    unitWork.Save();
-                    response.ReturnedId = newLocation.Id;
+                        isLocationCreated.Latitude = model.Latitude;
+                        isLocationCreated.Longitude = model.Longitude;
+                        unitWork.LocationRepository.Update(isLocationCreated);
+
+                        response.ReturnedId = isLocationCreated.Id;
+                    }
+                    else
+                    {
+                        var newLocation = unitWork.LocationRepository.Insert(new EFLocation()
+                        {
+                            Location = model.Location,
+                            Latitude = model.Latitude,
+                            Longitude = model.Longitude
+                        });
+                        unitWork.Save();
+                        response.ReturnedId = newLocation.Id;
+                    }
+                    
                 }
                 catch (Exception ex)
                 {

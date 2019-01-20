@@ -112,28 +112,36 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var parentSector = unitWork.SectorRepository.GetByID(model.ParentId);
-                    EFSector newSector = null;
-
-                    if (parentSector != null)
+                    var isSectorCreated = unitWork.SectorRepository.GetOne(s => s.SectorName.ToLower() == model.SectorName);
+                    if (isSectorCreated != null)
                     {
-                        newSector = unitWork.SectorRepository.Insert(new EFSector()
-                        {
-                            ParentSector = parentSector,
-                            SectorName = model.SectorName,
-                            TimeStamp = DateTime.Now
-                        });
+                        response.ReturnedId = isSectorCreated.Id;
                     }
                     else
                     {
-                        newSector = unitWork.SectorRepository.Insert(new EFSector()
+                        var parentSector = unitWork.SectorRepository.GetByID(model.ParentId);
+                        EFSector newSector = null;
+
+                        if (parentSector != null)
                         {
-                            SectorName = model.SectorName,
-                            TimeStamp = DateTime.Now
-                        });
+                            newSector = unitWork.SectorRepository.Insert(new EFSector()
+                            {
+                                ParentSector = parentSector,
+                                SectorName = model.SectorName,
+                                TimeStamp = DateTime.Now
+                            });
+                        }
+                        else
+                        {
+                            newSector = unitWork.SectorRepository.Insert(new EFSector()
+                            {
+                                SectorName = model.SectorName,
+                                TimeStamp = DateTime.Now
+                            });
+                        }
+                        unitWork.Save();
+                        response.ReturnedId = newSector.Id;
                     }
-                    unitWork.Save();
-                    response.ReturnedId = newSector.Id;
                 }
                 catch (Exception ex)
                 {

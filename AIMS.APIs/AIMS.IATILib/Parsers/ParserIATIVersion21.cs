@@ -126,7 +126,7 @@ namespace AIMS.IATILib.Parsers
                                         {
                                             organizationName = (from n in narratives
                                                                 where n.FirstAttribute.Value == "en"
-                                                                select n.FirstAttribute.Value).FirstOrDefault();
+                                                                select n.Value).FirstOrDefault();
                                         }
                                         else
                                         {

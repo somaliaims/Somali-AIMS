@@ -120,12 +120,20 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                    var isOrganizationCreated = unitWork.OrganizationRepository.GetOne(o => o.OrganizationName.ToLower() == model.Name.ToLower());
+                    if (isOrganizationCreated != null)
                     {
-                        OrganizationName = model.Name,
-                    });
-                    response.ReturnedId = newOrganization.Id;
-                    unitWork.Save();
+                        response.ReturnedId = isOrganizationCreated.Id;
+                    }
+                    else
+                    {
+                        var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                        {
+                            OrganizationName = model.Name,
+                        });
+                        response.ReturnedId = newOrganization.Id;
+                        unitWork.Save();
+                    }
                 }
                 catch (Exception ex)
                 {
