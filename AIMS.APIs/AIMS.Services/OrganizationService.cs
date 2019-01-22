@@ -131,8 +131,8 @@ namespace AIMS.Services
                         {
                             OrganizationName = model.Name,
                         });
-                        response.ReturnedId = newOrganization.Id;
                         unitWork.Save();
+                        response.ReturnedId = newOrganization.Id;
                     }
                 }
                 catch (Exception ex)

@@ -32,8 +32,8 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFSector>()
                 .HasOne(s => s.ParentSector);
 
-            modelBuilder.Entity<EFProjectImplementors>()
-                .HasKey(i => new { i.ProjectId, i.ImplementorId });
+            modelBuilder.Entity<EFProjectImplementers>()
+                .HasKey(i => new { i.ProjectId, i.ImplementerId });
 
             modelBuilder.Entity<EFProjectDisbursements>()
                 .HasKey(d => new { d.ProjectId, d.StartingYear });
@@ -71,7 +71,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFCustomFields> CustomFields { get; set; }
         public DbSet<EFProject> Projects { get; set; }
         public DbSet<EFProjectFunders> ProjectFunders { get; set; }
-        public DbSet<EFProjectImplementors> ProjectImplementors { get; set; }
+        public DbSet<EFProjectImplementers> ProjectImplementers { get; set; }
         public DbSet<EFProjectLocations> ProjectLocations { get; set; }
         public DbSet<EFProjectSectors> ProjectSectors { get; set; }
         public DbSet<EFProjectDisbursements> ProjectDisbursements { get; set; }

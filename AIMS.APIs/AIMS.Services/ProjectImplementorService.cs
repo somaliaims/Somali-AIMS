@@ -10,39 +10,39 @@ using System.Threading.Tasks;
 
 namespace AIMS.Services
 {
-    public interface IProjectImplementorService
+    public interface IProjectImplementerService
     {
         /// <summary>
-        /// Gets all projectImplementors
+        /// Gets all projectImplementers
         /// </summary>
         /// <returns></returns>
-        IEnumerable<ProjectImplementorView> GetAll();
+        IEnumerable<ProjectImplementerView> GetAll();
 
         /// <summary>
-        /// Gets all projectImplementors async
+        /// Gets all projectImplementers async
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<ProjectImplementorView>> GetAllAsync();
+        Task<IEnumerable<ProjectImplementerView>> GetAllAsync();
 
         /// <summary>
-        /// Gets list of implementors for the provided project id
+        /// Gets list of implementers for the provided project id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        IEnumerable<ProjectImplementorView> GetProjectImplementors(int id);
+        IEnumerable<ProjectImplementerView> GetProjectImplementers(int id);
 
         /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(ProjectImplementorModel projectImplementor);
+        ActionResponse Add(ProjectImplementerModel projectImplementer);
 
         /// <summary>
-        /// Updates a projectImplementor
+        /// Updates a projectImplementer
         /// </summary>
-        /// <param name="projectImplementor"></param>
+        /// <param name="projectImplementer"></param>
         /// <returns></returns>
-        ActionResponse RemoveImplementor(ProjectImplementorModel model);
+        ActionResponse RemoveImplementer(ProjectImplementerModel model);
 
         /// <summary>
         /// Deletes organization type by id
@@ -52,45 +52,45 @@ namespace AIMS.Services
         ActionResponse Delete(int id);
     }
 
-    public class ProjectImplementorService
+    public class ProjectImplementerService
     {
         AIMSDbContext context;
         IMapper mapper;
 
-        public ProjectImplementorService(AIMSDbContext cntxt, IMapper autoMapper)
+        public ProjectImplementerService(AIMSDbContext cntxt, IMapper autoMapper)
         {
             context = cntxt;
             mapper = autoMapper;
         }
 
-        public IEnumerable<ProjectImplementorView> GetAll()
+        public IEnumerable<ProjectImplementerView> GetAll()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectImplementors = unitWork.ProjectImplementorsRepository.GetAll();
-                return mapper.Map<List<ProjectImplementorView>>(projectImplementors);
+                var projectImplementers = unitWork.ProjectImplementersRepository.GetAll();
+                return mapper.Map<List<ProjectImplementerView>>(projectImplementers);
             }
         }
 
-        public async Task<IEnumerable<ProjectImplementorView>> GetAllAsync()
+        public async Task<IEnumerable<ProjectImplementerView>> GetAllAsync()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectImplementors = await unitWork.ProjectImplementorsRepository.GetAllAsync();
-                return await Task<IEnumerable<ProjectImplementorView>>.Run(() => mapper.Map<List<ProjectImplementorView>>(projectImplementors)).ConfigureAwait(false);
+                var projectImplementers = await unitWork.ProjectImplementersRepository.GetAllAsync();
+                return await Task<IEnumerable<ProjectImplementerView>>.Run(() => mapper.Map<List<ProjectImplementerView>>(projectImplementers)).ConfigureAwait(false);
             }
         }
 
-        public IEnumerable<ProjectImplementorView> GetProjectImplementors(int id)
+        public IEnumerable<ProjectImplementerView> GetProjectImplementers(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectImplementors = unitWork.ProjectImplementorsRepository.GetMany(i => i.ProjectId == id);
-                return mapper.Map<List<ProjectImplementorView>>(projectImplementors);
+                var projectImplementers = unitWork.ProjectImplementersRepository.GetMany(i => i.ProjectId == id);
+                return mapper.Map<List<ProjectImplementerView>>(projectImplementers);
             }
         }
 
-        public ActionResponse Add(ProjectImplementorModel model)
+        public ActionResponse Add(ProjectImplementerModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -106,20 +106,20 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var implementor = unitWork.OrganizationRepository.GetByID(model.ImplementorId);
-                    if (implementor == null)
+                    var implementer = unitWork.OrganizationRepository.GetByID(model.ImplementerId);
+                    if (implementer == null)
                     {
                         response.Success = false;
-                        response.Message = mHelper.GetNotFound("Organization/Implementor");
+                        response.Message = mHelper.GetNotFound("Organization/Implementer");
                         return response;
                     }
 
-                    var newProjectImplementor = unitWork.ProjectImplementorsRepository.Insert(new EFProjectImplementors()
+                    var newProjectImplementer = unitWork.ProjectImplementersRepository.Insert(new EFProjectImplementers()
                     {
                         Project = project,
-                        Implementor = implementor,
+                        Implementer = implementer,
                     });
-                    response.ReturnedId = newProjectImplementor.ImplementorId;
+                    response.ReturnedId = newProjectImplementer.ImplementerId;
                     unitWork.Save();
                 }
                 catch (Exception ex)
@@ -131,21 +131,21 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse RemoveImplementor(ProjectImplementorModel model)
+        public ActionResponse RemoveImplementer(ProjectImplementerModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectImplementor = unitWork.ProjectImplementorsRepository.Get(pf => pf.ImplementorId.Equals(model.ImplementorId) && pf.ProjectId.Equals(model.ProjectId));
-                if (projectImplementor == null)
+                var projectImplementer = unitWork.ProjectImplementersRepository.Get(pf => pf.ImplementerId.Equals(model.ImplementerId) && pf.ProjectId.Equals(model.ProjectId));
+                if (projectImplementer == null)
                 {
                     IMessageHelper mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("Project Implementor");
+                    response.Message = mHelper.GetNotFound("Project Implementer");
                     return response;
                 }
 
-                unitWork.ProjectImplementorsRepository.Delete(projectImplementor);
+                unitWork.ProjectImplementersRepository.Delete(projectImplementer);
                 unitWork.Save();
                 response.Message = "1";
                 return response;
@@ -157,16 +157,16 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectImplementorObj = unitWork.ProjectImplementorsRepository.GetByID(id);
-                if (projectImplementorObj == null)
+                var projectImplementerObj = unitWork.ProjectImplementersRepository.GetByID(id);
+                if (projectImplementerObj == null)
                 {
                     IMessageHelper mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("Project Implementor");
+                    response.Message = mHelper.GetNotFound("Project Implementer");
                     return response;
                 }
 
-                unitWork.ProjectImplementorsRepository.Delete(projectImplementorObj);
+                unitWork.ProjectImplementersRepository.Delete(projectImplementerObj);
                 unitWork.Save();
                 return response;
             }

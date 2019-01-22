@@ -30,7 +30,7 @@
             </summary>
             <returns>Will return an array or json objects</returns>
         </member>
-        <member name="M:AIMS.APIs.Controllers.ProjectImplementorController.Get">
+        <member name="M:AIMS.APIs.Controllers.ProjectImplementerController.Get">
             <summary>
             Gets list of organizations
             </summary>

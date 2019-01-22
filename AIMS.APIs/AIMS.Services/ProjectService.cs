@@ -135,11 +135,11 @@ namespace AIMS.Services
         ActionResponse AddProjectFunder(ProjectFunderModel model);
 
         /// <summary>
-        /// Adds implementor to a project
+        /// Adds implementer to a project
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse AddProjectImplementor(ProjectImplementorModel model);
+        ActionResponse AddProjectImplementer(ProjectImplementerModel model);
 
         /// <summary>
         /// Adds disbursement to a project
@@ -170,11 +170,11 @@ namespace AIMS.Services
         IEnumerable<ProjectFunderView> GetProjectFunders(int id);
 
         /// <summary>
-        /// Gets implementors for the provided project id
+        /// Gets implementers for the provided project id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        IEnumerable<ProjectImplementorView> GetProjectImplementors(int id);
+        IEnumerable<ProjectImplementerView> GetProjectImplementers(int id);
 
         /// <summary>
         /// Gets project disbursements
@@ -222,12 +222,12 @@ namespace AIMS.Services
         ActionResponse DeleteProjectFunder(int projectId, int funderId);
 
         /// <summary>
-        /// Deletes project implementor
+        /// Deletes project implementer
         /// </summary>
         /// <param name="projectId"></param>
-        /// <param name="implementorId"></param>
+        /// <param name="implementerId"></param>
         /// <returns></returns>
-        ActionResponse DeleteProjectImplementor(int projectId, int implementorId);
+        ActionResponse DeleteProjectImplementer(int projectId, int implementerId);
 
         /// <summary>
         /// Deletes the disbursement with the provided id
@@ -325,7 +325,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementors", "Implementors.Implementor" , "Documents" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" , "Documents" });
                 ProjectProfileView profileView = new ProjectProfileView();
 
                 if (projectProfileList != null)
@@ -340,7 +340,7 @@ namespace AIMS.Services
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
                         profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
-                        profileView.Implementers = mapper.Map<List<ProjectImplementorView>>(project.Implementors);
+                        profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
                         profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);
                         profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
                     }
@@ -364,7 +364,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id) , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementors", "Implementors.Implementor", "Documents" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id) , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
                 List<ProjectProfileView> profileViewList = new List<ProjectProfileView>();
 
                 if (projectProfileList != null)
@@ -381,7 +381,7 @@ namespace AIMS.Services
                             Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors),
                             Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations),
                             Funders = mapper.Map<List<ProjectFunderView>>(project.Funders),
-                            Implementers = mapper.Map<List<ProjectImplementorView>>(project.Implementors),
+                            Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers),
                             Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements),
                             Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents)
                         });
@@ -412,7 +412,7 @@ namespace AIMS.Services
                 var sector = unitWork.ProjectSectorsRepository.GetByID(sectorId);
                 if (sector != null)
                 {
-                    var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Sectors.Contains(sector), new string[] { "Sectors", "Locations", "Disbursements", "Funders", "Implementors", "Documents" });
+                    var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Sectors.Contains(sector), new string[] { "Sectors", "Locations", "Disbursements", "Funders", "Implementers", "Documents" });
                     if (projectProfileList != null)
                     {
                         foreach (var project in projectProfileList)
@@ -426,7 +426,7 @@ namespace AIMS.Services
                             profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
                             profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                             profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
-                            profileView.Implementers = mapper.Map<List<ProjectImplementorView>>(project.Implementors);
+                            profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
                             profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);
                             profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
                             projectsList.Add(profileView);
@@ -494,12 +494,12 @@ namespace AIMS.Services
             }
         }
 
-        public IEnumerable<ProjectImplementorView> GetProjectImplementors(int id)
+        public IEnumerable<ProjectImplementerView> GetProjectImplementers(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var implementors = unitWork.ProjectImplementorsRepository.GetWithInclude(s => s.ProjectId == id, new string[] { "Implementor" });
-                return mapper.Map<List<ProjectImplementorView>>(implementors);
+                var implementers = unitWork.ProjectImplementersRepository.GetWithInclude(s => s.ProjectId == id, new string[] { "Implementer" });
+                return mapper.Map<List<ProjectImplementerView>>(implementers);
             }
         }
 
@@ -686,7 +686,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddProjectImplementor(ProjectImplementorModel model)
+        public ActionResponse AddProjectImplementer(ProjectImplementerModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -702,18 +702,18 @@ namespace AIMS.Services
                         response.Message = mHelper.GetNotFound("Project");
                         response.Success = false;
                     }
-                    var implementor = unitWork.OrganizationRepository.GetByID(model.ImplementorId);
-                    if (implementor == null)
+                    var implementer = unitWork.OrganizationRepository.GetByID(model.ImplementerId);
+                    if (implementer == null)
                     {
                         mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Implementor");
+                        response.Message = mHelper.GetNotFound("Implementer");
                         response.Success = false;
                     }
 
-                    unitWork.ProjectImplementorsRepository.Insert(new EFProjectImplementors()
+                    unitWork.ProjectImplementersRepository.Insert(new EFProjectImplementers()
                     {
                         Project = project,
-                        Implementor = implementor,
+                        Implementer = implementer,
                     });
                     unitWork.Save();
                 }
@@ -921,22 +921,22 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse DeleteProjectImplementor(int projectId, int implementorId)
+        public ActionResponse DeleteProjectImplementer(int projectId, int implementerId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectImplementor = unitWork.ProjectImplementorsRepository.Get(i => i.ProjectId == projectId && i.ImplementorId == implementorId);
+                var projectImplementer = unitWork.ProjectImplementersRepository.Get(i => i.ProjectId == projectId && i.ImplementerId == implementerId);
                 IMessageHelper mHelper;
-                if (projectImplementor == null)
+                if (projectImplementer == null)
                 {
                     mHelper = new MessageHelper();
-                    response.Message = mHelper.GetNotFound("Project Implementor");
+                    response.Message = mHelper.GetNotFound("Project Implementer");
                     response.Success = false;
                     return response;
                 }
 
-                unitWork.ProjectImplementorsRepository.Delete(projectImplementor);
+                unitWork.ProjectImplementersRepository.Delete(projectImplementer);
                 unitWork.Save();
                 return response;
             }

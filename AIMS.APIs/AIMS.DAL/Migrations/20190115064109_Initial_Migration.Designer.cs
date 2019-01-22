@@ -260,17 +260,17 @@ namespace AIMS.DAL.Migrations
                     b.ToTable("ProjectFunders");
                 });
 
-            modelBuilder.Entity("AIMS.Models.EFProjectImplementors", b =>
+            modelBuilder.Entity("AIMS.Models.EFProjectImplementers", b =>
                 {
                     b.Property<int>("ProjectId");
 
-                    b.Property<int>("ImplementorId");
+                    b.Property<int>("ImplementerId");
 
-                    b.HasKey("ProjectId", "ImplementorId");
+                    b.HasKey("ProjectId", "ImplementerId");
 
-                    b.HasIndex("ImplementorId");
+                    b.HasIndex("ImplementerId");
 
-                    b.ToTable("ProjectImplementors");
+                    b.ToTable("ProjectImplementers");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFProjectLocations", b =>
@@ -535,15 +535,15 @@ namespace AIMS.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("AIMS.Models.EFProjectImplementors", b =>
+            modelBuilder.Entity("AIMS.Models.EFProjectImplementers", b =>
                 {
-                    b.HasOne("AIMS.Models.EFOrganization", "Implementor")
+                    b.HasOne("AIMS.Models.EFOrganization", "Implementer")
                         .WithMany()
-                        .HasForeignKey("ImplementorId")
+                        .HasForeignKey("ImplementerId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("AIMS.Models.EFProject", "Project")
-                        .WithMany("Implementors")
+                        .WithMany("Implementers")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

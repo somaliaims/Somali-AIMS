@@ -74,9 +74,9 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(f => f.FunderId, opts => opts.MapFrom(source => source.Funder.Id))
                 .ForMember(f => f.Funder, opts => opts.MapFrom(source => source.Funder.OrganizationName));
 
-            CreateMap<EFProjectImplementors, ProjectImplementorView>()
-                .ForMember(i => i.ImplementorId, opts => opts.MapFrom(source => source.Implementor.Id))
-                .ForMember(i => i.Implementor, opts => opts.MapFrom(source => source.Implementor.OrganizationName));
+            CreateMap<EFProjectImplementers, ProjectImplementerView>()
+                .ForMember(i => i.ImplementerId, opts => opts.MapFrom(source => source.Implementer.Id))
+                .ForMember(i => i.Implementer, opts => opts.MapFrom(source => source.Implementer.OrganizationName));
 
             CreateMap<EFIATISettings, IATISettings>().ReverseMap();
 

@@ -321,7 +321,7 @@ namespace AIMS.Models
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public ICollection<ProjectFunderView> Funders { get; set; }
-        public ICollection<ProjectImplementorView> Implementers { get; set; }
+        public ICollection<ProjectImplementerView> Implementers { get; set; }
         public ICollection<SectorView> Sectors { get; set; }
         public ICollection<LocationView> Locations { get; set; }
         public ICollection<ProjectDisbursementView> Disbursements { get; set; }
@@ -337,7 +337,7 @@ namespace AIMS.Models
         public string EndDate { get; set; }
         public int ProjectTypeId { get; set; }
         public ICollection<ProjectFunderView> Funders { get; set; }
-        public ICollection<ProjectImplementorView> Implementers { get; set; }
+        public ICollection<ProjectImplementerView> Implementers { get; set; }
         public ICollection<ProjectSectorView> Sectors { get; set; }
         public ICollection<ProjectLocationDetailView> Locations { get; set; }
         public ICollection<ProjectDisbursementView> Disbursements { get; set; }
@@ -436,20 +436,20 @@ namespace AIMS.Models
 
 
     /// <summary>
-    /// Project implementors models
+    /// Project implementers models
     /// </summary>
-    public class ProjectImplementorView
+    public class ProjectImplementerView
     {
-        public int ImplementorId { get; set; }
-        public string Implementor { get; set; }
+        public int ImplementerId { get; set; }
+        public string Implementer { get; set; }
     }
 
-    public class ProjectImplementorModel
+    public class ProjectImplementerModel
     {
         [Required]
         public int ProjectId { get; set; }
         [Required]
-        public int ImplementorId { get; set; }
+        public int ImplementerId { get; set; }
     }
 
 

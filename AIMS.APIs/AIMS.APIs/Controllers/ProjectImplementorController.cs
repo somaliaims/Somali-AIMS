@@ -12,13 +12,13 @@ namespace AIMS.APIs.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProjectImplementorController : ControllerBase
+    public class ProjectImplementerController : ControllerBase
     {
-        IProjectImplementorService projectImplementorService;
+        IProjectImplementerService projectImplementerService;
 
-        public ProjectImplementorController(IProjectImplementorService service)
+        public ProjectImplementerController(IProjectImplementerService service)
         {
-            this.projectImplementorService = service;
+            this.projectImplementerService = service;
         }
 
         /// <summary>
@@ -28,31 +28,31 @@ namespace AIMS.APIs.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            var organizations = projectImplementorService.GetAll();
+            var organizations = projectImplementerService.GetAll();
             return Ok(organizations);
         }
 
         [HttpGet]
-        [Route("GetProjectImplementors/{id}")]
-        public IActionResult GetProjectImplementors(int id)
+        [Route("GetProjectImplementers/{id}")]
+        public IActionResult GetProjectImplementers(int id)
         {
             if (id <= 0)
             {
-                return BadRequest("Invalid Implementor id provided");
+                return BadRequest("Invalid Implementer id provided");
             }
-            var implementors = projectImplementorService.GetProjectImplementors(id);
-            return Ok(implementors);
+            var implementers = projectImplementerService.GetProjectImplementers(id);
+            return Ok(implementers);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] ProjectImplementorModel model)
+        public IActionResult Post([FromBody] ProjectImplementerModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = projectImplementorService.Add(model);
+            var response = projectImplementerService.Add(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -61,15 +61,15 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
-        [Route("RemoveImplementor")]
-        public IActionResult RemoveImplementor([FromBody] ProjectImplementorModel model)
+        [Route("RemoveImplementer")]
+        public IActionResult RemoveImplementer([FromBody] ProjectImplementerModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = projectImplementorService.RemoveImplementor(model);
+            var response = projectImplementerService.RemoveImplementer(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

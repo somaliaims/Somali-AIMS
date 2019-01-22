@@ -349,23 +349,23 @@ namespace AIMS.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProjectImplementors",
+                name: "ProjectImplementers",
                 columns: table => new
                 {
-                    ImplementorId = table.Column<int>(nullable: false),
+                    ImplementerId = table.Column<int>(nullable: false),
                     ProjectId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProjectImplementors", x => new { x.ProjectId, x.ImplementorId });
+                    table.PrimaryKey("PK_ProjectImplementers", x => new { x.ProjectId, x.ImplementerId });
                     table.ForeignKey(
-                        name: "FK_ProjectImplementors_Organizations_ImplementorId",
-                        column: x => x.ImplementorId,
+                        name: "FK_ProjectImplementers_Organizations_ImplementerId",
+                        column: x => x.ImplementerId,
                         principalTable: "Organizations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProjectImplementors_Projects_ProjectId",
+                        name: "FK_ProjectImplementers_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -525,9 +525,9 @@ namespace AIMS.DAL.Migrations
                 column: "FunderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectImplementors_ImplementorId",
-                table: "ProjectImplementors",
-                column: "ImplementorId");
+                name: "IX_ProjectImplementers_ImplementerId",
+                table: "ProjectImplementers",
+                column: "ImplementerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectLocations_LocationId",
@@ -607,7 +607,7 @@ namespace AIMS.DAL.Migrations
                 name: "ProjectFunders");
 
             migrationBuilder.DropTable(
-                name: "ProjectImplementors");
+                name: "ProjectImplementers");
 
             migrationBuilder.DropTable(
                 name: "ProjectLocations");
