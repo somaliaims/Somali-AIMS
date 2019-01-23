@@ -120,7 +120,7 @@ namespace AIMS.IATILib.Parsers
                 }
 
                 //Extracting transactions
-                var transactions = activity.Elements("transaction");
+                /*var transactions = activity.Elements("transaction");
                 List<IATITransaction> transactionsList = new List<IATITransaction>();
                 foreach (var transaction in transactions)
                 {
@@ -133,7 +133,7 @@ namespace AIMS.IATILib.Parsers
                         TransactionType = transaction.Element("transaction-type")?.Value,
                         Description = transaction.Element("description")?.Value
                     });
-                }
+                }*/
 
                 //Extracting Receipient Countries
                 decimal percentage = 100;
@@ -193,7 +193,7 @@ namespace AIMS.IATILib.Parsers
                     Description = activity.Element("description")?.Value,
                     Sectors = sectors,
                     DefaultCurrency = currency,
-                    Transactions = transactionsList,
+                    //Transactions = transactionsList,
                     ParticipatingOrganizations = organizationList
                 });
             }

@@ -149,15 +149,15 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
-                        string aidType = "";
+                        /*string aidType = "";
                         var aidTypeObj = activity.Element("default-aid-type");
                         if (aidTypeObj != null && aidTypeObj.HasAttributes)
                         {
                             string aidTypeCode = aidTypeObj.Attribute("code")?.Value;
                             /*aidType = (from t in aidTypes
                                        where t.Code.Equals(aidTypeCode)
-                                       select t.Name).FirstOrDefault();*/
-                        }
+                                       select t.Name).FirstOrDefault();
+                        }*/
 
                         //Extracting documents
                         var documents = activity.Elements("document-link");
@@ -192,7 +192,7 @@ namespace AIMS.IATILib.Parsers
                         }
 
                         //Extracting transactions
-                        var transactions = activity.Elements("transaction");
+                        /*var transactions = activity.Elements("transaction");
                         List<IATITransaction> transactionsList = new List<IATITransaction>();
 
                         if (transactions != null)
@@ -205,7 +205,7 @@ namespace AIMS.IATILib.Parsers
                                                           where t.Code.Equals(transactionCode)
                                                           select t.Name).FirstOrDefault();*/
 
-                                transactionsList.Add(new IATITransaction()
+                                /*transactionsList.Add(new IATITransaction()
                                 {
                                     Amount = transaction.Element("value")?.Value,
                                     Currency = transaction.Element("value")?.FirstAttribute.Value,
@@ -215,7 +215,7 @@ namespace AIMS.IATILib.Parsers
                                     Description = transaction.Element("description")?.Value
                                 });
                             }
-                        }
+                        }*/
 
                         var recipientCountries = activity.Elements("recipient-country");
                         List<IATICountry> countries = new List<IATICountry>();
@@ -343,7 +343,7 @@ namespace AIMS.IATILib.Parsers
                             Description = activity.Element("description")?.Value,
                             Sectors = sectors,
                             DefaultCurrency = currency,
-                            Transactions = transactionsList,
+                            //Transactions = transactionsList,
                             ParticipatingOrganizations = organizationList
                         });
                         ++activityCounter;

@@ -76,7 +76,7 @@ namespace AIMS.IATILib.Parsers
         public ICollection<IATICountry> Countries { get; set; }
         public ICollection<IATIRegion> Regions { get; set; }
         public ICollection<IATIOrganization> ParticipatingOrganizations { get; set; }
-        public ICollection<IATITransaction> Transactions { get; set; }
+        //public ICollection<IATITransaction> Transactions { get; set; }
         public ICollection<IATIDocument> Documents { get; set; }
     }
 
