@@ -55,6 +55,17 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("LoadIATITransactionTypes")]
+        public async Task<IActionResult> LoadIATITransactionTypes()
+        {
+            string iatiFilePath = hostingEnvironment.WebRootPath + "/IATITransactionTypes.json";
+            string iatiUrl = configuration.GetValue<string>("IATI:TransactionTypesUrl");
+            var response = await iatiService.DownloadTransactionTypesFromUrl(iatiUrl, iatiFilePath);
+            return Ok(response);
+        }
+
+
+        [HttpGet]
         [Route("GetProjects")]
         public IActionResult Projects()
         {

@@ -187,9 +187,6 @@ namespace AIMS.Models
         public EFSector Sector { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal FundsPercentage { get; set; }
-        public string Currency { get; set; }
-        [Column(TypeName = "decimal(9, 2)")]
-        public decimal ExchangeRate { get; set; }
     }
 
     public class EFProjectMarkers

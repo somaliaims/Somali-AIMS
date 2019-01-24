@@ -416,8 +416,6 @@ namespace AIMS.Models
         public int SectorId { get; set; }
         public string Sector { get; set; }
         public decimal FundsPercentage { get; set; }
-        public string Currency { get; set; }
-        public decimal ExchangeRate { get; set; }
     }
 
     public class ProjectSectorModel
@@ -428,10 +426,6 @@ namespace AIMS.Models
         public int SectorId { get; set; }
         [Required]
         public decimal FundsPercentage { get; set; }
-        [Required]
-        public string Currency { get; set; }
-        [Required]
-        public decimal ExchangeRate { get; set; }
     }
 
 
@@ -499,6 +493,7 @@ namespace AIMS.Models
     /// </summary>
     public class ProjectDisbursementView
     {
+        public int Id { get; set; }
         public int ProjectId { get; set; }
         public int StartingYear { get; set; }
         public int StartingMonth { get; set; }

@@ -4,11 +4,13 @@ using AIMS.IATILib.Parsers;
 using AIMS.Models;
 using AutoMapper;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -44,6 +46,14 @@ namespace AIMS.Services
         /// <param name="url"></param>
         /// <returns></returns>
         Task<ActionResponse> DownloadIATIFromUrl(string url, string fileToWrite);
+
+        /// <summary>
+        /// Downloads json for transaction types from IATI and write to a file
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="fileToWrite"></param>
+        /// <returns></returns>
+        Task<ActionResponse> DownloadTransactionTypesFromUrl(string url, string fileToWrite);
 
         /// <summary>
         /// Loads latest IATI
@@ -277,6 +287,27 @@ namespace AIMS.Services
                     xml = client.DownloadString(url);
                 }
                 File.WriteAllText(fileToWrite, xml);
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+        }
+
+        public async Task<ActionResponse> DownloadTransactionTypesFromUrl(string url, string fileToWrite)
+        {
+            ActionResponse response = new ActionResponse();
+            HttpClient client = new HttpClient();
+            List<IATITransactionTypes> list = new List<IATITransactionTypes>();
+            try
+            {
+                var httpResponse = await client.GetAsync(url);
+                string json = await httpResponse.Content.ReadAsStringAsync();
+                JObject obj = JObject.Parse(json);
+                string parsedJson = obj["data"].ToString();
+                File.WriteAllText(fileToWrite, parsedJson);
             }
             catch (Exception ex)
             {

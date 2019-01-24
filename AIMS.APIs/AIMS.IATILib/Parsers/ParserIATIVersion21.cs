@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -192,7 +194,7 @@ namespace AIMS.IATILib.Parsers
                         }
 
                         //Extracting transactions
-                        /*var transactions = activity.Elements("transaction");
+                        var transactions = activity.Elements("transaction");
                         List<IATITransaction> transactionsList = new List<IATITransaction>();
 
                         if (transactions != null)
@@ -205,17 +207,17 @@ namespace AIMS.IATILib.Parsers
                                                           where t.Code.Equals(transactionCode)
                                                           select t.Name).FirstOrDefault();*/
 
-                                /*transactionsList.Add(new IATITransaction()
+                                transactionsList.Add(new IATITransaction()
                                 {
                                     Amount = transaction.Element("value")?.Value,
                                     Currency = transaction.Element("value")?.FirstAttribute.Value,
                                     Dated = transaction.Element("transaction-date")?.Attribute("iso-date").Value,
-                                    AidType = aidType,
+                                    //AidType = aidType,
                                     //TransactionType = transactionType,
                                     Description = transaction.Element("description")?.Value
                                 });
                             }
-                        }*/
+                        }
 
                         var recipientCountries = activity.Elements("recipient-country");
                         List<IATICountry> countries = new List<IATICountry>();
@@ -439,19 +441,6 @@ namespace AIMS.IATILib.Parsers
             return list;
         }*/
 
-        /*public List<TransactionTypes> FillTransactionTypes(IEnumerable<IConfigurationSection> dataArray)
-        {
-            List<TransactionTypes> list = new List<TransactionTypes>();
-            foreach (var data in dataArray)
-            {
-                list.Add(new TransactionTypes()
-                {
-                    Code = data.GetValue<string>("Code"),
-                    Name = data.GetValue<string>("Name")
-                });
-            }
-            return list;
-        }*/
 
     }
 }

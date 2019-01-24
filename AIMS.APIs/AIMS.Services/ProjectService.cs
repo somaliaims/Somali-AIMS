@@ -409,10 +409,16 @@ namespace AIMS.Services
                     ProjectsList = projectsList
                 };
 
-                var sector = unitWork.ProjectSectorsRepository.GetByID(sectorId);
-                if (sector != null)
+                List<int> projectIds = new List<int>();
+                var sectorsList = unitWork.ProjectSectorsRepository.GetMany(s => s.SectorId == sectorId);
+                foreach(var sector in sectorsList)
                 {
-                    var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Sectors.Contains(sector), new string[] { "Sectors", "Locations", "Disbursements", "Funders", "Implementers", "Documents" });
+                    projectIds.Add(sector.ProjectId);
+                }
+
+                if (projectIds.Count > 0)
+                {
+                    var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id), new string[] { "Sectors", "Locations", "Disbursements", "Funders", "Implementers", "Documents" });
                     if (projectProfileList != null)
                     {
                         foreach (var project in projectProfileList)
@@ -627,8 +633,6 @@ namespace AIMS.Services
                         Project = project,
                         Sector = sector,
                         FundsPercentage = model.FundsPercentage,
-                        Currency = model.Currency,
-                        ExchangeRate = model.ExchangeRate
                     });
 
                     unitWork.Save();
