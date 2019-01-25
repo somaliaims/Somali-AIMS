@@ -187,7 +187,8 @@ namespace AIMS.Services
             var activity = (from el in xDoc.Descendants("iati-activity")
                             select el.FirstAttribute).FirstOrDefault();
 
-            var transactionTypes = await this.GetTransactionTypes(tTypeFilePath);
+            //var transactionTypes = await this.GetTransactionTypes(tTypeFilePath);
+            var transactionTypes = JsonConvert.DeserializeObject<List<IATITransactionTypes>>(File.ReadAllText(tTypeFilePath));
 
             IEnumerable<string> ids = (from id in IdsModel
                             select id.Identifier);
@@ -464,7 +465,7 @@ namespace AIMS.Services
             }
         }
 
-        private async Task<List<IATITransactionTypes>> GetTransactionTypes(string url)
+        /*private async Task<List<IATITransactionTypes>> GetTransactionTypes(string url)
         {
             HttpClient client = new HttpClient();
             List<IATITransactionTypes> list = new List<IATITransactionTypes>();
@@ -478,6 +479,6 @@ namespace AIMS.Services
             {
             }
             return list;
-        }
+        }*/
     }
 }

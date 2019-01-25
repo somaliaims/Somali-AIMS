@@ -129,7 +129,7 @@ namespace AIMS.IATILib.Parsers
                         Amount = transaction.Element("value")?.Value,
                         Currency = transaction.Element("value")?.FirstAttribute.Value,
                         Dated = transaction.Element("transaction-date")?.Attribute("iso-date").Value,
-                        AidType = transaction.Element("aid-type")?.Value,
+                        //AidType = transaction.Element("aid-type")?.Value,
                         TransactionType = transaction.Element("transaction-type")?.Value,
                         Description = transaction.Element("description")?.Value
                     });

@@ -205,7 +205,7 @@ namespace AIMS.IATILib.Parsers
                                 string transactionCode = transaction.Element("transaction-type").Attribute("code")?.Value;
                                 string transactionType = (from t in transactionTypes
                                                           where t.Code.Equals(transactionCode)
-                                                          select t.TypeName).FirstOrDefault();
+                                                          select t.Name).FirstOrDefault();
 
                                 transactionsList.Add(new IATITransaction()
                                 {
@@ -213,7 +213,7 @@ namespace AIMS.IATILib.Parsers
                                     Currency = transaction.Element("value")?.FirstAttribute.Value,
                                     Dated = transaction.Element("transaction-date")?.Attribute("iso-date").Value,
                                     //AidType = aidType,
-                                    //TransactionType = transactionType,
+                                    TransactionType = transactionType,
                                     Description = transaction.Element("description")?.Value
                                 });
                             }
@@ -345,7 +345,7 @@ namespace AIMS.IATILib.Parsers
                             Description = activity.Element("description")?.Value,
                             Sectors = sectors,
                             DefaultCurrency = currency,
-                            //Transactions = transactionsList,
+                            Transactions = transactionsList,
                             ParticipatingOrganizations = organizationList
                         });
                         ++activityCounter;

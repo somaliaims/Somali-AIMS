@@ -16,7 +16,7 @@ namespace AIMS.IATILib.Parsers
     public class IATITransactionTypes
     {
         public string Code { get; set; }
-        public string TypeName { get; set; }
+        public string Name { get; set; }
     }
 
     public class IATICountry
@@ -55,7 +55,7 @@ namespace AIMS.IATILib.Parsers
 
     public class IATITransaction
     {
-        public string AidType { get; set; }
+        //public string AidType { get; set; }
         public string TransactionType { get; set; }
         public string Currency { get; set; }
         public string Amount { get; set; }
