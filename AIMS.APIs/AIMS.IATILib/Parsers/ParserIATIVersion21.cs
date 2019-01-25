@@ -15,7 +15,7 @@ namespace AIMS.IATILib.Parsers
         {
         }
 
-        public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria)
+        public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria, List<IATITransactionTypes> transactionTypes = null)
         {
             List<IATIActivity> activityList = new List<IATIActivity>();
             //Pick up all narratives
@@ -23,18 +23,18 @@ namespace AIMS.IATILib.Parsers
                              where activity.Element("title").Element("narrative") != null && 
                              activity.Element("title").Element("narrative").Value.IndexOf(criteria, 0, StringComparison.OrdinalIgnoreCase) >= 0
                              select activity;
-            this.ParseIATIAndFillList(activities, activityList);
+            this.ParseIATIAndFillList(activities, activityList, transactionTypes);
 
             //Pick up all titles
             var titleActivities = from activity in xmlDoc.Descendants("iati-activity")
                                   where activity.Element("title") != null &&
                                   activity.Element("title").Value.IndexOf(criteria, 0, StringComparison.OrdinalIgnoreCase) >= 0
                                   select activity;
-            this.ParseIATIAndFillList(titleActivities, activityList);
+            this.ParseIATIAndFillList(titleActivities, activityList, transactionTypes);
             return activityList;
         }
 
-        public ICollection<IATIActivity> ExtractAcitivitiesForIds(XDocument xmlDoc, IEnumerable<string> Ids)
+        public ICollection<IATIActivity> ExtractAcitivitiesForIds(XDocument xmlDoc, IEnumerable<string> Ids, List<IATITransactionTypes> transactionTypes = null)
         {
             List<IATIActivity> activityList = new List<IATIActivity>();
             //Pick up all narratives
@@ -42,7 +42,7 @@ namespace AIMS.IATILib.Parsers
                              where activity.Element("title").Element("narrative") != null &&
                              Ids.Contains(activity.Element("iati-identifier").Value)
                              select activity;
-            this.ParseIATIAndFillList(activities, activityList);
+            this.ParseIATIAndFillList(activities, activityList, transactionTypes);
             return activityList;
         }
 
@@ -59,7 +59,7 @@ namespace AIMS.IATILib.Parsers
             return projectsList;
         }
 
-        private void ParseIATIAndFillList(IEnumerable<XElement> activities, List<IATIActivity> activityList)
+        private void ParseIATIAndFillList(IEnumerable<XElement> activities, List<IATIActivity> activityList, List<IATITransactionTypes> transactionTypes)
         {
             string message = "";
             try
@@ -203,9 +203,9 @@ namespace AIMS.IATILib.Parsers
                             {
 
                                 string transactionCode = transaction.Element("transaction-type").Attribute("code")?.Value;
-                                /*string transactionType = (from t in transactionTypes
+                                string transactionType = (from t in transactionTypes
                                                           where t.Code.Equals(transactionCode)
-                                                          select t.Name).FirstOrDefault();*/
+                                                          select t.TypeName).FirstOrDefault();
 
                                 transactionsList.Add(new IATITransaction()
                                 {

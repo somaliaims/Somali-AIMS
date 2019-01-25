@@ -117,7 +117,7 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("ExtractProjectsByIds")]
-        public IActionResult ExtractProjectsByIds([FromBody] List<IATIByIdModel> Ids)
+        public async Task<IActionResult> ExtractProjectsByIds([FromBody] List<IATIByIdModel> Ids)
         {
             if (Ids.Count() == 0)
             {
@@ -125,7 +125,8 @@ namespace AIMS.APIs.Controllers
             }
 
             string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
-            var activities = iatiService.GetActivitiesByIds(iatiFilePath, Ids);
+            string tTypeFilePath = hostingEnvironment.WebRootPath + "/IATISomali.json";
+            var activities = await iatiService.GetActivitiesByIds(iatiFilePath, Ids, tTypeFilePath);
             return Ok(activities);
         }
     }

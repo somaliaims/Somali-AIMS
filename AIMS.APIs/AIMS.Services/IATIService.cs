@@ -73,10 +73,10 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="IdsModel"></param>
         /// <returns></returns>
-        ICollection<IATIActivity> GetActivitiesByIds(string dataFilePath, List<IATIByIdModel> IdsModel);
+        Task<ICollection<IATIActivity>> GetActivitiesByIds(string dataFilePath, List<IATIByIdModel> IdsModel, string tTypeFilePath);
 
         /// <summary>
-        /// Gets all the activities
+        /// Gets all the activitiesGetActivitiesByIds
         /// </summary>
         /// <returns></returns>
         IEnumerable<IATIActivity> GetAll();
@@ -179,13 +179,15 @@ namespace AIMS.Services
             return activityList;
         }
 
-        public ICollection<IATIActivity> GetActivitiesByIds(string dataFilePath, List<IATIByIdModel> IdsModel)
+        public async Task<ICollection<IATIActivity>> GetActivitiesByIds(string dataFilePath, List<IATIByIdModel> IdsModel, string tTypeFilePath)
         {
             string url = dataFilePath;
             XmlReader xReader = XmlReader.Create(url);
             XDocument xDoc = XDocument.Load(xReader);
             var activity = (from el in xDoc.Descendants("iati-activity")
                             select el.FirstAttribute).FirstOrDefault();
+
+            var transactionTypes = await this.GetTransactionTypes(tTypeFilePath);
 
             IEnumerable<string> ids = (from id in IdsModel
                             select id.Identifier);
@@ -203,7 +205,7 @@ namespace AIMS.Services
 
                 case "2.01":
                     parser = new ParserIATIVersion21();
-                    activityList = parser.ExtractAcitivitiesForIds(xDoc, ids);
+                    activityList = parser.ExtractAcitivitiesForIds(xDoc, ids, transactionTypes);
                     break;
             }
 
@@ -246,7 +248,7 @@ namespace AIMS.Services
                     }
                 }
             }
-            return activityList;
+            return await Task<ICollection<IATIActivity>>.Run(() => activityList).ConfigureAwait(false);
         }
 
         public ICollection<IATIProject> GetProjects(string dataFilePath)
@@ -460,6 +462,22 @@ namespace AIMS.Services
                 unitWork.Save();
                 return response;
             }
+        }
+
+        private async Task<List<IATITransactionTypes>> GetTransactionTypes(string url)
+        {
+            HttpClient client = new HttpClient();
+            List<IATITransactionTypes> list = new List<IATITransactionTypes>();
+            try
+            {
+                var httpResponse = await client.GetAsync(url);
+                string json = await httpResponse.Content.ReadAsStringAsync();
+                list = JsonConvert.DeserializeObject<List<IATITransactionTypes>>(json);
+            }
+            catch (Exception)
+            {
+            }
+            return list;
         }
     }
 }

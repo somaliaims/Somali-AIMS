@@ -8,7 +8,7 @@ namespace AIMS.IATILib.Parsers
 {
     public class ParserIATIVersion13 : IParser
     {
-        public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria)
+        public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria, List<IATITransactionTypes> transactionTypes = null)
         {
             List<IATIActivity> activityList = new List<IATIActivity>();
             var activities = from activity in xmlDoc.Descendants("iati-activity")
@@ -19,7 +19,7 @@ namespace AIMS.IATILib.Parsers
             return activityList;
         }
 
-        public ICollection<IATIActivity> ExtractAcitivitiesForIds(XDocument xmlDoc, IEnumerable<string> Ids)
+        public ICollection<IATIActivity> ExtractAcitivitiesForIds(XDocument xmlDoc, IEnumerable<string> Ids, List<IATITransactionTypes> transactionTypes = null)
         {
             List<IATIActivity> activityList = new List<IATIActivity>();
             var activities = from activity in xmlDoc.Descendants("iati-activity")
