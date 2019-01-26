@@ -754,7 +754,7 @@ namespace AIMS.Services
                         StartingMonth = model.StartingMonth,
                         EndingYear = model.EndingYear,
                         EndingMonth = model.EndingMonth,
-                        Percentage = model.Percentage,
+                        Amount = model.Amount,
                     });
                     unitWork.Save();
                 }

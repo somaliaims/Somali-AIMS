@@ -175,7 +175,7 @@ namespace AIMS.Models
         public int EndingYear { get; set; }
         public int EndingMonth { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
-        public decimal Percentage { get; set; }
+        public decimal Amount { get; set; }
     }
 
     public class EFProjectSectors

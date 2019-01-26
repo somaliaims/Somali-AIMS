@@ -86,6 +86,7 @@ namespace AIMS.IATILib.Parsers
         private void ExtractAndFillActivities(IEnumerable<XElement> activities, List<IATIActivity> activityList)
         {
             string currency = "";
+            int transactionCounter = 1;
             foreach (var activity in activities)
             {
                 string startDate, endDate, projectTitle = "";
@@ -126,13 +127,15 @@ namespace AIMS.IATILib.Parsers
                 {
                     transactionsList.Add(new IATITransaction()
                     {
+                        Id = transactionCounter,
                         Amount = transaction.Element("value")?.Value,
                         Currency = transaction.Element("value")?.FirstAttribute.Value,
                         Dated = transaction.Element("transaction-date")?.Attribute("iso-date").Value,
                         //AidType = transaction.Element("aid-type")?.Value,
                         TransactionType = transaction.Element("transaction-type")?.Value,
-                        Description = transaction.Element("description")?.Value
+                        //Description = transaction.Element("description")?.Value
                     });
+                    ++transactionCounter;
                 }
 
                 //Extracting Receipient Countries

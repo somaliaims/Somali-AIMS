@@ -70,6 +70,7 @@ namespace AIMS.IATILib.Parsers
                     int activityCounter = 1;
                     int orgCounter = 1;
                     int documentCounter = 1;
+                    int transactionCounter = 1;
                     foreach (var activity in activities)
                     {
                         string startDate, endDate, projectTitle = "";
@@ -209,13 +210,15 @@ namespace AIMS.IATILib.Parsers
 
                                 transactionsList.Add(new IATITransaction()
                                 {
+                                    Id = transactionCounter,
                                     Amount = transaction.Element("value")?.Value,
-                                    Currency = transaction.Element("value")?.FirstAttribute.Value,
-                                    Dated = transaction.Element("transaction-date")?.Attribute("iso-date").Value,
+                                    Currency = transaction.Element("value")?.Attribute("currency")?.Value,
+                                    Dated = transaction.Element("transaction-date")?.Attribute("iso-date")?.Value,
                                     //AidType = aidType,
                                     TransactionType = transactionType,
-                                    Description = transaction.Element("description")?.Value
+                                    //Description = transaction.Element("description")?.Value
                                 });
+                                ++transactionCounter;
                             }
                         }
 

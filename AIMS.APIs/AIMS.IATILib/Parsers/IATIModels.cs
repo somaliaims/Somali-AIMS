@@ -56,11 +56,12 @@ namespace AIMS.IATILib.Parsers
     public class IATITransaction
     {
         //public string AidType { get; set; }
+        public int Id { get; set; }
         public string TransactionType { get; set; }
         public string Currency { get; set; }
         public string Amount { get; set; }
         public string Dated { get; set; }
-        public string Description { get; set; }
+        //public string Description { get; set; }
     }
 
     public class IATIDocument

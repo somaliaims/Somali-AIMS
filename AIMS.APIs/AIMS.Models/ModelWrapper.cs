@@ -499,7 +499,7 @@ namespace AIMS.Models
         public int StartingMonth { get; set; }
         public int EndingYear { get; set; }
         public int EndingMonth { get; set; }
-        public decimal Percentage { get; set; }
+        public decimal Amount { get; set; }
     }
 
     public class ProjectDisbursementModel
@@ -509,7 +509,7 @@ namespace AIMS.Models
         public int StartingMonth { get; set; }
         public int EndingYear { get; set; }
         public int EndingMonth { get; set; }
-        public decimal Percentage { get; set; }
+        public decimal Amount { get; set; }
     }
 
 
