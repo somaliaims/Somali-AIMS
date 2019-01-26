@@ -36,7 +36,7 @@ namespace AIMS.DAL.EF
                 .HasKey(i => new { i.ProjectId, i.ImplementerId });
 
             modelBuilder.Entity<EFProjectDisbursements>()
-                .HasKey(d => new { d.ProjectId, d.StartingYear });
+                .HasKey(d => new { d.ProjectId, d.StartingYear, d.StartingMonth });
 
             modelBuilder.Entity<EFProjectSectors>()
                 .HasKey(s => new { s.ProjectId, s.SectorId });

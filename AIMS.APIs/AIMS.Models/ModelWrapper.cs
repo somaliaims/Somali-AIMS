@@ -493,7 +493,6 @@ namespace AIMS.Models
     /// </summary>
     public class ProjectDisbursementView
     {
-        public int Id { get; set; }
         public int ProjectId { get; set; }
         public int StartingYear { get; set; }
         public int StartingMonth { get; set; }

@@ -327,14 +327,14 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpDelete]
-        [Route("DeleteProjectDisbursement/{projectId}/{startingYear}")]
-        public IActionResult DeleteProjectDisbursement(int projectId, int startingYear)
+        [Route("DeleteProjectDisbursement/{projectId}/{startingYear}/{startingMonth}")]
+        public IActionResult DeleteProjectDisbursement(int projectId, int startingYear, int startingMonth)
         {
-            if (projectId <= 0 || startingYear <= 0)
+            if (projectId <= 0 || startingYear <= 0 || startingMonth <= 0)
             {
                 return BadRequest("Invalid Ids provided");
             }
-            projectService.DeleteProjectDisbursement(projectId, startingYear);
+            projectService.DeleteProjectDisbursement(projectId, startingYear, startingMonth);
             return Ok(true);
         }
 
