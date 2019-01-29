@@ -161,9 +161,19 @@ namespace AIMS.DAL.Repository
             return DbSet.Where(where).AsQueryable();
         }
 
+        public virtual IQueryable<TEntity> GetManyQueryableOrderBy(Func<TEntity, bool> where, Func<TEntity, bool> orderBy)
+        {
+            return DbSet.Where(where).OrderBy(orderBy).AsQueryable();
+        }
+
         public virtual async Task<IQueryable<TEntity>> GetManyQueryableAsync(Func<TEntity, bool> where)
         {
             return await Task<IQueryable<TEntity>>.Run(() => DbSet.Where(where).AsQueryable()).ConfigureAwait(false);
+        }
+
+        public virtual async Task<IQueryable<TEntity>> GetManyQueryableOrderByAsync(Func<TEntity, bool> where, Func<TEntity, bool> orderBy)
+        {
+            return await Task<IQueryable<TEntity>>.Run(() => DbSet.Where(where).OrderBy(orderBy).AsQueryable()).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -221,6 +231,13 @@ namespace AIMS.DAL.Repository
             IQueryable<TEntity> query = this.DbSet;
             query = include.Aggregate(query, (current, inc) => current.Include(inc));
             return query.Where(predicate);
+        }
+
+        public IQueryable<TEntity> GetWithIncludeOrderBy(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate, Func<TEntity, string> orderBy, params string[] include)
+        {
+            IQueryable<TEntity> query = this.DbSet;
+            query = include.Aggregate(query, (current, inc) => current.Include(inc));
+            return query.Where(predicate).OrderBy(orderBy).AsQueryable();
         }
 
         /// <summary>

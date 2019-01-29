@@ -335,7 +335,7 @@ namespace AIMS.Models
         public string Description { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
-        public int ProjectTypeId { get; set; }
+        public decimal ProjectCost { get; set; }
         public ICollection<ProjectFunderView> Funders { get; set; }
         public ICollection<ProjectImplementerView> Implementers { get; set; }
         public ICollection<ProjectSectorView> Sectors { get; set; }
@@ -716,6 +716,26 @@ namespace AIMS.Models
     {
         public Report ReportSettings { get; set; }
         public ICollection<ProjectProfileView> ProjectsList { get; set; }
+    }
+
+    public class ProjectProfileReportBySector
+    {
+        public Report ReportSettings { get; set; } 
+        public IEnumerable<ProjectsBySector> SectorProjectsList { get; set; }
+    }
+
+    public class ProjectsBySector
+    {
+        public string SectorName { get; set; }
+        public decimal TotalCost { get; set; }
+        public IEnumerable<ProjectProfileView> Projects { get; set; }
+    }
+
+    public class SectorProjects
+    {
+        public int SectorId { get; set; }
+        public string SectorName { get; set; }
+        public List<int> ProjectIds { get; set; }
     }
 
     public class IATIByIdModel
