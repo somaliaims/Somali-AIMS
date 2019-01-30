@@ -111,6 +111,7 @@ namespace AIMS.APIs
             services.AddScoped<ISectorCategoryService, SectorCategoryService>();
             services.AddScoped<ISectorSubCategoryService, SectorSubCategoryService>();*/
             services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<IReportService, ReportService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             //Configure Email Settings

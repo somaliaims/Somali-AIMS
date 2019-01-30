@@ -13,23 +13,19 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class ReportController : ControllerBase
     {
-        private readonly IViewRenderService _viewRenderService;
-        public ReportController(IViewRenderService viewRenderService)
+        IReportService reportService;
+
+        public ReportController(IReportService service)
         {
-            _viewRenderService = viewRenderService;
+            this.reportService = service;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        [Route("GetSectorWiseProjects")]
+        public async Task<IActionResult> GetSectorWiseProjects()
         {
-            var viewModel = new ViewModel
-            {
-               Title = "A good Title"
-            };
-
-            //var result = await _viewRenderService.RenderToStringAsync("Email/Invite", viewModel);*/
-            var result = await _viewRenderService.RenderToStringAsync("Reports/Index", viewModel);
-            return Ok(result);
+            var report = await reportService.GetProjectsBySector();
+            return Ok(report);
         }
     }
 }

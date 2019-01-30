@@ -16,7 +16,7 @@ namespace AIMS.Services
         Task<ProjectProfileReportBySector> GetProjectsBySector();
     }
 
-    public class ReportService
+    public class ReportService : IReportService
     {
         AIMSDbContext context;
         IMapper mapper;
@@ -48,9 +48,12 @@ namespace AIMS.Services
                         new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
 
 
-                var projectSectors = unitWork.ProjectSectorsRepository.GetWithIncludeOrderBy(p => p.ProjectId != 0, s => s.Sector.SectorName, new string[] { "Sector" });
+                var projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => p.ProjectId != 0, new string[] { "Sector" });
+                projectSectors = from pSector in projectSectors
+                                 orderby pSector.Sector.SectorName
+                                 select pSector;
 
-                List<ProjectProfileView> projectsList = new List<ProjectProfileView>();
+                List < ProjectProfileView > projectsList = new List<ProjectProfileView>();
                 ProjectProfileView profileView = new ProjectProfileView();
                 foreach(var project in projectProfileListObj)
                 {
@@ -68,12 +71,13 @@ namespace AIMS.Services
                     projectsList.Add(profileView);
                 }
 
-                string currentSector = "";
+                string currentSector = null;
                 List<int> projectIds = new List<int>();
                 List<ProjectsBySector> sectorProjectsList = new List<ProjectsBySector>();
-                foreach(var sector in projectSectors)
+                ProjectsBySector projectsBySector = null;
+
+                foreach (var sector in projectSectors)
                 {
-                    ProjectsBySector projectsBySector = null;
                     if (sector.Sector.SectorName != currentSector)
                     {
                         if (currentSector != null)
