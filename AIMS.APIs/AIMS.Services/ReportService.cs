@@ -54,9 +54,9 @@ namespace AIMS.Services
                                  select pSector;
 
                 List < ProjectProfileView > projectsList = new List<ProjectProfileView>();
-                ProjectProfileView profileView = new ProjectProfileView();
                 foreach(var project in projectProfileListObj)
                 {
+                    ProjectProfileView profileView = new ProjectProfileView();
                     profileView.Id = project.Id;
                     profileView.Title = project.Title;
                     profileView.Description = project.Description;
@@ -84,7 +84,7 @@ namespace AIMS.Services
                         {
                             var sectorProjects = (from project in projectsList
                                                   where projectIds.Contains(project.Id)
-                                                  select project);
+                                                  select project).ToList<ProjectProfileView>();
 
                             projectsBySector.Projects = sectorProjects;
                             sectorProjectsList.Add(projectsBySector);
