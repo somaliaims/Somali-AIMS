@@ -68,6 +68,23 @@ namespace AIMS.Services
                     profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
                     profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);
                     profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
+                    decimal projectCost = 0;
+                    if (profileView.Funders.Count > 0)
+                    {
+                        projectCost = profileView.Funders.Select(f => (f.Amount)).Sum();
+                        profileView.ProjectCost = projectCost;
+                    }
+                    if (profileView.Disbursements.Count > 0)
+                    {
+                        decimal totalDisbursements = profileView.Disbursements.Select(d => (d.Amount)).Sum();
+                        UtilityHelper helper = new UtilityHelper();
+                        var endDate = Convert.ToDateTime(profileView.EndDate);
+                        var startDate = DateTime.Now;
+                        int months = helper.GetMonthDifference(startDate, endDate);
+
+                        profileView.ActualDisbursements = totalDisbursements;
+                        profileView.PlannedDisbursements = Math.Round((projectCost - totalDisbursements) / months);
+                    }
                     projectsList.Add(profileView);
                 }
 
@@ -76,6 +93,8 @@ namespace AIMS.Services
                 List<ProjectsBySector> sectorProjectsList = new List<ProjectsBySector>();
                 ProjectsBySector projectsBySector = null;
 
+                int totalSectors = projectSectors.Count();
+                int counter = 0;
                 foreach (var sector in projectSectors)
                 {
                     if (sector.Sector.SectorName != currentSector)
@@ -88,12 +107,25 @@ namespace AIMS.Services
 
                             projectsBySector.Projects = sectorProjects;
                             sectorProjectsList.Add(projectsBySector);
+                            projectIds.Clear();
                         }
                         projectsBySector = new ProjectsBySector();
                         projectsBySector.SectorName = sector.Sector.SectorName; 
                     }
                     currentSector = sector.Sector.SectorName;
                     projectIds.Add(sector.ProjectId);
+                    ++counter;
+
+                    if (totalSectors == counter)
+                    {
+                        var sectorProjects = (from project in projectsList
+                                              where projectIds.Contains(project.Id)
+                                              select project).ToList<ProjectProfileView>();
+
+                        projectsBySector.Projects = sectorProjects;
+                        sectorProjectsList.Add(projectsBySector);
+                        projectIds.Clear();
+                    }
                 }
                 sectorProjectsReport.SectorProjectsList = sectorProjectsList;
                 return await Task<ProjectProfileReportBySector>.Run(() => sectorProjectsReport).ConfigureAwait(false);

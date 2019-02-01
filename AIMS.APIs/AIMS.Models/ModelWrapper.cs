@@ -336,6 +336,8 @@ namespace AIMS.Models
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public decimal ProjectCost { get; set; }
+        public decimal ActualDisbursements { get; set; }
+        public decimal PlannedDisbursements { get; set; }
         public ICollection<ProjectFunderView> Funders { get; set; }
         public ICollection<ProjectImplementerView> Implementers { get; set; }
         public ICollection<ProjectSectorView> Sectors { get; set; }
