@@ -745,4 +745,10 @@ namespace AIMS.Models
         public string Identifier { get; set; }
     }
 
+    public class ReportModelForProjectSectors
+    {
+        public int Year { get; set; } = 0;
+        public List<int> SectorIds { get; set; } = null;
+    }
+
 }

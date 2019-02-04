@@ -13,7 +13,7 @@ namespace AIMS.Services
 {
     public interface IReportService
     {
-        Task<ProjectProfileReportBySector> GetProjectsBySector();
+        Task<ProjectProfileReportBySector> GetProjectsBySector(ReportModelForProjectSectors model);
     }
 
     public class ReportService : IReportService
@@ -27,7 +27,7 @@ namespace AIMS.Services
             mapper = autoMapper;
         }
 
-        public async Task<ProjectProfileReportBySector> GetProjectsBySector()
+        public async Task<ProjectProfileReportBySector> GetProjectsBySector(ReportModelForProjectSectors model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -43,12 +43,31 @@ namespace AIMS.Services
                 DateTime dated = new DateTime();
                 int year = dated.Year;
                 int month = dated.Month;
-                var projectProfileListObj = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartDate.Year == year && p.StartDate.Month >= month)
+                IQueryable<EFProject> projectProfileListObj = null;
+                IQueryable<EFProjectSectors> projectSectors = null;
+
+                if (model.Year != 0)
+                {
+                    projectProfileListObj = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartDate.Year == model.Year && p.StartDate.Month >= month)
                         || (p.EndDate.Year >= year && p.EndDate.Month >= month)),
                         new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+                }
+                else
+                {
+                    projectProfileListObj = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartDate.Year == year && p.StartDate.Month >= month)
+                        || (p.EndDate.Year >= year && p.EndDate.Month >= month)),
+                        new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+                }
 
-
-                var projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => p.ProjectId != 0, new string[] { "Sector" });
+                if (model.SectorIds != null)
+                {
+                    projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains(p.SectorId), new string[] { "Sector" });
+                }
+                else
+                {
+                    projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => p.ProjectId != 0, new string[] { "Sector" });
+                }
+                
                 projectSectors = from pSector in projectSectors
                                  orderby pSector.Sector.SectorName
                                  select pSector;

@@ -20,11 +20,11 @@ namespace AIMS.APIs.Controllers
             this.reportService = service;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("GetSectorWiseProjects")]
-        public async Task<IActionResult> GetSectorWiseProjects()
+        public async Task<IActionResult> GetSectorWiseProjects([FromBody] ReportModelForProjectSectors model)
         {
-            var report = await reportService.GetProjectsBySector();
+            var report = await reportService.GetProjectsBySector(model);
             return Ok(report);
         }
     }
