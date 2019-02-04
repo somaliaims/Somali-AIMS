@@ -48,8 +48,7 @@ namespace AIMS.Services
 
                 if (model.Year != 0)
                 {
-                    projectProfileListObj = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartDate.Year == model.Year && p.StartDate.Month >= month)
-                        || (p.EndDate.Year >= year && p.EndDate.Month >= month)),
+                    projectProfileListObj = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartDate.Year == model.Year)),
                         new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
                 }
                 else
