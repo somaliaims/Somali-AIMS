@@ -740,6 +740,16 @@ namespace AIMS.Models
         public List<int> ProjectIds { get; set; }
     }
 
+    public class SearchProjectModel
+    {
+        public string Title { get; set; } = null;
+        public List<int> OrganizationIds { get; set; } = new List<int>();
+        public string StartDate { get; set; } = null;
+        public string EndDate { get; set; } = null;
+        public List<int> SectorIds { get; set; } = new List<int>();
+        public List<int> LocationIds { get; set; } = new List<int>();
+    }
+
     public class IATIByIdModel
     {
         public string Identifier { get; set; }

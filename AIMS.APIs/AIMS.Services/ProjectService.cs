@@ -5,6 +5,7 @@ using AIMS.Services.Helpers;
 using AutoMapper;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -67,6 +68,13 @@ namespace AIMS.Services
         IEnumerable<ProjectView> GetMatching(string criteria);
 
         /// <summary>
+        /// Search matching projects for the provided criteria
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        Task<IEnumerable<ProjectProfileView>> SearchProjectsByCriteria(SearchProjectModel model);
+
+        /// <summary>
         /// Gets project profiles for the provided project ids
         /// </summary>
         /// <param name="ids"></param>
@@ -91,7 +99,7 @@ namespace AIMS.Services
         /// <param name="project"></param>
         /// <returns></returns>
         ActionResponse Update(int id, ProjectModel model);
-        
+
         /// <summary>
         /// Gets locations for the provided project id
         /// </summary>
@@ -325,12 +333,12 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" , "Documents" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
                 ProjectProfileView profileView = new ProjectProfileView();
 
                 if (projectProfileList != null)
                 {
-                    foreach(var project in projectProfileList)
+                    foreach (var project in projectProfileList)
                     {
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
@@ -360,11 +368,140 @@ namespace AIMS.Services
             }
         }
 
+        public async Task<IEnumerable<ProjectProfileView>> SearchProjectsByCriteria(SearchProjectModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IQueryable<EFProject> projectProfileList = null;
+                List<ProjectProfileView> projectsList = new List<ProjectProfileView>();
+
+                try
+                {
+                    if (!string.IsNullOrEmpty(model.Title))
+                    {
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title)
+                            , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                    }
+
+                    if (!string.IsNullOrEmpty(model.StartDate) && !string.IsNullOrEmpty(model.EndDate))
+                    {
+                        DateTime startDate = Convert.ToDateTime(model.StartDate);
+                        DateTime endDate = Convert.ToDateTime(model.EndDate);
+
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.StartDate >= startDate && p.EndDate <= endDate)
+                            , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = (from project in projectProfileList
+                                                  where project.StartDate >= startDate &&
+                                                  project.EndDate <= endDate
+                                                  select project);
+                        }
+                    }
+
+                    if (model.SectorIds.Count > 0)
+                    {
+                        var projectSectors = unitWork.ProjectSectorsRepository.GetMany(s => model.SectorIds.Contains(s.SectorId));
+                        var projectIds = (from pSector in projectSectors
+                                          select pSector.ProjectId).ToList<int>().Distinct();
+
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id)
+                            , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = from project in projectProfileList
+                                                 where projectIds.Contains(project.Id)
+                                                 select project;
+                        }
+                    }
+
+                    if (model.OrganizationIds.Count > 0)
+                    {
+                        var projectFunders = unitWork.ProjectFundersRepository.GetMany(f => model.OrganizationIds.Contains(f.FunderId));
+                        var projectIdsFunders = (from pFunder in projectFunders
+                                                 select pFunder.ProjectId).ToList<int>().Distinct();
+
+                        var projectImplementers = unitWork.ProjectImplementersRepository.GetMany(f => model.OrganizationIds.Contains(f.ImplementerId));
+                        var projectIdsImplementers = (from pImplementer in projectImplementers
+                                                      select pImplementer.ProjectId).ToList<int>().Distinct();
+
+
+                        var projectIds = projectIdsFunders.Union(projectIdsImplementers);
+
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id)
+                            , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = from project in projectProfileList
+                                                 where projectIds.Contains(project.Id)
+                                                 select project;
+                        }
+                    }
+
+                    if (model.LocationIds.Count > 0)
+                    {
+                        var projectLocations = unitWork.ProjectLocationsRepository.GetMany(l => model.LocationIds.Contains(l.LocationId));
+                        var projectIds = (from pLocation in projectLocations
+                                          select pLocation.ProjectId).ToList<int>().Distinct();
+
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id)
+                            , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = from project in projectProfileList
+                                                 where projectIds.Contains(project.Id)
+                                                 select project;
+                        }
+                    }
+
+                    if (projectProfileList == null)
+                    {
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title)
+                            , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                    }
+
+                    foreach (var project in projectProfileList)
+                    {
+                        ProjectProfileView profileView = new ProjectProfileView();
+                        profileView.Id = project.Id;
+                        profileView.Title = project.Title;
+                        profileView.Description = project.Description;
+                        profileView.StartDate = project.StartDate.ToLongDateString();
+                        profileView.EndDate = project.EndDate.ToLongDateString();
+                        profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
+                        profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
+                        profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
+                        profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
+                        profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);
+                        profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
+
+                        projectsList.Add(profileView);
+                    }
+                }
+                catch (Exception)
+                {
+                }
+                return await Task<ProjectProfileView>.Run(() => projectsList).ConfigureAwait(false);
+            }
+        }
+
         public async Task<IEnumerable<ProjectProfileView>> GetProjectsByIdsAsync(List<int> ids)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id) , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
                 List<ProjectProfileView> profileViewList = new List<ProjectProfileView>();
 
                 if (projectProfileList != null)
@@ -411,7 +548,7 @@ namespace AIMS.Services
 
                 List<int> projectIds = new List<int>();
                 var sectorsList = unitWork.ProjectSectorsRepository.GetMany(s => s.SectorId == sectorId);
-                foreach(var sector in sectorsList)
+                foreach (var sector in sectorsList)
                 {
                     projectIds.Add(sector.ProjectId);
                 }
@@ -440,7 +577,7 @@ namespace AIMS.Services
                     }
                     projectProfileReport.ProjectsList = projectsList;
                 }
-                
+
                 return await Task<FilteredProjectProfileReport>.Run(() => projectProfileReport).ConfigureAwait(false);
             }
         }
@@ -595,7 +732,7 @@ namespace AIMS.Services
 
                     unitWork.Save();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
@@ -849,7 +986,7 @@ namespace AIMS.Services
                     response.Message = mHelper.GetNotFound("Project");
                     return response;
                 }
-                
+
                 projectObj.Title = model.Title;
                 projectObj.Description = model.Description;
                 projectObj.StartDate = model.StartDate;
