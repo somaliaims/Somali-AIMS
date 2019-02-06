@@ -299,6 +299,46 @@ namespace AIMS.APIs.Controllers
             return Ok(projects);
         }
 
+        [HttpPost]
+        [Route("SearchProjectsViewByCriteria")]
+        public async Task<IActionResult> SearchProjectsViewByCriteria([FromBody] SearchProjectModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                DateTime startDate;
+                DateTime endDate;
+
+                if (!string.IsNullOrEmpty(model.StartDate))
+                {
+                    bool validDate = DateTime.TryParse(model.StartDate, out startDate);
+                    if (!validDate)
+                    {
+                        return BadRequest("Invalid start date provided");
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(model.EndDate))
+                {
+                    bool validDate = DateTime.TryParse(model.EndDate, out endDate);
+                    if (!validDate)
+                    {
+                        return BadRequest("Invalid end date provided");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            var projects = await projectService.SearchProjectsViewByCriteria(model);
+            return Ok(projects);
+        }
+
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] ProjectModel project)
         {
