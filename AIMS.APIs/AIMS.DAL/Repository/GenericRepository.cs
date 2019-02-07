@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -129,6 +130,11 @@ namespace AIMS.DAL.Repository
         public virtual async Task<IEnumerable<TEntity>> GetManyAsync(Func<TEntity, bool> where)
         {
             return await Task<IEnumerable<TEntity>>.Run(() => DbSet.Where(where).ToList()).ConfigureAwait(false);
+        }
+
+        public virtual IEnumerable<TType> GetProjection<TType>(Expression<Func<TEntity, bool>> where, Expression<Func<TEntity, TType>> select)
+        {
+            return DbSet.Where(where).Select(select).ToList();
         }
 
         /// <summary>

@@ -44,8 +44,9 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFProjectLocations>()
                 .HasKey(l => new { l.ProjectId, l.LocationId });
 
-            /*modelBuilder.Entity<EFProjectFundings>()
-                .HasKey(fu => new { fu.ProjectId, fu.FunderId });*/
+            modelBuilder.Entity<EFFinancialYears>()
+                .HasIndex(f => f.FinacialYear)
+                .IsUnique();
 
             modelBuilder.Entity<EFReportSubscriptions>()
                 .HasKey(r => new { r.UserId, r.ReportId });
@@ -86,6 +87,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFSMTPSettings> SMTPSettings { get; set; }
         public DbSet<EFIATISettings> IATISettings { get; set; }
         public DbSet<EFPasswordRecoveryRequests> PasswordRecoveryRequests { get; set; }
+        public DbSet<EFFinancialYears> FinancialYears { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime

@@ -367,4 +367,11 @@ namespace AIMS.Models
         public string Token { get; set; }
         public DateTime Dated { get; set; }
     }
+
+    public class EFFinancialYears
+    {
+        [Key]
+        public int Id { get; set; }
+        public int FinacialYear { get; set; }
+    }
 }

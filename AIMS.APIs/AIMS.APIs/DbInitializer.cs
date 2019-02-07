@@ -27,6 +27,18 @@ namespace AIMS.APIs
             // Run Migrations
             context.Database.Migrate();
 
+            if (context.FinancialYears.Count() == 0)
+            {
+                context.FinancialYears.Add(new EFFinancialYears() { FinacialYear = 2015 } );
+                context.FinancialYears.Add(new EFFinancialYears() { FinacialYear = 2016 });
+                context.FinancialYears.Add(new EFFinancialYears() { FinacialYear = 2017 });
+                context.FinancialYears.Add(new EFFinancialYears() { FinacialYear = 2018 });
+                context.FinancialYears.Add(new EFFinancialYears() { FinacialYear = 2019 });
+                context.FinancialYears.Add(new EFFinancialYears() { FinacialYear = 2020 });
+
+                context.SaveChanges();
+            }
+
             if (context.Organizations.Count() == 0)
             {
                 /*var typeDefault = context.OrganizationTypes.Add(new EFOrganizationTypes() { TypeName = "Default" });
