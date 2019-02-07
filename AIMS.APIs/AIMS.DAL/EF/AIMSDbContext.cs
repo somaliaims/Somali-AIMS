@@ -45,7 +45,7 @@ namespace AIMS.DAL.EF
                 .HasKey(l => new { l.ProjectId, l.LocationId });
 
             modelBuilder.Entity<EFFinancialYears>()
-                .HasIndex(f => f.FinacialYear)
+                .HasIndex(f => f.FinancialYear)
                 .IsUnique();
 
             modelBuilder.Entity<EFReportSubscriptions>()

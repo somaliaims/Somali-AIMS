@@ -34,10 +34,21 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFPasswordRecoveryRequests> passwordRecoveryRepository;
         private GenericRepository<EFProjectLocations> projectLocationsRepository;
         private GenericRepository<EFProjectMarkers> projectMarkersRepository;
+        private GenericRepository<EFFinancialYears> financialYearRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
             context = dbContext;
+        }
+
+        public GenericRepository<EFFinancialYears> FinancialYearRepository
+        {
+            get
+            {
+                if (this.financialYearRepository == null)
+                    this.financialYearRepository = new GenericRepository<EFFinancialYears>(context);
+                return this.financialYearRepository;
+            }
         }
 
         public GenericRepository<EFSMTPSettings> SMTPSettingsRepository

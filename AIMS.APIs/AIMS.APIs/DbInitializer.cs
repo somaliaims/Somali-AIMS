@@ -29,12 +29,12 @@ namespace AIMS.APIs
 
             if (context.FinancialYears.Count() == 0)
             {
-                context.FinancialYears.Add(new EFFinancialYears() { FinacialYear = 2015 } );
-                context.FinancialYears.Add(new EFFinancialYears() { FinacialYear = 2016 });
-                context.FinancialYears.Add(new EFFinancialYears() { FinacialYear = 2017 });
-                context.FinancialYears.Add(new EFFinancialYears() { FinacialYear = 2018 });
-                context.FinancialYears.Add(new EFFinancialYears() { FinacialYear = 2019 });
-                context.FinancialYears.Add(new EFFinancialYears() { FinacialYear = 2020 });
+                context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2015 } );
+                context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2016 });
+                context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2017 });
+                context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2018 });
+                context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2019 });
+                context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2020 });
 
                 context.SaveChanges();
             }

@@ -589,6 +589,18 @@ namespace AIMS.Models
         public string Name { get; set; }
     }
 
+    public class FinancialYearView
+    {
+        public int Id { get; set; }
+        public int Year { get; set; }
+    }
+
+    public class FinancialYearModel
+    {
+        [Required]
+        public int FinancialYear { get; set; }
+    }
+
     /*public class IATIDBCountry
     {
         public string Code { get; set; }

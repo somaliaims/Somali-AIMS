@@ -372,6 +372,6 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        public int FinacialYear { get; set; }
+        public int FinancialYear { get; set; }
     }
 }
