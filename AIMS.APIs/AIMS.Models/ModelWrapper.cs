@@ -592,7 +592,7 @@ namespace AIMS.Models
     public class FinancialYearView
     {
         public int Id { get; set; }
-        public int Year { get; set; }
+        public int FinancialYear { get; set; }
     }
 
     public class FinancialYearModel

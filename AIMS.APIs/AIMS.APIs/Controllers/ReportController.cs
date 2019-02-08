@@ -27,5 +27,18 @@ namespace AIMS.APIs.Controllers
             var report = await reportService.GetProjectsBySector(model);
             return Ok(report);
         }
+
+        [HttpPost]
+        [Route("SearchProjectsByCriteria")]
+        public async Task<IActionResult> SearchProjectsViewByCriteria([FromBody] SearchProjectModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var projects = await reportService.SearchProjectsByCriteria(model);
+            return Ok(projects);
+        }
     }
 }
