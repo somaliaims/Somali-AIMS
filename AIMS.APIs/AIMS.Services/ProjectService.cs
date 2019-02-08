@@ -390,21 +390,18 @@ namespace AIMS.Services
                             , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
-                    if (!string.IsNullOrEmpty(model.StartDate) && !string.IsNullOrEmpty(model.EndDate))
+                    if (model.StartingYear != 0 && model.EndingYear != 0)
                     {
-                        DateTime startDate = Convert.ToDateTime(model.StartDate);
-                        DateTime endDate = Convert.ToDateTime(model.EndDate);
-
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.StartDate >= startDate && p.EndDate <= endDate)
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.StartDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear)
                             , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
                             projectProfileList = (from project in projectProfileList
-                                                  where project.StartDate >= startDate &&
-                                                  project.EndDate <= endDate
+                                                  where project.StartDate.Year >= model.StartingYear &&
+                                                  project.EndDate.Year <= model.EndingYear
                                                   select project);
                         }
                     }
@@ -518,20 +515,17 @@ namespace AIMS.Services
                         projectProfileList = await unitWork.ProjectRepository.GetManyQueryableAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase));
                     }
 
-                    if (!string.IsNullOrEmpty(model.StartDate) && !string.IsNullOrEmpty(model.EndDate))
+                    if (model.StartingYear != 0 && model.EndingYear != 0)
                     {
-                        DateTime startDate = Convert.ToDateTime(model.StartDate);
-                        DateTime endDate = Convert.ToDateTime(model.EndDate);
-
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetManyQueryableAsync(p => (p.StartDate >= startDate && p.EndDate <= endDate));
+                            projectProfileList = await unitWork.ProjectRepository.GetManyQueryableAsync(p => (p.StartDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear));
                         }
                         else
                         {
                             projectProfileList = (from project in projectProfileList
-                                                  where project.StartDate >= startDate &&
-                                                  project.EndDate <= endDate
+                                                  where project.StartDate.Year >= model.StartingYear &&
+                                                  project.EndDate.Year <= model.EndingYear
                                                   select project);
                         }
                     }

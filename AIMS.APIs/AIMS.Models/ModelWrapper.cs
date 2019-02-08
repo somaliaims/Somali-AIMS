@@ -756,8 +756,8 @@ namespace AIMS.Models
     {
         public string Title { get; set; } = null;
         public List<int> OrganizationIds { get; set; } = new List<int>();
-        public string StartDate { get; set; } = null;
-        public string EndDate { get; set; } = null;
+        public int StartingYear { get; set; } = 0;
+        public int EndingYear { get; set; } = 0;
         public List<int> SectorIds { get; set; } = new List<int>();
         public List<int> LocationIds { get; set; } = new List<int>();
     }
