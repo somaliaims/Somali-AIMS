@@ -49,9 +49,15 @@ namespace AIMS.APIs.Controllers
         public async Task<IActionResult> LoadLatestIATI()
         {
             string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
-            string iatiUrl = configuration.GetValue<string>("IATI:Url");
-            var response = await iatiService.DownloadIATIFromUrl(iatiUrl, iatiFilePath);
-            return Ok(response);
+            var iatiSettings = iatiService.GetIATISettings();
+            if (iatiSettings != null)
+            {
+                //string iatiUrl = configuration.GetValue<string>("IATI:Url");
+                string iatiUrl = iatiSettings.BaseUrl;
+                var response = await iatiService.DownloadIATIFromUrl(iatiUrl, iatiFilePath);
+                return Ok(response);
+            }
+            return Ok(null);
         }
 
         [HttpGet]

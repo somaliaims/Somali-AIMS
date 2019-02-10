@@ -341,7 +341,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 IATISettings settings = new IATISettings();
-                var iatiSettings = unitWork.IATISettingsRepository.GetFirst(i => i.Id != 0);
+                var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.Id != 0);
                 if (iatiSettings != null)
                 {
                     settings.BaseUrl = iatiSettings.BaseUrl;
@@ -424,7 +424,7 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var iatiSettings = unitWork.IATISettingsRepository.GetFirst(i => i.Id != 0);
+                    var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.Id != 0);
                     if (iatiSettings != null)
                     {
                         iatiSettings.BaseUrl = model.BaseUrl;

@@ -250,6 +250,12 @@ namespace AIMS.Services
                     }
                 }
 
+                if (projectProfileList == null)
+                {
+                    projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndDate.Year >= year && p.EndDate.Month >= month),
+                        new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+                }
+
                 if (model.SectorIds.Count > 0)
                 {
                     projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains(p.SectorId), new string[] { "Sector" });
