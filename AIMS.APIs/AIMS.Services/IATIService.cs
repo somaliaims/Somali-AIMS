@@ -345,7 +345,6 @@ namespace AIMS.Services
                 if (iatiSettings != null)
                 {
                     settings.BaseUrl = iatiSettings.BaseUrl;
-                    settings.CountryCode = iatiSettings.CountryCode;
                 }
                 return settings;
             }
@@ -428,7 +427,6 @@ namespace AIMS.Services
                     if (iatiSettings != null)
                     {
                         iatiSettings.BaseUrl = model.BaseUrl;
-                        iatiSettings.CountryCode = model.CountryCode;
                         unitWork.Save();
                     }
                     else
@@ -436,7 +434,6 @@ namespace AIMS.Services
                         unitWork.IATISettingsRepository.Insert(new EFIATISettings()
                         {
                             BaseUrl = model.BaseUrl,
-                            CountryCode = model.CountryCode
                         });
                         unitWork.Save();
                     }

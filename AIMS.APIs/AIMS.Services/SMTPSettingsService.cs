@@ -48,7 +48,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var settings = unitWork.SMTPSettingsRepository.GetFirst(s => s.Host != null);
+                var settings = unitWork.SMTPSettingsRepository.GetOne(s => s.Id != 0);
                 SMTPSettingsModelView view = new SMTPSettingsModelView();
                 if (settings != null)
                 {
@@ -69,16 +69,36 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var newSMTPSettings = unitWork.SMTPSettingsRepository.Insert(new EFSMTPSettings()
+                    var smtpSettings = unitWork.SMTPSettingsRepository.GetOne(s => s.Id != 0);
+                    if (smtpSettings != null)
                     {
-                        Host = model.Host,
-                        Port = model.Port,
-                        Username = model.Username,
-                        Password = model.Password,
-                        AdminEmail = model.AdminEmail
-                    });
-                    response.ReturnedId = newSMTPSettings.Id;
-                    unitWork.Save();
+                        smtpSettings.Host = model.Host;
+                        smtpSettings.Port = model.Port;
+                        smtpSettings.Username = model.Username;
+                        smtpSettings.AdminEmail = model.AdminEmail;
+
+                        if (!string.IsNullOrEmpty(model.Password))
+                        {
+                            smtpSettings.Password = model.Password;
+                        }
+
+                        unitWork.SMTPSettingsRepository.Update(smtpSettings);
+                        unitWork.Save();
+                        response.ReturnedId = smtpSettings.Id;
+                    }
+                    else
+                    {
+                        var newSMTPSettings = unitWork.SMTPSettingsRepository.Insert(new EFSMTPSettings()
+                        {
+                            Host = model.Host,
+                            Port = model.Port,
+                            Username = model.Username,
+                            Password = model.Password,
+                            AdminEmail = model.AdminEmail
+                        });
+                        response.ReturnedId = newSMTPSettings.Id;
+                        unitWork.Save();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -107,7 +127,12 @@ namespace AIMS.Services
                 settingsObj.Host = model.Host;
                 settingsObj.Port = model.Port;
                 settingsObj.Username = model.Username;
-                settingsObj.Password = model.Password;
+
+                if (!string.IsNullOrEmpty(model.Password))
+                {
+                    settingsObj.Password = model.Password;
+                }
+                
                 settingsObj.AdminEmail = model.AdminEmail;
 
                 unitWork.SMTPSettingsRepository.Update(settingsObj);

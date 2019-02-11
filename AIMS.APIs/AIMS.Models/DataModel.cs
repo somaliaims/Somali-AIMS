@@ -357,7 +357,6 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string BaseUrl { get; set; }
-        public string CountryCode { get; set; }
     }
 
     public class EFPasswordRecoveryRequests

@@ -700,7 +700,6 @@ namespace AIMS.Models
     public class IATISettings
     {
         public string BaseUrl { get; set; }
-        public string CountryCode { get; set; }
     }
 
     /// <summary>
