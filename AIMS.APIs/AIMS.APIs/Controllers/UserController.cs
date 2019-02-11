@@ -52,8 +52,8 @@ namespace AIMS.APIs.Controllers
             string adminEmail = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
                                 .GetValue<String>("Email:Smtp:AdminEmail");
 
-            var smtpClient = HttpContext.RequestServices.GetRequiredService<SmtpClient>();
-            var response = userService.Add(user, smtpClient, adminEmail);
+            //var smtpClient = HttpContext.RequestServices.GetRequiredService<SmtpClient>();
+            var response = userService.Add(user, adminEmail);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -94,7 +94,7 @@ namespace AIMS.APIs.Controllers
                     Url = resetPasswordUrl
                 };
 
-                var response = userService.ResetPasswordRequest(resetModel, datedTime, configuredSmtpClient, adminEmail);
+                var response = userService.ResetPasswordRequest(resetModel, datedTime, adminEmail);
                 if (!response.Success)
                 {
                     return BadRequest(response.Message);

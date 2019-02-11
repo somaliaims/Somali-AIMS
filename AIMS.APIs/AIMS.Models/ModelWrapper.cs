@@ -682,7 +682,7 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string Host { get; set; }
-        public string Port { get; set; }
+        public int Port { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public string AdminEmail { get; set; }
@@ -691,7 +691,7 @@ namespace AIMS.Models
     public class SMTPSettingsModel
     {
         public string Host { get; set; }
-        public string Port { get; set; }
+        public int Port { get; set; } = 0;
         public string Username { get; set; }
         public string Password { get; set; }
         public string AdminEmail { get; set; }

@@ -53,13 +53,13 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse ResetPasswordRequest(PasswordResetEmailModel model, DateTime dated, SmtpClient smtp, string adminEmail);
+        ActionResponse ResetPasswordRequest(PasswordResetEmailModel model, DateTime dated, string adminEmail);
 
         /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(UserModel user, SmtpClient smtp, string adminEmail);
+        ActionResponse Add(UserModel user, string adminEmail);
 
         /// <summary>
         /// Updates a user's organization
@@ -194,14 +194,26 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ResetPasswordRequest(PasswordResetEmailModel model, DateTime dated, SmtpClient smtp, string adminEmail)
+        public ActionResponse ResetPasswordRequest(PasswordResetEmailModel model, DateTime dated, string adminEmail)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    IEmailHelper emailHelper = new EmailHelper(smtp, adminEmail);
+                    ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                    var smtpSettings = smtpService.Get();
+                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+
+                    if (smtpSettings != null)
+                    {
+                        smtpSettingsModel.Host = smtpSettings.Host;
+                        smtpSettingsModel.Port = smtpSettings.Port;
+                        smtpSettingsModel.Username = smtpSettings.Username;
+                        smtpSettingsModel.Password = smtpSettings.Password;
+                    }
+
+                    IEmailHelper emailHelper = new EmailHelper(adminEmail, smtpSettingsModel);
                     response = emailHelper.SendPasswordRecoveryEmail(model);
                     if (!response.Success)
                     {
@@ -228,7 +240,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Add(UserModel model, SmtpClient smtp, string adminEmail)
+        public ActionResponse Add(UserModel model, string adminEmail)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -309,7 +321,18 @@ namespace AIMS.Services
                     if (usersEmailList.Count > 0)
                     {
                         //Send emails
-                        IEmailHelper emailHelper = new EmailHelper(smtp, adminEmail);
+                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                    var smtpSettings = smtpService.Get();
+                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+
+                    if (smtpSettings != null)
+                    {
+                        smtpSettingsModel.Host = smtpSettings.Host;
+                        smtpSettingsModel.Port = smtpSettings.Port;
+                        smtpSettingsModel.Username = smtpSettings.Username;
+                        smtpSettingsModel.Password = smtpSettings.Password;
+                    }
+                        IEmailHelper emailHelper = new EmailHelper(adminEmail, smtpSettingsModel);
                         emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName);
                         mHelper = new MessageHelper();
                         string notificationMessage = mHelper.NewUserForOrganization(organization.OrganizationName, model.Name);

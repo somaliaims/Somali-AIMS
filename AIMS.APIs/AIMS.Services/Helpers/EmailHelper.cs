@@ -31,9 +31,9 @@ namespace AIMS.Services.Helpers
         SmtpClient client;
         string emailFrom;
 
-        public EmailHelper(SmtpClient sClient, string adminEmail)
+        public EmailHelper(string adminEmail, SMTPSettingsModel smtpSettings)
         {
-            client = sClient;
+            client = this.GetSMTPClient(smtpSettings);
             emailFrom = adminEmail;
         }
 
@@ -129,6 +129,20 @@ namespace AIMS.Services.Helpers
             messageList.Add("<p><a target='_blank' href='" + url + token + "'>Password Reset Link</a></p>");
             messageList.Add("<b>AIMS Support Team</b>");
             return (String.Join(string.Empty, messageList));
+        }
+
+        private SmtpClient GetSMTPClient(SMTPSettingsModel settings)
+        {
+            return new SmtpClient()
+            {
+                Host = settings.Host,
+                Port = settings.Port,
+                Credentials = new NetworkCredential(
+                            settings.Username,
+                            settings.Password
+                        ),
+                EnableSsl = true
+            };
         }
 
     }
