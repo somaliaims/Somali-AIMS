@@ -20,6 +20,12 @@ namespace AIMS.Services
         SMTPSettingsModelView Get();
 
         /// <summary>
+        /// Gets settings used to be privately and not to expose through controller
+        /// </summary>
+        /// <returns></returns>
+        SMTPSettingsModel GetPrivate();
+
+        /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
@@ -60,6 +66,22 @@ namespace AIMS.Services
                 }
                 return view;
             }
+        }
+
+        public SMTPSettingsModel GetPrivate()
+        {
+            var unitWork = new UnitOfWork(context);
+            var settings = unitWork.SMTPSettingsRepository.GetOne(s => s.Id != 0);
+            SMTPSettingsModel view = new SMTPSettingsModel();
+            if (settings != null)
+            {
+                view.AdminEmail = settings.AdminEmail;
+                view.Host = settings.Host;
+                view.Port = settings.Port;
+                view.Username = settings.Username;
+                view.Password = settings.Password;
+            }
+            return view;
         }
 
         public ActionResponse Add(SMTPSettingsModel model)

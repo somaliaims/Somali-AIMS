@@ -70,13 +70,13 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Valid email address is required");
             }
 
+            ActionResponse response = new ActionResponse();
             var foundUser = userService.GetUserByEmail(model.Email);
             if (foundUser != null)
             {
                 string adminEmail = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
                 .GetValue<String>("Email:Smtp:AdminEmail");
                 string resetPasswordUrl = configuration["ResetPasswordUrl"];
-                var configuredSmtpClient = HttpContext.RequestServices.GetRequiredService<SmtpClient>();
                 DateTime datedTime = DateTime.Now;
                 PasswordTokenModel tModel = new PasswordTokenModel()
                 {
@@ -94,13 +94,13 @@ namespace AIMS.APIs.Controllers
                     Url = resetPasswordUrl
                 };
 
-                var response = userService.ResetPasswordRequest(resetModel, datedTime, adminEmail);
-                if (!response.Success)
+                response = userService.ResetPasswordRequest(resetModel, datedTime, adminEmail);
+                /*if (!response.Success)
                 {
                     return BadRequest(response.Message);
-                }
+                }*/
             }
-            return Ok(true);
+            return Ok(response);
         }
 
         [HttpPost]

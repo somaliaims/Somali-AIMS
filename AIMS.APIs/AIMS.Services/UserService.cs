@@ -158,25 +158,23 @@ namespace AIMS.Services
         public UserAuthenticationView GetUserByEmail(string email)
         {
             var unitWork = new UnitOfWork(context);
-            //{
-                UserAuthenticationView foundUser = new UserAuthenticationView();
-                var findUser = unitWork.UserRepository.GetWithInclude(u => u.Email.Equals(email),
-                    new string[] { "Organization" });
+            UserAuthenticationView foundUser = new UserAuthenticationView();
+            var findUser = unitWork.UserRepository.GetWithInclude(u => u.Email.Equals(email),
+                new string[] { "Organization" });
 
-                if (findUser != null)
+            if (findUser != null)
+            {
+                foreach (var user in findUser)
                 {
-                    foreach (var user in findUser)
-                    {
-                        foundUser.Id = user.Id;
-                        foundUser.Email = user.Email;
-                        foundUser.Name = user.Name;
-                        foundUser.UserType = user.UserType;
-                        foundUser.OrganizationId = user.Organization.Id;
-                        break;
-                    }
+                    foundUser.Id = user.Id;
+                    foundUser.Email = user.Email;
+                    foundUser.Name = user.Name;
+                    foundUser.UserType = user.UserType;
+                    foundUser.OrganizationId = user.Organization.Id;
+                    break;
                 }
-                return foundUser;
-            //}
+            }
+            return foundUser;
         }
 
         public ActionResponse CheckEmailAvailability(string email)
@@ -202,7 +200,7 @@ namespace AIMS.Services
                 try
                 {
                     ISMTPSettingsService smtpService = new SMTPSettingsService(context);
-                    var smtpSettings = smtpService.Get();
+                    var smtpSettings = smtpService.GetPrivate();
                     SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
 
                     if (smtpSettings != null)
@@ -231,7 +229,7 @@ namespace AIMS.Services
                         unitWork.Save();
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
@@ -292,22 +290,11 @@ namespace AIMS.Services
                     unitWork.Save();
                     //Get emails for all the users
                     //TODO: To bind the email and notifications with user account creation
-                    /*var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) && u.IsApproved == true);
+                    var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) && u.IsApproved == true);
                     List<EmailsModel> usersEmailList = new List<EmailsModel>();
                     foreach (var user in users)
                     {
-                        usersEmailList.Add(new EmailsModel()
-                        {
-                            Email = user.Email,
-                            UserName = user.Name,
-                            UserType = user.UserType
-                        });
-                    }
-
-                    if (usersEmailList.Count == 0)
-                    {
-                        var managerUsers = unitWork.UserRepository.GetMany(u => u.UserType == UserTypes.Manager || u.UserType == UserTypes.SuperAdmin);
-                        foreach (var user in managerUsers)
+                        if (user.Email != model.Email)
                         {
                             usersEmailList.Add(new EmailsModel()
                             {
@@ -318,20 +305,37 @@ namespace AIMS.Services
                         }
                     }
 
+                    if (usersEmailList.Count == 0)
+                    {
+                        var managerUsers = unitWork.UserRepository.GetMany(u => u.UserType == UserTypes.Manager || u.UserType == UserTypes.SuperAdmin);
+                        foreach (var user in managerUsers)
+                        {
+                            if (user.Email != model.Email)
+                            {
+                                usersEmailList.Add(new EmailsModel()
+                                {
+                                    Email = user.Email,
+                                    UserName = user.Name,
+                                    UserType = user.UserType
+                                });
+                            }
+                        }
+                    }
+
                     if (usersEmailList.Count > 0)
                     {
                         //Send emails
                         ISMTPSettingsService smtpService = new SMTPSettingsService(context);
-                    var smtpSettings = smtpService.Get();
-                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                        var smtpSettings = smtpService.GetPrivate();
+                        SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
 
-                    if (smtpSettings != null)
-                    {
-                        smtpSettingsModel.Host = smtpSettings.Host;
-                        smtpSettingsModel.Port = smtpSettings.Port;
-                        smtpSettingsModel.Username = smtpSettings.Username;
-                        smtpSettingsModel.Password = smtpSettings.Password;
-                    }
+                        if (smtpSettings != null)
+                        {
+                            smtpSettingsModel.Host = smtpSettings.Host;
+                            smtpSettingsModel.Port = smtpSettings.Port;
+                            smtpSettingsModel.Username = smtpSettings.Username;
+                            smtpSettingsModel.Password = smtpSettings.Password;
+                        }
                         IEmailHelper emailHelper = new EmailHelper(adminEmail, smtpSettingsModel);
                         emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName);
                         mHelper = new MessageHelper();
@@ -349,7 +353,7 @@ namespace AIMS.Services
                             NotificationType = NotificationTypes.NewUser
                         });
                         unitWork.Save();
-                    }*/
+                    }
                     response.ReturnedId = newUser.Id;
                 }
                 catch (Exception ex)
@@ -371,7 +375,7 @@ namespace AIMS.Services
                 EFUser approvedByAccount = null;
 
                 var userAccounts = unitWork.UserRepository.GetMany(u => u.Id.Equals(model.ApprovedById) || u.Id.Equals(model.UserId));
-                foreach(var user in userAccounts)
+                foreach (var user in userAccounts)
                 {
                     if (user.Id.Equals(model.ApprovedById))
                     {
@@ -483,7 +487,7 @@ namespace AIMS.Services
                 var isTokenExists = unitWork.PasswordRecoveryRepository.GetOne(r => r.Token == model.Token && r.Dated.Date == tokenTime.Date);
                 if (isTokenExists != null)
                 {
-                    DateTime expirationTime =isTokenExists.Dated.AddHours(2);
+                    DateTime expirationTime = isTokenExists.Dated.AddHours(2);
                     if (expirationTime >= DateTime.Now)
                     {
                         var user = unitWork.UserRepository.GetOne(u => u.Email == isTokenExists.Email);
