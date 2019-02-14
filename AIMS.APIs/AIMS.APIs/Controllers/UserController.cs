@@ -212,7 +212,14 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = userService.UpdatePassword(model.UserId, model.Password);
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdVal))
+            {
+                return BadRequest("Invalid attempt");
+            }
+
+            int userId = Convert.ToInt32(userIdVal);
+            var response = userService.UpdatePassword(userId, model.Password);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -246,7 +253,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
-        [Route("Delete")]
+        [Route("DeleteAccount")]
         public IActionResult Delete(DeleteAccountModel model)
         {
             if (!ModelState.IsValid)
@@ -254,12 +261,14 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = userService.Delete(model.Email, model.Password);
-            if (!response.Success)
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdVal))
             {
-                return BadRequest(response.Message);
+                return BadRequest("Invalid attempt");
             }
-            return Ok(true);
+            int userId = Convert.ToInt32(userIdVal);
+            var response = userService.Delete(userId, model.Password);
+            return Ok(response);
         }
     }
 }

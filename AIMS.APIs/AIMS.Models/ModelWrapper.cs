@@ -255,7 +255,6 @@ namespace AIMS.Models
 
     public class EditUserPassword
     {
-        public int UserId { get; set; }
         public string Password { get; set; }
     }
 
@@ -704,9 +703,6 @@ namespace AIMS.Models
 
     public class DeleteAccountModel
     {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
         [Required]
         public string Password { get; set; }
     }

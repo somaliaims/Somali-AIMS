@@ -88,7 +88,7 @@ namespace AIMS.Services
         /// <param name="userId"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        ActionResponse Delete(string email, string password);
+        ActionResponse Delete(int userId, string password);
 
         /// <summary>
         /// Activates account for the provided user
@@ -518,14 +518,14 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Delete(string email, string password)
+        public ActionResponse Delete(int userId, string password)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 ISecurityHelper sHelper = new SecurityHelper();
                 string passwordHash = sHelper.GetPasswordHash(password);
-                var user = unitWork.UserRepository.Get(u => u.Email.Equals(email) && u.Password.Equals(password));
+                var user = unitWork.UserRepository.Get(u => u.Id.Equals(userId) && u.Password.Equals(passwordHash));
 
                 IMessageHelper mHelper;
                 if (user == null)
