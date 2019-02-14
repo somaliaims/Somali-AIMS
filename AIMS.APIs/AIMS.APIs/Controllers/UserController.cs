@@ -244,5 +244,22 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(response.Success);
         }
+
+        [HttpPost]
+        [Route("Delete")]
+        public IActionResult Delete(DeleteAccountModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = userService.Delete(model.Email, model.Password);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
     }
 }

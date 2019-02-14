@@ -702,6 +702,15 @@ namespace AIMS.Models
         public string BaseUrl { get; set; }
     }
 
+    public class DeleteAccountModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+        [Required]
+        public string Password { get; set; }
+    }
+
     /// <summary>
     /// Models for Reports
     /// </summary>
