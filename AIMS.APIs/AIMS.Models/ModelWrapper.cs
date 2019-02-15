@@ -777,4 +777,9 @@ namespace AIMS.Models
         public List<int> SectorIds { get; set; } = null;
     }
 
+    public class NotificationUpdateModel
+    {
+        public List<int> Ids { get; set; }
+    }
+
 }

@@ -137,6 +137,11 @@ namespace AIMS.DAL.Repository
             return DbSet.Where(where).Select(select).ToList();
         }
 
+        public virtual int GetProjectionCount<TType>(Expression<Func<TEntity, bool>> where, Expression<Func<TEntity, TType>> select)
+        {
+            return DbSet.Where(where).Select(select).AsQueryable().Count();
+        }
+
         /// <summary>
         /// generic method to get a single entity on the basis of a condition
         /// </summary>

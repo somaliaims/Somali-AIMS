@@ -52,7 +52,6 @@ namespace AIMS.APIs.Controllers
             string adminEmail = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
                                 .GetValue<String>("Email:Smtp:AdminEmail");
 
-            //var smtpClient = HttpContext.RequestServices.GetRequiredService<SmtpClient>();
             var response = userService.Add(user, adminEmail);
             if (!response.Success)
             {
@@ -95,10 +94,6 @@ namespace AIMS.APIs.Controllers
                 };
 
                 response = userService.ResetPasswordRequest(resetModel, datedTime, adminEmail);
-                /*if (!response.Success)
-                {
-                    return BadRequest(response.Message);
-                }*/
             }
             return Ok(response);
         }
