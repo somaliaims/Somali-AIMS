@@ -195,7 +195,7 @@ namespace AIMS.APIs.Controllers
             TokenUtility utility = new TokenUtility();
             var tokenTime = utility.GetDecodedResetToken(model.Token);
             var response = userService.ResetPassword(model, tokenTime);
-            return Ok(response.Success);
+            return Ok(response);
         }
 
         [HttpPost]
