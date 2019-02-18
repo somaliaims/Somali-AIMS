@@ -18,7 +18,7 @@ namespace AIMS.Services
         /// Gets all report subscriptions
         /// </summary>
         /// <returns></returns>
-        IEnumerable<ReportSubscriptionView> GetAll();
+        IEnumerable<ReportSubscriptionView> GetAll(int userId);
 
         /// <summary>
         /// Gets the report subscription for the provided id
@@ -37,17 +37,17 @@ namespace AIMS.Services
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(ReportSubscriptionModel model);
+        ActionResponse Add(int userId, ReportSubscriptionModel model);
 
         /// <summary>
         /// Updates a report subscription
         /// </summary>
         /// <param name="report subscription"></param>
         /// <returns></returns>
-        ActionResponse Remove(ReportSubscriptionModel model);
+        ActionResponse Remove(int userId, ReportSubscriptionModel model);
     }
 
-    public class ReportSubscriptionService
+    public class ReportSubscriptionService : IReportSubscriptionService
     {
         AIMSDbContext context;
         IMapper mapper;
@@ -58,11 +58,11 @@ namespace AIMS.Services
             mapper = autoMapper;
         }
 
-        public IEnumerable<ReportSubscriptionView> GetAll()
+        public IEnumerable<ReportSubscriptionView> GetAll(int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var reportSubscriptions = unitWork.ReportSubscriptionRepository.GetAll();
+                var reportSubscriptions = unitWork.ReportSubscriptionRepository.GetManyQueryable(s => s.UserId == userId);
                 return mapper.Map<List<ReportSubscriptionView>>(reportSubscriptions);
             }
         }
@@ -86,7 +86,7 @@ namespace AIMS.Services
         }
 
 
-        public ActionResponse Add(ReportSubscriptionModel model)
+        public ActionResponse Add(int userId, ReportSubscriptionModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -94,7 +94,7 @@ namespace AIMS.Services
                 IMessageHelper mHelper;
                 try
                 {
-                    var user = unitWork.UserRepository.GetByID(model.UserId);
+                    var user = unitWork.UserRepository.GetByID(userId);
                     if (user == null)
                     {
                         mHelper = new MessageHelper();
@@ -107,7 +107,7 @@ namespace AIMS.Services
                     {
                         using (var scope = new TransactionScope())
                         {
-                            var subscriptions = unitWork.ReportSubscriptionRepository.GetManyQueryable(s => s.UserId == model.UserId);
+                            var subscriptions = unitWork.ReportSubscriptionRepository.GetManyQueryable(s => s.UserId == userId);
                             var reports = unitWork.ReportsRepository.GetManyQueryable(r => model.ReportIds.Contains(r.Id));
                             foreach(var report in reports)
                             {
@@ -139,7 +139,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Remove(ReportSubscriptionModel model)
+        public ActionResponse Remove(int userId, ReportSubscriptionModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -147,7 +147,7 @@ namespace AIMS.Services
                 IMessageHelper mHelper;
                 try
                 {
-                    var user = unitWork.UserRepository.GetByID(model.UserId);
+                    var user = unitWork.UserRepository.GetByID(userId);
                     if (user == null)
                     {
                         mHelper = new MessageHelper();
@@ -160,7 +160,7 @@ namespace AIMS.Services
                     {
                         using (var scope = new TransactionScope())
                         {
-                            var subscriptions = unitWork.ReportSubscriptionRepository.GetManyQueryable(s => model.ReportIds.Contains(s.ReportId) && s.UserId == model.UserId);
+                            var subscriptions = unitWork.ReportSubscriptionRepository.GetManyQueryable(s => model.ReportIds.Contains(s.ReportId) && s.UserId == userId);
 
                             if (subscriptions != null)
                             {

@@ -790,7 +790,6 @@ namespace AIMS.Models
 
     public class ReportSubscriptionModel
     {
-        public int UserId { get; set; }
         public List<int> ReportIds { get; set; }
     }
 
