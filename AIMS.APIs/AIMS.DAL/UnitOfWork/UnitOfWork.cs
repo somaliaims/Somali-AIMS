@@ -35,6 +35,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFProjectLocations> projectLocationsRepository;
         private GenericRepository<EFProjectMarkers> projectMarkersRepository;
         private GenericRepository<EFFinancialYears> financialYearRepository;
+        private GenericRepository<EFStaticReports> reportsRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -48,6 +49,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.financialYearRepository == null)
                     this.financialYearRepository = new GenericRepository<EFFinancialYears>(context);
                 return this.financialYearRepository;
+            }
+        }
+
+        public GenericRepository<EFStaticReports> ReportsRepository
+        {
+            get
+            {
+                if (this.reportsRepository == null)
+                    this.reportsRepository = new GenericRepository<EFStaticReports>(context);
+                return this.reportsRepository;
             }
         }
 

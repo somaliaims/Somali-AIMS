@@ -32,6 +32,12 @@ namespace AIMS.Models
         public string TokenExpirationDays { get; set; }
     }
 
+    public class ReportNameView
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+    }
+
     public class PasswordTokenModel
     {
         public string Email { get; set; }

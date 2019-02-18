@@ -27,6 +27,13 @@ namespace AIMS.APIs
             // Run Migrations
             context.Database.Migrate();
 
+            if (context.StaticReports.Count() == 0)
+            {
+                context.StaticReports.Add(new EFStaticReports() { Title = "Projects Report" });
+                context.StaticReports.Add(new EFStaticReports() { Title = "Organizations Report" });
+                context.StaticReports.Add(new EFStaticReports() { Title = "Sectors Report" });
+            }
+
             if (context.FinancialYears.Count() == 0)
             {
                 context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2015 } );
