@@ -108,12 +108,10 @@ namespace AIMS.APIs
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IIATIService, IATIService>();
             services.AddScoped<ISMTPSettingsService, SMTPSettingsService>();
-            /*services.AddScoped<ISectorTypesService, SectorTypesService>();
-            services.AddScoped<ISectorCategoryService, SectorCategoryService>();
-            services.AddScoped<ISectorSubCategoryService, SectorSubCategoryService>();*/
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IFinancialYearService, FinancialYearService>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<IReportNamesService, ReportNamesService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             //Configure Email Settings

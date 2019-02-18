@@ -32,12 +32,6 @@ namespace AIMS.Models
         public string TokenExpirationDays { get; set; }
     }
 
-    public class ReportNameView
-    {
-        public int Id { get; set; }
-        public string Title { get; set; }
-    }
-
     public class PasswordTokenModel
     {
         public string Email { get; set; }
@@ -788,4 +782,21 @@ namespace AIMS.Models
         public List<int> Ids { get; set; }
     }
 
+    public class ReportNameView
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+    }
+
+    public class ReportSubscriptionModel
+    {
+        public int UserId { get; set; }
+        public List<int> ReportIds { get; set; }
+    }
+
+    public class ReportSubscriptionView
+    {
+        public int ReportId { get; set; }
+        public string ReportName { get; set; }
+    }
 }

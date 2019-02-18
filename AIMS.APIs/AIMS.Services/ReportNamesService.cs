@@ -25,7 +25,7 @@ namespace AIMS.Services
         IEnumerable<ReportNameView> GetMatching(string criteria);
 
         /// <summary>
-        /// Gets the location for the provided id
+        /// Gets the report for the provided id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -55,7 +55,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<ReportNameView> namesList = new List<ReportNameView>();
-                var reportNames = unitWork.LocationRepository.GetAll();
+                var reportNames = unitWork.ReportsRepository.GetAll();
                 return mapper.Map<List<ReportNameView>>(reportNames);
             }
         }
@@ -64,7 +64,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var reportNames = await unitWork.LocationRepository.GetAllAsync();
+                var reportNames = await unitWork.ReportsRepository.GetAllAsync();
                 return await Task<IEnumerable<ReportNameView>>.Run(() => mapper.Map<List<ReportNameView>>(reportNames)).ConfigureAwait(false);
             }
         }
@@ -73,8 +73,8 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var location = unitWork.LocationRepository.GetByID(id);
-                return mapper.Map<ReportNameView>(location);
+                var report = unitWork.ReportsRepository.GetByID(id);
+                return mapper.Map<ReportNameView>(report);
             }
         }
 
@@ -83,7 +83,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<ReportNameView> reportNamesList = new List<ReportNameView>();
-                var reportNames = unitWork.LocationRepository.GetMany(o => o.Location.Contains(criteria));
+                var reportNames = unitWork.ReportsRepository.GetMany(r => r.Title.Contains(criteria));
                 return mapper.Map<List<ReportNameView>>(reportNames);
             }
         }

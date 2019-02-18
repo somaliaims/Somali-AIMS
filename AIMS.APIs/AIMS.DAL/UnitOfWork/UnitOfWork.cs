@@ -12,9 +12,6 @@ namespace AIMS.DAL.UnitOfWork
     public class UnitOfWork : IDisposable
     {
         private AIMSDbContext context = null;
-        /*private GenericRepository<EFSectorTypes> sectorTypesRepository;
-        private GenericRepository<EFSectorCategory> sectorCategoryRepository;
-        private GenericRepository<EFSectorSubCategory> sectorSubCategoryRepository;*/
         private GenericRepository<EFSector> sectorRepository;
         private GenericRepository<EFLocation> locationRepository;
         private GenericRepository<EFOrganization> organizationRepository;
@@ -23,7 +20,6 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFProjectSectors> projectSectorsRepository;
         private GenericRepository<EFProjectFunders> fundersRepository;
         private GenericRepository<EFProjectImplementers> implementersRepository;
-        //private GenericRepository<EFProjectFundings> fundingsRepository;
         private GenericRepository<EFUser> userRepository;
         private GenericRepository<EFProjectDocuments> projectDocumentsRepository;
         private GenericRepository<EFProjectDisbursements> projectDisbursementsRepository;
@@ -36,6 +32,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFProjectMarkers> projectMarkersRepository;
         private GenericRepository<EFFinancialYears> financialYearRepository;
         private GenericRepository<EFStaticReports> reportsRepository;
+        private GenericRepository<EFReportSubscriptions> reportSubscriptionsRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -49,6 +46,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.financialYearRepository == null)
                     this.financialYearRepository = new GenericRepository<EFFinancialYears>(context);
                 return this.financialYearRepository;
+            }
+        }
+
+        public GenericRepository<EFReportSubscriptions> ReportSubscriptionRepository
+        {
+            get
+            {
+                if (this.reportSubscriptionsRepository == null)
+                    this.reportSubscriptionsRepository = new GenericRepository<EFReportSubscriptions>(context);
+                return this.reportSubscriptionsRepository;
             }
         }
 
