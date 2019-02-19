@@ -84,8 +84,8 @@ namespace AIMS.Services
                     var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => model.Ids.Contains(n.Id));
                     if (notifications != null)
                     {
-                        using (var scope = new TransactionScope())
-                        {
+                        //using (var scope = context.Database.BeginTransaction())
+                        //{
                             foreach (var notification in notifications)
                             {
                                 notification.IsSeen = true;
@@ -93,8 +93,8 @@ namespace AIMS.Services
                             }
 
                             unitWork.Save();
-                            scope.Complete();
-                        }
+                          //  scope.Commit();
+                        //}
                     }
                     response.ReturnedId = model.Ids.Count;
                 }
@@ -117,16 +117,16 @@ namespace AIMS.Services
                     var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => model.Ids.Contains(n.Id));
                     if (notifications != null)
                     {
-                        using (var scope = new TransactionScope())
-                        {
+                        //using (var scope = new TransactionScope())
+                        //{
                             foreach (var notification in notifications)
                             {
                                 unitWork.NotificationsRepository.Delete(notification);
                             }
 
                             unitWork.Save();
-                            scope.Complete();
-                        }
+                          //  scope.Complete();
+                        //}
                     }
                     response.ReturnedId = model.Ids.Count;
                 }

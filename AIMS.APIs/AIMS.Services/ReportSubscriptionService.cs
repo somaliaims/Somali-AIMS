@@ -105,8 +105,8 @@ namespace AIMS.Services
 
                     if (model.ReportIds.Count > 0)
                     {
-                        using (var scope = new TransactionScope())
-                        {
+                        //using (var scope = context.Database.BeginTransaction())
+                        //{
                             var subscriptions = unitWork.ReportSubscriptionRepository.GetManyQueryable(s => s.UserId == userId);
                             var reports = unitWork.ReportsRepository.GetManyQueryable(r => model.ReportIds.Contains(r.Id));
                             foreach(var report in reports)
@@ -124,9 +124,9 @@ namespace AIMS.Services
                                     });
                                 }
                             }
-                            scope.Complete();
                             unitWork.Save();
-                        }
+                          //  scope.Commit();
+                        //}
                             
                     }
                 }
@@ -158,20 +158,19 @@ namespace AIMS.Services
 
                     if (model.ReportIds.Count > 0)
                     {
-                        using (var scope = new TransactionScope())
-                        {
+                        //using (var scope = context.Database.BeginTransaction())
+                        //{
                             var subscriptions = unitWork.ReportSubscriptionRepository.GetManyQueryable(s => model.ReportIds.Contains(s.ReportId) && s.UserId == userId);
-
                             if (subscriptions != null)
                             {
                                 foreach(var subscription in subscriptions)
                                 {
                                     unitWork.ReportSubscriptionRepository.Delete(subscription);
                                 }
-                                scope.Complete();
                                 unitWork.Save();
+                                //scope.Commit();
                             }
-                        }
+                        //}
                     }
                 }
                 catch (Exception ex)

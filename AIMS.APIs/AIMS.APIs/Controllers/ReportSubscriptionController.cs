@@ -74,7 +74,7 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid attempt");
             }
             int userId = Convert.ToInt32(userIdVal);
-            var response = reportSubscriptionService.Add(userId, model);
+            var response = reportSubscriptionService.Remove(userId, model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

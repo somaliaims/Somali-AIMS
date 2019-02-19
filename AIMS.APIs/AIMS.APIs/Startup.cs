@@ -112,6 +112,7 @@ namespace AIMS.APIs
             services.AddScoped<IFinancialYearService, FinancialYearService>();
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IReportNamesService, ReportNamesService>();
+            services.AddScoped<IReportSubscriptionService, ReportSubscriptionService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             //Configure Email Settings
