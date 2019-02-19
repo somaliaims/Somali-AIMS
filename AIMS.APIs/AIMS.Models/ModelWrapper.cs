@@ -159,7 +159,6 @@ namespace AIMS.Models
     public class UserView
     {
         public int Id { get; set; }
-        public string Name { get; set; }
         public string Email { get; set; }
         public UserTypes UserType { get; set; }
         public int OrganizationId { get; set; }
@@ -171,7 +170,6 @@ namespace AIMS.Models
     public class UserAuthenticationView
     {
         public int Id { get; set; }
-        public string Name { get; set; }
         public string Email { get; set; }
         public int OrganizationId { get; set; }
         public UserTypes UserType { get; set; }
@@ -179,7 +177,6 @@ namespace AIMS.Models
 
     public class UserReturnView
     {
-        public string Name { get; set; }
         public string Token { get; set; }
         public int OrganizationId { get; set; }
         public UserTypes UserType { get; set; }
@@ -188,7 +185,6 @@ namespace AIMS.Models
     public class EmailsModel
     {
         public string Email { get; set; }
-        public string UserName { get; set; }
         public UserTypes UserType { get; set; }
     }
 
@@ -232,8 +228,6 @@ namespace AIMS.Models
 
     public class UserModel
     {
-        [Required]
-        public string Name { get; set; }
         [Required]
         [EmailAddress]
         public string Email { get; set; }

@@ -87,7 +87,6 @@ namespace AIMS.APIs.Controllers
                 string token = utility.GeneratePasswordResetToken(tModel);
                 PasswordResetEmailModel resetModel = new PasswordResetEmailModel()
                 {
-                    FullName = foundUser.Name,
                     Email = foundUser.Email,
                     Token = token,
                     Url = resetPasswordUrl
@@ -111,7 +110,7 @@ namespace AIMS.APIs.Controllers
             model.Password = sHelper.GetPasswordHash(model.Password);
             var foundUser = userService.AuthenticateUser(model.Email, model.Password);
 
-            if (!string.IsNullOrEmpty(foundUser.Name))
+            if (!string.IsNullOrEmpty(foundUser.Email))
             {
                 TokenModel tModel = new TokenModel()
                 {
@@ -129,7 +128,6 @@ namespace AIMS.APIs.Controllers
                 UserReturnView uView = new UserReturnView()
                 {
                     Token = jwtToken,
-                    Name = foundUser.Name,
                     UserType = foundUser.UserType
                 };
                 return Ok(uView);

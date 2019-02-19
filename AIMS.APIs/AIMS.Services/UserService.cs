@@ -145,7 +145,6 @@ namespace AIMS.Services
                     {
                         foundUser.Id = user.Id;
                         foundUser.Email = user.Email;
-                        foundUser.Name = user.Name;
                         foundUser.UserType = user.UserType;
                         foundUser.OrganizationId = user.Organization.Id;
                         break;
@@ -168,7 +167,6 @@ namespace AIMS.Services
                 {
                     foundUser.Id = user.Id;
                     foundUser.Email = user.Email;
-                    foundUser.Name = user.Name;
                     foundUser.UserType = user.UserType;
                     foundUser.OrganizationId = user.Organization.Id;
                     break;
@@ -278,7 +276,6 @@ namespace AIMS.Services
                     //TODO: Set approved to false to make it approved through notification
                     var newUser = unitWork.UserRepository.Insert(new EFUser()
                     {
-                        Name = model.Name,
                         Email = model.Email,
                         UserType = UserTypes.Standard,
                         Organization = organization,
@@ -299,7 +296,6 @@ namespace AIMS.Services
                             usersEmailList.Add(new EmailsModel()
                             {
                                 Email = user.Email,
-                                UserName = user.Name,
                                 UserType = user.UserType
                             });
                         }
@@ -315,7 +311,6 @@ namespace AIMS.Services
                                 usersEmailList.Add(new EmailsModel()
                                 {
                                     Email = user.Email,
-                                    UserName = user.Name,
                                     UserType = user.UserType
                                 });
                             }
@@ -339,7 +334,7 @@ namespace AIMS.Services
                         IEmailHelper emailHelper = new EmailHelper(adminEmail, smtpSettingsModel);
                         emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName);
                         mHelper = new MessageHelper();
-                        string notificationMessage = mHelper.NewUserForOrganization(organization.OrganizationName, model.Name);
+                        string notificationMessage = mHelper.NewUserForOrganization(organization.OrganizationName);
 
                         //Add notification
                         unitWork.NotificationsRepository.Insert(new EFUserNotifications()
@@ -359,7 +354,14 @@ namespace AIMS.Services
                 catch (Exception ex)
                 {
                     response.Success = false;
-                    response.Message = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        response.Message = ex.InnerException.Message;
+                    }
+                    else
+                    {
+                        response.Message = ex.Message;
+                    }
                 }
                 return response;
             }
