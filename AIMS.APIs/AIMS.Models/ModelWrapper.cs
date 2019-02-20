@@ -53,6 +53,16 @@ namespace AIMS.Models
         public string Name { get; set; }
     }
 
+    public class MergeOrganizationModel
+    {
+        [Required]
+        public string NewName { get; set; }
+        [Required]
+        public int OrgFirst { get; set; }
+        [Required]
+        public int OrgSecond { get; set; }
+    }
+
     public class OrganizationViewModel
     {
         public int Id { get; set; }

@@ -45,6 +45,13 @@ namespace AIMS.Services
         ActionResponse Add(OrganizationModel organization);
 
         /// <summary>
+        /// Merges two organizations
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse MergeOrganizations(MergeOrganizationModel model);
+
+        /// <summary>
         /// Updates a organization
         /// </summary>
         /// <param name="organization"></param>
@@ -163,6 +170,56 @@ namespace AIMS.Services
                 unitWork.OrganizationRepository.Update(organizationObj);
                 unitWork.Save();
                 response.Message = "1";
+                return response;
+            }
+        }
+
+        public ActionResponse MergeOrganizations(MergeOrganizationModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                var orgOne = unitWork.OrganizationRepository.GetByID(model.OrgFirst);
+                if (orgOne == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("One of merging organizations");
+                    response.Success = false;
+                    return response;
+                }
+
+                var orgTwo = unitWork.OrganizationRepository.GetByID(model.OrgSecond);
+                if (orgTwo == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("One of merging organizations");
+                    response.Success = false;
+                    return response;
+                }
+
+                var users = unitWork.UserRepository.GetManyQueryable(u => (u.OrganizationId.Equals(orgOne.Id) || u.OrganizationId.Equals(orgTwo.Id)));
+
+                var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                {
+                    OrganizationName = model.NewName,
+                    RegisteredOn = DateTime.Now,
+                    IsApproved = true
+                });
+                unitWork.Save();
+
+                foreach(var user in users)
+                {
+                    user.Organization = newOrganization;
+                    unitWork.UserRepository.Update(user);
+                }
+                unitWork.Save();
+
+                unitWork.OrganizationRepository.Delete(orgOne);
+                unitWork.OrganizationRepository.Delete(orgTwo);
+
+                unitWork.Save();
+
                 return response;
             }
         }
