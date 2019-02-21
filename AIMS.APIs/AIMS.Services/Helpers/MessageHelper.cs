@@ -54,6 +54,12 @@ namespace AIMS.Services.Helpers
         /// <param name="user"></param>
         /// <returns></returns>
         string NewUserForOrganization(string organization);
+
+        /// <summary>
+        /// Gets invalid percentage message
+        /// </summary>
+        /// <returns></returns>
+        string InvalidPercentage();
     }
 
     public class MessageHelper : IMessageHelper
@@ -65,6 +71,7 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
         private readonly string INVALID_ACCOUNT_DELETION_ATTEMPT = "A super admin account cannot be deleted";
         private readonly string EMAIL_NOT_FOUND = " did not match any of our records for registered users.";
+        private readonly string INVALID_PERCENTAGE = "Invalid value provided for percentage.";
 
         public string GetNotFound(string entity)
         {
@@ -99,6 +106,11 @@ namespace AIMS.Services.Helpers
         public string EmailNotFound(string email)
         {
             return (email + EMAIL_NOT_FOUND);
+        }
+
+        public string InvalidPercentage()
+        {
+            return (INVALID_PERCENTAGE);
         }
     }
 }

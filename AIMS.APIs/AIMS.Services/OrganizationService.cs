@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace AIMS.Services
 {
@@ -180,46 +181,49 @@ namespace AIMS.Services
             {
                 IMessageHelper mHelper;
                 ActionResponse response = new ActionResponse();
-                var orgOne = unitWork.OrganizationRepository.GetByID(model.OrgFirst);
-                if (orgOne == null)
+
+                using (var scope = new TransactionScope())
                 {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.GetNotFound("One of merging organizations");
-                    response.Success = false;
-                    return response;
+                    var orgOne = unitWork.OrganizationRepository.GetByID(model.OrgFirst);
+                    if (orgOne == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("One of merging organizations");
+                        response.Success = false;
+                        return response;
+                    }
+
+                    var orgTwo = unitWork.OrganizationRepository.GetByID(model.OrgSecond);
+                    if (orgTwo == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("One of merging organizations");
+                        response.Success = false;
+                        return response;
+                    }
+
+                    var users = unitWork.UserRepository.GetManyQueryable(u => (u.OrganizationId.Equals(orgOne.Id) || u.OrganizationId.Equals(orgTwo.Id)));
+                    var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                    {
+                        OrganizationName = model.NewName,
+                        RegisteredOn = DateTime.Now,
+                        IsApproved = true
+                    });
+                    unitWork.Save();
+
+                    foreach (var user in users)
+                    {
+                        user.Organization = newOrganization;
+                        unitWork.UserRepository.Update(user);
+                    }
+                    unitWork.Save();
+
+                    unitWork.OrganizationRepository.Delete(orgOne);
+                    unitWork.OrganizationRepository.Delete(orgTwo);
+
+                    unitWork.Save();
+                    scope.Complete();
                 }
-
-                var orgTwo = unitWork.OrganizationRepository.GetByID(model.OrgSecond);
-                if (orgTwo == null)
-                {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.GetNotFound("One of merging organizations");
-                    response.Success = false;
-                    return response;
-                }
-
-                var users = unitWork.UserRepository.GetManyQueryable(u => (u.OrganizationId.Equals(orgOne.Id) || u.OrganizationId.Equals(orgTwo.Id)));
-
-                var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
-                {
-                    OrganizationName = model.NewName,
-                    RegisteredOn = DateTime.Now,
-                    IsApproved = true
-                });
-                unitWork.Save();
-
-                foreach(var user in users)
-                {
-                    user.Organization = newOrganization;
-                    unitWork.UserRepository.Update(user);
-                }
-                unitWork.Save();
-
-                unitWork.OrganizationRepository.Delete(orgOne);
-                unitWork.OrganizationRepository.Delete(orgTwo);
-
-                unitWork.Save();
-
                 return response;
             }
         }

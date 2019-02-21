@@ -882,13 +882,31 @@ namespace AIMS.Services
                         response.Success = false;
                     }
 
-                    unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
-                    {
-                        Project = project,
-                        Sector = sector,
-                        FundsPercentage = model.FundsPercentage,
-                    });
+                    var projectSector = unitWork.ProjectSectorsRepository.Get(s => (s.ProjectId.Equals(model.ProjectId) && (s.SectorId.Equals(model.SectorId))));
 
+                    if (projectSector != null)
+                    {
+                        decimal percentage = projectSector.FundsPercentage + model.FundsPercentage;
+                        if (percentage > 100)
+                        {
+                            mHelper = new MessageHelper();
+                            response.Message = mHelper.InvalidPercentage();
+                            response.Success = false;
+                            return response;
+                        }
+
+                        projectSector.FundsPercentage += model.FundsPercentage;
+                        unitWork.ProjectSectorsRepository.Update(projectSector);
+                    }
+                    else
+                    {
+                        unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
+                        {
+                            Project = project,
+                            Sector = sector,
+                            FundsPercentage = model.FundsPercentage,
+                        });
+                    }
                     unitWork.Save();
                 }
                 catch (Exception ex)
