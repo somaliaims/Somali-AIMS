@@ -49,6 +49,12 @@ namespace AIMS.APIs
                 {
                     options.UseSqlServer(connectionString,
                     sqlOptions => sqlOptions.EnableRetryOnFailure());
+                    /*sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
+                    });*/
                 });
 
             services.AddSwaggerGen(c =>
@@ -97,8 +103,8 @@ namespace AIMS.APIs
                 };
             });
 
-            
-            
+
+
             services.AddAutoMapper(a => a.AddProfile(new MappingProfile()));
             services.AddScoped<ISectorService, SectorService>();
             services.AddScoped<IUserService, UserService>();

@@ -63,6 +63,23 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [HttpPost]
+        [Route("Merge")]
+        public async Task<IActionResult> Merge([FromBody] MergeOrganizationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await organizationService.MergeOrganizations(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.ReturnedId);
+        }
+
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] OrganizationModel model)
         {
