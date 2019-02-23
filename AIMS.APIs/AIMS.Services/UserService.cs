@@ -492,22 +492,30 @@ namespace AIMS.Services
                     DateTime expirationTime = isTokenExists.Dated.AddHours(2);
                     if (expirationTime >= DateTime.Now)
                     {
-                        var user = unitWork.UserRepository.GetOne(u => u.Email == isTokenExists.Email);
-                        if (user != null)
+                        try
                         {
-                            ISecurityHelper sHelper = new SecurityHelper();
-                            var passwordHash = sHelper.GetPasswordHash(model.NewPassword);
-                            user.Password = passwordHash;
+                            var user = unitWork.UserRepository.GetOne(u => u.Email == isTokenExists.Email);
+                            if (user != null)
+                            {
+                                ISecurityHelper sHelper = new SecurityHelper();
+                                var passwordHash = sHelper.GetPasswordHash(model.NewPassword);
+                                user.Password = passwordHash;
 
-                            unitWork.UserRepository.Update(user);
-                            unitWork.PasswordRecoveryRepository.Delete(isTokenExists);
+                                unitWork.UserRepository.Update(user);
+                                unitWork.PasswordRecoveryRepository.Delete(isTokenExists);
 
-                            unitWork.Save();
+                                unitWork.Save();
+                            }
+                            else
+                            {
+                                response.Success = false;
+                                response.Message = "User not found for the provided email";
+                            }
                         }
-                        else
+                        catch(Exception ex)
                         {
                             response.Success = false;
-                            response.Message = "User not found for the provided email";
+                            response.Message = ex.Message;
                         }
                     }
                     else
@@ -515,6 +523,11 @@ namespace AIMS.Services
                         response.Success = false;
                         response.Message = "Token is expired";
                     }
+                }
+                else
+                {
+                    response.Success = false;
+                    response.Message = "Token expired or not found";
                 }
                 return response;
             }
