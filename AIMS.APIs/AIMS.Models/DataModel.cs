@@ -170,10 +170,8 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
-        public int StartingYear { get; set; }
-        public int StartingMonth { get; set; }
-        public int EndingYear { get; set; }
-        public int EndingMonth { get; set; }
+        public int Year { get; set; }
+        public int Month { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal Amount { get; set; }
     }

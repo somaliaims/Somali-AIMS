@@ -249,7 +249,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ActionResponse DeleteProjectDisbursement(int id, int startingYear, int startingMonth);
+        ActionResponse DeleteProjectDisbursement(int id, int year, int month);
 
         /// <summary>
         /// Deletes a document for the provided id
@@ -1022,10 +1022,8 @@ namespace AIMS.Services
                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                     {
                         Project = project,
-                        StartingYear = model.StartingYear,
-                        StartingMonth = model.StartingMonth,
-                        EndingYear = model.EndingYear,
-                        EndingMonth = model.EndingMonth,
+                        Year = model.Year,
+                        Month = model.Month,
                         Amount = model.Amount,
                     });
                     unitWork.Save();
@@ -1218,12 +1216,12 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse DeleteProjectDisbursement(int projectId, int startingYear, int startingMonth)
+        public ActionResponse DeleteProjectDisbursement(int projectId, int year, int month)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetSingle(d => d.ProjectId == projectId && d.StartingYear == startingYear && d.StartingMonth == startingMonth);
+                var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetSingle(d => d.ProjectId == projectId && d.Year == year && d.Month == month);
                 IMessageHelper mHelper;
                 if (projectDisbursement == null)
                 {
