@@ -119,6 +119,7 @@ namespace AIMS.APIs
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IReportNamesService, ReportNamesService>();
             services.AddScoped<IReportSubscriptionService, ReportSubscriptionService>();
+            services.AddScoped<ICurrencyService, CurrencyService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             //Configure Email Settings
@@ -145,7 +146,6 @@ namespace AIMS.APIs
             //Need to work on this scheduled task in future
             //services.AddSingleton<IHostedService, ScheduleTask>();
             services.AddScoped<IViewRenderService, ViewRenderService>();
-            //services.AddDistributedMemoryCache();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
@@ -179,17 +179,6 @@ namespace AIMS.APIs
             app.UseAuthentication();
 
             /*Enabling cache and setting expiration time*/
-            string expirationTimeInSecondsStr = Configuration.GetSection("Caching:ExpirationTimeInSeconds").Value;
-            double seconds = 300;
-            if (!string.IsNullOrEmpty(expirationTimeInSecondsStr))
-            {
-                seconds = Convert.ToDouble(expirationTimeInSecondsStr);
-            }
-            lifetime.ApplicationStarted.Register(() =>
-            {
-                var options = new DistributedCacheEntryOptions()
-                .SetSlidingExpiration(TimeSpan.FromSeconds(seconds));
-            });
             app.UseMvc();
         }
     }

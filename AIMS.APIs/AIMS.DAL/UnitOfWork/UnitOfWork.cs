@@ -33,10 +33,21 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFFinancialYears> financialYearRepository;
         private GenericRepository<EFStaticReports> reportsRepository;
         private GenericRepository<EFReportSubscriptions> reportSubscriptionsRepository;
+        private GenericRepository<EFCurrency> currencyRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
             context = dbContext;
+        }
+
+        public GenericRepository<EFCurrency> CurrencyRepository
+        {
+            get
+            {
+                if (this.currencyRepository == null)
+                    this.currencyRepository = new GenericRepository<EFCurrency>(context);
+                return this.currencyRepository;
+            }
         }
 
         public GenericRepository<EFFinancialYears> FinancialYearRepository

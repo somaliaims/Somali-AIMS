@@ -310,6 +310,13 @@ namespace AIMS.Models
         public string Title { get; set; }
     }
 
+    public class EFCurrency
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Currency { get; set; }
+    }
+
     public class EFCustomFields
     {
         [Key]

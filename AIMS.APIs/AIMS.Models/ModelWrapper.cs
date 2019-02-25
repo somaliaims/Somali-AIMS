@@ -39,6 +39,22 @@ namespace AIMS.Models
     }
 
     /// <summary>
+    /// Currency models
+    /// </summary>
+    public class CurrencyView
+    {
+        public int Id { get; set; }
+        public string Currency { get; set; }
+    }
+
+    public class CurrencyModel
+    {
+        [Required]
+        [MaxLength(3)]
+        public string Currency { get; set; }
+    }
+
+    /// <summary>
     /// Organization models
     /// </summary>
     public class OrganizationView

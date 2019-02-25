@@ -57,6 +57,11 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFUser>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+
+            modelBuilder.Entity<EFCurrency>()
+                .HasIndex(c => c.Currency)
+                .IsUnique();
+                
         }
 
         //Creating DB Tables for the Objects
