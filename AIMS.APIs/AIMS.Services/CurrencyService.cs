@@ -50,6 +50,13 @@ namespace AIMS.Services
         /// <param name="currency"></param>
         /// <returns></returns>
         ActionResponse Update(int id, CurrencyModel currency);
+
+        /// <summary>
+        /// Deletes a currency
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ActionResponse Delete(int id);
     }
 
     public class CurrencyService : ICurrencyService
@@ -150,6 +157,27 @@ namespace AIMS.Services
                 currencyObj.Currency = model.Currency;
 
                 unitWork.CurrencyRepository.Update(currencyObj);
+                unitWork.Save();
+                response.Message = true.ToString();
+                return response;
+            }
+        }
+
+        public ActionResponse Delete(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var currencyObj = unitWork.CurrencyRepository.GetByID(id);
+                if (currencyObj == null)
+                {
+                    IMessageHelper mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Currency");
+                    return response;
+                }
+
+                unitWork.CurrencyRepository.Delete(currencyObj);
                 unitWork.Save();
                 response.Message = true.ToString();
                 return response;

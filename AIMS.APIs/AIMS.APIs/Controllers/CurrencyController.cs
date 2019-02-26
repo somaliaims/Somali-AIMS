@@ -62,6 +62,22 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(response.ReturnedId);
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid id provided");
+            }
+
+            var response = currencyService.Delete(id);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response);
+        }
         
     }
 }
