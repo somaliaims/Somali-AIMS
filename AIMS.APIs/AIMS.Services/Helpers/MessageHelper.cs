@@ -60,6 +60,13 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string InvalidPercentage();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        string AlreadyExists(string entity);
     }
 
     public class MessageHelper : IMessageHelper
@@ -72,6 +79,7 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_ACCOUNT_DELETION_ATTEMPT = "A super admin account cannot be deleted";
         private readonly string EMAIL_NOT_FOUND = " did not match any of our records for registered users.";
         private readonly string INVALID_PERCENTAGE = "Invalid value provided for percentage.";
+        private readonly string ALREADY_EXISTS = " provided is already entered once.";
 
         public string GetNotFound(string entity)
         {
@@ -111,6 +119,11 @@ namespace AIMS.Services.Helpers
         public string InvalidPercentage()
         {
             return (INVALID_PERCENTAGE);
+        }
+
+        public string AlreadyExists(string entity)
+        {
+            return (entity + ALREADY_EXISTS);
         }
     }
 }

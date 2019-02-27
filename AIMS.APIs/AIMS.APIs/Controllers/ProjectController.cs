@@ -205,7 +205,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(response.Message);
             }
-            return Ok(true);
+            return Ok(response);
         }
 
         [HttpPost]

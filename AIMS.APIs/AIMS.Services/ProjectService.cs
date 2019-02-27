@@ -933,6 +933,7 @@ namespace AIMS.Services
                         mHelper = new MessageHelper();
                         response.Message = mHelper.GetNotFound("Project");
                         response.Success = false;
+                        return response;
                     }
                     var funder = unitWork.OrganizationRepository.GetByID(model.FunderId);
                     if (funder == null)
@@ -940,6 +941,16 @@ namespace AIMS.Services
                         mHelper = new MessageHelper();
                         response.Message = mHelper.GetNotFound("Funder");
                         response.Success = false;
+                        return response;
+                    }
+
+                    var projectFunder = unitWork.ProjectFundersRepository.GetOne(f => f.ProjectId == model.ProjectId && f.FunderId == model.FunderId);
+                    if (projectFunder != null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.AlreadyExists("Project Funder");
+                        response.Success = false;
+                        return response;
                     }
 
                     unitWork.ProjectFundersRepository.Insert(new EFProjectFunders()
