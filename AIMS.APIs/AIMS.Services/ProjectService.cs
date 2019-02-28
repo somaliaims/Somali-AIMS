@@ -1030,6 +1030,23 @@ namespace AIMS.Services
                         response.Success = false;
                     }
 
+                    var funders = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.ProjectId == model.ProjectId);
+                    decimal totalFunds = (from funds in funders
+                                      select funds.Amount).Sum();
+
+                    var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.ProjectId == model.ProjectId);
+                    decimal totalDisbursement = ((from disbursement in disbursements
+                                             select disbursement.Amount).Sum()) + model.Amount;
+
+                    if (totalDisbursement > totalFunds)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.InvalidDisbursement();
+                        response.Success = false;
+                        return response;
+                    }
+
+
                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                     {
                         Project = project,

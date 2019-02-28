@@ -67,6 +67,12 @@ namespace AIMS.Services.Helpers
         /// <param name="entity"></param>
         /// <returns></returns>
         string AlreadyExists(string entity);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string InvalidDisbursement();
     }
 
     public class MessageHelper : IMessageHelper
@@ -80,6 +86,7 @@ namespace AIMS.Services.Helpers
         private readonly string EMAIL_NOT_FOUND = " did not match any of our records for registered users.";
         private readonly string INVALID_PERCENTAGE = "Invalid value provided for percentage.";
         private readonly string ALREADY_EXISTS = " provided is already entered once.";
+        private readonly string INVALID_DISBURSEMENTS = "You cannot add more disbursements than the project total value. Please increase the project funding amount before adding more disbursements.";
 
         public string GetNotFound(string entity)
         {
@@ -124,6 +131,11 @@ namespace AIMS.Services.Helpers
         public string AlreadyExists(string entity)
         {
             return (entity + ALREADY_EXISTS);
+        }
+
+        public string InvalidDisbursement()
+        {
+            return (INVALID_DISBURSEMENTS);
         }
     }
 }
