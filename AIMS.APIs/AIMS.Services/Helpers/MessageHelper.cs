@@ -73,6 +73,13 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string InvalidDisbursement();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        string DeleteMessage(string entity);
     }
 
     public class MessageHelper : IMessageHelper
@@ -81,6 +88,7 @@ namespace AIMS.Services.Helpers
         private readonly string USERNAME_TAKEN = " is already taken.";
         private readonly string NEW_RECORD = " added successfully.";
         private readonly string NEW = "New ";
+        private readonly string DELETED = " deleted successfully";
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
         private readonly string INVALID_ACCOUNT_DELETION_ATTEMPT = "A super admin account cannot be deleted";
         private readonly string EMAIL_NOT_FOUND = " did not match any of our records for registered users.";
@@ -136,6 +144,11 @@ namespace AIMS.Services.Helpers
         public string InvalidDisbursement()
         {
             return (INVALID_DISBURSEMENTS);
+        }
+
+        public string DeleteMessage(string entity)
+        {
+            return (entity + DELETED);
         }
     }
 }

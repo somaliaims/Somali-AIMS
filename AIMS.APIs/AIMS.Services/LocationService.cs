@@ -50,6 +50,13 @@ namespace AIMS.Services
         /// <param name="location"></param>
         /// <returns></returns>
         ActionResponse Update(int id, LocationModel location);
+
+        /// <summary>
+        /// Deletes a location
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ActionResponse Delete(int id);
     }
 
     public class LocationService : ILocationService
@@ -159,6 +166,27 @@ namespace AIMS.Services
                 unitWork.LocationRepository.Update(locationObj);
                 unitWork.Save();
                 response.Message = "1";
+                return response;
+            }
+        }
+
+        public ActionResponse Delete(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper = new MessageHelper();
+                ActionResponse response = new ActionResponse();
+                var locationObj = unitWork.LocationRepository.GetByID(id);
+                if (locationObj == null)
+                {
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Location");
+                    return response;
+                }
+
+                unitWork.LocationRepository.Delete(locationObj);
+                unitWork.Save();
+                response.Message = mHelper.DeleteMessage("Location");
                 return response;
             }
         }
