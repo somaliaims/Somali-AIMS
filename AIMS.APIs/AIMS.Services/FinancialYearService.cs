@@ -3,10 +3,12 @@ using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace AIMS.Services
 {
@@ -36,6 +38,13 @@ namespace AIMS.Services
         /// </summary>
         /// <returns>Response with success/failure details</returns>
         ActionResponse Add(FinancialYearModel model);
+
+        /// <summary>
+        /// Adds multiple years, for internal use only
+        /// </summary>
+        /// <param name="years"></param>
+        /// <returns></returns>
+        Task<ActionResponse> AddMultipleAsync(List<int> years);
 
         /// <summary>
         /// Updates a location
@@ -105,6 +114,47 @@ namespace AIMS.Services
                         response.ReturnedId = newFinancialYear.Id;
                     }
 
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public async Task<ActionResponse> AddMultipleAsync(List<int> years)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
+                    {
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            var financialYears = await unitWork.FinancialYearRepository.GetAllAsync();
+                            List<int> yearsList = (from year in financialYears
+                                                   select year.FinancialYear).ToList<int>();
+
+                            foreach(int year in years)
+                            {
+                                if (!yearsList.Contains(year))
+                                {
+                                    unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                    {
+                                        FinancialYear = year
+                                    });
+                                }
+                            }
+                            unitWork.Save();
+                            transaction.Commit();
+                        }
+                    });
                 }
                 catch (Exception ex)
                 {

@@ -129,14 +129,14 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] ProjectModel project)
+        public async Task<IActionResult> Post([FromBody] ProjectModel project)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = projectService.Add(project);
+            var response = await projectService.AddAsync(project);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

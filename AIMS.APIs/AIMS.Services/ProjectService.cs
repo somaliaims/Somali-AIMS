@@ -3,6 +3,7 @@ using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -98,7 +99,7 @@ namespace AIMS.Services
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(ProjectModel project);
+        Task<ActionResponse> AddAsync(ProjectModel project);
 
         /// <summary>
         /// Updates a project
@@ -790,29 +791,64 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Add(ProjectModel model)
+        public async Task<ActionResponse> AddAsync(ProjectModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var newProject = unitWork.ProjectRepository.Insert(new EFProject()
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        Title = model.Title,
-                        Description = model.Description,
-                        StartDate = model.StartDate,
-                        EndDate = model.EndDate
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            var newProject = unitWork.ProjectRepository.Insert(new EFProject()
+                            {
+                                Title = model.Title,
+                                Description = model.Description,
+                                StartDate = model.StartDate,
+                                EndDate = model.EndDate
+                            });
+                            await unitWork.SaveAsync();
+
+                            List<int> yearsList = new List<int>();
+                            yearsList.Add(model.StartDate.Year);
+                            yearsList.Add(model.EndDate.Year);
+
+                            var fYears = await unitWork.FinancialYearRepository.GetAllAsync();
+                            List<int> financialYears = (from year in fYears
+                                                        select year.FinancialYear).ToList<int>();
+
+                            List<EFFinancialYears> entityList = new List<EFFinancialYears>();
+                            foreach(int year in yearsList)
+                            {
+                                if (!financialYears.Contains(year))
+                                {
+                                    entityList.Add(new EFFinancialYears()
+                                    {
+                                        FinancialYear = year
+                                    });
+                                }
+                            }
+
+                            if (entityList.Count > 0)
+                            {
+                                unitWork.FinancialYearRepository.InsertMultiple(entityList);
+                            }
+                            await unitWork.SaveAsync();
+                            response.ReturnedId = newProject.Id;
+
+                            transaction.Commit();
+                        }
                     });
-                    unitWork.Save();
-                    response.ReturnedId = newProject.Id;
                 }
                 catch (Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
                 }
-                return response;
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
 
