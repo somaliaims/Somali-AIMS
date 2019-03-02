@@ -56,7 +56,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ActionResponse Delete(int id);
+        ActionResponse Delete(int id, int newId);
     }
 
     public class LocationService : ILocationService
@@ -170,7 +170,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Delete(int id)
+        public ActionResponse Delete(int id, int newId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -182,6 +182,23 @@ namespace AIMS.Services
                     response.Success = false;
                     response.Message = mHelper.GetNotFound("Location");
                     return response;
+                }
+
+                if (newId != 0)
+                {
+                    var newLocation = unitWork.LocationRepository.GetByID(newId);
+                    if (newLocation != null)
+                    {
+                        var projectLocations = unitWork.ProjectLocationsRepository.GetManyQueryable(l => l.LocationId == id);
+                        if (projectLocations != null)
+                        {
+                            foreach (var pLocation in projectLocations)
+                            {
+                                pLocation.Location = newLocation;
+                            }
+                        }
+                        unitWork.Save();
+                    }
                 }
 
                 unitWork.LocationRepository.Delete(locationObj);
