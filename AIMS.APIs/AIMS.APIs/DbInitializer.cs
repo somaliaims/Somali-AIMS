@@ -164,7 +164,10 @@ namespace AIMS.APIs
                 context.Organizations.Add(new EFOrganization() { OrganizationName = "Mott Macdonald" });
                 context.Organizations.Add(new EFOrganization() { OrganizationName = "Creative Associates International Inc." });
                 context.Organizations.Add(new EFOrganization() { OrganizationName = "DAI" });
-
+                context.Organizations.Add(new EFOrganization() { OrganizationName = "CESVI" });
+                context.Organizations.Add(new EFOrganization() { OrganizationName = "International Rescue Committee" });
+                context.Organizations.Add(new EFOrganization() { OrganizationName = "Concern World Wide" });
+                context.Organizations.Add(new EFOrganization() { OrganizationName = "Norwegian Refugee Council" });
 
                 var adminUser = context.Users.Add(new EFUser() { Email = "admin@aims.org",
                     Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
