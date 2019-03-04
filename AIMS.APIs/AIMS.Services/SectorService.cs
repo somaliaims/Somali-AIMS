@@ -3,6 +3,7 @@ using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -50,6 +51,14 @@ namespace AIMS.Services
         /// <param name="sector"></param>
         /// <returns></returns>
         ActionResponse Update(int id, SectorModel sector);
+
+        /// <summary>
+        /// Deletes a sector
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="newId"></param>
+        /// <returns></returns>
+        Task<ActionResponse> DeleteAsync(int id, int newId);
     }
 
     public class SectorService : ISectorService
@@ -183,6 +192,67 @@ namespace AIMS.Services
                 }
                 return response;
             }
+        }
+
+        public async Task<ActionResponse> DeleteAsync(int id, int newId)
+        {
+            ActionResponse response = new ActionResponse();
+            IMessageHelper mHelper;
+            using (var unitWork = new UnitOfWork(context))
+            {
+                EFSector newSector = null;
+                var sector = await unitWork.SectorRepository.GetByIDAsync(id);
+                if (sector == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Sector");
+                    return response;
+                }
+
+                if (newId > 0)
+                {
+                    newSector = await unitWork.SectorRepository.GetByIDAsync(newId);
+                    if (newSector == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Sector");
+                        return response;
+                    }
+                }
+
+                try
+                {
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
+                    {
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            var projectSectors = await unitWork.ProjectSectorsRepository.GetManyQueryableAsync(s => s.SectorId == id);
+                            if (projectSectors != null)
+                            {
+                                foreach (var projectSector in projectSectors)
+                                {
+                                    projectSector.Sector = newSector;
+                                }
+                            }
+                            await unitWork.SaveAsync();
+
+                            unitWork.SectorRepository.Delete(sector);
+                            await unitWork.SaveAsync();
+
+                            transaction.Commit();
+                        }
+                    });
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+            }
+            return response;
         }
     }
 }

@@ -85,15 +85,15 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        [HttpDelete("{id}/{newId}")]
+        public IActionResult Delete(int id, int newId)
         {
             if (id <= 0)
             {
                 return BadRequest("Invalid id provided");
             }
 
-            var response = locationService.Delete(id);
+            var response = locationService.Delete(id, newId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
