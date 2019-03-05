@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -76,6 +77,11 @@ namespace AIMS.APIs.Controllers
         public IActionResult Projects()
         {
             string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
+            FileInfo fileInfo = new FileInfo(iatiFilePath);
+            if (!fileInfo.Exists)
+            {
+                return BadRequest("IATI source file not found. Load latest IATI before making this request.");
+            }
             var projects = iatiService.GetProjects(iatiFilePath);
             return Ok(projects);
         }
