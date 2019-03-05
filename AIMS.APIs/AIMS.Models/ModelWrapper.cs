@@ -515,16 +515,14 @@ namespace AIMS.Models
     public class ProjectDisbursementView
     {
         public int ProjectId { get; set; }
-        public int Year { get; set; }
-        public int Month { get; set; }
+        public string Dated { get; set; }
         public decimal Amount { get; set; }
     }
 
     public class ProjectDisbursementModel
     {
         public int ProjectId { get; set; }
-        public int Year { get; set; }
-        public int Month { get; set; }
+        public string Dated { get; set; }
         public decimal Amount { get; set; }
     }
 

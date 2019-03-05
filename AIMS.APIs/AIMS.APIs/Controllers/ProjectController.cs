@@ -365,14 +365,21 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpDelete]
-        [Route("DeleteProjectDisbursement/{projectId}/{startingYear}/{startingMonth}")]
-        public IActionResult DeleteProjectDisbursement(int projectId, int startingYear, int startingMonth)
+        [Route("DeleteProjectDisbursement/{projectId}/{date}")]
+        public IActionResult DeleteProjectDisbursement(int projectId, string date)
         {
-            if (projectId <= 0 || startingYear <= 0 || startingMonth <= 0)
+            DateTime dated = DateTime.Now;
+            if (projectId <= 0)
             {
                 return BadRequest("Invalid Ids provided");
             }
-            var response = projectService.DeleteProjectDisbursement(projectId, startingYear, startingMonth);
+
+            bool isValidDate = DateTime.TryParse(date, out dated);
+            if (!isValidDate)
+            {
+                return BadRequest("Invalid value provided for the date");
+            }
+            var response = projectService.DeleteProjectDisbursement(projectId, dated);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

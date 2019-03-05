@@ -250,7 +250,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ActionResponse DeleteProjectDisbursement(int id, int year, int month);
+        ActionResponse DeleteProjectDisbursement(int id, DateTime dated);
 
         /// <summary>
         /// Deletes a document for the provided id
@@ -1058,6 +1058,16 @@ namespace AIMS.Services
 
                 try
                 {
+                    DateTime dated = DateTime.Now;
+                    bool isValidDate = DateTime.TryParse(model.Dated, out dated);
+                    if (!isValidDate)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.InvalidDate();
+                        response.Success = false;
+                        return response;
+                    }
+
                     var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
                     if (project == null)
                     {
@@ -1086,8 +1096,7 @@ namespace AIMS.Services
                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                     {
                         Project = project,
-                        Year = model.Year,
-                        Month = model.Month,
+                        Dated = dated,
                         Amount = model.Amount,
                     });
                     unitWork.Save();
@@ -1280,12 +1289,12 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse DeleteProjectDisbursement(int projectId, int year, int month)
+        public ActionResponse DeleteProjectDisbursement(int projectId, DateTime dated)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetSingle(d => d.ProjectId == projectId && d.Year == year && d.Month == month);
+                var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetSingle(d => d.ProjectId == projectId && d.Dated == dated);
                 IMessageHelper mHelper;
                 if (projectDisbursement == null)
                 {

@@ -62,6 +62,12 @@ namespace AIMS.Services.Helpers
         string InvalidPercentage();
 
         /// <summary>
+        /// Gets invalid date message
+        /// </summary>
+        /// <returns></returns>
+        string InvalidDate();
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="entity"></param>
@@ -94,6 +100,7 @@ namespace AIMS.Services.Helpers
         private readonly string EMAIL_NOT_FOUND = " did not match any of our records for registered users.";
         private readonly string INVALID_PERCENTAGE = "Invalid value provided for percentage.";
         private readonly string ALREADY_EXISTS = " provided is already entered once.";
+        private readonly string INVALID_DATE = "Invalid value provided for date";
         private readonly string INVALID_DISBURSEMENTS = "You cannot add more disbursements than the project total value. Please increase the project funding amount before adding more disbursements.";
 
         public string GetNotFound(string entity)
@@ -149,6 +156,11 @@ namespace AIMS.Services.Helpers
         public string DeleteMessage(string entity)
         {
             return (entity + DELETED);
+        }
+
+        public string InvalidDate()
+        {
+            return INVALID_DATE;
         }
     }
 }
