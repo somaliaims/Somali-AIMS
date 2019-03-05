@@ -323,7 +323,11 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid Ids provided");
             }
 
-            projectService.DeleteProjectSector(projectId, sectorId);
+            var response = projectService.DeleteProjectSector(projectId, sectorId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
             return Ok(true);
         }
 
@@ -336,7 +340,11 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid Ids provided");
             }
 
-            projectService.DeleteProjectFunder(projectId, funderId);
+            var response  = projectService.DeleteProjectFunder(projectId, funderId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
             return Ok(true);
         }
 
@@ -348,7 +356,11 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Invalid Ids provided");
             }
-            projectService.DeleteProjectImplementer(projectId, implementerId);
+            var response = projectService.DeleteProjectImplementer(projectId, implementerId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
             return Ok(true);
         }
 
@@ -360,7 +372,11 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Invalid Ids provided");
             }
-            projectService.DeleteProjectDisbursement(projectId, startingYear, startingMonth);
+            var response = projectService.DeleteProjectDisbursement(projectId, startingYear, startingMonth);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
             return Ok(true);
         }
 
@@ -372,7 +388,11 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Invalid Id provided");
             }
-            projectService.DeleteProjectDocument(id);
+            var response = projectService.DeleteProjectDocument(id);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
             return Ok(true);
         }
     }
