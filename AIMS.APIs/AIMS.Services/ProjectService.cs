@@ -250,7 +250,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ActionResponse DeleteProjectDisbursement(int id, DateTime dated);
+        ActionResponse DeleteProjectDisbursement(int id);
 
         /// <summary>
         /// Deletes a document for the provided id
@@ -1289,12 +1289,12 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse DeleteProjectDisbursement(int projectId, DateTime dated)
+        public ActionResponse DeleteProjectDisbursement(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetSingle(d => d.ProjectId == projectId && d.Dated == dated);
+                var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetSingle(d => d.Id == id);
                 IMessageHelper mHelper;
                 if (projectDisbursement == null)
                 {

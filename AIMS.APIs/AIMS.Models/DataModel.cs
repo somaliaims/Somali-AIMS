@@ -167,6 +167,8 @@ namespace AIMS.Models
 
     public class EFProjectDisbursements
     {
+        [Key]
+        public int Id { get; set; }
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
