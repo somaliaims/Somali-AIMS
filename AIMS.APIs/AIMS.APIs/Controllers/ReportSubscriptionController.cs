@@ -38,7 +38,7 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("Subscribe")]
-        public IActionResult Subscribe([FromBody] ReportSubscriptionModel model)
+        public async Task<IActionResult> Subscribe([FromBody] ReportSubscriptionModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -51,7 +51,7 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid attempt");
             }
             int userId = Convert.ToInt32(userIdVal);
-            var response = reportSubscriptionService.Add(userId, model);
+            var response = await reportSubscriptionService.AddAsync(userId, model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -61,7 +61,7 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("Unsubscribe")]
-        public IActionResult UnSubscribe([FromBody] ReportSubscriptionModel model)
+        public async Task<IActionResult> UnSubscribe([FromBody] ReportSubscriptionModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -74,7 +74,7 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid attempt");
             }
             int userId = Convert.ToInt32(userIdVal);
-            var response = reportSubscriptionService.Remove(userId, model);
+            var response = await reportSubscriptionService.RemoveAsync(userId, model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
