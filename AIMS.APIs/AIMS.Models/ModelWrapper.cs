@@ -514,6 +514,7 @@ namespace AIMS.Models
     /// </summary>
     public class ProjectDisbursementView
     {
+        public int Id { get; set; }
         public int ProjectId { get; set; }
         public string Dated { get; set; }
         public decimal Amount { get; set; }

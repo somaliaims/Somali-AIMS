@@ -1294,18 +1294,26 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetSingle(d => d.Id == id);
-                IMessageHelper mHelper;
-                if (projectDisbursement == null)
+                try
                 {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.GetNotFound("Project Disbursement");
-                    response.Success = false;
-                    return response;
-                }
+                    var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetByID(id);
+                    IMessageHelper mHelper;
+                    if (projectDisbursement == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Project Disbursement");
+                        response.Success = false;
+                        return response;
+                    }
 
-                unitWork.ProjectDisbursementsRepository.Delete(projectDisbursement);
-                unitWork.Save();
+                    unitWork.ProjectDisbursementsRepository.Delete(projectDisbursement);
+                    unitWork.Save();
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
                 return response;
             }
         }

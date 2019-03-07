@@ -368,7 +368,6 @@ namespace AIMS.APIs.Controllers
         [Route("DeleteProjectDisbursement/{id}")]
         public IActionResult DeleteProjectDisbursement(int id)
         {
-            DateTime dated = DateTime.Now;
             if (id <= 0)
             {
                 return BadRequest("Invalid Id provided");
