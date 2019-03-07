@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace AIMS.Services
 {
@@ -37,14 +38,14 @@ namespace AIMS.Services
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(int userId, ReportSubscriptionModel model);
+        Task<ActionResponse> AddAsync(int userId, ReportSubscriptionModel model);
 
         /// <summary>
         /// Updates a report subscription
         /// </summary>
         /// <param name="report subscription"></param>
         /// <returns></returns>
-        ActionResponse Remove(int userId, ReportSubscriptionModel model);
+        Task<ActionResponse> RemoveAsync(int userId, ReportSubscriptionModel model);
     }
 
     public class ReportSubscriptionService : IReportSubscriptionService
@@ -86,7 +87,7 @@ namespace AIMS.Services
         }
 
 
-        public ActionResponse Add(int userId, ReportSubscriptionModel model)
+        public async Task<ActionResponse> AddAsync(int userId, ReportSubscriptionModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -105,29 +106,32 @@ namespace AIMS.Services
 
                     if (model.ReportIds.Count > 0)
                     {
-                        //using (var scope = context.Database.BeginTransaction())
-                        //{
-                            var subscriptions = unitWork.ReportSubscriptionRepository.GetManyQueryable(s => s.UserId == userId);
-                            var reports = unitWork.ReportsRepository.GetManyQueryable(r => model.ReportIds.Contains(r.Id));
-                            foreach(var report in reports)
+                        var strategy = context.Database.CreateExecutionStrategy();
+                        await strategy.ExecuteAsync(async () =>
+                        {
+                            using (var transaction = context.Database.BeginTransaction())
                             {
-                                var subscription = from sub in subscriptions
-                                                   where sub.ReportId.Equals(report.Id)
-                                                   select sub;
-
-                                if (subscription != null)
+                                var subscriptions = await unitWork.ReportSubscriptionRepository.GetManyQueryableAsync(s => s.UserId == userId);
+                                var reports = await unitWork.ReportsRepository.GetManyQueryableAsync(r => model.ReportIds.Contains(r.Id));
+                                foreach (var report in reports)
                                 {
-                                    unitWork.ReportSubscriptionRepository.Insert(new EFReportSubscriptions()
+                                    var subscription = from sub in subscriptions
+                                                       where sub.ReportId.Equals(report.Id)
+                                                       select sub;
+
+                                    if (subscription != null)
                                     {
-                                        Report = report,
-                                        User = user
-                                    });
+                                        unitWork.ReportSubscriptionRepository.Insert(new EFReportSubscriptions()
+                                        {
+                                            Report = report,
+                                            User = user
+                                        });
+                                    }
                                 }
+                                await unitWork.SaveAsync();
+                                transaction.Commit();
                             }
-                            unitWork.Save();
-                          //  scope.Commit();
-                        //}
-                            
+                        });
                     }
                 }
                 catch (Exception ex)
@@ -139,7 +143,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Remove(int userId, ReportSubscriptionModel model)
+        public async Task<ActionResponse> RemoveAsync(int userId, ReportSubscriptionModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -158,19 +162,23 @@ namespace AIMS.Services
 
                     if (model.ReportIds.Count > 0)
                     {
-                        //using (var scope = context.Database.BeginTransaction())
-                        //{
-                            var subscriptions = unitWork.ReportSubscriptionRepository.GetManyQueryable(s => model.ReportIds.Contains(s.ReportId) && s.UserId == userId);
-                            if (subscriptions != null)
+                        var strategy = context.Database.CreateExecutionStrategy();
+                        await strategy.ExecuteAsync(async () =>
+                        {
+                            using (var transaction = context.Database.BeginTransaction())
                             {
-                                foreach(var subscription in subscriptions)
+                                var subscriptions = await unitWork.ReportSubscriptionRepository.GetManyQueryableAsync(s => model.ReportIds.Contains(s.ReportId) && s.UserId == userId);
+                                if (subscriptions != null)
                                 {
-                                    unitWork.ReportSubscriptionRepository.Delete(subscription);
+                                    foreach (var subscription in subscriptions)
+                                    {
+                                        unitWork.ReportSubscriptionRepository.Delete(subscription);
+                                    }
+                                    await unitWork.SaveAsync();
+                                    transaction.Commit();
                                 }
-                                unitWork.Save();
-                                //scope.Commit();
                             }
-                        //}
+                        });
                     }
                 }
                 catch (Exception ex)

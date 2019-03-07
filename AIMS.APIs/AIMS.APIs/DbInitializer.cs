@@ -29,9 +29,12 @@ namespace AIMS.APIs
 
             if (context.StaticReports.Count() == 0)
             {
-                context.StaticReports.Add(new EFStaticReports() { Title = "Projects Report" });
-                context.StaticReports.Add(new EFStaticReports() { Title = "Organizations Report" });
-                context.StaticReports.Add(new EFStaticReports() { Title = "Sectors Report" });
+                context.StaticReports.Add(new EFStaticReports() { Title = "Projects report" });
+                context.StaticReports.Add(new EFStaticReports() { Title = "Locations report" });
+                context.StaticReports.Add(new EFStaticReports() { Title = "Sectors report" });
+                context.StaticReports.Add(new EFStaticReports() { Title = "Budget report" });
+                context.StaticReports.Add(new EFStaticReports() { Title = "Project profile" });
+                context.StaticReports.Add(new EFStaticReports() { Title = "Excel report" });
             }
 
             if (context.FinancialYears.Count() == 0)
