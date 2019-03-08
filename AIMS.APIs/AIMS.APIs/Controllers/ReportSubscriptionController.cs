@@ -59,27 +59,5 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
-        [HttpPost]
-        [Route("Unsubscribe")]
-        public async Task<IActionResult> UnSubscribe([FromBody] ReportSubscriptionModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdVal))
-            {
-                return BadRequest("Invalid attempt");
-            }
-            int userId = Convert.ToInt32(userIdVal);
-            var response = await reportSubscriptionService.RemoveAsync(userId, model);
-            if (!response.Success)
-            {
-                return BadRequest(response.Message);
-            }
-            return Ok(true);
-        }
     }
 }

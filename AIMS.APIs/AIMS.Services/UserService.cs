@@ -147,8 +147,13 @@ namespace AIMS.Services
                         foundUser.Email = user.Email;
                         foundUser.UserType = user.UserType;
                         foundUser.OrganizationId = user.Organization.Id;
+
+                        user.LastLogin = DateTime.Now;
+                        unitWork.UserRepository.Update(user);
+                        unitWork.Save();
                         break;
                     }
+
                 }
                 return foundUser;
             }
@@ -281,7 +286,6 @@ namespace AIMS.Services
                         Organization = organization,
                         Password = passwordHash,
                         IsApproved = true,
-                        IsActive = true,
                         RegistrationDate = DateTime.Now
                     });
                     unitWork.Save();

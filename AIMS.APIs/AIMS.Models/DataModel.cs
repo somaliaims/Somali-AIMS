@@ -66,7 +66,6 @@ namespace AIMS.Models
         [EmailAddress]
         public string Email { get; set; }
         public string Password { get; set; }
-        //public string Name { get; set; }
         public UserTypes UserType { get; set; }
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }
@@ -75,10 +74,9 @@ namespace AIMS.Models
         public int? ApprovedById { get; set; }
         public EFUser ApprovedBy { get; set; }
         public bool IsApproved { get; set; }
-        public bool IsActive { get; set; }
         public DateTime? ApprovedOn { get; set; }
         public DateTime RegistrationDate { get; set; }
-        public DateTime? DeActivatedOn { get; set; }
+        public DateTime? LastLogin { get; set; }
     }
 
     /*
