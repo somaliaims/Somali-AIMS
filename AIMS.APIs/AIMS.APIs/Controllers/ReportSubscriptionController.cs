@@ -56,7 +56,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(response.Message);
             }
-            return Ok(response.ReturnedId);
+            return Ok(true);
         }
 
         [HttpPost]
@@ -79,7 +79,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(response.Message);
             }
-            return Ok(response.ReturnedId);
+            return Ok(true);
         }
     }
 }

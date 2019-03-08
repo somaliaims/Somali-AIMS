@@ -811,6 +811,5 @@ namespace AIMS.Models
     public class ReportSubscriptionView
     {
         public int ReportId { get; set; }
-        public string ReportName { get; set; }
     }
 }

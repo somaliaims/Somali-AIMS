@@ -39,13 +39,6 @@ namespace AIMS.Services
         /// </summary>
         /// <returns>Response with success/failure details</returns>
         Task<ActionResponse> AddAsync(int userId, ReportSubscriptionModel model);
-
-        /// <summary>
-        /// Updates a report subscription
-        /// </summary>
-        /// <param name="report subscription"></param>
-        /// <returns></returns>
-        Task<ActionResponse> RemoveAsync(int userId, ReportSubscriptionModel model);
     }
 
     public class ReportSubscriptionService : IReportSubscriptionService
@@ -111,22 +104,23 @@ namespace AIMS.Services
                         {
                             using (var transaction = context.Database.BeginTransaction())
                             {
-                                var subscriptions = await unitWork.ReportSubscriptionRepository.GetManyQueryableAsync(s => s.UserId == userId);
                                 var reports = await unitWork.ReportsRepository.GetManyQueryableAsync(r => model.ReportIds.Contains(r.Id));
+                                var deleteSubscriptions = await unitWork.ReportSubscriptionRepository.GetManyQueryableAsync(s => s.UserId == userId);
+
+                                foreach (var sub in deleteSubscriptions)
+                                {
+                                    unitWork.ReportSubscriptionRepository.Delete(sub);
+                                }
+                                await unitWork.SaveAsync();
+
                                 foreach (var report in reports)
                                 {
-                                    var subscription = from sub in subscriptions
-                                                       where sub.ReportId.Equals(report.Id)
-                                                       select sub;
 
-                                    if (subscription != null)
+                                    unitWork.ReportSubscriptionRepository.Insert(new EFReportSubscriptions()
                                     {
-                                        unitWork.ReportSubscriptionRepository.Insert(new EFReportSubscriptions()
-                                        {
-                                            Report = report,
-                                            User = user
-                                        });
-                                    }
+                                        Report = report,
+                                        User = user
+                                    });
                                 }
                                 await unitWork.SaveAsync();
                                 transaction.Commit();
@@ -142,52 +136,6 @@ namespace AIMS.Services
                 return response;
             }
         }
-
-        public async Task<ActionResponse> RemoveAsync(int userId, ReportSubscriptionModel model)
-        {
-            using (var unitWork = new UnitOfWork(context))
-            {
-                ActionResponse response = new ActionResponse();
-                IMessageHelper mHelper;
-                try
-                {
-                    var user = unitWork.UserRepository.GetByID(userId);
-                    if (user == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("User");
-                        response.Success = false;
-                        return response;
-                    }
-
-                    if (model.ReportIds.Count > 0)
-                    {
-                        var strategy = context.Database.CreateExecutionStrategy();
-                        await strategy.ExecuteAsync(async () =>
-                        {
-                            using (var transaction = context.Database.BeginTransaction())
-                            {
-                                var subscriptions = await unitWork.ReportSubscriptionRepository.GetManyQueryableAsync(s => model.ReportIds.Contains(s.ReportId) && s.UserId == userId);
-                                if (subscriptions != null)
-                                {
-                                    foreach (var subscription in subscriptions)
-                                    {
-                                        unitWork.ReportSubscriptionRepository.Delete(subscription);
-                                    }
-                                    await unitWork.SaveAsync();
-                                    transaction.Commit();
-                                }
-                            }
-                        });
-                    }
-                }
-                catch (Exception ex)
-                {
-                    response.Success = false;
-                    response.Message = ex.Message;
-                }
-                return response;
-            }
-        }
+        
     }
 }
