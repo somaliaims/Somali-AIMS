@@ -298,7 +298,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(response.Message);
             }
-            return Ok(response.Message);
+            return Ok(true);
         }
 
         [HttpDelete]

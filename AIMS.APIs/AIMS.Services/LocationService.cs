@@ -187,16 +187,21 @@ namespace AIMS.Services
                 if (newId != 0)
                 {
                     var newLocation = unitWork.LocationRepository.GetByID(newId);
+                    //List<int> organizationIds = 
                     if (newLocation != null)
                     {
+                        List<int> effectedProjects = new List<int>();
                         var projectLocations = unitWork.ProjectLocationsRepository.GetManyQueryable(l => l.LocationId == id);
                         if (projectLocations != null)
                         {
                             foreach (var pLocation in projectLocations)
                             {
                                 pLocation.Location = newLocation;
+                                effectedProjects.Add(pLocation.ProjectId);
                             }
                         }
+
+
                         unitWork.Save();
                     }
                 }

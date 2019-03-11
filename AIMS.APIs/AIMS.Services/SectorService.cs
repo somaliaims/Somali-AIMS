@@ -33,6 +33,13 @@ namespace AIMS.Services
         SectorViewModel Get(int id);
 
         /// <summary>
+        /// Gets child sectors of a sector
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<SectorView> GetChildSectors(int id);
+
+        /// <summary>
         /// Gets the matching categories for the provided criteria
         /// </summary>
         /// <param name="criteria"></param>
@@ -76,8 +83,17 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorCategories = unitWork.SectorRepository.GetWithInclude(c => c.Id != 0, new string[] { "ParentSector" });
-                return mapper.Map<List<SectorView>>(sectorCategories);
+                var sectors = unitWork.SectorRepository.GetWithInclude(c => c.Id != 0, new string[] { "ParentSector" });
+                return mapper.Map<List<SectorView>>(sectors);
+            }
+        }
+
+        public IEnumerable<SectorView> GetChildSectors(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var sectors = unitWork.SectorRepository.GetWithInclude(s => s.ParentSectorId == id);
+                return mapper.Map<List<SectorView>>(sectors);
             }
         }
 
