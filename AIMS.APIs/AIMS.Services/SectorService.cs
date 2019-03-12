@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,7 +38,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        IEnumerable<SectorView> GetChildSectors(int id);
+        IEnumerable<SectorView> GetChildren(int id);
 
         /// <summary>
         /// Gets the matching categories for the provided criteria
@@ -51,6 +52,22 @@ namespace AIMS.Services
         /// </summary>
         /// <returns>Response with success/failure details</returns>
         ActionResponse Add(SectorModel sector);
+
+        /// <summary>
+        /// Sets the provided sector as child
+        /// </summary>
+        /// <param name="sectorId"></param>
+        /// <param name="childId"></param>
+        /// <returns></returns>
+        ActionResponse SetChildSector(int sectorId, int childId);
+
+        /// <summary>
+        /// Removes the provided sector as child
+        /// </summary>
+        /// <param name="sectorId"></param>
+        /// <param name="childId"></param>
+        /// <returns></returns>
+        ActionResponse RemoveChildSector(int sectorId, int childId);
 
         /// <summary>
         /// Updates a sector
@@ -88,7 +105,7 @@ namespace AIMS.Services
             }
         }
 
-        public IEnumerable<SectorView> GetChildSectors(int id)
+        public IEnumerable<SectorView> GetChildren(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -267,6 +284,99 @@ namespace AIMS.Services
                     response.Success = false;
                     response.Message = ex.Message;
                 }
+            }
+            return response;
+        }
+
+        public ActionResponse SetChildSector(int sectorId, int childId)
+        {
+            ActionResponse response = new ActionResponse();
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                var sectors = unitWork.SectorRepository.GetManyQueryable(s => (s.Id == sectorId || s.Id == childId));
+                if (sectors == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Sector");
+                    return response;
+                }
+
+                var childSector = (from sector in sectors
+                                  where sector.Id.Equals(childId)
+                                  select sector).FirstOrDefault();
+
+                if (childSector == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Child Sector");
+                    return response;
+                }
+
+                var parentSector = (from sector in sectors
+                                  where sector.Id.Equals(sectorId)
+                                  select sector).FirstOrDefault();
+
+                if (parentSector == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Parent Sector");
+                    return response;
+                }
+
+                childSector.ParentSector = parentSector;
+                unitWork.SectorRepository.Update(childSector);
+                response.ReturnedId = childSector.Id;
+                unitWork.Save();
+            }
+            return response;
+        }
+
+        public ActionResponse RemoveChildSector(int sectorId, int childId)
+        {
+            ActionResponse response = new ActionResponse();
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                var sectors = unitWork.SectorRepository.GetManyQueryable(s => (s.Id == sectorId || s.Id == childId));
+                if (sectors == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Sector");
+                    return response;
+                }
+
+                var childSector = (from sector in sectors
+                                   where sector.Id.Equals(childId)
+                                   select sector).FirstOrDefault();
+
+                if (childSector == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Child Sector");
+                    return response;
+                }
+
+                var parentSector = (from sector in sectors
+                                    where sector.Id.Equals(sectorId)
+                                    select sector).FirstOrDefault();
+
+                if (parentSector == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Parent Sector");
+                    return response;
+                }
+
+                childSector.ParentSector = null;
+                unitWork.SectorRepository.Update(childSector);
+                unitWork.Save();
             }
             return response;
         }

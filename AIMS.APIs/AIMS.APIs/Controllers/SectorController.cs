@@ -37,11 +37,35 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
-        [Route("GetChildSectors/{id}")]
-        public IActionResult GetChildSectors(int id)
+        [Route("GetChildren/{id}")]
+        public IActionResult GetChildren(int id)
         {
-            var sectors = sectorService.GetChildSectors(id);
+            var sectors = sectorService.GetChildren(id);
             return Ok(sectors);
+        }
+
+        [HttpGet]
+        [Route("SetChild/{sectorId}/{childId}")]
+        public IActionResult SetChild(int sectorId, int childId)
+        {
+            var response = sectorService.SetChildSector(sectorId, childId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpGet]
+        [Route("RemoveChild/{sectorId}/{childId}")]
+        public IActionResult RemoveChild(int sectorId, int childId)
+        {
+            var response = sectorService.RemoveChildSector(sectorId, childId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
         }
 
         [HttpGet("{criteria}")]
