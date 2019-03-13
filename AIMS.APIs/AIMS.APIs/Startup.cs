@@ -120,29 +120,11 @@ namespace AIMS.APIs
             services.AddScoped<IReportNamesService, ReportNamesService>();
             services.AddScoped<IReportSubscriptionService, ReportSubscriptionService>();
             services.AddScoped<ICurrencyService, CurrencyService>();
+            services.AddScoped<IExchangeRateService, ExchangeRateService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
-            //Configure Email Settings
-            //string host = "", userName = "", password = "";
-            //int port = 0;
-            /*services.AddTransient<SmtpClient>((serviceProvider) =>
-            {
-                var config = serviceProvider.GetRequiredService<IConfiguration>();
-                //services.AddSingleton<ISMTPSettingsService, SMTPSettingsService>();
-                //var smtpService = serviceProvider.GetRequiredService<ISMTPSettingsService>();
-                return new SmtpClient()
-                {
-                    Host = config.GetValue<String>("Email:Smtp:Host"),
-                    Port = config.GetValue<int>("Email:Smtp:Port"),
-                    Credentials = new NetworkCredential(
-                            config.GetValue<String>("Email:Smtp:Username"),
-                            config.GetValue<String>("Email:Smtp:Password")
-                        ),
-                    EnableSsl = true
-                };
-            });*/
-
             services.AddHttpClient();
+            services.AddHttpClient<IExchangeRateService, ExchangeRateService>();
             //Need to work on this scheduled task in future
             //services.AddSingleton<IHostedService, ScheduleTask>();
             services.AddScoped<IViewRenderService, ViewRenderService>();

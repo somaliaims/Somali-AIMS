@@ -316,6 +316,14 @@ namespace AIMS.Models
         public string Currency { get; set; }
     }
 
+    public class EFCurrencyRates
+    {
+        [Key]
+        public int Id { get; set; }
+        public string CurrencyRatesJson { get; set; }
+        public DateTime Dated { get; set; }
+    }
+
     public class EFCustomFields
     {
         [Key]

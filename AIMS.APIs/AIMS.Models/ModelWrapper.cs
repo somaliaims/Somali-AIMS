@@ -47,6 +47,18 @@ namespace AIMS.Models
         public string Currency { get; set; }
     }
 
+    public class ExchangeRates
+    {
+        public string Base { get; set; }
+        public string Rates { get; set; }
+    }
+
+    public class CurrencyWithRates
+    {
+        public string Currency { get; set; }
+        public decimal Rate { get; set; }
+    }
+
     public class CurrencyModel
     {
         [Required]
