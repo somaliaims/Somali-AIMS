@@ -23,6 +23,13 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         Task<ExchangeRatesView> GetLatestCurrencyRates();
+
+        /// <summary>
+        /// Get the currency rates for the specified date
+        /// </summary>
+        /// <param name="dated"></param>
+        /// <returns></returns>
+        Task<ExchangeRatesView> GetCurrencyRatesForDate(DateTime dated);
     }
 
     public class ExchangeRateService : IExchangeRateService
@@ -68,6 +75,18 @@ namespace AIMS.Services
             var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
             ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
             return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
+        }
+
+        public async Task<ExchangeRatesView> GetCurrencyRatesForDate(DateTime dated)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ExchangeRatesView ratesView = new ExchangeRatesView() { Base = "USD" };
+                List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
+                var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
+                ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
+                return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
+            }
         }
     }
 }

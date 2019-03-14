@@ -34,5 +34,14 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(ratesView);
         }
+
+        [HttpGet]
+        [Route("GetExchangeRatesForDate/{dated}")]
+        public async Task<IActionResult> GetExchangeRatesForDate(DateTime dated)
+        {
+            ExchangeRatesView ratesView = null;
+            ratesView = await ratesService.GetCurrencyRatesForDate(dated);
+            return Ok(ratesView);
+        }
     }
 }
