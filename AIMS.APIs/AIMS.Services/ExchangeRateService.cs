@@ -1,9 +1,9 @@
-﻿using AIMS.Models;
+﻿using AIMS.DAL.EF;
+using AIMS.DAL.UnitOfWork;
+using AIMS.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,67 +12,62 @@ namespace AIMS.Services
     public interface IExchangeRateService
     {
         /// <summary>
-        /// Gets latest list of the rates from open exchange rates
+        /// Saves new exchange rates for current date
         /// </summary>
+        /// <param name="ratesJson"></param>
         /// <returns></returns>
-        Task<ExchangeRatesView> GetRatesAsync();
+        ActionResponse SaveCurrencyRates(List<CurrencyWithRates> ratesList);
 
         /// <summary>
-        /// Converts rates str 
+        /// Gets the latest currency rates list from DB
         /// </summary>
-        /// <param name="ratesStr"></param>
         /// <returns></returns>
-        List<CurrencyWithRates> GetRatesList(string ratesStr);
+        Task<ExchangeRatesView> GetLatestCurrencyRates();
     }
 
     public class ExchangeRateService : IExchangeRateService
     {
-        private readonly HttpClient client;
+        AIMSDbContext context;
 
-        public ExchangeRateService(HttpClient httpClient)
+        public ExchangeRateService(AIMSDbContext cntxt)
         {
-            httpClient.BaseAddress = new Uri("https://openexchangerates.org/api/");
-            httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "ExchangeRates");
-            client = httpClient;
+            context = cntxt;
         }
 
-        public async Task<ExchangeRatesView> GetRatesAsync()
+        public ActionResponse SaveCurrencyRates(List<CurrencyWithRates> ratesList)
         {
-            var response = await client.GetStringAsync("latest.json?app_id=ce2f27af4d414969bfe05b7285a01dec");
-            var ratesJson = JsonConvert.DeserializeObject<dynamic>(response);
-            string ratesStr = ratesJson != null ? JsonConvert.SerializeObject(ratesJson.rates) : "";
-            ExchangeRatesView ratesView = new ExchangeRatesView();
-            ratesStr = ratesStr.Replace("\\", "").Replace("\"", "");
-            ratesStr = ratesStr.Replace("{", "");
-            ratesStr = ratesStr.Replace("}", "");
-            ratesView.Rates = this.GetRatesList(ratesStr);
-            return ratesView;
-        }
-
-        public List<CurrencyWithRates> GetRatesList(string ratesStr)
-        {
-            List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
-            if (ratesStr.Length > 0)
+            using (var unitWork = new UnitOfWork(context))
             {
-                string[] rateRows = ratesStr.Split(",");
-                for(int row=0; row < rateRows.Length; row++)
-                {
-                    string[] currencyRate = rateRows[row].Split(":");
-                    if (currencyRate.Length > 1)
-                    {
-                        string currency = currencyRate[0];
-                        decimal rate = Convert.ToDecimal(currencyRate[1]);
+                ActionResponse response = new ActionResponse();
+                DateTime dated = DateTime.Now;
 
-                        ratesList.Add(new CurrencyWithRates()
+                if (ratesList.Count > 0)
+                {
+                    string ratesJson = JsonConvert.SerializeObject(ratesList);
+                    var exchangeRate = unitWork.ExchangeRatesRepository.GetOne(e => e.Dated.Date == dated.Date);
+                    if (exchangeRate == null)
+                    {
+                        unitWork.ExchangeRatesRepository.Insert(new EFExchangeRates()
                         {
-                            Currency = currency,
-                            Rate = rate
+                            ExchangeRatesJson = ratesJson,
+                            Dated = dated
                         });
                     }
                 }
+                unitWork.Save();
+                return response;
             }
-            return ratesList;
+        }
+
+        public async Task<ExchangeRatesView> GetLatestCurrencyRates()
+        {
+            var unitWork = new UnitOfWork(context);
+            ExchangeRatesView ratesView = new ExchangeRatesView() { Base = "USD" };
+            List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
+            DateTime dated = DateTime.Now;
+            var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
+            ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
+            return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
         }
     }
 }

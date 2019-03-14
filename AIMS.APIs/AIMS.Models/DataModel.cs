@@ -316,11 +316,11 @@ namespace AIMS.Models
         public string Currency { get; set; }
     }
 
-    public class EFCurrencyRates
+    public class EFExchangeRates
     {
         [Key]
         public int Id { get; set; }
-        public string CurrencyRatesJson { get; set; }
+        public string ExchangeRatesJson { get; set; }
         public DateTime Dated { get; set; }
     }
 

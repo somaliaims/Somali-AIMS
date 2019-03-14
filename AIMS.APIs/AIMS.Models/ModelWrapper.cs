@@ -72,6 +72,13 @@ namespace AIMS.Models
         public string Currency { get; set; }
     }
 
+    public class ExchangeRatesModel
+    {
+        public string RatesJson { get; set; }
+        public DateTime Dated { get; set; }
+    }
+
+
     /// <summary>
     /// Organization models
     /// </summary>

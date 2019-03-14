@@ -124,7 +124,7 @@ namespace AIMS.APIs
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();
-            services.AddHttpClient<IExchangeRateService, ExchangeRateService>();
+            services.AddHttpClient<IExchangeRateHttpService, ExchangeRateHttpService>();
             //Need to work on this scheduled task in future
             //services.AddSingleton<IHostedService, ScheduleTask>();
             services.AddScoped<IViewRenderService, ViewRenderService>();
