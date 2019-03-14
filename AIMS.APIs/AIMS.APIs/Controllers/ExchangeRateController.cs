@@ -23,7 +23,6 @@ namespace AIMS.APIs.Controllers
         public async Task<IActionResult> LoadLatestRates()
         {
             var response = await exchangeRateService.GetRatesAsync();
-            
             return Ok(response);
         }
     }

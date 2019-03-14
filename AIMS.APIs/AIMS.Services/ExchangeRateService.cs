@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace AIMS.Services
         /// Gets latest list of the rates from open exchange rates
         /// </summary>
         /// <returns></returns>
-        Task<ExchangeRates> GetRatesAsync();
+        Task<ExchangeRatesView> GetRatesAsync();
 
         /// <summary>
         /// Converts rates str 
@@ -36,11 +37,17 @@ namespace AIMS.Services
             client = httpClient;
         }
 
-        public async Task<ExchangeRates> GetRatesAsync()
+        public async Task<ExchangeRatesView> GetRatesAsync()
         {
             var response = await client.GetStringAsync("latest.json?app_id=ce2f27af4d414969bfe05b7285a01dec");
-            ExchangeRates rates = JsonConvert.DeserializeObject<ExchangeRates>(response);
-            return rates;
+            var ratesJson = JsonConvert.DeserializeObject<dynamic>(response);
+            string ratesStr = ratesJson != null ? JsonConvert.SerializeObject(ratesJson.rates) : "";
+            ExchangeRatesView ratesView = new ExchangeRatesView();
+            ratesStr = ratesStr.Replace("\\", "").Replace("\"", "");
+            ratesStr = ratesStr.Replace("{", "");
+            ratesStr = ratesStr.Replace("}", "");
+            ratesView.Rates = this.GetRatesList(ratesStr);
+            return ratesView;
         }
 
         public List<CurrencyWithRates> GetRatesList(string ratesStr)

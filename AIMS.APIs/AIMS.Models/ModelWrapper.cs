@@ -53,6 +53,12 @@ namespace AIMS.Models
         public string Rates { get; set; }
     }
 
+    public class ExchangeRatesView
+    {
+        public string Base { get; set; }
+        public List<CurrencyWithRates> Rates { get; set; }
+    }
+
     public class CurrencyWithRates
     {
         public string Currency { get; set; }
