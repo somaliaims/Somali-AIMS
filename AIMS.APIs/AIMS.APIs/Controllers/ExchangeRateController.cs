@@ -23,9 +23,14 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> LoadLatestRates()
+        public async Task<IActionResult> GetLatestRates()
         {
             ExchangeRatesView ratesView = null;
+            int count = ratesService.GetAPIsCallsCount();
+            if (count >= 999)
+            {
+                return Ok(null);
+            }
             ratesView = await ratesService.GetLatestCurrencyRates();
             if (ratesView.Rates == null)
             {
@@ -36,10 +41,35 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("GetRatesForDate/{dated}")]
+        public async Task<IActionResult> GetRatesForDate(DateTime dated)
+        {
+            ExchangeRatesView ratesView = null;
+            int count = ratesService.GetAPIsCallsCount();
+            if (count >= 999)
+            {
+                return Ok(null);
+            }
+            string datedStr = dated.Year + "-" + dated.Month + "-" + dated.Day;
+            ratesView = await ratesService.GetCurrencyRatesForDate(dated);
+            if (ratesView.Rates == null)
+            {
+                ratesView = await ratesHttpService.GetRatesForDateAsync(datedStr);
+                ratesService.SaveCurrencyRates(ratesView.Rates);
+            }
+            return Ok(ratesView);
+        }
+
+        [HttpGet]
         [Route("GetExchangeRatesForDate/{dated}")]
         public async Task<IActionResult> GetExchangeRatesForDate(DateTime dated)
         {
             ExchangeRatesView ratesView = null;
+            int count = ratesService.GetAPIsCallsCount();
+            if (count >= 999)
+            {
+                return Ok(null);
+            }
             ratesView = await ratesService.GetCurrencyRatesForDate(dated);
             return Ok(ratesView);
         }

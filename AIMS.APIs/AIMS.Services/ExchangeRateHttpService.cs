@@ -18,6 +18,12 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         Task<ExchangeRatesView> GetRatesAsync();
+
+        /// <summary>
+        /// Gets rates for the provided date
+        /// </summary>
+        /// <returns></returns>
+        Task<ExchangeRatesView> GetRatesForDateAsync(string dated);
     }
 
     public class ExchangeRateHttpService : IExchangeRateHttpService
@@ -35,14 +41,40 @@ namespace AIMS.Services
         public async Task<ExchangeRatesView> GetRatesAsync()
         {
             ExchangeRatesView ratesView = new ExchangeRatesView() { Base = "USD" };
-            var response = await client.GetStringAsync("latest.json?app_id=ce2f27af4d414969bfe05b7285a01dec");
-            var ratesJson = JsonConvert.DeserializeObject<dynamic>(response);
-            string ratesStr = ratesJson != null ? JsonConvert.SerializeObject(ratesJson.rates) : "";
-            ratesStr = ratesStr.Replace("\\", "").Replace("\"", "");
-            ratesStr = ratesStr.Replace("{", "");
-            ratesStr = ratesStr.Replace("}", "");
-            ratesView.Rates = this.GetRatesList(ratesStr);
-            string ratesJsonStr = JsonConvert.SerializeObject(ratesView.Rates);
+            try
+            {
+                var response = await client.GetStringAsync("latest.json?app_id=ce2f27af4d414969bfe05b7285a01dec");
+                var ratesJson = JsonConvert.DeserializeObject<dynamic>(response);
+                string ratesStr = ratesJson != null ? JsonConvert.SerializeObject(ratesJson.rates) : "";
+                ratesStr = ratesStr.Replace("\\", "").Replace("\"", "");
+                ratesStr = ratesStr.Replace("{", "");
+                ratesStr = ratesStr.Replace("}", "");
+                ratesView.Rates = this.GetRatesList(ratesStr);
+                string ratesJsonStr = JsonConvert.SerializeObject(ratesView.Rates);
+            }
+            catch(Exception)
+            {
+            }
+            return await Task<List<CurrencyWithRates>>.Run(() => ratesView).ConfigureAwait(false);
+        }
+
+        public async Task<ExchangeRatesView> GetRatesForDateAsync(string dated)
+        {
+            ExchangeRatesView ratesView = new ExchangeRatesView() { Base = "USD" };
+            try
+            {
+                var response = await client.GetStringAsync(dated + ".json?app_id=ce2f27af4d414969bfe05b7285a01dec");
+                var ratesJson = JsonConvert.DeserializeObject<dynamic>(response);
+                string ratesStr = ratesJson != null ? JsonConvert.SerializeObject(ratesJson.rates) : "";
+                ratesStr = ratesStr.Replace("\\", "").Replace("\"", "");
+                ratesStr = ratesStr.Replace("{", "");
+                ratesStr = ratesStr.Replace("}", "");
+                ratesView.Rates = this.GetRatesList(ratesStr);
+                string ratesJsonStr = JsonConvert.SerializeObject(ratesView.Rates);
+            }
+            catch(Exception)
+            {
+            }
             return await Task<List<CurrencyWithRates>>.Run(() => ratesView).ConfigureAwait(false);
         }
 

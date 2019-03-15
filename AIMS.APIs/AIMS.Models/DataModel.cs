@@ -324,6 +324,13 @@ namespace AIMS.Models
         public DateTime Dated { get; set; }
     }
 
+    public class EFExchangeRatesAPIsCount
+    {
+        public int Id { get; set; }
+        public DateTime Dated { get; set; }
+        public int Count { get; set; }
+    }
+
     public class EFCustomFields
     {
         [Key]

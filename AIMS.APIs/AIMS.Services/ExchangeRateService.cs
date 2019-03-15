@@ -30,6 +30,12 @@ namespace AIMS.Services
         /// <param name="dated"></param>
         /// <returns></returns>
         Task<ExchangeRatesView> GetCurrencyRatesForDate(DateTime dated);
+
+        /// <summary>
+        /// Get apis calls count for current month
+        /// </summary>
+        /// <returns></returns>
+        int GetAPIsCallsCount();
     }
 
     public class ExchangeRateService : IExchangeRateService
@@ -59,9 +65,24 @@ namespace AIMS.Services
                             ExchangeRatesJson = ratesJson,
                             Dated = dated
                         });
+                        unitWork.Save();
+                    }
+
+                    var apisCountObj = unitWork.ExchangeRatesAPIsRepository.GetOne(a => (a.Dated.Year == dated.Year && a.Dated.Month == dated.Month));
+                    if (apisCountObj != null)
+                    {
+                        apisCountObj.Count++;
+                    }
+                    else
+                    {
+                        unitWork.ExchangeRatesAPIsRepository.Insert(new EFExchangeRatesAPIsCount()
+                        {
+                            Count = 1,
+                            Dated = dated
+                        });
+                        unitWork.Save();
                     }
                 }
-                unitWork.Save();
                 return response;
             }
         }
@@ -75,6 +96,19 @@ namespace AIMS.Services
             var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
             ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
             return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
+        }
+
+        public int GetAPIsCallsCount()
+        {
+            int count = 0;
+            var unitWork = new UnitOfWork(context);
+            DateTime dated = DateTime.Now;
+            var apisCountObj = unitWork.ExchangeRatesAPIsRepository.GetOne(a => (a.Dated.Year == dated.Year && a.Dated.Month == dated.Month));
+            if (apisCountObj != null)
+            {
+                count = apisCountObj.Count;
+            }
+            return count;
         }
 
         public async Task<ExchangeRatesView> GetCurrencyRatesForDate(DateTime dated)

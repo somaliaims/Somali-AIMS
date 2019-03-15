@@ -35,6 +35,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFReportSubscriptions> reportSubscriptionsRepository;
         private GenericRepository<EFCurrency> currencyRepository;
         private GenericRepository<EFExchangeRates> exchangeRatesRepository;
+        private GenericRepository<EFExchangeRatesAPIsCount> exRatesAPIsRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -308,6 +309,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.exchangeRatesRepository == null)
                     this.exchangeRatesRepository = new GenericRepository<EFExchangeRates>(context);
                 return this.exchangeRatesRepository;
+            }
+        }
+
+        public GenericRepository<EFExchangeRatesAPIsCount> ExchangeRatesAPIsRepository
+        {
+            get
+            {
+                if (this.exRatesAPIsRepository == null)
+                    this.exRatesAPIsRepository = new GenericRepository<EFExchangeRatesAPIsCount>(context);
+                return this.exRatesAPIsRepository;
             }
         }
 
