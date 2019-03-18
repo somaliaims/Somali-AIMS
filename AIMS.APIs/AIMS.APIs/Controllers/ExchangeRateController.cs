@@ -31,6 +31,7 @@ namespace AIMS.APIs.Controllers
             {
                 return Ok(null);
             }
+            
             ratesView = await ratesService.GetLatestCurrencyRates();
             if (ratesView.Rates == null)
             {
@@ -60,18 +61,5 @@ namespace AIMS.APIs.Controllers
             return Ok(ratesView);
         }
 
-        [HttpGet]
-        [Route("GetExchangeRatesForDate/{dated}")]
-        public async Task<IActionResult> GetExchangeRatesForDate(DateTime dated)
-        {
-            ExchangeRatesView ratesView = null;
-            int count = ratesService.GetAPIsCallsCount();
-            if (count >= 999)
-            {
-                return Ok(null);
-            }
-            ratesView = await ratesService.GetCurrencyRatesForDate(dated);
-            return Ok(ratesView);
-        }
     }
 }

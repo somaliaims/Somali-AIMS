@@ -93,6 +93,7 @@ namespace AIMS.Services
             ExchangeRatesView ratesView = new ExchangeRatesView() { Base = "USD" };
             List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
             DateTime dated = DateTime.Now;
+            ratesView.Dated = dated.Date.ToString();
             var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
             ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
             return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);

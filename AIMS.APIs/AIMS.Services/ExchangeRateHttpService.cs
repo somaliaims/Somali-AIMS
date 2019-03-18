@@ -50,7 +50,7 @@ namespace AIMS.Services
                 ratesStr = ratesStr.Replace("{", "");
                 ratesStr = ratesStr.Replace("}", "");
                 ratesView.Rates = this.GetRatesList(ratesStr);
-                string ratesJsonStr = JsonConvert.SerializeObject(ratesView.Rates);
+                //string ratesJsonStr = JsonConvert.SerializeObject(ratesView.Rates);
             }
             catch(Exception)
             {
@@ -60,7 +60,7 @@ namespace AIMS.Services
 
         public async Task<ExchangeRatesView> GetRatesForDateAsync(string dated)
         {
-            ExchangeRatesView ratesView = new ExchangeRatesView() { Base = "USD" };
+            ExchangeRatesView ratesView = new ExchangeRatesView() { Base = "USD", Dated = dated };
             try
             {
                 var response = await client.GetStringAsync(dated + ".json?app_id=ce2f27af4d414969bfe05b7285a01dec");
