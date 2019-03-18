@@ -1445,119 +1445,69 @@ namespace AIMS.Services
                                     unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
                                     await unitWork.SaveAsync();
                                 }
-                            }
-                        }
-                        //Add funders
-                        /*if (model.Funders.Count > 0)
-                        {
-                            var funderIds = (from funder in model.Funders
-                                             select funder.FunderId).ToList<int>();
 
-                            var fundersList = unitWork.OrganizationRepository.GetManyQueryable(o => funderIds.Contains(o.Id));
-                            foreach (var funder in fundersList)
-                            {
-                                var funderModel = (from f in model.Funders
-                                                   where f.FunderId == funder.Id
-                                                   select f).FirstOrDefault();
-
-                                unitWork.ProjectFundersRepository.Insert(new EFProjectFunders()
+                                if (project.Sectors.Count > 0)
                                 {
-                                    Project = newProject,
-                                    Funder = funder,
-                                    Amount = funderModel.Amount,
-                                    Currency = funderModel.Currency,
-                                    ExchangeRate = funderModel.ExchangeRate
-                                });
-                            }
-                            await unitWork.SaveAsync();
-                        }
+                                    List<EFProjectSectors> sectorsList = new List<EFProjectSectors>();
+                                    foreach(var sector in project.Sectors)
+                                    {
+                                        sectorsList.Add(new EFProjectSectors()
+                                        {
+                                            Project = newProject,
+                                            Sector = sector.Sector,
+                                            FundsPercentage = sector.FundsPercentage
+                                        });
+                                    }
+                                    unitWork.ProjectSectorsRepository.InsertMultiple(sectorsList);
+                                    await unitWork.SaveAsync();
+                                }
 
-                        if (model.Implementers.Count > 0)
-                        {
-                            var implementerIds = (from implementer in model.Implementers
-                                                  select implementer.ImplementerId).ToList<int>();
-                            var implementersList = unitWork.OrganizationRepository.GetManyQueryable(o => implementerIds.Contains(o.Id));
-
-                            foreach (var implementer in implementersList)
-                            {
-                                unitWork.ProjectImplementersRepository.Insert(new EFProjectImplementers()
+                                if (project.Locations.Count > 0)
                                 {
-                                    Project = newProject,
-                                    Implementer = implementer
-                                });
-                            }
-                            await unitWork.SaveAsync();
-                        }
+                                    List<EFProjectLocations> locationsList = new List<EFProjectLocations>();
+                                    foreach(var location in project.Locations)
+                                    {
+                                        locationsList.Add(new EFProjectLocations()
+                                        {
+                                            Project = newProject,
+                                            Location = location.Location,
+                                            FundsPercentage = location.FundsPercentage
+                                        });
+                                    }
+                                    unitWork.ProjectLocationsRepository.InsertMultiple(locationsList);
+                                    await unitWork.SaveAsync();
+                                }
 
-                        if (model.Sectors.Count > 0)
-                        {
-                            var sectorIds = (from sector in model.Sectors
-                                             select sector.SectorId).ToList<int>();
-                            var sectorsList = unitWork.SectorRepository.GetManyQueryable(s => sectorIds.Contains(s.Id));
-
-                            foreach (var sector in sectorsList)
-                            {
-                                var sectorObj = (from s in model.Sectors
-                                                 where s.SectorId == sector.Id
-                                                 select s).FirstOrDefault();
-
-                                unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
+                                if (project.Disbursements.Count > 0)
                                 {
-                                    Sector = sector,
-                                    Project = newProject,
-                                    FundsPercentage = sectorObj.FundsPercentage
-                                });
-                            }
-                            await unitWork.SaveAsync();
-                        }
+                                    List<EFProjectDisbursements> disbursementsList = new List<EFProjectDisbursements>();
+                                    foreach(var disbursement in project.Disbursements)
+                                    {
+                                        disbursementsList.Add(new EFProjectDisbursements()
+                                        {
+                                            Project = newProject,
+                                            Amount = disbursement.Amount,
+                                            Dated = disbursement.Dated
+                                        });
+                                    }
+                                    unitWork.ProjectDisbursementsRepository.InsertMultiple(disbursementsList);
+                                    await unitWork.SaveAsync();
+                                }
 
-                        //Saving project locations
-                        if (model.Locations.Count > 0)
-                        {
-                            var locationIds = (from location in model.Locations
-                                               select location.LocationId).ToList<int>();
-                            var locationsList = unitWork.LocationRepository.GetManyQueryable(s => locationIds.Contains(s.Id));
-
-                            foreach (var location in locationsList)
-                            {
-                                var locationObj = (from l in model.Locations
-                                                   where l.LocationId == location.Id
-                                                   select l).FirstOrDefault();
-
-                                unitWork.ProjectLocationsRepository.Insert(new EFProjectLocations()
+                                if (project.Documents.Count > 0)
                                 {
-                                    Location = location,
-                                    Project = newProject,
-                                    FundsPercentage = locationObj.FundsPercentage
-                                });
-                            }
-                            await unitWork.SaveAsync();
-                        }
-
-                        if (model.Disbursements.Count > 0)
-                        {
-                            foreach (var disbursement in model.Disbursements)
-                            {
-                                unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
-                                {
-                                    Project = newProject,
-                                    Dated = disbursement.Dated,
-                                    Amount = disbursement.Amount,
-                                });
-                            }
-                            await unitWork.SaveAsync();
-                        }
-
-                        if (model.Documents.Count > 0)
-                        {
-                            foreach (var document in model.Documents)
-                            {
-                                unitWork.ProjectDocumentRepository.Insert(new EFProjectDocuments()
-                                {
-                                    Project = newProject,
-                                    DocumentTitle = document.DocumentTitle,
-                                    DocumentUrl = document.DocumentUrl
-                                });
+                                    List<EFProjectDocuments> documentsList = new List<EFProjectDocuments>();
+                                    foreach(var document in project.Documents)
+                                    {
+                                        documentsList.Add(new EFProjectDocuments()
+                                        {
+                                            DocumentTitle = document.DocumentTitle,
+                                            DocumentUrl = document.DocumentUrl
+                                        });
+                                    }
+                                    unitWork.ProjectDocumentRepository.InsertMultiple(documentsList);
+                                    await unitWork.SaveAsync();
+                                }
                             }
                         }
 
@@ -1571,7 +1521,7 @@ namespace AIMS.Services
                                 unitWork.ProjectRepository.Delete(project);
                             }
                             await unitWork.SaveAsync();
-                        }*/
+                        }
                         transaction.Commit();
                     }
                 });

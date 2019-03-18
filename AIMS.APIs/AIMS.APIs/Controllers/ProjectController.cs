@@ -145,6 +145,23 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
+        [Route("MergeProjects")]
+        public async Task<IActionResult> MergeProjects([FromBody] MergeProjectsModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await projectService.MergeProjectsAsync(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost]
         [Route("ExtractProjectsByIds")]
         public async Task<IActionResult> ExtractProjectsByIds([FromBody] int[] ids)
         {
