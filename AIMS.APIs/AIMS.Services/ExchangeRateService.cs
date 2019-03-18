@@ -72,6 +72,7 @@ namespace AIMS.Services
                     if (apisCountObj != null)
                     {
                         apisCountObj.Count++;
+                        unitWork.ExchangeRatesAPIsRepository.Update(apisCountObj);
                     }
                     else
                     {
@@ -80,8 +81,8 @@ namespace AIMS.Services
                             Count = 1,
                             Dated = dated
                         });
-                        unitWork.Save();
                     }
+                    unitWork.Save();
                 }
                 return response;
             }

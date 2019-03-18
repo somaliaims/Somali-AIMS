@@ -402,6 +402,16 @@ namespace AIMS.Models
         public int ProjectTypeId { get; set; }
     }
 
+    public class MergeProjectsModel
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public List<int> ProjectsIds { get; set; }
+    }
+
     /// <summary>
     /// Project funders models
     /// </summary>
@@ -549,7 +559,7 @@ namespace AIMS.Models
     public class ProjectDisbursementModel
     {
         public int ProjectId { get; set; }
-        public string Dated { get; set; }
+        public DateTime Dated { get; set; }
         public decimal Amount { get; set; }
     }
 

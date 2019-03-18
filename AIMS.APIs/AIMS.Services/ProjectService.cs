@@ -265,6 +265,13 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         ActionResponse DeleteProjectMarker(int id);
+
+        /// <summary>
+        /// Merges the provided projects and their relevant data
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        Task<ActionResponse> MergeProjectsAsync(MergeProjectsModel model);
     }
 
     public class ProjectService : IProjectService
@@ -821,7 +828,7 @@ namespace AIMS.Services
                                                         select year.FinancialYear).ToList<int>();
 
                             List<EFFinancialYears> entityList = new List<EFFinancialYears>();
-                            foreach(int year in yearsList)
+                            foreach (int year in yearsList)
                             {
                                 if (!financialYears.Contains(year))
                                 {
@@ -1058,16 +1065,6 @@ namespace AIMS.Services
 
                 try
                 {
-                    DateTime dated = DateTime.Now;
-                    bool isValidDate = DateTime.TryParse(model.Dated, out dated);
-                    if (!isValidDate)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.InvalidDate();
-                        response.Success = false;
-                        return response;
-                    }
-
                     var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
                     if (project == null)
                     {
@@ -1078,11 +1075,11 @@ namespace AIMS.Services
 
                     var funders = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.ProjectId == model.ProjectId);
                     decimal totalFunds = (from funds in funders
-                                      select funds.Amount).Sum();
+                                          select funds.Amount).Sum();
 
                     var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.ProjectId == model.ProjectId);
                     decimal totalDisbursement = ((from disbursement in disbursements
-                                             select disbursement.Amount).Sum()) + model.Amount;
+                                                  select disbursement.Amount).Sum()) + model.Amount;
 
                     if (totalDisbursement > totalFunds)
                     {
@@ -1096,7 +1093,7 @@ namespace AIMS.Services
                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                     {
                         Project = project,
-                        Dated = dated,
+                        Dated = model.Dated,
                         Amount = model.Amount,
                     });
                     unitWork.Save();
@@ -1309,7 +1306,7 @@ namespace AIMS.Services
                     unitWork.ProjectDisbursementsRepository.Delete(projectDisbursement);
                     unitWork.Save();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
@@ -1357,6 +1354,228 @@ namespace AIMS.Services
                 unitWork.ProjectMarkersRepository.Delete(projectMarker);
                 unitWork.Save();
                 return response;
+            }
+        }
+
+        public async Task<ActionResponse> MergeProjectsAsync(MergeProjectsModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        //Add project
+                        var newProject = unitWork.ProjectRepository.Insert(new EFProject()
+                        {
+                            Title = model.Title,
+                            Description = model.Description,
+                            StartDate = model.StartDate,
+                            EndDate = model.EndDate
+                        });
+                        await unitWork.SaveAsync();
+
+                        //To check if there is a need to add financial year
+                        List<int> yearsList = new List<int>();
+                        yearsList.Add(model.StartDate.Year);
+                        yearsList.Add(model.EndDate.Year);
+
+                        var fYears = await unitWork.FinancialYearRepository.GetAllAsync();
+                        List<int> financialYears = (from year in fYears
+                                                    select year.FinancialYear).ToList<int>();
+
+                        List<EFFinancialYears> entityList = new List<EFFinancialYears>();
+                        foreach (int year in yearsList)
+                        {
+                            if (!financialYears.Contains(year))
+                            {
+                                entityList.Add(new EFFinancialYears()
+                                {
+                                    FinancialYear = year
+                                });
+                            }
+                        }
+
+                        if (entityList.Count > 0)
+                        {
+                            unitWork.FinancialYearRepository.InsertMultiple(entityList);
+                        }
+                        await unitWork.SaveAsync();
+
+                        var projectsToBeMerged = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectsIds.Contains(p.Id),
+                            new string[] { "Funders", "Implementers", "Sectors", "Locations", "Disbursements", "Documents" });
+
+                        if (projectsToBeMerged != null)
+                        {
+                            
+                            foreach(var project in projectsToBeMerged)
+                            {
+                                if (project.Funders.Count > 0)
+                                {
+                                    List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
+                                    foreach (var funder in project.Funders)
+                                    {
+                                        fundersList.Add(new EFProjectFunders()
+                                        {
+                                            Project = newProject,
+                                            Funder = funder.Funder,
+                                            Amount = funder.Amount,
+                                            Currency = funder.Currency,
+                                            ExchangeRate = funder.ExchangeRate
+                                        });
+                                    }
+                                    unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
+                                    await unitWork.SaveAsync();
+                                }
+
+                                if (project.Implementers.Count > 0)
+                                {
+                                    List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
+                                    foreach(var implementer in project.Implementers)
+                                    {
+                                        implementersList.Add(new EFProjectImplementers()
+                                        {
+                                            Project = newProject,
+                                            Implementer = implementer.Implementer
+                                        });
+                                    }
+                                    unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
+                                    await unitWork.SaveAsync();
+                                }
+                            }
+                        }
+                        //Add funders
+                        /*if (model.Funders.Count > 0)
+                        {
+                            var funderIds = (from funder in model.Funders
+                                             select funder.FunderId).ToList<int>();
+
+                            var fundersList = unitWork.OrganizationRepository.GetManyQueryable(o => funderIds.Contains(o.Id));
+                            foreach (var funder in fundersList)
+                            {
+                                var funderModel = (from f in model.Funders
+                                                   where f.FunderId == funder.Id
+                                                   select f).FirstOrDefault();
+
+                                unitWork.ProjectFundersRepository.Insert(new EFProjectFunders()
+                                {
+                                    Project = newProject,
+                                    Funder = funder,
+                                    Amount = funderModel.Amount,
+                                    Currency = funderModel.Currency,
+                                    ExchangeRate = funderModel.ExchangeRate
+                                });
+                            }
+                            await unitWork.SaveAsync();
+                        }
+
+                        if (model.Implementers.Count > 0)
+                        {
+                            var implementerIds = (from implementer in model.Implementers
+                                                  select implementer.ImplementerId).ToList<int>();
+                            var implementersList = unitWork.OrganizationRepository.GetManyQueryable(o => implementerIds.Contains(o.Id));
+
+                            foreach (var implementer in implementersList)
+                            {
+                                unitWork.ProjectImplementersRepository.Insert(new EFProjectImplementers()
+                                {
+                                    Project = newProject,
+                                    Implementer = implementer
+                                });
+                            }
+                            await unitWork.SaveAsync();
+                        }
+
+                        if (model.Sectors.Count > 0)
+                        {
+                            var sectorIds = (from sector in model.Sectors
+                                             select sector.SectorId).ToList<int>();
+                            var sectorsList = unitWork.SectorRepository.GetManyQueryable(s => sectorIds.Contains(s.Id));
+
+                            foreach (var sector in sectorsList)
+                            {
+                                var sectorObj = (from s in model.Sectors
+                                                 where s.SectorId == sector.Id
+                                                 select s).FirstOrDefault();
+
+                                unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
+                                {
+                                    Sector = sector,
+                                    Project = newProject,
+                                    FundsPercentage = sectorObj.FundsPercentage
+                                });
+                            }
+                            await unitWork.SaveAsync();
+                        }
+
+                        //Saving project locations
+                        if (model.Locations.Count > 0)
+                        {
+                            var locationIds = (from location in model.Locations
+                                               select location.LocationId).ToList<int>();
+                            var locationsList = unitWork.LocationRepository.GetManyQueryable(s => locationIds.Contains(s.Id));
+
+                            foreach (var location in locationsList)
+                            {
+                                var locationObj = (from l in model.Locations
+                                                   where l.LocationId == location.Id
+                                                   select l).FirstOrDefault();
+
+                                unitWork.ProjectLocationsRepository.Insert(new EFProjectLocations()
+                                {
+                                    Location = location,
+                                    Project = newProject,
+                                    FundsPercentage = locationObj.FundsPercentage
+                                });
+                            }
+                            await unitWork.SaveAsync();
+                        }
+
+                        if (model.Disbursements.Count > 0)
+                        {
+                            foreach (var disbursement in model.Disbursements)
+                            {
+                                unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                {
+                                    Project = newProject,
+                                    Dated = disbursement.Dated,
+                                    Amount = disbursement.Amount,
+                                });
+                            }
+                            await unitWork.SaveAsync();
+                        }
+
+                        if (model.Documents.Count > 0)
+                        {
+                            foreach (var document in model.Documents)
+                            {
+                                unitWork.ProjectDocumentRepository.Insert(new EFProjectDocuments()
+                                {
+                                    Project = newProject,
+                                    DocumentTitle = document.DocumentTitle,
+                                    DocumentUrl = document.DocumentUrl
+                                });
+                            }
+                        }
+
+                        //Now delete the old projects
+                        if (model.ProjectsIds.Count > 0)
+                        {
+                            var projectsToDelete = unitWork.ProjectRepository.GetManyQueryable(p => model.ProjectsIds.Contains(p.Id));
+
+                            foreach (var project in projectsToDelete)
+                            {
+                                unitWork.ProjectRepository.Delete(project);
+                            }
+                            await unitWork.SaveAsync();
+                        }*/
+                        transaction.Commit();
+                    }
+                });
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
     }
