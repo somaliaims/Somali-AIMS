@@ -1410,7 +1410,6 @@ namespace AIMS.Services
 
                         if (projectsToBeMerged != null)
                         {
-                            
                             foreach(var project in projectsToBeMerged)
                             {
                                 if (project.Funders.Count > 0)
@@ -1418,14 +1417,21 @@ namespace AIMS.Services
                                     List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
                                     foreach (var funder in project.Funders)
                                     {
-                                        fundersList.Add(new EFProjectFunders()
+                                        var funderExists = (from f in fundersList
+                                                            where f.ProjectId == newProject.Id && f.FunderId == funder.FunderId
+                                                            select f).FirstOrDefault();
+
+                                        if (funderExists == null)
                                         {
-                                            Project = newProject,
-                                            Funder = funder.Funder,
-                                            Amount = funder.Amount,
-                                            Currency = funder.Currency,
-                                            ExchangeRate = funder.ExchangeRate
-                                        });
+                                            fundersList.Add(new EFProjectFunders()
+                                            {
+                                                Project = newProject,
+                                                FunderId = funder.FunderId,
+                                                Amount = funder.Amount,
+                                                Currency = funder.Currency,
+                                                ExchangeRate = funder.ExchangeRate
+                                            });
+                                        }
                                     }
                                     unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
                                     await unitWork.SaveAsync();
@@ -1436,11 +1442,18 @@ namespace AIMS.Services
                                     List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
                                     foreach(var implementer in project.Implementers)
                                     {
-                                        implementersList.Add(new EFProjectImplementers()
+                                        var implementerExists = (from i in implementersList
+                                                                 where i.ImplementerId == implementer.ImplementerId && i.ProjectId == newProject.Id
+                                                                 select i).FirstOrDefault();
+
+                                        if (implementerExists == null)
                                         {
-                                            Project = newProject,
-                                            Implementer = implementer.Implementer
-                                        });
+                                            implementersList.Add(new EFProjectImplementers()
+                                            {
+                                                Project = newProject,
+                                                ImplementerId = implementer.ImplementerId
+                                            });
+                                        }
                                     }
                                     unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
                                     await unitWork.SaveAsync();
@@ -1451,12 +1464,19 @@ namespace AIMS.Services
                                     List<EFProjectSectors> sectorsList = new List<EFProjectSectors>();
                                     foreach(var sector in project.Sectors)
                                     {
-                                        sectorsList.Add(new EFProjectSectors()
+                                        var sectorExists = (from s in sectorsList
+                                                            where s.ProjectId == newProject.Id && s.SectorId == sector.SectorId
+                                                            select s).FirstOrDefault();
+
+                                        if (sectorExists == null)
                                         {
-                                            Project = newProject,
-                                            Sector = sector.Sector,
-                                            FundsPercentage = sector.FundsPercentage
-                                        });
+                                            sectorsList.Add(new EFProjectSectors()
+                                            {
+                                                Project = newProject,
+                                                SectorId = sector.SectorId,
+                                                FundsPercentage = sector.FundsPercentage
+                                            });
+                                        }
                                     }
                                     unitWork.ProjectSectorsRepository.InsertMultiple(sectorsList);
                                     await unitWork.SaveAsync();
@@ -1467,12 +1487,19 @@ namespace AIMS.Services
                                     List<EFProjectLocations> locationsList = new List<EFProjectLocations>();
                                     foreach(var location in project.Locations)
                                     {
-                                        locationsList.Add(new EFProjectLocations()
+                                        var locationExists = (from l in locationsList
+                                                              where l.LocationId == location.LocationId && l.ProjectId == newProject.Id
+                                                              select l).FirstOrDefault();
+      
+                                        if (locationExists == null)
                                         {
-                                            Project = newProject,
-                                            Location = location.Location,
-                                            FundsPercentage = location.FundsPercentage
-                                        });
+                                            locationsList.Add(new EFProjectLocations()
+                                            {
+                                                Project = newProject,
+                                                LocationId = location.LocationId,
+                                                FundsPercentage = location.FundsPercentage
+                                            });
+                                        }
                                     }
                                     unitWork.ProjectLocationsRepository.InsertMultiple(locationsList);
                                     await unitWork.SaveAsync();
@@ -1483,12 +1510,22 @@ namespace AIMS.Services
                                     List<EFProjectDisbursements> disbursementsList = new List<EFProjectDisbursements>();
                                     foreach(var disbursement in project.Disbursements)
                                     {
-                                        disbursementsList.Add(new EFProjectDisbursements()
+                                        var disbursementExists = (from d in disbursementsList
+                                                                  where d.ProjectId == newProject.Id &&
+                                                                  d.Amount == disbursement.Amount &&
+                                                                  d.Dated.Date == disbursement.Dated.Date
+                                                                  select d).FirstOrDefault();
+
+                                        if (disbursementExists == null)
                                         {
-                                            Project = newProject,
-                                            Amount = disbursement.Amount,
-                                            Dated = disbursement.Dated
-                                        });
+                                            disbursementsList.Add(new EFProjectDisbursements()
+                                            {
+                                                Project = newProject,
+                                                Amount = disbursement.Amount,
+                                                Dated = disbursement.Dated
+                                            });
+                                        }
+                                        
                                     }
                                     unitWork.ProjectDisbursementsRepository.InsertMultiple(disbursementsList);
                                     await unitWork.SaveAsync();
@@ -1499,11 +1536,21 @@ namespace AIMS.Services
                                     List<EFProjectDocuments> documentsList = new List<EFProjectDocuments>();
                                     foreach(var document in project.Documents)
                                     {
-                                        documentsList.Add(new EFProjectDocuments()
+                                        var documentExists = (from d in documentsList
+                                                              where d.DocumentTitle == document.DocumentTitle &&
+                                                              d.DocumentUrl == document.DocumentUrl &&
+                                                              d.ProjectId == newProject.Id
+                                                              select d).FirstOrDefault();
+
+                                        if (documentExists == null)
                                         {
-                                            DocumentTitle = document.DocumentTitle,
-                                            DocumentUrl = document.DocumentUrl
-                                        });
+                                            documentsList.Add(new EFProjectDocuments()
+                                            {
+                                                Project = newProject,
+                                                DocumentTitle = document.DocumentTitle,
+                                                DocumentUrl = document.DocumentUrl
+                                            });
+                                        }
                                     }
                                     unitWork.ProjectDocumentRepository.InsertMultiple(documentsList);
                                     await unitWork.SaveAsync();
@@ -1523,6 +1570,7 @@ namespace AIMS.Services
                             await unitWork.SaveAsync();
                         }
                         transaction.Commit();
+                        response.ReturnedId = newProject.Id;
                     }
                 });
                 return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
