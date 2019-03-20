@@ -1410,11 +1410,17 @@ namespace AIMS.Services
 
                         if (projectsToBeMerged != null)
                         {
-                            foreach(var project in projectsToBeMerged)
+                            List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
+                            List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
+                            List<EFProjectSectors> sectorsList = new List<EFProjectSectors>();
+                            List<EFProjectLocations> locationsList = new List<EFProjectLocations>();
+                            List<EFProjectDisbursements> disbursementsList = new List<EFProjectDisbursements>();
+                            List<EFProjectDocuments> documentsList = new List<EFProjectDocuments>();
+
+                            foreach (var project in projectsToBeMerged)
                             {
                                 if (project.Funders.Count > 0)
                                 {
-                                    List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
                                     foreach (var funder in project.Funders)
                                     {
                                         var funderExists = (from f in fundersList
@@ -1425,7 +1431,7 @@ namespace AIMS.Services
                                         {
                                             fundersList.Add(new EFProjectFunders()
                                             {
-                                                Project = newProject,
+                                                ProjectId = newProject.Id,
                                                 FunderId = funder.FunderId,
                                                 Amount = funder.Amount,
                                                 Currency = funder.Currency,
@@ -1433,13 +1439,10 @@ namespace AIMS.Services
                                             });
                                         }
                                     }
-                                    unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
-                                    await unitWork.SaveAsync();
                                 }
 
                                 if (project.Implementers.Count > 0)
                                 {
-                                    List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
                                     foreach(var implementer in project.Implementers)
                                     {
                                         var implementerExists = (from i in implementersList
@@ -1450,18 +1453,15 @@ namespace AIMS.Services
                                         {
                                             implementersList.Add(new EFProjectImplementers()
                                             {
-                                                Project = newProject,
+                                                ProjectId = newProject.Id,
                                                 ImplementerId = implementer.ImplementerId
                                             });
                                         }
                                     }
-                                    unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
-                                    await unitWork.SaveAsync();
                                 }
 
                                 if (project.Sectors.Count > 0)
                                 {
-                                    List<EFProjectSectors> sectorsList = new List<EFProjectSectors>();
                                     foreach(var sector in project.Sectors)
                                     {
                                         var sectorExists = (from s in sectorsList
@@ -1472,19 +1472,16 @@ namespace AIMS.Services
                                         {
                                             sectorsList.Add(new EFProjectSectors()
                                             {
-                                                Project = newProject,
+                                                ProjectId = newProject.Id,
                                                 SectorId = sector.SectorId,
                                                 FundsPercentage = sector.FundsPercentage
                                             });
                                         }
                                     }
-                                    unitWork.ProjectSectorsRepository.InsertMultiple(sectorsList);
-                                    await unitWork.SaveAsync();
                                 }
 
                                 if (project.Locations.Count > 0)
                                 {
-                                    List<EFProjectLocations> locationsList = new List<EFProjectLocations>();
                                     foreach(var location in project.Locations)
                                     {
                                         var locationExists = (from l in locationsList
@@ -1495,19 +1492,16 @@ namespace AIMS.Services
                                         {
                                             locationsList.Add(new EFProjectLocations()
                                             {
-                                                Project = newProject,
+                                                ProjectId = newProject.Id,
                                                 LocationId = location.LocationId,
                                                 FundsPercentage = location.FundsPercentage
                                             });
                                         }
                                     }
-                                    unitWork.ProjectLocationsRepository.InsertMultiple(locationsList);
-                                    await unitWork.SaveAsync();
                                 }
 
                                 if (project.Disbursements.Count > 0)
                                 {
-                                    List<EFProjectDisbursements> disbursementsList = new List<EFProjectDisbursements>();
                                     foreach(var disbursement in project.Disbursements)
                                     {
                                         var disbursementExists = (from d in disbursementsList
@@ -1520,20 +1514,17 @@ namespace AIMS.Services
                                         {
                                             disbursementsList.Add(new EFProjectDisbursements()
                                             {
-                                                Project = newProject,
+                                                ProjectId = newProject.Id,
                                                 Amount = disbursement.Amount,
                                                 Dated = disbursement.Dated
                                             });
                                         }
                                         
                                     }
-                                    unitWork.ProjectDisbursementsRepository.InsertMultiple(disbursementsList);
-                                    await unitWork.SaveAsync();
                                 }
 
                                 if (project.Documents.Count > 0)
                                 {
-                                    List<EFProjectDocuments> documentsList = new List<EFProjectDocuments>();
                                     foreach(var document in project.Documents)
                                     {
                                         var documentExists = (from d in documentsList
@@ -1546,18 +1537,48 @@ namespace AIMS.Services
                                         {
                                             documentsList.Add(new EFProjectDocuments()
                                             {
-                                                Project = newProject,
+                                                ProjectId = newProject.Id,
                                                 DocumentTitle = document.DocumentTitle,
                                                 DocumentUrl = document.DocumentUrl
                                             });
                                         }
                                     }
-                                    unitWork.ProjectDocumentRepository.InsertMultiple(documentsList);
-                                    await unitWork.SaveAsync();
                                 }
                             }
+
+                            if (fundersList.Count > 0)
+                            {
+                                unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
+                            }
+                            
+                            if (implementersList.Count > 0)
+                            {
+                                unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
+                            }
+
+                            if (sectorsList.Count > 0)
+                            {
+                                unitWork.ProjectSectorsRepository.InsertMultiple(sectorsList);
+                            }
+
+                            if (locationsList.Count > 0)
+                            {
+                                unitWork.ProjectLocationsRepository.InsertMultiple(locationsList);
+                            }
+
+                            if (disbursementsList.Count > 0)
+                            {
+                                unitWork.ProjectDisbursementsRepository.InsertMultiple(disbursementsList);
+                            }
+
+                            if (documentsList.Count > 0)
+                            {
+                                unitWork.ProjectDocumentRepository.InsertMultiple(documentsList);
+                            }
+                            await unitWork.SaveAsync();
                         }
 
+                        
                         //Now delete the old projects
                         if (model.ProjectsIds.Count > 0)
                         {
