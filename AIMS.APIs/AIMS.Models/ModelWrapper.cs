@@ -100,9 +100,7 @@ namespace AIMS.Models
         [Required]
         public string NewName { get; set; }
         [Required]
-        public int OrgFirst { get; set; }
-        [Required]
-        public int OrgSecond { get; set; }
+        public List<int> Ids { get; set; }
     }
 
     public class OrganizationViewModel

@@ -5,6 +5,7 @@ using AIMS.Services.Helpers;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -188,25 +189,11 @@ namespace AIMS.Services
                 {
                     using (var transaction = context.Database.BeginTransaction())
                     {
-                        var orgOne = unitWork.OrganizationRepository.GetByID(model.OrgFirst);
-                        if (orgOne == null)
-                        {
-                            mHelper = new MessageHelper();
-                            response.Message = mHelper.GetNotFound("One of merging organizations");
-                            response.Success = false;
-                            await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
-                        }
+                        var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => model.Ids.Contains(o.Id));
+                        var orgIds = (from org in organizations
+                                      select org.Id).ToList<int>();
 
-                        var orgTwo = unitWork.OrganizationRepository.GetByID(model.OrgSecond);
-                        if (orgTwo == null)
-                        {
-                            mHelper = new MessageHelper();
-                            response.Message = mHelper.GetNotFound("One of merging organizations");
-                            response.Success = false;
-                            await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
-                        }
-
-                        var users = unitWork.UserRepository.GetManyQueryable(u => (u.OrganizationId.Equals(orgOne.Id) || u.OrganizationId.Equals(orgTwo.Id)));
+                        var users = unitWork.UserRepository.GetManyQueryable(u => (orgIds.Contains(u.OrganizationId)));
                         var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
                         {
                             OrganizationName = model.NewName,
@@ -222,7 +209,7 @@ namespace AIMS.Services
                         }
                         unitWork.Save();
 
-                        var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => (f.FunderId == orgOne.Id || f.FunderId == orgTwo.Id));
+                        var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => orgIds.Contains(f.FunderId));
                         foreach(var funder in projectFunders)
                         {
                             funder.FunderId = newOrganization.Id;
@@ -230,7 +217,7 @@ namespace AIMS.Services
                         }
                         unitWork.Save();
 
-                        var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(i => (i.ImplementerId == orgOne.Id || i.ImplementerId == orgOne.Id));
+                        var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(i => orgIds.Contains(i.ImplementerId));
                         foreach(var implementer in projectImplementers)
                         {
                             implementer.ImplementerId = newOrganization.Id;
@@ -238,8 +225,10 @@ namespace AIMS.Services
                         }
                         unitWork.Save();
 
-                        unitWork.OrganizationRepository.Delete(orgOne);
-                        unitWork.OrganizationRepository.Delete(orgTwo);
+                        foreach(var organization in organizations)
+                        {
+                            unitWork.OrganizationRepository.Delete(organization);
+                        }
 
                         unitWork.Save();
                         transaction.Commit();
