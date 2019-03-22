@@ -186,8 +186,6 @@ namespace AIMS.Services
                 var strategy = context.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
                 {
-                    // Achieving atomicity between original Catalog database operation and the
-                    // IntegrationEventLog thanks to a local transaction
                     using (var transaction = context.Database.BeginTransaction())
                     {
                         var orgOne = unitWork.OrganizationRepository.GetByID(model.OrgFirst);
@@ -221,6 +219,22 @@ namespace AIMS.Services
                         {
                             user.Organization = newOrganization;
                             unitWork.UserRepository.Update(user);
+                        }
+                        unitWork.Save();
+
+                        var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => (f.FunderId == orgOne.Id || f.FunderId == orgTwo.Id));
+                        foreach(var funder in projectFunders)
+                        {
+                            funder.FunderId = newOrganization.Id;
+                            unitWork.ProjectFundersRepository.Update(funder);
+                        }
+                        unitWork.Save();
+
+                        var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(i => (i.ImplementerId == orgOne.Id || i.ImplementerId == orgOne.Id));
+                        foreach(var implementer in projectImplementers)
+                        {
+                            implementer.ImplementerId = newOrganization.Id;
+                            unitWork.ProjectImplementersRepository.Update(implementer);
                         }
                         unitWork.Save();
 

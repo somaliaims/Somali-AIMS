@@ -86,6 +86,12 @@ namespace AIMS.Services.Helpers
         /// <param name="entity"></param>
         /// <returns></returns>
         string DeleteMessage(string entity);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string InvalidProjectMerge();
     }
 
     public class MessageHelper : IMessageHelper
@@ -97,6 +103,7 @@ namespace AIMS.Services.Helpers
         private readonly string DELETED = " deleted successfully";
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
         private readonly string INVALID_ACCOUNT_DELETION_ATTEMPT = "A super admin account cannot be deleted";
+        private readonly string INVALID_PROJECT_MERGE = "At least two projects must be provided for completing the project merge process";
         private readonly string EMAIL_NOT_FOUND = " did not match any of our records for registered users.";
         private readonly string INVALID_PERCENTAGE = "Invalid value provided for percentage.";
         private readonly string ALREADY_EXISTS = " provided is already entered once.";
@@ -161,6 +168,11 @@ namespace AIMS.Services.Helpers
         public string InvalidDate()
         {
             return INVALID_DATE;
+        }
+
+        public string InvalidProjectMerge()
+        {
+            return INVALID_PROJECT_MERGE;
         }
     }
 }

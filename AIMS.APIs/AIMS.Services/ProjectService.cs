@@ -1363,6 +1363,15 @@ namespace AIMS.Services
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
+
+                if (model.ProjectsIds.Count < 2)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.InvalidProjectMerge();
+                    response.Success = false;
+                    return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                }
+
                 var strategy = context.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
                 {
