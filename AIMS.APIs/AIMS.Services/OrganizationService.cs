@@ -184,6 +184,14 @@ namespace AIMS.Services
                 IMessageHelper mHelper;
                 ActionResponse response = new ActionResponse();
 
+                if (model.Ids.Count < 2)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.InvalidOrganizationMerge();
+                    response.Success = false;
+                    return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                }
+
                 var strategy = context.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
                 {
@@ -192,6 +200,14 @@ namespace AIMS.Services
                         var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => model.Ids.Contains(o.Id));
                         var orgIds = (from org in organizations
                                       select org.Id).ToList<int>();
+
+                        if (model.Ids.Count < orgIds.Count)
+                        {
+                            mHelper = new MessageHelper();
+                            response.Message = mHelper.GetNotFound("Organization/s");
+                            response.Success = false;
+                            return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                        }
 
                         var users = unitWork.UserRepository.GetManyQueryable(u => (orgIds.Contains(u.OrganizationId)));
                         var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
@@ -210,20 +226,46 @@ namespace AIMS.Services
                         unitWork.Save();
 
                         var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => orgIds.Contains(f.FunderId));
-                        foreach(var funder in projectFunders)
+                        List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
+
+                        foreach (var funder in projectFunders)
                         {
-                            funder.FunderId = newOrganization.Id;
-                            unitWork.ProjectFundersRepository.Update(funder);
+                            fundersList.Add(new EFProjectFunders()
+                            {
+                                ProjectId = funder.ProjectId,
+                                FunderId = newOrganization.Id,
+                                Amount = funder.Amount,
+                                ExchangeRate = funder.ExchangeRate,
+                                Currency = funder.Currency
+                            });
+                            unitWork.ProjectFundersRepository.Delete(funder);
                         }
-                        unitWork.Save();
+
+                        if (fundersList.Count > 0)
+                        {
+                            unitWork.Save();
+                            unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
+                            unitWork.Save();
+                        }
 
                         var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(i => orgIds.Contains(i.ImplementerId));
-                        foreach(var implementer in projectImplementers)
+                        List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
+                        foreach (var implementer in projectImplementers)
                         {
-                            implementer.ImplementerId = newOrganization.Id;
-                            unitWork.ProjectImplementersRepository.Update(implementer);
+                            implementersList.Add(new EFProjectImplementers()
+                            {
+                                ImplementerId = newOrganization.Id,
+                                ProjectId = implementer.ProjectId
+                            });
+                            unitWork.ProjectImplementersRepository.Delete(implementer);
                         }
-                        unitWork.Save();
+
+                        if (implementersList.Count > 0)
+                        {
+                            unitWork.Save();
+                            unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
+                            unitWork.Save();
+                        }
 
                         foreach(var organization in organizations)
                         {
@@ -232,6 +274,7 @@ namespace AIMS.Services
 
                         unitWork.Save();
                         transaction.Commit();
+                        response.ReturnedId = newOrganization.Id;
                     }
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                 });

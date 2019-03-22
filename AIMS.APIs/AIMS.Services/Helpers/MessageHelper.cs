@@ -92,6 +92,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string InvalidProjectMerge();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string InvalidOrganizationMerge();
     }
 
     public class MessageHelper : IMessageHelper
@@ -104,6 +110,7 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
         private readonly string INVALID_ACCOUNT_DELETION_ATTEMPT = "A super admin account cannot be deleted";
         private readonly string INVALID_PROJECT_MERGE = "At least two projects must be provided for completing the project merge process";
+        private readonly string INVALID_ORGANIZATION_MERGE = "At least two organizations must be provided for completing the project merge process";
         private readonly string EMAIL_NOT_FOUND = " did not match any of our records for registered users.";
         private readonly string INVALID_PERCENTAGE = "Invalid value provided for percentage.";
         private readonly string ALREADY_EXISTS = " provided is already entered once.";
@@ -173,6 +180,11 @@ namespace AIMS.Services.Helpers
         public string InvalidProjectMerge()
         {
             return INVALID_PROJECT_MERGE;
+        }
+
+        public string InvalidOrganizationMerge()
+        {
+            return INVALID_ORGANIZATION_MERGE;
         }
     }
 }
