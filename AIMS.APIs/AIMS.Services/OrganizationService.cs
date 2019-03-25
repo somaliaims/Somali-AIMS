@@ -48,6 +48,14 @@ namespace AIMS.Services
         ActionResponse Add(OrganizationModel organization);
 
         /// <summary>
+        /// Deletes an organization and assigns new one if required
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="newId"></param>
+        /// <returns></returns>
+        Task<ActionResponse> DeleteAsync(int id, int newId = 0);
+
+        /// <summary>
         /// Merges two organizations
         /// </summary>
         /// <param name="model"></param>
@@ -96,7 +104,7 @@ namespace AIMS.Services
             {
                 var organizationList = unitWork.OrganizationRepository.GetMany(o => o.Id.Equals(id));
                 EFOrganization organization = null;
-                foreach(var org in organizationList)
+                foreach (var org in organizationList)
                 {
                     organization = org;
                 }
@@ -267,7 +275,7 @@ namespace AIMS.Services
                             unitWork.Save();
                         }
 
-                        foreach(var organization in organizations)
+                        foreach (var organization in organizations)
                         {
                             unitWork.OrganizationRepository.Delete(organization);
                         }
@@ -303,12 +311,87 @@ namespace AIMS.Services
                     unitWork.OrganizationRepository.Update(organization);
                     unitWork.Save();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
                 }
                 return response;
+            }
+        }
+
+        public async Task<ActionResponse> DeleteAsync(int id, int newId = 0)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                var organizations = await unitWork.OrganizationRepository.GetManyQueryableAsync(o => (o.Id == id || o.Id == newId));
+                if (organizations.Count() < 2 && newId != 0)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Organization");
+                    response.Success = false;
+                    return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                }
+
+                EFOrganization newOrganization = null;
+                EFOrganization oldOrganization = (from org in organizations
+                                                  where org.Id == id
+                                                  select org).FirstOrDefault();
+
+                newOrganization = (from org in organizations
+                                   where org.Id == newId
+                                   select org).FirstOrDefault();
+
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        var projectFunders = await unitWork.ProjectFundersRepository.GetManyQueryableAsync(p => p.FunderId == id);
+                        var projectImplementers = await unitWork.ProjectImplementersRepository.GetManyQueryableAsync(p => p.ImplementerId == id);
+                        List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
+                        List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
+
+                        foreach(var funder in projectFunders)
+                        {
+                            fundersList.Add(new EFProjectFunders()
+                            {
+                                ProjectId = funder.ProjectId,
+                                FunderId = newId,
+                                Amount = funder.Amount,
+                                ExchangeRate = funder.ExchangeRate,
+                                Currency = funder.Currency
+                            });
+                            unitWork.ProjectFundersRepository.Delete(funder);
+                        }
+
+                        foreach(var implementer in projectImplementers)
+                        {
+                            implementersList.Add(new EFProjectImplementers()
+                            {
+                                ProjectId = implementer.ProjectId,
+                                ImplementerId = newId
+                            });
+                            unitWork.ProjectImplementersRepository.Delete(implementer);
+                        }
+                        await unitWork.SaveAsync();
+
+                        if (newId == 0)
+                        {
+                            unitWork.OrganizationRepository.Delete(oldOrganization);
+                        }
+                        else
+                        {
+                            unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
+                            unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
+                        }
+                        await unitWork.SaveAsync();
+                    }
+                });
+
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
     }
