@@ -193,6 +193,13 @@ namespace AIMS.Services
         IEnumerable<ProjectImplementerView> GetProjectImplementers(int id);
 
         /// <summary>
+        /// Gets list of projects for the provided funder
+        /// </summary>
+        /// <param name="funderId"></param>
+        /// <returns></returns>
+        IEnumerable<ProjectView> GetOrganizationProjects(int funderId);
+
+        /// <summary>
         /// Gets project disbursements
         /// </summary>
         /// <param name="id"></param>
@@ -300,6 +307,24 @@ namespace AIMS.Services
             {
                 var projects = await unitWork.ProjectRepository.GetAllAsync();
                 return await Task<IEnumerable<ProjectView>>.Run(() => mapper.Map<List<ProjectView>>(projects)).ConfigureAwait(false);
+            }
+        }
+
+        public IEnumerable<ProjectView> GetOrganizationProjects(int organizatioinId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var funderProjects = unitWork.ProjectFundersRepository.GetManyQueryable(p => p.FunderId == organizatioinId);
+                var implementerProjects = unitWork.ProjectImplementersRepository.GetManyQueryable(p => p.ImplementerId == organizatioinId);
+
+                var projectForFunders = (from f in funderProjects
+                                         select f.ProjectId).Distinct().ToList<int>();
+                var projectForImplementers = (from i in implementerProjects
+                                              select i.ProjectId).Distinct().ToList<int>();
+
+                List<int> projectIds = projectForFunders.Union(projectForImplementers).ToList<int>();
+                var projects = unitWork.ProjectRepository.GetManyQueryable(p => projectIds.Contains(p.Id));
+                return mapper.Map<List<ProjectView>>(projects);
             }
         }
 
