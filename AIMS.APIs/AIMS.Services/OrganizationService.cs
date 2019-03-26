@@ -349,18 +349,27 @@ namespace AIMS.Services
                 {
                     using (var transaction = context.Database.BeginTransaction())
                     {
-                        var projectFunders = await unitWork.ProjectFundersRepository.GetManyQueryableAsync(p => p.FunderId == id);
-                        var projectImplementers = await unitWork.ProjectImplementersRepository.GetManyQueryableAsync(p => p.ImplementerId == id);
+                        var projectFundersList = await unitWork.ProjectFundersRepository.GetManyQueryableAsync(p => (p.FunderId == id || p.FunderId == newId));
+                        var projectImplementersList = await unitWork.ProjectImplementersRepository.GetManyQueryableAsync(i => (i.ImplementerId == id || i.ImplementerId == newId));
                         List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
                         List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
 
-                        List<FundersKeyView> fundersInDb = (from f in projectFunders
+                        var projectFunders = (from f in projectFundersList
+                                              where f.FunderId == id
+                                              select f);
+                        var projectImplementers = (from i in projectImplementersList
+                                                   where i.ImplementerId == id
+                                                   select i);
+
+                        List<FundersKeyView> fundersInDb = (from f in projectFundersList
+                                                            where f.FunderId == newId
                                           select new FundersKeyView{
                                               FunderId = f.FunderId,
                                               ProjectId = f.ProjectId
                                           }).ToList<FundersKeyView>();
 
-                        List<ImplementersKeyView> implementersInDb = (from i in projectImplementers
+                        List<ImplementersKeyView> implementersInDb = (from i in projectImplementersList
+                                                                      where i.ImplementerId == newId
                                                             select new ImplementersKeyView
                                                             {
                                                                 ImplementerId = i.ImplementerId,
@@ -370,10 +379,10 @@ namespace AIMS.Services
                         foreach (var funder in projectFunders)
                         {
                             var funderExists = (from f in fundersList
-                                                where f.FunderId == funder.FunderId && f.ProjectId == funder.ProjectId
+                                                where f.FunderId == newId && f.ProjectId == funder.ProjectId
                                                 select f).FirstOrDefault();
                             var funderInDb = (from f in fundersInDb
-                                              where f.FunderId == funder.FunderId && f.ProjectId == funder.ProjectId
+                                              where f.FunderId == newId && f.ProjectId == funder.ProjectId
                                               select f).FirstOrDefault();
 
                             if (funderExists == null && funderInDb == null)
