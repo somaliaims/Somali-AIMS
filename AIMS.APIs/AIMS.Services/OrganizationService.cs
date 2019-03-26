@@ -432,6 +432,7 @@ namespace AIMS.Services
                             unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
                         }
                         await unitWork.SaveAsync();
+                        transaction.Commit();
                     }
                 });
 
