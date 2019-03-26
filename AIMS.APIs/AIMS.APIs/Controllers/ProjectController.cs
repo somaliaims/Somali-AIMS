@@ -137,7 +137,7 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid id provided");
             }
             var projects = projectService.GetOrganizationProjects(id);
-            return Ok();
+            return Ok(projects);
         }
 
 

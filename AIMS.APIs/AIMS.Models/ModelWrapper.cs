@@ -47,6 +47,18 @@ namespace AIMS.Models
         public string Currency { get; set; }
     }
 
+    public class FundersKeyView
+    {
+        public int FunderId { get; set; }
+        public int ProjectId { get; set; }
+    }
+
+    public class ImplementersKeyView
+    {
+        public int ImplementerId { get; set; }
+        public int ProjectId { get; set; }
+    }
+
     public class ExchangeRates
     {
         public string Base { get; set; }

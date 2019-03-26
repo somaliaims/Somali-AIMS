@@ -354,26 +354,61 @@ namespace AIMS.Services
                         List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
                         List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
 
-                        foreach(var funder in projectFunders)
+                        List<FundersKeyView> fundersInDb = (from f in projectFunders
+                                          select new FundersKeyView{
+                                              FunderId = f.FunderId,
+                                              ProjectId = f.ProjectId
+                                          }).ToList<FundersKeyView>();
+
+                        List<ImplementersKeyView> implementersInDb = (from i in projectImplementers
+                                                            select new ImplementersKeyView
+                                                            {
+                                                                ImplementerId = i.ImplementerId,
+                                                                ProjectId = i.ProjectId
+                                                            }).ToList<ImplementersKeyView>();
+
+                        foreach (var funder in projectFunders)
                         {
-                            fundersList.Add(new EFProjectFunders()
+                            var funderExists = (from f in fundersList
+                                                where f.FunderId == funder.FunderId && f.ProjectId == funder.ProjectId
+                                                select f).FirstOrDefault();
+                            var funderInDb = (from f in fundersInDb
+                                              where f.FunderId == funder.FunderId && f.ProjectId == funder.ProjectId
+                                              select f).FirstOrDefault();
+
+                            if (funderExists == null && funderInDb == null)
                             {
-                                ProjectId = funder.ProjectId,
-                                FunderId = newId,
-                                Amount = funder.Amount,
-                                ExchangeRate = funder.ExchangeRate,
-                                Currency = funder.Currency
-                            });
+                                fundersList.Add(new EFProjectFunders()
+                                {
+                                    ProjectId = funder.ProjectId,
+                                    FunderId = newId,
+                                    Amount = funder.Amount,
+                                    ExchangeRate = funder.ExchangeRate,
+                                    Currency = funder.Currency
+                                });
+                            }
                             unitWork.ProjectFundersRepository.Delete(funder);
                         }
+                        await unitWork.SaveAsync();
 
                         foreach(var implementer in projectImplementers)
                         {
-                            implementersList.Add(new EFProjectImplementers()
+                            var implementerExists = (from i in implementersList
+                                                     where (i.ImplementerId == implementer.ImplementerId && i.ProjectId == implementer.ProjectId)
+                                                     select i).FirstOrDefault();
+
+                            var implementerInDb = (from i in implementersInDb
+                                                   where i.ImplementerId == implementer.ImplementerId && i.ProjectId == implementer.ProjectId
+                                                   select i).FirstOrDefault();
+
+                            if (implementerExists == null && implementerInDb == null)
                             {
-                                ProjectId = implementer.ProjectId,
-                                ImplementerId = newId
-                            });
+                                implementersList.Add(new EFProjectImplementers()
+                                {
+                                    ProjectId = implementer.ProjectId,
+                                    ImplementerId = newId
+                                });
+                            }
                             unitWork.ProjectImplementersRepository.Delete(implementer);
                         }
                         await unitWork.SaveAsync();
