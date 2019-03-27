@@ -200,6 +200,13 @@ namespace AIMS.Services
         IEnumerable<ProjectView> GetOrganizationProjects(int funderId);
 
         /// <summary>
+        /// Gets list of projects for the provided location
+        /// </summary>
+        /// <param name="locationId"></param>
+        /// <returns></returns>
+        IEnumerable<ProjectView> GetLocationProjects(int locationId);
+
+        /// <summary>
         /// Gets project disbursements
         /// </summary>
         /// <param name="id"></param>
@@ -323,6 +330,20 @@ namespace AIMS.Services
                                               select i.ProjectId).Distinct().ToList<int>();
 
                 List<int> projectIds = projectForFunders.Union(projectForImplementers).ToList<int>();
+                var projects = unitWork.ProjectRepository.GetManyQueryable(p => projectIds.Contains(p.Id));
+                return mapper.Map<List<ProjectView>>(projects);
+            }
+        }
+
+        public IEnumerable<ProjectView> GetLocationProjects(int locationId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var locationProjects = unitWork.ProjectLocationsRepository.GetManyQueryable(p => p.LocationId == locationId);
+
+                var projectIds = (from l in locationProjects
+                                         select l.ProjectId).Distinct().ToList<int>();
+
                 var projects = unitWork.ProjectRepository.GetManyQueryable(p => projectIds.Contains(p.Id));
                 return mapper.Map<List<ProjectView>>(projects);
             }

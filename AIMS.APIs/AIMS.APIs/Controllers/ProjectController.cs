@@ -140,6 +140,18 @@ namespace AIMS.APIs.Controllers
             return Ok(projects);
         }
 
+        [HttpGet]
+        [Route("GetLocationProjects/{id}")]
+        public IActionResult GetLocationProjects(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid id provided");
+            }
+            var projects = projectService.GetLocationProjects(id);
+            return Ok(projects);
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ProjectModel project)
