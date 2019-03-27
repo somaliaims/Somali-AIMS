@@ -4,6 +4,7 @@ using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,7 +57,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ActionResponse Delete(int id, int newId);
+        Task<ActionResponse> DeleteAsync(int id, int newId);
     }
 
     public class LocationService : ILocationService
@@ -170,46 +171,73 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Delete(int id, int newId)
+        public async Task<ActionResponse> DeleteAsync(int id, int newId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 IMessageHelper mHelper = new MessageHelper();
                 ActionResponse response = new ActionResponse();
-                var locationObj = unitWork.LocationRepository.GetByID(id);
-                if (locationObj == null)
+                var locations = await unitWork.LocationRepository.GetManyQueryableAsync(l => (l.Id == id || l.Id == newId));
+                if (locations.Count() < 2 && newId == 0)
                 {
                     response.Success = false;
                     response.Message = mHelper.GetNotFound("Location");
-                    return response;
+                    return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                 }
 
-                if (newId != 0)
-                {
-                    var newLocation = unitWork.LocationRepository.GetByID(newId);
-                    //List<int> organizationIds = 
-                    if (newLocation != null)
+                var projectLocations = await unitWork.ProjectLocationsRepository.GetManyQueryableAsync(l => (l.LocationId == id || l.LocationId == newId));
+                var locationsInDb = (from l in projectLocations
+                                     select new LocationKeyPreview
+                                     {
+                                         ProjectId = l.ProjectId,
+                                         LocationId = l.LocationId
+                                     }).ToList<LocationKeyPreview>();
+
+                var location = (from l in locations
+                                where l.Id == id
+                                select l).FirstOrDefault();
+
+                List<EFProjectLocations> locationsList = new List<EFProjectLocations>();
+                    foreach(var pLocation in projectLocations)
                     {
-                        List<int> effectedProjects = new List<int>();
-                        var projectLocations = unitWork.ProjectLocationsRepository.GetManyQueryable(l => l.LocationId == id);
-                        if (projectLocations != null)
+                        var isLocationExists = (from l in locationsList
+                                                where l.ProjectId == pLocation.ProjectId && l.LocationId == newId
+                                                select l).FirstOrDefault();
+
+                        var isLocationInDB = (from l in locationsInDb
+                                              where l.LocationId == newId && l.ProjectId == pLocation.ProjectId
+                                              select l).FirstOrDefault();
+
+                        if (isLocationExists == null && isLocationInDB == null)
                         {
-                            foreach (var pLocation in projectLocations)
+                            locationsList.Add(new EFProjectLocations()
                             {
-                                pLocation.Location = newLocation;
-                                effectedProjects.Add(pLocation.ProjectId);
-                            }
+                                LocationId = newId,
+                                ProjectId = pLocation.ProjectId,
+                                FundsPercentage = pLocation.FundsPercentage
+                            });
                         }
 
-
-                        unitWork.Save();
+                        unitWork.ProjectLocationsRepository.Delete(pLocation);
                     }
+                    await unitWork.SaveAsync();
+
+                if (newId == 0)
+                {
+                    var locationToDelete = (from l in locations
+                                            where l.Id == id
+                                            select l).FirstOrDefault();
+                    unitWork.LocationRepository.Delete(locationToDelete);
+                }
+                else
+                {
+                    unitWork.ProjectLocationsRepository.InsertMultiple(locationsList);
                 }
 
-                unitWork.LocationRepository.Delete(locationObj);
-                unitWork.Save();
+                await unitWork.SaveAsync();
+                response.ReturnedId = newId;
                 response.Message = mHelper.DeleteMessage("Location");
-                return response;
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
     }

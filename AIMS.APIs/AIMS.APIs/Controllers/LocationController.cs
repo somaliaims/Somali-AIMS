@@ -86,19 +86,19 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpDelete("{id}/{newId}")]
-        public IActionResult Delete(int id, int newId)
+        public async Task<IActionResult> Delete(int id, int newId)
         {
             if (id <= 0)
             {
                 return BadRequest("Invalid id provided");
             }
 
-            var response = locationService.Delete(id, newId);
+            var response = await locationService.DeleteAsync(id, newId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
             }
-            return Ok(response);
+            return Ok(true);
         }
     }
 }

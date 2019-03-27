@@ -47,6 +47,12 @@ namespace AIMS.Models
         public string Currency { get; set; }
     }
 
+    public class LocationKeyPreview
+    {
+        public int LocationId { get; set; }
+        public int ProjectId { get; set; }
+    }
+
     public class FundersKeyView
     {
         public int FunderId { get; set; }
