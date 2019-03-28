@@ -234,7 +234,6 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 EFSector sector = null;
-                EFSector newSector = null;
 
                 var sectors = await unitWork.SectorRepository.GetManyQueryableAsync(s => (s.Id == id || s.Id == newId));
                 if (sectors.Count() < 2 && newId != 0)
@@ -247,12 +246,14 @@ namespace AIMS.Services
 
                 var projectSectors = await unitWork.ProjectSectorsRepository.GetManyQueryableAsync(s => (s.SectorId == id || s.SectorId == newId));
                 var sectorsInDb = (from s in projectSectors
-                                   where s.SectorId == newId
                                    select new SectorsKeyView()
                                    {
                                        SectorId = s.SectorId,
                                        ProjectId = s.ProjectId
                                    });
+                projectSectors = (from s in projectSectors
+                                  where s.SectorId == id
+                                  select s);
 
                 sector = (from s in sectors
                           where s.Id == id
@@ -307,7 +308,7 @@ namespace AIMS.Services
                     response.Message = ex.Message;
                 }
             }
-            return response;
+            return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
         }
 
         public ActionResponse SetChildSector(int sectorId, int childId)
