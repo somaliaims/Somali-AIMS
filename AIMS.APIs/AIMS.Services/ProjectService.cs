@@ -311,6 +311,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var projects = unitWork.ProjectRepository.GetAll();
+                projects = (from p in projects
+                            orderby p.DateUpdated descending
+                            select p);
                 return mapper.Map<List<ProjectView>>(projects);
             }
         }
@@ -320,6 +323,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var projects = await unitWork.ProjectRepository.GetAllAsync();
+                projects = (from p in projects
+                            orderby p.DateUpdated descending
+                            select p);
                 return await Task<IEnumerable<ProjectView>>.Run(() => mapper.Map<List<ProjectView>>(projects)).ConfigureAwait(false);
             }
         }
@@ -882,7 +888,8 @@ namespace AIMS.Services
                                 Title = model.Title,
                                 Description = model.Description,
                                 StartDate = model.StartDate,
-                                EndDate = model.EndDate
+                                EndDate = model.EndDate,
+                                DateUpdated = DateTime.Now
                             });
                             await unitWork.SaveAsync();
 
@@ -956,7 +963,8 @@ namespace AIMS.Services
                         Location = location,
                         FundsPercentage = model.FundsPercentage,
                     });
-
+                    project.DateUpdated = DateTime.Now;
+                    unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
                 }
                 catch (Exception ex)
@@ -1017,6 +1025,8 @@ namespace AIMS.Services
                             FundsPercentage = model.FundsPercentage,
                         });
                     }
+                    project.DateUpdated = DateTime.Now;
+                    unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
                 }
                 catch (Exception ex)
@@ -1071,7 +1081,8 @@ namespace AIMS.Services
                         Currency = model.Currency,
                         ExchangeRate = model.ExchangeRate
                     });
-
+                    project.DateUpdated = DateTime.Now;
+                    unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
                 }
                 catch (Exception ex)
@@ -1112,6 +1123,8 @@ namespace AIMS.Services
                         Project = project,
                         Implementer = implementer,
                     });
+                    project.DateUpdated = DateTime.Now;
+                    unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
                 }
                 catch (Exception ex)
@@ -1163,6 +1176,8 @@ namespace AIMS.Services
                         Dated = model.Dated,
                         Amount = model.Amount,
                     });
+                    project.DateUpdated = DateTime.Now;
+                    unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
                 }
                 catch (Exception ex)
@@ -1197,6 +1212,8 @@ namespace AIMS.Services
                         DocumentTitle = model.DocumentTitle,
                         DocumentUrl = model.DocumentUrl
                     });
+                    project.DateUpdated = DateTime.Now;
+                    unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
                 }
                 catch (Exception ex)
@@ -1231,6 +1248,8 @@ namespace AIMS.Services
                         Marker = model.Marker,
                         Percentage = model.Percentage
                     });
+                    project.DateUpdated = DateTime.Now;
+                    unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
                 }
                 catch (Exception ex)
@@ -1261,6 +1280,7 @@ namespace AIMS.Services
                 projectObj.Description = model.Description;
                 projectObj.StartDate = model.StartDate;
                 projectObj.EndDate = model.EndDate;
+                projectObj.DateUpdated = DateTime.Now;
 
                 unitWork.ProjectRepository.Update(projectObj);
                 unitWork.Save();
