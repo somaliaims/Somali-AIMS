@@ -49,6 +49,11 @@ namespace AIMS.APIs
                 context.SaveChanges();
             }
 
+            if (context.SectorTypes.Count() == 0)
+            {
+                context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Somali Sectors" });
+            }
+
             if (context.Organizations.Count() == 0)
             {
                 //Funders & Implementers

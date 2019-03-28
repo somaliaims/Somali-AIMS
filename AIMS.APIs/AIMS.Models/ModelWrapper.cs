@@ -194,6 +194,7 @@ namespace AIMS.Models
     public class SectorView
     {
         public int Id { get; set; }
+        public string SectorType { get; set; }
         public string ParentSector { get; set; }
         public string SectorName { get; set; }
     }
@@ -207,9 +208,19 @@ namespace AIMS.Models
 
     public class SectorModel
     {
+        [Required]
+        public int SectorTypeId { get; set; }
         public int? ParentId { get; set; }
         [Required]
         public string SectorName { get; set; }
+    }
+
+    public class SectorMappingsModel
+    {
+        [Required]
+        public int SectorTypeId { get; set; }
+        public int SectorId { get; set; }
+        public List<int> MappingIds { get; set; }
     }
 
     /// <summary>

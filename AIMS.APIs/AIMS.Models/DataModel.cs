@@ -50,6 +50,13 @@ namespace AIMS.Models
         public string TypeName { get; set; }
     }
 
+    public class EFSectorTypes
+    {
+        public int Id { get; set; }
+        public string TypeName { get; set; }
+        public IEnumerable<EFSector> Sectors { get; set; }
+    }
+
     public class EFOrganization
     {
         [Key]
@@ -116,6 +123,9 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
+        [ForeignKey("SectorType")]
+        public int SectorTypeId { get; set; }
+        public EFSectorTypes SectorType { get; set; }
         public string SectorName { get; set; }
         [ForeignKey("ParentSector")]
         public int? ParentSectorId { get; set; }
@@ -126,7 +136,7 @@ namespace AIMS.Models
     public class EFSectorMappings
     {
         public int Id { get; set; }
-        public int NativeSectorId { get; set; }
+        public int SectorId { get; set; }
         public int MappedSectorId { get; set; }
         public int SectorTypeId { get; set; }
     }
@@ -247,22 +257,6 @@ namespace AIMS.Models
         public EFProject Project { get; set; }
         
     }
-
-    /*public class EFProjectFundings
-    {
-        [ForeignKey("Funder")]
-        public int FunderId { get; set; }
-        public EFOrganization Funder { get; set; }
-        [ForeignKey("Project")]
-        public int ProjectId { get; set; }
-        public EFProject Project { get; set; }
-        public GrantTypes GrantType { get; set; }
-        [Column(TypeName = "decimal(9 ,2)")]
-        public decimal Amount { get; set; }
-        public string Currency { get; set; }
-        [Column(TypeName = "decimal(9, 2)")]
-        public decimal ExchangeRate { get; set; }
-    }*/
 
     public class EFReportSubscriptions
     {

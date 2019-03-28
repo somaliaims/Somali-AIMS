@@ -152,8 +152,18 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
                 try
                 {
+                    var sectorType = unitWork.SectorTypesRepository.GetByID(model.SectorTypeId);
+                    if (sectorType == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Sector Type");
+                        response.Success = false;
+                        return response;
+                    }
+
                     var isSectorCreated = unitWork.SectorRepository.GetOne(s => s.SectorName.ToLower() == model.SectorName.ToLower());
                     if (isSectorCreated != null)
                     {
@@ -168,6 +178,7 @@ namespace AIMS.Services
                         {
                             newSector = unitWork.SectorRepository.Insert(new EFSector()
                             {
+                                SectorType = sectorType,
                                 ParentSector = parentSector,
                                 SectorName = model.SectorName,
                                 TimeStamp = DateTime.Now
@@ -201,6 +212,15 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
 
+                var sectorType = unitWork.SectorTypesRepository.GetByID(model.SectorTypeId);
+                if (sectorType == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Sector Type");
+                    return response;
+                }
+
                 var parentSector = unitWork.SectorRepository.GetByID(model.ParentId);
                 var sectorObj = unitWork.SectorRepository.GetByID(id);
                 if (sectorObj == null)
@@ -213,6 +233,7 @@ namespace AIMS.Services
 
                 try
                 {
+                    sectorObj.SectorType = sectorType;
                     sectorObj.ParentSector = parentSector;
                     sectorObj.SectorName = model.SectorName;
                     unitWork.SectorRepository.Update(sectorObj);

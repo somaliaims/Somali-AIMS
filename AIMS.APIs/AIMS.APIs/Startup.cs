@@ -106,6 +106,7 @@ namespace AIMS.APIs
 
 
             services.AddAutoMapper(a => a.AddProfile(new MappingProfile()));
+            services.AddScoped<ISectorTypesService, SectorTypesService>();
             services.AddScoped<ISectorService, SectorService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IOrganizationTypeService, OrganizationTypeService>();

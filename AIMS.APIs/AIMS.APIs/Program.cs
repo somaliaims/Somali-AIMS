@@ -37,7 +37,6 @@ namespace AIMS.APIs
                     logger.LogError(ex, "An error occurred seeding the DB.");
                 }
             }
-
             host.Run();
         }
 

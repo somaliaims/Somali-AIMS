@@ -12,7 +12,9 @@ namespace AIMS.DAL.UnitOfWork
     public class UnitOfWork : IDisposable
     {
         private AIMSDbContext context = null;
+        private GenericRepository<EFSectorTypes> sectorTypesRepository;
         private GenericRepository<EFSector> sectorRepository;
+        private GenericRepository<EFSectorMappings> sectorMappingsRepository;
         private GenericRepository<EFLocation> locationRepository;
         private GenericRepository<EFOrganization> organizationRepository;
         private GenericRepository<EFOrganizationTypes> organizationTypesRepository;
@@ -122,7 +124,7 @@ namespace AIMS.DAL.UnitOfWork
             }
         }
 
-        /*public GenericRepository<EFSectorTypes> SectorTypesRepository
+        public GenericRepository<EFSectorTypes> SectorTypesRepository
         {
             get
             {
@@ -132,7 +134,17 @@ namespace AIMS.DAL.UnitOfWork
             }
         }
 
-        public GenericRepository<EFSectorCategory> SectorCategoryRepository
+        public GenericRepository<EFSectorMappings> SectorMappingsRepository
+        {
+            get
+            {
+                if (this.sectorMappingsRepository == null)
+                    this.sectorMappingsRepository = new GenericRepository<EFSectorMappings>(context);
+                return this.sectorMappingsRepository;
+            }
+        }
+
+        /*public GenericRepository<EFSectorCategory> SectorCategoryRepository
         {
             get
             {

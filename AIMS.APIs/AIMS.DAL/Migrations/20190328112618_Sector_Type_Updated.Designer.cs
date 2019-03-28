@@ -4,14 +4,16 @@ using AIMS.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    partial class AIMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190328112618_Sector_Type_Updated")]
+    partial class Sector_Type_Updated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -430,7 +432,7 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("MappedSectorId");
 
-                    b.Property<int>("SectorId");
+                    b.Property<int>("NativeSectorId");
 
                     b.Property<int>("SectorTypeId");
 
@@ -449,7 +451,7 @@ namespace AIMS.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SectorTypes");
+                    b.ToTable("EFSectorTypes");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFSMTPSettings", b =>
