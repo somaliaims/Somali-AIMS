@@ -106,5 +106,22 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(response.Message);
         }
+
+        [HttpDelete]
+        [Route("Delete/{id}/{newId}")]
+        public async Task<IActionResult> Delete(int id, int newId)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid id provided");
+            }
+
+            var response = await sectorService.DeleteAsync(id, newId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
     }
 }

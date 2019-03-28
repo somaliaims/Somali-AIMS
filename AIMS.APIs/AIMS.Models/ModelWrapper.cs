@@ -65,6 +65,12 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
     }
 
+    public class SectorsKeyView
+    {
+        public int SectorId { get; set; }
+        public int ProjectId { get; set; }
+    }
+
     public class ExchangeRates
     {
         public string Base { get; set; }

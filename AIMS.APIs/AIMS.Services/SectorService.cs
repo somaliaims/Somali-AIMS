@@ -233,48 +233,70 @@ namespace AIMS.Services
             IMessageHelper mHelper;
             using (var unitWork = new UnitOfWork(context))
             {
+                EFSector sector = null;
                 EFSector newSector = null;
-                var sector = await unitWork.SectorRepository.GetByIDAsync(id);
-                if (sector == null)
+
+                var sectors = await unitWork.SectorRepository.GetManyQueryableAsync(s => (s.Id == id || s.Id == newId));
+                if (sectors.Count() < 2 && newId != 0)
                 {
                     mHelper = new MessageHelper();
                     response.Success = false;
                     response.Message = mHelper.GetNotFound("Sector");
-                    return response;
+                    return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                 }
 
-                if (newId > 0)
-                {
-                    newSector = await unitWork.SectorRepository.GetByIDAsync(newId);
-                    if (newSector == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Success = false;
-                        response.Message = mHelper.GetNotFound("Sector");
-                        return response;
-                    }
-                }
+                var projectSectors = await unitWork.ProjectSectorsRepository.GetManyQueryableAsync(s => (s.SectorId == id || s.SectorId == newId));
+                var sectorsInDb = (from s in projectSectors
+                                   where s.SectorId == newId
+                                   select new SectorsKeyView()
+                                   {
+                                       SectorId = s.SectorId,
+                                       ProjectId = s.ProjectId
+                                   });
 
+                sector = (from s in sectors
+                          where s.Id == id
+                          select s).FirstOrDefault();
                 try
                 {
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
                     {
+                        
                         using (var transaction = context.Database.BeginTransaction())
                         {
-                            var projectSectors = await unitWork.ProjectSectorsRepository.GetManyQueryableAsync(s => s.SectorId == id);
-                            if (projectSectors != null)
+                            List<EFProjectSectors> sectorsList = new List<EFProjectSectors>();
+                            foreach(var projectSector in projectSectors)
                             {
-                                foreach (var projectSector in projectSectors)
+                                var isExists = (from s in sectorsList
+                                                        where s.SectorId == newId && s.ProjectId == projectSector.ProjectId
+                                                        select s).FirstOrDefault();
+                                var isExistsInDb = (from s in sectorsInDb
+                                                    where s.SectorId == newId && s.ProjectId == projectSector.ProjectId
+                                                    select s).FirstOrDefault();
+
+                                if (isExists == null && isExistsInDb == null)
                                 {
-                                    projectSector.Sector = newSector;
+                                    sectorsList.Add(new EFProjectSectors()
+                                    {
+                                        SectorId = newId,
+                                        ProjectId = projectSector.ProjectId,
+                                        FundsPercentage = projectSector.FundsPercentage
+                                    });
                                 }
+                                unitWork.ProjectSectorsRepository.Delete(projectSector);
                             }
                             await unitWork.SaveAsync();
 
-                            unitWork.SectorRepository.Delete(sector);
+                            if (newId == 0)
+                            {
+                                unitWork.SectorRepository.Delete(sector);
+                            }
+                            else
+                            {
+                                unitWork.ProjectSectorsRepository.InsertMultiple(sectorsList);
+                            }
                             await unitWork.SaveAsync();
-
                             transaction.Commit();
                         }
                     });
