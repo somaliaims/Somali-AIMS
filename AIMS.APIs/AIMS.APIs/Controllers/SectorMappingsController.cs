@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AIMS.Models;
 using AIMS.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,8 @@ namespace AIMS.APIs.Controllers
             mappingService = mService;
         }
 
+        [HttpGet]
+        [Route("GetForSector/{id}")]
         public IActionResult GetForSector(int id)
         {
             if (id <= 0)
@@ -27,6 +30,17 @@ namespace AIMS.APIs.Controllers
             }
             var sectors = mappingService.GetForSector(id);
             return Ok(sectors);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Add(SectorMappingsModel model)
+        {
+            var response = await mappingService.AddAsync(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
         }
     }
 }

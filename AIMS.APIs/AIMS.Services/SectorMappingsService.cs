@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using AIMS.Services.Helpers;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace AIMS.Services
 {
@@ -23,7 +25,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse Add(SectorMappingsModel model);
+        Task<ActionResponse> AddAsync(SectorMappingsModel model);
     }
 
     public class SectorMappingsService : ISectorMappingsService
@@ -79,31 +81,68 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Add(SectorMappingsModel model)
+        public async Task<ActionResponse> AddAsync(SectorMappingsModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
-                var sectorType = unitWork.SectorTypesRepository.GetByID(model.SectorTypeId);
-                if (sectorType == null)
+                try
                 {
-                    mHelper = new MessageHelper();
-                    response.Success = false;
-                    response.Message = mHelper.GetNotFound("Sector Type");
-                    return response;
-                }
+                    var sectorType = unitWork.SectorTypesRepository.GetByID(model.SectorTypeId);
+                    if (sectorType == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Sector Type");
+                        return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                    }
 
-                var sectors = unitWork.SectorRepository.GetManyQueryable(s => (model.MappingIds.Contains(s.Id) || s.Id == model.SectorId));
-                int sectorCount = sectors.Count() - 1;
-                if (sectorCount < model.MappingIds.Count)
-                {
-                    mHelper = new MessageHelper();
-                    response.Success = false;
-                    response.Message = mHelper.GetNotFound("Sector/s");
-                    return response;
+                    var sectors = unitWork.SectorRepository.GetManyQueryable(s => (model.MappingIds.Contains(s.Id) || s.Id == model.SectorId));
+                    int sectorCount = sectors.Count() - 1;
+                    if (sectorCount < model.MappingIds.Count)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Sector/s");
+                        return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                    }
+                    var sector = (from s in sectors
+                                  where s.Id == model.SectorId
+                                  select s).FirstOrDefault();
+
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
+                    {
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            var sectorMappings = await unitWork.SectorMappingsRepository.GetManyQueryableAsync(m => m.SectorId == model.SectorId);
+                            foreach (var mapping in sectorMappings)
+                            {
+                                unitWork.SectorMappingsRepository.Delete(mapping);
+                            }
+                            await unitWork.SaveAsync();
+
+                            List<EFSectorMappings> mappingsList = new List<EFSectorMappings>();
+                            foreach (var id in model.MappingIds)
+                            {
+                                mappingsList.Add(new EFSectorMappings()
+                                {
+                                    SectorId = sector.Id,
+                                    SectorTypeId = sectorType.Id,
+                                    MappedSectorId = id
+                                });
+                            }
+                            await unitWork.SaveAsync();
+                        }
+                    });
                 }
-                return response;
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
     }
