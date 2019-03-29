@@ -51,6 +51,9 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFProjectCustomFields>()
                 .HasKey(c => new { c.ProjectId, c.CustomFieldId });
 
+            modelBuilder.Entity<EFSectorMappings>()
+                .HasKey(m => new { m.SectorId, m.MappedSectorId });
+
             modelBuilder.Entity<EFUser>()
                 .HasIndex(u => u.Email)
                 .IsUnique();

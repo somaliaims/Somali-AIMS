@@ -135,10 +135,15 @@ namespace AIMS.Models
 
     public class EFSectorMappings
     {
-        public int Id { get; set; }
+        [ForeignKey("SectorId")]
         public int SectorId { get; set; }
+        public EFSector Sector { get; set; }
+        [ForeignKey("MappedSector")]
         public int MappedSectorId { get; set; }
+        public EFSector MappedSector { get; set; }
+        [ForeignKey("SectorType")]
         public int SectorTypeId { get; set; }
+        public EFSector SectorType { get; set; }
     }
 
 

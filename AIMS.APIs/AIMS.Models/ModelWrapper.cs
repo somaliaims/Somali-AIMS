@@ -224,6 +224,26 @@ namespace AIMS.Models
         public List<int> MappingIds { get; set; }
     }
 
+    public class MappingSectors
+    {
+        public int SectorTypeId { get; set; }
+        public string SectorType { get; set; }
+        public List<SectorSimpleView> Sectors { get; set; }
+    }
+
+    public class SectorSimpleView
+    {
+        public int SectorId { get; set; }
+        public string Sector { get; set; }
+    }
+
+    public class SectorMappingsView
+    {
+        public string Sector { get; set; }
+        public int SectorId { get; set; }
+        public IEnumerable<MappingSectors> MappedSectors { get; set; }
+    }
+
     /// <summary>
     /// Organization type models
     /// </summary>
