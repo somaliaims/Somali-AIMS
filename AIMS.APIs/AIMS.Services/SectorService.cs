@@ -127,11 +127,11 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorObj = unitWork.SectorRepository.GetWithInclude(c => c.Id == id, new string[] { "ParentSector" });
+                var sectorObj = unitWork.SectorRepository.GetWithInclude(c => c.Id == id, new string[] { "ParentSector", "SectorType" });
                 EFSector sector = null;
-                foreach (var category in sectorObj)
+                foreach (var sec in sectorObj)
                 {
-                    sector = category;
+                    sector = sec;
                 }
                 return mapper.Map<SectorViewModel>(sector);
             }
@@ -188,6 +188,7 @@ namespace AIMS.Services
                         {
                             newSector = unitWork.SectorRepository.Insert(new EFSector()
                             {
+                                SectorType = sectorType,
                                 SectorName = model.SectorName,
                                 TimeStamp = DateTime.Now
                             });

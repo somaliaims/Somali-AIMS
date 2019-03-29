@@ -202,6 +202,7 @@ namespace AIMS.Models
     public class SectorViewModel
     {
         public int Id { get; set; }
+        public int SectorTypeId { get; set; }
         public int ParentId { get; set; }
         public string SectorName { get; set; }
     }

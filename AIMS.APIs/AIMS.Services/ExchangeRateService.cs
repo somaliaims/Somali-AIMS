@@ -4,6 +4,7 @@ using AIMS.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -97,6 +98,36 @@ namespace AIMS.Services
             ratesView.Dated = dated.Date.ToString();
             var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
             ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
+
+            if (ratesView.Rates != null)
+            {
+                int count = ratesView.Rates.Count;
+                var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => c.Id != 0);
+                if (currencies.Count() < count)
+                {
+                    var currencyNames = (from c in currencies
+                                         select c.Currency).ToList<string>();
+
+                    var currenciesFromAPI = ratesView.Rates;
+                    List<EFCurrency> newCurrencies = new List<EFCurrency>();
+                    foreach(var currency in currenciesFromAPI)
+                    {
+                        if (!currencyNames.Contains(currency.Currency))
+                        {
+                            newCurrencies.Add(new EFCurrency()
+                            {
+                                Currency = currency.Currency
+                            });
+                        }
+                    }
+                    if (newCurrencies.Count > 0)
+                    {
+                        unitWork.CurrencyRepository.InsertMultiple(newCurrencies);
+                        unitWork.Save();
+                    }
+                }
+            }
+
             return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
         }
 
