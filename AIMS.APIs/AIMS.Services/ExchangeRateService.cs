@@ -1,6 +1,7 @@
 ﻿using AIMS.DAL.EF;
 using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
+using AIMS.Services.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,13 @@ namespace AIMS.Services
         /// <param name="ratesJson"></param>
         /// <returns></returns>
         ActionResponse SaveCurrencyRates(List<CurrencyWithRates> ratesList);
+
+        /// <summary>
+        /// Saves new exchange rates for provided date
+        /// </summary>
+        /// <param name="ratesList"></param>
+        /// <returns></returns>
+        ActionResponse SaveCurrencyRatesManual(List<CurrencyWithRates> ratesList, DateTime dated);
 
         /// <summary>
         /// Gets the latest currency rates list from DB
@@ -85,6 +93,27 @@ namespace AIMS.Services
                     }
                     unitWork.Save();
                 }
+                return response;
+            }
+        }
+
+        public ActionResponse SaveCurrencyRatesManual(List<CurrencyWithRates> ratesList, DateTime dated)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper msgHelper;
+                ActionResponse response = new ActionResponse();
+                var rateObj = unitWork.ExchangeRatesRepository.GetOne(r => r.Dated.Date == dated.Date);
+                if (rateObj == null)
+                {
+                    msgHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = msgHelper.GetNotFound("Exchange Rates");
+                    return response;
+                }
+                rateObj.ManualRatesJson = JsonConvert.SerializeObject(ratesList);
+                unitWork.ExchangeRatesRepository.Update(rateObj);
+                unitWork.Save();
                 return response;
             }
         }

@@ -321,6 +321,7 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string ExchangeRatesJson { get; set; }
+        public string ManualRatesJson { get; set; }
         public DateTime Dated { get; set; }
     }
 
@@ -376,6 +377,12 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string BaseUrl { get; set; }
+    }
+
+    public class CurrencySettings
+    {
+        public int Id { get; set; }
+        public bool IsAutomatic { get; set; }
     }
 
     public class EFPasswordRecoveryRequests

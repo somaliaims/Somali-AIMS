@@ -61,5 +61,20 @@ namespace AIMS.APIs.Controllers
             return Ok(ratesView);
         }
 
+        [HttpPost]
+        [Route("SaveManualCurrencyRates")]
+        public IActionResult SaveManualCurrencyRates(ManualCurrencyRateModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = ratesService.SaveCurrencyRatesManual(model.Rates, model.Dated);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
     }
 }

@@ -47,6 +47,12 @@ namespace AIMS.Models
         public string Currency { get; set; }
     }
 
+    public class ManualCurrencyRateModel
+    {
+        public DateTime Dated { get; set; }
+        public List<CurrencyWithRates> Rates { get; set; }
+    }
+
     public class LocationKeyPreview
     {
         public int LocationId { get; set; }
