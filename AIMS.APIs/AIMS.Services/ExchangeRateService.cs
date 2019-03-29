@@ -25,7 +25,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="ratesList"></param>
         /// <returns></returns>
-        ActionResponse SaveCurrencyRatesManual(List<CurrencyWithRates> ratesList, DateTime dated);
+        ActionResponse SaveCurrencyRatesManual(List<CurrencyWithRates> ratesList);
 
         /// <summary>
         /// Gets the latest currency rates list from DB
@@ -97,22 +97,22 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse SaveCurrencyRatesManual(List<CurrencyWithRates> ratesList, DateTime dated)
+        public ActionResponse SaveCurrencyRatesManual(List<CurrencyWithRates> ratesList)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 IMessageHelper msgHelper;
                 ActionResponse response = new ActionResponse();
-                var rateObj = unitWork.ExchangeRatesRepository.GetOne(r => r.Dated.Date == dated.Date);
-                if (rateObj == null)
+                var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(r => r.Id != 0);
+                if (exRateSettings == null)
                 {
                     msgHelper = new MessageHelper();
                     response.Success = false;
                     response.Message = msgHelper.GetNotFound("Exchange Rates");
                     return response;
                 }
-                rateObj.ManualRatesJson = JsonConvert.SerializeObject(ratesList);
-                unitWork.ExchangeRatesRepository.Update(rateObj);
+                exRateSettings.ManualExchangeRates = JsonConvert.SerializeObject(ratesList);
+                unitWork.ExRatesSettingsRepository.Update(exRateSettings);
                 unitWork.Save();
                 return response;
             }
@@ -156,7 +156,6 @@ namespace AIMS.Services
                     }
                 }
             }
-
             return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
         }
 

@@ -69,7 +69,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var response = ratesService.SaveCurrencyRatesManual(model.Rates, model.Dated);
+            var response = ratesService.SaveCurrencyRatesManual(model.Rates);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

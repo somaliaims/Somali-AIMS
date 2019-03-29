@@ -93,6 +93,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFFinancialYears> FinancialYears { get; set; }
         public DbSet<EFCurrency> Currencies { get; set; }
         public DbSet<EFExchangeRates> ExchangeRates { get; set; }
+        public DbSet<EFExchangeRatesSettings> ExchangeRatesSettings { get; set; }
         public DbSet<EFExchangeRatesAPIsCount> ExchangeRatesAPIsCount { get; set; }
 
         //Overridden SaveChanges to catch full exception details about

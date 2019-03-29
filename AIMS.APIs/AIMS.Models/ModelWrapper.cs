@@ -49,7 +49,7 @@ namespace AIMS.Models
 
     public class ManualCurrencyRateModel
     {
-        public DateTime Dated { get; set; }
+        [Required]
         public List<CurrencyWithRates> Rates { get; set; }
     }
 
