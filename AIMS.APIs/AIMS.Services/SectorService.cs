@@ -27,6 +27,12 @@ namespace AIMS.Services
         Task<IEnumerable<SectorView>> GetAllAsync();
 
         /// <summary>
+        /// Gets list of default sector types
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<SectorView> GetDefaultSectors();
+
+        /// <summary>
         /// Gets sector category view for the provided id
         /// </summary>
         /// <param name="id"></param>
@@ -101,6 +107,15 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var sectors = unitWork.SectorRepository.GetWithInclude(c => c.Id != 0, new string[] { "ParentSector" });
+                return mapper.Map<List<SectorView>>(sectors);
+            }
+        }
+
+        public IEnumerable<SectorView> GetDefaultSectors()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var sectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsDefault == true, new string[] { "SectorType" });
                 return mapper.Map<List<SectorView>>(sectors);
             }
         }

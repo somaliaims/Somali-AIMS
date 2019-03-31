@@ -29,6 +29,14 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("GetDefaultSectors")]
+        public IActionResult GetDefaultSectors()
+        {
+            var sectors = sectorService.GetDefaultSectors();
+            return Ok(sectors);
+        }
+
+        [HttpGet]
         [Route("GetById/{id}")]
         public IActionResult Get(int id)
         {

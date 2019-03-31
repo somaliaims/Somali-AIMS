@@ -26,6 +26,12 @@ namespace AIMS.Services
         SectorTypesView Get(int id);
 
         /// <summary>
+        /// Gets default sector type
+        /// </summary>
+        /// <returns></returns>
+        SectorTypesView GetDefault();
+
+        /// <summary>
         /// Gets matching sector types for the provided criteria
         /// </summary>
         /// <param name="criteria"></param>
@@ -77,6 +83,15 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var sectorType = unitWork.SectorTypesRepository.GetByID(id);
+                return mapper.Map<SectorTypesView>(sectorType);
+            }
+        }
+
+        public SectorTypesView GetDefault()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsDefault == true);
                 return mapper.Map<SectorTypesView>(sectorType);
             }
         }
