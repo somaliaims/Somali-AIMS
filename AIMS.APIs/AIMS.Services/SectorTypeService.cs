@@ -3,7 +3,9 @@ using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,10 +28,23 @@ namespace AIMS.Services
         SectorTypesView Get(int id);
 
         /// <summary>
+        /// Sets a sector as default
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<ActionResponse> MarkAsDefaultAsync(int id);
+
+        /// <summary>
         /// Gets default sector type
         /// </summary>
         /// <returns></returns>
         SectorTypesView GetDefault();
+
+        /// <summary>
+        /// Gets sectors other than default
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<SectorTypesView> GetOtherSectors();
 
         /// <summary>
         /// Gets matching sector types for the provided criteria
@@ -74,6 +89,15 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var sectorTypes = unitWork.SectorTypesRepository.GetAll();
+                return mapper.Map<List<SectorTypesView>>(sectorTypes);
+            }
+        }
+
+        public IEnumerable<SectorTypesView> GetOtherSectors()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var sectorTypes = unitWork.SectorTypesRepository.GetManyQueryable(s => s.IsDefault == false);
                 return mapper.Map<List<SectorTypesView>>(sectorTypes);
             }
         }
@@ -132,6 +156,43 @@ namespace AIMS.Services
                     response.Message = ex.Message;
                 }
                 return response;
+            }
+        }
+
+        public async Task<ActionResponse> MarkAsDefaultAsync(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                var sectorTypes = unitWork.SectorTypesRepository.GetAll();
+                var sectorType = (from s in sectorTypes
+                                  where s.Id == id
+                                  select s).FirstOrDefault();
+
+                if (sectorType == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Sector type");
+                    return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                }
+
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        foreach(var sType in sectorTypes)
+                        {
+                            sType.IsDefault = false;
+                            unitWork.SectorTypesRepository.Update(sType);
+                        }
+                        sectorType.IsDefault = true;
+                        await unitWork.SaveAsync();
+                    }
+                });
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
 
