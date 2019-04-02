@@ -54,7 +54,7 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string TypeName { get; set; }
-        public bool IsDefault { get; set; }
+        public bool? IsDefault { get; set; }
         public IEnumerable<EFSector> Sectors { get; set; }
     }
 
@@ -136,15 +136,9 @@ namespace AIMS.Models
 
     public class EFSectorMappings
     {
-        [ForeignKey("SectorId")]
         public int SectorId { get; set; }
-        public EFSector Sector { get; set; }
-        [ForeignKey("MappedSector")]
         public int MappedSectorId { get; set; }
-        public EFSector MappedSector { get; set; }
-        [ForeignKey("SectorType")]
         public int SectorTypeId { get; set; }
-        public EFSector SectorType { get; set; }
     }
 
 

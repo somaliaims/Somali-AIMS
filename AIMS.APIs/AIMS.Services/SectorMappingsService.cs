@@ -43,10 +43,12 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                SectorMappingsView mappingsView = new SectorMappingsView();
-                var mappings = unitWork.SectorMappingsRepository.GetWithInclude(m => m.SectorId == id, new string[] { "Sector", "MappedSector" });
                 string sectorName = "";
                 int sectorTypeId = 0;
+                SectorMappingsView mappingsView = new SectorMappingsView();
+                var sectors = unitWork.SectorRepository.GetManyQueryable(s => s.Id != 0);
+                var sectorTypes = unitWork.SectorTypesRepository.GetAll();
+                var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => m.SectorId == id);
                 MappingSectors mappedSectors = null;
                 List<MappingSectors> mappingSectorsList = new List<MappingSectors>();
                 List<SectorSimpleView> sectorsList = new List<SectorSimpleView>();
@@ -56,6 +58,9 @@ namespace AIMS.Services
 
                 foreach (var mapping in mappings)
                 {
+                    var sectorType = (from sType in sectorTypes
+                                         where sType.Id == mapping.SectorTypeId
+                                         select sType).FirstOrDefault();
                     if (sectorTypeId != mapping.SectorTypeId)
                     {
                         if (mappedSectors != null)
@@ -66,14 +71,18 @@ namespace AIMS.Services
                         mappedSectors = new MappingSectors()
                         {
                             SectorTypeId = mapping.SectorTypeId,
-                            SectorType = mapping.SectorType.SectorType.TypeName
+                            SectorType = sectorType.TypeName
                         };
                         sectorsList = new List<SectorSimpleView>();
                     }
+
+                    sectorName = (from s in sectors
+                                  where s.Id == mapping.SectorId
+                                  select s).FirstOrDefault().SectorName;
                     sectorsList.Add(new SectorSimpleView()
                     {
-                        SectorId = mapping.Sector.Id,
-                        Sector = mapping.Sector.SectorName
+                        SectorId = mapping.SectorId,
+                        Sector = sectorName
                     });
                 }
                 mappingsView.Sector = sectorName;

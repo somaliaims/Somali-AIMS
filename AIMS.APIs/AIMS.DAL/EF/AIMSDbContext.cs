@@ -61,6 +61,9 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFCurrency>()
                 .HasIndex(c => c.Currency)
                 .IsUnique();
+
+            modelBuilder.Entity<EFSectorMappings>()
+                .HasKey(m => new { m.SectorId, m.MappedSectorId });
                 
         }
 

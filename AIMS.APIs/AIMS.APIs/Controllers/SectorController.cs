@@ -45,6 +45,14 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("GetSectorsForType/{id}")]
+        public IActionResult GetSectorsForType(int id)
+        {
+            var sector = sectorService.GetSectorsForType(id);
+            return Ok(sector);
+        }
+
+        [HttpGet]
         [Route("GetChildren/{id}")]
         public IActionResult GetChildren(int id)
         {

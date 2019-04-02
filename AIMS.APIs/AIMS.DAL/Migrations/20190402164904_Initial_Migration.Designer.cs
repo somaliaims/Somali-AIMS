@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    [Migration("20190225095041_Currency_Model_Added")]
-    partial class Currency_Model_Added
+    [Migration("20190402164904_Initial_Migration")]
+    partial class Initial_Migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -35,7 +35,7 @@ namespace AIMS.DAL.Migrations
                         .IsUnique()
                         .HasFilter("[Currency] IS NOT NULL");
 
-                    b.ToTable("EFCurrency");
+                    b.ToTable("Currencies");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFCustomFields", b =>
@@ -55,6 +55,51 @@ namespace AIMS.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CustomFields");
+                });
+
+            modelBuilder.Entity("AIMS.Models.EFExchangeRates", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("Dated");
+
+                    b.Property<string>("ExchangeRatesJson");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExchangeRates");
+                });
+
+            modelBuilder.Entity("AIMS.Models.EFExchangeRatesAPIsCount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Count");
+
+                    b.Property<DateTime>("Dated");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExchangeRatesAPIsCount");
+                });
+
+            modelBuilder.Entity("AIMS.Models.EFExchangeRatesSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("IsAutomatic");
+
+                    b.Property<string>("ManualExchangeRates");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExchangeRatesSettings");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFFinancialYears", b =>
@@ -202,6 +247,8 @@ namespace AIMS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<DateTime>("DateUpdated");
+
                     b.Property<string>("Description");
 
                     b.Property<DateTime>("EndDate");
@@ -233,16 +280,20 @@ namespace AIMS.DAL.Migrations
 
             modelBuilder.Entity("AIMS.Models.EFProjectDisbursements", b =>
                 {
-                    b.Property<int>("ProjectId");
-
-                    b.Property<int>("Year");
-
-                    b.Property<int>("Month");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(9, 2)");
 
-                    b.HasKey("ProjectId", "Year", "Month");
+                    b.Property<DateTime>("Dated");
+
+                    b.Property<int>("ProjectId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("ProjectDisbursements");
                 });
@@ -375,30 +426,45 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<string>("SectorName");
 
+                    b.Property<int>("SectorTypeId");
+
                     b.Property<DateTime>("TimeStamp");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ParentSectorId");
 
+                    b.HasIndex("SectorTypeId");
+
                     b.ToTable("Sectors");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFSectorMappings", b =>
                 {
+                    b.Property<int>("SectorId");
+
+                    b.Property<int>("MappedSectorId");
+
+                    b.Property<int>("SectorTypeId");
+
+                    b.HasKey("SectorId", "MappedSectorId");
+
+                    b.ToTable("SectorMappings");
+                });
+
+            modelBuilder.Entity("AIMS.Models.EFSectorTypes", b =>
+                {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("MappedSectorId");
+                    b.Property<bool?>("IsDefault");
 
-                    b.Property<int>("NativeSectorId");
-
-                    b.Property<int>("SectorTypeId");
+                    b.Property<string>("TypeName");
 
                     b.HasKey("Id");
 
-                    b.ToTable("SectorMappings");
+                    b.ToTable("SectorTypes");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFSMTPSettings", b =>
@@ -445,13 +511,11 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<DateTime?>("ApprovedOn");
 
-                    b.Property<DateTime?>("DeActivatedOn");
-
                     b.Property<string>("Email");
 
-                    b.Property<bool>("IsActive");
-
                     b.Property<bool>("IsApproved");
+
+                    b.Property<DateTime?>("LastLogin");
 
                     b.Property<int>("OrganizationId");
 
@@ -620,6 +684,11 @@ namespace AIMS.DAL.Migrations
                     b.HasOne("AIMS.Models.EFSector", "ParentSector")
                         .WithMany()
                         .HasForeignKey("ParentSectorId");
+
+                    b.HasOne("AIMS.Models.EFSectorTypes", "SectorType")
+                        .WithMany("Sectors")
+                        .HasForeignKey("SectorTypeId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("AIMS.Models.EFUser", b =>

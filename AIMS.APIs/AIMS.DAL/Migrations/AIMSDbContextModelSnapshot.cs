@@ -447,10 +447,6 @@ namespace AIMS.DAL.Migrations
 
                     b.HasKey("SectorId", "MappedSectorId");
 
-                    b.HasIndex("MappedSectorId");
-
-                    b.HasIndex("SectorTypeId");
-
                     b.ToTable("SectorMappings");
                 });
 
@@ -459,6 +455,8 @@ namespace AIMS.DAL.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool?>("IsDefault");
 
                     b.Property<string>("TypeName");
 
@@ -687,24 +685,6 @@ namespace AIMS.DAL.Migrations
 
                     b.HasOne("AIMS.Models.EFSectorTypes", "SectorType")
                         .WithMany("Sectors")
-                        .HasForeignKey("SectorTypeId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("AIMS.Models.EFSectorMappings", b =>
-                {
-                    b.HasOne("AIMS.Models.EFSector", "MappedSector")
-                        .WithMany()
-                        .HasForeignKey("MappedSectorId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("AIMS.Models.EFSector", "Sector")
-                        .WithMany()
-                        .HasForeignKey("SectorId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("AIMS.Models.EFSector", "SectorType")
-                        .WithMany()
                         .HasForeignKey("SectorTypeId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

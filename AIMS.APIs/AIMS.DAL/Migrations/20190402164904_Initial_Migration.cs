@@ -9,6 +9,19 @@ namespace AIMS.DAL.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Currencies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Currency = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Currencies", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CustomFields",
                 columns: table => new
                 {
@@ -22,6 +35,61 @@ namespace AIMS.DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CustomFields", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ExchangeRates",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ExchangeRatesJson = table.Column<string>(nullable: true),
+                    Dated = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExchangeRates", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ExchangeRatesAPIsCount",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Dated = table.Column<DateTime>(nullable: false),
+                    Count = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExchangeRatesAPIsCount", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ExchangeRatesSettings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    IsAutomatic = table.Column<bool>(nullable: false),
+                    ManualExchangeRates = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExchangeRatesSettings", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FinancialYears",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    FinancialYear = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FinancialYears", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -45,8 +113,7 @@ namespace AIMS.DAL.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    BaseUrl = table.Column<string>(nullable: true),
-                    CountryCode = table.Column<string>(nullable: true)
+                    BaseUrl = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -60,8 +127,8 @@ namespace AIMS.DAL.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Location = table.Column<string>(nullable: true),
-                    Latitude = table.Column<decimal>(type: "decimal(9, 5)", nullable: false),
-                    Longitude = table.Column<decimal>(type: "decimal(9, 5)", nullable: false)
+                    Latitude = table.Column<decimal>(type: "decimal(9, 5)", nullable: true),
+                    Longitude = table.Column<decimal>(type: "decimal(9, 5)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -120,7 +187,8 @@ namespace AIMS.DAL.Migrations
                     Title = table.Column<string>(maxLength: 1000, nullable: true),
                     Description = table.Column<string>(nullable: true),
                     StartDate = table.Column<DateTime>(nullable: false),
-                    EndDate = table.Column<DateTime>(nullable: false)
+                    EndDate = table.Column<DateTime>(nullable: false),
+                    DateUpdated = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -131,36 +199,27 @@ namespace AIMS.DAL.Migrations
                 name: "SectorMappings",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    NativeSectorId = table.Column<int>(nullable: false),
+                    SectorId = table.Column<int>(nullable: false),
                     MappedSectorId = table.Column<int>(nullable: false),
                     SectorTypeId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SectorMappings", x => x.Id);
+                    table.PrimaryKey("PK_SectorMappings", x => new { x.SectorId, x.MappedSectorId });
                 });
 
             migrationBuilder.CreateTable(
-                name: "Sectors",
+                name: "SectorTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    SectorName = table.Column<string>(nullable: true),
-                    ParentSectorId = table.Column<int>(nullable: true),
-                    TimeStamp = table.Column<DateTime>(nullable: false)
+                    TypeName = table.Column<string>(nullable: true),
+                    IsDefault = table.Column<bool>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Sectors", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Sectors_Sectors_ParentSectorId",
-                        column: x => x.ParentSectorId,
-                        principalTable: "Sectors",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                    table.PrimaryKey("PK_SectorTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -170,7 +229,7 @@ namespace AIMS.DAL.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Host = table.Column<string>(nullable: true),
-                    Port = table.Column<string>(nullable: true),
+                    Port = table.Column<int>(nullable: false),
                     Username = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
                     AdminEmail = table.Column<string>(nullable: true)
@@ -226,15 +285,13 @@ namespace AIMS.DAL.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Email = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
                     UserType = table.Column<int>(nullable: false),
                     OrganizationId = table.Column<int>(nullable: false),
                     ApprovedById = table.Column<int>(nullable: true),
                     IsApproved = table.Column<bool>(nullable: false),
-                    IsActive = table.Column<bool>(nullable: false),
                     ApprovedOn = table.Column<DateTime>(nullable: true),
                     RegistrationDate = table.Column<DateTime>(nullable: false),
-                    DeActivatedOn = table.Column<DateTime>(nullable: true)
+                    LastLogin = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -282,16 +339,15 @@ namespace AIMS.DAL.Migrations
                 name: "ProjectDisbursements",
                 columns: table => new
                 {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     ProjectId = table.Column<int>(nullable: false),
-                    StartingYear = table.Column<int>(nullable: false),
-                    StartingMonth = table.Column<int>(nullable: false),
-                    EndingYear = table.Column<int>(nullable: false),
-                    EndingMonth = table.Column<int>(nullable: false),
-                    Percentage = table.Column<decimal>(type: "decimal(9, 2)", nullable: false)
+                    Dated = table.Column<DateTime>(nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(9, 2)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProjectDisbursements", x => new { x.ProjectId, x.StartingYear });
+                    table.PrimaryKey("PK_ProjectDisbursements", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ProjectDisbursements_Projects_ProjectId",
                         column: x => x.ProjectId,
@@ -419,28 +475,29 @@ namespace AIMS.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProjectSectors",
+                name: "Sectors",
                 columns: table => new
                 {
-                    ProjectId = table.Column<int>(nullable: false),
-                    SectorId = table.Column<int>(nullable: false),
-                    FundsPercentage = table.Column<decimal>(type: "decimal(9, 2)", nullable: false),
-                    Currency = table.Column<string>(nullable: true),
-                    ExchangeRate = table.Column<decimal>(type: "decimal(9, 2)", nullable: false)
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    SectorTypeId = table.Column<int>(nullable: false),
+                    SectorName = table.Column<string>(nullable: true),
+                    ParentSectorId = table.Column<int>(nullable: true),
+                    TimeStamp = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProjectSectors", x => new { x.ProjectId, x.SectorId });
+                    table.PrimaryKey("PK_Sectors", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProjectSectors_Projects_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "Projects",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ProjectSectors_Sectors_SectorId",
-                        column: x => x.SectorId,
+                        name: "FK_Sectors_Sectors_ParentSectorId",
+                        column: x => x.ParentSectorId,
                         principalTable: "Sectors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Sectors_SectorTypes_SectorTypeId",
+                        column: x => x.SectorTypeId,
+                        principalTable: "SectorTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -499,6 +556,44 @@ namespace AIMS.DAL.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ProjectSectors",
+                columns: table => new
+                {
+                    ProjectId = table.Column<int>(nullable: false),
+                    SectorId = table.Column<int>(nullable: false),
+                    FundsPercentage = table.Column<decimal>(type: "decimal(9, 2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectSectors", x => new { x.ProjectId, x.SectorId });
+                    table.ForeignKey(
+                        name: "FK_ProjectSectors_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProjectSectors_Sectors_SectorId",
+                        column: x => x.SectorId,
+                        principalTable: "Sectors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Currencies_Currency",
+                table: "Currencies",
+                column: "Currency",
+                unique: true,
+                filter: "[Currency] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FinancialYears_FinancialYear",
+                table: "FinancialYears",
+                column: "FinancialYear",
+                unique: true);
+
             migrationBuilder.CreateIndex(
                 name: "IX_Logs_ProjectId",
                 table: "Logs",
@@ -513,6 +608,11 @@ namespace AIMS.DAL.Migrations
                 name: "IX_ProjectCustomFields_CustomFieldId",
                 table: "ProjectCustomFields",
                 column: "CustomFieldId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectDisbursements_ProjectId",
+                table: "ProjectDisbursements",
+                column: "ProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectDocuments_ProjectId",
@@ -555,6 +655,11 @@ namespace AIMS.DAL.Migrations
                 column: "ParentSectorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Sectors_SectorTypeId",
+                table: "Sectors",
+                column: "SectorTypeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserNotifications_OrganizationId",
                 table: "UserNotifications",
                 column: "OrganizationId");
@@ -579,6 +684,21 @@ namespace AIMS.DAL.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Currencies");
+
+            migrationBuilder.DropTable(
+                name: "ExchangeRates");
+
+            migrationBuilder.DropTable(
+                name: "ExchangeRatesAPIsCount");
+
+            migrationBuilder.DropTable(
+                name: "ExchangeRatesSettings");
+
+            migrationBuilder.DropTable(
+                name: "FinancialYears");
+
             migrationBuilder.DropTable(
                 name: "IATIData");
 
@@ -647,6 +767,9 @@ namespace AIMS.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "SectorTypes");
 
             migrationBuilder.DropTable(
                 name: "Organizations");

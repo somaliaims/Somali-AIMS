@@ -24,8 +24,16 @@ namespace AIMS.APIs
 
         public void Seed()
         {
-            // Run Migrations
-            context.Database.Migrate();
+            try
+            {
+                // Run Migrations
+                context.Database.Migrate();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
 
             if (context.StaticReports.Count() == 0)
             {
@@ -51,7 +59,7 @@ namespace AIMS.APIs
 
             if (context.SectorTypes.Count() == 0)
             {
-                context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Somali Sectors" });
+                context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Somali Sectors", IsDefault = true });
             }
 
             if (context.Organizations.Count() == 0)
