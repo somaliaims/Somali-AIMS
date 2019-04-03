@@ -97,7 +97,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorTypes = unitWork.SectorTypesRepository.GetManyQueryable(s => s.IsDefault == false);
+                var sectorTypes = unitWork.SectorTypesRepository.GetManyQueryable(s => s.IsDefault != true);
                 return mapper.Map<List<SectorTypesView>>(sectorTypes);
             }
         }
@@ -115,7 +115,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsDefault == true);
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => (s.IsDefault == true));
                 return mapper.Map<SectorTypesView>(sectorType);
             }
         }
@@ -146,7 +146,7 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var newSectorTypes = unitWork.SectorTypesRepository.Insert(new EFSectorTypes() { TypeName = model.TypeName });
+                    var newSectorTypes = unitWork.SectorTypesRepository.Insert(new EFSectorTypes() { TypeName = model.TypeName, IsDefault = false });
                     response.ReturnedId = newSectorTypes.Id;
                     unitWork.Save();
                 }

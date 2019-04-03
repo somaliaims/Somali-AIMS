@@ -131,7 +131,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectors = unitWork.SectorRepository.GetManyQueryable(s => s.SectorType.Id == id);
+                var sectors = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == id);
                 return mapper.Map<List<SectorView>>(sectors);
             }
         }
