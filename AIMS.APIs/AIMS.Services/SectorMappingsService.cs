@@ -56,6 +56,7 @@ namespace AIMS.Services
                             orderby mapping.SectorTypeId ascending
                             select mapping);
 
+                EFSectorMappings lastMapping = mappings.Last();
                 foreach (var mapping in mappings)
                 {
                     var sectorType = (from sType in sectorTypes
@@ -84,8 +85,15 @@ namespace AIMS.Services
                         SectorId = mapping.SectorId,
                         Sector = sectorName
                     });
+
+                    if (mapping == lastMapping && mappedSectors != null)
+                    {
+                        mappedSectors.Sectors = sectorsList;
+                        mappingSectorsList.Add(mappedSectors);
+                    }
                 }
                 mappingsView.Sector = sectorName;
+                mappingsView.MappedSectors = mappingSectorsList;
                 return mappingsView;
             }
         }
@@ -142,7 +150,9 @@ namespace AIMS.Services
                                     MappedSectorId = id
                                 });
                             }
+                            unitWork.SectorMappingsRepository.InsertMultiple(mappingsList);
                             await unitWork.SaveAsync();
+                            transaction.Commit();
                         }
                     });
                 }
