@@ -26,6 +26,14 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <returns></returns>
         Task<ActionResponse> AddAsync(SectorMappingsModel model);
+
+        /// <summary>
+        /// Deletes a mapping
+        /// </summary>
+        /// <param name="sectorId"></param>
+        /// <param name="mappingId"></param>
+        /// <returns></returns>
+        ActionResponse Delete(int sectorId, int mappingId);
     }
 
     public class SectorMappingsService : ISectorMappingsService
@@ -52,48 +60,53 @@ namespace AIMS.Services
                 MappingSectors mappedSectors = null;
                 List<MappingSectors> mappingSectorsList = new List<MappingSectors>();
                 List<SectorSimpleView> sectorsList = new List<SectorSimpleView>();
-                mappings = (from mapping in mappings
-                            orderby mapping.SectorTypeId ascending
-                            select mapping);
 
-                EFSectorMappings lastMapping = mappings.Last();
-                foreach (var mapping in mappings)
+                if (mappings.Count() > 0)
                 {
-                    var sectorType = (from sType in sectorTypes
-                                         where sType.Id == mapping.SectorTypeId
-                                         select sType).FirstOrDefault();
-                    if (sectorTypeId != mapping.SectorTypeId)
+                    mappings = (from mapping in mappings
+                                orderby mapping.SectorTypeId ascending
+                                select mapping);
+
+                    EFSectorMappings lastMapping = mappings.Last();
+                    foreach (var mapping in mappings)
                     {
-                        if (mappedSectors != null)
+                        var sectorType = (from sType in sectorTypes
+                                          where sType.Id == mapping.SectorTypeId
+                                          select sType).FirstOrDefault();
+                        if (sectorTypeId != mapping.SectorTypeId)
+                        {
+                            if (mappedSectors != null)
+                            {
+                                mappedSectors.Sectors = sectorsList;
+                                mappingSectorsList.Add(mappedSectors);
+                            }
+                            mappedSectors = new MappingSectors()
+                            {
+                                SectorTypeId = mapping.SectorTypeId,
+                                SectorType = sectorType.TypeName
+                            };
+                            sectorsList = new List<SectorSimpleView>();
+                        }
+
+                        sectorName = (from s in sectors
+                                      where s.Id == mapping.SectorId
+                                      select s).FirstOrDefault().SectorName;
+                        sectorsList.Add(new SectorSimpleView()
+                        {
+                            SectorId = mapping.SectorId,
+                            Sector = sectorName
+                        });
+
+                        if (mapping == lastMapping && mappedSectors != null)
                         {
                             mappedSectors.Sectors = sectorsList;
                             mappingSectorsList.Add(mappedSectors);
                         }
-                        mappedSectors = new MappingSectors()
-                        {
-                            SectorTypeId = mapping.SectorTypeId,
-                            SectorType = sectorType.TypeName
-                        };
-                        sectorsList = new List<SectorSimpleView>();
                     }
-
-                    sectorName = (from s in sectors
-                                  where s.Id == mapping.SectorId
-                                  select s).FirstOrDefault().SectorName;
-                    sectorsList.Add(new SectorSimpleView()
-                    {
-                        SectorId = mapping.SectorId,
-                        Sector = sectorName
-                    });
-
-                    if (mapping == lastMapping && mappedSectors != null)
-                    {
-                        mappedSectors.Sectors = sectorsList;
-                        mappingSectorsList.Add(mappedSectors);
-                    }
+                    mappingsView.Sector = sectorName;
+                    mappingsView.MappedSectors = mappingSectorsList;
                 }
-                mappingsView.Sector = sectorName;
-                mappingsView.MappedSectors = mappingSectorsList;
+                
                 return mappingsView;
             }
         }
@@ -162,6 +175,27 @@ namespace AIMS.Services
                     response.Message = ex.Message;
                 }
                 return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+            }
+        }
+
+        public ActionResponse Delete(int sectorId, int mappingId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                var mapping = unitWork.SectorMappingsRepository.GetOne(m => (m.SectorId == sectorId && m.MappedSectorId == mappingId));
+                if (mapping == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Sector Mapping");
+                    return response;
+                }
+
+                unitWork.SectorMappingsRepository.Delete(mapping);
+                unitWork.Save();
+                return response;
             }
         }
     }

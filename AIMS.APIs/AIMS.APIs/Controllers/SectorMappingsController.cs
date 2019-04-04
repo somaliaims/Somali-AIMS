@@ -42,5 +42,20 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(true);
         }
+
+        [HttpDelete("{sectorId}/{mappingId}")]
+        public IActionResult Delete(int sectorId, int mappingId)
+        {
+            if (sectorId <= 0 || mappingId <= 0)
+            {
+                return BadRequest("Invalid Id/s provided");
+            }
+            var response = mappingService.Delete(sectorId, mappingId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
     }
 }
