@@ -18,13 +18,13 @@ namespace AIMS.Services
         /// Gets all sectorCategories
         /// </summary>
         /// <returns></returns>
-        IEnumerable<SectorView> GetAll();
+        IEnumerable<SectorDetailedView> GetAll();
 
         /// <summary>
         /// Gets all sectorCategories async
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<SectorView>> GetAllAsync();
+        Task<IEnumerable<SectorDetailedView>> GetAllAsync();
 
         /// <summary>
         /// Gets sectors list for the type
@@ -109,12 +109,12 @@ namespace AIMS.Services
             mapper = autoMapper;
         }
 
-        public IEnumerable<SectorView> GetAll()
+        public IEnumerable<SectorDetailedView> GetAll()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectors = unitWork.SectorRepository.GetWithInclude(c => c.Id != 0, new string[] { "ParentSector" });
-                return mapper.Map<List<SectorView>>(sectors);
+                var sectors = unitWork.SectorRepository.GetWithInclude(c => c.Id != 0, new string[] { "ParentSector", "SectorType" });
+                return mapper.Map<List<SectorDetailedView>>(sectors);
             }
         }
 
@@ -145,12 +145,12 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<IEnumerable<SectorView>> GetAllAsync()
+        public async Task<IEnumerable<SectorDetailedView>> GetAllAsync()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorCategories = await unitWork.SectorRepository.GetWithIncludeAsync(c => c.Id != 0, new string[] { "ParentSector"});
-                return await Task<IEnumerable<SectorView>>.Run(() => mapper.Map<List<SectorView>>(sectorCategories)).ConfigureAwait(false);
+                var sectorCategories = await unitWork.SectorRepository.GetWithIncludeAsync(c => c.Id != 0, new string[] { "ParentSector", "SectorType"});
+                return await Task<IEnumerable<SectorDetailedView>>.Run(() => mapper.Map<List<SectorDetailedView>>(sectorCategories)).ConfigureAwait(false);
             }
         }
 

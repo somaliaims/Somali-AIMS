@@ -50,7 +50,6 @@ namespace AIMS.Services
                 ratesStr = ratesStr.Replace("{", "");
                 ratesStr = ratesStr.Replace("}", "");
                 ratesView.Rates = this.GetRatesList(ratesStr);
-                //string ratesJsonStr = JsonConvert.SerializeObject(ratesView.Rates);
             }
             catch(Exception)
             {

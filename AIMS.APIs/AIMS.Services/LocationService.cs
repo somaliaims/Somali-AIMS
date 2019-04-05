@@ -178,7 +178,7 @@ namespace AIMS.Services
                 IMessageHelper mHelper = new MessageHelper();
                 ActionResponse response = new ActionResponse();
                 var locations = await unitWork.LocationRepository.GetManyQueryableAsync(l => (l.Id == id || l.Id == newId));
-                if (locations.Count() < 2 && newId == 0)
+                if (locations.Count() < 2 && newId != 0)
                 {
                     response.Success = false;
                     response.Message = mHelper.GetNotFound("Location");
