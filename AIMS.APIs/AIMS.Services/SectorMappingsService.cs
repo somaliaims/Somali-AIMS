@@ -75,6 +75,7 @@ namespace AIMS.Services
                                           select sType).FirstOrDefault();
                         if (sectorTypeId != mapping.SectorTypeId)
                         {
+                            sectorTypeId = mapping.SectorTypeId;
                             if (mappedSectors != null)
                             {
                                 mappedSectors.Sectors = sectorsList;
@@ -147,11 +148,6 @@ namespace AIMS.Services
                         using (var transaction = context.Database.BeginTransaction())
                         {
                             var sectorMappings = await unitWork.SectorMappingsRepository.GetManyQueryableAsync(m => m.SectorId == model.SectorId);
-                            /*foreach (var mapping in sectorMappings)
-                            {
-                                unitWork.SectorMappingsRepository.Delete(mapping);
-                            }
-                            await unitWork.SaveAsync();*/
                             List<MappingsKeyView> mappingsView = (from m in sectorMappings
                                                                  select new MappingsKeyView
                                                                  {
