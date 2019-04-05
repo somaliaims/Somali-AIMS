@@ -89,11 +89,11 @@ namespace AIMS.Services
                         }
 
                         sectorName = (from s in sectors
-                                      where s.Id == mapping.SectorId
+                                      where s.Id == mapping.MappedSectorId
                                       select s).FirstOrDefault().SectorName;
                         sectorsList.Add(new SectorSimpleView()
                         {
-                            SectorId = mapping.SectorId,
+                            SectorId = mapping.MappedSectorId,
                             Sector = sectorName
                         });
 
@@ -147,25 +147,43 @@ namespace AIMS.Services
                         using (var transaction = context.Database.BeginTransaction())
                         {
                             var sectorMappings = await unitWork.SectorMappingsRepository.GetManyQueryableAsync(m => m.SectorId == model.SectorId);
-                            foreach (var mapping in sectorMappings)
+                            /*foreach (var mapping in sectorMappings)
                             {
                                 unitWork.SectorMappingsRepository.Delete(mapping);
                             }
-                            await unitWork.SaveAsync();
+                            await unitWork.SaveAsync();*/
+                            List<MappingsKeyView> mappingsView = (from m in sectorMappings
+                                                                 select new MappingsKeyView
+                                                                 {
+                                                                     SectorId = m.SectorId,
+                                                                     MappingId = m.MappedSectorId
+                                                                 }).ToList<MappingsKeyView>();
 
                             List<EFSectorMappings> mappingsList = new List<EFSectorMappings>();
+                            MappingsKeyView mappingView = null;
                             foreach (var id in model.MappingIds)
                             {
-                                mappingsList.Add(new EFSectorMappings()
+                                mappingView = (from m in mappingsView
+                                            where m.SectorId == sector.Id && id == m.MappingId
+                                            select m).FirstOrDefault();
+
+                                if (mappingView == null)
                                 {
-                                    SectorId = sector.Id,
-                                    SectorTypeId = sectorType.Id,
-                                    MappedSectorId = id
-                                });
+                                    mappingsList.Add(new EFSectorMappings()
+                                    {
+                                        SectorId = sector.Id,
+                                        SectorTypeId = sectorType.Id,
+                                        MappedSectorId = id
+                                    });
+                                }
                             }
-                            unitWork.SectorMappingsRepository.InsertMultiple(mappingsList);
-                            await unitWork.SaveAsync();
-                            transaction.Commit();
+
+                            if (mappingsList.Count > 0)
+                            {
+                                unitWork.SectorMappingsRepository.InsertMultiple(mappingsList);
+                                await unitWork.SaveAsync();
+                                transaction.Commit();
+                            }
                         }
                     });
                 }

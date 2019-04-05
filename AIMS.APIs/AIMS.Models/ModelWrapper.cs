@@ -59,6 +59,12 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
     }
 
+    public class MappingsKeyView
+    {
+        public int SectorId { get; set; }
+        public int MappingId { get; set; }
+    }
+
     public class FundersKeyView
     {
         public int FunderId { get; set; }
