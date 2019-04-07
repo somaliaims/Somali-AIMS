@@ -32,6 +32,18 @@ namespace AIMS.APIs.Controllers
             return Ok(sectors);
         }
 
+        [HttpGet]
+        [Route("GetSectorMappings/{sectorId}/{sectorTypeId}")]
+        public IActionResult GetSectorMappings(int sectorId, int sectorTypeId)
+        {
+            if (sectorId <= 0 || sectorTypeId <= 0)
+            {
+                return BadRequest("Invalid id provided");
+            }
+            var sectors = mappingService.GetSectorMappings(sectorId, sectorTypeId);
+            return Ok(sectors);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Add(SectorMappingsModel model)
         {

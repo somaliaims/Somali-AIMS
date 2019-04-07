@@ -14,6 +14,13 @@ namespace AIMS.Services.Helpers
         string GetNotFound(string entity);
 
         /// <summary>
+        /// Gets invalid sector type message
+        /// </summary>
+        /// <param name="sectorType"></param>
+        /// <returns></returns>
+        string InvalidSectorMapping(string sectorType);
+
+        /// <summary>
         /// Gets username taken message
         /// </summary>
         /// <param name="userName"></param>
@@ -109,6 +116,7 @@ namespace AIMS.Services.Helpers
         private readonly string DELETED = " deleted successfully";
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
         private readonly string INVALID_ACCOUNT_DELETION_ATTEMPT = "A super admin account cannot be deleted";
+        private readonly string INVALID_SECTORTYPE_MAPPING = " cannot be used for sector mapping as it is a default sector type.";
         private readonly string INVALID_PROJECT_MERGE = "At least two projects must be provided for completing the project merge process";
         private readonly string INVALID_ORGANIZATION_MERGE = "At least two organizations must be provided for completing the project merge process";
         private readonly string EMAIL_NOT_FOUND = " did not match any of our records for registered users.";
@@ -185,6 +193,11 @@ namespace AIMS.Services.Helpers
         public string InvalidOrganizationMerge()
         {
             return INVALID_ORGANIZATION_MERGE;
+        }
+
+        public string InvalidSectorMapping(string sectorType)
+        {
+            return (sectorType + INVALID_SECTORTYPE_MAPPING);
         }
     }
 }

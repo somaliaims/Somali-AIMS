@@ -33,20 +33,6 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFLocation, LocationView>().ReverseMap();
 
-            /*CreateMap<EFSectorCategory, SectorCategoryView>()
-                .ForMember(c => c.SectorType, opts => opts.MapFrom(source => source.SectorType.TypeName))
-                .ForMember(c => c.SectorTypeId, opts => opts.MapFrom(source => source.SectorType.Id));
-
-            CreateMap<EFSectorCategory, SectorCategoryViewModel>()
-                .ForMember(s => s.SectorTypeId, opts => opts.MapFrom(source => source.SectorType.Id));
-
-            CreateMap<EFSectorSubCategory, SectorSubCategoryView>()
-                .ForMember(s => s.SectorCategory, opts => opts.MapFrom(source => source.SectorCategory.Category))
-                .ForMember(s => s.CategoryId, opts => opts.MapFrom(source => source.SectorCategory.Id));
-
-            CreateMap<EFSectorSubCategory, SectorSubCategoryViewModel>()
-                .ForMember(s => s.CategoryId, opts => opts.MapFrom(source => source.SectorCategory.Id));*/
-
             CreateMap<EFProject, ProjectView>()
                 .ForMember(p => p.StartDate, opts => opts.MapFrom(source => source.StartDate.ToShortDateString()))
                 .ForMember(p => p.EndDate, opts => opts.MapFrom(source => source.EndDate.ToShortDateString()));

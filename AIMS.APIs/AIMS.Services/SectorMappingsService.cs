@@ -21,6 +21,13 @@ namespace AIMS.Services
         SectorMappingsView GetForSector(int id);
 
         /// <summary>
+        /// Gets sector mappings
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<SectorView> GetSectorMappings(int id, int sectorTypeId);
+
+        /// <summary>
         /// Adds new sector mappings for the provided sector
         /// </summary>
         /// <param name="model"></param>
@@ -112,6 +119,25 @@ namespace AIMS.Services
             }
         }
 
+        public IEnumerable<SectorView> GetSectorMappings(int id, int sectorTypeId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<SectorView> mappingsList = new List<SectorView>();
+                var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => (m.SectorId == id && m.SectorTypeId == sectorTypeId));
+                List<int> mappingIds = new List<int>();
+                IEnumerable<EFSector> sectorsList = new List<EFSector>();
+                if (mappings != null)
+                {
+                    mappingIds = (from s in mappings
+                                  select s.MappedSectorId).ToList<int>();
+
+                    sectorsList = unitWork.SectorRepository.GetManyQueryable(s => mappingIds.Contains(s.Id));
+                }
+                return mapper.Map<List<SectorView>>(sectorsList);
+            }
+        }
+
         public async Task<ActionResponse> AddAsync(SectorMappingsModel model)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -126,6 +152,14 @@ namespace AIMS.Services
                         mHelper = new MessageHelper();
                         response.Success = false;
                         response.Message = mHelper.GetNotFound("Sector Type");
+                        return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                    }
+
+                    if (sectorType.IsDefault == true)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.InvalidSectorMapping(sectorType.TypeName);
                         return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                     }
 
