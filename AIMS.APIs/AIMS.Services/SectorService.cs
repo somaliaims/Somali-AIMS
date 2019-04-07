@@ -58,7 +58,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        IEnumerable<SectorView> GetMatching(string criteria);
+        IEnumerable<SectorDetailedView> GetMatching(string criteria);
 
         /// <summary>
         /// Adds a new section
@@ -168,13 +168,13 @@ namespace AIMS.Services
             }
         }
 
-        public IEnumerable<SectorView> GetMatching(string criteria)
+        public IEnumerable<SectorDetailedView> GetMatching(string criteria)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                List<SectorView> sectorTypesList = new List<SectorView>();
-                var sectorTypes = unitWork.SectorRepository.GetWithInclude(c => c.SectorName.Contains(criteria), new string[] { "ParentSector" });
-                return mapper.Map<List<SectorView>>(sectorTypes);
+                List<SectorDetailedView> sectorTypesList = new List<SectorDetailedView>();
+                var sectorTypes = unitWork.SectorRepository.GetWithInclude(c => c.SectorName.Contains(criteria), new string[] { "ParentSector", "SectorType" });
+                return mapper.Map<List<SectorDetailedView>>(sectorTypes);
             }
         }
 

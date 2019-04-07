@@ -13,6 +13,7 @@ namespace AIMS.APIs.AutoMapper
         {
             CreateMap<EFSector, SectorDetailedView>()
                 .ForMember(s => s.ParentSector, opts => opts.MapFrom(source => source.ParentSector.SectorName))
+                .ForMember(s => s.SectorTypeId, opts => opts.MapFrom(source => source.SectorType.Id))
                 .ForMember(s => s.SectorType, opts => opts.MapFrom(source => source.SectorType.TypeName));
 
             CreateMap<EFSector, SectorView>()
