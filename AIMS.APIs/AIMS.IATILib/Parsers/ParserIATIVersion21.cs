@@ -453,7 +453,6 @@ namespace AIMS.IATILib.Parsers
                     foreach (var activity in activities)
                     {
                         var aSectors = activity.Elements("sector");
-                        List<IATISectorModel> sectors = new List<IATISectorModel>();
                         if (aSectors != null)
                         {
                             foreach (var sector in aSectors)
@@ -464,7 +463,7 @@ namespace AIMS.IATILib.Parsers
                                 {
                                     sectorName = sector.Element("narrative").Value;
                                 }
-                                sectors.Add(new IATISectorModel()
+                                sectorsList.Add(new IATISectorModel()
                                 {
                                     SectorName = sectorName,
                                 });

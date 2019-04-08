@@ -32,7 +32,8 @@ namespace AIMS.APIs.Scheduler
             hostingEnvironment = _hostingEnvironment;
         }
 
-        protected override string Schedule => "*/20 * * * *";
+        //"*/10 * * * *"; 10 mins
+        protected override string Schedule => "*/2 * * * *";
 
         public override Task ProcessInScope(IServiceProvider serviceProvider)
         {
@@ -43,11 +44,11 @@ namespace AIMS.APIs.Scheduler
                 string filePath = sWebRootFolder + "/IATISomali.xml";
                 string xml = "";
 
-                using (var client = new WebClient())
+                /*using (var client = new WebClient())
                 {
                     xml = client.DownloadString(url);
                 }
-                File.WriteAllText(filePath, xml);
+                File.WriteAllText(filePath, xml);*/
 
                 //Save sectors to db
                 using (var scope = scopeFactory.CreateScope())

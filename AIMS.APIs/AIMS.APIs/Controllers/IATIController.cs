@@ -87,6 +87,20 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("SaveSectors")]
+        public IActionResult SaveSectors()
+        {
+            string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
+            FileInfo fileInfo = new FileInfo(iatiFilePath);
+            if (!fileInfo.Exists)
+            {
+                return BadRequest("IATI source file not found. Load latest IATI before making this request.");
+            }
+            var response = iatiService.ExtractAndSaveDAC5Sectors(iatiFilePath);
+            return Ok(response);
+        }
+
+        [HttpGet]
         [Route("GetOrganizations")]
         public IActionResult GetOrganizations()
         {
