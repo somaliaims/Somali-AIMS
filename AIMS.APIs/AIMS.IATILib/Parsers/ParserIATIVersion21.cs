@@ -20,7 +20,7 @@ namespace AIMS.IATILib.Parsers
             List<IATIActivity> activityList = new List<IATIActivity>();
             //Pick up all narratives
             var activities = from activity in xmlDoc.Descendants("iati-activity")
-                             where activity.Element("title").Element("narrative") != null && 
+                             where activity.Element("title").Element("narrative") != null &&
                              activity.Element("title").Element("narrative").Value.IndexOf(criteria, 0, StringComparison.OrdinalIgnoreCase) >= 0
                              select activity;
             this.ParseIATIAndFillList(activities, activityList, transactionTypes);
@@ -57,6 +57,19 @@ namespace AIMS.IATILib.Parsers
 
             this.ParseAndFillProjects(activities, projectsList);
             return projectsList;
+        }
+
+        public ICollection<IATISectorModel> ExtractSectors(XDocument xmlDoc)
+        {
+            List<IATISectorModel> sectorsList = new List<IATISectorModel>();
+            //Pick up all narratives
+            var activities = from activity in xmlDoc.Descendants("iati-activity")
+                             where activity.Element("title").Element("narrative") != null ||
+                             activity.Element("title") != null
+                             select activity;
+
+            this.ParseAndFillSectors(activities, sectorsList);
+            return sectorsList;
         }
 
         private void ParseIATIAndFillList(IEnumerable<XElement> activities, List<IATIActivity> activityList, List<IATITransactionTypes> transactionTypes)
@@ -421,6 +434,42 @@ namespace AIMS.IATILib.Parsers
                             EndDate = endDate
                         });
                         ++activityCounter;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+        }
+
+        private void ParseAndFillSectors(IEnumerable<XElement> activities, List<IATISectorModel> sectorsList)
+        {
+            string message = "";
+            try
+            {
+                if (activities != null)
+                {
+                    foreach (var activity in activities)
+                    {
+                        var aSectors = activity.Elements("sector");
+                        List<IATISectorModel> sectors = new List<IATISectorModel>();
+                        if (aSectors != null)
+                        {
+                            foreach (var sector in aSectors)
+                            {
+                                string sectorName = "";
+                                var setorNarrative = sector.Element("narrative");
+                                if (setorNarrative != null)
+                                {
+                                    sectorName = sector.Element("narrative").Value;
+                                }
+                                sectors.Add(new IATISectorModel()
+                                {
+                                    SectorName = sectorName,
+                                });
+                            }
+                        }
                     }
                 }
             }

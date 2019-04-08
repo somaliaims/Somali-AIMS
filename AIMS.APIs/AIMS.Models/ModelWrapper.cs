@@ -202,6 +202,8 @@ namespace AIMS.Models
     {
         [Required]
         public string TypeName { get; set; }
+        public bool IsDefault { get; set; } = false;
+        public bool IsIATIType { get; set; } = false;
     }
 
     public class SectorDetailedView
@@ -211,6 +213,8 @@ namespace AIMS.Models
         public string SectorType { get; set; }
         public string ParentSector { get; set; }
         public string SectorName { get; set; }
+        public bool IsDefault { get; set; } = false;
+        public bool IsIATIType { get; set; } = false;
     }
 
     public class SectorView

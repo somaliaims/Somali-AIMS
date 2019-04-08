@@ -69,6 +69,12 @@ namespace AIMS.Services
         ICollection<IATIProject> GetProjects(string dataFilePath);
 
         /// <summary>
+        /// Extracts and save sectors
+        /// </summary>
+        /// <returns></returns>
+        ActionResponse ExtractAndSaveDAC5Sectors(string dataFilePath);
+
+        /// <summary>
         /// Get activities by provided Ids
         /// </summary>
         /// <param name="IdsModel"></param>
@@ -277,6 +283,76 @@ namespace AIMS.Services
                     break;
             }
             return iatiProjects;
+        }
+
+        public ActionResponse ExtractAndSaveDAC5Sectors(string dataFilePath)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                ICollection<IATISectorModel> iatiSectors = new List<IATISectorModel>();
+                string url = dataFilePath;
+                XmlReader xReader = XmlReader.Create(url);
+                XDocument xDoc = XDocument.Load(xReader);
+                var activity = (from el in xDoc.Descendants("iati-activity")
+                                select el.FirstAttribute).FirstOrDefault();
+
+                IParser parser;
+                string version = "";
+                version = activity.Value;
+                switch (version)
+                {
+                    case "1.03":
+                        parser = new ParserIATIVersion13();
+                        iatiSectors = parser.ExtractSectors(xDoc);
+                        break;
+
+                    case "2.01":
+                        parser = new ParserIATIVersion21();
+                        iatiSectors = parser.ExtractSectors(xDoc);
+                        break;
+                }
+
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsIATIType == true);
+                if (sectorType != null)
+                {
+                    var sectorsList = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == sectorType.Id);
+                    List<string> sectorNames = (from s in sectorsList
+                                                select s.SectorName).ToList<string>();
+
+                    List<EFSector> newIATISectors = new List<EFSector>();
+                    foreach (var sector in iatiSectors)
+                    {
+                        if (sectorNames.Contains(sector.SectorName, StringComparer.OrdinalIgnoreCase) == false)
+                        {
+                            EFSector isSectorInList = null;
+                            if (newIATISectors.Count > 0)
+                            {
+                                isSectorInList = (from s in newIATISectors
+                                                  where s.SectorName.ToLower() == sector.SectorName.ToLower()
+                                                  select s).FirstOrDefault();
+                            }
+
+                            if (isSectorInList == null)
+                            {
+                                newIATISectors.Add(new EFSector()
+                                {
+                                    SectorName = sector.SectorName,
+                                    SectorType = sectorType,
+                                    ParentSector = null
+                                });
+                            }
+                        }
+                    }
+
+                    if (newIATISectors.Count > 0)
+                    {
+                        unitWork.SectorRepository.InsertMultiple(newIATISectors);
+                        unitWork.Save();
+                    }
+                }
+                return response;
+            }
         }
 
         public async Task<ActionResponse> DownloadIATIFromUrl(string url, string fileToWrite)

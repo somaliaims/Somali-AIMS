@@ -83,6 +83,38 @@ namespace AIMS.IATILib.Parsers
             return projectsList;
         }
 
+        public ICollection<IATISectorModel> ExtractSectors(XDocument xmlDoc)
+        {
+            List<IATISectorModel> sectorsList = new List<IATISectorModel>();
+            string message = "";
+            try
+            {
+                var activities = from activity in xmlDoc.Descendants("iati-activity")
+                                 where activity.Element("title") != null
+                                 select activity;
+
+                foreach (var activity in activities)
+                {
+                    //Extracting Sectors
+                    var aSectors = activity.Elements("sector");
+                    List<IATISectorModel> sectors = new List<IATISectorModel>();
+                    var sectorPercentage = (100 / aSectors.Count());
+                    foreach (var sector in aSectors)
+                    {
+                        sectors.Add(new IATISectorModel()
+                        {
+                            SectorName = sector.Value,
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+            return sectorsList;
+        }
+
         private void ExtractAndFillActivities(IEnumerable<XElement> activities, List<IATIActivity> activityList)
         {
             string currency = "";

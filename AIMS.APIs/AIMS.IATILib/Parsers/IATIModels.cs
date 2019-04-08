@@ -38,6 +38,11 @@ namespace AIMS.IATILib.Parsers
         public string FundsPercentage { get; set; }
     }
 
+    public class IATISectorModel
+    {
+        public string SectorName { get; set; }
+    }
+
     public class IATILocation
     {
         public string Name { get; set; }
@@ -110,5 +115,6 @@ namespace AIMS.IATILib.Parsers
         public string DefaultCurrency { get; set; }
         public string Description { get; set; }
     }
+
 
 }

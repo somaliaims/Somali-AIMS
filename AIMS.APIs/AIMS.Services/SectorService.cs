@@ -212,7 +212,7 @@ namespace AIMS.Services
                                 SectorType = sectorType,
                                 ParentSector = parentSector,
                                 SectorName = model.SectorName,
-                                TimeStamp = DateTime.Now
+                                TimeStamp = DateTime.Now,
                             });
                         }
                         else

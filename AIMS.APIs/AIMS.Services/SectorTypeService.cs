@@ -146,7 +146,12 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var newSectorTypes = unitWork.SectorTypesRepository.Insert(new EFSectorTypes() { TypeName = model.TypeName, IsDefault = false });
+                    var newSectorTypes = unitWork.SectorTypesRepository.Insert(new EFSectorTypes()
+                    {
+                        TypeName = model.TypeName,
+                        IsDefault = model.IsDefault,
+                        IsIATIType = model.IsIATIType
+                    });
                     response.ReturnedId = newSectorTypes.Id;
                     unitWork.Save();
                 }
@@ -211,6 +216,7 @@ namespace AIMS.Services
                 }
 
                 sectorTypeObj.TypeName = model.TypeName;
+                sectorTypeObj.IsIATIType = model.IsIATIType;
                 unitWork.Save();
                 response.Message = "1";
                 return response;
