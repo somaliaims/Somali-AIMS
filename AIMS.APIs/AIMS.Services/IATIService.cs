@@ -112,12 +112,10 @@ namespace AIMS.Services
     public class IATIService : IIATIService
     {
         AIMSDbContext context;
-        INotificationService notificationService;
 
-        public IATIService(AIMSDbContext cntxt, INotificationService nService)
+        public IATIService(AIMSDbContext cntxt)
         {
             this.context = cntxt;
-            this.notificationService = nService;
         }
 
         public ICollection<IATIActivity> GetMatchingIATIActivities(string dataFilePath, string criteria)
@@ -352,16 +350,17 @@ namespace AIMS.Services
                     {
                         unitWork.SectorRepository.InsertMultiple(newIATISectors);
                         unitWork.Save();
+
                         IMessageHelper mHelper = new MessageHelper();
-                        NotificationModel model = new NotificationModel()
+                        unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                         {
                             NotificationType = NotificationTypes.NewIATISector,
                             Message = mHelper.NewIATISectorsAdded(newIATISectors.Count),
                             OrganizationId = 0,
                             TreatmentId = 0,
                             UserType = UserTypes.Manager
-                        };
-                        notificationService.Add(model);
+                        });
+                        unitWork.Save();
                     }
                 }
                 return response;
