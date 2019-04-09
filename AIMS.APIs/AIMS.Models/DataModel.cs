@@ -26,7 +26,8 @@ namespace AIMS.Models
         NewProjectToOrg = 2,
         NewIATIToProject = 3,
         UserInactive = 4,
-        ChangedMappingEffectedProject = 5
+        ChangedMappingEffectedProject = 5,
+        NewIATISector = 6
     }
 
     public enum DataTransactions

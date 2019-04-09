@@ -2,6 +2,7 @@
 using AIMS.DAL.UnitOfWork;
 using AIMS.IATILib.Parsers;
 using AIMS.Models;
+using AIMS.Services.Helpers;
 using AutoMapper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -111,10 +112,12 @@ namespace AIMS.Services
     public class IATIService : IIATIService
     {
         AIMSDbContext context;
+        INotificationService notificationService;
 
-        public IATIService(AIMSDbContext cntxt)
+        public IATIService(AIMSDbContext cntxt, INotificationService nService)
         {
             this.context = cntxt;
+            this.notificationService = nService;
         }
 
         public ICollection<IATIActivity> GetMatchingIATIActivities(string dataFilePath, string criteria)
@@ -349,6 +352,16 @@ namespace AIMS.Services
                     {
                         unitWork.SectorRepository.InsertMultiple(newIATISectors);
                         unitWork.Save();
+                        IMessageHelper mHelper = new MessageHelper();
+                        NotificationModel model = new NotificationModel()
+                        {
+                            NotificationType = NotificationTypes.NewIATISector,
+                            Message = mHelper.NewIATISectorsAdded(newIATISectors.Count),
+                            OrganizationId = 0,
+                            TreatmentId = 0,
+                            UserType = UserTypes.Manager
+                        };
+                        notificationService.Add(model);
                     }
                 }
                 return response;

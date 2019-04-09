@@ -63,6 +63,13 @@ namespace AIMS.Services.Helpers
         string NewUserForOrganization(string organization);
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sectorCount"></param>
+        /// <returns></returns>
+        string NewIATISectorsAdded(int sectorCount);
+
+        /// <summary>
         /// Gets invalid percentage message
         /// </summary>
         /// <returns></returns>
@@ -153,6 +160,11 @@ namespace AIMS.Services.Helpers
         public string NewUserForOrganization(string organization)
         {
             return ("A new user has submitted the request to register for the organization " +  organization);
+        }
+
+        public string NewIATISectorsAdded(int sectorCount)
+        {
+            return (sectorCount + " new IATI sectors loaded into the database. Please do mappings for new sectors if required");
         }
 
         public string EmailNotFound(string email)

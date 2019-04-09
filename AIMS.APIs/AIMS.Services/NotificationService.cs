@@ -1,6 +1,7 @@
 ﻿using AIMS.DAL.EF;
 using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
+using AIMS.Services.Helpers;
 using AutoMapper;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,13 @@ namespace AIMS.Services
         /// <param name="organizationId"></param>
         /// <returns></returns>
         int GetCount(int userId, UserTypes uType, int organizationId);
+
+        /// <summary>
+        /// Adds new notification
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse Add(NotificationModel model);
 
         /// <summary>
         /// Sets notifications as read
@@ -70,6 +78,36 @@ namespace AIMS.Services
             {
                 var count = unitWork.NotificationsRepository.GetProjectionCount(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin), n => n.Id);
                 return count;
+            }
+        }
+
+        public ActionResponse Add(NotificationModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                var organization = unitWork.OrganizationRepository.GetByID(model.OrganizationId);
+                if (organization == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Organization");
+                    response.Success = false;
+                    return response;
+                }
+
+                unitWork.NotificationsRepository.Insert(new EFUserNotifications()
+                {
+                    UserType = model.UserType,
+                    Organization = organization,
+                    Message = model.Message,
+                    TreatmentId = model.TreatmentId,
+                    Dated = DateTime.Now,
+                    IsSeen = false,
+                    NotificationType = model.NotificationType
+                });
+                unitWork.Save();
+                return response;
             }
         }
 

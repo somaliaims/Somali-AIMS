@@ -735,6 +735,15 @@ namespace AIMS.Models
         public int FinancialYear { get; set; }
     }
 
+    public class NotificationModel
+    {
+        public UserTypes UserType { get; set; }
+        public int OrganizationId { get; set; }
+        public string Message { get; set; }
+        public int TreatmentId { get; set; }
+        public NotificationTypes NotificationType { get; set; }
+    }
+
     /*public class IATIDBCountry
     {
         public string Code { get; set; }
