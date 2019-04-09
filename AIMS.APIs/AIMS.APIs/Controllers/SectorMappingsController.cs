@@ -33,14 +33,26 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
-        [Route("GetSectorMappings/{sectorId}/{sectorTypeId}")]
-        public IActionResult GetSectorMappings(int sectorId, int sectorTypeId)
+        [Route("GetSectorMappings/{sectorId}")]
+        public IActionResult GetSectorMappings(int sectorId)
         {
-            if (sectorId <= 0 || sectorTypeId <= 0)
+            if (sectorId <= 0)
             {
                 return BadRequest("Invalid id provided");
             }
-            var sectors = mappingService.GetSectorMappings(sectorId, sectorTypeId);
+            var sectors = mappingService.GetSectorMappings(sectorId);
+            return Ok(sectors);
+        }
+
+        [HttpGet]
+        [Route("GetSectorMappingsByName/{sectorName}")]
+        public IActionResult GetSectorMappingsByName(string sectorName)
+        {
+            if (string.IsNullOrEmpty(sectorName))
+            {
+                return BadRequest("Invalid sector name provided");
+            }
+            var sectors = mappingService.GetSectorMappings(sectorName);
             return Ok(sectors);
         }
 

@@ -241,6 +241,15 @@ namespace AIMS.Models
         public string SectorName { get; set; }
     }
 
+    public class IATINewSectorModel
+    {
+        public int? ParentId { get; set; }
+        [Required]
+        public string SectorName { get; set; }
+        [Required]
+        public int MappingSectorId { get; set; }
+    }
+
     public class SectorMappingsModel
     {
         [Required]

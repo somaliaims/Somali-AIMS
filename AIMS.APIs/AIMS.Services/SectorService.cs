@@ -67,6 +67,13 @@ namespace AIMS.Services
         ActionResponse Add(SectorModel sector);
 
         /// <summary>
+        /// Adds new iati sector
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddIATISector(IATINewSectorModel model);
+
+        /// <summary>
         /// Sets the provided sector as child
         /// </summary>
         /// <param name="sectorId"></param>
@@ -226,6 +233,78 @@ namespace AIMS.Services
                         }
                         unitWork.Save();
                         response.ReturnedId = newSector.Id;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddIATISector(IATINewSectorModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                try
+                {
+                    var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsIATIType == true);
+                    if (sectorType == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Sector Type");
+                        response.Success = false;
+                        return response;
+                    }
+
+                    var isSectorCreated = unitWork.SectorRepository.GetOne(s => s.SectorName.ToLower() == model.SectorName.ToLower());
+                    if (isSectorCreated != null)
+                    {
+                        response.ReturnedId = isSectorCreated.Id;
+                    }
+                    else
+                    {
+                        var parentSector = unitWork.SectorRepository.GetByID(model.ParentId);
+                        EFSector newSector = null;
+
+                        if (parentSector != null)
+                        {
+                            newSector = unitWork.SectorRepository.Insert(new EFSector()
+                            {
+                                SectorType = sectorType,
+                                ParentSector = parentSector,
+                                SectorName = model.SectorName,
+                                TimeStamp = DateTime.Now,
+                            });
+                        }
+                        else
+                        {
+                            newSector = unitWork.SectorRepository.Insert(new EFSector()
+                            {
+                                SectorType = sectorType,
+                                SectorName = model.SectorName,
+                                TimeStamp = DateTime.Now
+                            });
+                        }
+                        unitWork.Save();
+                        response.ReturnedId = newSector.Id;
+                    }
+
+                    EFSectorMappings mapping = unitWork.SectorMappingsRepository.Get(m => m.SectorId == response.ReturnedId && m.MappedSectorId == model.MappingSectorId);
+                    if (mapping == null)
+                    {
+                       mapping = new EFSectorMappings()
+                        {
+                            SectorId = response.ReturnedId,
+                            SectorTypeId = sectorType.Id,
+                            MappedSectorId = model.MappingSectorId
+                        };
+                        unitWork.SectorMappingsRepository.Insert(mapping);
+                        unitWork.Save();
                     }
                 }
                 catch (Exception ex)

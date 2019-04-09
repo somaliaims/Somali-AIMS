@@ -28,6 +28,12 @@ namespace AIMS.Services
         SectorTypesView Get(int id);
 
         /// <summary>
+        /// Gets sector type for IATI
+        /// </summary>
+        /// <returns></returns>
+        SectorTypesView GetSectorTypeForIATI();
+
+        /// <summary>
         /// Sets a sector as default
         /// </summary>
         /// <param name="id"></param>
@@ -99,6 +105,21 @@ namespace AIMS.Services
             {
                 var sectorTypes = unitWork.SectorTypesRepository.GetManyQueryable(s => s.IsDefault != true);
                 return mapper.Map<List<SectorTypesView>>(sectorTypes);
+            }
+        }
+
+        public SectorTypesView GetSectorTypeForIATI()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                SectorTypesView view = new SectorTypesView();
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsIATIType == true);
+                if (sectorType != null)
+                {
+                    view.Id = sectorType.Id;
+                    view.TypeName = sectorType.TypeName;
+                }
+                return view;
             }
         }
 

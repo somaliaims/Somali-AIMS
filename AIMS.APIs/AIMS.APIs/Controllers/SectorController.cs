@@ -107,6 +107,23 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [HttpPost]
+        [Route("AddIATISector")]
+        public IActionResult AddIATISector([FromBody] IATINewSectorModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = sectorService.AddIATISector(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.ReturnedId);
+        }
+
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] SectorModel sector)
         {

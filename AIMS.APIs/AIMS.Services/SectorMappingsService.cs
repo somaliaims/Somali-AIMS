@@ -25,7 +25,14 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        IEnumerable<SectorView> GetSectorMappings(int id, int sectorTypeId);
+        IEnumerable<SectorView> GetSectorMappings(int id);
+
+        /// <summary>
+        /// Gets sector mappings
+        /// </summary>
+        /// <param name="sectorName"></param>
+        /// <returns></returns>
+        IEnumerable<SectorView> GetSectorMappings(string sectorName);
 
         /// <summary>
         /// Adds new sector mappings for the provided sector
@@ -119,20 +126,53 @@ namespace AIMS.Services
             }
         }
 
-        public IEnumerable<SectorView> GetSectorMappings(int id, int sectorTypeId)
+        public IEnumerable<SectorView> GetSectorMappings(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 List<SectorView> mappingsList = new List<SectorView>();
-                var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => (m.SectorId == id && m.SectorTypeId == sectorTypeId));
-                List<int> mappingIds = new List<int>();
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsDefault == true);
                 IEnumerable<EFSector> sectorsList = new List<EFSector>();
-                if (mappings != null)
-                {
-                    mappingIds = (from s in mappings
-                                  select s.MappedSectorId).ToList<int>();
 
-                    sectorsList = unitWork.SectorRepository.GetManyQueryable(s => mappingIds.Contains(s.Id));
+                if (sectorType != null)
+                {
+                    var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => (m.SectorId == id && m.SectorTypeId == sectorType.Id));
+                    List<int> mappingIds = new List<int>();
+                    if (mappings != null)
+                    {
+                        mappingIds = (from s in mappings
+                                      select s.MappedSectorId).ToList<int>();
+
+                        sectorsList = unitWork.SectorRepository.GetManyQueryable(s => mappingIds.Contains(s.Id));
+                    }
+                }
+                return mapper.Map<List<SectorView>>(sectorsList);
+            }
+        }
+
+        public IEnumerable<SectorView> GetSectorMappings(string sectorName)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<SectorView> mappingsList = new List<SectorView>();
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsDefault == true);
+                IEnumerable<EFSector> sectorsList = new List<EFSector>();
+
+                if (sectorType != null)
+                {
+                    var sector = unitWork.SectorRepository.GetOne(s => s.SectorName.ToLower() == sectorName);
+                    if (sector != null)
+                    {
+                        var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => (m.SectorId == sector.Id && m.SectorTypeId == sectorType.Id));
+                        List<int> mappingIds = new List<int>();
+                        if (mappings != null)
+                        {
+                            mappingIds = (from s in mappings
+                                          select s.MappedSectorId).ToList<int>();
+
+                            sectorsList = unitWork.SectorRepository.GetManyQueryable(s => mappingIds.Contains(s.Id));
+                        }
+                    }
                 }
                 return mapper.Map<List<SectorView>>(sectorsList);
             }
