@@ -88,8 +88,14 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var currencys = unitWork.CurrencyRepository.GetAll();
-                return mapper.Map<List<CurrencyView>>(currencys);
+                var currencies = unitWork.CurrencyRepository.GetAll();
+                if (currencies != null)
+                {
+                    currencies = (from c in currencies
+                                  orderby c.Currency ascending
+                                  select c);
+                }
+                return mapper.Map<List<CurrencyView>>(currencies);
             }
         }
 
@@ -97,8 +103,14 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var currencys = await unitWork.CurrencyRepository.GetAllAsync();
-                return await Task<IEnumerable<CurrencyView>>.Run(() => mapper.Map<List<CurrencyView>>(currencys)).ConfigureAwait(false);
+                var currencies = await unitWork.CurrencyRepository.GetAllAsync();
+                if (currencies != null)
+                {
+                    currencies = (from c in currencies
+                                  orderby c.Currency ascending
+                                  select c);
+                }
+                return await Task<IEnumerable<CurrencyView>>.Run(() => mapper.Map<List<CurrencyView>>(currencies)).ConfigureAwait(false);
             }
         }
 
@@ -124,9 +136,15 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                List<CurrencyView> currencysList = new List<CurrencyView>();
-                var currencys = unitWork.CurrencyRepository.GetMany(o => o.Currency.Contains(criteria));
-                return mapper.Map<List<CurrencyView>>(currencys);
+                List<CurrencyView> currenciesList = new List<CurrencyView>();
+                var currencies = unitWork.CurrencyRepository.GetMany(o => o.Currency.Contains(criteria));
+                if (currencies != null)
+                {
+                    currencies = (from c in currencies
+                                  orderby c.Currency ascending
+                                  select c);
+                }
+                return mapper.Map<List<CurrencyView>>(currencies);
             }
         }
 
@@ -140,7 +158,9 @@ namespace AIMS.Services
                     var isCurrencyCreated = unitWork.CurrencyRepository.GetOne(l => l.Currency.ToLower() == model.Currency.ToLower());
                     if (isCurrencyCreated != null)
                     {
+                        isCurrencyCreated.IsDefault = model.IsDefault;
                         unitWork.CurrencyRepository.Update(isCurrencyCreated);
+                        unitWork.Save();
                         response.ReturnedId = isCurrencyCreated.Id;
                     }
                     else
@@ -148,7 +168,7 @@ namespace AIMS.Services
                         var newCurrency = unitWork.CurrencyRepository.Insert(new EFCurrency()
                         {
                             Currency = model.Currency,
-                            IsDefault = false
+                            IsDefault = model.IsDefault
                         });
                         unitWork.Save();
                         response.ReturnedId = newCurrency.Id;

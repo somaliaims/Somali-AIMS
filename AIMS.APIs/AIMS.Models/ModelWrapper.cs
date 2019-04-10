@@ -45,6 +45,7 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string Currency { get; set; }
+        public bool IsDefault { get; set; }
     }
 
     public class ManualCurrencyRateModel
@@ -107,6 +108,7 @@ namespace AIMS.Models
         [Required]
         [MaxLength(3)]
         public string Currency { get; set; }
+        public bool IsDefault { get; set; } = false;
     }
 
     public class ExchangeRatesModel

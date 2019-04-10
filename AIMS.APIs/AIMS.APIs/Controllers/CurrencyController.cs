@@ -23,8 +23,8 @@ namespace AIMS.APIs.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            var currencys = currencyService.GetAll();
-            return Ok(currencys);
+            var currencies = currencyService.GetAll();
+            return Ok(currencies);
         }
 
         [HttpGet]
@@ -43,8 +43,8 @@ namespace AIMS.APIs.Controllers
         [HttpGet("{criteria}")]
         public IActionResult Get(string criteria)
         {
-            var currencys = currencyService.GetMatching(criteria);
-            return Ok(currencys);
+            var currencies = currencyService.GetMatching(criteria);
+            return Ok(currencies);
         }
 
         [HttpPost]
