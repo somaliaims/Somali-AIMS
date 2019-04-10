@@ -4,6 +4,7 @@ using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,12 @@ namespace AIMS.Services
         IEnumerable<CurrencyView> GetMatching(string criteria);
 
         /// <summary>
+        /// Gets default currency
+        /// </summary>
+        /// <returns></returns>
+        string GetDefaultCurrency();
+
+        /// <summary>
         /// Gets the currency for the provided id
         /// </summary>
         /// <param name="id"></param>
@@ -43,6 +50,13 @@ namespace AIMS.Services
         /// </summary>
         /// <returns>Response with success/failure details</returns>
         ActionResponse Add(CurrencyModel currency);
+
+        /// <summary>
+        /// Sets currency to default
+        /// </summary>
+        /// <param name="currencyId"></param>
+        /// <returns></returns>
+        ActionResponse SetDefault(int currencyId);
 
         /// <summary>
         /// Updates a currency
@@ -88,6 +102,15 @@ namespace AIMS.Services
             }
         }
 
+        public string GetDefaultCurrency()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
+                return defaultCurrency == null ? null : defaultCurrency.Currency;
+            }
+        }
+
         public CurrencyView Get(int id)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -125,6 +148,7 @@ namespace AIMS.Services
                         var newCurrency = unitWork.CurrencyRepository.Insert(new EFCurrency()
                         {
                             Currency = model.Currency,
+                            IsDefault = false
                         });
                         unitWork.Save();
                         response.ReturnedId = newCurrency.Id;
@@ -136,6 +160,40 @@ namespace AIMS.Services
                     response.Success = false;
                     response.Message = ex.Message;
                 }
+                return response;
+            }
+        }
+
+        public ActionResponse SetDefault(int currencyId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => (c.IsDefault == true || c.Id == currencyId));
+                var currency = (from c in currencies
+                                where c.Id == currencyId
+                                select c).FirstOrDefault();
+
+                if (currency == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Currency");
+                    return response;
+                }
+
+                var defaultCurrencies = (from c in currencies
+                                         where c.IsDefault == true
+                                         select c);
+                
+                foreach(var cur in defaultCurrencies)
+                {
+                    cur.IsDefault = false;
+                    unitWork.CurrencyRepository.Update(cur);
+                }
+                currency.IsDefault = true;
+                unitWork.CurrencyRepository.Update(currency);
+                unitWork.Save();
                 return response;
             }
         }
@@ -155,7 +213,6 @@ namespace AIMS.Services
                 }
 
                 currencyObj.Currency = model.Currency;
-
                 unitWork.CurrencyRepository.Update(currencyObj);
                 unitWork.Save();
                 response.Message = true.ToString();

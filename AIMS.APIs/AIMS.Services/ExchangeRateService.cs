@@ -31,14 +31,14 @@ namespace AIMS.Services
         /// Gets the latest currency rates list from DB
         /// </summary>
         /// <returns></returns>
-        Task<ExchangeRatesView> GetLatestCurrencyRates();
+        Task<ExchangeRatesView> GetLatestCurrencyRates(string baseCurrency);
 
         /// <summary>
         /// Get the currency rates for the specified date
         /// </summary>
         /// <param name="dated"></param>
         /// <returns></returns>
-        Task<ExchangeRatesView> GetCurrencyRatesForDate(DateTime dated);
+        Task<ExchangeRatesView> GetCurrencyRatesForDate(DateTime dated, string baseCurrency);
 
         /// <summary>
         /// Get apis calls count for current month
@@ -118,10 +118,10 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ExchangeRatesView> GetLatestCurrencyRates()
+        public async Task<ExchangeRatesView> GetLatestCurrencyRates(string baseCurrency)
         {
             var unitWork = new UnitOfWork(context);
-            ExchangeRatesView ratesView = new ExchangeRatesView() { Base = "USD" };
+            ExchangeRatesView ratesView = new ExchangeRatesView() { Base = baseCurrency };
             List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
             DateTime dated = DateTime.Now;
             ratesView.Dated = dated.Date.ToString();
@@ -172,11 +172,11 @@ namespace AIMS.Services
             return count;
         }
 
-        public async Task<ExchangeRatesView> GetCurrencyRatesForDate(DateTime dated)
+        public async Task<ExchangeRatesView> GetCurrencyRatesForDate(DateTime dated, string baseCurrency)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                ExchangeRatesView ratesView = new ExchangeRatesView() { Base = "USD" };
+                ExchangeRatesView ratesView = new ExchangeRatesView() { Base = baseCurrency };
                 List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
                 var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
                 ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;

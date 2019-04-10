@@ -311,6 +311,7 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string Currency { get; set; }
+        public bool IsDefault { get; set; }
     }
 
     public class EFExchangeRates
