@@ -241,9 +241,9 @@ namespace AIMS.Services
                                 {
                                     mappingsList.Add(new EFSectorMappings()
                                     {
-                                        SectorId = sector.Id,
+                                        SectorId = id,
                                         SectorTypeId = sectorType.Id,
-                                        MappedSectorId = id
+                                        MappedSectorId = sector.Id
                                     });
                                 }
                             }
