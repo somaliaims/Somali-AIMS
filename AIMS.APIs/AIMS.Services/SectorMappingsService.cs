@@ -70,7 +70,7 @@ namespace AIMS.Services
                 SectorMappingsView mappingsView = new SectorMappingsView();
                 var sectors = unitWork.SectorRepository.GetManyQueryable(s => s.Id != 0);
                 var sectorTypes = unitWork.SectorTypesRepository.GetAll();
-                var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => m.SectorId == id);
+                var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => m.MappedSectorId == id);
                 MappingSectors mappedSectors = null;
                 List<MappingSectors> mappingSectorsList = new List<MappingSectors>();
                 List<SectorSimpleView> sectorsList = new List<SectorSimpleView>();
@@ -104,11 +104,11 @@ namespace AIMS.Services
                         }
 
                         sectorName = (from s in sectors
-                                      where s.Id == mapping.MappedSectorId
+                                      where s.Id == mapping.SectorId
                                       select s).FirstOrDefault().SectorName;
                         sectorsList.Add(new SectorSimpleView()
                         {
-                            SectorId = mapping.MappedSectorId,
+                            SectorId = mapping.SectorId,
                             Sector = sectorName
                         });
 
@@ -160,10 +160,10 @@ namespace AIMS.Services
 
                 if (sectorType != null)
                 {
-                    var sector = unitWork.SectorRepository.GetOne(s => s.SectorName.ToLower() == sectorName);
+                    var sector = unitWork.SectorRepository.GetOne(s => s.SectorName.Trim().ToLower() == sectorName.Trim().ToLower());
                     if (sector != null)
                     {
-                        var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => (m.SectorId == sector.Id && m.SectorTypeId == sectorType.Id));
+                        var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => (m.SectorId == sector.Id && m.SectorTypeId == sector.SectorTypeId));
                         List<int> mappingIds = new List<int>();
                         if (mappings != null)
                         {
