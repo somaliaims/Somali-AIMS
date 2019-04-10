@@ -63,6 +63,22 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] CurrencyModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = currencyService.Update(id, model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
