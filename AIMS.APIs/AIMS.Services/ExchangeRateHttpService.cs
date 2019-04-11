@@ -43,7 +43,7 @@ namespace AIMS.Services
             ExchangeRatesView ratesView = new ExchangeRatesView() { Base = baseCurrency };
             try
             {
-                var response = await client.GetStringAsync("latest.json?app_id=ce2f27af4d414969bfe05b7285a01dec&base=" + baseCurrency);
+                var response = await client.GetStringAsync("latest.json?app_id=ce2f27af4d414969bfe05b7285a01dec");
                 var ratesJson = JsonConvert.DeserializeObject<dynamic>(response);
                 string ratesStr = ratesJson != null ? JsonConvert.SerializeObject(ratesJson.rates) : "";
                 ratesStr = ratesStr.Replace("\\", "").Replace("\"", "");

@@ -183,7 +183,8 @@ namespace AIMS.Services
             }
 
             ratesView.Base = defaultCurrency.Currency;
-            if (isExRateAuto == true && defaultCurrency != null)
+
+            if ((exRateSettings == null && defaultCurrency != null) || (isExRateAuto == true && defaultCurrency != null))
             {
                 List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
                 DateTime dated = DateTime.Now;
@@ -220,7 +221,7 @@ namespace AIMS.Services
                     }
                 }
             }
-            else if (defaultCurrency != null)
+            else if (exRateSettings != null && defaultCurrency != null)
             {
                 string exRatesManual = exRateSettings.ManualExchangeRates;
                 if (!string.IsNullOrEmpty(exRatesManual))

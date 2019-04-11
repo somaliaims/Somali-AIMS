@@ -137,7 +137,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<CurrencyView> currenciesList = new List<CurrencyView>();
-                var currencies = unitWork.CurrencyRepository.GetMany(o => o.Currency.Contains(criteria));
+                var currencies = unitWork.CurrencyRepository.GetMany(o => o.Currency.Contains(criteria, StringComparison.OrdinalIgnoreCase));
                 if (currencies != null)
                 {
                     currencies = (from c in currencies

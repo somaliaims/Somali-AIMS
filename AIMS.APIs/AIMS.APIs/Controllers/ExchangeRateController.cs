@@ -23,7 +23,6 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
-        [Route("GetLatestRates")]
         public async Task<IActionResult> GetLatestRates()
         {
             ExchangeRatesView ratesView = null;
@@ -37,7 +36,10 @@ namespace AIMS.APIs.Controllers
             if (ratesView.Rates == null)
             {
                 ratesView = await ratesHttpService.GetRatesAsync(ratesView.Base);
-                ratesService.SaveCurrencyRates(ratesView.Rates);
+                if (ratesView.Rates != null)
+                {
+                    ratesService.SaveCurrencyRates(ratesView.Rates);
+                }
             }
             return Ok(ratesView);
         }
