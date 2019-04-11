@@ -57,6 +57,16 @@ namespace AIMS.APIs
                 context.SaveChanges();
             }
 
+            if (context.ExchangeRatesSettings.Count() == 0)
+            {
+                context.ExchangeRatesSettings.Add(new EFExchangeRatesSettings()
+                {
+                    APIKeyOpenExchangeRates = null,
+                    IsAutomatic = true,
+                    ManualExchangeRates = null
+                });
+            }
+
             if (context.SectorTypes.Count() == 0)
             {
                 context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Somali Sectors", IsDefault = true });
