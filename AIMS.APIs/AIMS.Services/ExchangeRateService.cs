@@ -44,7 +44,7 @@ namespace AIMS.Services
         /// Gets the value for exchange rate setting for manual or auto
         /// </summary>
         /// <returns></returns>
-        bool GetExRateSetting();
+        ExchangeRatesSettingsView GetExRateSettings();
 
         /// <summary>
         /// Get the currency rates for the specified date
@@ -270,12 +270,18 @@ namespace AIMS.Services
             }
         }
 
-        public bool GetExRateSetting()
+        public ExchangeRatesSettingsView GetExRateSettings()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var setting = unitWork.ExRatesSettingsRepository.GetOne(e => e.Id != 0);
-                return setting == null ? true : setting.IsAutomatic;
+                var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(e => e.Id != 0);
+                ExchangeRatesSettingsView settingsView = new ExchangeRatesSettingsView();
+                if (exRateSettings != null)
+                {
+                    settingsView.IsAutomatic = exRateSettings.IsAutomatic;
+                    settingsView.IsOpenExchangeKeySet = !string.IsNullOrEmpty(exRateSettings.APIKeyOpenExchangeRates) ? true : false;
+                }
+                return settingsView;
             }
         }
     }

@@ -97,6 +97,12 @@ namespace AIMS.Models
         public List<CurrencyWithRates> Rates { get; set; }
     }
 
+    public class ExchangeRatesSettingsView
+    {
+        public bool IsAutomatic { get; set; }
+        public bool IsOpenExchangeKeySet { get; set; }
+    }
+
     public class CurrencyWithRates
     {
         public string Currency { get; set; }

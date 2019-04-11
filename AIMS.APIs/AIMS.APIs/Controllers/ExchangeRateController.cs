@@ -42,6 +42,13 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        public IActionResult GetSettings()
+        {
+            var settings = ratesService.GetExRateSettings();
+            return Ok(settings);
+        }
+
+        [HttpGet]
         [Route("GetRatesForDate/{dated}")]
         public async Task<IActionResult> GetRatesForDate(DateTime dated)
         {
