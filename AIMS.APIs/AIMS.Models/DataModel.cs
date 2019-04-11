@@ -318,6 +318,7 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
+        public string DefaultCurrency { get; set; }
         public string ExchangeRatesJson { get; set; }
         public DateTime Dated { get; set; }
     }
@@ -380,6 +381,7 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public bool IsAutomatic { get; set; }
+        public string APIKeyOpenExchangeRates { get; set; }
         public string ManualExchangeRates { get; set; }
     }
 
