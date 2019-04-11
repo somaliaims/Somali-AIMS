@@ -41,6 +41,12 @@ namespace AIMS.Services
         Task<ExchangeRatesView> GetLatestCurrencyRates();
 
         /// <summary>
+        /// Gets the value for exchange rate setting for manual or auto
+        /// </summary>
+        /// <returns></returns>
+        bool GetExRateSetting();
+
+        /// <summary>
         /// Get the currency rates for the specified date
         /// </summary>
         /// <param name="dated"></param>
@@ -161,10 +167,17 @@ namespace AIMS.Services
             var unitWork = new UnitOfWork(context);
             var defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
             ExchangeRatesView ratesView = new ExchangeRatesView();
+            bool isExRateAuto = false;
+            var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(r => r.Id != 0);
 
-            if (defaultCurrency != null)
+            if (exRateSettings != null)
             {
-                ratesView.Base = defaultCurrency.Currency;
+                isExRateAuto = exRateSettings.IsAutomatic;
+            }
+
+            ratesView.Base = defaultCurrency.Currency;
+            if (isExRateAuto == true && defaultCurrency != null)
+            {
                 List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
                 DateTime dated = DateTime.Now;
                 ratesView.Dated = dated.Date.ToString();
@@ -200,6 +213,14 @@ namespace AIMS.Services
                     }
                 }
             }
+            else if (defaultCurrency != null)
+            {
+                string exRatesManual = exRateSettings.ManualExchangeRates;
+                if (!string.IsNullOrEmpty(exRatesManual))
+                {
+                    ratesView.Rates = JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRatesManual);
+                }
+            }
             return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
         }
 
@@ -222,15 +243,39 @@ namespace AIMS.Services
             {
                 var defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
                 ExchangeRatesView ratesView = new ExchangeRatesView();
+                bool isExRateAuto = false;
+                var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(r => r.Id != 0);
 
-                if (defaultCurrency != null)
+                if (exRateSettings != null)
                 {
-                    ratesView.Base = defaultCurrency.Currency;
+                    isExRateAuto = exRateSettings.IsAutomatic;
+                }
+
+                ratesView.Base = defaultCurrency.Currency;
+                if (isExRateAuto == true && defaultCurrency != null)
+                {
                     List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
                     var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date && e.DefaultCurrency == defaultCurrency.Currency);
                     ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
                 }
+                else if (defaultCurrency != null)
+                {
+                    string exRatesManual = exRateSettings.ManualExchangeRates;
+                    if (!string.IsNullOrEmpty(exRatesManual))
+                    {
+                        ratesView.Rates = JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRatesManual);
+                    }
+                }
                 return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
+            }
+        }
+
+        public bool GetExRateSetting()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var setting = unitWork.ExRatesSettingsRepository.GetOne(e => e.Id != 0);
+                return setting == null ? true : setting.IsAutomatic;
             }
         }
     }

@@ -31,7 +31,7 @@ namespace AIMS.APIs.Controllers
             {
                 return Ok(null);
             }
-            
+
             ratesView = await ratesService.GetLatestCurrencyRates();
             if (ratesView.Rates == null)
             {
@@ -70,6 +70,23 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
             var response = ratesService.SaveCurrencyRatesManual(model.Rates);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost]
+        [Route("SaveAPIKeyForOpenExchange")]
+        public IActionResult SaveAPIKeyForOpenExchange([FromBody] ExchangeRateAPIKeyModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = ratesService.SetAPIKeyForOpenExchange(model.Key);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

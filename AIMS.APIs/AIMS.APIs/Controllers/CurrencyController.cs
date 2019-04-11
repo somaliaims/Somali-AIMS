@@ -48,8 +48,8 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
-        [Route("GetDefaultCurrency")]
-        public IActionResult GetDefaultCurrency()
+        [Route("GetDefault")]
+        public IActionResult GetDefault()
         {
             var currency = currencyService.GetDefaultCurrency();
             return Ok(currency);

@@ -103,6 +103,12 @@ namespace AIMS.Models
         public decimal Rate { get; set; }
     }
 
+    public class ExchangeRateAPIKeyModel
+    {
+        [Required]
+        public string Key { get; set; }
+    }
+
     public class CurrencyModel
     {
         [Required]
