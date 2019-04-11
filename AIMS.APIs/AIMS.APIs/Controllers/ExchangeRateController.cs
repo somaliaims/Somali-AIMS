@@ -23,6 +23,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("GetLatestRates")]
         public async Task<IActionResult> GetLatestRates()
         {
             ExchangeRatesView ratesView = null;
@@ -42,6 +43,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("GetSettings")]
         public IActionResult GetSettings()
         {
             var settings = ratesService.GetExRateSettings();
