@@ -71,6 +71,22 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
+        [Route("SetExchangeRateAutoSetting")]
+        public IActionResult SetExchangeRatesAutoSettings([FromBody] ExRateAutoSetting model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = ratesService.SetExchangeRatesAutoSettings(model.IsAutomatic);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost]
         [Route("SaveManualCurrencyRates")]
         public IActionResult SaveManualCurrencyRates(ManualCurrencyRateModel model)
         {

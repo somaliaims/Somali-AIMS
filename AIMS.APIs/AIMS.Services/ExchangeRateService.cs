@@ -35,6 +35,13 @@ namespace AIMS.Services
         ActionResponse SetAPIKeyForOpenExchange(string key);
 
         /// <summary>
+        /// Sets settings for auto exchange rates
+        /// </summary>
+        /// <param name="autoExchangeRates"></param>
+        /// <returns></returns>
+        ActionResponse SetExchangeRatesAutoSettings(bool autoExchangeRates);
+
+        /// <summary>
         /// Gets the latest currency rates list from DB
         /// </summary>
         /// <returns></returns>
@@ -282,6 +289,27 @@ namespace AIMS.Services
                     settingsView.IsOpenExchangeKeySet = !string.IsNullOrEmpty(exRateSettings.APIKeyOpenExchangeRates) ? true : false;
                 }
                 return settingsView;
+            }
+        }
+
+        public ActionResponse SetExchangeRatesAutoSettings(bool autoExchangeRates)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(e => e.Id != 0);
+                if (exRateSettings == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Exchange Rate Settings");
+                    response.Success = false;
+                    return response;
+                }
+                exRateSettings.IsAutomatic = autoExchangeRates;
+                unitWork.ExRatesSettingsRepository.Update(exRateSettings);
+                unitWork.Save();
+                return response;
             }
         }
     }

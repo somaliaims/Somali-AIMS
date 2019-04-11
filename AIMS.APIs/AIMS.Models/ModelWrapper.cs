@@ -103,6 +103,12 @@ namespace AIMS.Models
         public bool IsOpenExchangeKeySet { get; set; }
     }
 
+    public class ExRateAutoSetting
+    {
+        [Required]
+        public bool IsAutomatic { get; set; }
+    }
+
     public class CurrencyWithRates
     {
         public string Currency { get; set; }
