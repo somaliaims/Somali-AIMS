@@ -63,7 +63,7 @@ namespace AIMS.Services
             ExchangeRatesView ratesView = new ExchangeRatesView();
             try
             {
-                var response = await client.GetStringAsync(dated + ".json?app_id=" + apiToken);
+                var response = await client.GetStringAsync("historical/" + dated + ".json?app_id=" + apiToken);
                 var ratesJson = JsonConvert.DeserializeObject<dynamic>(response);
                 string ratesStr = ratesJson != null ? JsonConvert.SerializeObject(ratesJson.rates) : "";
                 ratesStr = ratesStr.Replace("\\", "").Replace("\"", "");
@@ -72,8 +72,9 @@ namespace AIMS.Services
                 ratesView.Rates = this.GetRatesList(ratesStr);
                 string ratesJsonStr = JsonConvert.SerializeObject(ratesView.Rates);
             }
-            catch(Exception)
+            catch(Exception ex)
             {
+                string error = ex.Message;
             }
             return await Task<List<CurrencyWithRates>>.Run(() => ratesView).ConfigureAwait(false);
         }

@@ -57,6 +57,16 @@ namespace AIMS.APIs.Controllers
         [Route("GetRatesForDate/{dated}")]
         public async Task<IActionResult> GetRatesForDate(DateTime dated)
         {
+            bool isTodaysDate = false;
+            if (dated.Date > DateTime.Now.Date)
+            {
+                return BadRequest("Invalid date provided. Currency rates cannot be fetched for future dates");
+            }
+            else if(dated.Date == DateTime.Now.Date)
+            {
+                isTodaysDate = true;
+            }
+
             ExchangeRatesView ratesView = null;
             int count = ratesService.GetAPIsCallsCount();
             if (count >= 999)
@@ -68,7 +78,8 @@ namespace AIMS.APIs.Controllers
             if (ratesView.Rates == null)
             {
                 string apiKey = ratesService.GetAPIKeyForOpenExchange();
-                ratesView = await ratesHttpService.GetRatesForDateAsync(datedStr, apiKey);
+                
+                ratesView = (isTodaysDate) ? await ratesHttpService.GetRatesAsync(apiKey) : await ratesHttpService.GetRatesForDateAsync(datedStr, apiKey);
                 ratesService.SaveCurrencyRates(ratesView.Rates);
             }
             return Ok(ratesView);
