@@ -105,6 +105,7 @@ namespace AIMS.Models
     {
         public bool IsAutomatic { get; set; }
         public bool IsOpenExchangeKeySet { get; set; }
+        public IEnumerable<CurrencyWithRates> ManualCurrencyRates { get; set; }
     }
 
     public class ExRateAutoSetting

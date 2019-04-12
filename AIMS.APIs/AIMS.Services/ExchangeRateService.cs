@@ -87,7 +87,6 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                IMessageHelper mHelper;
 
                 if (ratesList.Count > 0)
                 {
@@ -300,6 +299,7 @@ namespace AIMS.Services
                 {
                     settingsView.IsAutomatic = exRateSettings.IsAutomatic;
                     settingsView.IsOpenExchangeKeySet = !string.IsNullOrEmpty(exRateSettings.APIKeyOpenExchangeRates) ? true : false;
+                    settingsView.ManualCurrencyRates = exRateSettings.ManualExchangeRates == null ? null : JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRateSettings.ManualExchangeRates);
                 }
                 return settingsView;
             }
