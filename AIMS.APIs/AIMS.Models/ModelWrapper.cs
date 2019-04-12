@@ -92,7 +92,6 @@ namespace AIMS.Models
 
     public class ExchangeRatesView
     {
-        public string Base { get; set; }
         public string Dated { get; set; }
         public List<CurrencyWithRates> Rates { get; set; }
     }

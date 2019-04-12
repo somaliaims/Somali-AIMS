@@ -17,13 +17,13 @@ namespace AIMS.Services
         /// Gets latest list of the rates from open exchange rates
         /// </summary>
         /// <returns></returns>
-        Task<ExchangeRatesView> GetRatesAsync(string baseCurrency);
+        Task<ExchangeRatesView> GetRatesAsync(string apiToken);
 
         /// <summary>
         /// Gets rates for the provided date
         /// </summary>
         /// <returns></returns>
-        Task<ExchangeRatesView> GetRatesForDateAsync(string dated, string baseCurrency);
+        Task<ExchangeRatesView> GetRatesForDateAsync(string dated, string apiToken);
     }
 
     public class ExchangeRateHttpService : IExchangeRateHttpService
@@ -38,12 +38,13 @@ namespace AIMS.Services
             client = httpClient;
         }
 
-        public async Task<ExchangeRatesView> GetRatesAsync(string baseCurrency)
+        public async Task<ExchangeRatesView> GetRatesAsync(string apiToken)
         {
-            ExchangeRatesView ratesView = new ExchangeRatesView() { Base = baseCurrency };
+            ExchangeRatesView ratesView = new ExchangeRatesView();
             try
             {
-                var response = await client.GetStringAsync("latest.json?app_id=ce2f27af4d414969bfe05b7285a01dec");
+                //var response = await client.GetStringAsync("latest.json?app_id=ce2f27af4d414969bfe05b7285a01dec");
+                var response = await client.GetStringAsync("latest.json?app_id=" + apiToken);
                 var ratesJson = JsonConvert.DeserializeObject<dynamic>(response);
                 string ratesStr = ratesJson != null ? JsonConvert.SerializeObject(ratesJson.rates) : "";
                 ratesStr = ratesStr.Replace("\\", "").Replace("\"", "");
@@ -57,12 +58,12 @@ namespace AIMS.Services
             return await Task<List<CurrencyWithRates>>.Run(() => ratesView).ConfigureAwait(false);
         }
 
-        public async Task<ExchangeRatesView> GetRatesForDateAsync(string dated, string baseCurrency)
+        public async Task<ExchangeRatesView> GetRatesForDateAsync(string dated, string apiToken)
         {
-            ExchangeRatesView ratesView = new ExchangeRatesView() { Base = baseCurrency, Dated = dated };
+            ExchangeRatesView ratesView = new ExchangeRatesView();
             try
             {
-                var response = await client.GetStringAsync(dated + ".json?app_id=ce2f27af4d414969bfe05b7285a01dec&base=" + baseCurrency);
+                var response = await client.GetStringAsync(dated + ".json?app_id=" + apiToken);
                 var ratesJson = JsonConvert.DeserializeObject<dynamic>(response);
                 string ratesStr = ratesJson != null ? JsonConvert.SerializeObject(ratesJson.rates) : "";
                 ratesStr = ratesStr.Replace("\\", "").Replace("\"", "");

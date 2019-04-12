@@ -318,7 +318,6 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        public string DefaultCurrency { get; set; }
         public string ExchangeRatesJson { get; set; }
         public DateTime Dated { get; set; }
     }

@@ -35,6 +35,12 @@ namespace AIMS.Services
         ActionResponse SetAPIKeyForOpenExchange(string key);
 
         /// <summary>
+        /// Gets api key for open exchange
+        /// </summary>
+        /// <returns></returns>
+        string GetAPIKeyForOpenExchange();
+
+        /// <summary>
         /// Sets settings for auto exchange rates
         /// </summary>
         /// <param name="autoExchangeRates"></param>
@@ -101,7 +107,6 @@ namespace AIMS.Services
                         unitWork.ExchangeRatesRepository.Insert(new EFExchangeRates()
                         {
                             ExchangeRatesJson = ratesJson,
-                            DefaultCurrency = defaultCurrency.Currency,
                             Dated = dated
                         });
                         unitWork.Save();
@@ -169,10 +174,23 @@ namespace AIMS.Services
             }
         }
 
+        public string GetAPIKeyForOpenExchange()
+        {
+            using(var unitWork = new UnitOfWork(context))
+            {
+                string apiKey = "";
+                var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(r => r.Id != 0);
+                if (exRateSettings == null)
+                {
+                    apiKey = exRateSettings.APIKeyOpenExchangeRates;
+                }
+                return apiKey;
+            }
+        }
+
         public async Task<ExchangeRatesView> GetLatestCurrencyRates()
         {
             var unitWork = new UnitOfWork(context);
-            var defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
             ExchangeRatesView ratesView = new ExchangeRatesView();
             bool isExRateAuto = false;
             var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(r => r.Id != 0);
@@ -182,14 +200,12 @@ namespace AIMS.Services
                 isExRateAuto = exRateSettings.IsAutomatic;
             }
 
-            ratesView.Base = defaultCurrency.Currency;
-
-            if ((exRateSettings == null && defaultCurrency != null) || (isExRateAuto == true && defaultCurrency != null))
+            if (isExRateAuto)
             {
                 List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
                 DateTime dated = DateTime.Now;
                 ratesView.Dated = dated.Date.ToString();
-                var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date && e.DefaultCurrency == defaultCurrency.Currency);
+                var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
                 ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
 
                 if (ratesView.Rates != null)
@@ -221,7 +237,7 @@ namespace AIMS.Services
                     }
                 }
             }
-            else if (exRateSettings != null && defaultCurrency != null)
+            else if (exRateSettings != null)
             {
                 string exRatesManual = exRateSettings.ManualExchangeRates;
                 if (!string.IsNullOrEmpty(exRatesManual))
@@ -249,7 +265,6 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
                 ExchangeRatesView ratesView = new ExchangeRatesView();
                 bool isExRateAuto = false;
                 var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(r => r.Id != 0);
@@ -259,14 +274,13 @@ namespace AIMS.Services
                     isExRateAuto = exRateSettings.IsAutomatic;
                 }
 
-                ratesView.Base = defaultCurrency.Currency;
-                if (isExRateAuto == true && defaultCurrency != null)
+                if (isExRateAuto == true)
                 {
                     List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
-                    var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date && e.DefaultCurrency == defaultCurrency.Currency);
+                    var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
                     ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
                 }
-                else if (defaultCurrency != null)
+                else if (exRateSettings != null)
                 {
                     string exRatesManual = exRateSettings.ManualExchangeRates;
                     if (!string.IsNullOrEmpty(exRatesManual))
