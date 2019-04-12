@@ -18,7 +18,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="ratesJson"></param>
         /// <returns></returns>
-        ActionResponse SaveCurrencyRates(List<CurrencyWithRates> ratesList);
+        ActionResponse SaveCurrencyRates(List<CurrencyWithRates> ratesList, DateTime dated);
 
         /// <summary>
         /// Saves new exchange rates for provided date
@@ -82,24 +82,15 @@ namespace AIMS.Services
             context = cntxt;
         }
 
-        public ActionResponse SaveCurrencyRates(List<CurrencyWithRates> ratesList)
+        public ActionResponse SaveCurrencyRates(List<CurrencyWithRates> ratesList, DateTime dated)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
-                DateTime dated = DateTime.Now;
 
                 if (ratesList.Count > 0)
                 {
-                    var defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
-                    if (defaultCurrency == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Default Currency");
-                        response.Success = false;
-                        return response;
-                    }
                     string ratesJson = JsonConvert.SerializeObject(ratesList);
                     var exchangeRate = unitWork.ExchangeRatesRepository.GetOne(e => e.Dated.Date == dated.Date);
                     if (exchangeRate == null)

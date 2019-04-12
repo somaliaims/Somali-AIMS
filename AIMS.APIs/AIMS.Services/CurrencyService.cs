@@ -30,7 +30,7 @@ namespace AIMS.Services
         /// Gets default currency
         /// </summary>
         /// <returns></returns>
-        string GetDefaultCurrency();
+        DefaultCurrencyView GetDefaultCurrency();
 
         /// <summary>
         /// Gets the currency for the provided id
@@ -114,12 +114,12 @@ namespace AIMS.Services
             }
         }
 
-        public string GetDefaultCurrency()
+        public DefaultCurrencyView GetDefaultCurrency()
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 var defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
-                return defaultCurrency == null ? null : defaultCurrency.Currency;
+                return defaultCurrency == null ? null : new DefaultCurrencyView() { Currency = defaultCurrency.Currency };
             }
         }
 

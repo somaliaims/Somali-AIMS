@@ -17,6 +17,11 @@ namespace AIMS.Models
         public string Title { get; set; }
     }
 
+    public class DefaultCurrencyView
+    {
+        public string Currency { get; set; }
+    }
+
     /// <summary>
     /// Token models
     /// </summary>

@@ -39,7 +39,7 @@ namespace AIMS.APIs.Controllers
                 ratesView = await ratesHttpService.GetRatesAsync(apiKey);
                 if (ratesView.Rates != null)
                 {
-                    ratesService.SaveCurrencyRates(ratesView.Rates);
+                    ratesService.SaveCurrencyRates(ratesView.Rates, DateTime.Now);
                 }
             }
             return Ok(ratesView);
@@ -73,14 +73,15 @@ namespace AIMS.APIs.Controllers
             {
                 return Ok(null);
             }
-            string datedStr = dated.Year + "-" + dated.Month + "-" + dated.Day;
             ratesView = await ratesService.GetCurrencyRatesForDate(dated);
             if (ratesView.Rates == null)
             {
                 string apiKey = ratesService.GetAPIKeyForOpenExchange();
-                
+                string monthStr = dated.Month < 10 ? "0" + dated.Month : dated.Month.ToString();
+                string dateStr = dated.Day < 10 ? "0" + dated.Day : dated.Day.ToString();
+                string datedStr = dated.Year + "-" + monthStr + "-" + dateStr;
                 ratesView = (isTodaysDate) ? await ratesHttpService.GetRatesAsync(apiKey) : await ratesHttpService.GetRatesForDateAsync(datedStr, apiKey);
-                ratesService.SaveCurrencyRates(ratesView.Rates);
+                ratesService.SaveCurrencyRates(ratesView.Rates, dated);
             }
             return Ok(ratesView);
         }
