@@ -60,6 +60,12 @@ namespace AIMS.Services
         ExchangeRatesSettingsView GetExRateSettings();
 
         /// <summary>
+        /// Gets list of manual exchange rates
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<CurrencyWithRates> GetManualExchangeRates();
+
+        /// <summary>
         /// Get the currency rates for the specified date
         /// </summary>
         /// <param name="dated"></param>
@@ -302,6 +308,20 @@ namespace AIMS.Services
                     settingsView.ManualCurrencyRates = exRateSettings.ManualExchangeRates == null ? null : JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRateSettings.ManualExchangeRates);
                 }
                 return settingsView;
+            }
+        }
+
+        public IEnumerable<CurrencyWithRates> GetManualExchangeRates()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(e => e.Id != 0);
+                List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
+                if (exRateSettings != null)
+                {
+                    ratesList = exRateSettings.ManualExchangeRates == null ? null : JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRateSettings.ManualExchangeRates);
+                }
+                return ratesList;
             }
         }
 

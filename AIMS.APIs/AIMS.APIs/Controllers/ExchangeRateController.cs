@@ -45,6 +45,14 @@ namespace AIMS.APIs.Controllers
             return Ok(ratesView);
         }
 
+        [HttpGet("GetManualExchangeRates")]
+        public IActionResult GetManualExchangeRates()
+        {
+            var rates = ratesService.GetManualExchangeRates();
+            return Ok(rates);
+        }
+
+
         [HttpGet]
         [Route("GetSettings")]
         public IActionResult GetSettings()
