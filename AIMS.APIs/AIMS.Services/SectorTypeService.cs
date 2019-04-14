@@ -38,7 +38,14 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<ActionResponse> MarkAsDefaultAsync(int id);
+        Task<ActionResponse> SetAsDefaultAsync(int id);
+
+        /// <summary>
+        /// Sets sector type as iati sector default type
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<ActionResponse> SetAsIATIAsync(int id);
 
         /// <summary>
         /// Gets default sector type
@@ -185,7 +192,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> MarkAsDefaultAsync(int id)
+        public async Task<ActionResponse> SetAsDefaultAsync(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -222,6 +229,43 @@ namespace AIMS.Services
             }
         }
 
+        public async Task<ActionResponse> SetAsIATIAsync(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                var sectorTypes = unitWork.SectorTypesRepository.GetAll();
+                var sectorType = (from s in sectorTypes
+                                  where s.Id == id
+                                  select s).FirstOrDefault();
+
+                if (sectorType == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Sector type");
+                    return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                }
+
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        foreach (var sType in sectorTypes)
+                        {
+                            sType.IsIATIType = false;
+                            unitWork.SectorTypesRepository.Update(sType);
+                        }
+                        sectorType.IsIATIType = true;
+                        await unitWork.SaveAsync();
+                    }
+                });
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+            }
+        }
+
         public ActionResponse Update(int id, SectorTypesModel model)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -237,6 +281,7 @@ namespace AIMS.Services
                 }
 
                 sectorTypeObj.TypeName = model.TypeName;
+                sectorTypeObj.IsDefault = model.IsDefault;
                 sectorTypeObj.IsIATIType = model.IsIATIType;
                 unitWork.Save();
                 response.Message = "1";

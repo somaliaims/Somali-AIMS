@@ -75,6 +75,38 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [HttpPut]
+        [Route("SetAsDefault/{id}")]
+        public async Task<IActionResult> SetAsDefault(int id)
+        {
+            if (id < 1)
+            {
+                return BadRequest("Invalid id provided");
+            }
+            var response = await sectorTypeService.SetAsDefaultAsync(id);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPut]
+        [Route("SetAsIATIType/{id}")]
+        public async Task<IActionResult> SetAsIATIType(int id)
+        {
+            if (id < 1)
+            {
+                return BadRequest("Invalid id provided");
+            }
+            var response = await sectorTypeService.SetAsIATIAsync(id);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] SectorTypesModel sectorType)
         {
