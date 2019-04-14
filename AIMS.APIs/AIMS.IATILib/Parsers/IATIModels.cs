@@ -82,6 +82,7 @@ namespace AIMS.IATILib.Parsers
         public string Identifier { get; set; }
         public string DefaultCurrency { get; set; }
         public string Title { get; set; }
+        public string TrimmedTitle { get; set; }
         public string Description { get; set; }
         public ICollection<IATILocation> Locations { get; set; }
         public ICollection<IATISector> Sectors { get; set; }
@@ -112,6 +113,7 @@ namespace AIMS.IATILib.Parsers
         public string EndDate { get; set; }
         public string IATIIdentifier { get; set; }
         public string Title { get; set; }
+        public string TrimmedTitle { get; set; }
         public string DefaultCurrency { get; set; }
         public string Description { get; set; }
     }

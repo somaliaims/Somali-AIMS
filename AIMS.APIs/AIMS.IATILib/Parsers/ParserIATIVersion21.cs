@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -50,10 +51,10 @@ namespace AIMS.IATILib.Parsers
         {
             List<IATIProject> projectsList = new List<IATIProject>();
             //Pick up all narratives
-            var activities = from activity in xmlDoc.Descendants("iati-activity")
-                             where activity.Element("title").Element("narrative") != null ||
-                             activity.Element("title") != null
-                             select activity;
+            var activities = (from activity in xmlDoc.Descendants("iati-activity")
+                              where activity.Element("title").Element("narrative") != null ||
+                              activity.Element("title") != null
+                              select activity);
 
             this.ParseAndFillProjects(activities, projectsList);
             return projectsList;
@@ -349,22 +350,33 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
-                        activityList.Add(new IATIActivity()
+                        string trimmedTitle = Regex.Replace(projectTitle, @"\s+", " ");
+                        var isActivityAdded = (from a in activityList
+                                               where a.TrimmedTitle.Contains(trimmedTitle, StringComparison.OrdinalIgnoreCase)
+                                               select a).FirstOrDefault();
+
+                        if (isActivityAdded == null)
                         {
-                            Id = activityCounter,
-                            Identifier = activity.Element("iati-identifier")?.Value,
-                            Title = projectTitle,
-                            Locations = locations,
-                            Countries = countries,
-                            Regions = regions,
-                            Documents = documentsList,
-                            Description = activity.Element("description")?.Value,
-                            Sectors = sectors,
-                            DefaultCurrency = currency,
-                            Transactions = transactionsList,
-                            ParticipatingOrganizations = organizationList
-                        });
-                        ++activityCounter;
+                            
+                            activityList.Add(new IATIActivity()
+                            {
+                                Id = activityCounter,
+                                Identifier = activity.Element("iati-identifier")?.Value,
+                                Title = projectTitle,
+                                TrimmedTitle = trimmedTitle,
+                                Locations = locations,
+                                Countries = countries,
+                                Regions = regions,
+                                Documents = documentsList,
+                                Description = activity.Element("description")?.Value,
+                                Sectors = sectors,
+                                DefaultCurrency = currency,
+                                Transactions = transactionsList,
+                                ParticipatingOrganizations = organizationList
+                            });
+                            ++activityCounter;
+                        }
+
                     }
                 }
             }
@@ -423,17 +435,27 @@ namespace AIMS.IATILib.Parsers
                         {
                             startDate = "N/A";
                         }
-                        projectsList.Add(new IATIProject()
+
+                        string trimmedTitle = Regex.Replace(projectTitle, @"\s+", " ");
+                        var isProjectAdded = (from p in projectsList
+                                              where p.TrimmedTitle.Contains(trimmedTitle, StringComparison.OrdinalIgnoreCase)
+                                              select p).FirstOrDefault();
+
+                        if (isProjectAdded == null)
                         {
-                            Id = activityCounter,
-                            DefaultCurrency = currency,
-                            IATIIdentifier = activity.Element("iati-identifier")?.Value,
-                            Title = projectTitle,
-                            Description = activity.Element("description")?.Value,
-                            StartDate = startDate,
-                            EndDate = endDate
-                        });
-                        ++activityCounter;
+                            projectsList.Add(new IATIProject()
+                            {
+                                Id = activityCounter,
+                                DefaultCurrency = currency,
+                                IATIIdentifier = activity.Element("iati-identifier")?.Value,
+                                Title = projectTitle,
+                                TrimmedTitle = trimmedTitle,
+                                Description = activity.Element("description")?.Value,
+                                StartDate = startDate,
+                                EndDate = endDate
+                            });
+                            ++activityCounter;
+                        }
                     }
                 }
             }
