@@ -44,6 +44,19 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("GetForManager")]
+        public IActionResult GetForManager()
+        {
+            var userType = (UserTypes)Convert.ToInt32(User.FindFirst(ClaimTypes.Role)?.Value);
+            if (userType != UserTypes.Manager && userType != UserTypes.SuperAdmin)
+            {
+                return BadRequest("You are not authorized to access notifications");
+            }
+            var notifications = notificationService.GetForManager();
+            return Ok(notifications);
+        }
+
+        [HttpGet]
         [Route("GetCount")]
         public IActionResult GetCount()
         {
@@ -65,14 +78,14 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("MarkNotificationsRead")]
-        public IActionResult MarkNotificationsRead([FromBody] NotificationUpdateModel model)
+        public async Task<IActionResult> MarkNotificationsRead([FromBody] NotificationUpdateModel model)
         {
             if (model.Ids.Count == 0)
             {
                 return Ok(0);
             }
 
-            var response = notificationService.MarkNotificationsRead(model);
+            var response = await notificationService.MarkNotificationsReadAsync(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -82,14 +95,14 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("DeleteNotifications")]
-        public IActionResult DeleteNotifications([FromBody] NotificationUpdateModel model)
+        public async Task<IActionResult> DeleteNotifications([FromBody] NotificationUpdateModel model)
         {
             if (model.Ids.Count == 0)
             {
                 return Ok(0);
             }
 
-            var response = notificationService.DeleteNotifications(model);
+            var response = await notificationService.DeleteNotificationsAsync(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

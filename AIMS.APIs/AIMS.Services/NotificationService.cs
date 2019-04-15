@@ -3,9 +3,11 @@ using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using System.Transactions;
 
 namespace AIMS.Services
@@ -20,6 +22,12 @@ namespace AIMS.Services
         /// <param name="organizationId"></param>
         /// <returns></returns>
         IEnumerable<NotificationView> Get(int userId, UserTypes uType, int organizationId);
+
+        /// <summary>
+        /// Gets list of notifications for manager
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<NotificationView> GetForManager();
 
         /// <summary>
         /// Get notifications count for the logged in user
@@ -42,14 +50,14 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse MarkNotificationsRead(NotificationUpdateModel model);
+        Task<ActionResponse> MarkNotificationsReadAsync(NotificationUpdateModel model);
 
         /// <summary>
         /// Deletes notifications
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse DeleteNotifications(NotificationUpdateModel model);
+        Task<ActionResponse> DeleteNotificationsAsync(NotificationUpdateModel model);
     }
 
     public class NotificationService : INotificationService
@@ -68,6 +76,15 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin));
+                return mapper.Map<List<NotificationView>>(notifications);
+            }
+        }
+
+        public IEnumerable<NotificationView> GetForManager()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => (n.UserType == UserTypes.Manager));
                 return mapper.Map<List<NotificationView>>(notifications);
             }
         }
@@ -111,7 +128,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse MarkNotificationsRead(NotificationUpdateModel model)
+        public async Task<ActionResponse> MarkNotificationsReadAsync(NotificationUpdateModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -122,17 +139,20 @@ namespace AIMS.Services
                     var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => model.Ids.Contains(n.Id));
                     if (notifications != null)
                     {
-                        //using (var scope = context.Database.BeginTransaction())
-                        //{
-                            foreach (var notification in notifications)
+                        var strategy = context.Database.CreateExecutionStrategy();
+                        await strategy.ExecuteAsync(async () =>
+                        {
+                            using (var transaction = context.Database.BeginTransaction())
                             {
-                                notification.IsSeen = true;
-                                unitWork.NotificationsRepository.Update(notification);
+                                foreach (var notification in notifications)
+                                {
+                                    notification.IsSeen = true;
+                                    unitWork.NotificationsRepository.Update(notification);
+                                }
+                                await unitWork.SaveAsync();
+                                transaction.Commit();
                             }
-
-                            unitWork.Save();
-                          //  scope.Commit();
-                        //}
+                        });
                     }
                     response.ReturnedId = model.Ids.Count;
                 }
@@ -141,11 +161,11 @@ namespace AIMS.Services
                     response.Success = false;
                     response.Message = ex.Message;
                 }
-                return response;
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
 
-        public ActionResponse DeleteNotifications(NotificationUpdateModel model)
+        public async Task<ActionResponse> DeleteNotificationsAsync(NotificationUpdateModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -155,16 +175,19 @@ namespace AIMS.Services
                     var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => model.Ids.Contains(n.Id));
                     if (notifications != null)
                     {
-                        //using (var scope = new TransactionScope())
-                        //{
-                            foreach (var notification in notifications)
+                        var strategy = context.Database.CreateExecutionStrategy();
+                        await strategy.ExecuteAsync(async () =>
+                        {
+                            using (var transaction = context.Database.BeginTransaction())
                             {
-                                unitWork.NotificationsRepository.Delete(notification);
+                                foreach (var notification in notifications)
+                                {
+                                    unitWork.NotificationsRepository.Delete(notification);
+                                }
+                                await unitWork.SaveAsync();
+                                transaction.Commit();
                             }
-
-                            unitWork.Save();
-                          //  scope.Complete();
-                        //}
+                        });
                     }
                     response.ReturnedId = model.Ids.Count;
                 }
@@ -173,7 +196,7 @@ namespace AIMS.Services
                     response.Success = false;
                     response.Message = ex.Message;
                 }
-                return response;
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
     }
