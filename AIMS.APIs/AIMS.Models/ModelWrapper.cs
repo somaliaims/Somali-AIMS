@@ -484,8 +484,27 @@ namespace AIMS.Models
     {
         public int FunderId { get; set; }
         public string FunderName { get; set; }
+        public IEnumerable<ProjectMiniView> Projects { get; set; }
+        public IEnumerable<EnvelopeSectorBreakup> Sectors { get; set; }
+        public IEnumerable<EnvelopeBreakup> EnvelopeBreakups { get; set; }
+    }
+
+    public class ProjectMiniView
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+    }
+
+    public class EnvelopeBreakup
+    {
         public int Year { get; set; }
         public decimal TotalAmount { get; set; }
+    }
+
+    public class EnvelopeSectorBreakup
+    {
+        public string Sector { get; set; }
+        public decimal Percentage { get; set; }
     }
 
     public class ProjectModelView

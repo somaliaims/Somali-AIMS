@@ -9,7 +9,7 @@ using System.Text;
 
 namespace AIMS.Services
 {
-    public interface IEnvelopeDataService
+    public interface IEnvelopeService
     {
         /// <summary>
         /// Gets all envelopes
@@ -25,12 +25,11 @@ namespace AIMS.Services
         IEnumerable<EnvelopeView> GetMatching(string criteria);
 
         /// <summary>
-        /// Gets the envelope for the provided id
+        /// Gets envelope data for funder
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="funderId"></param>
         /// <returns></returns>
-
-        EnvelopeView Get(int id);
+        EnvelopeView GetFunderEnvelope(int funderId);
 
         /// <summary>
         /// Adds a new section
@@ -54,12 +53,12 @@ namespace AIMS.Services
         ActionResponse Delete(int funderId, int year);
     }
 
-    public class EnvelopeDataService
+    public class EnvelopeService
     {
         AIMSDbContext context;
         IMapper mapper;
 
-        public EnvelopeDataService(AIMSDbContext cntxt, IMapper autoMapper)
+        public EnvelopeService(AIMSDbContext cntxt, IMapper autoMapper)
         {
             context = cntxt;
             mapper = autoMapper;
@@ -74,12 +73,38 @@ namespace AIMS.Services
             }
         }
 
-        public EnvelopeView Get(int id)
+        public EnvelopeView GetFunderEnvelope(int funderId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var envelope = unitWork.EnvelopeRepository.GetByID(id);
-                return mapper.Map<EnvelopeView>(envelope);
+                EnvelopeView envelope = new EnvelopeView();
+                List<EnvelopeBreakup> envelopeList = new List<EnvelopeBreakup>();
+                List<ProjectMiniView> projects = new List<ProjectMiniView>();
+                List<int> projectIds = new List<int>();
+                var envelopes = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == funderId);
+                if (envelopes != null)
+                {
+                    foreach(var e in envelopes)
+                    {
+                        envelopeList.Add(new EnvelopeBreakup()
+                        {
+                            TotalAmount = e.TotalAmount,
+                            Year = e.Year
+                        });
+                    }
+                }
+                var funderProjects = unitWork.ProjectFundersRepository.GetWithInclude(f => f.FunderId == funderId, new string[] { "Project" });
+                foreach(var project in funderProjects)
+                {
+                    projects.Add(new ProjectMiniView()
+                    {
+                        Title = project.Project.Title,
+                        Description = project.Project.Description
+                    });
+                }
+
+                var envelopeSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => projectIds.Contains(p.ProjectId), new string[] { "Sector" });
+                return envelope;
             }
         }
 
