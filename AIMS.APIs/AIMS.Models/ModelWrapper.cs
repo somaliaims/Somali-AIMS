@@ -473,6 +473,21 @@ namespace AIMS.Models
         public DateTime DateUpdated { get; set; }
     }
 
+    public class EnvelopeModel
+    {
+        public int FunderId { get; set; }
+        public int Year { get; set; }
+        public decimal TotalAmount { get; set; }
+    }
+
+    public class EnvelopeView
+    {
+        public int FunderId { get; set; }
+        public string FunderName { get; set; }
+        public int Year { get; set; }
+        public decimal TotalAmount { get; set; }
+    }
+
     public class ProjectModelView
     {
         public int Id { get; set; }

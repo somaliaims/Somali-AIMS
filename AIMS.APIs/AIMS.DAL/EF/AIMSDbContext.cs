@@ -54,6 +54,9 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFSectorMappings>()
                 .HasKey(m => new { m.SectorId, m.MappedSectorId });
 
+            modelBuilder.Entity<EFEnvelope>()
+                .HasKey(e => new { e.FunderId, e.Year });
+
             modelBuilder.Entity<EFUser>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
@@ -98,6 +101,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFExchangeRates> ExchangeRates { get; set; }
         public DbSet<EFExchangeRatesSettings> ExchangeRatesSettings { get; set; }
         public DbSet<EFExchangeRatesAPIsCount> ExchangeRatesAPIsCount { get; set; }
+        public DbSet<EFEnvelope> Envelope { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime

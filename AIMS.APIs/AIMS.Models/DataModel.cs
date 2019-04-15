@@ -176,6 +176,15 @@ namespace AIMS.Models
         public DateTime DateUpdated { get; set; }
     }
 
+    public class EFEnvelope
+    {
+        [ForeignKey("Funder")]
+        public int FunderId { get; set; }
+        public EFOrganization Funder { get; set; }
+        public int Year { get; set; }
+        public decimal TotalAmount { get; set; }
+    }
+
     public class EFProjectDisbursements
     {
         [Key]
