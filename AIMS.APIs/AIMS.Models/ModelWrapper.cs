@@ -475,8 +475,11 @@ namespace AIMS.Models
 
     public class EnvelopeModel
     {
+        [Required]
         public int FunderId { get; set; }
+        [Required]
         public int Year { get; set; }
+        [Required]
         public decimal TotalAmount { get; set; }
     }
 

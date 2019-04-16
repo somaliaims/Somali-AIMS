@@ -18,13 +18,6 @@ namespace AIMS.Services
         IEnumerable<EnvelopeView> GetAll();
 
         /// <summary>
-        /// Get matching envelopes for the criteria
-        /// </summary>
-        /// <param name="criteria"></param>
-        /// <returns></returns>
-        IEnumerable<EnvelopeView> GetMatching(string criteria);
-
-        /// <summary>
         /// Gets envelope data for funder
         /// </summary>
         /// <param name="funderId"></param>
@@ -42,7 +35,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="envelope"></param>
         /// <returns></returns>
-        ActionResponse Update(int id, EnvelopeModel envelope);
+        ActionResponse Update(EnvelopeModel envelope);
 
         /// <summary>
         /// Deletes a relevant funder row from envelope data
@@ -53,7 +46,7 @@ namespace AIMS.Services
         ActionResponse Delete(int funderId, int year);
     }
 
-    public class EnvelopeService
+    public class EnvelopeService : IEnvelopeService
     {
         AIMSDbContext context;
         IMapper mapper;
@@ -176,6 +169,18 @@ namespace AIMS.Services
             {
                 IMessageHelper mHelper = new MessageHelper();
                 ActionResponse response = new ActionResponse();
+
+                var envelope = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == funderId && e.Year == year);
+                if (envelope == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Envelope Data");
+                    response.Success = false;
+                    return response;
+                }
+
+                unitWork.EnvelopeRepository.Delete(envelope);
+                unitWork.Save();
                 return response;
             }
         }
