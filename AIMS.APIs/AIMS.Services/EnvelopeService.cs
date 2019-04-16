@@ -3,9 +3,12 @@ using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace AIMS.Services
 {
@@ -28,14 +31,7 @@ namespace AIMS.Services
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(EnvelopeModel envelope);
-
-        /// <summary>
-        /// Updates a envelope
-        /// </summary>
-        /// <param name="envelope"></param>
-        /// <returns></returns>
-        ActionResponse Update(EnvelopeModel envelope);
+        Task<ActionResponse> AddAsync(EnvelopeModel envelope);
 
         /// <summary>
         /// Deletes a relevant funder row from envelope data
@@ -108,29 +104,51 @@ namespace AIMS.Services
         }
 
 
-        public ActionResponse Add(EnvelopeModel model)
+        public async Task<ActionResponse> AddAsync(EnvelopeModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var isEnvelopeCreated = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == model.FunderId);
-                    if (isEnvelopeCreated != null)
+                    var years = (from y in model.FundsBreakup
+                                 select y.Year).ToList<int>();
+
+                    List<EFEnvelope> envelopeList = new List<EFEnvelope>();
+                    var envelopeFunds = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == model.FunderId);
+
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        response.ReturnedId = isEnvelopeCreated.FunderId;
-                    }
-                    else
-                    {
-                        var newEnvelope = unitWork.EnvelopeRepository.Insert(new EFEnvelope()
+                        using (var transaction = context.Database.BeginTransaction())
                         {
-                            FunderId = model.FunderId,
-                            Year = model.Year,
-                            TotalAmount = model.TotalAmount
-                        });
-                        unitWork.Save();
-                        response.ReturnedId = newEnvelope.FunderId;
-                    }
+                            foreach (var funds in model.FundsBreakup)
+                            {
+                                var isEnvelopeExists = (from e in envelopeFunds
+                                                        where e.Year == funds.Year
+                                                        select e).FirstOrDefault();
+
+                                if (isEnvelopeExists == null)
+                                {
+                                    envelopeList.Add(new EFEnvelope()
+                                    {
+                                        FunderId = model.FunderId,
+                                        TotalAmount = funds.TotalAmount,
+                                        Year = funds.Year
+                                    });
+                                }
+                                else
+                                {
+                                    isEnvelopeExists.TotalAmount = funds.TotalAmount;
+                                    unitWork.EnvelopeRepository.Update(isEnvelopeExists);
+                                }
+                            }
+
+                            unitWork.EnvelopeRepository.InsertMultiple(envelopeList);
+                            await unitWork.SaveAsync();
+                            transaction.Commit();
+                        }
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -141,27 +159,6 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Update(EnvelopeModel model)
-        {
-            using (var unitWork = new UnitOfWork(context))
-            {
-                ActionResponse response = new ActionResponse();
-                var envelopeObj = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == model.FunderId && e.Year == model.Year);
-                if (envelopeObj == null)
-                {
-                    IMessageHelper mHelper = new MessageHelper();
-                    response.Success = false;
-                    response.Message = mHelper.GetNotFound("Envelope");
-                    return response;
-                }
-
-                envelopeObj.TotalAmount = model.TotalAmount;
-                unitWork.EnvelopeRepository.Update(envelopeObj);
-                unitWork.Save();
-                response.Message = true.ToString();
-                return response;
-            }
-        }
 
         public ActionResponse Delete(int funderId, int year)
         {

@@ -477,6 +477,11 @@ namespace AIMS.Models
     {
         [Required]
         public int FunderId { get; set; }
+        public IEnumerable<FundBreakup> FundsBreakup { get; set; }
+    }
+
+    public class FundBreakup
+    {
         [Required]
         public int Year { get; set; }
         [Required]

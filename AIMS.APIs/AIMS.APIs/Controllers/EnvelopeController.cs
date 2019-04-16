@@ -32,14 +32,14 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] EnvelopeModel model)
+        public async Task<IActionResult> Post([FromBody] EnvelopeModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = envelopeService.Add(model);
+            var response = await envelopeService.AddAsync(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -48,14 +48,14 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] EnvelopeModel model)
+        public async Task<IActionResult> Put([FromBody] EnvelopeModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = envelopeService.Update(model);
+            var response = await envelopeService.AddAsync(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
