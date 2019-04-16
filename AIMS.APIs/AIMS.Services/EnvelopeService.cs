@@ -79,7 +79,7 @@ namespace AIMS.Services
             {
                 EnvelopeView envelope = new EnvelopeView();
                 List<EnvelopeBreakup> envelopeList = new List<EnvelopeBreakup>();
-                List<ProjectMiniView> projects = new List<ProjectMiniView>();
+                List<EnvelopeSectorBreakup> sectorsList = new List<EnvelopeSectorBreakup>();
                 List<int> projectIds = new List<int>();
                 var envelopes = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == funderId);
                 if (envelopes != null)
@@ -93,17 +93,23 @@ namespace AIMS.Services
                         });
                     }
                 }
-                var funderProjects = unitWork.ProjectFundersRepository.GetWithInclude(f => f.FunderId == funderId, new string[] { "Project" });
-                foreach(var project in funderProjects)
+                var funding = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.FunderId == funderId);
+                decimal totalFunding = 0;
+                foreach (var fund in funding)
                 {
-                    projects.Add(new ProjectMiniView()
-                    {
-                        Title = project.Project.Title,
-                        Description = project.Project.Description
-                    });
+                    totalFunding += fund.Amount;
                 }
 
                 var envelopeSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => projectIds.Contains(p.ProjectId), new string[] { "Sector" });
+                foreach(var sector in envelopeSectors)
+                {
+                    sectorsList.Add(new EnvelopeSectorBreakup()
+                    {
+                        Sector = sector.Sector.SectorName,
+                        Percentage = sector.FundsPercentage
+                    });
+                }
+                envelope.Sectors = sectorsList;
                 return envelope;
             }
         }
