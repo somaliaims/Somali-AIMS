@@ -84,10 +84,10 @@ namespace AIMS.IATILib.Parsers
         public string Title { get; set; }
         public string TrimmedTitle { get; set; }
         public string Description { get; set; }
+        public ICollection<IATIBudget> Budgets { get; set; }
+        public ICollection<IATIDisbursement> Disbursements { get; set; }
         public ICollection<IATILocation> Locations { get; set; }
         public ICollection<IATISector> Sectors { get; set; }
-        public ICollection<IATICountry> Countries { get; set; }
-        public ICollection<IATIRegion> Regions { get; set; }
         public ICollection<IATIOrganization> ParticipatingOrganizations { get; set; }
         public ICollection<IATITransaction> Transactions { get; set; }
         public ICollection<IATIDocument> Documents { get; set; }
@@ -97,6 +97,24 @@ namespace AIMS.IATILib.Parsers
     {
         public ICollection<IATIActivity> Activities { get; set; }
         public string Dated { get; set; }
+    }
+
+    public class IATIBudget
+    {
+        public int Id { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public decimal Amount { get; set; }
+        public string Currency { get; set; }
+    }
+
+    public class IATIDisbursement
+    {
+        public int Id { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public decimal Amount { get; set; }
+        public string Currency { get; set; }
     }
 
     public class IATIModel

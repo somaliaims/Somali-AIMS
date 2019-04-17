@@ -111,7 +111,7 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var years = (from y in model.FundsBreakup
+                    var years = (from y in model.EnvelopeBreakups
                                  select y.Year).ToList<int>();
 
                     List<EFEnvelope> envelopeList = new List<EFEnvelope>();
@@ -122,7 +122,7 @@ namespace AIMS.Services
                     {
                         using (var transaction = context.Database.BeginTransaction())
                         {
-                            foreach (var funds in model.FundsBreakup)
+                            foreach (var funds in model.EnvelopeBreakups)
                             {
                                 var isEnvelopeExists = (from e in envelopeFunds
                                                         where e.Year == funds.Year

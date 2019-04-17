@@ -22,14 +22,14 @@ namespace AIMS.IATILib.Parsers
             //Pick up all narratives
             var activities = from activity in xmlDoc.Descendants("iati-activity")
                              where activity.Element("title").Element("narrative") != null &&
-                             activity.Element("title").Element("narrative").Value.IndexOf(criteria, 0, StringComparison.OrdinalIgnoreCase) >= 0
+                             activity.Element("title").Element("narrative").Value.Contains(criteria, StringComparison.OrdinalIgnoreCase)
                              select activity;
             this.ParseIATIAndFillList(activities, activityList, transactionTypes);
 
             //Pick up all titles
             var titleActivities = from activity in xmlDoc.Descendants("iati-activity")
                                   where activity.Element("title") != null &&
-                                  activity.Element("title").Value.IndexOf(criteria, 0, StringComparison.OrdinalIgnoreCase) >= 0
+                                  activity.Element("title").Value.Contains(criteria, StringComparison.OrdinalIgnoreCase)
                                   select activity;
             this.ParseIATIAndFillList(titleActivities, activityList, transactionTypes);
             return activityList;
@@ -85,6 +85,8 @@ namespace AIMS.IATILib.Parsers
                     int orgCounter = 1;
                     int documentCounter = 1;
                     int transactionCounter = 1;
+                    int budgetCounter = 1;
+                    int disbursementCounter = 1;
                     foreach (var activity in activities)
                     {
                         string startDate, endDate, projectTitle = "";
@@ -236,6 +238,73 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
+                        //Extracting budgets
+                        var budgets = activity.Elements("budget");
+                        List<IATIBudget> budgetsList = new List<IATIBudget>();
+                        if (budgets != null)
+                        {
+                            foreach (var budget in budgets)
+                            {
+                                string budgetStartDate = budget.Element("period-start").Attribute("iso-date")?.Value;
+                                string budgetEndDate = budget.Element("period-end").Attribute("iso-date")?.Value;
+                                string budgetAmountStr = budget.Element("value")?.Value;
+                                string budgetCurrency = budget.Element("value").Attribute("currency")?.Value;
+                                if (string.IsNullOrEmpty(budgetCurrency))
+                                {
+                                    budgetCurrency = currency;
+                                }
+
+                                decimal budgetAmount = 0;
+                                Decimal.TryParse(budgetAmountStr, out budgetAmount);
+
+                                budgetsList.Add(new IATIBudget()
+                                {
+                                    Id = budgetCounter,
+                                    StartDate = budgetStartDate,
+                                    EndDate = budgetEndDate,
+                                    Currency = budgetCurrency,
+                                    Amount = budgetAmount
+                                });
+                                ++budgetCounter;
+                            }
+                        }
+
+                        //Extracting budgets
+                        var disbursements = activity.Elements("planned-disbursement");
+                        List<IATIDisbursement> disbursementsList = new List<IATIDisbursement>();
+                        if (disbursements != null)
+                        {
+                            foreach (var disbursement in disbursements)
+                            {
+                                //if (disbursement.HasAttributes && (disbursement.Attribute("type").Value == "3"
+                                  //  || disbursement.Attribute("type").Value == "4"))
+                                //{
+                                    string disbursementStartDate = disbursement.Element("period-start").Attribute("iso-date")?.Value;
+                                    string disbursementEndDate = disbursement.Element("period-end").Attribute("iso-date")?.Value;
+                                    string disbursementAmountStr = disbursement.Element("value")?.Value;
+                                    string disbursementCurrency = disbursement.Element("value").Attribute("currency")?.Value;
+                                    if (string.IsNullOrEmpty(disbursementCurrency))
+                                    {
+                                        disbursementCurrency = currency;
+                                    }
+
+                                    decimal disbursementAmount = 0;
+                                    Decimal.TryParse(disbursementAmountStr, out disbursementAmount);
+
+                                    disbursementsList.Add(new IATIDisbursement()
+                                    {
+                                        Id = disbursementCounter,
+                                        StartDate = disbursementStartDate,
+                                        EndDate = disbursementEndDate,
+                                        Currency = disbursementCurrency,
+                                        Amount = disbursementAmount
+                                    });
+                                    ++budgetCounter;
+                                }
+                            //}
+                        }
+
+
                         var recipientCountries = activity.Elements("recipient-country");
                         List<IATICountry> countries = new List<IATICountry>();
                         if (recipientCountries != null)
@@ -365,10 +434,10 @@ namespace AIMS.IATILib.Parsers
                                 Title = projectTitle,
                                 TrimmedTitle = trimmedTitle,
                                 Locations = locations,
-                                Countries = countries,
-                                Regions = regions,
                                 Documents = documentsList,
                                 Description = activity.Element("description")?.Value,
+                                Budgets = budgetsList,
+                                Disbursements = disbursementsList,
                                 Sectors = sectors,
                                 DefaultCurrency = currency,
                                 Transactions = transactionsList,

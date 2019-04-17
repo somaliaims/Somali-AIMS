@@ -171,8 +171,8 @@ namespace AIMS.IATILib.Parsers
                 }
 
                 //Extracting Receipient Countries
-                decimal percentage = 100;
-                var recipientCountries = activity.Elements("recipient-country");
+                //decimal percentage = 100;
+                /*var recipientCountries = activity.Elements("recipient-country");
                 List<IATICountry> countries = new List<IATICountry>();
                 if (recipientCountries.Count() > 1)
                 {
@@ -186,10 +186,10 @@ namespace AIMS.IATILib.Parsers
                         Code = country.Attribute("code")?.Value,
                         ContributionPercentage = percentage.ToString()
                     });
-                }
+                }*/
 
                 //Extracting Receipient Regions
-                var recipientRegions = activity.Elements("recipient-region");
+                /*var recipientRegions = activity.Elements("recipient-region");
                 List<IATIRegion> regions = new List<IATIRegion>();
                 decimal regionPercentage = 100;
                 if (recipientRegions.Count() > 1)
@@ -204,7 +204,7 @@ namespace AIMS.IATILib.Parsers
                         Code = region.Attribute("code")?.Value,
                         ContributionPercentage = regionPercentage.ToString()
                     });
-                }
+                }*/
 
                 //Extracting Sectors
                 var aSectors = activity.Elements("sector");
@@ -223,8 +223,6 @@ namespace AIMS.IATILib.Parsers
                 {
                     Identifier = activity.Element("iati-identifier")?.Value,
                     Title = projectTitle,
-                    Countries = countries,
-                    Regions = regions,
                     Description = activity.Element("description")?.Value,
                     Sectors = sectors,
                     DefaultCurrency = currency,
