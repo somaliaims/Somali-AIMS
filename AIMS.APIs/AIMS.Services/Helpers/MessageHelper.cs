@@ -112,6 +112,22 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string InvalidOrganizationMerge();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="organization"></param>
+        /// <param name="projectTitle"></param>
+        /// <returns></returns>
+        string OrganizationAsFunderMessage(string organization, string projectTitle);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="organization"></param>
+        /// <returns></returns>
+        string InactiveUserMessage(string email, string organization);
     }
 
     public class MessageHelper : IMessageHelper
@@ -210,6 +226,17 @@ namespace AIMS.Services.Helpers
         public string InvalidSectorMapping(string sectorType)
         {
             return (sectorType + INVALID_SECTORTYPE_MAPPING);
+        }
+
+        public string OrganizationAsFunderMessage(string organization, string projectTitle)
+        {
+            return ("You organization (" + organization + ") has been added as a funder into a project (" + projectTitle + ")" );
+        }
+
+        public string InactiveUserMessage(string email, string organization)
+        {
+            return ("The user having (" + email + ") which is registered with your organization (" 
+                + organization + ") is inactive since an year and will be deleted soon.");
         }
     }
 }

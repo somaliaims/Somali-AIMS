@@ -591,8 +591,11 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         [Required]
         public int FunderId { get; set; }
+        [Required]
         public decimal Amount { get; set; }
+        [Required]
         public string Currency { get; set; }
+        [Required]
         public decimal ExchangeRate { get; set; }
     }
 

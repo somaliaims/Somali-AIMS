@@ -18,6 +18,8 @@ namespace AIMS.Models
         DropDown = 1,
         CheckBox = 2,
         Text = 3,
+        List = 4,
+        Radio = 5
     }
 
     public enum NotificationTypes
@@ -346,7 +348,7 @@ namespace AIMS.Models
         public FieldTypes FieldType { get; set; }
         public DateTime ActiveFrom { get; set; }
         public DateTime ActiveUpto { get; set; }
-        public ICollection<EFProjectCustomFields> ProjectFieldsList { get; set; }
+        public string Values { get; set; }
     }
 
     public class EFProjectCustomFields
@@ -356,6 +358,7 @@ namespace AIMS.Models
         [ForeignKey("CustomField")]
         public int CustomFieldId { get; set; }
         public EFCustomFields CustomField { get; set; }
+        public FieldTypes FieldType { get; set; }
         public string Value { get; set; }
     }
 

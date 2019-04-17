@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AIMS.APIs.Controllers
 {
+    //[Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProjectController : ControllerBase
@@ -254,7 +257,13 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = projectService.AddProjectFunder(model);
+            int organizationId = 0;
+            var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            if (!string.IsNullOrEmpty(organizationIdVal))
+            {
+                organizationId = Convert.ToInt32(organizationIdVal);
+            }
+            var response = projectService.AddProjectFunder(model, organizationId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

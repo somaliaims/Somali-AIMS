@@ -3,6 +3,8 @@ using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -96,6 +98,18 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <returns></returns>
         ActionResponse ActivateUserAccount(UserApprovalModel model);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        ActionResponse SetNotificationsForUsers();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        Task<ActionResponse> SetNotificationsForUsersAsync();
     }
 
     public class UserService : IUserService
@@ -516,7 +530,7 @@ namespace AIMS.Services
                                 response.Message = "User not found for the provided email";
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             response.Success = false;
                             response.Message = ex.Message;
@@ -566,6 +580,112 @@ namespace AIMS.Services
                 unitWork.UserRepository.Delete(user);
                 unitWork.Save();
                 return response;
+            }
+        }
+
+        public ActionResponse SetNotificationsForUsers()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+
+                var strategy = context.Database.CreateExecutionStrategy();
+
+                var todaysDate = DateTime.Now;
+                var dateForDeletion = todaysDate.AddDays(-365);
+                var dateForInactive = todaysDate.AddDays(-350);
+                IMessageHelper mHelper = new MessageHelper();
+                var userNotifications = unitWork.NotificationsRepository.GetManyQueryable(n => n.NotificationType == NotificationTypes.UserInactive && n.Dated.Date < DateTime.Now.Date);
+                var users = unitWork.UserRepository.GetWithInclude(u => u.LastLogin <= dateForInactive, new string[] { "Organization" });
+                List<EFUserNotifications> notificationsList = new List<EFUserNotifications>();
+                foreach (var user in users)
+                {
+                    if (user.LastLogin <= dateForDeletion)
+                    {
+                        unitWork.UserRepository.Delete(user);
+                    }
+                    else
+                    {
+                        var isNotificationExists = (from notification in userNotifications
+                                                    where notification.OrganizationId == user.OrganizationId
+                                                    && notification.TreatmentId == user.Id
+                                                    select notification).FirstOrDefault();
+
+                        if (isNotificationExists == null)
+                        {
+                            notificationsList.Add(new EFUserNotifications()
+                            {
+                                OrganizationId = user.OrganizationId,
+                                NotificationType = NotificationTypes.UserInactive,
+                                Message = mHelper.InactiveUserMessage(user.Email, user.Organization.OrganizationName),
+                                Dated = DateTime.Now,
+                                UserType = UserTypes.Standard
+                            });
+                        }
+                    }
+                }
+                if (notificationsList.Count > 0)
+                {
+                    unitWork.NotificationsRepository.InsertMultiple(notificationsList);
+                }
+                unitWork.Save();
+                return response;
+            }
+        }
+
+        public async Task<ActionResponse> SetNotificationsForUsersAsync()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        var todaysDate = DateTime.Now;
+                        var dateForDeletion = todaysDate.AddDays(-365);
+                        var dateForInactive = todaysDate.AddDays(-350);
+                        IMessageHelper mHelper = new MessageHelper();
+                        var userNotifications = unitWork.NotificationsRepository.GetManyQueryable(n => n.NotificationType == NotificationTypes.UserInactive && n.Dated.Date < DateTime.Now.Date);
+                        var users = await unitWork.UserRepository.GetWithIncludeAsync(u => u.LastLogin <= dateForInactive, new string[] { "Organization" });
+                        List<EFUserNotifications> notificationsList = new List<EFUserNotifications>();
+                        foreach (var user in users)
+                        {
+                            if (user.LastLogin <= dateForDeletion)
+                            {
+                                unitWork.UserRepository.Delete(user);
+                            }
+                            else
+                            {
+                                var isNotificationExists = (from notification in userNotifications
+                                                            where notification.OrganizationId == user.OrganizationId
+                                                            && notification.TreatmentId == user.Id
+                                                            select notification).FirstOrDefault();
+
+                                if (isNotificationExists == null)
+                                {
+                                    notificationsList.Add(new EFUserNotifications()
+                                    {
+                                        OrganizationId = user.OrganizationId,
+                                        NotificationType = NotificationTypes.UserInactive,
+                                        Message = mHelper.InactiveUserMessage(user.Email, user.Organization.OrganizationName),
+                                        Dated = DateTime.Now,
+                                        UserType = UserTypes.Standard
+                                    });
+                                }
+                            }
+                        }
+                        if (notificationsList.Count > 0)
+                        {
+                            unitWork.NotificationsRepository.InsertMultiple(notificationsList);
+                        }
+                        await unitWork.SaveAsync();
+                        transaction.Commit();
+                    }
+                });
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
     }

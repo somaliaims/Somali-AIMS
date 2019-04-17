@@ -148,7 +148,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse AddProjectFunder(ProjectFunderModel model);
+        ActionResponse AddProjectFunder(ProjectFunderModel model, int userOrganizationId);
 
         /// <summary>
         /// Adds implementer to a project
@@ -1038,7 +1038,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddProjectFunder(ProjectFunderModel model)
+        public ActionResponse AddProjectFunder(ProjectFunderModel model, int userOrganizationId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -1047,10 +1047,10 @@ namespace AIMS.Services
 
                 try
                 {
+                    mHelper = new MessageHelper();
                     var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
                     if (project == null)
                     {
-                        mHelper = new MessageHelper();
                         response.Message = mHelper.GetNotFound("Project");
                         response.Success = false;
                         return response;
@@ -1058,7 +1058,6 @@ namespace AIMS.Services
                     var funder = unitWork.OrganizationRepository.GetByID(model.FunderId);
                     if (funder == null)
                     {
-                        mHelper = new MessageHelper();
                         response.Message = mHelper.GetNotFound("Funder");
                         response.Success = false;
                         return response;
@@ -1067,7 +1066,6 @@ namespace AIMS.Services
                     var projectFunder = unitWork.ProjectFundersRepository.GetOne(f => f.ProjectId == model.ProjectId && f.FunderId == model.FunderId);
                     if (projectFunder != null)
                     {
-                        mHelper = new MessageHelper();
                         response.Message = mHelper.AlreadyExists("Project Funder");
                         response.Success = false;
                         return response;
@@ -1084,6 +1082,18 @@ namespace AIMS.Services
                     project.DateUpdated = DateTime.Now;
                     unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
+
+                    
+                    unitWork.NotificationsRepository.Insert(new EFUserNotifications()
+                    {
+                        UserType = UserTypes.Standard,
+                        Message = mHelper.OrganizationAsFunderMessage(funder.OrganizationName, project.Title),
+                        OrganizationId = funder.Id,
+                        Dated = DateTime.Now,
+                        TreatmentId = 0,
+                        NotificationType = NotificationTypes.NewProjectToOrg
+                    });
+
                 }
                 catch (Exception ex)
                 {

@@ -2,6 +2,7 @@
 using AIMS.IATILib.Parsers;
 using AIMS.Models;
 using AIMS.Services;
+using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,9 +54,14 @@ namespace AIMS.APIs.Scheduler
                 //Save sectors to db
                 using (var scope = scopeFactory.CreateScope())
                 {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
+                    AIMSDbContext dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
                     IATIService service = new IATIService(dbContext);
                     service.ExtractAndSaveDAC5Sectors(filePath);
+
+                    dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
+                    IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                    UserService userService = new UserService(dbContext, imapper);
+                    userService.SetNotificationsForUsers();
                 }
 
                 //File cleanup
