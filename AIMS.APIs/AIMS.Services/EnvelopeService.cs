@@ -82,11 +82,50 @@ namespace AIMS.Services
                         });
                     }
                 }
-                var funding = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.FunderId == funderId);
-                decimal totalFunding = 0;
-                foreach (var fund in funding)
+
+                var funderProjects = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.FunderId == funderId);
+                if (funderProjects != null)
                 {
-                    totalFunding += fund.Amount;
+                    projectIds = (from p in funderProjects
+                                  select p.ProjectId).ToList<int>();
+                }
+
+                var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => projectIds.Contains(d.ProjectId));
+                decimal totalFunding = 0;
+                if (disbursements.Count() > 0)
+                {
+                    disbursements = (from disbursement in disbursements
+                                     orderby disbursement.Dated
+                                     select disbursement);
+                }
+
+                int year = 0;
+                totalFunding = 0;
+
+                foreach (var disbursement in disbursements)
+                {
+                    if (year != disbursement.Dated.Year && year != 0)
+                    {
+                        var isEnvelopeExists = (from e in envelopeList
+                                                where e.Year == disbursement.Dated.Year
+                                                select e).FirstOrDefault();
+
+                        if (isEnvelopeExists == null)
+                        {
+                            envelopeList.Add(new EnvelopeBreakup()
+                            {
+                                Year = year,
+                                TotalAmount = totalFunding
+                            });
+                        }
+                        else
+                        {
+                            isEnvelopeExists.TotalAmount = totalFunding;
+                        }
+                        totalFunding = 0;
+                    }
+                    totalFunding += disbursement.Amount;
+                    year = disbursement.Dated.Year;
                 }
 
                 var envelopeSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => projectIds.Contains(p.ProjectId), new string[] { "Sector" });
@@ -95,9 +134,11 @@ namespace AIMS.Services
                     sectorsList.Add(new EnvelopeSectorBreakup()
                     {
                         Sector = sector.Sector.SectorName,
-                        Percentage = sector.FundsPercentage
+                        Percentage = sector.FundsPercentage,
+                        Amount = ((totalFunding / 100) * sector.FundsPercentage)
                     });
                 }
+                envelope.EnvelopeBreakups = envelopeList;
                 envelope.Sectors = sectorsList;
                 return envelope;
             }

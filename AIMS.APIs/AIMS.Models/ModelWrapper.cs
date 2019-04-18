@@ -513,6 +513,7 @@ namespace AIMS.Models
     {
         public string Sector { get; set; }
         public decimal Percentage { get; set; }
+        public decimal Amount { get; set; }
     }
 
     public class ProjectModelView
