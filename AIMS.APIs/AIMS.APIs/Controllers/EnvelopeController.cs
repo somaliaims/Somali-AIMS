@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AIMS.APIs.Controllers
 {
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     [ApiController]
     public class EnvelopeController : ControllerBase
@@ -20,14 +23,17 @@ namespace AIMS.APIs.Controllers
             this.envelopeService = service;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [HttpGet]
+        public IActionResult Get()
         {
-            if (id <= 0)
+            int organizationId = 0;
+            var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            bool isValid = int.TryParse(organizationIdVal, out organizationId);
+            if (organizationId == 0)
             {
-                return BadRequest("Invalid id provided");
+                return BadRequest("A bad attempt to access the envelope");
             }
-            var envelope = envelopeService.GetFunderEnvelope(id);
+            var envelope = envelopeService.GetFunderEnvelope(organizationId);
             return Ok(envelope);
         }
 

@@ -128,7 +128,8 @@ namespace AIMS.APIs.Controllers
                 UserReturnView uView = new UserReturnView()
                 {
                     Token = jwtToken,
-                    UserType = foundUser.UserType
+                    UserType = foundUser.UserType,
+                    OrganizationId = foundUser.OrganizationId
                 };
                 return Ok(uView);
             }

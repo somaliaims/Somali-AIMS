@@ -102,6 +102,7 @@ namespace AIMS.Services
                 int year = 0;
                 totalFunding = 0;
 
+                var lastElement = disbursements.LastOrDefault();
                 foreach (var disbursement in disbursements)
                 {
                     if (year != disbursement.Dated.Year && year != 0)
@@ -126,6 +127,15 @@ namespace AIMS.Services
                     }
                     totalFunding += disbursement.Amount;
                     year = disbursement.Dated.Year;
+
+                    if (disbursement == lastElement)
+                    {
+                        envelopeList.Add(new EnvelopeBreakup()
+                        {
+                            Year = year,
+                            TotalAmount = totalFunding
+                        });
+                    }
                 }
 
                 var envelopeSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => projectIds.Contains(p.ProjectId), new string[] { "Sector" });
