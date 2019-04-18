@@ -184,6 +184,7 @@ namespace AIMS.Models
         public int FunderId { get; set; }
         public EFOrganization Funder { get; set; }
         public int Year { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
         public decimal TotalAmount { get; set; }
     }
 

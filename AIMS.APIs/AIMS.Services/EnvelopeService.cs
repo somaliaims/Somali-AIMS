@@ -66,6 +66,9 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                int currentYear = DateTime.Now.Year;
+                int previousYear = currentYear - 1;
+                int upperThreeYearsLimit = currentYear + 3;
                 EnvelopeView envelope = new EnvelopeView();
                 List<EnvelopeBreakup> envelopeList = new List<EnvelopeBreakup>();
                 List<EnvelopeSectorBreakup> sectorsList = new List<EnvelopeSectorBreakup>();
@@ -95,6 +98,7 @@ namespace AIMS.Services
                 if (disbursements.Count() > 0)
                 {
                     disbursements = (from disbursement in disbursements
+                                     where (disbursement.Dated.Year >= previousYear && disbursement.Dated.Year <= upperThreeYearsLimit)
                                      orderby disbursement.Dated
                                      select disbursement);
                 }
@@ -138,17 +142,47 @@ namespace AIMS.Services
                     }
                 }
 
+                envelopeList = (from e in envelopeList
+                                        orderby e.Year ascending
+                                        select e).ToList();
+
+                List<EnvelopeBreakup> requiredEnvelopeList = new List<EnvelopeBreakup>();
+                for(int y = previousYear; y <= upperThreeYearsLimit; y++)
+                {
+                    var yearEnvelope = (from e in envelopeList
+                                       where e.Year == y
+                                       select e).FirstOrDefault();
+
+                    if (yearEnvelope == null)
+                    {
+                        requiredEnvelopeList.Add(new EnvelopeBreakup()
+                        {
+                            Year = y,
+                            TotalAmount = 0
+                        });
+                    }
+                    else
+                    {
+                        requiredEnvelopeList.Add(yearEnvelope);
+                    }
+                }
+
                 var envelopeSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => projectIds.Contains(p.ProjectId), new string[] { "Sector" });
                 foreach(var sector in envelopeSectors)
                 {
+                    decimal allocatedAmount = 0;
+                    if (totalFunding > 0)
+                    {
+                        allocatedAmount = ((totalFunding / 100) * sector.FundsPercentage);
+                    }
                     sectorsList.Add(new EnvelopeSectorBreakup()
                     {
                         Sector = sector.Sector.SectorName,
                         Percentage = sector.FundsPercentage,
-                        Amount = ((totalFunding / 100) * sector.FundsPercentage)
+                        Amount = allocatedAmount
                     });
                 }
-                envelope.EnvelopeBreakups = envelopeList;
+                envelope.EnvelopeBreakups = requiredEnvelopeList;
                 envelope.Sectors = sectorsList;
                 return envelope;
             }
