@@ -171,15 +171,30 @@ namespace AIMS.Services
                 foreach(var sector in envelopeSectors)
                 {
                     decimal allocatedAmount = 0;
-                    if (totalFunding > 0)
+
+                    List<SectorYearlyAllocation> allocationList = new List<SectorYearlyAllocation>();
+                    foreach(var yr in requiredEnvelopeList)
                     {
-                        allocatedAmount = ((totalFunding / 100) * sector.FundsPercentage);
+                        allocatedAmount = (from e in requiredEnvelopeList
+                                            where e.Year == yr.Year
+                                            select e.TotalAmount).First();
+
+                        if (allocatedAmount > 0)
+                        {
+                            allocatedAmount = ((allocatedAmount / 100) * sector.FundsPercentage);
+                        }
+                        allocationList.Add(new SectorYearlyAllocation()
+                        {
+                            Year = yr.Year,
+                            Amount = allocatedAmount
+                        });
                     }
+
                     sectorsList.Add(new EnvelopeSectorBreakup()
                     {
                         Sector = sector.Sector.SectorName,
                         Percentage = sector.FundsPercentage,
-                        Amount = allocatedAmount
+                        YearlyAllocation = allocationList
                     });
                 }
                 envelope.EnvelopeBreakups = requiredEnvelopeList;

@@ -513,6 +513,12 @@ namespace AIMS.Models
     {
         public string Sector { get; set; }
         public decimal Percentage { get; set; }
+        public IEnumerable<SectorYearlyAllocation> YearlyAllocation { get; set; }
+    }
+
+    public class SectorYearlyAllocation
+    {
+        public int Year { get; set; }
         public decimal Amount { get; set; }
     }
 
