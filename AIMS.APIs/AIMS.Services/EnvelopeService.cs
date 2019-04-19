@@ -66,6 +66,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                decimal expectedFundingAmount = 0, actualFundingAmount = 0;
                 int currentYear = DateTime.Now.Year;
                 int previousYear = currentYear - 1;
                 int upperThreeYearsLimit = currentYear + 3;
@@ -73,6 +74,7 @@ namespace AIMS.Services
                 List<EnvelopeBreakup> envelopeList = new List<EnvelopeBreakup>();
                 List<EnvelopeSectorBreakup> sectorsList = new List<EnvelopeSectorBreakup>();
                 List<int> projectIds = new List<int>();
+
                 var envelopes = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == funderId);
                 if (envelopes != null)
                 {
@@ -80,7 +82,7 @@ namespace AIMS.Services
                     {
                         envelopeList.Add(new EnvelopeBreakup()
                         {
-                            TotalAmount = e.TotalAmount,
+                            ActualAmount = e.TotalAmount,
                             Year = e.Year
                         });
                     }
@@ -91,6 +93,9 @@ namespace AIMS.Services
                 {
                     projectIds = (from p in funderProjects
                                   select p.ProjectId).ToList<int>();
+
+                    expectedFundingAmount = (from p in funderProjects
+                                          select p.Amount).Sum();
                 }
 
                 var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => projectIds.Contains(d.ProjectId));
@@ -105,7 +110,8 @@ namespace AIMS.Services
 
                 int year = 0;
                 totalFunding = 0;
-
+                int yearsLeft = 0;
+                decimal expectedFunds = 0;
                 var lastElement = disbursements.LastOrDefault();
                 foreach (var disbursement in disbursements)
                 {
@@ -117,15 +123,24 @@ namespace AIMS.Services
 
                         if (isEnvelopeExists == null)
                         {
+                            yearsLeft = upperThreeYearsLimit - year;
+                            expectedFunds = 0;
+
+                            if (yearsLeft > 0)
+                            {
+                                expectedFunds = ((expectedFundingAmount - totalFunding) / yearsLeft);
+                            }
+
                             envelopeList.Add(new EnvelopeBreakup()
                             {
                                 Year = year,
-                                TotalAmount = totalFunding
+                                ActualAmount = totalFunding,
+                                ExpectedAmount = expectedFunds
                             });
                         }
                         else
                         {
-                            isEnvelopeExists.TotalAmount = totalFunding;
+                            isEnvelopeExists.ActualAmount = totalFunding;
                         }
                         totalFunding = 0;
                     }
@@ -134,10 +149,17 @@ namespace AIMS.Services
 
                     if (disbursement == lastElement)
                     {
+                        expectedFunds = 0;
+                        if (yearsLeft > 0)
+                        {
+                            expectedFunds = ((expectedFundingAmount - totalFunding) / yearsLeft);
+                        }
+
                         envelopeList.Add(new EnvelopeBreakup()
                         {
                             Year = year,
-                            TotalAmount = totalFunding
+                            ActualAmount = totalFunding,
+                            ExpectedAmount = expectedFunds
                         });
                     }
                 }
@@ -153,12 +175,24 @@ namespace AIMS.Services
                                        where e.Year == y
                                        select e).FirstOrDefault();
 
+                    yearsLeft = upperThreeYearsLimit - y;
+                    expectedFunds = 0;
+                    if (yearsLeft > 0)
+                    {
+                        expectedFunds = ((expectedFundingAmount - totalFunding) / yearsLeft);
+                    }
+                    else if (yearsLeft == 0)
+                    {
+                        expectedFunds = (expectedFundingAmount - totalFunding);
+                    }
+
                     if (yearEnvelope == null)
                     {
                         requiredEnvelopeList.Add(new EnvelopeBreakup()
                         {
                             Year = y,
-                            TotalAmount = 0
+                            ActualAmount = 0,
+                            ExpectedAmount = expectedFunds
                         });
                     }
                     else
@@ -166,6 +200,9 @@ namespace AIMS.Services
                         requiredEnvelopeList.Add(yearEnvelope);
                     }
                 }
+
+                actualFundingAmount = (from e in requiredEnvelopeList
+                                       select e.ActualAmount).Sum();
 
                 var envelopeSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => projectIds.Contains(p.ProjectId), new string[] { "Sector" });
                 foreach(var sector in envelopeSectors)
@@ -177,7 +214,7 @@ namespace AIMS.Services
                     {
                         allocatedAmount = (from e in requiredEnvelopeList
                                             where e.Year == yr.Year
-                                            select e.TotalAmount).First();
+                                            select e.ActualAmount).First();
 
                         if (allocatedAmount > 0)
                         {
@@ -198,6 +235,8 @@ namespace AIMS.Services
                     });
                 }
                 envelope.EnvelopeBreakups = requiredEnvelopeList;
+                envelope.ActualFunds = actualFundingAmount;
+                envelope.ExpectedFunds = expectedFundingAmount;
                 envelope.Sectors = sectorsList;
                 return envelope;
             }
