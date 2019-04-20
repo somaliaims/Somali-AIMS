@@ -45,7 +45,15 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = await envelopeService.AddAsync(model);
+            int organizationId = 0;
+            var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            bool isValid = int.TryParse(organizationIdVal, out organizationId);
+            if (organizationId == 0)
+            {
+                return BadRequest("A bad attempt to access the envelope");
+            }
+
+            var response = await envelopeService.AddAsync(model, organizationId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -61,7 +69,14 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = await envelopeService.AddAsync(model);
+            int organizationId = 0;
+            var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            bool isValid = int.TryParse(organizationIdVal, out organizationId);
+            if (organizationId == 0)
+            {
+                return BadRequest("A bad attempt to access the envelope");
+            }
+            var response = await envelopeService.AddAsync(model, organizationId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

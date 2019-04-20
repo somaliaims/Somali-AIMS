@@ -14,7 +14,8 @@ namespace AIMS.DAL.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Currency = table.Column<string>(nullable: true)
+                    Currency = table.Column<string>(nullable: true),
+                    IsDefault = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,7 +31,8 @@ namespace AIMS.DAL.Migrations
                     FieldTitle = table.Column<string>(nullable: true),
                     FieldType = table.Column<int>(nullable: false),
                     ActiveFrom = table.Column<DateTime>(nullable: false),
-                    ActiveUpto = table.Column<DateTime>(nullable: false)
+                    ActiveUpto = table.Column<DateTime>(nullable: false),
+                    Values = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -72,6 +74,7 @@ namespace AIMS.DAL.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     IsAutomatic = table.Column<bool>(nullable: false),
+                    APIKeyOpenExchangeRates = table.Column<string>(nullable: true),
                     ManualExchangeRates = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -215,7 +218,8 @@ namespace AIMS.DAL.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     TypeName = table.Column<string>(nullable: true),
-                    IsDefault = table.Column<bool>(nullable: true)
+                    IsDefault = table.Column<bool>(nullable: true),
+                    IsIATIType = table.Column<bool>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -250,6 +254,27 @@ namespace AIMS.DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StaticReports", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Envelope",
+                columns: table => new
+                {
+                    FunderId = table.Column<int>(nullable: false),
+                    Currency = table.Column<string>(nullable: true),
+                    Year = table.Column<int>(nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(9, 2)", nullable: false),
+                    ExpectedAmount = table.Column<decimal>(type: "decimal(9, 2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Envelope", x => new { x.FunderId, x.Year });
+                    table.ForeignKey(
+                        name: "FK_Envelope_Organizations_FunderId",
+                        column: x => x.FunderId,
+                        principalTable: "Organizations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -316,6 +341,7 @@ namespace AIMS.DAL.Migrations
                 {
                     ProjectId = table.Column<int>(nullable: false),
                     CustomFieldId = table.Column<int>(nullable: false),
+                    FieldType = table.Column<int>(nullable: false),
                     Value = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -686,6 +712,9 @@ namespace AIMS.DAL.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Currencies");
+
+            migrationBuilder.DropTable(
+                name: "Envelope");
 
             migrationBuilder.DropTable(
                 name: "ExchangeRates");

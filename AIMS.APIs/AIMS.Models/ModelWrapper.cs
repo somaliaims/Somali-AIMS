@@ -476,7 +476,8 @@ namespace AIMS.Models
     public class EnvelopeModel
     {
         [Required]
-        public int FunderId { get; set; }
+        [MaxLength(3)]
+        public string Currency { get; set; }
         public IEnumerable<FundBreakup> EnvelopeBreakups { get; set; }
     }
 
@@ -485,7 +486,8 @@ namespace AIMS.Models
         [Required]
         public int Year { get; set; }
         [Required]
-        public decimal TotalAmount { get; set; }
+        public decimal ActualAmount { get; set; }
+        public decimal ExpectedAmount { get; set; }
     }
 
     public class EnvelopeView
@@ -494,6 +496,7 @@ namespace AIMS.Models
         public string FunderName { get; set; }
         public decimal ExpectedFunds { get; set; }
         public decimal ActualFunds { get; set; }
+        public string Currency { get; set; }
         public IEnumerable<EnvelopeSectorBreakup> Sectors { get; set; }
         public IEnumerable<EnvelopeBreakup> EnvelopeBreakups { get; set; }
     }

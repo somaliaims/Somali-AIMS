@@ -65,6 +65,11 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("Year");
 
+                    b.Property<string>("Currency");
+
+                    b.Property<decimal>("ExpectedAmount")
+                        .HasColumnType("decimal(9, 2)");
+
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(9, 2)");
 

@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    [Migration("20190408174159_Updated_SectorTypes")]
-    partial class Updated_SectorTypes
+    [Migration("20190420194326_Initial_Migration")]
+    partial class Initial_Migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,6 +28,8 @@ namespace AIMS.DAL.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Currency");
+
+                    b.Property<bool>("IsDefault");
 
                     b.HasKey("Id");
 
@@ -52,9 +54,30 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("FieldType");
 
+                    b.Property<string>("Values");
+
                     b.HasKey("Id");
 
                     b.ToTable("CustomFields");
+                });
+
+            modelBuilder.Entity("AIMS.Models.EFEnvelope", b =>
+                {
+                    b.Property<int>("FunderId");
+
+                    b.Property<int>("Year");
+
+                    b.Property<string>("Currency");
+
+                    b.Property<decimal>("ExpectedAmount")
+                        .HasColumnType("decimal(9, 2)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(9, 2)");
+
+                    b.HasKey("FunderId", "Year");
+
+                    b.ToTable("Envelope");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFExchangeRates", b =>
@@ -92,6 +115,8 @@ namespace AIMS.DAL.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("APIKeyOpenExchangeRates");
 
                     b.Property<bool>("IsAutomatic");
 
@@ -268,6 +293,8 @@ namespace AIMS.DAL.Migrations
                     b.Property<int>("ProjectId");
 
                     b.Property<int>("CustomFieldId");
+
+                    b.Property<int>("FieldType");
 
                     b.Property<string>("Value");
 
@@ -567,6 +594,14 @@ namespace AIMS.DAL.Migrations
                     b.ToTable("UserNotifications");
                 });
 
+            modelBuilder.Entity("AIMS.Models.EFEnvelope", b =>
+                {
+                    b.HasOne("AIMS.Models.EFOrganization", "Funder")
+                        .WithMany()
+                        .HasForeignKey("FunderId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("AIMS.Models.EFLogs", b =>
                 {
                     b.HasOne("AIMS.Models.EFProject", "Project")
@@ -582,7 +617,7 @@ namespace AIMS.DAL.Migrations
             modelBuilder.Entity("AIMS.Models.EFProjectCustomFields", b =>
                 {
                     b.HasOne("AIMS.Models.EFCustomFields", "CustomField")
-                        .WithMany("ProjectFieldsList")
+                        .WithMany()
                         .HasForeignKey("CustomFieldId")
                         .OnDelete(DeleteBehavior.Cascade);
 

@@ -31,7 +31,7 @@ namespace AIMS.Services
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        Task<ActionResponse> AddAsync(EnvelopeModel envelope);
+        Task<ActionResponse> AddAsync(EnvelopeModel envelope, int funderId);
 
         /// <summary>
         /// Deletes a relevant funder row from envelope data
@@ -80,9 +80,11 @@ namespace AIMS.Services
                 {
                     foreach(var e in envelopes)
                     {
+                        envelope.Currency = e.Currency;
                         envelopeList.Add(new EnvelopeBreakup()
                         {
                             ActualAmount = e.TotalAmount,
+                            ExpectedAmount = e.ExpectedAmount,
                             Year = e.Year
                         });
                     }
@@ -91,6 +93,11 @@ namespace AIMS.Services
                 var funderProjects = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.FunderId == funderId);
                 if (funderProjects != null)
                 {
+                    if (envelope.Currency == null)
+                    {
+                        envelope.Currency = (from f in funderProjects
+                                             select f.Currency).FirstOrDefault();
+                    }
                     projectIds = (from p in funderProjects
                                   select p.ProjectId).ToList<int>();
 
@@ -141,6 +148,7 @@ namespace AIMS.Services
                         else
                         {
                             isEnvelopeExists.ActualAmount = totalFunding;
+                            isEnvelopeExists.ExpectedAmount = expectedFunds;
                         }
                         totalFunding = 0;
                     }
@@ -243,7 +251,7 @@ namespace AIMS.Services
         }
 
 
-        public async Task<ActionResponse> AddAsync(EnvelopeModel model)
+        public async Task<ActionResponse> AddAsync(EnvelopeModel model, int funderId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -254,7 +262,7 @@ namespace AIMS.Services
                                  select y.Year).ToList<int>();
 
                     List<EFEnvelope> envelopeList = new List<EFEnvelope>();
-                    var envelopeFunds = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == model.FunderId);
+                    var envelopeFunds = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == funderId);
 
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
@@ -271,14 +279,17 @@ namespace AIMS.Services
                                 {
                                     envelopeList.Add(new EFEnvelope()
                                     {
-                                        FunderId = model.FunderId,
-                                        TotalAmount = funds.TotalAmount,
+                                        FunderId = funderId,
+                                        Currency = model.Currency,
+                                        TotalAmount = funds.ActualAmount,
+                                        ExpectedAmount = funds.ExpectedAmount,
                                         Year = funds.Year
                                     });
                                 }
                                 else
                                 {
-                                    isEnvelopeExists.TotalAmount = funds.TotalAmount;
+                                    isEnvelopeExists.TotalAmount = funds.ActualAmount;
+                                    isEnvelopeExists.ExpectedAmount = funds.ExpectedAmount;
                                     unitWork.EnvelopeRepository.Update(isEnvelopeExists);
                                 }
                             }
