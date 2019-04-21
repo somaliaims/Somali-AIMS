@@ -196,15 +196,24 @@ namespace AIMS.Services
 
                     if (yearEnvelope == null)
                     {
+                        decimal exFunds = 0;
+                        if (year >= currentYear)
+                        {
+                            exFunds = expectedFunds;
+                        }
                         requiredEnvelopeList.Add(new EnvelopeBreakup()
                         {
                             Year = y,
                             ActualAmount = 0,
-                            ExpectedAmount = expectedFunds
+                            ExpectedAmount = exFunds
                         });
                     }
                     else
                     {
+                        if (yearEnvelope.ExpectedAmount == 0 && yearEnvelope.ActualAmount > 0)
+                        {
+                            yearEnvelope.ExpectedAmount = expectedFunds;
+                        }
                         requiredEnvelopeList.Add(yearEnvelope);
                     }
                 }
