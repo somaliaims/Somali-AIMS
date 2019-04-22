@@ -91,39 +91,6 @@ namespace AIMS.Models
         public DateTime? LastLogin { get; set; }
     }
 
-    /*
-     * The idea to adjust new sector is that for any open projects, if sector name
-     * is updated, create a new sector for updated name and reference the open projects
-     * with the name and update the old sector id reference
-     */
-    /*public class EFSectorTypes
-    {
-        [Key]
-        public int Id { get; set; }
-        public string TypeName { get; set; }
-        public ICollection<EFSectorCategory> SectorCategories { get; set; }
-    }
-
-    public class EFSectorCategory
-    {
-        [Key]
-        public int Id { get; set; }
-        public string Category { get; set; }
-        [ForeignKey("SectorType")]
-        public int SectorTypeId { get; set; }
-        public EFSectorTypes SectorType { get; set; }
-    }
-
-    public class EFSectorSubCategory
-    {
-        [Key]
-        public int Id { get; set; }
-        [ForeignKey("SectoryCategory")]
-        public int SectorCategoryId { get; set; }
-        public EFSectorCategory SectorCategory { get; set; }
-        public string SubCategory { get; set; }
-    }*/
-
     public class EFSector
     {
         [Key]
@@ -272,7 +239,6 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
-        
     }
 
     public class EFReportSubscriptions
@@ -363,7 +329,7 @@ namespace AIMS.Models
         public int CustomFieldId { get; set; }
         public EFCustomFields CustomField { get; set; }
         public FieldTypes FieldType { get; set; }
-        public string Value { get; set; }
+        public string Values { get; set; }
     }
 
     public class EFIATIData

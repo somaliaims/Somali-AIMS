@@ -1,0 +1,77 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AIMS.Models;
+using AIMS.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AIMS.APIs.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class CustomFieldController : ControllerBase
+    {
+        ICustomFieldsService service;
+
+        public CustomFieldController(ICustomFieldsService cService)
+        {
+            service = cService;
+        }
+
+        [HttpGet]
+        public IActionResult Get()
+        {
+            var fields = service.GetAll();
+            return Ok(fields);
+        }
+
+        [HttpPost]
+        public IActionResult Post([FromBody] CustomFieldModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = service.Add(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.ReturnedId);
+        }
+
+        [HttpPut]
+        public IActionResult Put(int id, [FromBody] CustomFieldModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = service.Update(id, model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.ReturnedId);
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            if (id < 1)
+            {
+                return BadRequest("Invalid id provided");
+            }
+            var response = service.Delete(id);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.Success);
+        }
+    }
+}
