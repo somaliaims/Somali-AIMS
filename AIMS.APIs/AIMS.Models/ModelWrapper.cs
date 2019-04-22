@@ -1002,6 +1002,25 @@ namespace AIMS.Models
         public List<int> LocationIds { get; set; } = new List<int>();
     }
 
+    public class CustomFieldModel
+    {
+        public string FieldTitle { get; set; }
+        public FieldTypes FieldType { get; set; }
+        public DateTime ActiveFrom { get; set; }
+        public DateTime ActiveUpto { get; set; }
+        public string Values { get; set; }
+    }
+
+    public class CustomFieldView
+    {
+        public int Id { get; set; }
+        public string FieldTitle { get; set; }
+        public FieldTypes FieldType { get; set; }
+        public DateTime ActiveFrom { get; set; }
+        public DateTime ActiveUpto { get; set; }
+        public string Values { get; set; }
+    }
+
     public class IATIByIdModel
     {
         public string Identifier { get; set; }

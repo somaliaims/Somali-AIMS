@@ -94,6 +94,12 @@ namespace AIMS.Services
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
                 var organizations = unitWork.OrganizationRepository.GetMany(o => o.Id != 0);
+                if (organizations.Count() > 0)
+                {
+                    organizations = (from org in organizations
+                                     orderby org.OrganizationName ascending
+                                     select org);
+                }
                 return mapper.Map<List<OrganizationView>>(organizations);
             }
         }
@@ -118,6 +124,12 @@ namespace AIMS.Services
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
                 var organizations = unitWork.OrganizationRepository.GetMany(o => o.OrganizationName.Contains(criteria));
+                if (organizations.Count() > 0)
+                {
+                    organizations = (from org in organizations
+                                     orderby org.OrganizationName ascending
+                                     select org);
+                }
                 return mapper.Map<List<OrganizationView>>(organizations);
             }
         }
@@ -126,7 +138,13 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var organizations = await unitWork.OrganizationRepository.GetAsync(o => o.Id != 0);
+                var organizations = await unitWork.OrganizationRepository.GetAllAsync();
+                if (organizations.Count() > 0)
+                {
+                    organizations = (from org in organizations
+                                     orderby org.OrganizationName ascending
+                                     select org);
+                }
                 return await Task<IEnumerable<OrganizationView>>.Run(() => mapper.Map<List<OrganizationView>>(organizations)).ConfigureAwait(false);
             }
         }

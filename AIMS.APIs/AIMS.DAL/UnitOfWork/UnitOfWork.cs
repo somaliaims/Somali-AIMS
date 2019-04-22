@@ -40,6 +40,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFExchangeRatesSettings> exRatesSettingsRepository;
         private GenericRepository<EFExchangeRatesAPIsCount> exRatesAPIsRepository;
         private GenericRepository<EFEnvelope> envelopeDataRepository;
+        private GenericRepository<EFCustomFields> customFieldRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -53,6 +54,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.currencyRepository == null)
                     this.currencyRepository = new GenericRepository<EFCurrency>(context);
                 return this.currencyRepository;
+            }
+        }
+
+        public GenericRepository<EFCustomFields> CustomFieldRepository
+        {
+            get
+            {
+                if (this.customFieldRepository == null)
+                    this.customFieldRepository = new GenericRepository<EFCustomFields>(context);
+                return this.customFieldRepository;
             }
         }
 

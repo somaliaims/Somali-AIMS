@@ -122,10 +122,6 @@ namespace AIMS.Services
                 var lastElement = disbursements.LastOrDefault();
                 foreach (var disbursement in disbursements)
                 {
-                    /*if (year == 0)
-                    {
-                        year = disbursement.Dated.Year;
-                    }*/
                     yearsLeft = upperThreeYearsLimit - year;
 
                     if (year != disbursement.Dated.Year)
@@ -136,51 +132,25 @@ namespace AIMS.Services
 
                         if (isEnvelopeExists == null)
                         {
-                            /*expectedFunds = 0;
-                            if (yearsLeft > 0)
-                            {
-                                expectedFunds = Math.Round((projectValue - disbursementsValue) / yearsLeft);
-                            }
-
-                            if (year < currentYear && disbursementsValue == 0)
-                            {
-                                expectedFunds = 0;
-                            }*/
-
                             envelopeList.Add(new EnvelopeBreakup()
                             {
                                 Year = year,
                                 ActualAmount = disbursement.Amount,
-                                //ExpectedAmount = expectedFunds
                             });
                         }
                         else
                         {
                             isEnvelopeExists.ActualAmount = disbursement.Amount;
-                            //isEnvelopeExists.ExpectedAmount = expectedFunds;
                         }
-                        //disbursementsValue = 0;
                     }
-                    //disbursementsValue += disbursement.Amount;
                     year = disbursement.Dated.Year;
 
                     if (disbursement == lastElement)
                     {
-                        /*expectedFunds = 0;
-                        if (yearsLeft > 0)
-                        {
-                            expectedFunds = Math.Round((projectValue - disbursementsValue) / yearsLeft);
-                        }
-                        else
-                        {
-                            expectedFunds = actualFundingAmount - disbursementsValue;
-                        }*/
-
                         envelopeList.Add(new EnvelopeBreakup()
                         {
                             Year = year,
                             ActualAmount = disbursement.Amount,
-                           // ExpectedAmount = expectedFunds
                         });
                     }
                 }
@@ -195,10 +165,6 @@ namespace AIMS.Services
                     var yearEnvelope = (from e in envelopeList
                                        where e.Year == y
                                        select e).FirstOrDefault();
-
-                    /*disbursementsValue = (from e in envelopeList
-                                          where e.Year <= y
-                                          select e.ActualAmount).Sum();*/
 
                     disbursementsValue = (from r in requiredEnvelopeList
                                            where r.Year <= y
