@@ -130,6 +130,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var sectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsDefault == true, new string[] { "SectorType" });
+                sectors = (from sector in sectors
+                           orderby sector.SectorName ascending
+                           select sector);
                 return mapper.Map<List<SectorView>>(sectors);
             }
         }
@@ -139,6 +142,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var sectors = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == id);
+                sectors = (from sector in sectors
+                           orderby sector.SectorName ascending
+                           select sector);
                 return mapper.Map<List<SectorView>>(sectors);
             }
         }
@@ -148,6 +154,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var sectors = unitWork.SectorRepository.GetWithInclude(s => s.ParentSectorId == id);
+                sectors = (from sector in sectors
+                           orderby sector.SectorName ascending
+                           select sector);
                 return mapper.Map<List<SectorView>>(sectors);
             }
         }
