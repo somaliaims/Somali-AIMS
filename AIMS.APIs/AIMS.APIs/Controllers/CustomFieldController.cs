@@ -27,6 +27,13 @@ namespace AIMS.APIs.Controllers
             return Ok(fields);
         }
 
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            var field = service.Get(id);
+            return Ok(field);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] CustomFieldModel model)
         {

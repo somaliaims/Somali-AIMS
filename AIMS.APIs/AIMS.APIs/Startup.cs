@@ -124,6 +124,7 @@ namespace AIMS.APIs
             services.AddScoped<ICurrencyService, CurrencyService>();
             services.AddScoped<IExchangeRateService, ExchangeRateService>();
             services.AddScoped<IEnvelopeService, EnvelopeService>();
+            services.AddScoped<ICustomFieldsService, CustomFieldsService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();
