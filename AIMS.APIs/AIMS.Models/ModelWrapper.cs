@@ -1004,10 +1004,25 @@ namespace AIMS.Models
 
     public class CustomFieldModel
     {
+        [Required]
         public string FieldTitle { get; set; }
+        [Required]
         public FieldTypes FieldType { get; set; }
         public DateTime ActiveFrom { get; set; }
         public DateTime ActiveUpto { get; set; }
+        [Required]
+        public string Values { get; set; }
+    }
+
+    public class ProjectCustomFieldModel
+    {
+        [Required]
+        public int ProjectId { get; set; }
+        [Required]
+        public int CustomFieldId { get; set; }
+        [Required]
+        public FieldTypes FieldType { get; set; }
+        [Required]
         public string Values { get; set; }
     }
 

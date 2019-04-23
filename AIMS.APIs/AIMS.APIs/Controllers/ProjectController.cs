@@ -323,6 +323,40 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
+        [Route("AddProjectCustomField")]
+        public IActionResult AddProjectCustomField([FromBody] ProjectCustomFieldModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = projectService.AddUpdateProjectCustomField(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPut]
+        [Route("EditProjectCustomField")]
+        public IActionResult EditProjectCustomField([FromBody] ProjectCustomFieldModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = projectService.AddUpdateProjectCustomField(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost]
         [Route("SearchProjectsByCriteria")]
         public async Task<IActionResult> SearchProjectsByCriteria([FromBody] SearchProjectModel model)
         {
@@ -420,6 +454,23 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid Ids provided");
             }
             var response = projectService.DeleteProjectImplementer(projectId, implementerId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpDelete]
+        [Route("DeleteProjectCustomField/{projectId}/{customFieldId}")]
+        public IActionResult DeleteProjectCustomField(int projectId, int customFieldId)
+        {
+            if (projectId <= 0 || customFieldId <= 0)
+            {
+                return BadRequest("Invalid Ids provided");
+            }
+
+            var response = projectService.DeleteProjectCustomField(projectId, customFieldId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

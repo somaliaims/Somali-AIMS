@@ -172,6 +172,13 @@ namespace AIMS.Services
         ActionResponse AddProjectDocument(ProjectDocumentModel model);
 
         /// <summary>
+        /// Adds custom field to project
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddUpdateProjectCustomField(ProjectCustomFieldModel model);
+
+        /// <summary>
         /// Adds marker to a project
         /// </summary>
         /// <param name="model"></param>
@@ -265,6 +272,14 @@ namespace AIMS.Services
         /// <param name="implementerId"></param>
         /// <returns></returns>
         ActionResponse DeleteProjectImplementer(int projectId, int implementerId);
+
+        /// <summary>
+        /// Deletes project custom field id
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="customFieldId"></param>
+        /// <returns></returns>
+        ActionResponse DeleteProjectCustomField(int projectId, int customFieldId);
 
         /// <summary>
         /// Deletes the disbursement with the provided id
@@ -1235,6 +1250,39 @@ namespace AIMS.Services
             }
         }
 
+        public ActionResponse AddUpdateProjectCustomField(ProjectCustomFieldModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var customField = unitWork.ProjectCustomFieldsRepository.GetOne(p => p.ProjectId == model.ProjectId && p.CustomFieldId == model.CustomFieldId);
+                    if (customField != null)
+                    {
+                        customField.Values = model.Values;
+                    }
+                    else
+                    {
+                        unitWork.ProjectCustomFieldsRepository.Insert(new EFProjectCustomFields()
+                        {
+                            ProjectId = model.ProjectId,
+                            CustomFieldId = model.CustomFieldId,
+                            FieldType = model.FieldType,
+                            Values = model.Values
+                        });
+                    }
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                unitWork.Save();
+                return response;
+            }
+        }
+
         public ActionResponse AddProjectMarker(ProjectMarkersModel model)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -1378,6 +1426,27 @@ namespace AIMS.Services
                 }
 
                 unitWork.ProjectImplementersRepository.Delete(projectImplementer);
+                unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse DeleteProjectCustomField(int projectId, int customFieldId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var projectCustomField = unitWork.ProjectCustomFieldsRepository.Get(f => f.ProjectId == projectId && f.CustomFieldId == customFieldId);
+                IMessageHelper mHelper;
+                if (projectCustomField == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project Custom Field");
+                    response.Success = false;
+                    return response;
+                }
+
+                unitWork.ProjectCustomFieldsRepository.Delete(projectCustomField);
                 unitWork.Save();
                 return response;
             }
