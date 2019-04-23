@@ -1010,7 +1010,6 @@ namespace AIMS.Models
         public FieldTypes FieldType { get; set; }
         public DateTime ActiveFrom { get; set; }
         public DateTime ActiveUpto { get; set; }
-        [Required]
         public string Values { get; set; }
     }
 
