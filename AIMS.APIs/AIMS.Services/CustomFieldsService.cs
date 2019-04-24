@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AIMS.Services.Helpers;
 using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace AIMS.Services
 {
@@ -58,7 +59,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ActionResponse Delete(int id);
+        Task<ActionResponse> DeleteAsync(int id);
     }
 
     public class CustomFieldsService : ICustomFieldsService
@@ -225,6 +226,40 @@ namespace AIMS.Services
                     return response;
                 }
 
+                List<CustomFieldValues> valuesList = new List<CustomFieldValues>();
+                if (!string.IsNullOrEmpty(model.Values))
+                {
+                    valuesList = JsonConvert.DeserializeObject<List<CustomFieldValues>>(model.Values);
+                }
+
+                switch (model.FieldType)
+                {
+                    case FieldTypes.DropDown:
+                    case FieldTypes.List:
+                    case FieldTypes.CheckBox:
+                        if (valuesList.Count < 1)
+                        {
+                            mHelper = new MessageHelper();
+                            response.Message = mHelper.GetInvalidOptionsMessage();
+                            response.Success = false;
+                            return response;
+                        }
+                        break;
+
+                    case FieldTypes.Radio:
+                        if (valuesList.Count < 2)
+                        {
+                            mHelper = new MessageHelper();
+                            response.Message = mHelper.GetInvalidOptionsMessage();
+                            response.Success = false;
+                            return response;
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+
                 customField.FieldTitle = model.FieldTitle;
                 customField.FieldType = model.FieldType;
                 customField.Values = model.Values;
@@ -233,16 +268,17 @@ namespace AIMS.Services
                 unitWork.CustomFieldRepository.Update(customField);
                 unitWork.Save();
                 response.Message = true.ToString();
+                response.ReturnedId = id;
                 return response;
             }
         }
 
-        public ActionResponse Delete(int id)
+        public async Task<ActionResponse> DeleteAsync(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var customField = unitWork.CustomFieldRepository.GetByID(id);
+                var customField = await unitWork.CustomFieldRepository.GetByIDAsync(id);
                 if (customField == null)
                 {
                     IMessageHelper mHelper = new MessageHelper();
@@ -251,8 +287,21 @@ namespace AIMS.Services
                     return response;
                 }
 
-                unitWork.CustomFieldRepository.Delete(customField);
-                unitWork.Save();
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        var projectCustomFields = unitWork.ProjectCustomFieldsRepository.GetManyQueryable(c => c.CustomFieldId == id);
+                        foreach(var cField in projectCustomFields)
+                        {
+                            unitWork.ProjectCustomFieldsRepository.Delete(cField);
+                        }
+                        unitWork.CustomFieldRepository.Delete(customField);
+                        await unitWork.SaveAsync();
+                        transaction.Commit();
+                    }
+                });
                 response.Message = true.ToString();
                 return response;
             }

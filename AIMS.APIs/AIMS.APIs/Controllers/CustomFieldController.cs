@@ -50,7 +50,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] CustomFieldModel model)
         {
             if (!ModelState.IsValid)
@@ -67,13 +67,13 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpDelete]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             if (id < 1)
             {
                 return BadRequest("Invalid id provided");
             }
-            var response = service.Delete(id);
+            var response = await service.DeleteAsync(id);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

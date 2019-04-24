@@ -1004,6 +1004,7 @@ namespace AIMS.Models
 
     public class CustomFieldModel
     {
+        public int Id { get; set; }
         [Required]
         public string FieldTitle { get; set; }
         [Required]
