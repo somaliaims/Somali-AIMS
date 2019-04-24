@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using AIMS.Services.Helpers;
+using Newtonsoft.Json;
 
 namespace AIMS.Services
 {
@@ -133,6 +134,41 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
+                    IMessageHelper mHelper;
+                    List<CustomFieldValues> valuesList = new List<CustomFieldValues>();
+                    if (!string.IsNullOrEmpty(model.Values))
+                    {
+                       valuesList = JsonConvert.DeserializeObject<List<CustomFieldValues>>(model.Values);
+                    }
+
+                    switch (model.FieldType)
+                    {
+                        case FieldTypes.DropDown:
+                        case FieldTypes.List:
+                        case FieldTypes.CheckBox:
+                            if (valuesList.Count < 1)
+                            {
+                                mHelper = new MessageHelper();
+                                response.Message = mHelper.GetInvalidOptionsMessage();
+                                response.Success = false;
+                                return response;
+                            }
+                            break;
+
+                        case FieldTypes.Radio:
+                            if (valuesList.Count < 2)
+                            {
+                                mHelper = new MessageHelper();
+                                response.Message = mHelper.GetInvalidOptionsMessage();
+                                response.Success = false;
+                                return response;
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                    
                     var customFields = unitWork.CustomFieldRepository.GetManyQueryable(l => (l.FieldTitle.ToLower() == model.FieldTitle.ToLower()));
                     var isCustomFieldCreated = (from c in customFields
                                              where c.FieldTitle.ToLower() == model.FieldTitle

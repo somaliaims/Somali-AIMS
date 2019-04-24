@@ -1013,6 +1013,12 @@ namespace AIMS.Models
         public string Values { get; set; }
     }
 
+    public class CustomFieldValues
+    {
+        public int Id { get; set; }
+        public string Value { get; set; }
+    }
+
     public class ProjectCustomFieldModel
     {
         [Required]

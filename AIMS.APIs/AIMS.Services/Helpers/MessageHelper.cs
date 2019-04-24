@@ -128,6 +128,12 @@ namespace AIMS.Services.Helpers
         /// <param name="organization"></param>
         /// <returns></returns>
         string InactiveUserMessage(string email, string organization);
+
+        /// <summary>
+        /// Gets invalid options message
+        /// </summary>
+        /// <returns></returns>
+        string GetInvalidOptionsMessage();
     }
 
     public class MessageHelper : IMessageHelper
@@ -146,6 +152,7 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_PERCENTAGE = "Invalid value provided for percentage.";
         private readonly string ALREADY_EXISTS = " provided is already entered once.";
         private readonly string INVALID_DATE = "Invalid value provided for date";
+        private readonly string INVALID_OPTIONS_COUNT = "Invalid number of options provided for the type of field";
         private readonly string INVALID_DISBURSEMENTS = "You cannot add more disbursements than the project total value. Please increase the project funding amount before adding more disbursements.";
 
         public string GetNotFound(string entity)
@@ -237,6 +244,11 @@ namespace AIMS.Services.Helpers
         {
             return ("The user having (" + email + ") which is registered with your organization (" 
                 + organization + ") is inactive since an year and will be deleted soon.");
+        }
+
+        public string GetInvalidOptionsMessage()
+        {
+            return (INVALID_OPTIONS_COUNT);
         }
     }
 }
