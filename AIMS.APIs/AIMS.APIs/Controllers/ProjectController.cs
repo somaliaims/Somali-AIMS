@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AIMS.APIs.Controllers
@@ -164,6 +161,18 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid id provided");
             }
             var projects = projectService.GetSectorProjects(id);
+            return Ok(projects);
+        }
+
+        [HttpGet]
+        [Route("GetCustomFieldProjects/{id}")]
+        public IActionResult GetCustomFieldProjects(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid id provided");
+            }
+            var projects = projectService.GetCustomFieldProjects(id);
             return Ok(projects);
         }
 
