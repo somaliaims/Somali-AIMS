@@ -590,7 +590,7 @@ namespace AIMS.Services
                     if (projectProfileList == null)
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase)
-                            , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "CustomFields.CustomField" });
                     }
 
                     foreach (var project in projectProfileList)
@@ -607,6 +607,7 @@ namespace AIMS.Services
                         profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
                         profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);
                         profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
+                        profileView.CustomFields = mapper.Map<List<ProjectCustomFieldsView>>(project.CustomFields);
 
                         projectsList.Add(profileView);
                     }
@@ -735,7 +736,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "CustomFields.CustomField" });
                 List<ProjectProfileView> profileViewList = new List<ProjectProfileView>();
 
                 if (projectProfileList != null)
@@ -754,11 +755,11 @@ namespace AIMS.Services
                             Funders = mapper.Map<List<ProjectFunderView>>(project.Funders),
                             Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers),
                             Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements),
-                            Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents)
+                            Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents),
+                            CustomFields = mapper.Map<List<ProjectCustomFieldsView>>(project.CustomFields)
                         });
                     }
                 }
-
                 return await Task<IEnumerable<ProjectProfileView>>.Run(() => profileViewList).ConfigureAwait(false);
             }
         }

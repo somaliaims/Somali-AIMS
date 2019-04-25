@@ -27,6 +27,13 @@ namespace AIMS.APIs.Controllers
             return Ok(fields);
         }
 
+        [HttpGet("GetActive")]
+        public IActionResult GetActive()
+        {
+            var fields = service.GetActiveFields();
+            return Ok(fields);
+        }
+
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {

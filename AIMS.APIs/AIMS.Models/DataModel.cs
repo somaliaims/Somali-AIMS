@@ -142,6 +142,7 @@ namespace AIMS.Models
         public ICollection<EFProjectFunders> Funders { get; set; }
         public ICollection<EFProjectImplementers> Implementers { get; set; }
         public ICollection<EFProjectDocuments> Documents { get; set; }
+        public ICollection<EFProjectCustomFields> CustomFields { get; set; }
         public DateTime DateUpdated { get; set; }
     }
 

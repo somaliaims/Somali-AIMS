@@ -558,6 +558,7 @@ namespace AIMS.Models
         public ICollection<ProjectLocationDetailView> Locations { get; set; }
         public ICollection<ProjectDisbursementView> Disbursements { get; set; }
         public ICollection<ProjectDocumentView> Documents { get; set; }
+        public ICollection<ProjectCustomFieldsView> CustomFields { get; set; }
     }
 
     public class ProjectModel
@@ -710,6 +711,14 @@ namespace AIMS.Models
         public string Project { get; set; }
         public string DocumentTitle { get; set; }
         public string DocumentUrl { get; set; }
+    }
+
+    public class ProjectCustomFieldsView
+    {
+        public int Id { get; set; }
+        public int ProjectId { get; set; }
+        public FieldTypes FieldType { get; set; }
+        public string Values { get; set; }
     }
 
     public class ProjectDocumentModel

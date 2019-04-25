@@ -22,6 +22,12 @@ namespace AIMS.Services
         IEnumerable<CustomFieldView> GetAll();
 
         /// <summary>
+        /// Gets list of active fields
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<CustomFieldView> GetActiveFields();
+
+        /// <summary>
         /// Get matching customFields for the criteria
         /// </summary>
         /// <param name="criteria"></param>
@@ -83,6 +89,22 @@ namespace AIMS.Services
                     customFields = (from c in customFields
                                   orderby c.FieldTitle ascending
                                   select c);
+                }
+                return mapper.Map<List<CustomFieldView>>(customFields);
+            }
+        }
+
+        public IEnumerable<CustomFieldView> GetActiveFields()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var dated = DateTime.Now;
+                var customFields = unitWork.CustomFieldRepository.GetManyQueryable(c => c.ActiveFrom.Date >= dated.Date && c.ActiveUpto <= dated.Date);
+                if (customFields != null)
+                {
+                    customFields = (from c in customFields
+                                    orderby c.FieldTitle ascending
+                                    select c);
                 }
                 return mapper.Map<List<CustomFieldView>>(customFields);
             }
