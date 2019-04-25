@@ -99,7 +99,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var dated = DateTime.Now;
-                var customFields = unitWork.CustomFieldRepository.GetManyQueryable(c => c.ActiveFrom.Date >= dated.Date && c.ActiveUpto <= dated.Date);
+                var customFields = unitWork.CustomFieldRepository.GetManyQueryable(c => dated.Date >= c.ActiveFrom.Date && dated.Date <= c.ActiveUpto);
                 if (customFields != null)
                 {
                     customFields = (from c in customFields
