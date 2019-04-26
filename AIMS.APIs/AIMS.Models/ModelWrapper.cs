@@ -715,7 +715,8 @@ namespace AIMS.Models
 
     public class ProjectCustomFieldsView
     {
-        public int Id { get; set; }
+        public int CustomFieldId { get; set; }
+        public string FieldTitle { get; set; }
         public int ProjectId { get; set; }
         public FieldTypes FieldType { get; set; }
         public string Values { get; set; }

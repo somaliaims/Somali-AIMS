@@ -68,6 +68,9 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(i => i.Implementer, opts => opts.MapFrom(source => source.Implementer.OrganizationName));
 
             CreateMap<EFIATISettings, IATISettings>().ReverseMap();
+
+            CreateMap<EFProjectCustomFields, ProjectCustomFieldsView>()
+                .ForMember(c => c.FieldTitle, opts => opts.MapFrom(source => source.CustomField.FieldTitle));
         }
     }
 }
