@@ -18,8 +18,7 @@ namespace AIMS.Models
         DropDown = 1,
         CheckBox = 2,
         Text = 3,
-        List = 4,
-        Radio = 5
+        Radio = 4
     }
 
     public enum NotificationTypes

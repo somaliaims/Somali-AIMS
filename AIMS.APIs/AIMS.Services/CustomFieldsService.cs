@@ -167,7 +167,6 @@ namespace AIMS.Services
                     switch (model.FieldType)
                     {
                         case FieldTypes.DropDown:
-                        case FieldTypes.List:
                         case FieldTypes.CheckBox:
                             if (valuesList.Count < 1)
                             {
@@ -257,7 +256,6 @@ namespace AIMS.Services
                 switch (model.FieldType)
                 {
                     case FieldTypes.DropDown:
-                    case FieldTypes.List:
                     case FieldTypes.CheckBox:
                         if (valuesList.Count < 1)
                         {
