@@ -488,6 +488,7 @@ namespace AIMS.Models
         [Required]
         public decimal ActualAmount { get; set; }
         public decimal ExpectedAmount { get; set; }
+        public decimal ManualAmount { get; set; }
     }
 
     public class EnvelopeView
@@ -525,6 +526,8 @@ namespace AIMS.Models
     {
         public int Year { get; set; }
         public decimal Amount { get; set; }
+        public decimal ExpectedAmount { get; set; }
+        public decimal ManualAmount { get; set; }
     }
 
     public class ProjectModelView

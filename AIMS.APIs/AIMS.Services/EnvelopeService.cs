@@ -229,10 +229,25 @@ namespace AIMS.Services
                                             where e.Year == yr.Year
                                             select e.ActualAmount).First();
 
+                        yearsLeft = upperThreeYearsLimit - yr.Year;
+                        expectedFunds = 0;
+                        /*if (yearsLeft > 1)
+                        {
+                            expectedFunds = Math.Round((projectValue - disbursementsValue) / yearsLeft);
+                        }
+                        else if (yearsLeft == 1)
+                        {
+                            expectedFunds = Math.Round((projectValue - disbursementsValue) / 2);
+                        }
+                        else if (yearsLeft == 0)
+                        {
+                            expectedFunds = Math.Round(projectValue - disbursementsValue);
+                        }
+
                         if (allocatedAmount > 0)
                         {
                             allocatedAmount = ((allocatedAmount / 100) * sector.FundsPercentage);
-                        }
+                        }*/
                         allocationList.Add(new SectorYearlyAllocation()
                         {
                             Year = yr.Year,
