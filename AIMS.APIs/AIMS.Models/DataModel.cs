@@ -158,9 +158,7 @@ namespace AIMS.Models
         public decimal ExpectedAmount { get; set; } = 0;
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ManualAmount { get; set; } = 0;
-        public string SectorAmounts { get; set; }
-        public string SectorExpectedAmounts { get; set; }
-        public string SectorManualAmounts { get; set; }
+        public string SectorAmountsBreakup { get; set; }
     }
 
     public class EFProjectDisbursements

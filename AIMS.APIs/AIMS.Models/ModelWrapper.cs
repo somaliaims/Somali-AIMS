@@ -489,6 +489,7 @@ namespace AIMS.Models
         public decimal ActualAmount { get; set; }
         public decimal ExpectedAmount { get; set; }
         public decimal ManualAmount { get; set; }
+        public string SectorsAmountBreakup { get; set; }
     }
 
     public class EnvelopeView

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace AIMS.Services
 {
@@ -74,6 +75,7 @@ namespace AIMS.Services
                 List<EnvelopeBreakup> envelopeList = new List<EnvelopeBreakup>();
                 List<EnvelopeSectorBreakup> sectorsList = new List<EnvelopeSectorBreakup>();
                 List<int> projectIds = new List<int>();
+                EnvelopeSectorBreakup sectorBreakUp = null;
 
                 var envelopes = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == funderId);
                 if (envelopes != null)
@@ -87,6 +89,12 @@ namespace AIMS.Services
                             ExpectedAmount = e.ExpectedAmount,
                             Year = e.Year
                         });
+
+                        if (string.IsNullOrEmpty(e.SectorAmountsBreakup))
+                        {
+                            sectorBreakUp = JsonConvert.DeserializeObject<EnvelopeSectorBreakup>(e.SectorAmountsBreakup);
+                            sectorsList.Add(sectorBreakUp);
+                        }
                     }
                 }
 
@@ -220,47 +228,59 @@ namespace AIMS.Services
                 var envelopeSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => projectIds.Contains(p.ProjectId), new string[] { "Sector" });
                 foreach(var sector in envelopeSectors)
                 {
-                    decimal allocatedAmount = 0;
+                    var isSectorExists = (from s in sectorsList
+                                        where s.Sector == sector.Sector.SectorName
+                                        select s);
 
-                    List<SectorYearlyAllocation> allocationList = new List<SectorYearlyAllocation>();
-                    foreach(var yr in requiredEnvelopeList)
+                    if (isSectorExists == null)
                     {
-                        allocatedAmount = (from e in requiredEnvelopeList
-                                            where e.Year == yr.Year
-                                            select e.ActualAmount).First();
+                        decimal allocatedAmount = 0;
+                        List<SectorYearlyAllocation> allocationList = new List<SectorYearlyAllocation>();
+                        foreach (var yr in requiredEnvelopeList)
+                        {
+                            allocatedAmount = (from e in requiredEnvelopeList
+                                               where e.Year == yr.Year
+                                               select e.ActualAmount).First();
 
-                        yearsLeft = upperThreeYearsLimit - yr.Year;
-                        expectedFunds = 0;
-                        /*if (yearsLeft > 1)
-                        {
-                            expectedFunds = Math.Round((projectValue - disbursementsValue) / yearsLeft);
-                        }
-                        else if (yearsLeft == 1)
-                        {
-                            expectedFunds = Math.Round((projectValue - disbursementsValue) / 2);
-                        }
-                        else if (yearsLeft == 0)
-                        {
-                            expectedFunds = Math.Round(projectValue - disbursementsValue);
+                            disbursementsValue = (from r in requiredEnvelopeList
+                                                  where r.Year <= yr.Year
+                                                  select r.ExpectedAmount).Sum();
+
+                            yearsLeft = upperThreeYearsLimit - yr.Year;
+                            expectedFunds = 0;
+                            if (yearsLeft > 1)
+                            {
+                                expectedFunds = Math.Round((projectValue - disbursementsValue) / yearsLeft);
+                            }
+                            else if (yearsLeft == 1)
+                            {
+                                expectedFunds = Math.Round((projectValue - disbursementsValue) / 2);
+                            }
+                            else if (yearsLeft == 0)
+                            {
+                                expectedFunds = Math.Round(projectValue - disbursementsValue);
+                            }
+
+                            if (allocatedAmount > 0)
+                            {
+                                allocatedAmount = ((allocatedAmount / 100) * sector.FundsPercentage);
+                            }
+
+                            allocationList.Add(new SectorYearlyAllocation()
+                            {
+                                Year = yr.Year,
+                                Amount = allocatedAmount,
+                                ExpectedAmount = expectedFunds,
+                            });
                         }
 
-                        if (allocatedAmount > 0)
+                        sectorsList.Add(new EnvelopeSectorBreakup()
                         {
-                            allocatedAmount = ((allocatedAmount / 100) * sector.FundsPercentage);
-                        }*/
-                        allocationList.Add(new SectorYearlyAllocation()
-                        {
-                            Year = yr.Year,
-                            Amount = allocatedAmount
+                            Sector = sector.Sector.SectorName,
+                            Percentage = sector.FundsPercentage,
+                            YearlyAllocation = allocationList
                         });
                     }
-
-                    sectorsList.Add(new EnvelopeSectorBreakup()
-                    {
-                        Sector = sector.Sector.SectorName,
-                        Percentage = sector.FundsPercentage,
-                        YearlyAllocation = allocationList
-                    });
                 }
                 envelope.EnvelopeBreakups = requiredEnvelopeList;
                 envelope.ActualFunds = actualFundingAmount;
@@ -303,6 +323,7 @@ namespace AIMS.Services
                                         Currency = model.Currency,
                                         TotalAmount = funds.ActualAmount,
                                         ExpectedAmount = funds.ExpectedAmount,
+                                        SectorAmountsBreakup = funds.SectorsAmountBreakup,
                                         Year = funds.Year
                                     });
                                 }
@@ -310,6 +331,8 @@ namespace AIMS.Services
                                 {
                                     isEnvelopeExists.TotalAmount = funds.ActualAmount;
                                     isEnvelopeExists.ExpectedAmount = funds.ExpectedAmount;
+                                    isEnvelopeExists.ManualAmount = funds.ManualAmount;
+                                    isEnvelopeExists.SectorAmountsBreakup = funds.SectorsAmountBreakup;
                                     unitWork.EnvelopeRepository.Update(isEnvelopeExists);
                                 }
                             }
