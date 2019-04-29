@@ -274,10 +274,23 @@ namespace AIMS.Services
                             var yearlyAllocations = (from s in sectorsList
                                                      where (s.SectorId == sector.SectorId)
                                                      select s.YearlyAllocation).FirstOrDefault();
-                            var sectorManualAmount = (from y in yearlyAllocations
-                                                     where y.Year == yr.Year
-                                                     select y.ManualAmount).FirstOrDefault();
 
+                            decimal sectorManualAmount = 0;
+                            if (yearlyAllocations != null)
+                            {
+                                sectorManualAmount = (from y in yearlyAllocations
+                                                      where y.Year == yr.Year
+                                                      select y.ManualAmount).FirstOrDefault();
+                            }
+
+                            if (sectorManualAmount == 0)
+                            {
+                                if (expectedFunds > allocatedAmount)
+                                {
+                                    sectorManualAmount = expectedFunds - allocatedAmount;
+                                }
+                            }
+                            
                             allocationList.Add(new SectorYearlyAllocation()
                             {
                                 Year = yr.Year,
