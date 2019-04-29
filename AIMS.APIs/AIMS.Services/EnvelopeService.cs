@@ -271,16 +271,25 @@ namespace AIMS.Services
                                 expectedFunds = ((expectedFunds / 100) * sector.FundsPercentage);
                             }
 
+                            var yearlyAllocations = (from s in sectorsList
+                                                     where (s.SectorId == sector.SectorId)
+                                                     select s.YearlyAllocation).FirstOrDefault();
+                            var sectorManualAmount = (from y in yearlyAllocations
+                                                     where y.Year == yr.Year
+                                                     select y.ManualAmount).FirstOrDefault();
+
                             allocationList.Add(new SectorYearlyAllocation()
                             {
                                 Year = yr.Year,
                                 Amount = allocatedAmount,
                                 ExpectedAmount = expectedFunds,
+                                ManualAmount = sectorManualAmount
                             });
                         }
 
                         sectorsList.Add(new EnvelopeSectorBreakup()
                         {
+                            SectorId = sector.Sector.Id,
                             Sector = sector.Sector.SectorName,
                             Percentage = sector.FundsPercentage,
                             YearlyAllocation = allocationList

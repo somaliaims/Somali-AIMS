@@ -518,6 +518,7 @@ namespace AIMS.Models
 
     public class EnvelopeSectorBreakup
     {
+        public int SectorId { get; set; }
         public string Sector { get; set; }
         public decimal Percentage { get; set; }
         public IEnumerable<SectorYearlyAllocation> YearlyAllocation { get; set; }
