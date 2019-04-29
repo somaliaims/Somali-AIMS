@@ -90,7 +90,7 @@ namespace AIMS.Services
                             Year = e.Year
                         });
 
-                        if (string.IsNullOrEmpty(e.SectorAmountsBreakup))
+                        if (!string.IsNullOrEmpty(e.SectorAmountsBreakup))
                         {
                             sectorBreakUp = JsonConvert.DeserializeObject<EnvelopeSectorBreakup>(e.SectorAmountsBreakup);
                             sectorsList.Add(sectorBreakUp);
@@ -229,8 +229,8 @@ namespace AIMS.Services
                 foreach(var sector in envelopeSectors)
                 {
                     var isSectorExists = (from s in sectorsList
-                                        where s.Sector == sector.Sector.SectorName
-                                        select s);
+                                          where s.Sector == sector.Sector.SectorName
+                                          select s).FirstOrDefault();
 
                     if (isSectorExists == null)
                     {
@@ -264,6 +264,11 @@ namespace AIMS.Services
                             if (allocatedAmount > 0)
                             {
                                 allocatedAmount = ((allocatedAmount / 100) * sector.FundsPercentage);
+                            }
+
+                            if (expectedFunds > 0)
+                            {
+                                expectedFunds = ((expectedFunds / 100) * sector.FundsPercentage);
                             }
 
                             allocationList.Add(new SectorYearlyAllocation()
