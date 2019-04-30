@@ -478,7 +478,7 @@ namespace AIMS.Models
         [Required]
         [MaxLength(3)]
         public string Currency { get; set; }
-        public IEnumerable<FundBreakup> EnvelopeBreakups { get; set; }
+        public IEnumerable<EnvelopeSectorBreakup> SectorBreakups { get; set; }
     }
 
     public class FundBreakup
@@ -514,6 +514,7 @@ namespace AIMS.Models
         public int Year { get; set; }
         public decimal ActualAmount { get; set; }
         public decimal ExpectedAmount { get; set; }
+        public decimal ManualAmount { get; set; }
     }
 
     public class EnvelopeSectorBreakup

@@ -40,7 +40,7 @@ namespace AIMS.Services
         /// <param name="funderId"></param>
         /// <param name="year"></param>
         /// <returns></returns>
-        ActionResponse Delete(int funderId, int year);
+        ActionResponse Delete(int funderId);
     }
 
     public class EnvelopeService : IEnvelopeService
@@ -67,7 +67,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                decimal projectValue = 0, actualFundingAmount = 0;
+                decimal projectValue = 0, actualFundingAmount = 0, manualFundingAmount = 0;
                 int currentYear = DateTime.Now.Year;
                 int previousYear = currentYear - 1;
                 int upperThreeYearsLimit = currentYear + 3;
@@ -75,7 +75,6 @@ namespace AIMS.Services
                 List<EnvelopeBreakup> envelopeList = new List<EnvelopeBreakup>();
                 List<EnvelopeSectorBreakup> sectorsList = new List<EnvelopeSectorBreakup>();
                 List<int> projectIds = new List<int>();
-                EnvelopeSectorBreakup sectorBreakUp = null;
 
                 var envelopes = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == funderId);
                 if (envelopes != null)
@@ -83,17 +82,9 @@ namespace AIMS.Services
                     foreach(var e in envelopes)
                     {
                         envelope.Currency = e.Currency;
-                        envelopeList.Add(new EnvelopeBreakup()
-                        {
-                            ActualAmount = e.TotalAmount,
-                            ExpectedAmount = e.ExpectedAmount,
-                            Year = e.Year
-                        });
-
                         if (!string.IsNullOrEmpty(e.SectorAmountsBreakup))
                         {
-                            sectorBreakUp = JsonConvert.DeserializeObject<EnvelopeSectorBreakup>(e.SectorAmountsBreakup);
-                            sectorsList.Add(sectorBreakUp);
+                            sectorsList = JsonConvert.DeserializeObject<List<EnvelopeSectorBreakup>>(e.SectorAmountsBreakup);
                         }
                     }
                 }
@@ -225,6 +216,9 @@ namespace AIMS.Services
                 actualFundingAmount = (from e in requiredEnvelopeList
                                        select e.ActualAmount).Sum();
 
+                manualFundingAmount = (from e in requiredEnvelopeList
+                                       select e.ManualAmount).Sum();
+
                 var envelopeSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => projectIds.Contains(p.ProjectId), new string[] { "Sector" });
                 foreach(var sector in envelopeSectors)
                 {
@@ -248,19 +242,8 @@ namespace AIMS.Services
 
                             yearsLeft = upperThreeYearsLimit - yr.Year;
                             expectedFunds = 0;
-                            if (yearsLeft > 1)
-                            {
-                                expectedFunds = Math.Round((projectValue - disbursementsValue) / yearsLeft);
-                            }
-                            else if (yearsLeft == 1)
-                            {
-                                expectedFunds = Math.Round((projectValue - disbursementsValue) / 2);
-                            }
-                            else if (yearsLeft == 0)
-                            {
-                                expectedFunds = Math.Round(projectValue - disbursementsValue);
-                            }
 
+                            expectedFunds = yr.ExpectedAmount;
                             if (allocatedAmount > 0)
                             {
                                 allocatedAmount = ((allocatedAmount / 100) * sector.FundsPercentage);
@@ -289,6 +272,11 @@ namespace AIMS.Services
                                 {
                                     sectorManualAmount = expectedFunds - allocatedAmount;
                                 }
+                            }
+
+                            if (expectedFunds == 0)
+                            {
+                                sectorManualAmount = 0;
                             }
                             
                             allocationList.Add(new SectorYearlyAllocation()
@@ -325,46 +313,30 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var years = (from y in model.EnvelopeBreakups
-                                 select y.Year).ToList<int>();
-
                     List<EFEnvelope> envelopeList = new List<EFEnvelope>();
-                    var envelopeFunds = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == funderId);
+                    var envelope = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == funderId);
 
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
                     {
                         using (var transaction = context.Database.BeginTransaction())
                         {
-                            foreach (var funds in model.EnvelopeBreakups)
+                            if (envelope == null)
                             {
-                                var isEnvelopeExists = (from e in envelopeFunds
-                                                        where e.Year == funds.Year
-                                                        select e).FirstOrDefault();
-
-                                if (isEnvelopeExists == null)
+                                unitWork.EnvelopeRepository.Insert(new EFEnvelope()
                                 {
-                                    envelopeList.Add(new EFEnvelope()
-                                    {
-                                        FunderId = funderId,
-                                        Currency = model.Currency,
-                                        TotalAmount = funds.ActualAmount,
-                                        ExpectedAmount = funds.ExpectedAmount,
-                                        SectorAmountsBreakup = funds.SectorsAmountBreakup,
-                                        Year = funds.Year
-                                    });
-                                }
-                                else
-                                {
-                                    isEnvelopeExists.TotalAmount = funds.ActualAmount;
-                                    isEnvelopeExists.ExpectedAmount = funds.ExpectedAmount;
-                                    isEnvelopeExists.ManualAmount = funds.ManualAmount;
-                                    isEnvelopeExists.SectorAmountsBreakup = funds.SectorsAmountBreakup;
-                                    unitWork.EnvelopeRepository.Update(isEnvelopeExists);
-                                }
+                                    FunderId = funderId,
+                                    Currency = model.Currency,
+                                    SectorAmountsBreakup = JsonConvert.SerializeObject(model.SectorBreakups),
+                                });
+                            }
+                            else
+                            {
+                                envelope.Currency = model.Currency;
+                                envelope.SectorAmountsBreakup = JsonConvert.SerializeObject(model.SectorBreakups);
+                                unitWork.EnvelopeRepository.Update(envelope);
                             }
 
-                            unitWork.EnvelopeRepository.InsertMultiple(envelopeList);
                             await unitWork.SaveAsync();
                             transaction.Commit();
                         }
@@ -380,14 +352,14 @@ namespace AIMS.Services
         }
 
 
-        public ActionResponse Delete(int funderId, int year)
+        public ActionResponse Delete(int funderId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 IMessageHelper mHelper = new MessageHelper();
                 ActionResponse response = new ActionResponse();
 
-                var envelope = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == funderId && e.Year == year);
+                var envelope = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == funderId);
                 if (envelope == null)
                 {
                     mHelper = new MessageHelper();

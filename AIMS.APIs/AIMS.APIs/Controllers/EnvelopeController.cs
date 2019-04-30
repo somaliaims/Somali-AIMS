@@ -85,13 +85,13 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpDelete("{funderId}/{year}")]
-        public IActionResult Delete(int funderId, int year)
+        public IActionResult Delete(int funderId)
         {
-            if (funderId <= 0 || year < 1900)
+            if (funderId <= 0)
             {
                 return BadRequest("Invalid parameters provided");
             }
-            var response = envelopeService.Delete(funderId, year);
+            var response = envelopeService.Delete(funderId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

@@ -55,7 +55,7 @@ namespace AIMS.DAL.EF
                 .HasKey(m => new { m.SectorId, m.MappedSectorId });
 
             modelBuilder.Entity<EFEnvelope>()
-                .HasKey(e => new { e.FunderId, e.Year });
+                .HasKey(e => new { e.FunderId });
 
             modelBuilder.Entity<EFUser>()
                 .HasIndex(u => u.Email)
