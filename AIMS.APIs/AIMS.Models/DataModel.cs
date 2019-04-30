@@ -38,11 +38,10 @@ namespace AIMS.Models
         Deleted = 3
     }
 
-    public enum GrantTypes
+    public class EFGrantTypes
     {
-        Grant = 1,
-        Loan = 2,
-        MutuallyExclusive = 3
+        public int Id { get; set; }
+        public string GrantType { get; set; }
     }
 
     public class EFOrganizationTypes
@@ -151,13 +150,6 @@ namespace AIMS.Models
         public int FunderId { get; set; }
         public EFOrganization Funder { get; set; }
         public string Currency { get; set; }
-        /*public int Year { get; set; }
-        [Column(TypeName = "decimal(9, 2)")]
-        public decimal TotalAmount { get; set; }
-        [Column(TypeName = "decimal(9, 2)")]
-        public decimal ExpectedAmount { get; set; } = 0;
-        [Column(TypeName = "decimal(9, 2)")]
-        public decimal ManualAmount { get; set; } = 0;*/
         public string SectorAmountsBreakup { get; set; }
     }
 

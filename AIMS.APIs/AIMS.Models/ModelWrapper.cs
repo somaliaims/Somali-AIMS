@@ -22,6 +22,18 @@ namespace AIMS.Models
         public string Currency { get; set; }
     }
 
+    public class GrantTypeModel
+    {
+        [Required]
+        public string GrantType { get; set; }
+    }
+
+    public class GrantTypeView
+    {
+        public int Id { get; set; }
+        public string GrantType { get; set; }
+    }
+
     /// <summary>
     /// Token models
     /// </summary>

@@ -15,7 +15,6 @@ namespace AIMS.APIs.Controllers
     public class LocationController : ControllerBase
     {
         ILocationService locationService;
-
         public LocationController(ILocationService service)
         {
             this.locationService = service;

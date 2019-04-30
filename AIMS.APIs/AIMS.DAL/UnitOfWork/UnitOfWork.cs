@@ -12,6 +12,7 @@ namespace AIMS.DAL.UnitOfWork
     public class UnitOfWork : IDisposable
     {
         private AIMSDbContext context = null;
+        private GenericRepository<EFGrantTypes> grantTypesRepository;
         private GenericRepository<EFSectorTypes> sectorTypesRepository;
         private GenericRepository<EFSector> sectorRepository;
         private GenericRepository<EFSectorMappings> sectorMappingsRepository;
@@ -46,6 +47,16 @@ namespace AIMS.DAL.UnitOfWork
         public UnitOfWork(AIMSDbContext dbContext)
         {
             context = dbContext;
+        }
+
+        public GenericRepository<EFGrantTypes> GrantTypeRepository
+        {
+            get
+            {
+                if (this.grantTypesRepository == null)
+                    this.grantTypesRepository = new GenericRepository<EFGrantTypes>(context);
+                return this.grantTypesRepository;
+            }
         }
 
         public GenericRepository<EFCurrency> CurrencyRepository
