@@ -490,6 +490,8 @@ namespace AIMS.Models
         [Required]
         [MaxLength(3)]
         public string Currency { get; set; }
+        [Required]
+        public decimal ExchangeRate { get; set; }
         public IEnumerable<EnvelopeSectorBreakup> SectorBreakups { get; set; }
     }
 
@@ -511,6 +513,7 @@ namespace AIMS.Models
         public decimal ExpectedFunds { get; set; }
         public decimal ActualFunds { get; set; }
         public string Currency { get; set; }
+        public decimal ExchangeRate { get; set; }
         public IEnumerable<EnvelopeSectorBreakup> Sectors { get; set; }
         public IEnumerable<EnvelopeBreakup> EnvelopeBreakups { get; set; }
     }

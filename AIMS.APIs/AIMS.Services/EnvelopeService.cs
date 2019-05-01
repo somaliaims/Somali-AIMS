@@ -69,6 +69,7 @@ namespace AIMS.Services
             {
                 decimal projectValue = 0, actualFundingAmount = 0, manualFundingAmount = 0;
                 int currentYear = DateTime.Now.Year;
+                string funderCurrency = null;
                 int previousYear = currentYear - 1;
                 int upperThreeYearsLimit = currentYear + 3;
                 EnvelopeView envelope = new EnvelopeView();
@@ -82,6 +83,7 @@ namespace AIMS.Services
                     foreach(var e in envelopes)
                     {
                         envelope.Currency = e.Currency;
+                        envelope.ExchangeRate = e.ExchangeRate;
                         if (!string.IsNullOrEmpty(e.SectorAmountsBreakup))
                         {
                             sectorsList = JsonConvert.DeserializeObject<List<EnvelopeSectorBreakup>>(e.SectorAmountsBreakup);
@@ -94,7 +96,7 @@ namespace AIMS.Services
                 {
                     if (envelope.Currency == null)
                     {
-                        envelope.Currency = (from f in funderProjects
+                        funderCurrency = (from f in funderProjects
                                              select f.Currency).FirstOrDefault();
                     }
                     projectIds = (from p in funderProjects
@@ -102,6 +104,11 @@ namespace AIMS.Services
 
                     projectValue = (from p in funderProjects
                                           select p.Amount).Sum();
+
+                    if (funderCurrency != envelope.Currency)
+                    {
+                        projectValue = (projectValue * envelope.ExchangeRate);
+                    }
                 }
 
                 var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => projectIds.Contains(d.ProjectId));
@@ -123,6 +130,7 @@ namespace AIMS.Services
                 {
                     yearsLeft = upperThreeYearsLimit - year;
 
+                    decimal actualAmount = (funderCurrency != envelope.Currency) ? (envelope.ExchangeRate * disbursement.Amount) : disbursement.Amount;
                     if (year != disbursement.Dated.Year)
                     {
                         var isEnvelopeExists = (from e in envelopeList
@@ -134,12 +142,12 @@ namespace AIMS.Services
                             envelopeList.Add(new EnvelopeBreakup()
                             {
                                 Year = year,
-                                ActualAmount = disbursement.Amount,
+                                ActualAmount = actualAmount,
                             });
                         }
                         else
                         {
-                            isEnvelopeExists.ActualAmount = disbursement.Amount;
+                            isEnvelopeExists.ActualAmount = actualAmount;
                         }
                     }
                     year = disbursement.Dated.Year;
@@ -149,7 +157,8 @@ namespace AIMS.Services
                         envelopeList.Add(new EnvelopeBreakup()
                         {
                             Year = year,
-                            ActualAmount = disbursement.Amount,
+                            ActualAmount = actualAmount
+                            ,
                         });
                     }
                 }
@@ -327,12 +336,14 @@ namespace AIMS.Services
                                 {
                                     FunderId = funderId,
                                     Currency = model.Currency,
+                                    ExchangeRate = model.ExchangeRate,
                                     SectorAmountsBreakup = JsonConvert.SerializeObject(model.SectorBreakups),
                                 });
                             }
                             else
                             {
                                 envelope.Currency = model.Currency;
+                                envelope.ExchangeRate = model.ExchangeRate;
                                 envelope.SectorAmountsBreakup = JsonConvert.SerializeObject(model.SectorBreakups);
                                 unitWork.EnvelopeRepository.Update(envelope);
                             }
