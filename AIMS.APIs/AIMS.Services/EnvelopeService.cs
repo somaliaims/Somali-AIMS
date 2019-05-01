@@ -105,7 +105,7 @@ namespace AIMS.Services
                     projectValue = (from p in funderProjects
                                           select p.Amount).Sum();
 
-                    if (funderCurrency != envelope.Currency)
+                    if (funderCurrency != envelope.Currency && envelope.Currency != null)
                     {
                         projectValue = (projectValue * envelope.ExchangeRate);
                     }
@@ -130,7 +130,7 @@ namespace AIMS.Services
                 {
                     yearsLeft = upperThreeYearsLimit - year;
 
-                    decimal actualAmount = (funderCurrency != envelope.Currency) ? (envelope.ExchangeRate * disbursement.Amount) : disbursement.Amount;
+                    decimal actualAmount = (funderCurrency != envelope.Currency && envelope.Currency != null) ? (envelope.ExchangeRate * disbursement.Amount) : disbursement.Amount;
                     if (year != disbursement.Dated.Year)
                     {
                         var isEnvelopeExists = (from e in envelopeList
