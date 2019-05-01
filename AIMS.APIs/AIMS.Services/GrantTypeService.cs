@@ -60,7 +60,7 @@ namespace AIMS.Services
         Task<ActionResponse> DeleteAsync(int id, int newId);
     }
 
-    public class GrantTypeService
+    public class GrantTypeService : IGrantTypeService
     {
         AIMSDbContext context;
         IMapper mapper;
