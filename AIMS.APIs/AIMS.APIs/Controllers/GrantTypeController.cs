@@ -26,11 +26,11 @@ namespace AIMS.APIs.Controllers
             return Ok(grantTypes);
         }
 
-        [HttpGet("{criteria}")]
-        public IActionResult SearchGrantType(string criteria)
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
         {
-            var grantTypes = grantTypeService.GetMatching(criteria);
-            return Ok(grantTypes);
+            var grantType = grantTypeService.Get(id);
+            return Ok(grantType);
         }
 
         [HttpPost]
