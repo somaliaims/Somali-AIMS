@@ -103,6 +103,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFExchangeRatesSettings> ExchangeRatesSettings { get; set; }
         public DbSet<EFExchangeRatesAPIsCount> ExchangeRatesAPIsCount { get; set; }
         public DbSet<EFEnvelope> Envelope { get; set; }
+        public DbSet<EFEmailMessages> EmailMessages { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime

@@ -31,6 +31,15 @@ namespace AIMS.Models
         NewIATISector = 6
     }
 
+    public enum EmailMessageType
+    {
+        NewUser = 1,
+        NewProjectToOrg = 2,
+        UserInactive = 3,
+        ChangedMappingEffectedProject = 4,
+        NewIATISector = 5
+    }
+
     public enum DataTransactions
     {
         Inserted = 1,
@@ -364,6 +373,17 @@ namespace AIMS.Models
         public bool IsAutomatic { get; set; }
         public string APIKeyOpenExchangeRates { get; set; }
         public string ManualExchangeRates { get; set; }
+    }
+
+    public class EFEmailMessages
+    {
+        [Key]
+        public int Id { get; set; }
+        public EmailMessageType MessageType { get; set; }
+        [MaxLength(100)]
+        public string TypeDefinition { get; set; }
+        [MaxLength(1000)]
+        public string Message { get; set; }
     }
 
     public class EFPasswordRecoveryRequests

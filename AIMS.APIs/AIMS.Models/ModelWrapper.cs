@@ -1107,4 +1107,18 @@ namespace AIMS.Models
     {
         public int ReportId { get; set; }
     }
+
+    public class EmailMessageModel
+    {
+        public EmailMessageType MessageType { get; set; }
+        public string Message { get; set; }
+    }
+
+    public class EmailMessageView
+    {
+        public int Id { get; set; }
+        public EmailMessageType MessageType { get; set; }
+        public string TypeDefinition { get; set; }
+        public string Message { get; set; }
+    }
 }

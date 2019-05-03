@@ -43,10 +43,21 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFEnvelope> envelopeDataRepository;
         private GenericRepository<EFCustomFields> customFieldRepository;
         private GenericRepository<EFProjectCustomFields> projectCustomFieldsRepository;
+        private GenericRepository<EFEmailMessages> emailMessagesRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
             context = dbContext;
+        }
+
+        public GenericRepository<EFEmailMessages> EmailMessagesRepository
+        {
+            get
+            {
+                if (this.emailMessagesRepository == null)
+                    this.emailMessagesRepository = new GenericRepository<EFEmailMessages>(context);
+                return this.emailMessagesRepository;
+            }
         }
 
         public GenericRepository<EFGrantTypes> GrantTypeRepository
