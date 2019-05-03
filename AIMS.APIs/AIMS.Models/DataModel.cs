@@ -150,6 +150,7 @@ namespace AIMS.Models
         public int FunderId { get; set; }
         public EFOrganization Funder { get; set; }
         public string Currency { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; } = 1;
         public string SectorAmountsBreakup { get; set; }
     }

@@ -27,7 +27,7 @@ namespace AIMS.DAL.EF
         {
             //Composite keys and Unique index configuration while creating the model
             modelBuilder.Entity<EFProjectFunders>()
-                .HasKey(f => new { f.ProjectId, f.FunderId });
+                .HasKey(f => new { f.ProjectId, f.FunderId, f.GrantTypeId });
 
             modelBuilder.Entity<EFSector>()
                 .HasOne(s => s.ParentSector);

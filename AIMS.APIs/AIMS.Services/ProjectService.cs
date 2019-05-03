@@ -1108,27 +1108,30 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var projectFunder = unitWork.ProjectFundersRepository.GetOne(f => f.ProjectId == model.ProjectId && f.FunderId == model.FunderId);
+                    var projectFunder = unitWork.ProjectFundersRepository.GetOne(f => f.ProjectId == model.ProjectId && f.FunderId == model.FunderId && f.GrantTypeId == model.GrantTypeId);
                     if (projectFunder != null)
                     {
-                        response.Message = mHelper.AlreadyExists("Project Funder");
-                        response.Success = false;
-                        return response;
+                        projectFunder.Amount = model.Amount;
+                        projectFunder.Currency = model.Currency;
+                        projectFunder.ExchangeRate = model.ExchangeRate;
+                        unitWork.ProjectFundersRepository.Update(projectFunder);
                     }
-
-                    unitWork.ProjectFundersRepository.Insert(new EFProjectFunders()
+                    else
                     {
-                        Project = project,
-                        Funder = funder,
-                        GrantType = grantType,
-                        Amount = model.Amount,
-                        Currency = model.Currency,
-                        ExchangeRate = model.ExchangeRate
-                    });
+                        unitWork.ProjectFundersRepository.Insert(new EFProjectFunders()
+                        {
+                            Project = project,
+                            Funder = funder,
+                            GrantType = grantType,
+                            Amount = model.Amount,
+                            Currency = model.Currency,
+                            ExchangeRate = model.ExchangeRate
+                        });
+                    }
+                    
                     project.DateUpdated = DateTime.Now;
                     unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
-
                     
                     unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                     {
