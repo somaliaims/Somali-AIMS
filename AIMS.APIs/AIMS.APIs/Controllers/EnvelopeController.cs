@@ -84,7 +84,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
-        [HttpDelete("{funderId}/{year}")]
+        [HttpDelete("{funderId}")]
         public IActionResult Delete(int funderId)
         {
             if (funderId <= 0)

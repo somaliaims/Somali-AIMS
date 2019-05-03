@@ -457,7 +457,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "CustomFields.CustomField" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Funders.GrantType", "Implementers", "Implementers.Implementer", "Documents", "CustomFields.CustomField" });
                 ProjectProfileView profileView = new ProjectProfileView();
 
                 if (projectProfileList != null)
@@ -1100,6 +1100,13 @@ namespace AIMS.Services
                         response.Success = false;
                         return response;
                     }
+                    var grantType = unitWork.GrantTypeRepository.GetByID(model.GrantTypeId);
+                    if (grantType == null)
+                    {
+                        response.Message = mHelper.GetNotFound("Grant type");
+                        response.Success = false;
+                        return response;
+                    }
 
                     var projectFunder = unitWork.ProjectFundersRepository.GetOne(f => f.ProjectId == model.ProjectId && f.FunderId == model.FunderId);
                     if (projectFunder != null)
@@ -1113,6 +1120,7 @@ namespace AIMS.Services
                     {
                         Project = project,
                         Funder = funder,
+                        GrantType = grantType,
                         Amount = model.Amount,
                         Currency = model.Currency,
                         ExchangeRate = model.ExchangeRate

@@ -614,6 +614,8 @@ namespace AIMS.Models
     {
         public int FunderId { get; set; }
         public string Funder { get; set; }
+        public int GrantTypeId { get; set; }
+        public string GrantType { get; set; }
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRate { get; set; }
@@ -625,6 +627,7 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         [Required]
         public int FunderId { get; set; }
+        public int GrantTypeId { get; set; }
         [Required]
         public decimal Amount { get; set; }
         [Required]
