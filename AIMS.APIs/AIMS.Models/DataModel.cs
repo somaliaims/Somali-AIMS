@@ -383,7 +383,7 @@ namespace AIMS.Models
         [MaxLength(100)]
         public string TypeDefinition { get; set; }
         [MaxLength(1000)]
-        public string Message { get; set; }
+        public string Message { get; set; } = null;
     }
 
     public class EFPasswordRecoveryRequests
