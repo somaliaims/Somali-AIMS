@@ -22,16 +22,16 @@ namespace AIMS.Models
         public string Currency { get; set; }
     }
 
-    public class GrantTypeModel
+    public class FundingTypeModel
     {
         [Required]
-        public string GrantType { get; set; }
+        public string FundingType { get; set; }
     }
 
-    public class GrantTypeView
+    public class FundingTypeView
     {
         public int Id { get; set; }
-        public string GrantType { get; set; }
+        public string FundingType { get; set; }
     }
 
     /// <summary>
@@ -366,6 +366,13 @@ namespace AIMS.Models
         public UserTypes UserType { get; set; }
     }
 
+    public class EmailsList
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+    }
+
     public class PasswordResetRequest
     {
         [EmailAddress]
@@ -614,8 +621,8 @@ namespace AIMS.Models
     {
         public int FunderId { get; set; }
         public string Funder { get; set; }
-        public int GrantTypeId { get; set; }
-        public string GrantType { get; set; }
+        public int FundingTypeId { get; set; }
+        public string FundingType { get; set; }
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRate { get; set; }
@@ -627,7 +634,7 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         [Required]
         public int FunderId { get; set; }
-        public int GrantTypeId { get; set; }
+        public int FundingTypeId { get; set; }
         [Required]
         public decimal Amount { get; set; }
         [Required]

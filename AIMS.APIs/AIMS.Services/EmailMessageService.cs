@@ -104,10 +104,9 @@ namespace AIMS.Services
                             MessageType = model.MessageType,
                             Message = model.Message
                         });
-                        unitWork.Save();
                         response.ReturnedId = newEmailMessage.Id;
                     }
-
+                    unitWork.Save();
                 }
                 catch (Exception ex)
                 {

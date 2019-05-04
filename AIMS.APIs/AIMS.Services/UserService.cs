@@ -84,6 +84,8 @@ namespace AIMS.Services
         /// <returns></returns>
         ActionResponse ResetPassword(PasswordResetModel model, DateTime tokenTime);
 
+        //ActionResponse SendEmailToUsers();
+
         /// <summary>
         /// Deletes the account for the provided user
         /// </summary>

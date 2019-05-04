@@ -11,36 +11,36 @@ namespace AIMS.APIs.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GrantTypeController : ControllerBase
+    public class FundingTypeController : ControllerBase
     {
-        IGrantTypeService grantTypeService;
-        public GrantTypeController(IGrantTypeService gService)
+        IFundingTypeService fundingTypeService;
+        public FundingTypeController(IFundingTypeService gService)
         {
-            grantTypeService = gService;
+            fundingTypeService = gService;
         }
 
         [HttpGet]
         public IActionResult Get()
         {
-            var grantTypes = grantTypeService.GetAll();
-            return Ok(grantTypes);
+            var fundingTypes = fundingTypeService.GetAll();
+            return Ok(fundingTypes);
         }
 
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var grantType = grantTypeService.Get(id);
-            return Ok(grantType);
+            var fundingType = fundingTypeService.Get(id);
+            return Ok(fundingType);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] GrantTypeModel model)
+        public IActionResult Post([FromBody] FundingTypeModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var response = grantTypeService.Add(model);
+            var response = fundingTypeService.Add(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -49,13 +49,13 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] GrantTypeModel model)
+        public IActionResult Put(int id, [FromBody] FundingTypeModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var response = grantTypeService.Update(id, model);
+            var response = fundingTypeService.Update(id, model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -70,7 +70,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Invalid id/s provided");
             }
-            var response = await grantTypeService.DeleteAsync(id, newId);
+            var response = await fundingTypeService.DeleteAsync(id, newId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

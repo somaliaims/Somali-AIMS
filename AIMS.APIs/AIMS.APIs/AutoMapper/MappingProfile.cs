@@ -62,7 +62,7 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFProjectFunders, ProjectFunderView>()
                 .ForMember(f => f.FunderId, opts => opts.MapFrom(source => source.Funder.Id))
                 .ForMember(f => f.Funder, opts => opts.MapFrom(source => source.Funder.OrganizationName))
-                .ForMember(f => f.GrantType, opts => opts.MapFrom(source => source.GrantType.GrantType));
+                .ForMember(f => f.FundingType, opts => opts.MapFrom(source => source.FundingType.FundingType));
 
             CreateMap<EFProjectImplementers, ProjectImplementerView>()
                 .ForMember(i => i.ImplementerId, opts => opts.MapFrom(source => source.Implementer.Id))

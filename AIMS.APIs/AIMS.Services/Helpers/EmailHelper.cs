@@ -18,6 +18,8 @@ namespace AIMS.Services.Helpers
         /// <returns></returns>
         ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName);
 
+        ActionResponse SendEmailToUsers(List<EmailsList> emailsList, string subject, string adminEmail, string emailTitle, string emailMessage);
+
         /// <summary>
         /// Sends email to recover password for the provided email
         /// </summary>
@@ -98,7 +100,41 @@ namespace AIMS.Services.Helpers
             return response;
         }
 
+        public ActionResponse SendEmailToUsers(List<EmailsList> emailsList, string subject, string adminEmail, string emailTitle, string emailMessage)
+        {
+            ActionResponse response = new ActionResponse();
+            try
+            {
+                MailMessage mailMessage = new MailMessage();
+                var emailAddresses = (from e in emailsList
+                                      select e.Email);
 
+                foreach (var emailAddress in emailAddresses)
+                {
+                    mailMessage.To.Add(emailAddress);
+                }
+                mailMessage.IsBodyHtml = true;
+                mailMessage.From = new MailAddress(this.emailFrom);
+                mailMessage.To.Add(adminEmail);
+                mailMessage.Body = this.FormatMessage(emailTitle, emailMessage);
+                mailMessage.Subject = subject;
+                client.Send(mailMessage);
+            }
+            catch(Exception ex)
+            {
+                response.Message = ex.Message;
+                response.Success = false;
+            }
+            return response;
+        }
+
+        private string FormatMessage(string title, string message)
+        {
+            List<string> messageList = new List<string>();
+            messageList.Add("<h2>" + title + "</h2>");
+            messageList.Add("<p>" + message + "</p>");
+            return (String.Join(string.Empty, messageList));
+        }
 
         private string GetUserRegistrationMessageForAdmin(string organizationName)
         {

@@ -11,123 +11,123 @@ using System.Threading.Tasks;
 
 namespace AIMS.Services
 {
-    public interface IGrantTypeService
+    public interface IFundingTypeService
     {
         /// <summary>
-        /// Gets all GrantTypes
+        /// Gets all FundingTypes
         /// </summary>
         /// <returns></returns>
-        IEnumerable<GrantTypeView> GetAll();
+        IEnumerable<FundingTypeView> GetAll();
 
         /// <summary>
-        /// Get matching GrantTypes for the criteria
+        /// Get matching FundingTypes for the criteria
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        IEnumerable<GrantTypeView> GetMatching(string criteria);
+        IEnumerable<FundingTypeView> GetMatching(string criteria);
 
         /// <summary>
-        /// Gets the GrantType for the provided id
+        /// Gets the FundingType for the provided id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
 
-        GrantTypeView Get(int id);
+        FundingTypeView Get(int id);
         /// <summary>
-        /// Gets all GrantTypes async
+        /// Gets all FundingTypes async
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<GrantTypeView>> GetAllAsync();
+        Task<IEnumerable<FundingTypeView>> GetAllAsync();
 
         /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(GrantTypeModel GrantType);
+        ActionResponse Add(FundingTypeModel FundingType);
 
         /// <summary>
-        /// Updates a GrantType
+        /// Updates a FundingType
         /// </summary>
-        /// <param name="GrantType"></param>
+        /// <param name="FundingType"></param>
         /// <returns></returns>
-        ActionResponse Update(int id, GrantTypeModel GrantType);
+        ActionResponse Update(int id, FundingTypeModel FundingType);
 
         /// <summary>
-        /// Deletes a GrantType
+        /// Deletes a FundingType
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         Task<ActionResponse> DeleteAsync(int id, int newId);
     }
 
-    public class GrantTypeService : IGrantTypeService
+    public class FundingTypeService : IFundingTypeService
     {
         AIMSDbContext context;
         IMapper mapper;
 
-        public GrantTypeService(AIMSDbContext cntxt, IMapper autoMapper)
+        public FundingTypeService(AIMSDbContext cntxt, IMapper autoMapper)
         {
             context = cntxt;
             mapper = autoMapper;
         }
 
-        public IEnumerable<GrantTypeView> GetAll()
+        public IEnumerable<FundingTypeView> GetAll()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var GrantTypes = unitWork.GrantTypeRepository.GetAll();
-                return mapper.Map<List<GrantTypeView>>(GrantTypes);
+                var FundingTypes = unitWork.FundingTypeRepository.GetAll();
+                return mapper.Map<List<FundingTypeView>>(FundingTypes);
             }
         }
 
-        public async Task<IEnumerable<GrantTypeView>> GetAllAsync()
+        public async Task<IEnumerable<FundingTypeView>> GetAllAsync()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var GrantTypes = await unitWork.GrantTypeRepository.GetAllAsync();
-                return await Task<IEnumerable<GrantTypeView>>.Run(() => mapper.Map<List<GrantTypeView>>(GrantTypes)).ConfigureAwait(false);
+                var FundingTypes = await unitWork.FundingTypeRepository.GetAllAsync();
+                return await Task<IEnumerable<FundingTypeView>>.Run(() => mapper.Map<List<FundingTypeView>>(FundingTypes)).ConfigureAwait(false);
             }
         }
 
-        public GrantTypeView Get(int id)
+        public FundingTypeView Get(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var GrantType = unitWork.GrantTypeRepository.GetByID(id);
-                return mapper.Map<GrantTypeView>(GrantType);
+                var FundingType = unitWork.FundingTypeRepository.GetByID(id);
+                return mapper.Map<FundingTypeView>(FundingType);
             }
         }
 
-        public IEnumerable<GrantTypeView> GetMatching(string criteria)
+        public IEnumerable<FundingTypeView> GetMatching(string criteria)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                List<GrantTypeView> GrantTypesList = new List<GrantTypeView>();
-                var GrantTypes = unitWork.GrantTypeRepository.GetMany(o => o.GrantType.Contains(criteria));
-                return mapper.Map<List<GrantTypeView>>(GrantTypes);
+                List<FundingTypeView> FundingTypesList = new List<FundingTypeView>();
+                var FundingTypes = unitWork.FundingTypeRepository.GetMany(o => o.FundingType.Contains(criteria));
+                return mapper.Map<List<FundingTypeView>>(FundingTypes);
             }
         }
 
-        public ActionResponse Add(GrantTypeModel model)
+        public ActionResponse Add(FundingTypeModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var isGrantTypeCreated = unitWork.GrantTypeRepository.GetOne(l => l.GrantType.ToLower() == model.GrantType.ToLower());
-                    if (isGrantTypeCreated != null)
+                    var isFundingTypeCreated = unitWork.FundingTypeRepository.GetOne(l => l.FundingType.ToLower() == model.FundingType.ToLower());
+                    if (isFundingTypeCreated != null)
                     {
-                        response.ReturnedId = isGrantTypeCreated.Id;
+                        response.ReturnedId = isFundingTypeCreated.Id;
                     }
                     else
                     {
-                        var newGrantType = unitWork.GrantTypeRepository.Insert(new EFGrantTypes()
+                        var newFundingType = unitWork.FundingTypeRepository.Insert(new EFFundingTypes()
                         {
-                            GrantType = model.GrantType,
+                            FundingType = model.FundingType,
                         });
                         unitWork.Save();
-                        response.ReturnedId = newGrantType.Id;
+                        response.ReturnedId = newFundingType.Id;
                     }
 
                 }
@@ -140,22 +140,22 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Update(int id, GrantTypeModel model)
+        public ActionResponse Update(int id, FundingTypeModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var GrantTypeObj = unitWork.GrantTypeRepository.GetByID(id);
-                if (GrantTypeObj == null)
+                var FundingTypeObj = unitWork.FundingTypeRepository.GetByID(id);
+                if (FundingTypeObj == null)
                 {
                     IMessageHelper mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("GrantType");
+                    response.Message = mHelper.GetNotFound("FundingType");
                     return response;
                 }
 
-                GrantTypeObj.GrantType = model.GrantType;
-                unitWork.GrantTypeRepository.Update(GrantTypeObj);
+                FundingTypeObj.FundingType = model.FundingType;
+                unitWork.FundingTypeRepository.Update(FundingTypeObj);
                 unitWork.Save();
                 response.Message = true.ToString();
                 return response;
@@ -168,11 +168,11 @@ namespace AIMS.Services
             {
                 IMessageHelper mHelper = new MessageHelper();
                 ActionResponse response = new ActionResponse();
-                var GrantTypes = await unitWork.GrantTypeRepository.GetManyQueryableAsync(l => (l.Id == id || l.Id == newId));
-                if (GrantTypes.Count() < 2 && newId != 0)
+                var FundingTypes = await unitWork.FundingTypeRepository.GetManyQueryableAsync(l => (l.Id == id || l.Id == newId));
+                if (FundingTypes.Count() < 2 && newId != 0)
                 {
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("GrantType");
+                    response.Message = mHelper.GetNotFound("FundingType");
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                 }
 
@@ -181,10 +181,10 @@ namespace AIMS.Services
 
                 if (newId == 0)
                 {
-                    var GrantTypeToDelete = (from l in GrantTypes
+                    var FundingTypeToDelete = (from l in FundingTypes
                                             where l.Id == id
                                             select l).FirstOrDefault();
-                    unitWork.GrantTypeRepository.Delete(GrantTypeToDelete);
+                    unitWork.FundingTypeRepository.Delete(FundingTypeToDelete);
                 }
                 else
                 {
@@ -193,7 +193,7 @@ namespace AIMS.Services
 
                 await unitWork.SaveAsync();
                 response.ReturnedId = newId;
-                response.Message = mHelper.DeleteMessage("GrantType");
+                response.Message = mHelper.DeleteMessage("FundingType");
                 return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }

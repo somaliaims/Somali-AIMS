@@ -47,10 +47,10 @@ namespace AIMS.Models
         Deleted = 3
     }
 
-    public class EFGrantTypes
+    public class EFFundingTypes
     {
         public int Id { get; set; }
-        public string GrantType { get; set; }
+        public string FundingType { get; set; }
     }
 
     public class EFOrganizationTypes
@@ -231,8 +231,8 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
         [ForeignKey("GrantType")]
-        public int GrantTypeId { get; set; }
-        public EFGrantTypes GrantType { get; set; }
+        public int FundingTypeId { get; set; }
+        public EFFundingTypes FundingType { get; set; }
         [Column(TypeName = "decimal(9 ,2)")]
         public decimal Amount { get; set; }
         public string Currency { get; set; }
