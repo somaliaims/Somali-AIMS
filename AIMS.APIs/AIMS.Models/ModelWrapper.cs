@@ -22,6 +22,28 @@ namespace AIMS.Models
         public string Currency { get; set; }
     }
 
+    public class EmailModel
+    {
+        [Required]
+        public string Subject { get; set; }
+        [Required]
+        public string Title { get; set; }
+        [Required]
+        public string Message { get; set; }
+        [Required]
+        public List<EmailAddress> EmailsList { get; set; }
+    }
+
+    public class EmailSimpleModel
+    {
+        [Required]
+        public string Subject { get; set; }
+        [Required]
+        public string Title { get; set; }
+        [Required]
+        public string Message { get; set; }
+    }
+
     public class FundingTypeModel
     {
         [Required]
@@ -366,7 +388,7 @@ namespace AIMS.Models
         public UserTypes UserType { get; set; }
     }
 
-    public class EmailsList
+    public class EmailAddress
     {
         [Required]
         [EmailAddress]

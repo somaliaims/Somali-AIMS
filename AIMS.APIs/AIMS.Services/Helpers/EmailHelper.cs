@@ -18,7 +18,7 @@ namespace AIMS.Services.Helpers
         /// <returns></returns>
         ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName);
 
-        ActionResponse SendEmailToUsers(List<EmailsList> emailsList, string subject, string adminEmail, string emailTitle, string emailMessage);
+        ActionResponse SendEmailToUsers(List<EmailAddress> emailsList, string subject, string emailTitle, string emailMessage);
 
         /// <summary>
         /// Sends email to recover password for the provided email
@@ -100,7 +100,7 @@ namespace AIMS.Services.Helpers
             return response;
         }
 
-        public ActionResponse SendEmailToUsers(List<EmailsList> emailsList, string subject, string adminEmail, string emailTitle, string emailMessage)
+        public ActionResponse SendEmailToUsers(List<EmailAddress> emailsList, string subject, string emailTitle, string emailMessage)
         {
             ActionResponse response = new ActionResponse();
             try
@@ -115,7 +115,6 @@ namespace AIMS.Services.Helpers
                 }
                 mailMessage.IsBodyHtml = true;
                 mailMessage.From = new MailAddress(this.emailFrom);
-                mailMessage.To.Add(adminEmail);
                 mailMessage.Body = this.FormatMessage(emailTitle, emailMessage);
                 mailMessage.Subject = subject;
                 client.Send(mailMessage);
