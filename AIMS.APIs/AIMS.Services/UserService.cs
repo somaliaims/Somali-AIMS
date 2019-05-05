@@ -29,6 +29,18 @@ namespace AIMS.Services
         Task<IEnumerable<UserView>> GetAllAsync();
 
         /// <summary>
+        /// Gets list of standard users
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<UserView> GetStandardUsers();
+
+        /// <summary>
+        /// Gets list of manager users
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<UserView> GetManagerUsers();
+
+        /// <summary>
         /// Authenticates a user
         /// </summary>
         /// <param name="email"></param>
@@ -131,6 +143,28 @@ namespace AIMS.Services
             {
                 List<UserView> usersList = new List<UserView>();
                 var users = unitWork.UserRepository.GetWithInclude(u => u.Id != 0, new string[] { "Organization" });
+                usersList = mapper.Map<List<UserView>>(users);
+                return usersList;
+            }
+        }
+
+        public IEnumerable<UserView> GetStandardUsers()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<UserView> usersList = new List<UserView>();
+                var users = unitWork.UserRepository.GetWithInclude(u => u.Id != 0 && u.UserType == UserTypes.Standard, new string[] { "Organization" });
+                usersList = mapper.Map<List<UserView>>(users);
+                return usersList;
+            }
+        }
+
+        public IEnumerable<UserView> GetManagerUsers()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<UserView> usersList = new List<UserView>();
+                var users = unitWork.UserRepository.GetWithInclude(u => u.Id != 0 && u.UserType == UserTypes.Manager, new string[] { "Organization" });
                 usersList = mapper.Map<List<UserView>>(users);
                 return usersList;
             }

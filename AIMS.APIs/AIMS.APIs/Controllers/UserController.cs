@@ -41,6 +41,20 @@ namespace AIMS.APIs.Controllers
             return Ok();
         }
 
+        [HttpGet("GetStandardUsers")]
+        public IActionResult GetStandardUsers()
+        {
+            var users = userService.GetStandardUsers();
+            return Ok(users);
+        }
+
+        [HttpGet("GetManagerUsers")]
+        public IActionResult GetManagerUsers()
+        {
+            var users = userService.GetManagerUsers();
+            return Ok(users);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] UserModel user)
         {
