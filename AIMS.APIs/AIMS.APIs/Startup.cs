@@ -127,6 +127,7 @@ namespace AIMS.APIs
             services.AddScoped<ICustomFieldsService, CustomFieldsService>();
             services.AddScoped<IFundingTypeService, FundingTypeService>();
             services.AddScoped<IEmailMessageService, EmailMessageService>();
+            services.AddScoped<IEmailService, EmailService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();

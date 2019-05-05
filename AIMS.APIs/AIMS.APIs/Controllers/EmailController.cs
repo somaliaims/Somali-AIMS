@@ -20,7 +20,7 @@ namespace AIMS.APIs.Controllers
             emailService = eService;
         }
 
-        [HttpPost]
+        [HttpPost("SendEmailToUsers")]
         public IActionResult SendEmailToUsers([FromBody] EmailModel model)
         {
             if (!ModelState.IsValid)
