@@ -21,6 +21,7 @@ namespace AIMS.APIs.Controllers
     public class UserController : ControllerBase
     {
         IUserService userService;
+
         IConfiguration configuration;
 
         public UserController(IUserService service, IConfiguration config)
@@ -65,7 +66,6 @@ namespace AIMS.APIs.Controllers
 
             string adminEmail = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
                                 .GetValue<String>("Email:Smtp:AdminEmail");
-
             var response = userService.Add(user, adminEmail);
             if (!response.Success)
             {

@@ -377,7 +377,6 @@ namespace AIMS.Services
                         ISMTPSettingsService smtpService = new SMTPSettingsService(context);
                         var smtpSettings = smtpService.GetPrivate();
                         SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
-
                         if (smtpSettings != null)
                         {
                             smtpSettingsModel.Host = smtpSettings.Host;
@@ -385,10 +384,7 @@ namespace AIMS.Services
                             smtpSettingsModel.Username = smtpSettings.Username;
                             smtpSettingsModel.Password = smtpSettings.Password;
                         }
-                        IEmailHelper emailHelper = new EmailHelper(adminEmail, smtpSettingsModel);
-                        emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName);
-                        mHelper = new MessageHelper();
-                        string notificationMessage = mHelper.NewUserForOrganization(organization.OrganizationName);
+                        /*string notificationMessage = mHelper.NewUserForOrganization(organization.OrganizationName);
 
                         //Add notification
                         unitWork.NotificationsRepository.Insert(new EFUserNotifications()
@@ -400,8 +396,18 @@ namespace AIMS.Services
                             Dated = DateTime.Now,
                             IsSeen = false,
                             NotificationType = NotificationTypes.NewUser
-                        });
+                        });*/
                         unitWork.Save();
+
+                        string message = "";
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewUser);
+                        if (emailMessage != null)
+                        {
+                            message = emailMessage.Message;
+                        }
+                        IEmailHelper emailHelper = new EmailHelper(adminEmail, smtpSettingsModel);
+                        emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, message);
+                        mHelper = new MessageHelper();
                     }
                     response.ReturnedId = newUser.Id;
                 }

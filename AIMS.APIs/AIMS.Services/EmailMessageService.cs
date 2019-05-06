@@ -48,20 +48,29 @@ namespace AIMS.Services
     public class EmailMessageService : IEmailMessageService
     {
         AIMSDbContext context;
-        IMapper mapper;
 
-        public EmailMessageService(AIMSDbContext cntxt, IMapper autoMapper)
+        public EmailMessageService(AIMSDbContext cntxt)
         {
             context = cntxt;
-            mapper = autoMapper;
         }
 
         public IEnumerable<EmailMessageView> GetAll()
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                List<EmailMessageView> messagesList = new List<EmailMessageView>();
                 var messages = unitWork.EmailMessagesRepository.GetAll();
-                return mapper.Map<List<EmailMessageView>>(messages);
+                foreach(var message in messages)
+                {
+                    messagesList.Add(new EmailMessageView()
+                    {
+                        Id = message.Id,
+                        TypeDefinition = message.TypeDefinition,
+                        MessageType = message.MessageType,
+                        Message = message.Message
+                    });
+                }
+                return messagesList;
             }
         }
 
@@ -69,8 +78,19 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                List<EmailMessageView> messagesList = new List<EmailMessageView>();
                 var emailMessages = await unitWork.EmailMessagesRepository.GetAllAsync();
-                return await Task<IEnumerable<EmailMessageView>>.Run(() => mapper.Map<List<EmailMessageView>>(emailMessages)).ConfigureAwait(false);
+                foreach (var message in emailMessages)
+                {
+                    messagesList.Add(new EmailMessageView()
+                    {
+                        Id = message.Id,
+                        TypeDefinition = message.TypeDefinition,
+                        MessageType = message.MessageType,
+                        Message = message.Message
+                    });
+                }
+                return await Task<IEnumerable<EmailMessageView>>.Run(() => messagesList).ConfigureAwait(false);
             }
         }
 
@@ -79,7 +99,11 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var emailMessage = unitWork.EmailMessagesRepository.GetByID(id);
-                return mapper.Map<EmailMessageView>(emailMessage);
+                if (emailMessage == null)
+                {
+                    return new EmailMessageView() { };
+                }
+                return new EmailMessageView() { Id = emailMessage.Id, TypeDefinition = emailMessage.TypeDefinition, MessageType = emailMessage.MessageType, Message = emailMessage.Message };
             }
         }
 

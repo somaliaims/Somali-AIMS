@@ -16,8 +16,16 @@ namespace AIMS.Services.Helpers
         /// <param name="emailList"></param>
         /// <param name="organizationName"></param>
         /// <returns></returns>
-        ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName);
+        ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName, string message);
 
+        /// <summary>
+        /// Send emails to users
+        /// </summary>
+        /// <param name="emailsList"></param>
+        /// <param name="subject"></param>
+        /// <param name="emailTitle"></param>
+        /// <param name="emailMessage"></param>
+        /// <returns></returns>
         ActionResponse SendEmailToUsers(List<EmailAddress> emailsList, string subject, string emailTitle, string emailMessage);
 
         /// <summary>
@@ -39,7 +47,7 @@ namespace AIMS.Services.Helpers
             emailFrom = adminEmail;
         }
 
-        public ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName)
+        public ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName, string message)
         {
             ActionResponse response = new ActionResponse();
             MailMessage mailMessage = new MailMessage();
@@ -60,7 +68,7 @@ namespace AIMS.Services.Helpers
             //Sending bulk email to Managers
             if (managersEmailList.Count() > 0)
             {
-                string emailMessage = this.GetUserRegistrationMessageForAdmin(organizationName);
+                string emailMessage = this.GetUserRegistrationMessageForAdmin(organizationName, message);
                 mailMessage.To.Add(managersEmailString);
                 mailMessage.Body = emailMessage;
                 mailMessage.Subject = "New User Registration";
@@ -69,7 +77,7 @@ namespace AIMS.Services.Helpers
 
             if (usersEmailList.Count() > 0)
             {
-                string emailMessage = this.GetUserRegistrationMessageForUser(organizationName);
+                string emailMessage = this.GetUserRegistrationMessageForUser(organizationName, message);
                 mailMessage.To.Add(usersEmailString);
                 mailMessage.Body = emailMessage;
                 mailMessage.Subject = "New User Registration for " + organizationName;
@@ -135,22 +143,37 @@ namespace AIMS.Services.Helpers
             return (String.Join(string.Empty, messageList));
         }
 
-        private string GetUserRegistrationMessageForAdmin(string organizationName)
+        private string GetUserRegistrationMessageForAdmin(string organizationName, string message = null)
         {
             List<string> messageList = new List<string>();
             messageList.Add("<h1>New User Registration for " + organizationName + "</h1>");
-            messageList.Add("<p>A new user has just submitted the request for registration.</p>");
-            messageList.Add("<p>Please open your notification area using AIMS, and approve/disapprove the request.</p>");
+            if (message != null)
+            {
+                messageList.Add("<p>" + message + "</p>");
+            }
+            else
+            {
+                messageList.Add("<p>A new user has just submitted the request for registration.</p>");
+                messageList.Add("<p>Please open your notification area using AIMS, and approve/disapprove the request.</p>");
+            }
             messageList.Add("<b>AIMS Support Team</b>");
             return (String.Join(string.Empty, messageList));
         }
 
-        private string GetUserRegistrationMessageForUser(string organizationName)
+        private string GetUserRegistrationMessageForUser(string organizationName, string message = null)
         {
             List<string> messageList = new List<string>();
             messageList.Add("<h1>Dear AIMS User</h1>");
-            messageList.Add("<p>A new user has just submitted a request for registration into your organization.</p>");
-            messageList.Add("<p>Please open your notification area using AIMS, and approve/disapprove the request.</p>");
+
+            if (message != null)
+            {
+                messageList.Add("<p>" + message + "</p>");
+            }
+            else
+            {
+                messageList.Add("<p>A new user has just submitted a request for registration into your organization.</p>");
+                messageList.Add("<p>Please open your notification area using AIMS, and approve/disapprove the request.</p>");
+            }
             messageList.Add("<b>AIMS Support Team</b>");
             return (String.Join(string.Empty, messageList));
         }
