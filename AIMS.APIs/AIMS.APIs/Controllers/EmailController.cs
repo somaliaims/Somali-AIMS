@@ -29,7 +29,7 @@ namespace AIMS.APIs.Controllers
             }
 
             var response = emailService.SendEmailToUsers(model);
-            if (response.Success)
+            if (!response.Success)
             {
                 return BadRequest(response.Message);
             }
