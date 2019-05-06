@@ -230,7 +230,7 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
-        [ForeignKey("GrantType")]
+        [ForeignKey("FundingType")]
         public int FundingTypeId { get; set; }
         public EFFundingTypes FundingType { get; set; }
         [Column(TypeName = "decimal(9 ,2)")]

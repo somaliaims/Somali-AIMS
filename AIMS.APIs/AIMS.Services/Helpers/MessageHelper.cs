@@ -134,6 +134,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string GetInvalidOptionsMessage();
+
+        /// <summary>
+        /// Gets invalid attempt of sector type deletion
+        /// </summary>
+        /// <returns></returns>
+        string GetInvalidDeletionAttemptSectorType();
     }
 
     public class MessageHelper : IMessageHelper
@@ -153,6 +159,7 @@ namespace AIMS.Services.Helpers
         private readonly string ALREADY_EXISTS = " provided is already entered once.";
         private readonly string INVALID_DATE = "Invalid value provided for date";
         private readonly string INVALID_OPTIONS_COUNT = "Invalid number of options provided for the type of field";
+        private readonly string INVALID_SECTOR_TYPE_DELETION = "A sector type cannot be deleted untill all the sector under the type is deleted";
         private readonly string INVALID_DISBURSEMENTS = "You cannot add more disbursements than the project total value. Please increase the project funding amount before adding more disbursements.";
 
         public string GetNotFound(string entity)
@@ -249,6 +256,11 @@ namespace AIMS.Services.Helpers
         public string GetInvalidOptionsMessage()
         {
             return (INVALID_OPTIONS_COUNT);
+        }
+
+        public string GetInvalidDeletionAttemptSectorType()
+        {
+            return (INVALID_SECTOR_TYPE_DELETION);
         }
     }
 }

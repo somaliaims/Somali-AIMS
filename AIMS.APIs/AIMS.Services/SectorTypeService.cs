@@ -84,6 +84,13 @@ namespace AIMS.Services
         /// <param name="sectorType"></param>
         /// <returns></returns>
         ActionResponse Update(int id, SectorTypesModel sectorType);
+
+        /// <summary>
+        /// Deletes the sector type
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ActionResponse Delete(int id);
     }
 
     public class SectorTypesService : ISectorTypesService
@@ -284,9 +291,38 @@ namespace AIMS.Services
                 sectorTypeObj.IsDefault = model.IsDefault;
                 sectorTypeObj.IsIATIType = model.IsIATIType;
                 unitWork.Save();
-                response.Message = "1";
+                response.Message = true.ToString();
                 return response;
             }
+        }
+
+        public ActionResponse Delete(int id)
+        {
+            ActionResponse response = new ActionResponse();
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                var sectors = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == id);
+                if (sectors.Count() > 0)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetInvalidDeletionAttemptSectorType();
+                    response.Success = false;
+                    return response;
+                }
+
+                var sectorType = unitWork.SectorTypesRepository.GetByID(id);
+                if (sectorType == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Sector type");
+                    response.Success = false;
+                    return response;
+                }
+                unitWork.SectorTypesRepository.Delete(sectorType);
+                unitWork.Save();
+            }
+            return response;
         }
     }
 }

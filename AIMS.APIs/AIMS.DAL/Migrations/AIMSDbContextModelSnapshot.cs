@@ -377,7 +377,7 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("FunderId");
 
-                    b.Property<int>("FundingTypeId");
+                    b.Property<int?>("FundingTypeId");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(9 ,2)");

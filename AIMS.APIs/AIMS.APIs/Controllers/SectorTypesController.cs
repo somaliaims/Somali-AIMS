@@ -122,5 +122,20 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(response.Message);
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid id provided");
+            }
+            var response = sectorTypeService.Delete(id);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
     }
 }
