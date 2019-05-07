@@ -793,13 +793,22 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         public string Dated { get; set; }
         public decimal Amount { get; set; }
+        public string Currency { get; set; }
+        public decimal ExchangeRate { get; set; }
     }
 
     public class ProjectDisbursementModel
     {
+        [Required]
         public int ProjectId { get; set; }
+        [Required]
         public DateTime Dated { get; set; }
+        [Required]
         public decimal Amount { get; set; }
+        [Required]
+        public string Currency { get; set; }
+        [Required]
+        public decimal ExchangeRate { get; set; }
     }
 
 

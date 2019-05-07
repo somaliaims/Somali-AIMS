@@ -67,6 +67,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                string defaultCurrency = "";
                 decimal projectValue = 0, actualFundingAmount = 0, manualFundingAmount = 0;
                 int currentYear = DateTime.Now.Year;
                 string funderCurrency = null;
@@ -91,28 +92,37 @@ namespace AIMS.Services
                     }
                 }
 
+                var defaultCurrencyObj = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
+                if (defaultCurrencyObj != null)
+                {
+                    defaultCurrency = defaultCurrencyObj.Currency;
+                    if (string.IsNullOrEmpty(envelope.Currency))
+                    {
+                        envelope.Currency = defaultCurrency;
+                    }
+                }
+
                 var funderProjects = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.FunderId == funderId);
                 if (funderProjects != null)
                 {
-                    if (envelope.Currency == null)
+                    /*if (envelope.Currency == null)
                     {
                         funderCurrency = (from f in funderProjects
                                              select f.Currency).FirstOrDefault();
-                    }
+                    }*/
                     projectIds = (from p in funderProjects
                                   select p.ProjectId).ToList<int>();
 
                     projectValue = (from p in funderProjects
-                                          select p.Amount).Sum();
+                                          select (p.Amount * p.ExchangeRate)).Sum();
 
-                    if (funderCurrency != envelope.Currency && envelope.Currency != null)
+                    if (defaultCurrency != envelope.Currency && envelope.Currency != null)
                     {
                         projectValue = (projectValue * envelope.ExchangeRate);
                     }
                 }
 
                 var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => projectIds.Contains(d.ProjectId));
-                
                 if (disbursements.Count() > 0)
                 {
                     disbursements = (from disbursement in disbursements

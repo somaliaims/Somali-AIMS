@@ -174,6 +174,9 @@ namespace AIMS.Models
         public DateTime Dated { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal Amount { get; set; }
+        public string Currency { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
+        public decimal ExchangeRate { get; set; }
     }
 
     public class EFProjectSectors

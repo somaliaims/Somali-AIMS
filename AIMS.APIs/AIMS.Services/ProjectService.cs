@@ -1212,6 +1212,14 @@ namespace AIMS.Services
                         response.Success = false;
                     }
 
+                    var currency = unitWork.CurrencyRepository.GetOne(c => c.Currency == model.Currency);
+                    if (currency == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Currency");
+                        response.Success = false;
+                    }
+
                     var funders = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.ProjectId == model.ProjectId);
                     decimal totalFunds = (from funds in funders
                                           select funds.Amount).Sum();
@@ -1228,12 +1236,13 @@ namespace AIMS.Services
                         return response;
                     }
 
-
                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                     {
                         Project = project,
                         Dated = model.Dated,
                         Amount = model.Amount,
+                        Currency = model.Currency,
+                        ExchangeRate = model.ExchangeRate
                     });
                     project.DateUpdated = DateTime.Now;
                     unitWork.ProjectRepository.Update(project);
