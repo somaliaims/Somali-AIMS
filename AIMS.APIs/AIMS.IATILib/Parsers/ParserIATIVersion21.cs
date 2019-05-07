@@ -89,7 +89,7 @@ namespace AIMS.IATILib.Parsers
                     int disbursementCounter = 1;
                     foreach (var activity in activities)
                     {
-                        string startDate, endDate, projectTitle = "";
+                        string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "";
                         if (activity.HasAttributes)
                         {
                             if (activity.Attribute("default-currency") != null)
@@ -111,15 +111,32 @@ namespace AIMS.IATILib.Parsers
                             {
                                 if (date.HasAttributes && date.Attribute("type") != null)
                                 {
-                                    if (date.Attribute("type").Value.Equals("start-actual"))
+                                    if (date.Attribute("type").Value.Equals("1"))
                                     {
-                                        startDate = date.FirstAttribute?.Value;
+                                        startPlanned = date.Attribute("iso-date")?.Value;
                                     }
-                                    else if (date.Attribute("type").Value.Equals("end-planned"))
+                                    else if (date.Attribute("type").Value.Equals("2"))
                                     {
-                                        endDate = date.FirstAttribute?.Value;
+                                        startDate = date.Attribute("iso-date")?.Value;
+                                    }
+                                    else if (date.Attribute("type").Value.Equals("3"))
+                                    {
+                                        endPlanned = date.Attribute("iso-date")?.Value;
+                                    }
+                                    else if (date.Attribute("type").Value.Equals("4"))
+                                    {
+                                        endDate = date.Attribute("iso-date")?.Value;
                                     }
                                 }
+                            }
+
+                            if (string.IsNullOrEmpty(startDate))
+                            {
+                                startDate = startPlanned;
+                            }
+                            if (string.IsNullOrEmpty(endDate))
+                            {
+                                endDate = endPlanned;
                             }
                         }
 
@@ -432,6 +449,8 @@ namespace AIMS.IATILib.Parsers
                                 Id = activityCounter,
                                 Identifier = activity.Element("iati-identifier")?.Value,
                                 Title = projectTitle,
+                                StartDate = string.IsNullOrEmpty(startDate) ? startDate : Convert.ToDateTime(startDate).ToLongDateString(),
+                                EndDate = string.IsNullOrEmpty(endDate) ? endDate : Convert.ToDateTime(endDate).ToLongDateString(),
                                 TrimmedTitle = trimmedTitle,
                                 Locations = locations,
                                 Documents = documentsList,
@@ -466,7 +485,7 @@ namespace AIMS.IATILib.Parsers
                     int activityCounter = 1;
                     foreach (var activity in activities)
                     {
-                        string startDate = "", endDate = "", projectTitle = "";
+                        string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "";
                         if (activity.HasAttributes)
                         {
                             if (activity.Attribute("default-currency") != null)
@@ -488,15 +507,31 @@ namespace AIMS.IATILib.Parsers
                             {
                                 if (date.HasAttributes && date.Attribute("type") != null)
                                 {
-                                    if (date.Attribute("type").Value.Equals("start-actual"))
+                                    if (date.Attribute("type").Value.Equals("1"))
+                                    {
+                                        startPlanned = date.FirstAttribute?.Value;
+                                    }
+                                    else if (date.Attribute("type").Value.Equals("2"))
                                     {
                                         startDate = date.FirstAttribute?.Value;
                                     }
-                                    else if (date.Attribute("type").Value.Equals("end-planned"))
+                                    else if (date.Attribute("type").Value.Equals("3"))
+                                    {
+                                        endPlanned = date.FirstAttribute?.Value;
+                                    }
+                                    else if (date.Attribute("type").Value.Equals("2"))
                                     {
                                         endDate = date.FirstAttribute?.Value;
                                     }
                                 }
+                            }
+                            if (string.IsNullOrEmpty(startDate))
+                            {
+                                startDate = startPlanned;
+                            }
+                            if (string.IsNullOrEmpty(endDate))
+                            {
+                                endDate = endPlanned;
                             }
                         }
 
@@ -520,8 +555,8 @@ namespace AIMS.IATILib.Parsers
                                 Title = projectTitle,
                                 TrimmedTitle = trimmedTitle,
                                 Description = activity.Element("description")?.Value,
-                                StartDate = startDate,
-                                EndDate = endDate
+                                StartDate = string.IsNullOrEmpty(startDate) ? startDate : Convert.ToDateTime(startDate).ToLongDateString(),
+                                EndDate = string.IsNullOrEmpty(endDate) ? endDate : Convert.ToDateTime(endDate).ToLongDateString()
                             });
                             ++activityCounter;
                         }
