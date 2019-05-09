@@ -37,5 +37,12 @@ namespace AIMS.IATILib.Parsers
         /// <param name="xmlDoc"></param>
         /// <returns></returns>
         ICollection<IATISectorModel> ExtractSectors(XDocument xmlDoc);
+
+        /// <summary>
+        /// Parses organizations from the IATI document
+        /// </summary>
+        /// <param name="xmlDoc"></param>
+        /// <returns></returns>
+        ICollection<IATIOrganizationModel> ExtractOrganizations(XDocument xmlDoc);
     }
 }

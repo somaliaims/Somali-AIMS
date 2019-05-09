@@ -115,6 +115,43 @@ namespace AIMS.IATILib.Parsers
             return sectorsList;
         }
 
+        public ICollection<IATIOrganizationModel> ExtractOrganizations(XDocument xmlDoc)
+        {
+            List<IATIOrganizationModel> organizationsList = new List<IATIOrganizationModel>();
+            string message = "";
+            try
+            {
+                var activities = from activity in xmlDoc.Descendants("iati-activity")
+                                 where activity.Element("title") != null
+                                 select activity;
+
+                foreach (var activity in activities)
+                {
+                    var organizations = activity.Elements("participating-org");
+                    foreach (var organization in organizations)
+                    {
+                        string orgName = organization?.Value;
+                        string isOrgExists = (from org in organizationsList
+                                              where org.Name.Trim().ToLower() == orgName.Trim().ToLower()
+                                              select org.Name).FirstOrDefault();
+
+                        if (isOrgExists == null && !string.IsNullOrEmpty(orgName))
+                        {
+                            organizationsList.Add(new IATIOrganizationModel()
+                            {
+                                Name = organization?.Value,
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+            return organizationsList;
+        }
+
         private void ExtractAndFillActivities(IEnumerable<XElement> activities, List<IATIActivity> activityList)
         {
             string currency = "";

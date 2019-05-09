@@ -58,6 +58,11 @@ namespace AIMS.IATILib.Parsers
         public string Role { get; set; }
     }
 
+    public class IATIOrganizationModel
+    {
+        public string Name { get; set; }
+    }
+
     public class IATITransaction
     {
         //public string AidType { get; set; }

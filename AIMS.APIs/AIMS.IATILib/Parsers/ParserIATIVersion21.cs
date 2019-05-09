@@ -73,6 +73,18 @@ namespace AIMS.IATILib.Parsers
             return sectorsList;
         }
 
+        public ICollection<IATIOrganizationModel> ExtractOrganizations(XDocument xmlDoc)
+        {
+            List<IATIOrganizationModel> organizationsList = new List<IATIOrganizationModel>();
+            var activities = from activity in xmlDoc.Descendants("iati-activity")
+                             where activity.Element("title").Element("narrative") != null ||
+                             activity.Element("title") != null
+                             select activity;
+
+            this.ParseAndFillOrganizations(activities, organizationsList);
+            return organizationsList;
+        }
+
         private void ParseIATIAndFillList(IEnumerable<XElement> activities, List<IATIActivity> activityList, List<IATITransactionTypes> transactionTypes)
         {
             string message = "";
@@ -185,16 +197,6 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
-                        /*string aidType = "";
-                        var aidTypeObj = activity.Element("default-aid-type");
-                        if (aidTypeObj != null && aidTypeObj.HasAttributes)
-                        {
-                            string aidTypeCode = aidTypeObj.Attribute("code")?.Value;
-                            /*aidType = (from t in aidTypes
-                                       where t.Code.Equals(aidTypeCode)
-                                       select t.Name).FirstOrDefault();
-                        }*/
-
                         //Extracting documents
                         var documents = activity.Elements("document-link");
                         List<IATIDocument> documentsList = new List<IATIDocument>();
@@ -247,9 +249,7 @@ namespace AIMS.IATILib.Parsers
                                     Amount = transaction.Element("value")?.Value,
                                     Currency = transaction.Element("value")?.Attribute("currency")?.Value,
                                     Dated = transaction.Element("transaction-date")?.Attribute("iso-date")?.Value,
-                                    //AidType = aidType,
                                     TransactionType = transactionType,
-                                    //Description = transaction.Element("description")?.Value
                                 });
                                 ++transactionCounter;
                             }
@@ -293,32 +293,28 @@ namespace AIMS.IATILib.Parsers
                         {
                             foreach (var disbursement in disbursements)
                             {
-                                //if (disbursement.HasAttributes && (disbursement.Attribute("type").Value == "3"
-                                  //  || disbursement.Attribute("type").Value == "4"))
-                                //{
-                                    string disbursementStartDate = disbursement.Element("period-start").Attribute("iso-date")?.Value;
-                                    string disbursementEndDate = disbursement.Element("period-end").Attribute("iso-date")?.Value;
-                                    string disbursementAmountStr = disbursement.Element("value")?.Value;
-                                    string disbursementCurrency = disbursement.Element("value").Attribute("currency")?.Value;
-                                    if (string.IsNullOrEmpty(disbursementCurrency))
-                                    {
-                                        disbursementCurrency = currency;
-                                    }
-
-                                    decimal disbursementAmount = 0;
-                                    Decimal.TryParse(disbursementAmountStr, out disbursementAmount);
-
-                                    disbursementsList.Add(new IATIDisbursement()
-                                    {
-                                        Id = disbursementCounter,
-                                        StartDate = disbursementStartDate,
-                                        EndDate = disbursementEndDate,
-                                        Currency = disbursementCurrency,
-                                        Amount = disbursementAmount
-                                    });
-                                    ++budgetCounter;
+                                string disbursementStartDate = disbursement.Element("period-start").Attribute("iso-date")?.Value;
+                                string disbursementEndDate = disbursement.Element("period-end").Attribute("iso-date")?.Value;
+                                string disbursementAmountStr = disbursement.Element("value")?.Value;
+                                string disbursementCurrency = disbursement.Element("value").Attribute("currency")?.Value;
+                                if (string.IsNullOrEmpty(disbursementCurrency))
+                                {
+                                    disbursementCurrency = currency;
                                 }
-                            //}
+
+                                decimal disbursementAmount = 0;
+                                Decimal.TryParse(disbursementAmountStr, out disbursementAmount);
+
+                                disbursementsList.Add(new IATIDisbursement()
+                                {
+                                    Id = disbursementCounter,
+                                    StartDate = disbursementStartDate,
+                                    EndDate = disbursementEndDate,
+                                    Currency = disbursementCurrency,
+                                    Amount = disbursementAmount
+                                });
+                                ++budgetCounter;
+                            }
                         }
 
 
@@ -443,7 +439,7 @@ namespace AIMS.IATILib.Parsers
 
                         if (isActivityAdded == null)
                         {
-                            
+
                             activityList.Add(new IATIActivity()
                             {
                                 Id = activityCounter,
@@ -593,6 +589,58 @@ namespace AIMS.IATILib.Parsers
                                 {
                                     SectorName = sectorName,
                                 });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+        }
+
+        private void ParseAndFillOrganizations(IEnumerable<XElement> activities, List<IATIOrganizationModel> organizationsList)
+        {
+            string message = "";
+            try
+            {
+                if (activities != null)
+                {
+                    foreach (var activity in activities)
+                    {
+                        var organizations = activity.Elements("participating-org");
+                        if (organizations != null)
+                        {
+                            foreach (var organization in organizations)
+                            {
+                                if (organization.HasAttributes && organization.Attribute("role") != null)
+                                {
+                                    var narratives = organization.Elements("narrative");
+                                    string organizationName = "";
+
+                                    if (narratives.Count() > 0)
+                                    {
+                                        if (narratives.FirstOrDefault().HasAttributes)
+                                        {
+                                            organizationName = (from n in narratives
+                                                                where n.FirstAttribute.Value == "en"
+                                                                select n.Value).FirstOrDefault();
+                                        }
+                                        else
+                                        {
+                                            if (organization.HasElements && organization.Element("narrative") != null)
+                                            {
+                                                organizationName = organization.Element("narrative")?.Value;
+                                            }
+                                        }
+                                    }
+
+                                    organizationsList.Add(new IATIOrganizationModel()
+                                    {
+                                        Name = organizationName,
+                                    });
+                                }
                             }
                         }
                     }

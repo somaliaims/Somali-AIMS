@@ -102,6 +102,12 @@ namespace AIMS.Services
         ICollection<IATIOrganization> GetOrganizations();
 
         /// <summary>
+        /// Extracts and save organizations from IATI to DB
+        /// </summary>
+        /// <returns></returns>
+        ActionResponse ExtractAndSaveOrganizations(string dataFilePath);
+
+        /// <summary>
         /// Deletes all the data less than the specified date
         /// </summary>
         /// <param name="datedLessThan"></param>
@@ -284,6 +290,40 @@ namespace AIMS.Services
                     break;
             }
             return iatiProjects;
+        }
+
+        public ActionResponse ExtractAndSaveOrganizations(string dataFilePath)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                string url = dataFilePath;
+                XmlReader xReader = XmlReader.Create(url);
+                XDocument xDoc = XDocument.Load(xReader);
+                var activity = (from el in xDoc.Descendants("iati-activity")
+                                select el.FirstAttribute).FirstOrDefault();
+
+                IParser parser;
+                ICollection<IATIActivity> activityList = new List<IATIActivity>();
+                ICollection<IATIOrganizationModel> organizations = new List<IATIOrganizationModel>();
+                string version = "";
+                version = activity.Value;
+                switch (version)
+                {
+                    case "1.03":
+                        parser = new ParserIATIVersion13();
+                        organizations = parser.ExtractOrganizations(xDoc);
+                        break;
+
+                    case "2.01":
+                        parser = new ParserIATIVersion21();
+                        organizations = parser.ExtractOrganizations(xDoc);
+                        break;
+                }
+                
+                //TODO: Write the logic for storing organizations
+                return response;
+            }
         }
 
         public ActionResponse ExtractAndSaveDAC5Sectors(string dataFilePath)
