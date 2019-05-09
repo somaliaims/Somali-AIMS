@@ -64,7 +64,7 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string TypeName { get; set; }
-        public bool? IsDefault { get; set; }
+        public bool? IsPrimary { get; set; }
         public bool? IsIATIType { get; set; }
         public IEnumerable<EFSector> Sectors { get; set; }
     }

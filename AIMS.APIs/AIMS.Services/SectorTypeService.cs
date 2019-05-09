@@ -117,7 +117,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorTypes = unitWork.SectorTypesRepository.GetManyQueryable(s => s.IsDefault != true);
+                var sectorTypes = unitWork.SectorTypesRepository.GetManyQueryable(s => s.IsPrimary != true);
                 return mapper.Map<List<SectorTypesView>>(sectorTypes);
             }
         }
@@ -150,7 +150,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectorType = unitWork.SectorTypesRepository.GetOne(s => (s.IsDefault == true));
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => (s.IsPrimary == true));
                 return mapper.Map<SectorTypesView>(sectorType);
             }
         }
@@ -184,7 +184,7 @@ namespace AIMS.Services
                     var newSectorTypes = unitWork.SectorTypesRepository.Insert(new EFSectorTypes()
                     {
                         TypeName = model.TypeName,
-                        IsDefault = model.IsDefault,
+                        IsPrimary = model.IsPrimary,
                         IsIATIType = model.IsIATIType
                     });
                     response.ReturnedId = newSectorTypes.Id;
@@ -225,10 +225,10 @@ namespace AIMS.Services
                     {
                         foreach(var sType in sectorTypes)
                         {
-                            sType.IsDefault = false;
+                            sType.IsPrimary = false;
                             unitWork.SectorTypesRepository.Update(sType);
                         }
-                        sectorType.IsDefault = true;
+                        sectorType.IsPrimary = true;
                         await unitWork.SaveAsync();
                     }
                 });
@@ -288,7 +288,7 @@ namespace AIMS.Services
                 }
 
                 sectorTypeObj.TypeName = model.TypeName;
-                sectorTypeObj.IsDefault = model.IsDefault;
+                sectorTypeObj.IsPrimary = model.IsPrimary;
                 sectorTypeObj.IsIATIType = model.IsIATIType;
                 unitWork.Save();
                 response.Message = true.ToString();

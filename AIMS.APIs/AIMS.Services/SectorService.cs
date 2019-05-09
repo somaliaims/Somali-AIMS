@@ -135,7 +135,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsDefault == true, new string[] { "SectorType" });
+                var sectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsPrimary == true, new string[] { "SectorType" });
                 if (sectors.Count() > 1)
                 {
                     sectors = (from sector in sectors

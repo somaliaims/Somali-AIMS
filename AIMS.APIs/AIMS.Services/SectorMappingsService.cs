@@ -131,7 +131,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<SectorView> mappingsList = new List<SectorView>();
-                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsDefault == true);
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsPrimary == true);
                 IEnumerable<EFSector> sectorsList = new List<EFSector>();
 
                 if (sectorType != null)
@@ -155,7 +155,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<SectorView> mappingsList = new List<SectorView>();
-                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsDefault == true);
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsPrimary == true);
                 IEnumerable<EFSector> sectorsList = new List<EFSector>();
 
                 if (sectorType != null)
@@ -195,7 +195,7 @@ namespace AIMS.Services
                         return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                     }
 
-                    if (sectorType.IsDefault == true)
+                    if (sectorType.IsPrimary == true)
                     {
                         mHelper = new MessageHelper();
                         response.Success = false;

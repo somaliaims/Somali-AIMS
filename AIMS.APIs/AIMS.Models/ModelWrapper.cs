@@ -254,7 +254,7 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string TypeName { get; set; }
-        public bool? IsDefault { get; set; }
+        public bool? IsPrimary { get; set; }
         public bool? IsIATIType { get; set; }
     }
 
@@ -262,7 +262,7 @@ namespace AIMS.Models
     {
         [Required]
         public string TypeName { get; set; }
-        public bool IsDefault { get; set; } = false;
+        public bool IsPrimary { get; set; } = false;
         public bool IsIATIType { get; set; } = false;
     }
 

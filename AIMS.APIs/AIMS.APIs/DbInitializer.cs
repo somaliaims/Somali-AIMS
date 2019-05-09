@@ -74,7 +74,7 @@ namespace AIMS.APIs
 
                 if (context.SectorTypes.Count() == 0)
                 {
-                    context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Somali Sectors", IsDefault = true });
+                    context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Somali Sectors", IsPrimary = true });
                     context.SaveChanges();
                 }
 
