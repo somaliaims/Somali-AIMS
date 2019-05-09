@@ -1081,8 +1081,6 @@ namespace AIMS.Models
         public string FieldTitle { get; set; }
         [Required]
         public FieldTypes FieldType { get; set; }
-        public DateTime ActiveFrom { get; set; }
-        public DateTime ActiveUpto { get; set; }
         public string Values { get; set; }
     }
 
@@ -1109,8 +1107,6 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string FieldTitle { get; set; }
         public FieldTypes FieldType { get; set; }
-        public DateTime ActiveFrom { get; set; }
-        public DateTime ActiveUpto { get; set; }
         public string Values { get; set; }
     }
 

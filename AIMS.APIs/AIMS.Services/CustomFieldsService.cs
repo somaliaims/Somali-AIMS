@@ -99,7 +99,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var dated = DateTime.Now;
-                var customFields = unitWork.CustomFieldRepository.GetManyQueryable(c => dated.Date >= c.ActiveFrom.Date && dated.Date <= c.ActiveUpto);
+                var customFields = unitWork.CustomFieldRepository.GetManyQueryable(c => c.Id != 0);
                 if (customFields != null)
                 {
                     customFields = (from c in customFields
@@ -201,8 +201,6 @@ namespace AIMS.Services
                         isCustomFieldCreated.FieldTitle = model.FieldTitle;
                         isCustomFieldCreated.FieldType = model.FieldType;
                         isCustomFieldCreated.Values = model.Values;
-                        isCustomFieldCreated.ActiveFrom = model.ActiveFrom;
-                        isCustomFieldCreated.ActiveUpto = model.ActiveUpto;
                         unitWork.CustomFieldRepository.Update(isCustomFieldCreated);
                         unitWork.Save();
                         response.ReturnedId = isCustomFieldCreated.Id;
@@ -214,8 +212,6 @@ namespace AIMS.Services
                            FieldTitle = model.FieldTitle,
                            FieldType = model.FieldType,
                            Values = model.Values,
-                           ActiveFrom = model.ActiveFrom,
-                           ActiveUpto = model.ActiveUpto,
                         });
                         unitWork.Save();
                         response.ReturnedId = newCustomField.Id;
@@ -283,8 +279,6 @@ namespace AIMS.Services
                 customField.FieldTitle = model.FieldTitle;
                 customField.FieldType = model.FieldType;
                 customField.Values = model.Values;
-                customField.ActiveFrom = model.ActiveFrom;
-                customField.ActiveUpto = model.ActiveUpto;
                 unitWork.CustomFieldRepository.Update(customField);
                 unitWork.Save();
                 response.Message = true.ToString();
