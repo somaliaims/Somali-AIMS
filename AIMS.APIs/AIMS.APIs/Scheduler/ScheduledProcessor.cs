@@ -20,6 +20,8 @@ namespace AIMS.APIs.Scheduler
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            //Execute at startup without waiting for schedule
+            await Process();
             do
             {
                 var now = DateTime.Now;

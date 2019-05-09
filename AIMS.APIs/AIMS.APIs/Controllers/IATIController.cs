@@ -56,6 +56,7 @@ namespace AIMS.APIs.Controllers
                 //string iatiUrl = configuration.GetValue<string>("IATI:Url");
                 string iatiUrl = iatiSettings.BaseUrl;
                 var response = await iatiService.DownloadIATIFromUrl(iatiUrl, iatiFilePath);
+                response = iatiService.ExtractAndSaveDAC5Sectors(iatiFilePath);
                 return Ok(response);
             }
             return Ok(null);
