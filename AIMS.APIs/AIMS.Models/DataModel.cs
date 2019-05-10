@@ -304,6 +304,7 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string Currency { get; set; }
+        public string CurrencyName { get; set; } = null;
         public bool IsDefault { get; set; }
     }
 

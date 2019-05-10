@@ -24,6 +24,13 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         Task<ExchangeRatesView> GetRatesForDateAsync(string dated, string apiToken);
+
+        /// <summary>
+        /// Get currency with names
+        /// </summary>
+        /// <param name="apiToken"></param>
+        /// <returns></returns>
+        Task<List<CurrencyNamesView>> GetCurrencyWithNames();
     }
 
     public class ExchangeRateHttpService : IExchangeRateHttpService
@@ -43,7 +50,6 @@ namespace AIMS.Services
             ExchangeRatesView ratesView = new ExchangeRatesView();
             try
             {
-                //var response = await client.GetStringAsync("latest.json?app_id=ce2f27af4d414969bfe05b7285a01dec");
                 var response = await client.GetStringAsync("latest.json?app_id=" + apiToken);
                 var ratesJson = JsonConvert.DeserializeObject<dynamic>(response);
                 string ratesStr = ratesJson != null ? JsonConvert.SerializeObject(ratesJson.rates) : "";
@@ -79,6 +85,27 @@ namespace AIMS.Services
             return await Task<List<CurrencyWithRates>>.Run(() => ratesView).ConfigureAwait(false);
         }
 
+        public async Task<List<CurrencyNamesView>> GetCurrencyWithNames()
+        {
+            List<CurrencyNamesView> currencyList = new List<CurrencyNamesView>();
+            try
+            {
+                var response = await client.GetStringAsync("currencies.json");
+                var currencies = JsonConvert.DeserializeObject<dynamic>(response);
+                string currencyStr = currencies != null ? JsonConvert.SerializeObject(currencies) : "";
+                currencyStr = currencyStr.Replace("\\", "").Replace("\"", "");
+                currencyStr = currencyStr.Replace("{", "");
+                currencyStr = currencyStr.Replace("}", "");
+                currencyList = this.GetCurrencyNames(currencyStr);
+                string currencyJsonStr = JsonConvert.SerializeObject(currencyStr);
+            }
+            catch (Exception ex)
+            {
+                string error = ex.Message;
+            }
+            return await Task<CurrencyNamesView>.Run(() => currencyList).ConfigureAwait(false);
+        }
+
         private List<CurrencyWithRates> GetRatesList(string ratesStr)
         {
             List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
@@ -103,6 +130,31 @@ namespace AIMS.Services
             }
             return ratesList;
         }
-        
+
+        private List<CurrencyNamesView> GetCurrencyNames(string ratesStr)
+        {
+            List<CurrencyNamesView> namesList = new List<CurrencyNamesView>();
+            if (ratesStr.Length > 0)
+            {
+                string[] rateRows = ratesStr.Split(",");
+                for (int row = 0; row < rateRows.Length; row++)
+                {
+                    string[] currencyRate = rateRows[row].Split(":");
+                    if (currencyRate.Length > 1)
+                    {
+                        string code = currencyRate[0];
+                        string currency = currencyRate[1];
+
+                        namesList.Add(new CurrencyNamesView()
+                        {
+                            Currency = currency,
+                            Code = code
+                        });
+                    }
+                }
+            }
+            return namesList;
+        }
+
     }
 }

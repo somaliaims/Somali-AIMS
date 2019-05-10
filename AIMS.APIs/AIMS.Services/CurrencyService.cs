@@ -52,6 +52,13 @@ namespace AIMS.Services
         ActionResponse Add(CurrencyModel currency);
 
         /// <summary>
+        /// Adds currencies for provided list
+        /// </summary>
+        /// <param name="currencyList"></param>
+        /// <returns></returns>
+        ActionResponse AddMultiple(List<CurrencyNamesView> currencyList);
+
+        /// <summary>
         /// Sets currency to default
         /// </summary>
         /// <param name="currencyId"></param>
@@ -171,7 +178,8 @@ namespace AIMS.Services
                     {
                         var newCurrency = unitWork.CurrencyRepository.Insert(new EFCurrency()
                         {
-                            Currency = model.Currency,
+                            Currency = model.Code,
+                            CurrencyName = model.Currency,
                             IsDefault = model.IsDefault
                         });
                         unitWork.Save();
@@ -196,6 +204,39 @@ namespace AIMS.Services
                 {
                     response.Success = false;
                     response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddMultiple(List<CurrencyNamesView> currencyList)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var dbCurrencyList = unitWork.CurrencyRepository.GetAll();
+                List<EFCurrency> newCurrenciesList = new List<EFCurrency>();
+
+                foreach(var currency in currencyList)
+                {
+                    var isCurrencyExists = (from c in dbCurrencyList
+                                            where c.Currency == currency.Code
+                                            select c).FirstOrDefault();
+
+                    if (isCurrencyExists == null)
+                    {
+                        newCurrenciesList.Add(new EFCurrency()
+                        {
+                            Currency = currency.Code,
+                            CurrencyName = currency.Currency
+                        });
+                    }
+                }
+
+                if (newCurrenciesList.Count > 0)
+                {
+                    unitWork.CurrencyRepository.InsertMultiple(newCurrenciesList);
+                    unitWork.Save();
                 }
                 return response;
             }

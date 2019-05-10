@@ -20,6 +20,7 @@ namespace AIMS.Models
     public class DefaultCurrencyView
     {
         public string Currency { get; set; }
+        public string CurrencyName { get; set; }
     }
 
     public class EmailModel
@@ -84,6 +85,7 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string Currency { get; set; }
+        public string CurrencyName { get; set; }
         public bool IsDefault { get; set; }
     }
 
@@ -135,6 +137,12 @@ namespace AIMS.Models
         public List<CurrencyWithRates> Rates { get; set; }
     }
 
+    public class CurrencyNamesView
+    {
+        public string Code { get; set; }
+        public string Currency { get; set; }
+    }
+
     public class ExchangeRatesSettingsView
     {
         public bool IsAutomatic { get; set; }
@@ -154,6 +162,12 @@ namespace AIMS.Models
         public decimal Rate { get; set; }
     }
 
+    public class CurrencyWithNames
+    {
+        public string Code { get; set; }
+        public string Currency { get; set; }
+    }
+
     public class ExchangeRateAPIKeyModel
     {
         [Required]
@@ -163,8 +177,10 @@ namespace AIMS.Models
     public class CurrencyModel
     {
         [Required]
-        [MaxLength(3)]
         public string Currency { get; set; }
+        [Required]
+        [MaxLength(3)]
+        public string Code { get; set; }
         public bool IsDefault { get; set; } = false;
     }
 
