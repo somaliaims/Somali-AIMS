@@ -204,7 +204,7 @@ namespace AIMS.Services
             var transactionTypes = JsonConvert.DeserializeObject<List<IATITransactionTypes>>(File.ReadAllText(tTypeFilePath));
 
             IEnumerable<string> ids = (from id in IdsModel
-                            select id.Identifier);
+                                       select id.Identifier);
             IParser parser;
             ICollection<IATIActivity> activityList = new List<IATIActivity>();
             ICollection<IATIOrganization> organizations = new List<IATIOrganization>();
@@ -294,117 +294,146 @@ namespace AIMS.Services
 
         public ActionResponse ExtractAndSaveOrganizations(string dataFilePath)
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            ActionResponse response = new ActionResponse();
+            string url = dataFilePath;
+            XmlReader xReader = XmlReader.Create(url);
+            XDocument xDoc = XDocument.Load(xReader);
+            var activity = (from el in xDoc.Descendants("iati-activity")
+                            select el.FirstAttribute).FirstOrDefault();
+
+            IParser parser;
+            ICollection<IATIActivity> activityList = new List<IATIActivity>();
+            ICollection<IATIOrganizationModel> organizations = new List<IATIOrganizationModel>();
+            string version = "";
+            version = activity.Value;
+            switch (version)
             {
-                ActionResponse response = new ActionResponse();
-                string url = dataFilePath;
-                XmlReader xReader = XmlReader.Create(url);
-                XDocument xDoc = XDocument.Load(xReader);
-                var activity = (from el in xDoc.Descendants("iati-activity")
-                                select el.FirstAttribute).FirstOrDefault();
+                case "1.03":
+                    parser = new ParserIATIVersion13();
+                    organizations = parser.ExtractOrganizations(xDoc);
+                    break;
 
-                IParser parser;
-                ICollection<IATIActivity> activityList = new List<IATIActivity>();
-                ICollection<IATIOrganizationModel> organizations = new List<IATIOrganizationModel>();
-                string version = "";
-                version = activity.Value;
-                switch (version)
-                {
-                    case "1.03":
-                        parser = new ParserIATIVersion13();
-                        organizations = parser.ExtractOrganizations(xDoc);
-                        break;
-
-                    case "2.01":
-                        parser = new ParserIATIVersion21();
-                        organizations = parser.ExtractOrganizations(xDoc);
-                        break;
-                }
-                
-                //TODO: Write the logic for storing organizations
-                return response;
+                case "2.01":
+                    parser = new ParserIATIVersion21();
+                    organizations = parser.ExtractOrganizations(xDoc);
+                    break;
             }
+
+            var organizationsList = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
+            var orgNames = (from o in organizationsList
+                            select o.OrganizationName).ToList<string>();
+
+            List<EFOrganization> newIATIOrganizations = new List<EFOrganization>();
+            foreach (var org in organizations)
+            {
+                if (orgNames.Contains(org.Name, StringComparer.OrdinalIgnoreCase) == false)
+                {
+                    EFOrganization isOrganizationInList = null;
+                    if (newIATIOrganizations.Count > 0)
+                    {
+                        isOrganizationInList = (from s in newIATIOrganizations
+                                                where s.OrganizationName.ToLower() == org.Name.ToLower()
+                                                select s).FirstOrDefault();
+                    }
+
+                    if (isOrganizationInList == null)
+                    {
+                        newIATIOrganizations.Add(new EFOrganization()
+                        {
+                            OrganizationName = org.Name,
+                            IsApproved = true,
+                            RegisteredOn = DateTime.Now
+                        });
+                    }
+                }
+            }
+
+            if (newIATIOrganizations.Count > 0)
+            {
+                unitWork.OrganizationRepository.InsertMultiple(newIATIOrganizations);
+                unitWork.Save();
+            }
+            return response;
         }
 
         public ActionResponse ExtractAndSaveDAC5Sectors(string dataFilePath)
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            ActionResponse response = new ActionResponse();
+            ICollection<IATISectorModel> iatiSectors = new List<IATISectorModel>();
+            string url = dataFilePath;
+            XmlReader xReader = XmlReader.Create(url);
+            XDocument xDoc = XDocument.Load(xReader);
+            var activity = (from el in xDoc.Descendants("iati-activity")
+                            select el.FirstAttribute).FirstOrDefault();
+
+            IParser parser;
+            string version = "";
+            version = activity.Value;
+            switch (version)
             {
-                ActionResponse response = new ActionResponse();
-                ICollection<IATISectorModel> iatiSectors = new List<IATISectorModel>();
-                string url = dataFilePath;
-                XmlReader xReader = XmlReader.Create(url);
-                XDocument xDoc = XDocument.Load(xReader);
-                var activity = (from el in xDoc.Descendants("iati-activity")
-                                select el.FirstAttribute).FirstOrDefault();
+                case "1.03":
+                    parser = new ParserIATIVersion13();
+                    iatiSectors = parser.ExtractSectors(xDoc);
+                    break;
 
-                IParser parser;
-                string version = "";
-                version = activity.Value;
-                switch (version)
+                case "2.01":
+                    parser = new ParserIATIVersion21();
+                    iatiSectors = parser.ExtractSectors(xDoc);
+                    break;
+            }
+
+            var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsIATIType == true);
+            if (sectorType != null)
+            {
+                var sectorsList = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == sectorType.Id);
+                List<string> sectorNames = (from s in sectorsList
+                                            select s.SectorName).ToList<string>();
+
+                List<EFSector> newIATISectors = new List<EFSector>();
+                foreach (var sector in iatiSectors)
                 {
-                    case "1.03":
-                        parser = new ParserIATIVersion13();
-                        iatiSectors = parser.ExtractSectors(xDoc);
-                        break;
-
-                    case "2.01":
-                        parser = new ParserIATIVersion21();
-                        iatiSectors = parser.ExtractSectors(xDoc);
-                        break;
-                }
-
-                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsIATIType == true);
-                if (sectorType != null)
-                {
-                    var sectorsList = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == sectorType.Id);
-                    List<string> sectorNames = (from s in sectorsList
-                                                select s.SectorName).ToList<string>();
-
-                    List<EFSector> newIATISectors = new List<EFSector>();
-                    foreach (var sector in iatiSectors)
+                    if (sectorNames.Contains(sector.SectorName, StringComparer.OrdinalIgnoreCase) == false)
                     {
-                        if (sectorNames.Contains(sector.SectorName, StringComparer.OrdinalIgnoreCase) == false)
+                        EFSector isSectorInList = null;
+                        if (newIATISectors.Count > 0)
                         {
-                            EFSector isSectorInList = null;
-                            if (newIATISectors.Count > 0)
-                            {
-                                isSectorInList = (from s in newIATISectors
-                                                  where s.SectorName.ToLower() == sector.SectorName.ToLower()
-                                                  select s).FirstOrDefault();
-                            }
+                            isSectorInList = (from s in newIATISectors
+                                              where s.SectorName.ToLower() == sector.SectorName.ToLower()
+                                              select s).FirstOrDefault();
+                        }
 
-                            if (isSectorInList == null)
+                        if (isSectorInList == null)
+                        {
+                            newIATISectors.Add(new EFSector()
                             {
-                                newIATISectors.Add(new EFSector()
-                                {
-                                    SectorName = sector.SectorName,
-                                    SectorType = sectorType,
-                                    ParentSector = null
-                                });
-                            }
+                                SectorName = sector.SectorName,
+                                SectorType = sectorType,
+                                ParentSector = null
+                            });
                         }
                     }
-
-                    if (newIATISectors.Count > 0)
-                    {
-                        unitWork.SectorRepository.InsertMultiple(newIATISectors);
-                        unitWork.Save();
-
-                        IMessageHelper mHelper = new MessageHelper();
-                        unitWork.NotificationsRepository.Insert(new EFUserNotifications()
-                        {
-                            NotificationType = NotificationTypes.NewIATISector,
-                            Message = mHelper.NewIATISectorsAdded(newIATISectors.Count),
-                            OrganizationId = 0,
-                            TreatmentId = 0,
-                            UserType = UserTypes.Manager
-                        });
-                        unitWork.Save();
-                    }
                 }
-                return response;
+
+                if (newIATISectors.Count > 0)
+                {
+                    unitWork.SectorRepository.InsertMultiple(newIATISectors);
+                    unitWork.Save();
+
+                    IMessageHelper mHelper = new MessageHelper();
+                    unitWork.NotificationsRepository.Insert(new EFUserNotifications()
+                    {
+                        NotificationType = NotificationTypes.NewIATISector,
+                        Message = mHelper.NewIATISectorsAdded(newIATISectors.Count),
+                        OrganizationId = 0,
+                        TreatmentId = 0,
+                        UserType = UserTypes.Manager
+                    });
+                    unitWork.Save();
+                }
             }
+            return response;
         }
 
         public async Task<ActionResponse> DownloadIATIFromUrl(string url, string fileToWrite)
@@ -512,9 +541,9 @@ namespace AIMS.Services
                 {
                     var allActivities = JsonConvert.DeserializeObject<List<IATIActivity>>(activitiesStr);
                     iATIActivities = (from activity in allActivities
-                                     where activity.Title.Contains(keywords) ||
-                                     activity.Description.Contains(keywords)
-                                     select activity).ToList();
+                                      where activity.Title.Contains(keywords) ||
+                                      activity.Description.Contains(keywords)
+                                      select activity).ToList();
 
                 }
                 return iATIActivities;
@@ -527,7 +556,7 @@ namespace AIMS.Services
             {
                 ActionResponse response = new ActionResponse();
                 var iatiList = unitWork.IATIDataRepository.GetMany(i => i.Id != 0);
-                foreach(var iati in iatiList)
+                foreach (var iati in iatiList)
                 {
                     unitWork.IATIDataRepository.Delete(iati);
                 }
@@ -566,7 +595,7 @@ namespace AIMS.Services
                         unitWork.Save();
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     response.Message = ex.Message;
                     response.Success = false;
@@ -581,7 +610,7 @@ namespace AIMS.Services
             {
                 ActionResponse response = new ActionResponse();
                 var iatiData = unitWork.IATIDataRepository.GetMany(d => d.Dated.Date < dated.Date);
-                foreach(var data in iatiData)
+                foreach (var data in iatiData)
                 {
                     unitWork.IATIDataRepository.Delete(data);
                 }

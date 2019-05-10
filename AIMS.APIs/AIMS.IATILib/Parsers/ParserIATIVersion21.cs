@@ -585,10 +585,21 @@ namespace AIMS.IATILib.Parsers
                                 {
                                     sectorName = sector.Element("narrative").Value;
                                 }
-                                sectorsList.Add(new IATISectorModel()
+
+                                if (!string.IsNullOrEmpty(sectorName) && !string.IsNullOrWhiteSpace(sectorName))
                                 {
-                                    SectorName = sectorName,
-                                });
+                                    var isSectorExists = (from s in sectorsList
+                                                          where s.SectorName.ToLower().Trim() == sectorName.ToLower().Trim()
+                                                          select s).FirstOrDefault();
+
+                                    if (isSectorExists == null)
+                                    {
+                                        sectorsList.Add(new IATISectorModel()
+                                        {
+                                            SectorName = sectorName,
+                                        });
+                                    }
+                                }
                             }
                         }
                     }
@@ -636,10 +647,20 @@ namespace AIMS.IATILib.Parsers
                                         }
                                     }
 
-                                    organizationsList.Add(new IATIOrganizationModel()
+                                    if (!string.IsNullOrEmpty(organizationName) && !string.IsNullOrWhiteSpace(organizationName))
                                     {
-                                        Name = organizationName,
-                                    });
+                                        var isOrgExists = (from org in organizationsList
+                                                           where org.Name.ToLower().Trim() == organizationName.ToLower().Trim()
+                                                           select org).FirstOrDefault();
+
+                                        if (isOrgExists == null)
+                                        {
+                                            organizationsList.Add(new IATIOrganizationModel()
+                                            {
+                                                Name = organizationName,
+                                            });
+                                        }
+                                    }
                                 }
                             }
                         }

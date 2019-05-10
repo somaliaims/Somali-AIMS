@@ -58,6 +58,7 @@ namespace AIMS.APIs.Scheduler
                     AIMSDbContext dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
                     IATIService service = new IATIService(dbContext);
                     service.ExtractAndSaveDAC5Sectors(filePath);
+                    service.ExtractAndSaveOrganizations(filePath);
 
                     dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
                     IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
