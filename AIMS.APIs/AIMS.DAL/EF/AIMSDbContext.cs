@@ -65,6 +65,9 @@ namespace AIMS.DAL.EF
                 .HasIndex(c => c.Currency)
                 .IsUnique();
 
+            modelBuilder.Entity<EFManualExchangeRates>()
+                .HasKey(e => new { e.DefaultCurrencyId, e.NationalCurrencyId, e.Dated });
+
             modelBuilder.Entity<EFSectorMappings>()
                 .HasKey(m => new { m.SectorId, m.MappedSectorId });
                 

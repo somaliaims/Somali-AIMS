@@ -370,6 +370,16 @@ namespace AIMS.Models
         public string BaseUrl { get; set; }
     }
 
+    public class EFManualExchangeRates
+    {
+        [ForeignKey("DefaultCurrency")]
+        public int DefaultCurrencyId { get; set; }
+        public EFCurrency DefaultCurrency { get; set; }
+        public int NationalCurrencyId { get; set; }
+        public EFCurrency NationalCurrency { get; set; }
+        public DateTime Dated { get; set; }
+    }
+
     public class EFExchangeRatesSettings
     {
         public int Id { get; set; }
