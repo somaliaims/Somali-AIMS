@@ -248,17 +248,17 @@ namespace AIMS.DAL.Migrations
 
             modelBuilder.Entity("AIMS.Models.EFManualExchangeRates", b =>
                 {
-                    b.Property<int>("DefaultCurrencyId");
-
-                    b.Property<int>("NationalCurrencyId");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<DateTime>("Dated");
 
-                    b.HasKey("DefaultCurrencyId", "NationalCurrencyId", "Dated");
+                    b.Property<decimal>("ExchangeRate");
 
-                    b.HasIndex("NationalCurrencyId");
+                    b.HasKey("Id");
 
-                    b.ToTable("EFManualExchangeRates");
+                    b.ToTable("ManualExchangeRates");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFOrganization", b =>
@@ -663,19 +663,6 @@ namespace AIMS.DAL.Migrations
                     b.HasOne("AIMS.Models.EFUser", "UpdatedBy")
                         .WithMany()
                         .HasForeignKey("UpdatedById");
-                });
-
-            modelBuilder.Entity("AIMS.Models.EFManualExchangeRates", b =>
-                {
-                    b.HasOne("AIMS.Models.EFCurrency", "DefaultCurrency")
-                        .WithMany()
-                        .HasForeignKey("DefaultCurrencyId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("AIMS.Models.EFCurrency", "NationalCurrency")
-                        .WithMany()
-                        .HasForeignKey("NationalCurrencyId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("AIMS.Models.EFProjectCustomFields", b =>

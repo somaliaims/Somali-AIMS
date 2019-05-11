@@ -44,6 +44,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFCustomFields> customFieldRepository;
         private GenericRepository<EFProjectCustomFields> projectCustomFieldsRepository;
         private GenericRepository<EFEmailMessages> emailMessagesRepository;
+        private GenericRepository<EFManualExchangeRates> manualRatesRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -57,6 +58,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.emailMessagesRepository == null)
                     this.emailMessagesRepository = new GenericRepository<EFEmailMessages>(context);
                 return this.emailMessagesRepository;
+            }
+        }
+
+        public GenericRepository<EFManualExchangeRates> ManualRatesRepository
+        {
+            get
+            {
+                if (this.manualRatesRepository == null)
+                    this.manualRatesRepository = new GenericRepository<EFManualExchangeRates>(context);
+                return this.manualRatesRepository;
             }
         }
 

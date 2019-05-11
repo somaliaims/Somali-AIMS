@@ -372,12 +372,10 @@ namespace AIMS.Models
 
     public class EFManualExchangeRates
     {
-        [ForeignKey("DefaultCurrency")]
-        public int DefaultCurrencyId { get; set; }
-        public EFCurrency DefaultCurrency { get; set; }
-        public int NationalCurrencyId { get; set; }
-        public EFCurrency NationalCurrency { get; set; }
+        [Key]
+        public int Id { get; set; }
         public DateTime Dated { get; set; }
+        public decimal ExchangeRate { get; set; }
     }
 
     public class EFExchangeRatesSettings

@@ -90,6 +90,20 @@ namespace AIMS.Models
         public bool IsNational { get; set; }
     }
 
+    public class ManualRateModel
+    {
+        [Required]
+        public decimal ExchangeRate { get; set; }
+        [Required]
+        public DateTime Dated { get; set; }
+    }
+
+    public class ManualRatesView
+    {
+        public decimal ExchangeRate { get; set; }
+        public DateTime Dated { get; set; }
+    }
+
     public class ManualCurrencyRateModel
     {
         [Required]

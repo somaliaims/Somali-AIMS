@@ -65,9 +65,6 @@ namespace AIMS.DAL.EF
                 .HasIndex(c => c.Currency)
                 .IsUnique();
 
-            modelBuilder.Entity<EFManualExchangeRates>()
-                .HasKey(e => new { e.DefaultCurrencyId, e.NationalCurrencyId, e.Dated });
-
             modelBuilder.Entity<EFSectorMappings>()
                 .HasKey(m => new { m.SectorId, m.MappedSectorId });
                 
@@ -103,6 +100,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFFinancialYears> FinancialYears { get; set; }
         public DbSet<EFCurrency> Currencies { get; set; }
         public DbSet<EFExchangeRates> ExchangeRates { get; set; }
+        public DbSet<EFManualExchangeRates> ManualExchangeRates { get; set; }
         public DbSet<EFExchangeRatesSettings> ExchangeRatesSettings { get; set; }
         public DbSet<EFExchangeRatesAPIsCount> ExchangeRatesAPIsCount { get; set; }
         public DbSet<EFEnvelope> Envelope { get; set; }

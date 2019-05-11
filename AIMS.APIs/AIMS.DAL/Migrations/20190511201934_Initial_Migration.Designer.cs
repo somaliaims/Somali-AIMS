@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    [Migration("20190420194326_Initial_Migration")]
+    [Migration("20190511201934_Initial_Migration")]
     partial class Initial_Migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,7 +29,11 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<string>("Currency");
 
+                    b.Property<string>("CurrencyName");
+
                     b.Property<bool>("IsDefault");
+
+                    b.Property<bool>("IsNational");
 
                     b.HasKey("Id");
 
@@ -46,10 +50,6 @@ namespace AIMS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("ActiveFrom");
-
-                    b.Property<DateTime>("ActiveUpto");
-
                     b.Property<string>("FieldTitle");
 
                     b.Property<int>("FieldType");
@@ -61,21 +61,37 @@ namespace AIMS.DAL.Migrations
                     b.ToTable("CustomFields");
                 });
 
+            modelBuilder.Entity("AIMS.Models.EFEmailMessages", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(1000);
+
+                    b.Property<int>("MessageType");
+
+                    b.Property<string>("TypeDefinition")
+                        .HasMaxLength(100);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EmailMessages");
+                });
+
             modelBuilder.Entity("AIMS.Models.EFEnvelope", b =>
                 {
                     b.Property<int>("FunderId");
 
-                    b.Property<int>("Year");
-
                     b.Property<string>("Currency");
 
-                    b.Property<decimal>("ExpectedAmount")
+                    b.Property<decimal>("ExchangeRate")
                         .HasColumnType("decimal(9, 2)");
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(9, 2)");
+                    b.Property<string>("SectorAmountsBreakup");
 
-                    b.HasKey("FunderId", "Year");
+                    b.HasKey("FunderId");
 
                     b.ToTable("Envelope");
                 });
@@ -141,6 +157,19 @@ namespace AIMS.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("FinancialYears");
+                });
+
+            modelBuilder.Entity("AIMS.Models.EFFundingTypes", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("FundingType");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FundingTypes");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFIATIData", b =>
@@ -217,6 +246,21 @@ namespace AIMS.DAL.Migrations
                     b.HasIndex("UpdatedById");
 
                     b.ToTable("Logs");
+                });
+
+            modelBuilder.Entity("AIMS.Models.EFManualExchangeRates", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("Dated");
+
+                    b.Property<decimal>("ExchangeRate");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ManualExchangeRates");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFOrganization", b =>
@@ -296,7 +340,7 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("FieldType");
 
-                    b.Property<string>("Value");
+                    b.Property<string>("Values");
 
                     b.HasKey("ProjectId", "CustomFieldId");
 
@@ -314,7 +358,12 @@ namespace AIMS.DAL.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(9, 2)");
 
+                    b.Property<string>("Currency");
+
                     b.Property<DateTime>("Dated");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasColumnType("decimal(9, 2)");
 
                     b.Property<int>("ProjectId");
 
@@ -350,6 +399,8 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("FunderId");
 
+                    b.Property<int>("FundingTypeId");
+
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(9 ,2)");
 
@@ -358,9 +409,11 @@ namespace AIMS.DAL.Migrations
                     b.Property<decimal>("ExchangeRate")
                         .HasColumnType("decimal(9, 2)");
 
-                    b.HasKey("ProjectId", "FunderId");
+                    b.HasKey("ProjectId", "FunderId", "FundingTypeId");
 
                     b.HasIndex("FunderId");
+
+                    b.HasIndex("FundingTypeId");
 
                     b.ToTable("ProjectFunders");
                 });
@@ -485,9 +538,9 @@ namespace AIMS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool?>("IsDefault");
-
                     b.Property<bool?>("IsIATIType");
+
+                    b.Property<bool?>("IsPrimary");
 
                     b.Property<string>("TypeName");
 
@@ -622,7 +675,7 @@ namespace AIMS.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("AIMS.Models.EFProject", "Project")
-                        .WithMany()
+                        .WithMany("CustomFields")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
@@ -648,6 +701,11 @@ namespace AIMS.DAL.Migrations
                     b.HasOne("AIMS.Models.EFOrganization", "Funder")
                         .WithMany()
                         .HasForeignKey("FunderId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("AIMS.Models.EFFundingTypes", "FundingType")
+                        .WithMany()
+                        .HasForeignKey("FundingTypeId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("AIMS.Models.EFProject", "Project")

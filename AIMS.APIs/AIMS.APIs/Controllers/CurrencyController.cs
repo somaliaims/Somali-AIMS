@@ -55,6 +55,14 @@ namespace AIMS.APIs.Controllers
             return Ok(currency);
         }
 
+        [HttpGet]
+        [Route("GetNational")]
+        public IActionResult GetNational()
+        {
+            var currency = currencyService.GetNationalCurrency();
+            return Ok(currency);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] CurrencyModel model)
         {
