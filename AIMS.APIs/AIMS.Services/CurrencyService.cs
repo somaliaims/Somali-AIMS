@@ -33,6 +33,12 @@ namespace AIMS.Services
         DefaultCurrencyView GetDefaultCurrency();
 
         /// <summary>
+        /// Gets national currency
+        /// </summary>
+        /// <returns></returns>
+        DefaultCurrencyView GetNationalCurrency();
+
+        /// <summary>
         /// Gets the currency for the provided id
         /// </summary>
         /// <param name="id"></param>
@@ -64,6 +70,13 @@ namespace AIMS.Services
         /// <param name="currencyId"></param>
         /// <returns></returns>
         ActionResponse SetDefault(int currencyId);
+
+        /// <summary>
+        /// Sets currency to national
+        /// </summary>
+        /// <param name="currencyId"></param>
+        /// <returns></returns>
+        ActionResponse SetNational(int currencyId);
 
         /// <summary>
         /// Updates a currency
@@ -126,7 +139,16 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
-                return defaultCurrency == null ? null : new DefaultCurrencyView() { Currency = defaultCurrency.Currency };
+                return defaultCurrency == null ? null : new DefaultCurrencyView() { Currency = defaultCurrency.Currency, CurrencyName = defaultCurrency.CurrencyName };
+            }
+        }
+
+        public DefaultCurrencyView GetNationalCurrency()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var nationalCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsNational == true);
+                return nationalCurrency == null ? null : new DefaultCurrencyView() { Currency = nationalCurrency.Currency, CurrencyName = nationalCurrency.CurrencyName };
             }
         }
 
@@ -169,7 +191,9 @@ namespace AIMS.Services
 
                     if (isCurrencyCreated != null)
                     {
+                        isCurrencyCreated.CurrencyName = model.Currency;
                         isCurrencyCreated.IsDefault = model.IsDefault;
+                        isCurrencyCreated.IsNational = model.IsNational;
                         unitWork.CurrencyRepository.Update(isCurrencyCreated);
                         unitWork.Save();
                         response.ReturnedId = isCurrencyCreated.Id;
@@ -178,9 +202,10 @@ namespace AIMS.Services
                     {
                         var newCurrency = unitWork.CurrencyRepository.Insert(new EFCurrency()
                         {
-                            Currency = model.Code,
-                            CurrencyName = model.Currency,
-                            IsDefault = model.IsDefault
+                            Currency = model.Currency,
+                            CurrencyName = model.CurrencyName,
+                            IsDefault = model.IsDefault,
+                            IsNational = model.IsNational
                         });
                         unitWork.Save();
                         response.ReturnedId = newCurrency.Id;
@@ -277,6 +302,41 @@ namespace AIMS.Services
             }
         }
 
+        public ActionResponse SetNational(int currencyId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => (c.IsNational == true || c.Id == currencyId));
+                var currency = (from c in currencies
+                                where c.Id == currencyId
+                                select c).FirstOrDefault();
+
+                if (currency == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Currency");
+                    return response;
+                }
+
+                var nationalCurrencies = (from c in currencies
+                                         where c.IsNational == true
+                                         select c);
+
+                foreach (var cur in nationalCurrencies)
+                {
+                    cur.IsNational = false;
+                    unitWork.CurrencyRepository.Update(cur);
+                }
+                unitWork.Save();
+                currency.IsNational = true;
+                unitWork.CurrencyRepository.Update(currency);
+                unitWork.Save();
+                return response;
+            }
+        }
+
         public ActionResponse Update(int id, CurrencyModel model)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -310,8 +370,23 @@ namespace AIMS.Services
                     unitWork.Save();
                 }
 
+                if (model.IsNational == true)
+                {
+                    var defaultCurrencies = (from c in currencies
+                                             where c.IsNational == true && c.Id != currency.Id
+                                             select c);
+
+                    foreach (var cur in defaultCurrencies)
+                    {
+                        cur.IsNational = false;
+                        unitWork.CurrencyRepository.Update(cur);
+                    }
+                    unitWork.Save();
+                }
+
                 currency.Currency = model.Currency;
                 currency.IsDefault = model.IsDefault;
+                currency.IsNational = model.IsNational;
                 unitWork.CurrencyRepository.Update(currency);
                 unitWork.Save();
                 response.Message = true.ToString();

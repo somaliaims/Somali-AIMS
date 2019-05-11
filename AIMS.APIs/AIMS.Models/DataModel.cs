@@ -306,6 +306,7 @@ namespace AIMS.Models
         public string Currency { get; set; }
         public string CurrencyName { get; set; } = null;
         public bool IsDefault { get; set; }
+        public bool IsNational { get; set; } = false;
     }
 
     public class EFExchangeRates
