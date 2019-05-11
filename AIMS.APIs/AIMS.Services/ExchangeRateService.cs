@@ -188,7 +188,7 @@ namespace AIMS.Services
 
             ExchangeRatesView ratesView = new ExchangeRatesView();
             bool isExRateAuto = false;
-
+            IQueryable<EFCurrency> currencies = null;
             try
             {
                 var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(r => r.Id != 0);
@@ -208,17 +208,19 @@ namespace AIMS.Services
                     if (ratesView.Rates != null)
                     {
                         int count = ratesView.Rates.Count;
-                        var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => c.Id != 0);
+                        currencies = unitWork.CurrencyRepository.GetManyQueryable(c => c.Id != 0);
                         if (currencies.Count() < count)
                         {
-                            var currencyNames = (from c in currencies
+                            var currencyCodes = (from c in currencies
                                                  select c.Currency).ToList<string>();
+                            var currencyNames = (from c in currencies
+                                                 select c.CurrencyName).ToList<string>();
 
                             var currenciesFromAPI = ratesView.Rates;
                             List<EFCurrency> newCurrencies = new List<EFCurrency>();
                             foreach (var currency in currenciesFromAPI)
                             {
-                                if (!currencyNames.Contains(currency.Currency))
+                                if (!currencyCodes.Contains(currency.Currency))
                                 {
                                     newCurrencies.Add(new EFCurrency()
                                     {
@@ -242,12 +244,22 @@ namespace AIMS.Services
                         ratesView.Rates = JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRatesManual);
                     }
                 }
+
+                if (currencies != null && currencies.Count() > 0)
+                {
+                    foreach (var rate in ratesView.Rates)
+                    {
+                        rate.CurrencyName = (from c in currencies
+                                             where c.Currency == rate.Currency
+                                             select c.CurrencyName).FirstOrDefault();
+                    }
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 string error = ex.Message;
             }
-            
+
             return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
         }
 
@@ -267,32 +279,41 @@ namespace AIMS.Services
         public async Task<ExchangeRatesView> GetCurrencyRatesForDate(DateTime dated)
         {
             var unitWork = new UnitOfWork(context);
-            //{
-                ExchangeRatesView ratesView = new ExchangeRatesView();
-                bool isExRateAuto = false;
-                var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(r => r.Id != 0);
+            ExchangeRatesView ratesView = new ExchangeRatesView();
+            bool isExRateAuto = false;
+            var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(r => r.Id != 0);
 
-                if (exRateSettings != null)
-                {
-                    isExRateAuto = exRateSettings.IsAutomatic;
-                }
+            if (exRateSettings != null)
+            {
+                isExRateAuto = exRateSettings.IsAutomatic;
+            }
 
-                if (isExRateAuto == true)
+            if (isExRateAuto == true)
+            {
+                List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
+                var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
+                ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
+            }
+            else if (exRateSettings != null)
+            {
+                string exRatesManual = exRateSettings.ManualExchangeRates;
+                if (!string.IsNullOrEmpty(exRatesManual))
                 {
-                    List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
-                    var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
-                    ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
+                    ratesView.Rates = JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRatesManual);
                 }
-                else if (exRateSettings != null)
+            }
+
+            var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => c.Id != 0);
+            if (currencies.Count() > 0)
+            {
+                foreach (var rate in ratesView.Rates)
                 {
-                    string exRatesManual = exRateSettings.ManualExchangeRates;
-                    if (!string.IsNullOrEmpty(exRatesManual))
-                    {
-                        ratesView.Rates = JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRatesManual);
-                    }
+                    rate.CurrencyName = (from c in currencies
+                                         where c.Currency == rate.Currency
+                                         select c.CurrencyName).FirstOrDefault();
                 }
-                return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
-            //}
+            }
+            return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
         }
 
         public ExchangeRatesSettingsView GetExRateSettings()
@@ -321,6 +342,17 @@ namespace AIMS.Services
                 {
                     ratesList = exRateSettings.ManualExchangeRates == null ? null : JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRateSettings.ManualExchangeRates);
                 }
+
+                /*var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => c.Id != 0);
+                if (currencies.Count() > 0)
+                {
+                    foreach(var rate in ratesList)
+                    {
+                        rate.CurrencyName = (from c in currencies
+                                             where c.Currency == rate.Currency
+                                             select c.CurrencyName).FirstOrDefault();
+                    }
+                }*/
                 return ratesList;
             }
         }

@@ -160,6 +160,7 @@ namespace AIMS.Models
     public class CurrencyWithRates
     {
         public string Currency { get; set; }
+        public string CurrencyName { get; set; }
         public decimal Rate { get; set; }
     }
 
