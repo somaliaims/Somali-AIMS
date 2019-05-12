@@ -297,142 +297,171 @@ namespace AIMS.Services
             var unitWork = new UnitOfWork(context);
             ActionResponse response = new ActionResponse();
             string url = dataFilePath;
-            XmlReader xReader = XmlReader.Create(url);
-            XDocument xDoc = XDocument.Load(xReader);
-            var activity = (from el in xDoc.Descendants("iati-activity")
-                            select el.FirstAttribute).FirstOrDefault();
 
-            IParser parser;
-            ICollection<IATIActivity> activityList = new List<IATIActivity>();
-            ICollection<IATIOrganizationModel> organizations = new List<IATIOrganizationModel>();
-            string version = "";
-            version = activity.Value;
-            switch (version)
+            try
             {
-                case "1.03":
-                    parser = new ParserIATIVersion13();
-                    organizations = parser.ExtractOrganizations(xDoc);
-                    break;
+                XmlReader xReader = XmlReader.Create(url);
+                XDocument xDoc = XDocument.Load(xReader);
+                var activity = (from el in xDoc.Descendants("iati-activity")
+                                select el.FirstAttribute).FirstOrDefault();
 
-                case "2.01":
-                    parser = new ParserIATIVersion21();
-                    organizations = parser.ExtractOrganizations(xDoc);
-                    break;
-            }
-
-            var organizationsList = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
-            var orgNames = (from o in organizationsList
-                            select o.OrganizationName).ToList<string>();
-
-            List<EFOrganization> newIATIOrganizations = new List<EFOrganization>();
-            foreach (var org in organizations)
-            {
-                if (orgNames.Contains(org.Name, StringComparer.OrdinalIgnoreCase) == false)
+                IParser parser;
+                ICollection<IATIActivity> activityList = new List<IATIActivity>();
+                ICollection<IATIOrganizationModel> organizations = new List<IATIOrganizationModel>();
+                string version = "";
+                version = activity.Value;
+                switch (version)
                 {
-                    EFOrganization isOrganizationInList = null;
-                    if (newIATIOrganizations.Count > 0)
-                    {
-                        isOrganizationInList = (from s in newIATIOrganizations
-                                                where s.OrganizationName.ToLower() == org.Name.ToLower()
-                                                select s).FirstOrDefault();
-                    }
+                    case "1.03":
+                        parser = new ParserIATIVersion13();
+                        organizations = parser.ExtractOrganizations(xDoc);
+                        break;
 
-                    if (isOrganizationInList == null)
+                    case "2.01":
+                        parser = new ParserIATIVersion21();
+                        organizations = parser.ExtractOrganizations(xDoc);
+                        break;
+                }
+
+                var organizationsList = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
+                var orgNames = (from o in organizationsList
+                                select o.OrganizationName.Trim()).ToList<string>();
+
+                List<EFOrganization> newIATIOrganizations = new List<EFOrganization>();
+                foreach (var org in organizations)
+                {
+                    if (!string.IsNullOrEmpty(org.Name) && !string.IsNullOrWhiteSpace(org.Name))
                     {
-                        newIATIOrganizations.Add(new EFOrganization()
+                        if (orgNames.Contains(org.Name.Trim(), StringComparer.OrdinalIgnoreCase) == false)
                         {
-                            OrganizationName = org.Name,
-                            IsApproved = true,
-                            RegisteredOn = DateTime.Now
-                        });
+                            EFOrganization isOrganizationInList = null;
+                            EFOrganization isOrganizationInDb = null;
+
+                            if (newIATIOrganizations.Count > 0)
+                            {
+                                isOrganizationInList = (from s in newIATIOrganizations
+                                                        where s.OrganizationName.ToLower() == org.Name.ToLower()
+                                                        select s).FirstOrDefault();
+
+                                isOrganizationInDb = (from o in organizationsList
+                                                      where o.OrganizationName.ToLower() == org.Name.ToLower()
+                                                      select o).FirstOrDefault();
+                            }
+
+                            if (isOrganizationInList == null && isOrganizationInDb == null)
+                            {
+                                newIATIOrganizations.Add(new EFOrganization()
+                                {
+                                    OrganizationName = org.Name,
+                                    IsApproved = true,
+                                    RegisteredOn = DateTime.Now
+                                });
+                            }
+                        }
                     }
                 }
-            }
 
-            if (newIATIOrganizations.Count > 0)
+                if (newIATIOrganizations.Count > 0)
+                {
+                    unitWork.OrganizationRepository.InsertMultiple(newIATIOrganizations);
+                    unitWork.Save();
+                }
+            }
+            catch(Exception ex)
             {
-                unitWork.OrganizationRepository.InsertMultiple(newIATIOrganizations);
-                unitWork.Save();
+                response.Success = false;
+                response.Message = ex.Message;
             }
             return response;
         }
 
         public ActionResponse ExtractAndSaveDAC5Sectors(string dataFilePath)
         {
+
             var unitWork = new UnitOfWork(context);
             ActionResponse response = new ActionResponse();
             ICollection<IATISectorModel> iatiSectors = new List<IATISectorModel>();
             string url = dataFilePath;
-            XmlReader xReader = XmlReader.Create(url);
-            XDocument xDoc = XDocument.Load(xReader);
-            var activity = (from el in xDoc.Descendants("iati-activity")
-                            select el.FirstAttribute).FirstOrDefault();
 
-            IParser parser;
-            string version = "";
-            version = activity.Value;
-            switch (version)
+            try
             {
-                case "1.03":
-                    parser = new ParserIATIVersion13();
-                    iatiSectors = parser.ExtractSectors(xDoc);
-                    break;
+                XmlReader xReader = XmlReader.Create(url);
+                XDocument xDoc = XDocument.Load(xReader);
+                var activity = (from el in xDoc.Descendants("iati-activity")
+                                select el.FirstAttribute).FirstOrDefault();
 
-                case "2.01":
-                    parser = new ParserIATIVersion21();
-                    iatiSectors = parser.ExtractSectors(xDoc);
-                    break;
-            }
-
-            var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsIATIType == true);
-            if (sectorType != null)
-            {
-                var sectorsList = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == sectorType.Id);
-                List<string> sectorNames = (from s in sectorsList
-                                            select s.SectorName).ToList<string>();
-
-                List<EFSector> newIATISectors = new List<EFSector>();
-                foreach (var sector in iatiSectors)
+                IParser parser;
+                string version = "";
+                version = activity.Value;
+                switch (version)
                 {
-                    if (sectorNames.Contains(sector.SectorName, StringComparer.OrdinalIgnoreCase) == false)
-                    {
-                        EFSector isSectorInList = null;
-                        if (newIATISectors.Count > 0)
-                        {
-                            isSectorInList = (from s in newIATISectors
-                                              where s.SectorName.ToLower() == sector.SectorName.ToLower()
-                                              select s).FirstOrDefault();
-                        }
+                    case "1.03":
+                        parser = new ParserIATIVersion13();
+                        iatiSectors = parser.ExtractSectors(xDoc);
+                        break;
 
-                        if (isSectorInList == null)
+                    case "2.01":
+                        parser = new ParserIATIVersion21();
+                        iatiSectors = parser.ExtractSectors(xDoc);
+                        break;
+                }
+
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsIATIType == true);
+                if (sectorType != null)
+                {
+                    var sectorsList = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == sectorType.Id);
+                    List<string> sectorNames = (from s in sectorsList
+                                                select s.SectorName).ToList<string>();
+
+                    List<EFSector> newIATISectors = new List<EFSector>();
+                    foreach (var sector in iatiSectors)
+                    {
+                        if (sectorNames.Contains(sector.SectorName, StringComparer.OrdinalIgnoreCase) == false)
                         {
-                            newIATISectors.Add(new EFSector()
+                            EFSector isSectorInList = null;
+                            if (newIATISectors.Count > 0)
                             {
-                                SectorName = sector.SectorName,
-                                SectorType = sectorType,
-                                ParentSector = null
-                            });
+                                isSectorInList = (from s in newIATISectors
+                                                  where s.SectorName.ToLower() == sector.SectorName.ToLower()
+                                                  select s).FirstOrDefault();
+                            }
+
+                            if (isSectorInList == null)
+                            {
+                                newIATISectors.Add(new EFSector()
+                                {
+                                    SectorName = sector.SectorName,
+                                    SectorType = sectorType,
+                                    ParentSector = null
+                                });
+                            }
                         }
                     }
-                }
 
-                if (newIATISectors.Count > 0)
-                {
-                    unitWork.SectorRepository.InsertMultiple(newIATISectors);
-                    unitWork.Save();
-
-                    IMessageHelper mHelper = new MessageHelper();
-                    unitWork.NotificationsRepository.Insert(new EFUserNotifications()
+                    if (newIATISectors.Count > 0)
                     {
-                        NotificationType = NotificationTypes.NewIATISector,
-                        Message = mHelper.NewIATISectorsAdded(newIATISectors.Count),
-                        OrganizationId = 0,
-                        TreatmentId = 0,
-                        UserType = UserTypes.Manager
-                    });
-                    unitWork.Save();
+                        unitWork.SectorRepository.InsertMultiple(newIATISectors);
+                        unitWork.Save();
+
+                        IMessageHelper mHelper = new MessageHelper();
+                        unitWork.NotificationsRepository.Insert(new EFUserNotifications()
+                        {
+                            NotificationType = NotificationTypes.NewIATISector,
+                            Message = mHelper.NewIATISectorsAdded(newIATISectors.Count),
+                            OrganizationId = 0,
+                            TreatmentId = 0,
+                            UserType = UserTypes.Manager
+                        });
+                        unitWork.Save();
+                    }
                 }
             }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            
             return response;
         }
 

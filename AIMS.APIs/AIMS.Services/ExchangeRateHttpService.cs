@@ -106,6 +106,25 @@ namespace AIMS.Services
             return await Task<CurrencyNamesView>.Run(() => currencyList).ConfigureAwait(false);
         }
 
+        public List<CurrencyNamesView> ParseAndExtractCurrencyList(string json)
+        {
+            List<CurrencyNamesView> currencyList = new List<CurrencyNamesView>();
+            try
+            {
+                var currencies = JsonConvert.DeserializeObject<dynamic>(json);
+                string currencyStr = currencies != null ? JsonConvert.SerializeObject(currencies) : "";
+                currencyStr = currencyStr.Replace("\\", "").Replace("\"", "");
+                currencyStr = currencyStr.Replace("{", "");
+                currencyStr = currencyStr.Replace("}", "");
+                currencyList = this.GetCurrencyNames(currencyStr);
+            }
+            catch(Exception ex)
+            {
+                string error = ex.Message;
+            }
+            return currencyList;
+        }
+
         private List<CurrencyWithRates> GetRatesList(string ratesStr)
         {
             List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();

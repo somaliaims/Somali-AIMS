@@ -48,7 +48,7 @@ namespace AIMS.APIs.Scheduler
                 string filePath = sWebRootFolder + "/IATISomali.xml";
                 string currenciesFilePath = sWebRootFolder + "/Currency.json";
                 string xml = "";
-                //string json = "";
+                string json = "";
 
                 using (var client = new WebClient())
                 {
@@ -56,15 +56,19 @@ namespace AIMS.APIs.Scheduler
                 }
                 File.WriteAllText(filePath, xml);
 
-                /*using (var client = new WebClient())
+                using (var client = new WebClient())
                 {
                     json = client.DownloadString(currencyUrl);
                 }
-                File.WriteAllText(currenciesFilePath, json);*/
+                //File.WriteAllText(currenciesFilePath, json);
 
                 //Save sectors to db
                 using (var scope = scopeFactory.CreateScope())
                 {
+                    HttpClient httpClient = new HttpClient();
+                    ExchangeRateHttpService httpService = new ExchangeRateHttpService(httpClient);
+                    //var currencyList = httpService.GetCurrencyWithNames().GetAwaiter().GetResult();
+
                     AIMSDbContext dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
                     IATIService service = new IATIService(dbContext);
                     service.ExtractAndSaveDAC5Sectors(filePath);
@@ -74,14 +78,11 @@ namespace AIMS.APIs.Scheduler
                     IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
                     UserService userService = new UserService(dbContext, imapper);
                     userService.SetNotificationsForUsers();
-
-                    HttpClient httpClient = new HttpClient();
-                    ExchangeRateHttpService httpService = new ExchangeRateHttpService(httpClient);
-                    var currencyList = httpService.GetCurrencyWithNames().GetAwaiter().GetResult();
+                    var currencyList = httpService.ParseAndExtractCurrencyList(json);
                     if (currencyList.Count > 0)
                     {
-                        dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
-                        imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                        //dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
+                        //imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
                         ICurrencyService currencyService = new CurrencyService(dbContext, imapper);
                         currencyService.AddMultiple(currencyList);
                     }
