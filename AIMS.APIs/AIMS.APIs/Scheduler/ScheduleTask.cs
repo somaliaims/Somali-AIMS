@@ -70,14 +70,15 @@ namespace AIMS.APIs.Scheduler
                     //var currencyList = httpService.GetCurrencyWithNames().GetAwaiter().GetResult();
 
                     AIMSDbContext dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
+                    IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                    UserService userService = new UserService(dbContext, imapper);
                     IATIService service = new IATIService(dbContext);
+
+                    userService.SetNotificationsForUsers();
                     service.ExtractAndSaveDAC5Sectors(filePath);
                     service.ExtractAndSaveOrganizations(filePath);
 
-                    dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
-                    IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                    UserService userService = new UserService(dbContext, imapper);
-                    userService.SetNotificationsForUsers();
+                    
                     var currencyList = httpService.ParseAndExtractCurrencyList(json);
                     if (currencyList.Count > 0)
                     {
