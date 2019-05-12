@@ -1114,6 +1114,7 @@ namespace AIMS.Services
                         projectFunder.Amount = model.Amount;
                         projectFunder.Currency = model.Currency;
                         projectFunder.ExchangeRate = model.ExchangeRate;
+                        projectFunder.Dated = model.Dated;
                         unitWork.ProjectFundersRepository.Update(projectFunder);
                     }
                     else
@@ -1125,7 +1126,8 @@ namespace AIMS.Services
                             FundingType = fundingType,
                             Amount = model.Amount,
                             Currency = model.Currency,
-                            ExchangeRate = model.ExchangeRate
+                            ExchangeRate = model.ExchangeRate,
+                            Dated = model.Dated
                         });
                     }
                     

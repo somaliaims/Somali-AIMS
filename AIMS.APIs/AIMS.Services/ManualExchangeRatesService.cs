@@ -88,7 +88,8 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var manualRate = unitWork.ManualRatesRepository.GetOne(r => r.Dated.Date == model.Dated.Date);
+                var manualRate = unitWork.ManualRatesRepository.GetOne(r => r.Dated.Date == model.Dated.Date && r.DefaultCurrency == model.DefaultCurrency
+                && r.NationalCurrency == model.NationalCurrency);
 
                 if (manualRate != null)
                 {
@@ -99,6 +100,8 @@ namespace AIMS.Services
                 {
                     unitWork.ManualRatesRepository.Insert(new EFManualExchangeRates()
                     {
+                        DefaultCurrency = model.DefaultCurrency,
+                        NationalCurrency = model.NationalCurrency,
                         Dated = model.Dated,
                         ExchangeRate = model.ExchangeRate
                     });
@@ -136,6 +139,8 @@ namespace AIMS.Services
                 if (manualRate != null)
                 {
                     manualRate.ExchangeRate = model.ExchangeRate;
+                    manualRate.DefaultCurrency = model.DefaultCurrency;
+                    manualRate.NationalCurrency = model.NationalCurrency;
                     unitWork.ManualRatesRepository.Update(manualRate);
                 }
 

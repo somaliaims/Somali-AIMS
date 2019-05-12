@@ -95,6 +95,10 @@ namespace AIMS.Models
         [Required]
         public decimal ExchangeRate { get; set; }
         [Required]
+        public string DefaultCurrency { get; set; }
+        [Required]
+        public string NationalCurrency { get; set; }
+        [Required]
         public DateTime Dated { get; set; }
     }
 
@@ -681,6 +685,7 @@ namespace AIMS.Models
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRate { get; set; }
+        public DateTime Dated { get; set; }
     }
 
     public class ProjectFunderModel
@@ -696,6 +701,8 @@ namespace AIMS.Models
         public string Currency { get; set; }
         [Required]
         public decimal ExchangeRate { get; set; }
+        [Required]
+        public DateTime Dated { get; set; }
     }
 
     /// <summary>

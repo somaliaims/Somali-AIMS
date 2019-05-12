@@ -4,14 +4,16 @@ using AIMS.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    partial class AIMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190512062655_Added_Date_PFunders")]
+    partial class Added_Date_PFunders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -254,11 +256,7 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<DateTime>("Dated");
 
-                    b.Property<string>("DefaultCurrency");
-
                     b.Property<decimal>("ExchangeRate");
-
-                    b.Property<string>("NationalCurrency");
 
                     b.HasKey("Id");
 

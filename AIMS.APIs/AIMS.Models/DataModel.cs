@@ -241,6 +241,7 @@ namespace AIMS.Models
         public string Currency { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; }
+        public DateTime? Dated { get; set; }
     }
 
     public class EFProjectImplementers
@@ -374,6 +375,8 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
+        public string DefaultCurrency { get; set; }
+        public string NationalCurrency { get; set; }
         public DateTime Dated { get; set; }
         public decimal ExchangeRate { get; set; }
     }

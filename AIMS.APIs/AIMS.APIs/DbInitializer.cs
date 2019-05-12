@@ -72,6 +72,19 @@ namespace AIMS.APIs
                     context.SaveChanges();
                 }
 
+                if (context.SMTPSettings.Count() == 0)
+                {
+                    context.SMTPSettings.Add(new EFSMTPSettings()
+                    {
+                        AdminEmail = "admin@aims.org",
+                        Host = "smtp.gmail.com",
+                        Port = 587,
+                        Username = "aims.developer18@gmail.com",
+                        Password = "aims@123secure!"
+                    });
+                    context.SaveChanges();
+                }
+
                 if (context.SectorTypes.Count() == 0)
                 {
                     context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Somali Sectors", IsPrimary = true });
