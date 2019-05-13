@@ -288,29 +288,21 @@ namespace AIMS.Services
                 isExRateAuto = exRateSettings.IsAutomatic;
             }
 
-            if (isExRateAuto == true)
-            {
-                List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
-                var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
-                ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
-            }
-            else if (exRateSettings != null)
-            {
-                string exRatesManual = exRateSettings.ManualExchangeRates;
-                if (!string.IsNullOrEmpty(exRatesManual))
-                {
-                    ratesView.Rates = JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRatesManual);
-                }
-            }
+            List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
+            var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
+            ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
 
             var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => c.Id != 0);
             if (currencies.Count() > 0)
             {
-                foreach (var rate in ratesView.Rates)
+                if (ratesView.Rates != null)
                 {
-                    rate.CurrencyName = (from c in currencies
-                                         where c.Currency == rate.Currency
-                                         select c.CurrencyName).FirstOrDefault();
+                    foreach (var rate in ratesView.Rates)
+                    {
+                        rate.CurrencyName = (from c in currencies
+                                             where c.Currency == rate.Currency
+                                             select c.CurrencyName).FirstOrDefault();
+                    }
                 }
             }
             return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);

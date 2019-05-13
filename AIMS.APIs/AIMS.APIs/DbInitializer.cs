@@ -38,6 +38,13 @@ namespace AIMS.APIs
                     context.SaveChanges();
                 }
 
+                if (context.FundingTypes.Count() == 0)
+                {
+                    context.FundingTypes.Add(new EFFundingTypes() { FundingType = "Grant" });
+                    context.FundingTypes.Add(new EFFundingTypes() { FundingType = "Loan" });
+                    context.SaveChanges();
+                }
+
                 if (context.StaticReports.Count() == 0)
                 {
                     context.StaticReports.Add(new EFStaticReports() { Title = "Projects report" });

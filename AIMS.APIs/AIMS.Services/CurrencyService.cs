@@ -139,7 +139,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
-                return defaultCurrency == null ? null : new DefaultCurrencyView() { Currency = defaultCurrency.Currency, CurrencyName = defaultCurrency.CurrencyName };
+                return defaultCurrency == null ? null : new DefaultCurrencyView() { Id = defaultCurrency.Id, Currency = defaultCurrency.Currency, CurrencyName = defaultCurrency.CurrencyName };
             }
         }
 
@@ -148,7 +148,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var nationalCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsNational == true);
-                return nationalCurrency == null ? null : new DefaultCurrencyView() { Currency = nationalCurrency.Currency, CurrencyName = nationalCurrency.CurrencyName };
+                return nationalCurrency == null ? null : new DefaultCurrencyView() { Id = nationalCurrency.Id, Currency = nationalCurrency.Currency, CurrencyName = nationalCurrency.CurrencyName };
             }
         }
 
@@ -189,6 +189,32 @@ namespace AIMS.Services
                                              where c.Currency.ToLower() == model.Currency
                                              select c).FirstOrDefault();
 
+                    if (model.IsDefault)
+                    {
+                        foreach (var currency in currencies)
+                        {
+                            if (currency.Id != response.ReturnedId)
+                            {
+                                currency.IsDefault = false;
+                                unitWork.CurrencyRepository.Update(currency);
+                            }
+                        }
+                        unitWork.Save();
+                    }
+
+                    if (model.IsNational)
+                    {
+                        foreach (var currency in currencies)
+                        {
+                            if (currency.Id != response.ReturnedId)
+                            {
+                                currency.IsNational = false;
+                                unitWork.CurrencyRepository.Update(currency);
+                            }
+                        }
+                        unitWork.Save();
+                    }
+
                     if (isCurrencyCreated != null)
                     {
                         isCurrencyCreated.CurrencyName = model.Currency;
@@ -209,19 +235,6 @@ namespace AIMS.Services
                         });
                         unitWork.Save();
                         response.ReturnedId = newCurrency.Id;
-                    }
-
-                    if (model.IsDefault)
-                    {
-                        foreach(var currency in currencies)
-                        {
-                            if (currency.Id != response.ReturnedId)
-                            {
-                                currency.IsDefault = false;
-                                unitWork.CurrencyRepository.Update(currency);
-                            }
-                        }
-                        unitWork.Save();
                     }
 
                 }
@@ -343,7 +356,7 @@ namespace AIMS.Services
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
-                var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => (c.Id == id || c.IsDefault == true));
+                var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => (c.Id == id || (c.IsDefault == true || c.IsNational == true)));
                 var currency = (from c in currencies
                                 where c.Id == id
                                 select c).FirstOrDefault();
@@ -372,11 +385,11 @@ namespace AIMS.Services
 
                 if (model.IsNational == true)
                 {
-                    var defaultCurrencies = (from c in currencies
+                    var nationalCurrencies = (from c in currencies
                                              where c.IsNational == true && c.Id != currency.Id
                                              select c);
 
-                    foreach (var cur in defaultCurrencies)
+                    foreach (var cur in nationalCurrencies)
                     {
                         cur.IsNational = false;
                         unitWork.CurrencyRepository.Update(cur);

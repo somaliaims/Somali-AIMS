@@ -19,6 +19,13 @@ namespace AIMS.Services
         IEnumerable<ManualRatesView> GetAll();
 
         /// <summary>
+        /// Gets all rates for a single national currency
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<ManualRatesView> GetForNationalCurrency(string currencyCode);
+
+        /// <summary>
         /// Gets the rate for the specified date
         /// </summary>
         /// <returns></returns>
@@ -69,6 +76,21 @@ namespace AIMS.Services
                     rates = (from r in rates
                                   orderby r.Dated descending
                                   select r);
+                }
+                return mapper.Map<List<ManualRatesView>>(rates);
+            }
+        }
+
+        public IEnumerable<ManualRatesView> GetForNationalCurrency(string currencyCode)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var rates = unitWork.ManualRatesRepository.GetManyQueryable(e => e.NationalCurrency == currencyCode);
+                if (rates != null)
+                {
+                    rates = (from r in rates
+                             orderby r.Dated descending
+                             select r);
                 }
                 return mapper.Map<List<ManualRatesView>>(rates);
             }

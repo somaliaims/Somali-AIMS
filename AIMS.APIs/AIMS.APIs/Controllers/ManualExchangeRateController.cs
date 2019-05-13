@@ -27,6 +27,19 @@ namespace AIMS.APIs.Controllers
             return Ok(rates);
         }
 
+        [HttpGet]
+        [Route("GetForNationalCurrency/{code}")]
+        public IActionResult GetForNationalCurrency(string code)
+        {
+            if (code.Length != 3)
+            {
+                return BadRequest("Invalid currency code provided");
+            }
+
+            var rates = service.GetForNationalCurrency(code);
+            return Ok(rates);
+        }
+
         [HttpGet("GetByDate/{dated}")]
         public IActionResult GetByDated(DateTime dated)
         {

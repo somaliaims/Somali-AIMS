@@ -126,6 +126,7 @@ namespace AIMS.APIs
             services.AddScoped<IEnvelopeService, EnvelopeService>();
             services.AddScoped<ICustomFieldsService, CustomFieldsService>();
             services.AddScoped<IFundingTypeService, FundingTypeService>();
+            services.AddScoped<IManualExchangeRatesService, ManualExchangeRatesService>();
             services.AddScoped<IEmailMessageService, EmailMessageService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddSingleton<IConfiguration>(Configuration);
@@ -133,7 +134,7 @@ namespace AIMS.APIs
             services.AddHttpClient();
             services.AddHttpClient<IExchangeRateHttpService, ExchangeRateHttpService>();
             //Need to work on this scheduled task in future
-            services.AddSingleton<IHostedService, ScheduleTask>();
+            //services.AddSingleton<IHostedService, ScheduleTask>();
             services.AddScoped<IViewRenderService, ViewRenderService>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

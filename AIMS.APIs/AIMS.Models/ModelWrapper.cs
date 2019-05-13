@@ -19,6 +19,7 @@ namespace AIMS.Models
 
     public class DefaultCurrencyView
     {
+        public int Id { get; set; }
         public string Currency { get; set; }
         public string CurrencyName { get; set; }
     }
