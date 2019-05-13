@@ -73,20 +73,17 @@ namespace AIMS.APIs.Scheduler
                     IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
                     UserService userService = new UserService(dbContext, imapper);
                     IATIService service = new IATIService(dbContext);
-
                     userService.SetNotificationsForUsers();
                     service.ExtractAndSaveDAC5Sectors(filePath);
                     service.ExtractAndSaveOrganizations(filePath);
 
-                    
                     var currencyList = httpService.ParseAndExtractCurrencyList(json);
                     if (currencyList.Count > 0)
                     {
-                        //dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
-                        //imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
                         ICurrencyService currencyService = new CurrencyService(dbContext, imapper);
                         currencyService.AddMultiple(currencyList);
                     }
+                    
                 }
 
                 //File cleanup

@@ -239,7 +239,6 @@ namespace AIMS.Services
                         var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
                         {
                             OrganizationName = model.NewName,
-                            RegisteredOn = DateTime.Now,
                             IsApproved = true
                         });
                         unitWork.Save();

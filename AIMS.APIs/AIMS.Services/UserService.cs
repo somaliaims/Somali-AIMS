@@ -644,6 +644,7 @@ namespace AIMS.Services
                     if (user.LastLogin <= dateForDeletion)
                     {
                         unitWork.UserRepository.Delete(user);
+                        unitWork.Save();
                     }
                     else
                     {
@@ -668,8 +669,8 @@ namespace AIMS.Services
                 if (notificationsList.Count > 0)
                 {
                     unitWork.NotificationsRepository.InsertMultiple(notificationsList);
+                    unitWork.Save();
                 }
-                unitWork.Save();
             }
             catch(Exception ex)
             {

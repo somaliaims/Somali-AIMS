@@ -353,8 +353,6 @@ namespace AIMS.Services
                                 newIATIOrganizations.Add(new EFOrganization()
                                 {
                                     OrganizationName = org.Name,
-                                    IsApproved = true,
-                                    RegisteredOn = DateTime.Now
                                 });
                             }
                         }
@@ -363,18 +361,8 @@ namespace AIMS.Services
 
                 if (newIATIOrganizations.Count > 0)
                 {
-                    int iterations = (newIATIOrganizations.Count / 20);
-                    int skipRecords = 0;
-                    int takeRecords = 20;
-                    for(var i=1; i < iterations; i ++)
-                    {
-                        var newOrganizations = newIATIOrganizations.Select(o => o).Skip(skipRecords).Take(takeRecords).ToList<EFOrganization>();
-                        unitWork.OrganizationRepository.InsertMultiple(newOrganizations);
-                        unitWork.Save();
-                        skipRecords += takeRecords;
-                    }
-                    //unitWork.OrganizationRepository.InsertMultiple(newIATIOrganizations);
-                    //unitWork.Save();
+                    unitWork.OrganizationRepository.InsertMultiple(newIATIOrganizations);
+                    unitWork.Save();
                 }
             }
             catch(Exception ex)
@@ -453,7 +441,7 @@ namespace AIMS.Services
                         unitWork.SectorRepository.InsertMultiple(newIATISectors);
                         unitWork.Save();
 
-                        IMessageHelper mHelper = new MessageHelper();
+                        /*IMessageHelper mHelper = new MessageHelper();
                         unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                         {
                             NotificationType = NotificationTypes.NewIATISector,
@@ -462,7 +450,7 @@ namespace AIMS.Services
                             TreatmentId = 0,
                             UserType = UserTypes.Manager
                         });
-                        unitWork.Save();
+                        unitWork.Save();*/
                     }
                 }
             }
