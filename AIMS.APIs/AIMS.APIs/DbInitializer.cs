@@ -38,6 +38,11 @@ namespace AIMS.APIs
                     context.SaveChanges();
                 }
 
+                if (context.IATISettings.Count() == 0)
+                {
+                    context.IATISettings.Add(new EFIATISettings() { BaseUrl = "http://datastore.iatistandard.org/api/1/access/activity.xml?recipient-country=SO&stream=true" });
+                }
+
                 if (context.FundingTypes.Count() == 0)
                 {
                     context.FundingTypes.Add(new EFFundingTypes() { FundingType = "Grant" });
