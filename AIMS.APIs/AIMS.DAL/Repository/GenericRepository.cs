@@ -157,6 +157,11 @@ namespace AIMS.DAL.Repository
             return DbSet.OrderByDescending(orderBy).FirstOrDefault();
         }
 
+        public virtual TEntity GetOneOrderByAscending(Func<TEntity, bool> orderBy)
+        {
+            return DbSet.OrderBy(orderBy).FirstOrDefault();
+        }
+
         public virtual async Task<TEntity> GetOneAsync(Func<TEntity, bool> where)
         {
             return await Task<TEntity>.Run(() => DbSet.Where(where).FirstOrDefault()).ConfigureAwait(false);

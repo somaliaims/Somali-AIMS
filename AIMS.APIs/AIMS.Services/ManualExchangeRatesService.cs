@@ -101,6 +101,14 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var manualRate = unitWork.ManualRatesRepository.GetOne(r => r.Dated.Date == dated.Date);
+                if (manualRate == null)
+                {
+                    manualRate = unitWork.ManualRatesRepository.GetOneOrderByDescending(r => r.Dated.Date < dated.Date);
+                    if (manualRate == null)
+                    {
+                        manualRate = unitWork.ManualRatesRepository.GetOneOrderByAscending(r => r.Dated.Date > dated.Date);
+                    }
+                }
                 return mapper.Map<ManualRatesView>(manualRate);
             }
         }

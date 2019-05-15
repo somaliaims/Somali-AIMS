@@ -105,6 +105,7 @@ namespace AIMS.Models
 
     public class ManualRatesView
     {
+        public int Id { get; set; }
         public decimal ExchangeRate { get; set; }
         public DateTime Dated { get; set; }
     }

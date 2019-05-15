@@ -522,16 +522,14 @@ namespace AIMS.Services
 
         public IATISettings GetIATISettings()
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            IATISettings settings = new IATISettings();
+            var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.Id != 0);
+            if (iatiSettings != null)
             {
-                IATISettings settings = new IATISettings();
-                var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.Id != 0);
-                if (iatiSettings != null)
-                {
-                    settings.BaseUrl = iatiSettings.BaseUrl;
-                }
-                return settings;
+                settings.BaseUrl = iatiSettings.BaseUrl;
             }
+            return settings;
         }
 
         public ICollection<IATIOrganization> GetOrganizations()
