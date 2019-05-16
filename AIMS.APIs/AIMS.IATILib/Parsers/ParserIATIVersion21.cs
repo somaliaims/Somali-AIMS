@@ -52,8 +52,13 @@ namespace AIMS.IATILib.Parsers
             List<IATIProject> projectsList = new List<IATIProject>();
             //Pick up all narratives
             var activities = (from activity in xmlDoc.Descendants("iati-activity")
-                              where activity.Element("title").Element("narrative") != null ||
-                              activity.Element("title") != null
+                              where activity.Element("title").Element("narrative") != null
+                              select activity);
+
+            this.ParseAndFillProjects(activities, projectsList);
+
+            activities = (from activity in xmlDoc.Descendants("iati-activity")
+                              where activity.Element("title") != null
                               select activity);
 
             this.ParseAndFillProjects(activities, projectsList);
@@ -543,6 +548,11 @@ namespace AIMS.IATILib.Parsers
 
                         if (isProjectAdded == null)
                         {
+                            var validStartDate = new DateTime();
+                            var validEndDate = new DateTime();
+                            bool isValidStartDate = DateTime.TryParse(startDate, out validStartDate);
+                            bool isValidEndDate = DateTime.TryParse(endDate, out validEndDate);
+
                             projectsList.Add(new IATIProject()
                             {
                                 Id = activityCounter,
@@ -551,8 +561,8 @@ namespace AIMS.IATILib.Parsers
                                 Title = projectTitle,
                                 TrimmedTitle = trimmedTitle,
                                 Description = activity.Element("description")?.Value,
-                                StartDate = string.IsNullOrEmpty(startDate) ? startDate : Convert.ToDateTime(startDate).ToLongDateString(),
-                                EndDate = string.IsNullOrEmpty(endDate) ? endDate : Convert.ToDateTime(endDate).ToLongDateString()
+                                StartDate = isValidStartDate ? Convert.ToDateTime(startDate).ToLongDateString() : null,
+                                EndDate = isValidEndDate ? Convert.ToDateTime(endDate).ToLongDateString() : null
                             });
                             ++activityCounter;
                         }

@@ -232,7 +232,7 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var isSectorCreated = unitWork.SectorRepository.GetOne(s => s.SectorName.ToLower() == model.SectorName.ToLower());
+                    var isSectorCreated = unitWork.SectorRepository.GetOne(s => s.SectorName.ToLower() == model.SectorName.ToLower() && s.SectorTypeId == sectorType.Id);
                     if (isSectorCreated != null)
                     {
                         response.ReturnedId = isSectorCreated.Id;

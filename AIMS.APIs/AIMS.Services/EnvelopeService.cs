@@ -99,17 +99,13 @@ namespace AIMS.Services
                     if (string.IsNullOrEmpty(envelope.Currency))
                     {
                         envelope.Currency = defaultCurrency;
+                        envelope.ExchangeRate = 1;
                     }
                 }
 
                 var funderProjects = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.FunderId == funderId);
                 if (funderProjects != null)
                 {
-                    /*if (envelope.Currency == null)
-                    {
-                        funderCurrency = (from f in funderProjects
-                                             select f.Currency).FirstOrDefault();
-                    }*/
                     projectIds = (from p in funderProjects
                                   select p.ProjectId).ToList<int>();
 
