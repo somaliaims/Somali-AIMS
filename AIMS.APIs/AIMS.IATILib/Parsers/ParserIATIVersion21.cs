@@ -191,13 +191,20 @@ namespace AIMS.IATILib.Parsers
                                         }
                                     }
 
-                                    organizationList.Add(new IATIOrganization()
+                                    var isOrganizationExists = (from o in organizationList
+                                                                where o.Name.ToLower() == organizationName.ToLower()
+                                                                select o).FirstOrDefault();
+
+                                    if (isOrganizationExists == null)
                                     {
-                                        Id = orgCounter,
-                                        Project = projectTitle,
-                                        Name = organizationName,
-                                        Role = role.ToString()
-                                    });
+                                        organizationList.Add(new IATIOrganization()
+                                        {
+                                            Id = orgCounter,
+                                            Project = projectTitle,
+                                            Name = organizationName,
+                                            Role = role.ToString()
+                                        });
+                                    }
                                     ++orgCounter;
                                 }
                             }
@@ -367,12 +374,20 @@ namespace AIMS.IATILib.Parsers
                                     sectorName = sector.Element("narrative")?.Value;
                                     sectorName = sectorName != null ? sectorName.Trim() : sectorName;
                                 }
-                                sectors.Add(new IATISector()
+
+                                var isSectorExists = (from s in sectors
+                                                      where s.SectorName.ToLower() == sectorName.ToLower()
+                                                      select s).FirstOrDefault();
+
+                                if (isSectorExists == null)
                                 {
-                                    Code = sector.Attribute("code")?.Value,
-                                    SectorName = sectorName,
-                                    FundsPercentage = sector.Attribute("percentage")?.Value
-                                });
+                                    sectors.Add(new IATISector()
+                                    {
+                                        Code = sector.Attribute("code")?.Value,
+                                        SectorName = sectorName,
+                                        FundsPercentage = sector.Attribute("percentage")?.Value
+                                    });
+                                }
                             }
                         }
 
