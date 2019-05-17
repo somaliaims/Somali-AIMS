@@ -156,7 +156,7 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var isOrganizationCreated = unitWork.OrganizationRepository.GetOne(o => o.OrganizationName.ToLower() == model.Name.ToLower());
+                    var isOrganizationCreated = unitWork.OrganizationRepository.GetOne(o => o.OrganizationName.ToLower() == model.Name.ToLower().Trim());
                     if (isOrganizationCreated != null)
                     {
                         response.ReturnedId = isOrganizationCreated.Id;
@@ -165,7 +165,7 @@ namespace AIMS.Services
                     {
                         var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
                         {
-                            OrganizationName = model.Name,
+                            OrganizationName = model.Name.Trim(),
                         });
                         unitWork.Save();
                         response.ReturnedId = newOrganization.Id;
@@ -195,7 +195,7 @@ namespace AIMS.Services
                     return response;
                 }
 
-                organizationObj.OrganizationName = organization.Name;
+                organizationObj.OrganizationName = organization.Name.Trim();
                 unitWork.OrganizationRepository.Update(organizationObj);
                 unitWork.Save();
                 response.Message = "1";

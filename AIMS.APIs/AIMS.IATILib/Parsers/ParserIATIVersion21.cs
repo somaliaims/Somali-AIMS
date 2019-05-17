@@ -186,6 +186,7 @@ namespace AIMS.IATILib.Parsers
                                             if (organization.HasElements && organization.Element("narrative") != null)
                                             {
                                                 organizationName = organization.Element("narrative")?.Value;
+                                                organizationName = organizationName != null ? organizationName.Trim() : organizationName;
                                             }
                                         }
                                     }
@@ -363,7 +364,8 @@ namespace AIMS.IATILib.Parsers
                                 var setorNarrative = sector.Element("narrative");
                                 if (setorNarrative != null)
                                 {
-                                    sectorName = sector.Element("narrative").Value;
+                                    sectorName = sector.Element("narrative")?.Value;
+                                    sectorName = sectorName != null ? sectorName.Trim() : sectorName;
                                 }
                                 sectors.Add(new IATISector()
                                 {
@@ -593,13 +595,14 @@ namespace AIMS.IATILib.Parsers
                                 var setorNarrative = sector.Element("narrative");
                                 if (setorNarrative != null)
                                 {
-                                    sectorName = sector.Element("narrative").Value;
+                                    sectorName = sector.Element("narrative")?.Value;
+                                    sectorName = sectorName != null ? sectorName.Trim() : sectorName;
                                 }
 
                                 if (!string.IsNullOrEmpty(sectorName) && !string.IsNullOrWhiteSpace(sectorName))
                                 {
                                     var isSectorExists = (from s in sectorsList
-                                                          where s.SectorName.ToLower().Trim() == sectorName.ToLower().Trim()
+                                                          where s.SectorName.ToLower() == sectorName.ToLower()
                                                           select s).FirstOrDefault();
 
                                     if (isSectorExists == null)
@@ -653,6 +656,7 @@ namespace AIMS.IATILib.Parsers
                                             if (organization.HasElements && organization.Element("narrative") != null)
                                             {
                                                 organizationName = organization.Element("narrative")?.Value;
+                                                organizationName = organizationName != null ? organizationName.Trim() : organizationName;
                                             }
                                         }
                                     }
@@ -660,7 +664,7 @@ namespace AIMS.IATILib.Parsers
                                     if (!string.IsNullOrEmpty(organizationName) && !string.IsNullOrWhiteSpace(organizationName))
                                     {
                                         var isOrgExists = (from org in organizationsList
-                                                           where org.Name.ToLower().Trim() == organizationName.ToLower().Trim()
+                                                           where org.Name.ToLower() == organizationName.ToLower()
                                                            select org).FirstOrDefault();
 
                                         if (isOrgExists == null)

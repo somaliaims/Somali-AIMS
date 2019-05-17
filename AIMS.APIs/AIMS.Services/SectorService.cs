@@ -291,7 +291,7 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var isSectorCreated = unitWork.SectorRepository.GetOne(s => s.SectorName.ToLower() == model.SectorName.ToLower());
+                    var isSectorCreated = unitWork.SectorRepository.GetOne(s => s.SectorName.ToLower() == model.SectorName.ToLower().Trim());
                     if (isSectorCreated != null)
                     {
                         response.ReturnedId = isSectorCreated.Id;
@@ -307,7 +307,7 @@ namespace AIMS.Services
                             {
                                 SectorType = sectorType,
                                 ParentSector = parentSector,
-                                SectorName = model.SectorName,
+                                SectorName = model.SectorName.Trim(),
                                 TimeStamp = DateTime.Now,
                             });
                         }
@@ -376,7 +376,7 @@ namespace AIMS.Services
                 {
                     sectorObj.SectorType = sectorType;
                     sectorObj.ParentSector = parentSector;
-                    sectorObj.SectorName = model.SectorName;
+                    sectorObj.SectorName = model.SectorName.Trim();
                     unitWork.SectorRepository.Update(sectorObj);
                     unitWork.Save();
                 }
