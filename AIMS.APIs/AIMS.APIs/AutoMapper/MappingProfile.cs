@@ -35,7 +35,8 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFProject, ProjectView>()
                 .ForMember(p => p.StartDate, opts => opts.MapFrom(source => source.StartDate.ToShortDateString()))
-                .ForMember(p => p.EndDate, opts => opts.MapFrom(source => source.EndDate.ToShortDateString()));
+                .ForMember(p => p.EndDate, opts => opts.MapFrom(source => source.EndDate.ToShortDateString()))
+                .ForMember(p => p.DateUpdated, opts => opts.MapFrom(source => source.DateUpdated.ToShortDateString()));
 
             CreateMap<EFProject, ProjectModelView>()
                 .ForMember(p => p.StartDate, opts => opts.MapFrom(source => source.StartDate.ToShortDateString()))

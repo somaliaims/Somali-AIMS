@@ -112,7 +112,7 @@ namespace AIMS.Services
                 if (currencies != null)
                 {
                     currencies = (from c in currencies
-                                  orderby c.Currency ascending
+                                  orderby c.CurrencyName ascending
                                   select c);
                 }
                 return mapper.Map<List<CurrencyView>>(currencies);
@@ -127,7 +127,7 @@ namespace AIMS.Services
                 if (currencies != null)
                 {
                     currencies = (from c in currencies
-                                  orderby c.Currency ascending
+                                  orderby c.CurrencyName ascending
                                   select c);
                 }
                 return await Task<IEnumerable<CurrencyView>>.Run(() => mapper.Map<List<CurrencyView>>(currencies)).ConfigureAwait(false);

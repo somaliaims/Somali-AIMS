@@ -550,7 +550,7 @@ namespace AIMS.Models
         public string Description { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
-        public DateTime DateUpdated { get; set; }
+        public string DateUpdated { get; set; }
     }
 
     public class EnvelopeModel
