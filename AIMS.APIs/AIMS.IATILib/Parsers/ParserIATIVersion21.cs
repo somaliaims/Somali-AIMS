@@ -58,8 +58,8 @@ namespace AIMS.IATILib.Parsers
             this.ParseAndFillProjects(activities, projectsList);
 
             activities = (from activity in xmlDoc.Descendants("iati-activity")
-                              where activity.Element("title") != null
-                              select activity);
+                          where activity.Element("title") != null
+                          select activity);
 
             this.ParseAndFillProjects(activities, projectsList);
             return projectsList;
@@ -88,6 +88,18 @@ namespace AIMS.IATILib.Parsers
 
             this.ParseAndFillOrganizations(activities, organizationsList);
             return organizationsList;
+        }
+
+        public ICollection<IATILocation> ExtractLocations(XDocument xmlDoc)
+        {
+            List<IATILocation> locationsList = new List<IATILocation>();
+            var activities = from activity in xmlDoc.Descendants("iati-activity")
+                             where activity.Element("title").Element("narrative") != null ||
+                             activity.Element("title") != null
+                             select activity;
+
+            this.ParseAndFillLocations(activities, locationsList);
+            return locationsList;
         }
 
         private void ParseIATIAndFillList(IEnumerable<XElement> activities, List<IATIActivity> activityList, List<IATITransactionTypes> transactionTypes)
@@ -195,7 +207,7 @@ namespace AIMS.IATILib.Parsers
                                                                 where o.Name.ToLower() == organizationName.ToLower()
                                                                 select o).FirstOrDefault();
 
-                                    if (isOrganizationExists == null)
+                                    if (isOrganizationExists == null && !string.IsNullOrEmpty(organizationName))
                                     {
                                         organizationList.Add(new IATIOrganization()
                                         {
@@ -379,7 +391,7 @@ namespace AIMS.IATILib.Parsers
                                                       where s.SectorName.ToLower() == sectorName.ToLower()
                                                       select s).FirstOrDefault();
 
-                                if (isSectorExists == null)
+                                if (isSectorExists == null && !string.IsNullOrEmpty(sectorName))
                                 {
                                     sectors.Add(new IATISector()
                                     {
@@ -414,6 +426,7 @@ namespace AIMS.IATILib.Parsers
                                     {
                                         locationName = nameElement?.Value;
                                     }
+                                    locationName = locationName != null ? locationName.Trim() : locationName;
                                 }
 
                                 XElement locationPoint = (from point in location.Descendants("point")
@@ -445,12 +458,19 @@ namespace AIMS.IATILib.Parsers
                                     }
                                 }
 
-                                locations.Add(new IATILocation()
+                                var isLocationExists = (from l in locations
+                                                        where l.Name.ToLower() == locationName.ToLower()
+                                                        select l).FirstOrDefault();
+
+                                if (isLocationExists == null && !string.IsNullOrEmpty(locationName))
                                 {
-                                    Name = locationName,
-                                    Latitude = latitude,
-                                    Longitude = longitude
-                                });
+                                    locations.Add(new IATILocation()
+                                    {
+                                        Name = locationName,
+                                        Latitude = latitude,
+                                        Longitude = longitude
+                                    });
+                                }
                             }
                         }
 
@@ -461,6 +481,12 @@ namespace AIMS.IATILib.Parsers
 
                         if (isActivityAdded == null)
                         {
+                            var funders = (from org in organizationList
+                                           where org.Role == "Funding"
+                                           select org).ToList<IATIOrganization>();
+                            var implementers = (from org in organizationList
+                                                where org.Role == "Implementing"
+                                                select org).ToList<IATIOrganization>();
 
                             activityList.Add(new IATIActivity()
                             {
@@ -478,7 +504,8 @@ namespace AIMS.IATILib.Parsers
                                 Sectors = sectors,
                                 DefaultCurrency = currency,
                                 Transactions = transactionsList,
-                                ParticipatingOrganizations = organizationList
+                                Funders = funders,
+                                Implementers = implementers
                             });
                             ++activityCounter;
                         }
@@ -639,6 +666,93 @@ namespace AIMS.IATILib.Parsers
             }
         }
 
+        private void ParseAndFillLocations(IEnumerable<XElement> activities, List<IATILocation> locaitonsList)
+        {
+            string message = "";
+            try
+            {
+                if (activities != null)
+                {
+                    foreach (var activity in activities)
+                    {
+                        var aLocations = activity.Elements("location");
+                        List<IATILocation> locations = new List<IATILocation>();
+                        if (aLocations != null)
+                        {
+                            foreach (var location in aLocations)
+                            {
+                                string locationName = "", latitude = "", longitude = "";
+                                XElement nameElement = (from name in location.Descendants("name")
+                                                        select name).FirstOrDefault();
+
+                                if (nameElement != null)
+                                {
+                                    XElement narrative = (from narr in nameElement.Descendants("narrative")
+                                                          select narr).FirstOrDefault();
+
+                                    if (narrative != null)
+                                    {
+                                        locationName = narrative?.Value;
+                                    }
+                                    else
+                                    {
+                                        locationName = nameElement?.Value;
+                                    }
+                                    locationName = locationName != null ? locationName.Trim() : locationName;
+                                }
+
+                                XElement locationPoint = (from point in location.Descendants("point")
+                                                          select point).FirstOrDefault();
+
+                                XElement locationCoordinates = (from coordinate in location.Descendants("coordinates")
+                                                                select coordinate).FirstOrDefault();
+
+                                if (locationPoint != null)
+                                {
+                                    var position = locationPoint.Element("pos")?.Value;
+                                    if (position != null)
+                                    {
+                                        string[] arr = position.Split();
+                                        latitude = arr[0];
+                                        longitude = arr[1];
+                                    }
+                                }
+
+                                if (locationCoordinates != null)
+                                {
+                                    if (locationCoordinates.HasAttributes)
+                                    {
+                                        if (locationCoordinates.Attribute("latitude") != null)
+                                            latitude = locationCoordinates.Attribute("latitude")?.Value;
+
+                                        if (locationCoordinates.Attribute("longitude") != null)
+                                            longitude = locationCoordinates.Attribute("longitude")?.Value;
+                                    }
+                                }
+
+                                var isLocationExists = (from l in locations
+                                                        where l.Name.ToLower() == locationName.ToLower()
+                                                        select l).FirstOrDefault();
+
+                                if (isLocationExists == null && !string.IsNullOrEmpty(locationName))
+                                {
+                                    locations.Add(new IATILocation()
+                                    {
+                                        Name = locationName,
+                                        Latitude = latitude,
+                                        Longitude = longitude
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+        }
         private void ParseAndFillOrganizations(IEnumerable<XElement> activities, List<IATIOrganizationModel> organizationsList)
         {
             string message = "";
@@ -715,7 +829,6 @@ namespace AIMS.IATILib.Parsers
             }
             return list;
         }*/
-
 
     }
 }

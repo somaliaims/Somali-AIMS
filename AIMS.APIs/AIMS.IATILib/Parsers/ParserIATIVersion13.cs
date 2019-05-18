@@ -115,6 +115,21 @@ namespace AIMS.IATILib.Parsers
             return sectorsList;
         }
 
+        public ICollection<IATILocation> ExtractLocations(XDocument xmlDoc)
+        {
+            List<IATILocation> locationsList = new List<IATILocation>();
+            string message = "";
+            try
+            {
+                
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+            return locationsList;
+        }
+
         public ICollection<IATIOrganizationModel> ExtractOrganizations(XDocument xmlDoc)
         {
             List<IATIOrganizationModel> organizationsList = new List<IATIOrganizationModel>();
@@ -256,6 +271,13 @@ namespace AIMS.IATILib.Parsers
                     });
                 }
 
+                var funders = (from f in organizationList
+                               where f.Role == "Funding"
+                               select f).ToList<IATIOrganization>();
+                var implementers = (from i in organizationList
+                                    where i.Role == "Implementing"
+                                    select i).ToList<IATIOrganization>();
+
                 activityList.Add(new IATIActivity()
                 {
                     Identifier = activity.Element("iati-identifier")?.Value,
@@ -264,7 +286,8 @@ namespace AIMS.IATILib.Parsers
                     Sectors = sectors,
                     DefaultCurrency = currency,
                     Transactions = transactionsList,
-                    ParticipatingOrganizations = organizationList
+                    Funders = funders,
+                    Implementers = implementers
                 });
             }
         }

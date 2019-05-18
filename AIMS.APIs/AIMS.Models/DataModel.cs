@@ -377,6 +377,7 @@ namespace AIMS.Models
         public string DefaultCurrency { get; set; }
         public string NationalCurrency { get; set; }
         public DateTime Dated { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; }
     }
 

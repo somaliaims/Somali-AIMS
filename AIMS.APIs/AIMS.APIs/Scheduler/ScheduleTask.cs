@@ -75,6 +75,7 @@ namespace AIMS.APIs.Scheduler
                     IATIService service = new IATIService(dbContext);
                     userService.SetNotificationsForUsers();
                     service.ExtractAndSaveDAC5Sectors(filePath);
+                    service.ExtractAndSaveLocations(filePath);
                     service.ExtractAndSaveOrganizations(filePath);
 
                     var currencyList = httpService.ParseAndExtractCurrencyList(json);

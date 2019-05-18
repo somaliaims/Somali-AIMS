@@ -95,7 +95,8 @@ namespace AIMS.IATILib.Parsers
         public ICollection<IATIDisbursement> Disbursements { get; set; }
         public ICollection<IATILocation> Locations { get; set; }
         public ICollection<IATISector> Sectors { get; set; }
-        public ICollection<IATIOrganization> ParticipatingOrganizations { get; set; }
+        public ICollection<IATIOrganization> Funders { get; set; }
+        public ICollection<IATIOrganization> Implementers { get; set; }
         public ICollection<IATITransaction> Transactions { get; set; }
         public ICollection<IATIDocument> Documents { get; set; }
     }

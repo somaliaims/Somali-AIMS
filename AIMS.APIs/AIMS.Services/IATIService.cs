@@ -108,6 +108,13 @@ namespace AIMS.Services
         ActionResponse ExtractAndSaveOrganizations(string dataFilePath);
 
         /// <summary>
+        /// Extracts and save locations from IATI to DB
+        /// </summary>
+        /// <param name="dataFilePath"></param>
+        /// <returns></returns>
+        ActionResponse ExtractAndSaveLocations(string dataFilePath);
+
+        /// <summary>
         /// Deletes all the data less than the specified date
         /// </summary>
         /// <param name="datedLessThan"></param>
@@ -155,8 +162,12 @@ namespace AIMS.Services
             {
                 if (activityList != null)
                 {
-                    var organizationList = from a in activityList
-                                           select a.ParticipatingOrganizations;
+                    var fundersList = from a in activityList
+                                           select a.Funders;
+                    var implementersList = from i in activityList
+                                           select i.Implementers;
+
+                    var organizationList = fundersList.Union(implementersList);
 
                     if (organizationList.Count() > 0)
                     {
@@ -228,8 +239,11 @@ namespace AIMS.Services
             {
                 if (activityList != null)
                 {
-                    var organizationList = from a in activityList
-                                           select a.ParticipatingOrganizations;
+                    var fundersList = from a in activityList
+                                           select a.Funders;
+                    var implementersList = from i in activityList
+                                           select i.Implementers;
+                    var organizationList = fundersList.Union(implementersList);
 
                     if (organizationList.Count() > 0)
                     {
@@ -366,6 +380,95 @@ namespace AIMS.Services
                 }
             }
             catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public ActionResponse ExtractAndSaveLocations(string dataFilePath)
+        {
+            var unitWork = new UnitOfWork(context);
+            ActionResponse response = new ActionResponse();
+            string url = dataFilePath;
+
+            try
+            {
+                XmlReader xReader = XmlReader.Create(url);
+                XDocument xDoc = XDocument.Load(xReader);
+                var activity = (from el in xDoc.Descendants("iati-activity")
+                                select el.FirstAttribute).FirstOrDefault();
+
+                IParser parser;
+                ICollection<IATIActivity> activityList = new List<IATIActivity>();
+                ICollection<IATILocation> locations = new List<IATILocation>();
+                string version = "";
+                version = activity.Value;
+                switch (version)
+                {
+                    case "1.03":
+                        parser = new ParserIATIVersion13();
+                        locations = parser.ExtractLocations(xDoc);
+                        break;
+
+                    case "2.01":
+                        parser = new ParserIATIVersion21();
+                        locations = parser.ExtractLocations(xDoc);
+                        break;
+                }
+
+                var locationsList = unitWork.LocationRepository.GetManyQueryable(o => o.Id != 0);
+                var locationNames = (from l in locationsList
+                                select l.Location.Trim()).ToList<string>();
+
+                List<EFLocation> newIATILocations = new List<EFLocation>();
+                foreach (var loc in locations)
+                {
+                    if (!string.IsNullOrEmpty(loc.Name) && !string.IsNullOrWhiteSpace(loc.Name))
+                    {
+                        if (locationNames.Contains(loc.Name.Trim(), StringComparer.OrdinalIgnoreCase) == false)
+                        {
+                            EFLocation isLocationInList = null;
+                            EFLocation isLocationInDb = null;
+
+                            if (newIATILocations.Count > 0)
+                            {
+                                isLocationInList = (from l in newIATILocations
+                                                        where l.Location.ToLower() == loc.Name.ToLower()
+                                                        select l).FirstOrDefault();
+
+                                isLocationInDb = (from l in locationsList
+                                                      where l.Location.ToLower() == loc.Name.ToLower()
+                                                      select l).FirstOrDefault();
+                            }
+
+                            if (isLocationInList == null && isLocationInDb == null)
+                            {
+                                decimal latitude = 0;
+                                decimal longitude = 0;
+
+                                decimal.TryParse(loc.Latitude, out latitude);
+                                decimal.TryParse(loc.Longitude, out longitude);
+
+                                newIATILocations.Add(new EFLocation()
+                                {
+                                    Location = loc.Name,
+                                    Latitude = latitude,
+                                    Longitude = longitude
+                                });
+                            }
+                        }
+                    }
+                }
+
+                if (newIATILocations.Count > 0)
+                {
+                    unitWork.LocationRepository.InsertMultiple(newIATILocations);
+                    unitWork.Save();
+                }
+            }
+            catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = ex.Message;
