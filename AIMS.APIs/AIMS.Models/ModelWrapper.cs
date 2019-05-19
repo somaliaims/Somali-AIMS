@@ -294,7 +294,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string TypeName { get; set; }
         public bool? IsPrimary { get; set; }
-        public bool? IsIATIType { get; set; }
+        public bool? IsSourceType { get; set; }
     }
 
     public class SectorTypesModel
@@ -302,7 +302,7 @@ namespace AIMS.Models
         [Required]
         public string TypeName { get; set; }
         public bool IsPrimary { get; set; } = false;
-        public bool IsIATIType { get; set; } = false;
+        public bool IsSourceType { get; set; } = false;
     }
 
     public class SectorDetailedView
@@ -313,7 +313,7 @@ namespace AIMS.Models
         public string ParentSector { get; set; }
         public string SectorName { get; set; }
         public bool IsDefault { get; set; } = false;
-        public bool IsIATIType { get; set; } = false;
+        public bool IsSourceType { get; set; } = false;
     }
 
     public class SectorView

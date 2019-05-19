@@ -282,7 +282,7 @@ namespace AIMS.Services
                 IMessageHelper mHelper;
                 try
                 {
-                    var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsIATIType == true);
+                    var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsSourceType == true);
                     if (sectorType == null)
                     {
                         mHelper = new MessageHelper();

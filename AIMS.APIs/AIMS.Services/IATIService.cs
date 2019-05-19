@@ -507,7 +507,7 @@ namespace AIMS.Services
                         break;
                 }
 
-                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsIATIType == true);
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsSourceType == true);
                 if (sectorType != null)
                 {
                     var sectorsList = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == sectorType.Id);

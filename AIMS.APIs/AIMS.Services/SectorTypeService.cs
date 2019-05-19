@@ -127,7 +127,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 SectorTypesView view = new SectorTypesView();
-                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsIATIType == true);
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsSourceType == true);
                 if (sectorType != null)
                 {
                     view.Id = sectorType.Id;
@@ -185,7 +185,7 @@ namespace AIMS.Services
                     {
                         TypeName = model.TypeName,
                         IsPrimary = model.IsPrimary,
-                        IsIATIType = model.IsIATIType
+                        IsSourceType = model.IsSourceType
                     });
                     response.ReturnedId = newSectorTypes.Id;
                     unitWork.Save();
@@ -262,10 +262,10 @@ namespace AIMS.Services
                     {
                         foreach (var sType in sectorTypes)
                         {
-                            sType.IsIATIType = false;
+                            sType.IsSourceType = false;
                             unitWork.SectorTypesRepository.Update(sType);
                         }
-                        sectorType.IsIATIType = true;
+                        sectorType.IsSourceType = true;
                         await unitWork.SaveAsync();
                     }
                 });
@@ -289,7 +289,7 @@ namespace AIMS.Services
 
                 sectorTypeObj.TypeName = model.TypeName;
                 sectorTypeObj.IsPrimary = model.IsPrimary;
-                sectorTypeObj.IsIATIType = model.IsIATIType;
+                sectorTypeObj.IsSourceType = model.IsSourceType;
                 unitWork.Save();
                 response.Message = true.ToString();
                 return response;
