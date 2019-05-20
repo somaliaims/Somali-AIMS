@@ -45,10 +45,12 @@ namespace AIMS.APIs.Scheduler
                 string sWebRootFolder = hostingEnvironment.WebRootPath;
                 string url = configuration.GetValue<string>("IATI:Url");
                 string currencyUrl = configuration.GetValue<string>("IATI:CurrencyUrl");
+                string transactionTypesUrl = configuration.GetValue<string>("IATI:TransactionTypesUrl");
                 string filePath = sWebRootFolder + "/IATISomali.xml";
                 string currenciesFilePath = sWebRootFolder + "/Currency.json";
+                string transactionTypesPath = sWebRootFolder + "/TransactionTypes.json";
                 string xml = "";
-                string json = "";
+                string json = "", transactionTypesJson = "";
 
                 using (var client = new WebClient())
                 {
@@ -61,6 +63,11 @@ namespace AIMS.APIs.Scheduler
                     json = client.DownloadString(currencyUrl);
                 }
                 //File.WriteAllText(currenciesFilePath, json);
+
+                using (var client = new WebClient())
+                {
+                    transactionTypesJson = client.DownloadString(transactionTypesUrl);
+                }
 
                 //Save sectors to db
                 using (var scope = scopeFactory.CreateScope())

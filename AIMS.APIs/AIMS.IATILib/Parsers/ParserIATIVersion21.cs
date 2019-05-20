@@ -299,15 +299,27 @@ namespace AIMS.IATILib.Parsers
                                 decimal budgetAmount = 0;
                                 Decimal.TryParse(budgetAmountStr, out budgetAmount);
 
-                                budgetsList.Add(new IATIBudget()
+                                var isCurrencyExists = (from b in budgetsList
+                                                        where b.Currency == budgetCurrency
+                                                        select b).FirstOrDefault();
+
+                                if (isCurrencyExists != null)
                                 {
-                                    Id = budgetCounter,
-                                    StartDate = budgetStartDate,
-                                    EndDate = budgetEndDate,
-                                    Currency = budgetCurrency,
-                                    Amount = budgetAmount
-                                });
-                                ++budgetCounter;
+                                    isCurrencyExists.Amount += budgetAmount;
+                                    isCurrencyExists.EndDate = budgetEndDate;
+                                }
+                                else
+                                {
+                                    budgetsList.Add(new IATIBudget()
+                                    {
+                                        Id = budgetCounter,
+                                        StartDate = budgetStartDate,
+                                        EndDate = budgetEndDate,
+                                        Currency = budgetCurrency,
+                                        Amount = budgetAmount
+                                    });
+                                    ++budgetCounter;
+                                }
                             }
                         }
 
