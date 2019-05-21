@@ -50,13 +50,14 @@ namespace AIMS.APIs.Controllers
         public async Task<IActionResult> LoadLatestIATI()
         {
             string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
+            string sectorVocabPath = hostingEnvironment.WebRootPath + "/IATISectorVocabulary.json";
             var iatiSettings = iatiService.GetIATISettings();
             if (iatiSettings != null)
             {
                 //string iatiUrl = configuration.GetValue<string>("IATI:Url");
                 string iatiUrl = iatiSettings.BaseUrl;
                 var response = await iatiService.DownloadIATIFromUrl(iatiUrl, iatiFilePath);
-                response = iatiService.ExtractAndSaveDAC5Sectors(iatiFilePath);
+                response = iatiService.ExtractAndSaveIATISectors(iatiFilePath, sectorVocabPath);
                 return Ok(response);
             }
             return Ok(null);
@@ -92,12 +93,13 @@ namespace AIMS.APIs.Controllers
         public IActionResult SaveSectors()
         {
             string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
+            string sectorVocabPath = hostingEnvironment.WebRootPath + "/IATISectorVocabulary.json";
             FileInfo fileInfo = new FileInfo(iatiFilePath);
             if (!fileInfo.Exists)
             {
                 return BadRequest("IATI source file not found. Load latest IATI before making this request.");
             }
-            var response = iatiService.ExtractAndSaveDAC5Sectors(iatiFilePath);
+            var response = iatiService.ExtractAndSaveIATISectors(iatiFilePath, sectorVocabPath);
             return Ok(response);
         }
 

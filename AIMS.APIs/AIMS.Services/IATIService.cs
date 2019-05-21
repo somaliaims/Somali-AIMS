@@ -73,7 +73,7 @@ namespace AIMS.Services
         /// Extracts and save sectors
         /// </summary>
         /// <returns></returns>
-        ActionResponse ExtractAndSaveIATISectors(string dataFilePath);
+        ActionResponse ExtractAndSaveIATISectors(string dataFilePath, string sectorVocabPath);
 
         /// <summary>
         /// Saves transaction types
@@ -607,14 +607,16 @@ namespace AIMS.Services
             return response;
         }
 
-        public ActionResponse ExtractAndSaveIATISectors(string dataFilePath)
+        public ActionResponse ExtractAndSaveIATISectors(string dataFilePath, string sectorVocabPath)
         {
 
             var unitWork = new UnitOfWork(context);
             ActionResponse response = new ActionResponse();
             ICollection<IATISectorModel> iatiSectors = new List<IATISectorModel>();
             string url = dataFilePath;
-
+            var sectorVocabs = JsonConvert.DeserializeObject<List<IATIFinanceTypes>>(File.ReadAllText(sectorVocabPath));
+            var codes = (from s in sectorVocabs
+                         select s.Code).ToArray<string>();
             try
             {
                 XmlReader xReader = XmlReader.Create(url);

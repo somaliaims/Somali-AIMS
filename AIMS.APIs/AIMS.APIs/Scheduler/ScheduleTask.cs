@@ -100,7 +100,7 @@ namespace AIMS.APIs.Scheduler
                     File.WriteAllText(sectorsVocabPath, cleanedSectorVocabJson);
 
                     userService.SetNotificationsForUsers();
-                    service.ExtractAndSaveIATISectors(filePath);
+                    service.ExtractAndSaveIATISectors(filePath, sectorsVocabPath);
                     service.ExtractAndSaveLocations(filePath);
                     service.ExtractAndSaveOrganizations(filePath);
 
