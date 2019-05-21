@@ -25,6 +25,12 @@ namespace AIMS.IATILib.Parsers
         public string Name { get; set; }
     }
 
+    public class IATISectorsVocabulary
+    {
+        public int Code { get; set; }
+        public string Name { get; set; }
+    }
+
     public class IATICountry
     {
         public string Code { get; set; }
@@ -92,6 +98,7 @@ namespace AIMS.IATILib.Parsers
         public int Id { get; set; }
         public string Identifier { get; set; }
         public string DefaultCurrency { get; set; }
+        public string DefaultFinanceType { get; set; }
         public string Title { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
@@ -146,6 +153,7 @@ namespace AIMS.IATILib.Parsers
         public string IATIIdentifier { get; set; }
         public string Title { get; set; }
         public string TrimmedTitle { get; set; }
+        public string DefaultFinanceType { get; set; }
         public string DefaultCurrency { get; set; }
         public string Description { get; set; }
     }

@@ -16,7 +16,7 @@ namespace AIMS.IATILib.Parsers
         {
         }
 
-        public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria, List<IATITransactionTypes> transactionTypes = null)
+        public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria, List<IATITransactionTypes> transactionTypes = null, List<IATIFinanceTypes> financeTypes = null)
         {
             List<IATIActivity> activityList = new List<IATIActivity>();
             //Pick up all narratives
@@ -35,7 +35,7 @@ namespace AIMS.IATILib.Parsers
             return activityList;
         }
 
-        public ICollection<IATIActivity> ExtractAcitivitiesForIds(XDocument xmlDoc, IEnumerable<string> Ids, List<IATITransactionTypes> transactionTypes = null)
+        public ICollection<IATIActivity> ExtractAcitivitiesForIds(XDocument xmlDoc, IEnumerable<string> Ids, List<IATITransactionTypes> transactionTypes = null, List<IATIFinanceTypes> financeTypes = null)
         {
             List<IATIActivity> activityList = new List<IATIActivity>();
             //Pick up all narratives
@@ -102,7 +102,7 @@ namespace AIMS.IATILib.Parsers
             return locationsList;
         }
 
-        private void ParseIATIAndFillList(IEnumerable<XElement> activities, List<IATIActivity> activityList, List<IATITransactionTypes> transactionTypes)
+        private void ParseIATIAndFillList(IEnumerable<XElement> activities, List<IATIActivity> activityList, List<IATITransactionTypes> transactionTypes = null, List<IATIFinanceTypes> financeTypes = null)
         {
             string message = "";
             try
@@ -118,7 +118,7 @@ namespace AIMS.IATILib.Parsers
                     int disbursementCounter = 1;
                     foreach (var activity in activities)
                     {
-                        string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "";
+                        string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "", defaultFinanceType = "";
                         if (activity.HasAttributes)
                         {
                             if (activity.Attribute("default-currency") != null)
@@ -129,6 +129,21 @@ namespace AIMS.IATILib.Parsers
                             if (activity.Element("title") != null && activity.Element("title").Element("narrative") != null)
                             {
                                 projectTitle = activity.Element("title").Element("narrative")?.Value;
+                            }
+                        }
+
+                        var financeType = activity.Element("default-finance-type");
+                        if (financeType != null)
+                        {
+                            var financeCode = financeType.Attribute("Code")?.Value;
+                            if (!string.IsNullOrEmpty(financeCode))
+                            {
+                                if (financeTypes != null)
+                                {
+                                    defaultFinanceType = (from f in financeTypes
+                                                          where f.Code.Equals(financeCode)
+                                                          select f.Name).FirstOrDefault();
+                                }
                             }
                         }
 
@@ -515,6 +530,7 @@ namespace AIMS.IATILib.Parsers
                                 Disbursements = disbursementsList,
                                 Sectors = sectors,
                                 DefaultCurrency = currency,
+                                DefaultFinanceType = defaultFinanceType,
                                 Transactions = transactionsList,
                                 Funders = funders,
                                 Implementers = implementers
@@ -531,7 +547,7 @@ namespace AIMS.IATILib.Parsers
             }
         }
 
-        private void ParseAndFillProjects(IEnumerable<XElement> activities, List<IATIProject> projectsList)
+        private void ParseAndFillProjects(IEnumerable<XElement> activities, List<IATIProject> projectsList, List<IATIFinanceTypes> financeTypes = null)
         {
             string message = "";
             try
@@ -542,7 +558,7 @@ namespace AIMS.IATILib.Parsers
                     int activityCounter = 1;
                     foreach (var activity in activities)
                     {
-                        string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "";
+                        string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "", defaultFinanceType = "";
                         if (activity.HasAttributes)
                         {
                             if (activity.Attribute("default-currency") != null)
@@ -553,6 +569,21 @@ namespace AIMS.IATILib.Parsers
                             if (activity.Element("title") != null && activity.Element("title").Element("narrative") != null)
                             {
                                 projectTitle = activity.Element("title").Element("narrative")?.Value;
+                            }
+                        }
+
+                        var financeType = activity.Element("default-finance-type");
+                        if (financeType != null)
+                        {
+                            var financeCode = financeType.Attribute("Code")?.Value;
+                            if (!string.IsNullOrEmpty(financeCode))
+                            {
+                                if (financeTypes != null)
+                                {
+                                    defaultFinanceType = (from f in financeTypes
+                                                          where f.Code.Equals(financeCode)
+                                                          select f.Name).FirstOrDefault();
+                                }
                             }
                         }
 
@@ -613,6 +644,7 @@ namespace AIMS.IATILib.Parsers
                             {
                                 Id = activityCounter,
                                 DefaultCurrency = currency,
+                                DefaultFinanceType = defaultFinanceType,
                                 IATIIdentifier = activity.Element("iati-identifier")?.Value,
                                 Title = projectTitle,
                                 TrimmedTitle = trimmedTitle,

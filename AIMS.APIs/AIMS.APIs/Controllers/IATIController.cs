@@ -153,7 +153,8 @@ namespace AIMS.APIs.Controllers
 
             string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
             string tTypeFilePath = hostingEnvironment.WebRootPath + "/IATITransactionTypes.json";
-            var activities = await iatiService.GetActivitiesByIds(iatiFilePath, Ids, tTypeFilePath);
+            string fTypeFilePath = hostingEnvironment.WebRootPath + "/IATIFinanceTypes.json";
+            var activities = await iatiService.GetActivitiesByIds(iatiFilePath, Ids, tTypeFilePath, fTypeFilePath);
             return Ok(activities);
         }
     }

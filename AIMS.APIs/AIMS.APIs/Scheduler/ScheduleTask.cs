@@ -47,12 +47,13 @@ namespace AIMS.APIs.Scheduler
                 string currencyUrl = configuration.GetValue<string>("IATI:CurrencyUrl");
                 string transactionTypesUrl = configuration.GetValue<string>("IATI:TransactionTypesUrl");
                 string financeTypesUrl = configuration.GetValue<string>("IATI:FinanceTypesUrl");
+                string sectorVocabularyUrl = configuration.GetValue<string>("IATI:SectorsVocabulary");
                 string filePath = sWebRootFolder + "/IATISomali.xml";
                 string currenciesFilePath = sWebRootFolder + "/Currency.json";
                 string transactionTypesPath = sWebRootFolder + "/IATITransactionTypes.json";
                 string financeTypesPath = sWebRootFolder + "/IATIFinanceTypes.json";
-                string xml = "";
-                string json = "", transactionTypesJson = "", financeTypesJson = "";
+                string sectorsVocabPath = sWebRootFolder + "/IATISectorVocabulary.json";
+                string xml = "", json = "", transactionTypesJson = "", financeTypesJson = "", sectorsVocabJson = "";
 
                 using (var client = new WebClient())
                 {
@@ -75,6 +76,11 @@ namespace AIMS.APIs.Scheduler
                     financeTypesJson = client.DownloadString(financeTypesUrl);
                 }
 
+                using (var client = new WebClient())
+                {
+                    sectorsVocabJson = client.DownloadString(sectorVocabularyUrl);
+                }
+
                 //Save sectors to db
                 using (var scope = scopeFactory.CreateScope())
                 {
@@ -85,8 +91,16 @@ namespace AIMS.APIs.Scheduler
                     IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
                     UserService userService = new UserService(dbContext, imapper);
                     IATIService service = new IATIService(dbContext);
+
+                    var cleanedTTypeJson = service.ExtractTransactionTypesJson(transactionTypesJson);
+                    var cleanedFTypeJson = service.ExtractFinanceTypesJson(financeTypesJson);
+                    var cleanedSectorVocabJson = service.ExtractSectorsVocabJson(sectorsVocabJson);
+                    File.WriteAllText(transactionTypesPath, cleanedTTypeJson);
+                    File.WriteAllText(financeTypesPath, cleanedFTypeJson);
+                    File.WriteAllText(sectorsVocabPath, cleanedSectorVocabJson);
+
                     userService.SetNotificationsForUsers();
-                    service.ExtractAndSaveDAC5Sectors(filePath);
+                    service.ExtractAndSaveIATISectors(filePath);
                     service.ExtractAndSaveLocations(filePath);
                     service.ExtractAndSaveOrganizations(filePath);
 
@@ -96,10 +110,6 @@ namespace AIMS.APIs.Scheduler
                         ICurrencyService currencyService = new CurrencyService(dbContext, imapper);
                         currencyService.AddMultiple(currencyList);
                     }
-                    var cleanedTTypeJson = service.ExtractTransactionTypesJson(transactionTypesJson);
-                    var cleanedFTypeJson = service.ExtractFinanceTypesJson(financeTypesJson);
-                    File.WriteAllText(transactionTypesPath, cleanedTTypeJson);
-                    File.WriteAllText(financeTypesPath, cleanedFTypeJson);
                 }
 
                 //File cleanup

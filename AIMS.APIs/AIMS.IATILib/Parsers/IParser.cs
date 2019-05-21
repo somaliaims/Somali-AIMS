@@ -14,7 +14,7 @@ namespace AIMS.IATILib.Parsers
         /// <param name="xmlDoc"></param>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria, List<IATITransactionTypes> transactionTypes = null);
+        ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria, List<IATITransactionTypes> transactionTypes = null, List<IATIFinanceTypes> financeTypes = null);
 
         /// <summary>
         /// Extract activities for ids
@@ -22,7 +22,7 @@ namespace AIMS.IATILib.Parsers
         /// <param name="xmlDoc"></param>
         /// <param name="Ids"></param>
         /// <returns></returns>
-        ICollection<IATIActivity> ExtractAcitivitiesForIds(XDocument xmlDoc, IEnumerable<string> Ids, List<IATITransactionTypes> transactionTypes = null);
+        ICollection<IATIActivity> ExtractAcitivitiesForIds(XDocument xmlDoc, IEnumerable<string> Ids, List<IATITransactionTypes> transactionTypes = null, List<IATIFinanceTypes> financeTypes = null);
 
         /// <summary>
         /// Parses short version of projects

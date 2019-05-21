@@ -73,7 +73,7 @@ namespace AIMS.Services
         /// Extracts and save sectors
         /// </summary>
         /// <returns></returns>
-        ActionResponse ExtractAndSaveDAC5Sectors(string dataFilePath);
+        ActionResponse ExtractAndSaveIATISectors(string dataFilePath);
 
         /// <summary>
         /// Saves transaction types
@@ -87,7 +87,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="IdsModel"></param>
         /// <returns></returns>
-        Task<ICollection<IATIActivity>> GetActivitiesByIds(string dataFilePath, List<IATIByIdModel> IdsModel, string tTypeFilePath);
+        Task<ICollection<IATIActivity>> GetActivitiesByIds(string dataFilePath, List<IATIByIdModel> IdsModel, string tTypeFilePath, string fTypeFilePath);
 
         /// <summary>
         /// Gets all the activitiesGetActivitiesByIds
@@ -115,6 +115,13 @@ namespace AIMS.Services
         /// <param name="json"></param>
         /// <returns></returns>
         string ExtractFinanceTypesJson(string json);
+
+        /// <summary>
+        /// Extracts sector vocabulary json
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        string ExtractSectorsVocabJson(string json);
 
         /// <summary>
         /// Gets all the organizations
@@ -224,7 +231,7 @@ namespace AIMS.Services
             return activityList;
         }
 
-        public async Task<ICollection<IATIActivity>> GetActivitiesByIds(string dataFilePath, List<IATIByIdModel> IdsModel, string tTypeFilePath)
+        public async Task<ICollection<IATIActivity>> GetActivitiesByIds(string dataFilePath, List<IATIByIdModel> IdsModel, string tTypeFilePath, string fTypeFilePath)
         {
             string url = dataFilePath;
             XmlReader xReader = XmlReader.Create(url);
@@ -234,6 +241,7 @@ namespace AIMS.Services
 
             //var transactionTypes = await this.GetTransactionTypes(tTypeFilePath);
             var transactionTypes = JsonConvert.DeserializeObject<List<IATITransactionTypes>>(File.ReadAllText(tTypeFilePath));
+            var financeTypes = JsonConvert.DeserializeObject<List<IATIFinanceTypes>>(File.ReadAllText(fTypeFilePath));
 
             IEnumerable<string> ids = (from id in IdsModel
                                        select id.Identifier);
@@ -251,7 +259,7 @@ namespace AIMS.Services
 
                 case "2.01":
                     parser = new ParserIATIVersion21();
-                    activityList = parser.ExtractAcitivitiesForIds(xDoc, ids, transactionTypes);
+                    activityList = parser.ExtractAcitivitiesForIds(xDoc, ids, transactionTypes, financeTypes);
                     break;
             }
 
@@ -342,6 +350,28 @@ namespace AIMS.Services
                 fTypeJson = JsonConvert.SerializeObject(transactionTypes);
             }
             return fTypeJson;
+        }
+
+        public string ExtractSectorsVocabJson(string json)
+        {
+            string sVocabJson = null;
+            List<IATISectorsVocabulary> sectorVocabs = new List<IATISectorsVocabulary>();
+            JObject jObject = JObject.Parse(json);
+            var tCodesArray = jObject["data"].ToArray();
+            if (tCodesArray.Length > 0)
+            {
+                foreach (var tCode in tCodesArray)
+                {
+                    sectorVocabs.Add(new IATISectorsVocabulary()
+                    {
+                        Code = (int)tCode["code"],
+                        Name = (string)tCode["name"]
+                    });
+                }
+                var unitWork = new UnitOfWork(context);
+                sVocabJson = JsonConvert.SerializeObject(sectorVocabs);
+            }
+            return sVocabJson;
         }
 
         public ICollection<IATIProject> GetProjects(string dataFilePath)
@@ -577,7 +607,7 @@ namespace AIMS.Services
             return response;
         }
 
-        public ActionResponse ExtractAndSaveDAC5Sectors(string dataFilePath)
+        public ActionResponse ExtractAndSaveIATISectors(string dataFilePath)
         {
 
             var unitWork = new UnitOfWork(context);
