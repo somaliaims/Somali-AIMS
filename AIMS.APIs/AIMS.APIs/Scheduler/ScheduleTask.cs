@@ -46,11 +46,13 @@ namespace AIMS.APIs.Scheduler
                 string url = configuration.GetValue<string>("IATI:Url");
                 string currencyUrl = configuration.GetValue<string>("IATI:CurrencyUrl");
                 string transactionTypesUrl = configuration.GetValue<string>("IATI:TransactionTypesUrl");
+                string financeTypesUrl = configuration.GetValue<string>("IATI:FinanceTypesUrl");
                 string filePath = sWebRootFolder + "/IATISomali.xml";
                 string currenciesFilePath = sWebRootFolder + "/Currency.json";
-                string transactionTypesPath = sWebRootFolder + "/TransactionTypes.json";
+                string transactionTypesPath = sWebRootFolder + "/IATITransactionTypes.json";
+                string financeTypesPath = sWebRootFolder + "/IATIFinanceTypes.json";
                 string xml = "";
-                string json = "", transactionTypesJson = "";
+                string json = "", transactionTypesJson = "", financeTypesJson = "";
 
                 using (var client = new WebClient())
                 {
@@ -62,11 +64,15 @@ namespace AIMS.APIs.Scheduler
                 {
                     json = client.DownloadString(currencyUrl);
                 }
-                //File.WriteAllText(currenciesFilePath, json);
 
                 using (var client = new WebClient())
                 {
                     transactionTypesJson = client.DownloadString(transactionTypesUrl);
+                }
+
+                using (var client = new WebClient())
+                {
+                    financeTypesJson = client.DownloadString(financeTypesUrl);
                 }
 
                 //Save sectors to db
@@ -74,7 +80,6 @@ namespace AIMS.APIs.Scheduler
                 {
                     HttpClient httpClient = new HttpClient();
                     ExchangeRateHttpService httpService = new ExchangeRateHttpService(httpClient);
-                    //var currencyList = httpService.GetCurrencyWithNames().GetAwaiter().GetResult();
 
                     AIMSDbContext dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
                     IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
@@ -91,7 +96,10 @@ namespace AIMS.APIs.Scheduler
                         ICurrencyService currencyService = new CurrencyService(dbContext, imapper);
                         currencyService.AddMultiple(currencyList);
                     }
-                    
+                    var cleanedTTypeJson = service.ExtractTransactionTypesJson(transactionTypesJson);
+                    var cleanedFTypeJson = service.ExtractFinanceTypesJson(financeTypesJson);
+                    File.WriteAllText(transactionTypesPath, cleanedTTypeJson);
+                    File.WriteAllText(financeTypesPath, cleanedFTypeJson);
                 }
 
                 //File cleanup

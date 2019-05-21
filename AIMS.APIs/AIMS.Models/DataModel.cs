@@ -368,6 +368,7 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string BaseUrl { get; set; }
+        public string TransactionTypesJson { get; set; }
     }
 
     public class EFManualExchangeRates

@@ -19,6 +19,12 @@ namespace AIMS.IATILib.Parsers
         public string Name { get; set; }
     }
 
+    public class IATIFinanceTypes
+    {
+        public string Code { get; set; }
+        public string Name { get; set; }
+    }
+
     public class IATICountry
     {
         public string Code { get; set; }

@@ -929,6 +929,12 @@ namespace AIMS.Models
         public string Name { get; set; }
     }
 
+    public class FinanceTypes
+    {
+        public string Code { get; set; }
+        public string Name { get; set; }
+    }
+
     public class FinancialYearView
     {
         public int Id { get; set; }

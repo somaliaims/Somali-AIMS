@@ -76,6 +76,13 @@ namespace AIMS.Services
         ActionResponse ExtractAndSaveDAC5Sectors(string dataFilePath);
 
         /// <summary>
+        /// Saves transaction types
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        ActionResponse SaveTransactionTypes(string json);
+
+        /// <summary>
         /// Get activities by provided Ids
         /// </summary>
         /// <param name="IdsModel"></param>
@@ -94,6 +101,20 @@ namespace AIMS.Services
         /// <param name="keywords"></param>
         /// <returns></returns>
         ICollection<IATIActivity> GetMatchingTitleDescriptions(string keywords);
+
+        /// <summary>
+        /// Extracts json only for transaction types
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        string ExtractTransactionTypesJson(string json);
+
+        /// <summary>
+        /// Extract finance type json
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        string ExtractFinanceTypesJson(string json);
 
         /// <summary>
         /// Gets all the organizations
@@ -279,6 +300,50 @@ namespace AIMS.Services
             return await Task<ICollection<IATIActivity>>.Run(() => activityList).ConfigureAwait(false);
         }
 
+        public string ExtractTransactionTypesJson(string json)
+        {
+            string tTypeJson = null;
+            List<IATITransactionTypes> transactionTypes = new List<IATITransactionTypes>();
+            JObject jObject = JObject.Parse(json);
+            var tCodesArray = jObject["data"].ToArray();
+            if (tCodesArray.Length > 0)
+            {
+                foreach (var tCode in tCodesArray)
+                {
+                    transactionTypes.Add(new IATITransactionTypes()
+                    {
+                        Code = (string)tCode["code"],
+                        Name = (string)tCode["name"]
+                    });
+                }
+                var unitWork = new UnitOfWork(context);
+                tTypeJson = JsonConvert.SerializeObject(transactionTypes);
+            }
+            return tTypeJson;
+        }
+
+        public string ExtractFinanceTypesJson(string json)
+        {
+            string fTypeJson = null;
+            List<IATIFinanceTypes> transactionTypes = new List<IATIFinanceTypes>();
+            JObject jObject = JObject.Parse(json);
+            var tCodesArray = jObject["data"].ToArray();
+            if (tCodesArray.Length > 0)
+            {
+                foreach (var tCode in tCodesArray)
+                {
+                    transactionTypes.Add(new IATIFinanceTypes()
+                    {
+                        Code = (string)tCode["code"],
+                        Name = (string)tCode["name"]
+                    });
+                }
+                var unitWork = new UnitOfWork(context);
+                fTypeJson = JsonConvert.SerializeObject(transactionTypes);
+            }
+            return fTypeJson;
+        }
+
         public ICollection<IATIProject> GetProjects(string dataFilePath)
         {
             ICollection<IATIProject> iatiProjects = new List<IATIProject>();
@@ -376,6 +441,42 @@ namespace AIMS.Services
                 if (newIATIOrganizations.Count > 0)
                 {
                     unitWork.OrganizationRepository.InsertMultiple(newIATIOrganizations);
+                    unitWork.Save();
+                }
+            }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public ActionResponse SaveTransactionTypes(string json)
+        {
+            ActionResponse response = new ActionResponse();
+            try
+            {
+                List<IATITransactionTypes> transactionTypes = new List<IATITransactionTypes>();
+                JObject jObject = JObject.Parse(json);
+                var tCodesArray = jObject["data"].ToArray();
+                if (tCodesArray.Length > 0)
+                {
+                    foreach (var tCode in tCodesArray)
+                    {
+                        transactionTypes.Add(new IATITransactionTypes()
+                        {
+                            Code = (string)tCode["code"],
+                            Name = (string)tCode["name"]
+                        });
+                    }
+                    var unitWork = new UnitOfWork(context);
+                    string tTypeJson = JsonConvert.SerializeObject(transactionTypes);
+                    var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.Id != 0);
+                    if (iatiSettings != null)
+                    {
+                        iatiSettings.TransactionTypesJson = tTypeJson;
+                    }
                     unitWork.Save();
                 }
             }
