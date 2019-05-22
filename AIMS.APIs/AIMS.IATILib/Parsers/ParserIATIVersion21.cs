@@ -677,7 +677,13 @@ namespace AIMS.IATILib.Parsers
                         {
                             foreach (var sector in aSectors)
                             {
+                                int? sectorTypeVocabulary = null;
                                 string sectorName = "";
+                                if (sector.Attribute("vocabulary")?.Value != null)
+                                {
+                                    sectorTypeVocabulary = Convert.ToInt32(sector.Attribute("vocabulary")?.Value);
+                                }
+
                                 var setorNarrative = sector.Element("narrative");
                                 if (setorNarrative != null)
                                 {
@@ -695,6 +701,7 @@ namespace AIMS.IATILib.Parsers
                                     {
                                         sectorsList.Add(new IATISectorModel()
                                         {
+                                            SectorTypeCode = sectorTypeVocabulary,
                                             SectorName = sectorName,
                                         });
                                     }

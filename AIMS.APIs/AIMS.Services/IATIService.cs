@@ -614,9 +614,8 @@ namespace AIMS.Services
             ActionResponse response = new ActionResponse();
             ICollection<IATISectorModel> iatiSectors = new List<IATISectorModel>();
             string url = dataFilePath;
-            var sectorVocabs = JsonConvert.DeserializeObject<List<IATIFinanceTypes>>(File.ReadAllText(sectorVocabPath));
-            var codes = (from s in sectorVocabs
-                         select s.Code).ToArray<string>();
+            var sectorVocabs = JsonConvert.DeserializeObject<List<IATISectorsVocabulary>>(File.ReadAllText(sectorVocabPath));
+
             try
             {
                 XmlReader xReader = XmlReader.Create(url);
@@ -640,10 +639,12 @@ namespace AIMS.Services
                         break;
                 }
 
-                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsSourceType == true);
-                if (sectorType != null)
+                var sectorTypes = unitWork.SectorTypesRepository.GetManyQueryable(s => s.IsSourceType == true);
+                if (sectorTypes != null)
                 {
-                    var sectorsList = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == sectorType.Id);
+                    var sectorTypeIds = (from st in sectorTypes
+                                         select st.Id).ToList<int>();
+                    var sectorsList = unitWork.SectorRepository.GetManyQueryable(s => sectorTypeIds.Contains(s.SectorTypeId));
                     List<string> sectorNames = (from s in sectorsList
                                                 select s.SectorName).ToList<string>();
 
@@ -653,6 +654,28 @@ namespace AIMS.Services
                         if (sectorNames.Contains(sector.SectorName, StringComparer.OrdinalIgnoreCase) == false)
                         {
                             EFSector isSectorInList = null;
+                            var sectorType = (from s in sectorTypes
+                                              where (s.IATICode != null && s.IATICode == sector.SectorTypeCode)
+                                              select s).FirstOrDefault();
+
+                            if (sectorType == null)
+                            {
+                                var sectorVocab = (from v in sectorVocabs
+                                                   where v.Code == sector.SectorTypeCode
+                                                   select v).FirstOrDefault();
+
+                                if (sectorVocab != null)
+                                {
+                                    sectorType = unitWork.SectorTypesRepository.Insert(new EFSectorTypes()
+                                    {
+                                        IsSourceType = true,
+                                        TypeName = sectorVocab.Name,
+                                        IATICode = sectorVocab.Code
+                                    });
+                                    unitWork.Save();
+                                }
+                            }
+
                             if (newIATISectors.Count > 0)
                             {
                                 isSectorInList = (from s in newIATISectors
