@@ -76,6 +76,12 @@ namespace AIMS.IATILib.Parsers
         public string Name { get; set; }
     }
 
+    public enum FinanceDisplayType
+    {
+        Funding = 1,
+        Disbursement = 2
+    }
+
     public class IATITransaction
     {
         //public string AidType { get; set; }
@@ -84,7 +90,7 @@ namespace AIMS.IATILib.Parsers
         public string Currency { get; set; }
         public string Amount { get; set; }
         public string Dated { get; set; }
-        //public string Description { get; set; }
+        public FinanceDisplayType FinanceType { get; set; }
     }
 
     public class IATIDocument

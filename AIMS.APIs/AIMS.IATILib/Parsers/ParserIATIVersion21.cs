@@ -277,21 +277,42 @@ namespace AIMS.IATILib.Parsers
                         {
                             foreach (var transaction in transactions)
                             {
-
+                                FinanceDisplayType financeDisplayType = 0;
                                 string transactionCode = transaction.Element("transaction-type").Attribute("code")?.Value;
+                                if (transactionCode == "2" || transactionCode == "4")
+                                {
+                                    financeDisplayType = FinanceDisplayType.Funding;
+                                }
+                                else
+                                {
+                                    financeDisplayType = FinanceDisplayType.Disbursement;
+                                }
+
                                 string transactionType = (from t in transactionTypes
                                                           where t.Code.Equals(transactionCode)
                                                           select t.Name).FirstOrDefault();
 
-                                transactionsList.Add(new IATITransaction()
+                                var isTransactionExists = (from t in transactionsList
+                                                           where t.FinanceType == FinanceDisplayType.Funding && currency == t.Currency
+                                                           select t).FirstOrDefault();
+
+                                
+                                if (isTransactionExists != null)
                                 {
-                                    Id = transactionCounter,
-                                    Amount = transaction.Element("value")?.Value,
-                                    Currency = transaction.Element("value")?.Attribute("currency")?.Value,
-                                    Dated = transaction.Element("transaction-date")?.Attribute("iso-date")?.Value,
-                                    TransactionType = transactionType,
-                                });
-                                ++transactionCounter;
+                                }
+                                else
+                                {
+                                    transactionsList.Add(new IATITransaction()
+                                    {
+                                        Id = transactionCounter,
+                                        Amount = transaction.Element("value")?.Value,
+                                        Currency = transaction.Element("value")?.Attribute("currency")?.Value,
+                                        Dated = transaction.Element("transaction-date")?.Attribute("iso-date")?.Value,
+                                        TransactionType = transactionType,
+                                        FinanceType = financeDisplayType
+                                    });
+                                    ++transactionCounter;
+                                }
                             }
                         }
 
