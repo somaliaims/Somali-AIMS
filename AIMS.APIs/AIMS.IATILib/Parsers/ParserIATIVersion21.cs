@@ -281,7 +281,7 @@ namespace AIMS.IATILib.Parsers
                             {
                                 FinanceDisplayType financeDisplayType = 0;
                                 string transactionCode = transaction.Element("transaction-type").Attribute("code")?.Value;
-                                if (transactionCode == "2" || transactionCode == "4")
+                                if (transactionCode == "2" || transactionCode == "11")
                                 {
                                     financeDisplayType = FinanceDisplayType.Funding;
                                 }
@@ -295,7 +295,8 @@ namespace AIMS.IATILib.Parsers
                                                           select t.Name).FirstOrDefault();
 
                                 var isTransactionExists = (from t in transactionsList
-                                                           where t.FinanceType == FinanceDisplayType.Funding && currency == t.Currency
+                                                           where currency == t.Currency
+                                                           && t.TransactionType == transactionType
                                                            select t).FirstOrDefault();
 
                                 
@@ -305,13 +306,29 @@ namespace AIMS.IATILib.Parsers
                                     decimal amount = isTransactionExists.Amount != null ? Convert.ToDecimal(isTransactionExists.Amount) : 0;
                                     decimal newAmount = newValue != null ? Convert.ToDecimal(newValue) : 0;
                                     isTransactionExists.Amount = (amount + newAmount).ToString();
-                                    var isFundingExists = (from f in fundingTransactions
-                                                           where currency == f.Currency
-                                                           select f).FirstOrDefault();
 
-                                    if (isFundingExists != null)
+                                    if (financeDisplayType == FinanceDisplayType.Funding)
                                     {
-                                        isFundingExists.Amount = (amount + newAmount).ToString();
+                                        var isFundingExists = (from f in fundingTransactions
+                                                               where currency == f.Currency
+                                                               select f).FirstOrDefault();
+
+                                        if (isFundingExists != null)
+                                        {
+                                            isFundingExists.Amount = (amount + newAmount).ToString();
+                                        }
+                                    }
+
+                                    if (financeDisplayType == FinanceDisplayType.Disbursement)
+                                    {
+                                        var isDisbursementExists = (from f in disbursementTransactions
+                                                               where currency == f.Currency
+                                                               select f).FirstOrDefault();
+
+                                        if (isDisbursementExists != null)
+                                        {
+                                            isDisbursementExists.Amount = (amount + newAmount).ToString();
+                                        }
                                     }
                                 }
                                 else
@@ -340,7 +357,7 @@ namespace AIMS.IATILib.Parsers
                                     }
                                     else if (financeDisplayType == FinanceDisplayType.Disbursement)
                                     {
-                                        fundingTransactions.Add(new IATIFundingTransaction()
+                                        disbursementTransactions.Add(new IATIDisbursementTransaction()
                                         {
                                             Id = transactionCounter,
                                             Amount = transaction.Element("value")?.Value,

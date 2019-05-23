@@ -664,7 +664,7 @@ namespace AIMS.Services
                                                    where v.Code == sector.SectorTypeCode
                                                    select v).FirstOrDefault();
 
-                                if (sectorVocab != null && sectorVocab.Code != 99)
+                                if (sectorVocab != null && (sectorVocab.Code != 99 && sectorVocab.Code != 98))
                                 {
                                     sectorType = unitWork.SectorTypesRepository.Insert(new EFSectorTypes()
                                     {
