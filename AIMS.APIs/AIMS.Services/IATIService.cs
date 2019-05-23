@@ -664,7 +664,7 @@ namespace AIMS.Services
                                                    where v.Code == sector.SectorTypeCode
                                                    select v).FirstOrDefault();
 
-                                if (sectorVocab != null)
+                                if (sectorVocab != null && sectorVocab.Code != 99)
                                 {
                                     sectorType = unitWork.SectorTypesRepository.Insert(new EFSectorTypes()
                                     {
@@ -683,7 +683,7 @@ namespace AIMS.Services
                                                   select s).FirstOrDefault();
                             }
 
-                            if (isSectorInList == null)
+                            if (isSectorInList == null && sectorType != null)
                             {
                                 newIATISectors.Add(new EFSector()
                                 {

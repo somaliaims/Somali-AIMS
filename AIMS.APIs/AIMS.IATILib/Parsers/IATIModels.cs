@@ -93,6 +93,24 @@ namespace AIMS.IATILib.Parsers
         public FinanceDisplayType FinanceType { get; set; }
     }
 
+    public class IATIFundingTransaction
+    {
+        public int Id { get; set; }
+        public string TransactionType { get; set; }
+        public string Currency { get; set; }
+        public string Amount { get; set; }
+        public string Dated { get; set; }
+    }
+
+    public class IATIDisbursementTransaction
+    {
+        public int Id { get; set; }
+        public string TransactionType { get; set; }
+        public string Currency { get; set; }
+        public string Amount { get; set; }
+        public string Dated { get; set; }
+    }
+
     public class IATIDocument
     {
         public int Id { get; set; }
@@ -118,6 +136,8 @@ namespace AIMS.IATILib.Parsers
         public ICollection<IATIOrganization> Funders { get; set; }
         public ICollection<IATIOrganization> Implementers { get; set; }
         public ICollection<IATITransaction> Transactions { get; set; }
+        public ICollection<IATIFundingTransaction> FundingTransactions { get; set; }
+        public ICollection<IATIDisbursementTransaction> DisbursementTransactions { get; set; }
         public ICollection<IATIDocument> Documents { get; set; }
     }
 

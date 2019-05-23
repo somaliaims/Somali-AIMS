@@ -272,6 +272,8 @@ namespace AIMS.IATILib.Parsers
                         //Extracting transactions
                         var transactions = activity.Elements("transaction");
                         List<IATITransaction> transactionsList = new List<IATITransaction>();
+                        List<IATIFundingTransaction> fundingTransactions = new List<IATIFundingTransaction>();
+                        List<IATIDisbursementTransaction> disbursementTransactions = new List<IATIDisbursementTransaction>();
 
                         if (transactions != null)
                         {
@@ -299,6 +301,18 @@ namespace AIMS.IATILib.Parsers
                                 
                                 if (isTransactionExists != null)
                                 {
+                                    string newValue = transaction.Element("value")?.Value;
+                                    decimal amount = isTransactionExists.Amount != null ? Convert.ToDecimal(isTransactionExists.Amount) : 0;
+                                    decimal newAmount = newValue != null ? Convert.ToDecimal(newValue) : 0;
+                                    isTransactionExists.Amount = (amount + newAmount).ToString();
+                                    var isFundingExists = (from f in fundingTransactions
+                                                           where currency == f.Currency
+                                                           select f).FirstOrDefault();
+
+                                    if (isFundingExists != null)
+                                    {
+                                        isFundingExists.Amount = (amount + newAmount).ToString();
+                                    }
                                 }
                                 else
                                 {
@@ -312,6 +326,29 @@ namespace AIMS.IATILib.Parsers
                                         FinanceType = financeDisplayType
                                     });
                                     ++transactionCounter;
+
+                                    if (financeDisplayType == FinanceDisplayType.Funding)
+                                    {
+                                        fundingTransactions.Add(new IATIFundingTransaction()
+                                        {
+                                            Id = transactionCounter,
+                                            Amount = transaction.Element("value")?.Value,
+                                            Currency = transaction.Element("value")?.Attribute("currency")?.Value,
+                                            Dated = transaction.Element("transaction-date")?.Attribute("iso-date")?.Value,
+                                            TransactionType = transactionType,
+                                        });
+                                    }
+                                    else if (financeDisplayType == FinanceDisplayType.Disbursement)
+                                    {
+                                        fundingTransactions.Add(new IATIFundingTransaction()
+                                        {
+                                            Id = transactionCounter,
+                                            Amount = transaction.Element("value")?.Value,
+                                            Currency = transaction.Element("value")?.Attribute("currency")?.Value,
+                                            Dated = transaction.Element("transaction-date")?.Attribute("iso-date")?.Value,
+                                            TransactionType = transactionType,
+                                        });
+                                    }
                                 }
                             }
                         }
@@ -553,6 +590,8 @@ namespace AIMS.IATILib.Parsers
                                 DefaultCurrency = currency,
                                 DefaultFinanceType = defaultFinanceType,
                                 Transactions = transactionsList,
+                                FundingTransactions = fundingTransactions,
+                                DisbursementTransactions = disbursementTransactions,
                                 Funders = funders,
                                 Implementers = implementers
                             });
@@ -702,7 +741,12 @@ namespace AIMS.IATILib.Parsers
                                 string sectorName = "";
                                 if (sector.Attribute("vocabulary")?.Value != null)
                                 {
-                                    sectorTypeVocabulary = Convert.ToInt32(sector.Attribute("vocabulary")?.Value);
+                                    int sectorVocabCode = 0;
+                                    int.TryParse(sector.Attribute("vocabulary")?.Value, out sectorVocabCode);
+                                    if (sectorVocabCode != 0)
+                                    {
+                                        sectorTypeVocabulary = sectorVocabCode;
+                                    }
                                 }
 
                                 var setorNarrative = sector.Element("narrative");
