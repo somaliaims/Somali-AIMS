@@ -28,7 +28,8 @@ namespace AIMS.Models
         NewIATIToProject = 3,
         UserInactive = 4,
         ChangedMappingEffectedProject = 5,
-        NewIATISector = 6
+        NewIATISector = 6,
+        OrganizationMerged = 7
     }
 
     public enum EmailMessageType
@@ -37,7 +38,8 @@ namespace AIMS.Models
         NewProjectToOrg = 2,
         UserInactive = 3,
         ChangedMappingEffectedProject = 4,
-        NewIATISector = 5
+        NewIATISector = 5,
+        OrganizationMerged = 6
     }
 
     public enum DataTransactions

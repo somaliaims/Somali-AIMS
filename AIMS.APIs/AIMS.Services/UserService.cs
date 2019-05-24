@@ -407,7 +407,6 @@ namespace AIMS.Services
                         }
                         IEmailHelper emailHelper = new EmailHelper(adminEmail, smtpSettingsModel);
                         emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, message);
-                        mHelper = new MessageHelper();
                     }
                     response.ReturnedId = newUser.Id;
                 }
