@@ -383,6 +383,7 @@ namespace AIMS.Services
                             smtpSettingsModel.Port = smtpSettings.Port;
                             smtpSettingsModel.Username = smtpSettings.Username;
                             smtpSettingsModel.Password = smtpSettings.Password;
+                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                         }
 
                         mHelper = new MessageHelper();

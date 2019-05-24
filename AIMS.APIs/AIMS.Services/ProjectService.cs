@@ -957,8 +957,24 @@ namespace AIMS.Services
                             }
                             await unitWork.SaveAsync();
                             response.ReturnedId = newProject.Id;
-
                             transaction.Commit();
+
+                            ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                            var smtpSettings = smtpService.GetPrivate();
+                            SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                            if (smtpSettings != null)
+                            {
+                                smtpSettingsModel.Host = smtpSettings.Host;
+                                smtpSettingsModel.Port = smtpSettings.Port;
+                                smtpSettingsModel.Username = smtpSettings.Username;
+                                smtpSettingsModel.Password = smtpSettings.Password;
+                            }
+                            string message = "";
+                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewProjectToOrg);
+                            if (emailMessage != null)
+                            {
+                                message = emailMessage.Message;
+                            }
                         }
                     });
                 }

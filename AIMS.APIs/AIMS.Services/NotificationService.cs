@@ -174,6 +174,7 @@ namespace AIMS.Services
                         smtpSettingsModel.Port = smtpSettings.Port;
                         smtpSettingsModel.Username = smtpSettings.Username;
                         smtpSettingsModel.Password = smtpSettings.Password;
+                        smtpSettings.AdminEmail = smtpSettings.AdminEmail;
                     }
 
                     IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
@@ -191,6 +192,8 @@ namespace AIMS.Services
 
                     if (emailAddresses.Count > 0)
                     {
+                        IMessageHelper mHelper = new MessageHelper();
+                        message += mHelper.NewIATISectorsAdded(newSectors);
                         emailHelper.SendEmailToUsers(emailAddresses, "New IATI Sectors", "New IATI Sectors", message);
                     }
                 }

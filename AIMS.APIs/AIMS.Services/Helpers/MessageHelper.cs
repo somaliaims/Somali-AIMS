@@ -140,6 +140,44 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string GetInvalidDeletionAttemptSectorType();
+
+        /// <summary>
+        /// Formats tail of the dynamic message
+        /// </summary>
+        /// <param name="organization"></param>
+        /// <returns></returns>
+        string ProjectToOrganizationMessage(string organization);
+
+        /// <summary>
+        /// Formats new user registration message
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        string NewUserRegisteredMessage(string email);
+
+        /// <summary>
+        /// Formats new iati sectors added message
+        /// </summary>
+        /// <param name="sectorCount"></param>
+        /// <returns></returns>
+        string NewIATISectorsAddedMessage(string sectorCount);
+
+        /// <summary>
+        /// Formats merged organizations message
+        /// </summary>
+        /// <param name="organizations"></param>
+        /// <param name="newOrganization"></param>
+        /// <returns></returns>
+        string OrganizationsMergedMessage(List<string> organizations, string newOrganization);
+
+        /// <summary>
+        /// Formats sector mapping changed message
+        /// </summary>
+        /// <param name="affectedProjects"></param>
+        /// <param name="oldSector"></param>
+        /// <param name="newSector"></param>
+        /// <returns></returns>
+        string ChangedMappingAffectedProjectsMessage(List<string> affectedProjects, string oldSector, string newSector);
     }
 
     public class MessageHelper : IMessageHelper
@@ -261,6 +299,48 @@ namespace AIMS.Services.Helpers
         public string GetInvalidDeletionAttemptSectorType()
         {
             return (INVALID_SECTOR_TYPE_DELETION);
+        }
+
+        public string ProjectToOrganizationMessage(string organization)
+        {
+            return ("<h4>Organization name</h4><p>" + organization  + "</p>");
+        }
+
+        public string NewUserRegisteredMessage(string email)
+        {
+            return ("<h4>User email address</h4><p>" + email + "</p>");
+        }
+
+        public string NewIATISectorsAddedMessage(string sectorCount)
+        {
+            return (sectorCount + " new sectors added from IATI");
+        }
+        
+        public string OrganizationsMergedMessage(List<string> organizations, string newOrganization)
+        {
+            List<string> formattedMessageList = new List<string>();
+            formattedMessageList.Add("<h4>Organizations merged</h4><ul>");
+            foreach(var org in organizations)
+            {
+                formattedMessageList.Add("<li>" + org + "</li>");
+            }
+            formattedMessageList.Add("</ul>");
+            formattedMessageList.Add("<h4>New organization</h4><p>" + newOrganization + "</p>");
+            return (String.Join("", formattedMessageList));
+        }
+        
+        public string ChangedMappingAffectedProjectsMessage(List<string> affectedProjects, string oldSector, string newSector)
+        {
+            List<string> formattedMessageList = new List<string>();
+            formattedMessageList.Add("<h4>Organizations merged</h4><ul>");
+            foreach (var project in affectedProjects)
+            {
+                formattedMessageList.Add("<li>" + project + "</li>");
+            }
+            formattedMessageList.Add("</ul>");
+            formattedMessageList.Add("<h4>Old sector</h4><p>" + oldSector + "</p>");
+            formattedMessageList.Add("<h4>New sector</h4><p>" + newSector + "</p>");
+            return (String.Join("", formattedMessageList));
         }
     }
 }
