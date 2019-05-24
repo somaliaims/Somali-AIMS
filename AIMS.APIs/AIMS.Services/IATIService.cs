@@ -472,6 +472,7 @@ namespace AIMS.Services
                 {
                     unitWork.OrganizationRepository.InsertMultiple(newIATIOrganizations);
                     unitWork.Save();
+                    response.ReturnedId = newIATIOrganizations.Count;
                 }
             }
             catch(Exception ex)
@@ -597,6 +598,7 @@ namespace AIMS.Services
                 {
                     unitWork.LocationRepository.InsertMultiple(newIATILocations);
                     unitWork.Save();
+                    response.ReturnedId = newIATILocations.Count;
                 }
             }
             catch (Exception ex)
@@ -699,7 +701,7 @@ namespace AIMS.Services
                     {
                         unitWork.SectorRepository.InsertMultiple(newIATISectors);
                         unitWork.Save();
-
+                        response.ReturnedId = newIATISectors.Count;
                         /*IMessageHelper mHelper = new MessageHelper();
                         unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                         {

@@ -3,6 +3,7 @@ using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -44,6 +45,12 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <returns></returns>
         ActionResponse Add(NotificationModel model);
+
+        /// <summary>
+        /// Sends notifications for new data, organizations, sectors
+        /// </summary>
+        /// <returns></returns>
+        ActionResponse SendNotificationsForNewSectors(int newSectors);
 
         /// <summary>
         /// Sets notifications as read
@@ -124,6 +131,69 @@ namespace AIMS.Services
                     NotificationType = model.NotificationType
                 });
                 unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse SendNotificationsForNewSectors(int newSectors)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var messages = unitWork.EmailMessagesRepository.GetAll();
+
+                if (newSectors > 0)
+                {
+                    string message = "";
+                    var emailMessage = (from m in messages
+                                      where m.MessageType == EmailMessageType.NewIATISector
+                                      select m).FirstOrDefault();
+                    if (emailMessage != null)
+                    {
+                        message = emailMessage.Message;
+                    }
+
+                    unitWork.NotificationsRepository.Insert(new EFUserNotifications()
+                    {
+                        Message = message,
+                        NotificationType = NotificationTypes.NewIATISector,
+                        Dated = DateTime.Now,
+                        IsSeen = false,
+                        OrganizationId = 0,
+                        TreatmentId = 0,
+                        UserType = UserTypes.Manager
+                    });
+                    unitWork.Save();
+
+                    ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                    var smtpSettings = smtpService.GetPrivate();
+                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                    if (smtpSettings != null)
+                    {
+                        smtpSettingsModel.Host = smtpSettings.Host;
+                        smtpSettingsModel.Port = smtpSettings.Port;
+                        smtpSettingsModel.Username = smtpSettings.Username;
+                        smtpSettingsModel.Password = smtpSettings.Password;
+                    }
+
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
+                    var users = unitWork.UserRepository.GetManyQueryable(u => u.UserType == UserTypes.Manager);
+                    var emails = (from u in users
+                                  select u.Email);
+                    List<EmailAddress> emailAddresses = new List<EmailAddress>();
+                    foreach(var email in emails)
+                    {
+                        emailAddresses.Add(new EmailAddress()
+                        {
+                            Email = email
+                        });
+                    }
+
+                    if (emailAddresses.Count > 0)
+                    {
+                        emailHelper.SendEmailToUsers(emailAddresses, "New IATI Sectors", "New IATI Sectors", message);
+                    }
+                }
                 return response;
             }
         }

@@ -89,7 +89,8 @@ namespace AIMS.APIs.Scheduler
 
                     AIMSDbContext dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
                     IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                    UserService userService = new UserService(dbContext, imapper);
+                    IUserService userService = new UserService(dbContext, imapper);
+                    INotificationService notificationService = new NotificationService(dbContext, imapper);
                     IATIService service = new IATIService(dbContext);
 
                     var cleanedTTypeJson = service.ExtractTransactionTypesJson(transactionTypesJson);
@@ -100,9 +101,10 @@ namespace AIMS.APIs.Scheduler
                     File.WriteAllText(sectorsVocabPath, cleanedSectorVocabJson);
 
                     userService.SetNotificationsForUsers();
-                    service.ExtractAndSaveIATISectors(filePath, sectorsVocabPath);
+                    var sectorResponse = service.ExtractAndSaveIATISectors(filePath, sectorsVocabPath);
                     service.ExtractAndSaveLocations(filePath);
                     service.ExtractAndSaveOrganizations(filePath);
+                    notificationService.SendNotificationsForNewSectors(sectorResponse.ReturnedId);
 
                     var currencyList = httpService.ParseAndExtractCurrencyList(json);
                     if (currencyList.Count > 0)
@@ -110,6 +112,7 @@ namespace AIMS.APIs.Scheduler
                         ICurrencyService currencyService = new CurrencyService(dbContext, imapper);
                         currencyService.AddMultiple(currencyList);
                     }
+
                 }
 
                 //File cleanup

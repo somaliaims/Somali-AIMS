@@ -384,8 +384,9 @@ namespace AIMS.Services
                             smtpSettingsModel.Username = smtpSettings.Username;
                             smtpSettingsModel.Password = smtpSettings.Password;
                         }
-                        /*string notificationMessage = mHelper.NewUserForOrganization(organization.OrganizationName);
 
+                        mHelper = new MessageHelper();
+                        string notificationMessage = mHelper.NewUserForOrganization(organization.OrganizationName);
                         //Add notification
                         unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                         {
@@ -396,7 +397,7 @@ namespace AIMS.Services
                             Dated = DateTime.Now,
                             IsSeen = false,
                             NotificationType = NotificationTypes.NewUser
-                        });*/
+                        });
                         unitWork.Save();
 
                         string message = "";
