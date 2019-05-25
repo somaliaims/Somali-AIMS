@@ -391,7 +391,7 @@ namespace AIMS.Services
                         //Add notification
                         unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                         {
-                            UserType = model.UserType,
+                            UserType = UserTypes.Standard,
                             Organization = organization,
                             Message = notificationMessage,
                             TreatmentId = newUser.Id,

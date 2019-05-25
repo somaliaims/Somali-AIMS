@@ -82,7 +82,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin));
+                var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin || uType == UserTypes.Manager));
                 return mapper.Map<List<NotificationView>>(notifications);
             }
         }
@@ -100,7 +100,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var count = unitWork.NotificationsRepository.GetProjectionCount(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin), n => n.Id);
+                var count = unitWork.NotificationsRepository.GetProjectionCount(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin || uType == UserTypes.Manager), n => n.Id);
                 return count;
             }
         }

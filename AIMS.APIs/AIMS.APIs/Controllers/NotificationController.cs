@@ -36,10 +36,11 @@ namespace AIMS.APIs.Controllers
                 return Ok("[]");
             }
 
+            IEnumerable<NotificationView> notifications;
             UserTypes userType = (UserTypes)Convert.ToInt32(userTypeVal);
             int organizationId = Convert.ToInt32(organizationIdVal);
             int userId = Convert.ToInt32(userIdVal);
-            var notifications = notificationService.Get(userId, userType, organizationId);
+            notifications = notificationService.Get(userId, userType, organizationId);
             return Ok(notifications);
         }
 
