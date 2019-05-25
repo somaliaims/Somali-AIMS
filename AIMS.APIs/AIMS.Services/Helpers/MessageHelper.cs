@@ -227,12 +227,12 @@ namespace AIMS.Services.Helpers
 
         public string NewUserForOrganization(string organization)
         {
-            return ("Organization name: " +  organization);
+            return ("<p>Organization name: " +  organization + "</p>");
         }
 
         public string NewIATISectorsAdded(int sectorCount)
         {
-            return (sectorCount + " new IATI sectors added.");
+            return ("<p>" + sectorCount + " new IATI sectors added.</p>");
         }
 
         public string EmailNotFound(string email)
@@ -282,13 +282,13 @@ namespace AIMS.Services.Helpers
 
         public string OrganizationAsFunderMessage(string organization, string projectTitle)
         {
-            return ("You organization (" + organization + ") has been added as a funder into a project (" + projectTitle + ")" );
+            return ("<p>You organization (" + organization + ") has been added as a funder into a project (" + projectTitle + ") </p>" );
         }
 
         public string InactiveUserMessage(string email, string organization)
         {
-            return ("The user having (" + email + ") which is registered with your organization (" 
-                + organization + ") is inactive since an year and will be deleted soon.");
+            return ("<p>The user having (" + email + ") which is registered with your organization (" 
+                + organization + ") is inactive since an year and will be deleted soon.</p>");
         }
 
         public string GetInvalidOptionsMessage()
@@ -313,7 +313,7 @@ namespace AIMS.Services.Helpers
 
         public string NewIATISectorsAddedMessage(string sectorCount)
         {
-            return (sectorCount + " new sectors added from IATI");
+            return ("<p>" + sectorCount + " new sectors added from IATI</p>");
         }
         
         public string OrganizationsMergedMessage(List<string> organizations, string newOrganization)

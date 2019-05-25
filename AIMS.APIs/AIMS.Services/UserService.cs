@@ -386,27 +386,27 @@ namespace AIMS.Services
                             smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                         }
 
-                        mHelper = new MessageHelper();
-                        string notificationMessage = mHelper.NewUserForOrganization(organization.OrganizationName);
-                        //Add notification
-                        unitWork.NotificationsRepository.Insert(new EFUserNotifications()
-                        {
-                            UserType = UserTypes.Standard,
-                            Organization = organization,
-                            Message = notificationMessage,
-                            TreatmentId = newUser.Id,
-                            Dated = DateTime.Now,
-                            IsSeen = false,
-                            NotificationType = NotificationTypes.NewUser
-                        });
-                        unitWork.Save();
-
                         string message = "";
                         var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewUser);
                         if (emailMessage != null)
                         {
                             message = emailMessage.Message;
                         }
+
+                        mHelper = new MessageHelper();
+                        message += mHelper.NewUserForOrganization(organization.OrganizationName);
+                        //Add notification
+                        /*unitWork.NotificationsRepository.Insert(new EFUserNotifications()
+                        {
+                            UserType = UserTypes.Standard,
+                            Organization = organization,
+                            Message = message,
+                            TreatmentId = newUser.Id,
+                            Dated = DateTime.Now,
+                            IsSeen = false,
+                            NotificationType = NotificationTypes.NewUser
+                        });*/
+                        //unitWork.Save();
                         IEmailHelper emailHelper = new EmailHelper(adminEmail, smtpSettingsModel);
                         emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, message);
                     }

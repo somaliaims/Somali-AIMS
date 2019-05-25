@@ -396,7 +396,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 EFSector sector = null;
-
+                EFSector newSector = null;
                 var sectors = await unitWork.SectorRepository.GetManyQueryableAsync(s => (s.Id == id || s.Id == newId));
                 if (sectors.Count() < 2 && newId != 0)
                 {
@@ -407,6 +407,9 @@ namespace AIMS.Services
                 }
 
                 var projectSectors = await unitWork.ProjectSectorsRepository.GetManyQueryableAsync(s => (s.SectorId == id || s.SectorId == newId));
+                var projectIds = (from s in projectSectors
+                                  select s.ProjectId).Distinct().ToList<int>();
+
                 var sectorsInDb = (from s in projectSectors
                                    select new SectorsKeyView()
                                    {
@@ -420,6 +423,14 @@ namespace AIMS.Services
                 sector = (from s in sectors
                           where s.Id == id
                           select s).FirstOrDefault();
+
+                newSector = (from s in sectors
+                             where s.Id == newId
+                             select s).FirstOrDefault();
+
+                var projects = unitWork.ProjectRepository.GetManyQueryable(p => projectIds.Contains(p.Id));
+                List<string> projectNames = (from p in projects
+                                             select p.Title).ToList<string>();
                 try
                 {
                     var strategy = context.Database.CreateExecutionStrategy();
@@ -461,6 +472,48 @@ namespace AIMS.Services
                             }
                             await unitWork.SaveAsync();
                             transaction.Commit();
+
+                            if (projectNames.Count > 0)
+                            {
+                                var users = unitWork.UserRepository.GetManyQueryable(u => u.UserType == UserTypes.Manager);
+                                List<EmailAddress> emailAddresses = new List<EmailAddress>();
+                                foreach(var user in users)
+                                {
+                                    emailAddresses.Add(new EmailAddress()
+                                    {
+                                        Email = user.Email
+                                    });
+                                }
+
+                                if (emailAddresses.Count > 0)
+                                {
+                                    ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                                    var smtpSettings = smtpService.GetPrivate();
+                                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                                    if (smtpSettings != null)
+                                    {
+                                        smtpSettingsModel.Host = smtpSettings.Host;
+                                        smtpSettingsModel.Port = smtpSettings.Port;
+                                        smtpSettingsModel.Username = smtpSettings.Username;
+                                        smtpSettingsModel.Password = smtpSettings.Password;
+                                        smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                                    }
+
+                                    string message = "";
+                                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ChangedMappingEffectedProject);
+                                    if (emailMessage != null)
+                                    {
+                                        message = emailMessage.Message;
+                                    }
+
+                                    mHelper = new MessageHelper();
+                                    string oldSectorName = sector != null ? sector.SectorName : null;
+                                    string newSectorName = newSector != null ? newSector.SectorName : null;
+                                    message += mHelper.ChangedMappingAffectedProjectsMessage(projectNames, oldSectorName, newSectorName);
+                                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                                    emailHelper.SendEmailToUsers(emailAddresses, "Sector mapping changed", "Sector mapping changed", message);
+                                }
+                            }
                         }
                     });
                 }

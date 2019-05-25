@@ -303,14 +303,21 @@ namespace AIMS.Services
                         {
                             unitWork.OrganizationRepository.Delete(organization);
                         }
-
                         unitWork.Save();
 
+                        string message = "";
+                        if (emailMessage != null)
+                        {
+                            message = emailMessage.Message;
+                        }
+
+                        mHelper = new MessageHelper();
+                        message = mHelper.OrganizationsMergedMessage(organizationNames, newOrganization.OrganizationName);
                         //Send notifications and email
                         unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                         {
                             NotificationType = NotificationTypes.OrganizationMerged,
-                            Message = "",
+                            Message = message,
                             Dated = DateTime.Now,
                             OrganizationId = newOrganization.Id,
                             IsSeen = false,
@@ -344,7 +351,7 @@ namespace AIMS.Services
                                 });
                             }
                             IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
-                            emailHelper.SendEmailToUsers(emailAddresses, emailMessage.TypeDefinition, "Organization merged", emailMessage.Message);
+                            emailHelper.SendEmailToUsers(emailAddresses, "Organizations merged", "Organizations merged", message);
                         }
                         
                         

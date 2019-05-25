@@ -1190,7 +1190,7 @@ namespace AIMS.Services
                     unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
                     
-                    unitWork.NotificationsRepository.Insert(new EFUserNotifications()
+                   /*unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                     {
                         UserType = UserTypes.Standard,
                         Message = mHelper.OrganizationAsFunderMessage(funder.OrganizationName, project.Title),
@@ -1198,7 +1198,7 @@ namespace AIMS.Services
                         Dated = DateTime.Now,
                         TreatmentId = 0,
                         NotificationType = NotificationTypes.NewProjectToOrg
-                    });
+                    });*/
 
                 }
                 catch (Exception ex)
