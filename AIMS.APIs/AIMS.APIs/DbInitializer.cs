@@ -88,7 +88,7 @@ namespace AIMS.APIs
                 {
                     context.SMTPSettings.Add(new EFSMTPSettings()
                     {
-                        AdminEmail = "admin@aims.org",
+                        AdminEmail = "raashid.ahmad@gmail.com",
                         Host = "smtp.gmail.com",
                         Port = 587,
                         Username = "aims.developer18@gmail.com",

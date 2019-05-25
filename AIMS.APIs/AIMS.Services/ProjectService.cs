@@ -959,7 +959,7 @@ namespace AIMS.Services
                             response.ReturnedId = newProject.Id;
                             transaction.Commit();
 
-                            ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                            /*ISMTPSettingsService smtpService = new SMTPSettingsService(context);
                             var smtpSettings = smtpService.GetPrivate();
                             SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
                             if (smtpSettings != null)
@@ -969,12 +969,16 @@ namespace AIMS.Services
                                 smtpSettingsModel.Username = smtpSettings.Username;
                                 smtpSettingsModel.Password = smtpSettings.Password;
                             }
+
                             string message = "";
                             var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewProjectToOrg);
                             if (emailMessage != null)
                             {
                                 message = emailMessage.Message;
                             }
+
+                            IMessageHelper mHelper = new MessageHelper();
+                            message += mHelper.ProjectToOrganizationMessage(org);*/
                         }
                     });
                 }
@@ -1145,8 +1149,43 @@ namespace AIMS.Services
                             ExchangeRate = model.ExchangeRate,
                             Dated = model.Dated
                         });
+
+                        var users = unitWork.UserRepository.GetManyQueryable(u => u.OrganizationId == userOrganizationId);
+                        List<EmailAddress> emailAddresses = new List<EmailAddress>();
+
+                        foreach(var user in users)
+                        {
+                            emailAddresses.Add(new EmailAddress()
+                            {
+                                Email = user.Email
+                            });
+                        }
+
+                        if (emailAddresses.Count > 0)
+                        {
+                            ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                            var smtpSettings = smtpService.GetPrivate();
+                            SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                            if (smtpSettings != null)
+                            {
+                                smtpSettingsModel.Host = smtpSettings.Host;
+                                smtpSettingsModel.Port = smtpSettings.Port;
+                                smtpSettingsModel.Username = smtpSettings.Username;
+                                smtpSettingsModel.Password = smtpSettings.Password;
+                                smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                            }
+
+                            string message = "";
+                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewProjectToOrg);
+                            if (emailMessage != null)
+                            {
+                                message = emailMessage.Message;
+                            }
+                            message += mHelper.ProjectToOrganizationMessage(funder.OrganizationName);
+                            IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                            emailHelper.SendEmailToUsers(emailAddresses, "New project", "New project for " + funder.OrganizationName, message);
+                        }
                     }
-                    
                     project.DateUpdated = DateTime.Now;
                     unitWork.ProjectRepository.Update(project);
                     unitWork.Save();

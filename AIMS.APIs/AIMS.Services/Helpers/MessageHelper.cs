@@ -227,12 +227,12 @@ namespace AIMS.Services.Helpers
 
         public string NewUserForOrganization(string organization)
         {
-            return ("A new user has submitted the request to register for the organization " +  organization);
+            return ("Organization name: " +  organization);
         }
 
         public string NewIATISectorsAdded(int sectorCount)
         {
-            return (sectorCount + " new IATI sectors loaded into the database. Please do mappings for new sectors if required");
+            return (sectorCount + " new IATI sectors added.");
         }
 
         public string EmailNotFound(string email)

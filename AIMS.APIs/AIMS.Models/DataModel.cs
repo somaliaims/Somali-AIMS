@@ -272,7 +272,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public UserTypes UserType { get; set; }
         [ForeignKey("Organization")]
-        public int OrganizationId { get; set; }
+        public int? OrganizationId { get; set; }
         public int TreatmentId { get; set; }
         public EFOrganization Organization { get; set; }
         public string Message { get; set; }
