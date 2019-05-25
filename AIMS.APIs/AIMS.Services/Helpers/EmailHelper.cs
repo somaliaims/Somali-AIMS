@@ -139,7 +139,7 @@ namespace AIMS.Services.Helpers
         {
             List<string> messageList = new List<string>();
             messageList.Add("<h2>" + title + "</h2>");
-            messageList.Add("<p>" + message + "</p>");
+            messageList.Add(message);
             return (String.Join(string.Empty, messageList));
         }
 

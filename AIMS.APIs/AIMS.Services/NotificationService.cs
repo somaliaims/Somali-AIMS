@@ -137,8 +137,7 @@ namespace AIMS.Services
 
         public ActionResponse SendNotificationsForNewSectors(int newSectors)
         {
-            using (var unitWork = new UnitOfWork(context))
-            {
+            var unitWork = new UnitOfWork(context);
                 ActionResponse response = new ActionResponse();
                 var messages = unitWork.EmailMessagesRepository.GetAll();
 
@@ -152,8 +151,6 @@ namespace AIMS.Services
                     {
                         message = emailMessage.Message;
                     }
-
-                    
 
                     ISMTPSettingsService smtpService = new SMTPSettingsService(context);
                     var smtpSettings = smtpService.GetPrivate();
@@ -187,7 +184,7 @@ namespace AIMS.Services
                         emailHelper.SendEmailToUsers(emailAddresses, "New IATI Sectors", "New IATI Sectors", message);
                     }
 
-                    unitWork.NotificationsRepository.Insert(new EFUserNotifications()
+                    /*unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                     {
                         Message = message,
                         NotificationType = NotificationTypes.NewIATISector,
@@ -197,10 +194,9 @@ namespace AIMS.Services
                         TreatmentId = 0,
                         UserType = UserTypes.Manager
                     });
-                    unitWork.Save();
+                    unitWork.Save();*/
                 }
                 return response;
-            }
         }
 
         public async Task<ActionResponse> MarkNotificationsReadAsync(NotificationUpdateModel model)
