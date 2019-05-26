@@ -246,11 +246,10 @@ namespace AIMS.Services
                         });
                         unitWork.Save();
 
-                        List<string> emailsList = (from u in users
-                                                   select u.Email).ToList<string>();
-
+                        List<string> emailsList = new List<string>();
                         foreach (var user in users)
                         {
+                            emailsList.Add(user.Email);
                             user.Organization = newOrganization;
                             unitWork.UserRepository.Update(user);
                             unitWork.Save();
@@ -321,7 +320,7 @@ namespace AIMS.Services
                         }
 
                         mHelper = new MessageHelper();
-                        message = mHelper.OrganizationsMergedMessage(organizationNames, newOrganization.OrganizationName);
+                        message += mHelper.OrganizationsMergedMessage(organizationNames, newOrganization.OrganizationName);
                         //Send notifications and email
                         /*unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                         {
@@ -344,6 +343,7 @@ namespace AIMS.Services
                             smtpSettingsModel.Port = smtpSettings.Port;
                             smtpSettingsModel.Username = smtpSettings.Username;
                             smtpSettingsModel.Password = smtpSettings.Password;
+                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                         }
 
                         transaction.Commit();
