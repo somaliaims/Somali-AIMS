@@ -323,7 +323,7 @@ namespace AIMS.Services
                         mHelper = new MessageHelper();
                         message = mHelper.OrganizationsMergedMessage(organizationNames, newOrganization.OrganizationName);
                         //Send notifications and email
-                        unitWork.NotificationsRepository.Insert(new EFUserNotifications()
+                        /*unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                         {
                             NotificationType = NotificationTypes.OrganizationMerged,
                             Message = message,
@@ -332,7 +332,7 @@ namespace AIMS.Services
                             IsSeen = false,
                             TreatmentId = 0,
                         });
-                        unitWork.Save();
+                        unitWork.Save();*/
 
                         //Send email
                         ISMTPSettingsService smtpService = new SMTPSettingsService(context);
