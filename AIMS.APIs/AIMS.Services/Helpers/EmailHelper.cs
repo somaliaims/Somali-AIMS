@@ -113,13 +113,14 @@ namespace AIMS.Services.Helpers
             ActionResponse response = new ActionResponse();
             try
             {
-                MailMessage mailMessage = new MailMessage();
                 var emailAddresses = (from e in emailsList
                                       select e.Email);
+                var emailAddressString = string.Join(',', emailAddresses);
 
+                MailMessage mailMessage = new MailMessage();
                 foreach (var emailAddress in emailAddresses)
                 {
-                    mailMessage.To.Add(emailAddress);
+                    mailMessage.To.Add(new MailAddress(emailAddress));
                 }
                 mailMessage.IsBodyHtml = true;
                 mailMessage.From = new MailAddress(this.emailFrom);
