@@ -882,6 +882,7 @@ namespace AIMS.Models
         public string Message { get; set; }
         public int TreatmentId { get; set; }
         public string Dated { get; set; }
+        public string Organization { get; set; }
         public NotificationTypes NotificationType { get; set; }
     }
 

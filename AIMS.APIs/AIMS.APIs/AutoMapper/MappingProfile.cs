@@ -29,7 +29,8 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(u => u.OrganizationId, opts => opts.MapFrom(source => source.Organization.Id));
 
             CreateMap<EFUserNotifications, NotificationView>()
-                .ForMember(n => n.Dated, opts => opts.MapFrom(source => source.Dated.ToShortDateString()));
+                .ForMember(n => n.Dated, opts => opts.MapFrom(source => source.Dated.ToShortDateString()))
+                .ForMember(n => n.Organization, opts => opts.MapFrom(source => source.Organization.OrganizationName));
 
             CreateMap<EFLocation, LocationView>().ReverseMap();
 

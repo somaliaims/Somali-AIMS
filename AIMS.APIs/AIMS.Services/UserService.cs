@@ -394,7 +394,6 @@ namespace AIMS.Services
                         }
 
                         mHelper = new MessageHelper();
-                        message += mHelper.NewUserForOrganization(organization.OrganizationName);
                         //Add notification
                         unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                         {
@@ -407,6 +406,8 @@ namespace AIMS.Services
                             NotificationType = NotificationTypes.NewUser
                         });
                         unitWork.Save();
+
+                        message += mHelper.NewUserForOrganization(organization.OrganizationName);
                         IEmailHelper emailHelper = new EmailHelper(adminEmail, smtpSettingsModel);
                         emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, message);
                     }

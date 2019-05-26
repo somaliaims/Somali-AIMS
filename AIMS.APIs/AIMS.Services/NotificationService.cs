@@ -82,7 +82,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin || uType == UserTypes.Manager));
+                var notifications = unitWork.NotificationsRepository.GetWithInclude(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin || uType == UserTypes.Manager), new string[] { "Organization" });
                 return mapper.Map<List<NotificationView>>(notifications);
             }
         }
@@ -91,7 +91,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => (n.UserType == UserTypes.Manager));
+                var notifications = unitWork.NotificationsRepository.GetWithInclude(n => (n.UserType == UserTypes.Manager), new string[] { "Organization" });
                 return mapper.Map<List<NotificationView>>(notifications);
             }
         }

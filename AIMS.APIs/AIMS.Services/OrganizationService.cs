@@ -253,8 +253,8 @@ namespace AIMS.Services
                         {
                             user.Organization = newOrganization;
                             unitWork.UserRepository.Update(user);
+                            unitWork.Save();
                         }
-                        unitWork.Save();
 
                         var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => orgIds.Contains(f.FunderId));
                         List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
@@ -299,11 +299,20 @@ namespace AIMS.Services
                             unitWork.Save();
                         }
 
+                        //Update notifications
+                        var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => n.OrganizationId != null && orgIds.Contains((int)n.OrganizationId));
+                        foreach (var notification in notifications)
+                        {
+                            notification.OrganizationId = newOrganization.Id;
+                            unitWork.NotificationsRepository.Update(notification);
+                            unitWork.Save();
+                        }
+
                         foreach (var organization in organizations)
                         {
                             unitWork.OrganizationRepository.Delete(organization);
+                            unitWork.Save();
                         }
-                        unitWork.Save();
 
                         string message = "";
                         if (emailMessage != null)
