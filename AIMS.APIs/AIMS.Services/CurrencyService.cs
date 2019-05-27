@@ -231,7 +231,8 @@ namespace AIMS.Services
                             Currency = model.Currency,
                             CurrencyName = model.CurrencyName,
                             IsDefault = model.IsDefault,
-                            IsNational = model.IsNational
+                            IsNational = model.IsNational,
+                            Source = CurrencySource.Manual
                         });
                         unitWork.Save();
                         response.ReturnedId = newCurrency.Id;
@@ -266,7 +267,8 @@ namespace AIMS.Services
                         newCurrenciesList.Add(new EFCurrency()
                         {
                             Currency = currency.Code,
-                            CurrencyName = currency.Currency
+                            CurrencyName = currency.Currency,
+                            Source = CurrencySource.OpenExchange
                         });
                     }
                 }

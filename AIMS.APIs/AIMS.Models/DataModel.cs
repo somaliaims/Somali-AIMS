@@ -21,6 +21,12 @@ namespace AIMS.Models
         Radio = 4
     }
 
+    public enum CurrencySource
+    {
+        OpenExchange = 1,
+        Manual = 2
+    }
+
     public enum NotificationTypes
     {
         NewUser = 1,
@@ -310,6 +316,8 @@ namespace AIMS.Models
         public string CurrencyName { get; set; } = null;
         public bool IsDefault { get; set; }
         public bool IsNational { get; set; } = false;
+        public CurrencySource? Source { get; set; } = CurrencySource.OpenExchange;
+
     }
 
     public class EFExchangeRates
@@ -391,6 +399,7 @@ namespace AIMS.Models
         public bool IsAutomatic { get; set; }
         public string APIKeyOpenExchangeRates { get; set; }
         public string ManualExchangeRates { get; set; }
+        public string ManualExchangeRateSource { get; set; } = null;
     }
 
     public class EFEmailMessages

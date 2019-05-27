@@ -142,5 +142,22 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(true);
         }
+
+        [HttpPost]
+        [Route("SetLabelForManualExRates")]
+        public IActionResult SetLabelForManualExRates([FromBody] ManualExRateSourceModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = ratesService.SetLabelForManualExRates(model.Label);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
     }
 }

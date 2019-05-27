@@ -35,6 +35,13 @@ namespace AIMS.Services
         ActionResponse SetAPIKeyForOpenExchange(string key);
 
         /// <summary>
+        /// Sets label for manual ex rate source
+        /// </summary>
+        /// <param name="label"></param>
+        /// <returns></returns>
+        ActionResponse SetLabelForManualExRates(string label);
+
+        /// <summary>
         /// Gets api key for open exchange
         /// </summary>
         /// <returns></returns>
@@ -164,6 +171,27 @@ namespace AIMS.Services
                     return response;
                 }
                 exRateSettings.APIKeyOpenExchangeRates = key;
+                unitWork.ExRatesSettingsRepository.Update(exRateSettings);
+                unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse SetLabelForManualExRates(string label)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper msgHelper;
+                ActionResponse response = new ActionResponse();
+                var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(r => r.Id != 0);
+                if (exRateSettings == null)
+                {
+                    msgHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = msgHelper.GetNotFound("Exchange Rates");
+                    return response;
+                }
+                exRateSettings.ManualExchangeRateSource = label;
                 unitWork.ExRatesSettingsRepository.Update(exRateSettings);
                 unitWork.Save();
                 return response;
@@ -319,6 +347,7 @@ namespace AIMS.Services
                     settingsView.IsAutomatic = exRateSettings.IsAutomatic;
                     settingsView.IsOpenExchangeKeySet = !string.IsNullOrEmpty(exRateSettings.APIKeyOpenExchangeRates) ? true : false;
                     settingsView.ManualCurrencyRates = exRateSettings.ManualExchangeRates == null ? null : JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRateSettings.ManualExchangeRates);
+                    settingsView.ManualExchangeRateSource = exRateSettings.ManualExchangeRateSource;
                 }
                 return settingsView;
             }

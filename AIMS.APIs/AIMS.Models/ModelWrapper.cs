@@ -89,6 +89,7 @@ namespace AIMS.Models
         public string CurrencyName { get; set; }
         public bool IsDefault { get; set; }
         public bool IsNational { get; set; }
+        public CurrencySource Source { get; set; }
     }
 
     public class ManualRateModel
@@ -168,6 +169,7 @@ namespace AIMS.Models
     {
         public bool IsAutomatic { get; set; }
         public bool IsOpenExchangeKeySet { get; set; }
+        public string ManualExchangeRateSource { get; set; }
         public IEnumerable<CurrencyWithRates> ManualCurrencyRates { get; set; }
     }
 
@@ -194,6 +196,12 @@ namespace AIMS.Models
     {
         [Required]
         public string Key { get; set; }
+    }
+
+    public class ManualExRateSourceModel
+    {
+        [Required]
+        public string Label { get; set; }
     }
 
     public class CurrencyModel
