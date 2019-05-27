@@ -63,6 +63,36 @@ namespace AIMS.APIs.Controllers
             return Ok(currency);
         }
 
+        [HttpPost("SetDefault/{id}")]
+        public IActionResult SetDefault(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid id provided");
+            }
+            var response = currencyService.SetDefault(id);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost("SetNational/{id}")]
+        public IActionResult SetNational(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid id provided");
+            }
+            var response = currencyService.SetNational(id);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] CurrencyModel model)
         {
