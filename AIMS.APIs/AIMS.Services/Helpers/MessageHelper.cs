@@ -332,7 +332,7 @@ namespace AIMS.Services.Helpers
         public string ChangedMappingAffectedProjectsMessage(List<string> affectedProjects, string oldSector, string newSector)
         {
             List<string> formattedMessageList = new List<string>();
-            formattedMessageList.Add("<h4>Organizations merged</h4><ul>");
+            formattedMessageList.Add("<h4>Projects affected</h4><ul>");
             foreach (var project in affectedProjects)
             {
                 formattedMessageList.Add("<li>" + project + "</li>");
