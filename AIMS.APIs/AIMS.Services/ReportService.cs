@@ -338,13 +338,14 @@ namespace AIMS.Services
                                                       where projectIds.Contains(project.Id)
                                                       select project).ToList<ProjectProfileView>();
 
-                                decimal totalFunding = 0, totalDisbursements = 0, sectorFPercentage = 0, sectorDPercentage = 0 ;
+                                decimal totalFunding = 0, totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0;
                                 foreach (var project in sectorProjects)
                                 {
                                     if (project.Funders.Count() > 0)
                                     {
                                         foreach (var funder in project.Funders)
                                         {
+                                            totalFundingPercentage += ((funder.Amount / 100) * sector.FundsPercentage);
                                             totalFunding += funder.Amount;
                                         }
                                     }
@@ -355,12 +356,13 @@ namespace AIMS.Services
                                     {
                                         foreach (var disbursement in project.Disbursements)
                                         {
+                                            totalDisbursementsPercentage += ((disbursement.Amount / 100) * sector.FundsPercentage);
                                             totalDisbursements += disbursement.Amount;
                                         }
                                     }
                                 }
 
-                                if (totalFunding > 0)
+                                /*if (totalFunding > 0)
                                 {
                                     sectorFPercentage = ((totalFunding / 100) * sector.FundsPercentage);
                                 }
@@ -368,10 +370,10 @@ namespace AIMS.Services
                                 if (totalDisbursements > 0)
                                 {
                                     sectorDPercentage = ((totalDisbursements / 100) * sector.FundsPercentage);
-                                }
+                                }*/
 
-                                projectsBySector.TotalFunding = sectorFPercentage;
-                                projectsBySector.TotalDisbursements = sectorDPercentage;
+                                projectsBySector.TotalFunding = totalFundingPercentage;
+                                projectsBySector.TotalDisbursements = totalDisbursementsPercentage;
                                 projectsBySector.Projects = sectorProjects;
                                 sectorProjectsList.Add(projectsBySector);
                                 projectIds.Clear();
@@ -389,13 +391,18 @@ namespace AIMS.Services
                                                   where projectIds.Contains(project.Id)
                                                   select project).ToList<ProjectProfileView>();
 
-                            decimal totalFunding = 0, totalDisbursements = 0, sectorFPercentage = 0, sectorDPercentage = 0;
+                            decimal totalFunding = 0, totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0, sectorPercentage = 0;
                             foreach (var project in sectorProjects)
                             {
+                                sectorPercentage = (from s in project.Sectors
+                                                     where s.SectorId == sector.SectorId
+                                                     select s.FundsPercentage).FirstOrDefault();
+
                                 if (project.Funders.Count() > 0)
                                 {
                                     foreach (var funder in project.Funders)
                                     {
+                                        totalFundingPercentage += ((funder.Amount / 100) * sectorPercentage);
                                         totalFunding += funder.Amount;
                                     }
                                 }
@@ -407,11 +414,12 @@ namespace AIMS.Services
                                     foreach (var disbursement in project.Disbursements)
                                     {
                                         totalDisbursements += disbursement.Amount;
+                                        totalDisbursementsPercentage += ((disbursement.Amount / 100) * sectorPercentage);
                                     }
                                 }
                             }
 
-                            if (totalFunding > 0)
+                            /*if (totalFunding > 0)
                             {
                                 sectorFPercentage = ((totalFunding / 100) * sector.FundsPercentage);
                             }
@@ -419,10 +427,10 @@ namespace AIMS.Services
                             if (totalDisbursements > 0)
                             {
                                 sectorDPercentage = ((totalDisbursements / 100) * sector.FundsPercentage);
-                            }
+                            }*/
 
-                            projectsBySector.TotalFunding = sectorFPercentage;
-                            projectsBySector.TotalDisbursements = sectorDPercentage;
+                            projectsBySector.TotalFunding = totalFundingPercentage;
+                            projectsBySector.TotalDisbursements = totalDisbursementsPercentage;
                             projectsBySector.Projects = sectorProjects;
                             sectorProjectsList.Add(projectsBySector);
                             projectIds.Clear();
