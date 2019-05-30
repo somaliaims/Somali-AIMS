@@ -40,6 +40,12 @@ namespace AIMS.Services
         IEnumerable<SectorView> GetDefaultSectors();
 
         /// <summary>
+        /// Gets list of default parent sectors
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<SectorView> GetDefaultParentSectors();
+
+        /// <summary>
         /// Gets sector category view for the provided id
         /// </summary>
         /// <param name="id"></param>
@@ -136,6 +142,21 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var sectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsPrimary == true, new string[] { "SectorType" });
+                if (sectors.Count() > 1)
+                {
+                    sectors = (from sector in sectors
+                               orderby sector.SectorName ascending
+                               select sector);
+                }
+                return mapper.Map<List<SectorView>>(sectors);
+            }
+        }
+
+        public IEnumerable<SectorView> GetDefaultParentSectors()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var sectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsPrimary == true && s.ParentSectorId == null, new string[] { "SectorType" });
                 if (sectors.Count() > 1)
                 {
                     sectors = (from sector in sectors

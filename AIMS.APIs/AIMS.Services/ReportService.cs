@@ -355,6 +355,25 @@ namespace AIMS.Services
                                                   where projectIds.Contains(project.Id)
                                                   select project).ToList<ProjectProfileView>();
 
+                            decimal totalDisbursements = 0;
+                            foreach(var project in sectorProjects)
+                            {
+                                if (project.Disbursements.Count() > 0)
+                                {
+                                    foreach(var disbursement in project.Disbursements)
+                                    {
+                                        totalDisbursements += disbursement.Amount;
+                                    }
+                                }
+                            }
+                            decimal sectorPercentage = 0;
+
+                            if (totalDisbursements > 0)
+                            {
+                                sectorPercentage = ((totalDisbursements / 100) * sector.FundsPercentage);
+                            }
+
+                            projectsBySector.TotalCost = sectorPercentage;
                             projectsBySector.Projects = sectorProjects;
                             sectorProjectsList.Add(projectsBySector);
                             projectIds.Clear();
