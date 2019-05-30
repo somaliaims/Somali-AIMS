@@ -338,6 +338,40 @@ namespace AIMS.Services
                                                       where projectIds.Contains(project.Id)
                                                       select project).ToList<ProjectProfileView>();
 
+                                decimal totalFunding = 0, totalDisbursements = 0, sectorFPercentage = 0, sectorDPercentage = 0 ;
+                                foreach (var project in sectorProjects)
+                                {
+                                    if (project.Funders.Count() > 0)
+                                    {
+                                        foreach (var funder in project.Funders)
+                                        {
+                                            totalFunding += funder.Amount;
+                                        }
+                                    }
+                                }
+                                foreach (var project in sectorProjects)
+                                {
+                                    if (project.Disbursements.Count() > 0)
+                                    {
+                                        foreach (var disbursement in project.Disbursements)
+                                        {
+                                            totalDisbursements += disbursement.Amount;
+                                        }
+                                    }
+                                }
+
+                                if (totalFunding > 0)
+                                {
+                                    sectorFPercentage = ((totalFunding / 100) * sector.FundsPercentage);
+                                }
+
+                                if (totalDisbursements > 0)
+                                {
+                                    sectorDPercentage = ((totalDisbursements / 100) * sector.FundsPercentage);
+                                }
+
+                                projectsBySector.TotalFunding = sectorFPercentage;
+                                projectsBySector.TotalDisbursements = sectorDPercentage;
                                 projectsBySector.Projects = sectorProjects;
                                 sectorProjectsList.Add(projectsBySector);
                                 projectIds.Clear();
@@ -355,25 +389,40 @@ namespace AIMS.Services
                                                   where projectIds.Contains(project.Id)
                                                   select project).ToList<ProjectProfileView>();
 
-                            decimal totalDisbursements = 0;
-                            foreach(var project in sectorProjects)
+                            decimal totalFunding = 0, totalDisbursements = 0, sectorFPercentage = 0, sectorDPercentage = 0;
+                            foreach (var project in sectorProjects)
+                            {
+                                if (project.Funders.Count() > 0)
+                                {
+                                    foreach (var funder in project.Funders)
+                                    {
+                                        totalFunding += funder.Amount;
+                                    }
+                                }
+                            }
+                            foreach (var project in sectorProjects)
                             {
                                 if (project.Disbursements.Count() > 0)
                                 {
-                                    foreach(var disbursement in project.Disbursements)
+                                    foreach (var disbursement in project.Disbursements)
                                     {
                                         totalDisbursements += disbursement.Amount;
                                     }
                                 }
                             }
-                            decimal sectorPercentage = 0;
+
+                            if (totalFunding > 0)
+                            {
+                                sectorFPercentage = ((totalFunding / 100) * sector.FundsPercentage);
+                            }
 
                             if (totalDisbursements > 0)
                             {
-                                sectorPercentage = ((totalDisbursements / 100) * sector.FundsPercentage);
+                                sectorDPercentage = ((totalDisbursements / 100) * sector.FundsPercentage);
                             }
 
-                            projectsBySector.TotalCost = sectorPercentage;
+                            projectsBySector.TotalFunding = sectorFPercentage;
+                            projectsBySector.TotalDisbursements = sectorDPercentage;
                             projectsBySector.Projects = sectorProjects;
                             sectorProjectsList.Add(projectsBySector);
                             projectIds.Clear();

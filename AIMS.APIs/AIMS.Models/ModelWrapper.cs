@@ -1110,7 +1110,8 @@ namespace AIMS.Models
     public class ProjectsBySector
     {
         public string SectorName { get; set; }
-        public decimal TotalCost { get; set; }
+        public decimal TotalFunding { get; set; }
+        public decimal TotalDisbursements { get; set; }
         public IEnumerable<ProjectProfileView> Projects { get; set; }
     }
 
