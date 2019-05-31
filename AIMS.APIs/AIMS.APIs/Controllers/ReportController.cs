@@ -22,23 +22,28 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("GetSectorWiseProjects")]
-        public async Task<IActionResult> GetSectorWiseProjects([FromBody] ReportModelForProjectSectors model)
-        {
-            var report = await reportService.GetProjectsBySector(model);
-            return Ok(report);
-        }
-
-        [HttpPost]
-        [Route("SearchProjectsByCriteria")]
-        public async Task<IActionResult> SearchProjectsViewByCriteria([FromBody] SearchProjectModel model)
+        public async Task<IActionResult> GetSectorWiseProjects([FromBody] SearchProjectsBySectorModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var projects = await reportService.SearchProjectsByCriteria(model);
-            return Ok(projects);
+            var report = await reportService.GetProjectsBySectors(model);
+            return Ok(report);
         }
+
+        /*[HttpPost]
+        [Route("SearchProjectsBySector")]
+        public async Task<IActionResult> SearchProjectsBySector([FromBody] ReportModelForProjectSectors model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var projects = await reportService.GetProjectsBySector(model);
+            return Ok(projects);
+        }*/
     }
 }

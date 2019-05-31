@@ -1122,6 +1122,16 @@ namespace AIMS.Models
         public List<int> ProjectIds { get; set; }
     }
 
+    public class SearchProjectsBySectorModel
+    {
+        public string Title { get; set; } = null;
+        public List<int> OrganizationIds { get; set; } = new List<int>();
+        public int StartingYear { get; set; } = 0;
+        public int EndingYear { get; set; } = 0;
+        public List<int> SectorIds { get; set; } = new List<int>();
+        //public List<int> LocationIds { get; set; } = new List<int>();
+    }
+
     public class SearchProjectModel
     {
         public string Title { get; set; } = null;

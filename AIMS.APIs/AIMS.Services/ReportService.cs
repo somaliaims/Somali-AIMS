@@ -18,14 +18,14 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ProjectProfileReportBySector> GetProjectsBySector(ReportModelForProjectSectors model);
+        //Task<ProjectProfileReportBySector> GetProjectsBySector(ReportModelForProjectSectors model);
 
         /// <summary>
         /// Search matching projects for the provided criteria
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ProjectProfileReportBySector> SearchProjectsByCriteria(SearchProjectModel model);
+        Task<ProjectProfileReportBySector> GetProjectsBySectors(SearchProjectsBySectorModel model);
     }
 
     public class ReportService : IReportService
@@ -39,7 +39,7 @@ namespace AIMS.Services
             mapper = autoMapper;
         }
 
-        public async Task<ProjectProfileReportBySector> GetProjectsBySector(ReportModelForProjectSectors model)
+        /*public async Task<ProjectProfileReportBySector> GetProjectsBySector(ReportModelForProjectSectors model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -168,10 +168,10 @@ namespace AIMS.Services
                 }
                 return await Task<ProjectProfileReportBySector>.Run(() => sectorProjectsReport).ConfigureAwait(false);
             }     
-        }
+        }*/
 
 
-        public async Task<ProjectProfileReportBySector> SearchProjectsByCriteria(SearchProjectModel model)
+        public async Task<ProjectProfileReportBySector> GetProjectsBySectors(SearchProjectsBySectorModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -195,7 +195,7 @@ namespace AIMS.Services
                     if (!string.IsNullOrEmpty(model.Title))
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase),
-                            new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+                            new string[] {  "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
                     }
 
                     if (model.StartingYear >= 2000 && model.EndingYear >= 2000)
@@ -203,7 +203,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear)),
-                            new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+                            new string[] { "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
                         }
                         else
                         {
@@ -230,7 +230,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
-                            , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "Sectors", "Sectors.Sector", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -240,7 +240,7 @@ namespace AIMS.Services
                         }
                     }
 
-                    if (model.LocationIds.Count > 0)
+                    /*if (model.LocationIds.Count > 0)
                     {
                         var projectLocations = unitWork.ProjectLocationsRepository.GetMany(l => model.LocationIds.Contains(l.LocationId));
                         var projectIdsList = (from pLocation in projectLocations
@@ -257,12 +257,12 @@ namespace AIMS.Services
                                                  where projectIdsList.Contains(project.Id)
                                                  select project;
                         }
-                    }
+                    }*/
 
                     if (projectProfileList == null)
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndDate.Year >= year && p.EndDate.Month >= month),
-                            new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+                            new string[] { "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
                     }
 
                     if (model.SectorIds.Count > 0)
@@ -288,12 +288,12 @@ namespace AIMS.Services
                         profileView.StartDate = project.StartDate.ToLongDateString();
                         profileView.EndDate = project.EndDate.ToLongDateString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
-                        profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
+                        //profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                         profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
                         profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);
-                        profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
-                        decimal projectCost = 0;
+                        //profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
+                        /*decimal projectCost = 0;
                         if (profileView.Funders != null &&  profileView.Funders.Count > 0)
                         {
                             projectCost = profileView.Funders.Select(f => (f.Amount)).Sum();
@@ -317,7 +317,7 @@ namespace AIMS.Services
                                 }
                             }
                             
-                        }
+                        }*/
                         projectsList.Add(profileView);
                     }
 
@@ -339,26 +339,67 @@ namespace AIMS.Services
                                                       select project).ToList<ProjectProfileView>();
 
                                 decimal totalFunding = 0, totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0;
+
                                 foreach (var project in sectorProjects)
                                 {
                                     if (project.Funders.Count() > 0)
                                     {
                                         foreach (var funder in project.Funders)
                                         {
-                                            totalFundingPercentage += ((funder.Amount / 100) * sector.FundsPercentage);
                                             totalFunding += funder.Amount;
+                                            funder.Amount = ((funder.Amount / 100) * sector.FundsPercentage);
                                         }
                                     }
                                 }
+
+                                if (totalFunding > 0)
+                                {
+                                    totalFundingPercentage += ((totalFunding / 100) * sector.FundsPercentage);
+                                }
+
                                 foreach (var project in sectorProjects)
                                 {
                                     if (project.Disbursements.Count() > 0)
                                     {
                                         foreach (var disbursement in project.Disbursements)
                                         {
-                                            totalDisbursementsPercentage += ((disbursement.Amount / 100) * sector.FundsPercentage);
                                             totalDisbursements += disbursement.Amount;
+                                            disbursement.Amount = ((disbursement.Amount / 100) * sector.FundsPercentage);
                                         }
+                                    }
+                                }
+
+                                if (totalDisbursements > 0)
+                                {
+                                    totalDisbursementsPercentage += ((totalDisbursements / 100) * sector.FundsPercentage);
+                                }
+
+                                foreach (var project in sectorProjects)
+                                {
+                                    decimal projectCost = 0;
+                                    if (project.Funders != null && project.Funders.Count > 0)
+                                    {
+                                        projectCost = project.Funders.Select(f => (f.Amount)).Sum();
+                                        project.ProjectCost = projectCost;
+                                    }
+                                    if (project.Disbursements != null && project.Disbursements.Count > 0)
+                                    {
+                                        decimal projectDisbursements = project.Disbursements.Select(d => (d.Amount)).Sum();
+                                        UtilityHelper helper = new UtilityHelper();
+                                        var endDate = Convert.ToDateTime(project.EndDate);
+                                        var startDate = DateTime.Now;
+                                        int months = helper.GetMonthDifference(startDate, endDate);
+
+                                        project.ActualDisbursements = projectDisbursements;
+                                        if (months > 0)
+                                        {
+                                            project.PlannedDisbursements = Math.Round((projectCost - projectDisbursements) / months);
+                                            if (project.PlannedDisbursements < 0)
+                                            {
+                                                project.PlannedDisbursements = 0;
+                                            }
+                                        }
+
                                     }
                                 }
 
@@ -394,27 +435,38 @@ namespace AIMS.Services
                             decimal totalFunding = 0, totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0, sectorPercentage = 0;
                             foreach (var project in sectorProjects)
                             {
-                                sectorPercentage = (from s in project.Sectors
-                                                     where s.SectorId == sector.SectorId
-                                                     select s.FundsPercentage).FirstOrDefault();
-
-                                if (project.Funders.Count() > 0)
+                                if (project.Sectors != null)
                                 {
-                                    foreach (var funder in project.Funders)
+                                    sectorPercentage = (from s in project.Sectors
+                                                        where s.SectorId == sector.SectorId
+                                                        select s.FundsPercentage).FirstOrDefault();
+
+                                    if (project.Funders.Count() > 0)
                                     {
-                                        totalFundingPercentage += ((funder.Amount / 100) * sectorPercentage);
-                                        totalFunding += funder.Amount;
+                                        foreach (var funder in project.Funders)
+                                        {
+                                            totalFunding += funder.Amount;
+                                            funder.Amount = ((funder.Amount / 100) * sectorPercentage);
+                                        }
+                                        totalFundingPercentage += ((totalFunding / 100) * sectorPercentage);
                                     }
                                 }
                             }
                             foreach (var project in sectorProjects)
                             {
-                                if (project.Disbursements.Count() > 0)
+                                if (project.Sectors != null)
                                 {
-                                    foreach (var disbursement in project.Disbursements)
+                                    sectorPercentage = (from s in project.Sectors
+                                                        where s.SectorId == sector.SectorId
+                                                        select s.FundsPercentage).FirstOrDefault();
+                                    if (project.Disbursements.Count() > 0)
                                     {
-                                        totalDisbursements += disbursement.Amount;
-                                        totalDisbursementsPercentage += ((disbursement.Amount / 100) * sectorPercentage);
+                                        foreach (var disbursement in project.Disbursements)
+                                        {
+                                            totalDisbursements += disbursement.Amount;
+                                            disbursement.Amount = ((disbursement.Amount / 100) * sectorPercentage);
+                                        }
+                                        totalDisbursementsPercentage += ((totalDisbursements / 100) * sectorPercentage);
                                     }
                                 }
                             }
