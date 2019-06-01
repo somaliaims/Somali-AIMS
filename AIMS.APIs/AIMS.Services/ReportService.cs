@@ -301,18 +301,19 @@ namespace AIMS.Services
 
                     int totalSectors = projectSectors.Count();
                     int counter = 0;
+                    List<ProjectViewForSector> projectsListForSector = null;
                     foreach (var sector in projectSectors)
                     {
                         if (sector.Sector.SectorName != currentSector)
                         {
                             if (currentSector != null)
                             {
+                                projectsListForSector = new List<ProjectViewForSector>();
                                 var sectorProjects = (from project in projectsList
                                                       where projectIds.Contains(project.Id)
                                                       select project).ToList<ProjectProfileView>();
 
                                 decimal totalFunding = 0, totalDisbursements = 0, totalFundingPercentage = 0, totalDisbursementsPercentage = 0;
-
                                 foreach (var project in sectorProjects)
                                 {
                                     if (project.Funders.Count() > 0)
@@ -357,9 +358,24 @@ namespace AIMS.Services
                                     totalDisbursementsPercentage = ((totalDisbursements / 100) * sector.FundsPercentage);
                                 }
 
+                                foreach (var project in sectorProjects)
+                                {
+                                    projectsListForSector.Add(new ProjectViewForSector()
+                                    {
+                                        Title = project.Title,
+                                        StartDate = project.StartDate,
+                                        EndDate = project.EndDate,
+                                        Funders = string.Join(", ", project.Funders.Select(f => f.Funder)),
+                                        Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
+                                        ProjectCost = project.ProjectCost,
+                                        ActualDisbursements = project.ActualDisbursements,
+                                        PlannedDisbursements = project.PlannedDisbursements,
+                                    });
+                                }
+
                                 projectsBySector.TotalFunding = totalFundingPercentage;
                                 projectsBySector.TotalDisbursements = totalDisbursementsPercentage;
-                                projectsBySector.Projects = sectorProjects;
+                                projectsBySector.Projects = projectsListForSector;
                                 sectorProjectsList.Add(projectsBySector);
                                 projectIds.Clear();
                             }
@@ -372,6 +388,7 @@ namespace AIMS.Services
 
                         if (totalSectors == counter)
                         {
+                            projectsListForSector = new List<ProjectViewForSector>();
                             var sectorProjects = (from project in projectsList
                                                   where projectIds.Contains(project.Id)
                                                   select project).ToList<ProjectProfileView>();
@@ -434,9 +451,24 @@ namespace AIMS.Services
                                 totalDisbursementsPercentage = ((totalDisbursements / 100) *  sector.FundsPercentage);
                             }
 
+                            foreach(var project in sectorProjects)
+                            {
+                                projectsListForSector.Add(new ProjectViewForSector()
+                                {
+                                    Title = project.Title,
+                                    StartDate = project.StartDate,
+                                    EndDate = project.EndDate,
+                                    Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
+                                    Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
+                                    ProjectCost = project.ProjectCost,
+                                    ActualDisbursements = project.ActualDisbursements,
+                                    PlannedDisbursements = project.PlannedDisbursements,
+                                }) ;
+                            }
+
                             projectsBySector.TotalFunding = totalFundingPercentage;
                             projectsBySector.TotalDisbursements = totalDisbursementsPercentage;
-                            projectsBySector.Projects = sectorProjects;
+                            projectsBySector.Projects = projectsListForSector;
                             sectorProjectsList.Add(projectsBySector);
                             projectIds.Clear();
                         }
