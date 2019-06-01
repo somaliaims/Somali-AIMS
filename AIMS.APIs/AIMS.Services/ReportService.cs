@@ -195,7 +195,7 @@ namespace AIMS.Services
                     if (!string.IsNullOrEmpty(model.Title))
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase),
-                            new string[] {  "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+                            new string[] {  "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     if (model.StartingYear >= 2000 && model.EndingYear >= 2000)
@@ -203,7 +203,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear)),
-                            new string[] { "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+                            new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -230,7 +230,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
-                            , new string[] { "Sectors", "Sectors.Sector", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -262,7 +262,7 @@ namespace AIMS.Services
                     if (projectProfileList == null)
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndDate.Year >= year && p.EndDate.Month >= month),
-                            new string[] { "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+                            new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     if (model.SectorIds.Count > 0)
@@ -332,7 +332,7 @@ namespace AIMS.Services
                                 {
                                     if (project.Disbursements.Count() > 0)
                                     {
-                                        decimal projectDisbursements = ((project.Disbursements.Select(d=> (d.Amount)).Sum() / 100) * sector.FundsPercentage );
+                                        decimal projectDisbursements = project.Disbursements.Select(d=> (d.Amount)).Sum();
                                         totalDisbursements += projectDisbursements;
 
                                         UtilityHelper helper = new UtilityHelper();
@@ -340,7 +340,7 @@ namespace AIMS.Services
                                         var startDate = DateTime.Now;
                                         int months = helper.GetMonthDifference(startDate, endDate);
 
-                                        project.ActualDisbursements = projectDisbursements;
+                                        project.ActualDisbursements = ((projectDisbursements / 100) * sector.FundsPercentage);
                                         if (months > 0)
                                         {
                                             project.PlannedDisbursements = Math.Round((project.ProjectCost - projectDisbursements) / months);
@@ -354,7 +354,7 @@ namespace AIMS.Services
 
                                 if (totalDisbursements > 0)
                                 {
-                                    totalDisbursementsPercentage += ((totalDisbursements / 100) * sector.FundsPercentage);
+                                    totalDisbursementsPercentage = ((totalDisbursements / 100) * sector.FundsPercentage);
                                 }
 
                                 projectsBySector.TotalFunding = totalFundingPercentage;
