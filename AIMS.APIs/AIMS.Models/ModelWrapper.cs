@@ -1101,10 +1101,10 @@ namespace AIMS.Models
         public ICollection<ProjectProfileView> ProjectsList { get; set; }
     }
 
-    public class ProjectProfileReportBySector
+    public class ProjectProfileReportByLocation
     {
-        public Report ReportSettings { get; set; } 
-        public IEnumerable<ProjectsBySector> SectorProjectsList { get; set; }
+        public Report ReportSettings { get; set; }
+        public IEnumerable<ProjectsByLocation> LocationProjectsList { get; set; }
     }
 
     public class ProjectsBySector
@@ -1112,8 +1112,21 @@ namespace AIMS.Models
         public string SectorName { get; set; }
         public decimal TotalFunding { get; set; }
         public decimal TotalDisbursements { get; set; }
-        //public IEnumerable<ProjectProfileView> Projects { get; set; }
         public IEnumerable<ProjectViewForSector> Projects { get; set; }
+    }
+
+    public class ProjectProfileReportBySector
+    {
+        public Report ReportSettings { get; set; } 
+        public IEnumerable<ProjectsBySector> SectorProjectsList { get; set; }
+    }
+
+    public class ProjectsByLocation
+    {
+        public string LocationName { get; set; }
+        public decimal TotalFunding { get; set; }
+        public decimal TotalDisbursements { get; set; }
+        public IEnumerable<ProjectViewForLocation> Projects { get; set; }
     }
 
     public class SectorProjects
@@ -1130,10 +1143,30 @@ namespace AIMS.Models
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
         public List<int> SectorIds { get; set; } = new List<int>();
-        //public List<int> LocationIds { get; set; } = new List<int>();
+    }
+
+    public class SearchProjectsByLocationModel
+    {
+        public string Title { get; set; } = null;
+        public List<int> OrganizationIds { get; set; } = new List<int>();
+        public int StartingYear { get; set; } = 0;
+        public int EndingYear { get; set; } = 0;
+        public List<int> LocationIds { get; set; } = new List<int>();
     }
 
     public class ProjectViewForSector
+    {
+        public string Title { get; set; }
+        public string Funders { get; set; }
+        public string Implementers { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public decimal ProjectCost { get; set; }
+        public decimal ActualDisbursements { get; set; }
+        public decimal PlannedDisbursements { get; set; }
+    }
+
+    public class ProjectViewForLocation
     {
         public string Title { get; set; }
         public string Funders { get; set; }

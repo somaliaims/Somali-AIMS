@@ -33,17 +33,18 @@ namespace AIMS.APIs.Controllers
             return Ok(report);
         }
 
-        /*[HttpPost]
-        [Route("SearchProjectsBySector")]
-        public async Task<IActionResult> SearchProjectsBySector([FromBody] ReportModelForProjectSectors model)
+        [HttpPost]
+        [Route("GetLocationWiseProjects")]
+        public async Task<IActionResult> GetLocationWiseProjects([FromBody] SearchProjectsByLocationModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var projects = await reportService.GetProjectsBySector(model);
-            return Ok(projects);
-        }*/
+            var report = await reportService.GetProjectsByLocations(model);
+            return Ok(report);
+        }
+
     }
 }
