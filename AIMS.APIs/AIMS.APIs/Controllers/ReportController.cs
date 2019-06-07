@@ -50,6 +50,11 @@ namespace AIMS.APIs.Controllers
             }
 
             var report = await reportService.GetProjectsByLocations(model);
+            var response = excelService.GenerateLocationProjectsReport(report);
+            if (response.Success)
+            {
+                report.ReportSettings.ExcelReportName = response.Message;
+            }
             return Ok(report);
         }
 

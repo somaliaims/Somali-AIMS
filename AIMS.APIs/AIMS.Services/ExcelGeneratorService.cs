@@ -28,6 +28,13 @@ namespace AIMS.Services
         /// <param name="report"></param>
         /// <returns></returns>
         ActionResponse GenerateSectorProjectsReport(ProjectProfileReportBySector report);
+
+        /// <summary>
+        /// Generates excel for location projects report
+        /// </summary>
+        /// <param name="report"></param>
+        /// <returns></returns>
+        ActionResponse GenerateLocationProjectsReport(ProjectProfileReportByLocation report);
     }
 
     public class ExcelGeneratorService : IExcelGeneratorService
@@ -58,13 +65,13 @@ namespace AIMS.Services
                     NPOI.SS.UserModel.IFont fontTitle = workbook.CreateFont();
                     fontTitle.Color = IndexedColors.DarkBlue.Index;
                     fontTitle.IsBold = true;
-                    fontTitle.Boldweight = 16;
+                    fontTitle.Boldweight = 18;
                     fontTitle.FontHeight = 18;
                     fontTitle.FontHeightInPoints = 18;
                     style.SetFont(fontTitle);
                     style.FillBackgroundColor = IndexedColors.LightYellow.Index;
                     style.Alignment = HorizontalAlignment.Center;
-                    row.RowStyle = style;
+       
 
                     var titleCell = row.CreateCell(0, CellType.String);
                     titleCell.SetCellValue("Sector Projects Report");
@@ -134,22 +141,18 @@ namespace AIMS.Services
                     //Setting styles for different cell types
                     ICellStyle titleStyle = workbook.CreateCellStyle();
                     NPOI.SS.UserModel.IFont fontTitle = workbook.CreateFont();
-                    fontTitle.Color = IndexedColors.Black.Index;
+                    fontTitle.Color = IndexedColors.DarkGreen.Index;
                     fontTitle.IsBold = true;
-                    fontTitle.Boldweight = 18;
-                    fontTitle.FontHeight = 18;
-                    fontTitle.FontHeightInPoints = 18;
                     titleStyle.SetFont(fontTitle);
+                    fontTitle.FontHeightInPoints = 16;
                     titleStyle.Alignment = HorizontalAlignment.CenterSelection;
                     titleStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle footerStyle = workbook.CreateCellStyle();
                     NPOI.SS.UserModel.IFont footerFontTitle = workbook.CreateFont();
-                    footerFontTitle.Color = IndexedColors.Black.Index;
+                    footerFontTitle.Color = IndexedColors.DarkGreen.Index;
                     footerFontTitle.IsBold = true;
-                    footerFontTitle.Boldweight = 18;
-                    footerFontTitle.FontHeight = 18;
-                    footerFontTitle.FontHeightInPoints = 18;
+                    fontTitle.FontHeightInPoints = 16;
                     footerStyle.SetFont(fontTitle);
                     footerStyle.Alignment = HorizontalAlignment.Right;
                     footerStyle.VerticalAlignment = VerticalAlignment.Center;
@@ -158,33 +161,23 @@ namespace AIMS.Services
                     NPOI.SS.UserModel.IFont fontHeader = workbook.CreateFont();
                     fontHeader.Color = IndexedColors.Black.Index;
                     fontHeader.IsBold = true;
-                    fontHeader.Boldweight = 13;
-                    fontHeader.FontHeight = 13;
-                    fontHeader.FontHeightInPoints = 13;
                     headerStyle.SetFont(fontTitle);
+                    fontTitle.Boldweight = 11;
+                    fontTitle.FontHeight = 11;
+                    fontTitle.FontHeightInPoints = 11;
                     headerStyle.Alignment = HorizontalAlignment.Center;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
                     NPOI.SS.UserModel.IFont groupFontHeader = workbook.CreateFont();
-                    groupFontHeader.Color = IndexedColors.Black.Index;
+                    groupFontHeader.Color = IndexedColors.DarkYellow.Index;
                     groupFontHeader.IsBold = true;
-                    groupFontHeader.Boldweight = 12;
-                    groupFontHeader.FontHeight = 12;
-                    groupFontHeader.FontHeightInPoints = 12;
                     groupHeaderStyle.SetFont(fontTitle);
                     groupHeaderStyle.Alignment = HorizontalAlignment.Center;
                     groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
-                    groupHeaderStyle.FillBackgroundColor = IndexedColors.LightYellow.Index;
 
                     ICellStyle dataCellStyle = workbook.CreateCellStyle();
-                    NPOI.SS.UserModel.IFont dataFontHeader = workbook.CreateFont();
-                    dataFontHeader.Color = IndexedColors.Black.Index;
-                    dataFontHeader.IsBold = true;
-                    dataFontHeader.Boldweight = 11;
-                    dataFontHeader.FontHeight = 11;
-                    dataFontHeader.FontHeightInPoints = 11;
-                    dataCellStyle.SetFont(fontTitle);
+                    dataCellStyle.WrapText = true;
                     dataCellStyle.Alignment = HorizontalAlignment.Center;
                     dataCellStyle.VerticalAlignment = VerticalAlignment.Center;
 
@@ -267,15 +260,177 @@ namespace AIMS.Services
                             plannedDisbursementDataCell.SetCellValue(project.PlannedDisbursements.ToString());
                             plannedDisbursementDataCell.CellStyle = dataCellStyle;
                         }
+                    }
 
+                    row = excelSheet.CreateRow(++rowCounter);
+                    string grandTotalString = "Total funding: " + grandTotalFunding + " - Total disbursements: " + grandTotalDisbursement;
+                    var footerCell = row.CreateCell(0, CellType.String);
+                    footerCell.SetCellValue(grandTotalString);
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns));
+                    footerCell.CellStyle = footerStyle;
+                    workbook.Write(fs);
+                }
+                response.Message = sFileName;
+            }
+            catch(Exception ex)
+            {
+                response.Message = ex.Message;
+                response.Success = false;
+            }
+            return response;
+        }
+
+        public ActionResponse GenerateLocationProjectsReport(ProjectProfileReportByLocation report)
+        {
+            ActionResponse response = new ActionResponse();
+            try
+            {
+                string sWebRootFolder = hostingEnvironment.WebRootPath + "/ExcelFiles/";
+                string sFileName = @"LocationProjects-" + DateTime.UtcNow.Ticks.ToString() + ".xlsx";
+                FileInfo file = new FileInfo(Path.Combine(sWebRootFolder, sFileName));
+                var memory = new MemoryStream();
+                using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
+                {
+                    int rowCounter = 0, totalColumns = 6;
+                    decimal grandTotalFunding = 0, grandTotalDisbursement = 0;
+
+                    
+                    IWorkbook workbook;
+                    workbook = new XSSFWorkbook();
+                    ISheet excelSheet = workbook.CreateSheet("Report");
+
+                    //Setting styles for different cell types
+                    ICellStyle titleStyle = workbook.CreateCellStyle();
+                    NPOI.SS.UserModel.IFont fontTitle = workbook.CreateFont();
+                    fontTitle.Color = IndexedColors.DarkGreen.Index;
+                    fontTitle.IsBold = true;
+                    titleStyle.SetFont(fontTitle);
+                    fontTitle.FontHeightInPoints = 16;
+                    titleStyle.Alignment = HorizontalAlignment.CenterSelection;
+                    titleStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle footerStyle = workbook.CreateCellStyle();
+                    NPOI.SS.UserModel.IFont footerFontTitle = workbook.CreateFont();
+                    footerFontTitle.Color = IndexedColors.DarkGreen.Index;
+                    footerFontTitle.IsBold = true;
+                    fontTitle.FontHeightInPoints = 16;
+                    footerStyle.SetFont(fontTitle);
+                    footerStyle.Alignment = HorizontalAlignment.Right;
+                    footerStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle headerStyle = workbook.CreateCellStyle();
+                    NPOI.SS.UserModel.IFont fontHeader = workbook.CreateFont();
+                    fontHeader.Color = IndexedColors.Black.Index;
+                    fontHeader.IsBold = true;
+                    headerStyle.SetFont(fontTitle);
+                    fontTitle.Boldweight = 11;
+                    fontTitle.FontHeight = 11;
+                    fontTitle.FontHeightInPoints = 11;
+                    headerStyle.Alignment = HorizontalAlignment.Center;
+                    headerStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
+                    NPOI.SS.UserModel.IFont groupFontHeader = workbook.CreateFont();
+                    groupFontHeader.Color = IndexedColors.DarkYellow.Index;
+                    groupFontHeader.IsBold = true;
+                    groupHeaderStyle.SetFont(fontTitle);
+                    groupHeaderStyle.Alignment = HorizontalAlignment.Center;
+                    groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle dataCellStyle = workbook.CreateCellStyle();
+                    dataCellStyle.WrapText = true;
+                    dataCellStyle.Alignment = HorizontalAlignment.Center;
+                    dataCellStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    IRow row = excelSheet.CreateRow(rowCounter);
+                    row.CreateCell(0, CellType.Blank);
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        1, 1, 0, 3
+                        ));
+
+                    row = excelSheet.CreateRow(++rowCounter);
+                    var titleCell = row.CreateCell(0, CellType.String);
+                    titleCell.SetCellValue("Location Projects Report");
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns));
+                    titleCell.CellStyle = titleStyle;
+
+                    //Header columns row
+                    row = excelSheet.CreateRow(++rowCounter);
+                    var projectCol = row.CreateCell(0);
+                    projectCol.SetCellValue("Projects");
+                    projectCol.CellStyle = headerStyle;
+
+                    var funderCol = row.CreateCell(1);
+                    funderCol.SetCellValue("Funders");
+                    funderCol.CellStyle = headerStyle;
+
+                    var implementerCol = row.CreateCell(2);
+                    implementerCol.SetCellValue("Implementers");
+                    implementerCol.CellStyle = headerStyle;
+
+                    var projectCostCol = row.CreateCell(3);
+                    projectCostCol.SetCellValue("Project Cost");
+                    projectCostCol.CellStyle = headerStyle;
+
+                    var actualDisbursementsCol = row.CreateCell(4);
+                    actualDisbursementsCol.SetCellValue("Actual Disbursements");
+                    actualDisbursementsCol.CellStyle = headerStyle;
+
+                    var plannedDisbursementsCol = row.CreateCell(5);
+                    plannedDisbursementsCol.SetCellValue("Planned Disbursements");
+                    plannedDisbursementsCol.CellStyle = headerStyle;
+
+                    foreach (var location in report.LocationProjectsList)
+                    {
+                        string locationName = location.LocationName + " Funding (" + location.TotalFunding + ") - Disbursements (" + location.TotalDisbursements + ")";
                         row = excelSheet.CreateRow(++rowCounter);
-                        string grandTotalString = "Total funding: " + grandTotalFunding + " - Total disbursements: " + grandTotalDisbursement;
-                        var footerCell = row.CreateCell(0, CellType.String);
-                        footerCell.SetCellValue(grandTotalString);
+                        grandTotalFunding += location.TotalFunding;
+                        grandTotalDisbursement += location.TotalDisbursements;
+
+                        var groupTitleCell = row.CreateCell(0, CellType.String);
                         excelSheet.AddMergedRegion(new CellRangeAddress(
                             rowCounter, rowCounter, 0, totalColumns));
-                        footerCell.CellStyle = footerStyle;
+                        groupTitleCell.SetCellValue(locationName);
+                        groupTitleCell.CellStyle = groupHeaderStyle;
+
+                        foreach (var project in location.Projects)
+                        {
+                            row = excelSheet.CreateRow(++rowCounter);
+                            var titleDataCell = row.CreateCell(0);
+                            titleDataCell.SetCellValue(project.Title);
+                            titleDataCell.CellStyle = dataCellStyle;
+
+                            var funderDataCell = row.CreateCell(1);
+                            funderDataCell.SetCellValue(project.Funders);
+                            funderDataCell.CellStyle = dataCellStyle;
+
+                            var implementerDataCell = row.CreateCell(2);
+                            implementerDataCell.SetCellValue(project.Implementers);
+                            implementerDataCell.CellStyle = dataCellStyle;
+
+                            var projectCostDataCell = row.CreateCell(3);
+                            projectCostDataCell.SetCellValue(project.ProjectCost.ToString());
+                            projectCostDataCell.CellStyle = dataCellStyle;
+
+                            var actualDisbursementDataCell = row.CreateCell(4);
+                            actualDisbursementDataCell.SetCellValue(project.ActualDisbursements.ToString());
+                            actualDisbursementDataCell.CellStyle = dataCellStyle;
+
+                            var plannedDisbursementDataCell = row.CreateCell(5);
+                            plannedDisbursementDataCell.SetCellValue(project.PlannedDisbursements.ToString());
+                            plannedDisbursementDataCell.CellStyle = dataCellStyle;
+                        }
                     }
+
+                    row = excelSheet.CreateRow(++rowCounter);
+                    string grandTotalString = "Total funding: " + grandTotalFunding + " - Total disbursements: " + grandTotalDisbursement;
+                    var footerCell = row.CreateCell(0, CellType.String);
+                    footerCell.SetCellValue(grandTotalString);
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns));
+                    footerCell.CellStyle = footerStyle;
                     workbook.Write(fs);
                 }
                 response.Message = sFileName;
