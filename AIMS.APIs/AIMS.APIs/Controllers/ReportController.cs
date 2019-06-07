@@ -14,10 +14,12 @@ namespace AIMS.APIs.Controllers
     public class ReportController : ControllerBase
     {
         IReportService reportService;
+        IExcelGeneratorService excelService;
 
-        public ReportController(IReportService service)
+        public ReportController(IReportService service, IExcelGeneratorService eService)
         {
             this.reportService = service;
+            this.excelService = eService;
         }
 
         [HttpPost]
@@ -30,6 +32,11 @@ namespace AIMS.APIs.Controllers
             }
 
             var report = await reportService.GetProjectsBySectors(model);
+            var response = excelService.GenerateSectorProjectsReport(report);
+            if (response.Success)
+            {
+                report.ReportSettings.ExcelReportName = response.Message;
+            }
             return Ok(report);
         }
 
