@@ -27,6 +27,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AIMS.APIs.Scheduler;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.Http;
 
 namespace AIMS.APIs
 {
@@ -171,6 +173,14 @@ namespace AIMS.APIs
 
             /*Enabling cache and setting expiration time*/
             app.UseMvc();
+            app.UseStaticFiles();
+
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                FileProvider = new PhysicalFileProvider(
+                Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot/ExcelFiles")),
+                RequestPath = new PathString("/StaticFiles")
+            });
         }
     }
 }

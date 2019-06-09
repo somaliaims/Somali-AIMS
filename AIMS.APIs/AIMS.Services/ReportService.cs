@@ -56,9 +56,9 @@ namespace AIMS.Services
                 {
                     locationProjectsReport.ReportSettings = new Report()
                     {
-                        Title = ReportConstants.PROJECTS_BY_SECTOR_TITLE,
-                        SubTitle = ReportConstants.PROJECTS_BY_SECTOR_SUBTITLE,
-                        Footer = ReportConstants.PROJECTS_BY_SECTOR_FOOTER,
+                        Title = ReportConstants.PROJECTS_BY_LOCATION_TITLE,
+                        SubTitle = ReportConstants.PROJECTS_BY_LOCATION_SUBTITLE,
+                        Footer = ReportConstants.PROJECTS_BY_LOCATION_FOOTER,
                         Dated = DateTime.Now.ToLongDateString()
                     };
 
