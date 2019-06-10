@@ -1096,6 +1096,29 @@ namespace AIMS.Models
         public ProjectProfileView ProjectProfile { get; set; }
     }
 
+    public class ProjectsBudgetReport
+    {
+        public Report ReportSettings { get; set; }
+        public IEnumerable<ProjectBudgetView> Projects { get; set; }
+    }
+
+    public class ProjectBudgetView
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public decimal ProjectCost { get; set; }
+        public decimal ActualDisbursements { get; set; }
+        public decimal PlannedDisbursements { get; set; }
+        public ICollection<ProjectFunderView> Funders { get; set; }
+        public ICollection<ProjectImplementerView> Implementers { get; set; }
+        public ICollection<ProjectSectorView> Sectors { get; set; }
+        public ICollection<ProjectLocationDetailView> Locations { get; set; }
+        public ICollection<ProjectDisbursementView> Disbursements { get; set; }
+    }
+
     public class FilteredProjectProfileReport
     {
         public Report ReportSettings { get; set; }

@@ -143,8 +143,8 @@ namespace AIMS.Services
                     NPOI.SS.UserModel.IFont fontTitle = workbook.CreateFont();
                     fontTitle.Color = IndexedColors.DarkGreen.Index;
                     fontTitle.IsBold = true;
-                    titleStyle.SetFont(fontTitle);
                     fontTitle.FontHeightInPoints = 16;
+                    titleStyle.SetFont(fontTitle);
                     titleStyle.Alignment = HorizontalAlignment.CenterSelection;
                     titleStyle.VerticalAlignment = VerticalAlignment.Center;
 
