@@ -154,7 +154,7 @@ namespace AIMS.Services
                     footerFontTitle.IsBold = true;
                     fontTitle.FontHeightInPoints = 16;
                     footerStyle.SetFont(fontTitle);
-                    footerStyle.Alignment = HorizontalAlignment.Right;
+                    footerStyle.Alignment = HorizontalAlignment.Center;
                     footerStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle headerStyle = workbook.CreateCellStyle();
@@ -283,12 +283,22 @@ namespace AIMS.Services
                     }
 
                     row = excelSheet.CreateRow(++rowCounter);
-                    string grandTotalString = "Total funding: " + ApplyThousandFormat(grandTotalFunding) + " - Total disbursements: " + ApplyThousandFormat(grandTotalDisbursement);
                     var footerCell = row.CreateCell(0, CellType.String);
-                    footerCell.SetCellValue(grandTotalString);
+                    footerCell.SetCellValue("Grand totals: ");
                     excelSheet.AddMergedRegion(new CellRangeAddress(
-                        rowCounter, rowCounter, 0, totalColumns));
+                        rowCounter, rowCounter, 0, groupHeaderColumns));
                     footerCell.CellStyle = footerStyle;
+
+                    var grandFundTotalCell = row.CreateCell(3, CellType.Numeric);
+                    grandFundTotalCell.SetCellValue(ApplyThousandFormat(grandTotalFunding));
+                    grandFundTotalCell.CellStyle = footerStyle;
+
+                    var grandDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
+                    grandDisbursementTotalCell.SetCellValue(ApplyThousandFormat(grandTotalDisbursement));
+                    grandDisbursementTotalCell.CellStyle = footerStyle;
+
+                    var grandPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Numeric);
+                    grandPlannedDisbursementTotalCell.SetCellValue("");
                     workbook.Write(fs);
                 }
                 response.Message = sFileName;
@@ -336,7 +346,7 @@ namespace AIMS.Services
                     footerFontTitle.IsBold = true;
                     fontTitle.FontHeightInPoints = 16;
                     footerStyle.SetFont(fontTitle);
-                    footerStyle.Alignment = HorizontalAlignment.Right;
+                    footerStyle.Alignment = HorizontalAlignment.Center;
                     footerStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle headerStyle = workbook.CreateCellStyle();
@@ -462,12 +472,23 @@ namespace AIMS.Services
                     }
 
                     row = excelSheet.CreateRow(++rowCounter);
-                    string grandTotalString = "Total funding: " + ApplyThousandFormat(grandTotalFunding) + " - Total disbursements: " + ApplyThousandFormat(grandTotalDisbursement);
                     var footerCell = row.CreateCell(0, CellType.String);
-                    footerCell.SetCellValue(grandTotalString);
+                    footerCell.SetCellValue("Grand totals: ");
                     excelSheet.AddMergedRegion(new CellRangeAddress(
-                        rowCounter, rowCounter, 0, totalColumns));
+                        rowCounter, rowCounter, 0, groupHeaderColumns));
                     footerCell.CellStyle = footerStyle;
+
+                    var grandFundTotalCell = row.CreateCell(3, CellType.Numeric);
+                    grandFundTotalCell.SetCellValue(ApplyThousandFormat(grandTotalFunding));
+                    grandFundTotalCell.CellStyle = footerStyle;
+
+                    var grandDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
+                    grandDisbursementTotalCell.SetCellValue(ApplyThousandFormat(grandTotalDisbursement));
+                    grandDisbursementTotalCell.CellStyle = footerStyle;
+
+                    var grandPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Numeric);
+                    grandPlannedDisbursementTotalCell.SetCellValue("");
+                    
                     workbook.Write(fs);
                 }
                 response.Message = sFileName;
