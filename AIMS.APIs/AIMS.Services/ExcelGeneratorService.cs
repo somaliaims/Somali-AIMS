@@ -62,7 +62,7 @@ namespace AIMS.Services
                     IRow row = excelSheet.CreateRow(0);
 
                     var style = workbook.CreateCellStyle();
-                    NPOI.SS.UserModel.IFont fontTitle = workbook.CreateFont();
+                    IFont fontTitle = workbook.CreateFont();
                     fontTitle.Color = IndexedColors.DarkBlue.Index;
                     fontTitle.IsBold = true;
                     fontTitle.Boldweight = 18;
@@ -130,7 +130,7 @@ namespace AIMS.Services
                 var memory = new MemoryStream();
                 using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
                 {
-                    int rowCounter = 0, totalColumns = 6;
+                    int rowCounter = 0, totalColumns = 5, groupHeaderColumns = 2;
                     decimal grandTotalFunding = 0, grandTotalDisbursement = 0;
 
                     
@@ -140,7 +140,7 @@ namespace AIMS.Services
 
                     //Setting styles for different cell types
                     ICellStyle titleStyle = workbook.CreateCellStyle();
-                    NPOI.SS.UserModel.IFont fontTitle = workbook.CreateFont();
+                    IFont fontTitle = workbook.CreateFont();
                     fontTitle.Color = IndexedColors.DarkGreen.Index;
                     fontTitle.IsBold = true;
                     fontTitle.FontHeightInPoints = 16;
@@ -149,7 +149,7 @@ namespace AIMS.Services
                     titleStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle footerStyle = workbook.CreateCellStyle();
-                    NPOI.SS.UserModel.IFont footerFontTitle = workbook.CreateFont();
+                    IFont footerFontTitle = workbook.CreateFont();
                     footerFontTitle.Color = IndexedColors.DarkGreen.Index;
                     footerFontTitle.IsBold = true;
                     fontTitle.FontHeightInPoints = 16;
@@ -158,7 +158,7 @@ namespace AIMS.Services
                     footerStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle headerStyle = workbook.CreateCellStyle();
-                    NPOI.SS.UserModel.IFont fontHeader = workbook.CreateFont();
+                    IFont fontHeader = workbook.CreateFont();
                     fontHeader.Color = IndexedColors.Black.Index;
                     fontHeader.IsBold = true;
                     headerStyle.SetFont(fontTitle);
@@ -169,7 +169,7 @@ namespace AIMS.Services
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
-                    NPOI.SS.UserModel.IFont groupFontHeader = workbook.CreateFont();
+                    IFont groupFontHeader = workbook.CreateFont();
                     groupFontHeader.Color = IndexedColors.DarkYellow.Index;
                     groupFontHeader.IsBold = true;
                     groupHeaderStyle.SetFont(fontTitle);
@@ -184,15 +184,22 @@ namespace AIMS.Services
                     IRow row = excelSheet.CreateRow(rowCounter);
                     row.CreateCell(0, CellType.Blank);
                     excelSheet.AddMergedRegion(new CellRangeAddress(
-                        1, 1, 0, 3
+                        1, 1, 0, totalColumns
                         ));
 
                     row = excelSheet.CreateRow(++rowCounter);
                     var titleCell = row.CreateCell(0, CellType.String);
-                    titleCell.SetCellValue("Sector Projects Report");
+                    titleCell.SetCellValue("SomaliAIMS sector report - generated on " + DateTime.Now.ToLongDateString());
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns));
                     titleCell.CellStyle = titleStyle;
+
+                    //Adding extra line
+                    row = excelSheet.CreateRow(++rowCounter);
+                    row.CreateCell(0, CellType.Blank);
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns
+                        ));
 
                     //Header columns row
                     row = excelSheet.CreateRow(++rowCounter);
@@ -209,29 +216,42 @@ namespace AIMS.Services
                     implementerCol.CellStyle = headerStyle;
 
                     var projectCostCol = row.CreateCell(3);
-                    projectCostCol.SetCellValue("Project Cost");
+                    projectCostCol.SetCellValue("Project value");
                     projectCostCol.CellStyle = headerStyle;
 
                     var actualDisbursementsCol = row.CreateCell(4);
-                    actualDisbursementsCol.SetCellValue("Actual Disbursements");
+                    actualDisbursementsCol.SetCellValue("Actual disbursements");
                     actualDisbursementsCol.CellStyle = headerStyle;
 
                     var plannedDisbursementsCol = row.CreateCell(5);
-                    plannedDisbursementsCol.SetCellValue("Planned Disbursements");
+                    plannedDisbursementsCol.SetCellValue("Planned disbursements");
                     plannedDisbursementsCol.CellStyle = headerStyle;
 
                     foreach (var sector in report.SectorProjectsList)
                     {
-                        string sectorName = sector.SectorName + " Funding (" + sector.TotalFunding + ") - Disbursements (" + sector.TotalDisbursements + ")";
+                        decimal totalFunding = 0, totalDisbursements = 0;
+                        totalFunding = Math.Round(sector.TotalFunding, MidpointRounding.AwayFromZero);
+                        totalDisbursements = Math.Round(sector.TotalDisbursements, MidpointRounding.AwayFromZero);
                         row = excelSheet.CreateRow(++rowCounter);
                         grandTotalFunding += sector.TotalFunding;
                         grandTotalDisbursement += sector.TotalDisbursements;
 
                         var groupTitleCell = row.CreateCell(0, CellType.String);
                         excelSheet.AddMergedRegion(new CellRangeAddress(
-                            rowCounter, rowCounter, 0, totalColumns));
-                        groupTitleCell.SetCellValue(sectorName);
+                            rowCounter, rowCounter, 0, groupHeaderColumns));
+                        groupTitleCell.SetCellValue(sector.SectorName);
                         groupTitleCell.CellStyle = groupHeaderStyle;
+
+                        var groupFundTotalCell = row.CreateCell(3, CellType.Numeric);
+                        groupFundTotalCell.SetCellValue(ApplyThousandFormat(sector.TotalFunding));
+                        groupFundTotalCell.CellStyle = groupHeaderStyle;
+
+                        var groupDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
+                        groupDisbursementTotalCell.SetCellValue(ApplyThousandFormat(sector.TotalDisbursements));
+                        groupDisbursementTotalCell.CellStyle = groupHeaderStyle;
+
+                        var groupPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Numeric);
+                        groupPlannedDisbursementTotalCell.SetCellValue("");
 
                         foreach (var project in sector.Projects)
                         {
@@ -249,21 +269,21 @@ namespace AIMS.Services
                             implementerDataCell.CellStyle = dataCellStyle;
 
                             var projectCostDataCell = row.CreateCell(3);
-                            projectCostDataCell.SetCellValue(project.ProjectCost.ToString());
+                            projectCostDataCell.SetCellValue(ApplyThousandFormat(project.ProjectCost));
                             projectCostDataCell.CellStyle = dataCellStyle;
 
                             var actualDisbursementDataCell = row.CreateCell(4);
-                            actualDisbursementDataCell.SetCellValue(project.ActualDisbursements.ToString());
+                            actualDisbursementDataCell.SetCellValue(ApplyThousandFormat(project.ActualDisbursements));
                             actualDisbursementDataCell.CellStyle = dataCellStyle;
 
                             var plannedDisbursementDataCell = row.CreateCell(5);
-                            plannedDisbursementDataCell.SetCellValue(project.PlannedDisbursements.ToString());
+                            plannedDisbursementDataCell.SetCellValue(ApplyThousandFormat(project.PlannedDisbursements));
                             plannedDisbursementDataCell.CellStyle = dataCellStyle;
                         }
                     }
 
                     row = excelSheet.CreateRow(++rowCounter);
-                    string grandTotalString = "Total funding: " + grandTotalFunding + " - Total disbursements: " + grandTotalDisbursement;
+                    string grandTotalString = "Total funding: " + ApplyThousandFormat(grandTotalFunding) + " - Total disbursements: " + ApplyThousandFormat(grandTotalDisbursement);
                     var footerCell = row.CreateCell(0, CellType.String);
                     footerCell.SetCellValue(grandTotalString);
                     excelSheet.AddMergedRegion(new CellRangeAddress(
@@ -292,7 +312,7 @@ namespace AIMS.Services
                 var memory = new MemoryStream();
                 using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
                 {
-                    int rowCounter = 0, totalColumns = 6;
+                    int rowCounter = 0, totalColumns = 5, groupHeaderColumns = 2;
                     decimal grandTotalFunding = 0, grandTotalDisbursement = 0;
 
                     
@@ -302,7 +322,7 @@ namespace AIMS.Services
 
                     //Setting styles for different cell types
                     ICellStyle titleStyle = workbook.CreateCellStyle();
-                    NPOI.SS.UserModel.IFont fontTitle = workbook.CreateFont();
+                    IFont fontTitle = workbook.CreateFont();
                     fontTitle.Color = IndexedColors.DarkGreen.Index;
                     fontTitle.IsBold = true;
                     titleStyle.SetFont(fontTitle);
@@ -311,7 +331,7 @@ namespace AIMS.Services
                     titleStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle footerStyle = workbook.CreateCellStyle();
-                    NPOI.SS.UserModel.IFont footerFontTitle = workbook.CreateFont();
+                    IFont footerFontTitle = workbook.CreateFont();
                     footerFontTitle.Color = IndexedColors.DarkGreen.Index;
                     footerFontTitle.IsBold = true;
                     fontTitle.FontHeightInPoints = 16;
@@ -320,7 +340,7 @@ namespace AIMS.Services
                     footerStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle headerStyle = workbook.CreateCellStyle();
-                    NPOI.SS.UserModel.IFont fontHeader = workbook.CreateFont();
+                    IFont fontHeader = workbook.CreateFont();
                     fontHeader.Color = IndexedColors.Black.Index;
                     fontHeader.IsBold = true;
                     headerStyle.SetFont(fontTitle);
@@ -331,7 +351,7 @@ namespace AIMS.Services
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
-                    NPOI.SS.UserModel.IFont groupFontHeader = workbook.CreateFont();
+                    IFont groupFontHeader = workbook.CreateFont();
                     groupFontHeader.Color = IndexedColors.DarkYellow.Index;
                     groupFontHeader.IsBold = true;
                     groupHeaderStyle.SetFont(fontTitle);
@@ -346,15 +366,22 @@ namespace AIMS.Services
                     IRow row = excelSheet.CreateRow(rowCounter);
                     row.CreateCell(0, CellType.Blank);
                     excelSheet.AddMergedRegion(new CellRangeAddress(
-                        1, 1, 0, 3
+                        rowCounter, rowCounter, 0, totalColumns
                         ));
 
                     row = excelSheet.CreateRow(++rowCounter);
                     var titleCell = row.CreateCell(0, CellType.String);
-                    titleCell.SetCellValue("Location Projects Report");
+                    titleCell.SetCellValue("SomaliAIMS location report - generated on " + DateTime.Now.ToLongDateString());
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns));
                     titleCell.CellStyle = titleStyle;
+
+                    //Inserting extra row
+                    row = excelSheet.CreateRow(++rowCounter);
+                    row.CreateCell(0, CellType.Blank);
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns
+                        ));
 
                     //Header columns row
                     row = excelSheet.CreateRow(++rowCounter);
@@ -371,29 +398,39 @@ namespace AIMS.Services
                     implementerCol.CellStyle = headerStyle;
 
                     var projectCostCol = row.CreateCell(3);
-                    projectCostCol.SetCellValue("Project Cost");
+                    projectCostCol.SetCellValue("Project value");
                     projectCostCol.CellStyle = headerStyle;
 
                     var actualDisbursementsCol = row.CreateCell(4);
-                    actualDisbursementsCol.SetCellValue("Actual Disbursements");
+                    actualDisbursementsCol.SetCellValue("Actual disbursements");
                     actualDisbursementsCol.CellStyle = headerStyle;
 
                     var plannedDisbursementsCol = row.CreateCell(5);
-                    plannedDisbursementsCol.SetCellValue("Planned Disbursements");
+                    plannedDisbursementsCol.SetCellValue("Planned disbursements");
                     plannedDisbursementsCol.CellStyle = headerStyle;
 
                     foreach (var location in report.LocationProjectsList)
                     {
-                        string locationName = location.LocationName + " Funding (" + location.TotalFunding + ") - Disbursements (" + location.TotalDisbursements + ")";
                         row = excelSheet.CreateRow(++rowCounter);
                         grandTotalFunding += location.TotalFunding;
                         grandTotalDisbursement += location.TotalDisbursements;
 
                         var groupTitleCell = row.CreateCell(0, CellType.String);
                         excelSheet.AddMergedRegion(new CellRangeAddress(
-                            rowCounter, rowCounter, 0, totalColumns));
-                        groupTitleCell.SetCellValue(locationName);
+                            rowCounter, rowCounter, 0, groupHeaderColumns));
+                        groupTitleCell.SetCellValue(location.LocationName);
                         groupTitleCell.CellStyle = groupHeaderStyle;
+
+                        var groupFundTotalCell = row.CreateCell(3, CellType.Numeric);
+                        groupFundTotalCell.SetCellValue(ApplyThousandFormat(location.TotalFunding));
+                        groupFundTotalCell.CellStyle = groupHeaderStyle;
+
+                        var groupDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
+                        groupDisbursementTotalCell.SetCellValue(ApplyThousandFormat(location.TotalDisbursements));
+                        groupDisbursementTotalCell.CellStyle = groupHeaderStyle;
+
+                        var groupPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Numeric);
+                        groupPlannedDisbursementTotalCell.SetCellValue("");
 
                         foreach (var project in location.Projects)
                         {
@@ -411,21 +448,21 @@ namespace AIMS.Services
                             implementerDataCell.CellStyle = dataCellStyle;
 
                             var projectCostDataCell = row.CreateCell(3);
-                            projectCostDataCell.SetCellValue(project.ProjectCost.ToString());
+                            projectCostDataCell.SetCellValue(ApplyThousandFormat(project.ProjectCost));
                             projectCostDataCell.CellStyle = dataCellStyle;
 
                             var actualDisbursementDataCell = row.CreateCell(4);
-                            actualDisbursementDataCell.SetCellValue(project.ActualDisbursements.ToString());
+                            actualDisbursementDataCell.SetCellValue(ApplyThousandFormat(project.ActualDisbursements));
                             actualDisbursementDataCell.CellStyle = dataCellStyle;
 
                             var plannedDisbursementDataCell = row.CreateCell(5);
-                            plannedDisbursementDataCell.SetCellValue(project.PlannedDisbursements.ToString());
+                            plannedDisbursementDataCell.SetCellValue(ApplyThousandFormat(project.PlannedDisbursements));
                             plannedDisbursementDataCell.CellStyle = dataCellStyle;
                         }
                     }
 
                     row = excelSheet.CreateRow(++rowCounter);
-                    string grandTotalString = "Total funding: " + grandTotalFunding + " - Total disbursements: " + grandTotalDisbursement;
+                    string grandTotalString = "Total funding: " + ApplyThousandFormat(grandTotalFunding) + " - Total disbursements: " + ApplyThousandFormat(grandTotalDisbursement);
                     var footerCell = row.CreateCell(0, CellType.String);
                     footerCell.SetCellValue(grandTotalString);
                     excelSheet.AddMergedRegion(new CellRangeAddress(
@@ -441,6 +478,11 @@ namespace AIMS.Services
                 response.Success = false;
             }
             return response;
+        }
+
+        private string ApplyThousandFormat(decimal number)
+        {
+            return (number.ToString("#,##0.00"));
         }
     }
 }

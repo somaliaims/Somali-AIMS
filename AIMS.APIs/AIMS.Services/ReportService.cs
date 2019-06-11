@@ -33,6 +33,8 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <returns></returns>
         Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model);
+
+        //Task<ProjectsBudgetReport> GetProjectsBudgetReport();
     }
 
     public class ReportService : IReportService
