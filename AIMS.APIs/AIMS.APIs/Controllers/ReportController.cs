@@ -22,6 +22,14 @@ namespace AIMS.APIs.Controllers
             this.excelService = eService;
         }
 
+        [HttpGet]
+        [Route("GetProjectsBudgetReport")]
+        public async Task<IActionResult> GetProjectsBudgetReport()
+        {
+            var report = await reportService.GetProjectsBudgetReport();
+            return Ok(report);
+        }
+
         [HttpPost]
         [Route("GetSectorWiseProjects")]
         public async Task<IActionResult> GetSectorWiseProjects([FromBody] SearchProjectsBySectorModel model)

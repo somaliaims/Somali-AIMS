@@ -353,29 +353,37 @@ namespace AIMS.Services
                 IQueryable<EFProject> projectProfileList = null;
                 try
                 {
+                    budgetReport.ReportSettings = new Report()
+                    {
+                        Title = ReportConstants.PROJECTS_BUDGET_REPORT_TITLE,
+                        SubTitle = ReportConstants.PROJECTS_BUDGET_REPORT_SUBTITLE,
+                        Footer = ReportConstants.PROJECTS_BUDGET_REPORT_FOOTER,
+                        Dated = DateTime.Now.ToLongDateString()
+                    };
+
                     int currentYear = DateTime.Now.Year;
                     int previousYear = (currentYear - 1);
-                    int yearsUpperLimit = (currentYear + 3);
+                    int futureYearsLimit = (currentYear + 3);
                     List<ProjectBudgetView> projectBudgetsList = new List<ProjectBudgetView>();
 
                     projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndDate.Year >= currentYear,
-                            new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.FundingType" });
+                            new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.FundingType" });
 
-                    var currentYearProjects = (from project in projectProfileList
-                                               where project.StartDate.Year == currentYear
-                                               select project);
 
-                    foreach(var project in projectProfileList)
+                    
+                    foreach (var project in projectProfileList)
                     {
                         ProjectBudgetView projectBudget = new ProjectBudgetView();
                         int upperYearLimit = project.EndDate.Year;
                         int yearsLeft = upperYearLimit - currentYear;
 
+                        projectBudget.Id = project.Id;
+                        projectBudget.Title = project.Title;
                         if (project.Funders.Count > 0)
                         {
                             List<ProjectFunding> projectFunding = new List<ProjectFunding>();
                             projectBudget.Funding = (from f in project.Funders
-                                           group (f.Amount * f.ExchangeRate) by f.FundingType into g
+                                           group (f.Amount * f.ExchangeRate) by f.FundingType.FundingType into g
                                            select new ProjectFunding()
                                            {
                                                FundType = g.Key.ToString(),
@@ -384,10 +392,14 @@ namespace AIMS.Services
 
                             projectBudget.ProjectValue = projectBudget.Funding.Sum(f => f.Amount);
                         }
+                        else
+                        {
+                            projectBudget.ProjectValue = 0;
+                            projectBudget.Funding = new List<ProjectFunding>();
+                        }
                         
                         if (project.Disbursements.Count > 0)
                         {
-                            projectBudget.Title = project.Title;
                             projectBudget.PreviousYearDisbursements = (from d in project.Disbursements
                                                                        where d.Dated.Year == previousYear
                                                                        select (d.Amount * d.ExchangeRate)).Sum();
@@ -399,18 +411,55 @@ namespace AIMS.Services
                             List<ProjectExpectedDisbursements> expectedDisbursements = new List<ProjectExpectedDisbursements>();
                             for (int year = currentYear; year <= upperYearLimit; year++)
                             {
+                                decimal yearDisbursements = yearsLeft > 0 ? (Math.Round((projectBudget.ProjectValue - projectBudget.ActualDisbursements) / yearsLeft)) : projectBudget.ActualDisbursements;
+                                List<SectorDisbursements> sectorDisbursements = new List<SectorDisbursements>();
+                                foreach (var sector in project.Sectors)
+                                {
+                                    sectorDisbursements.Add(new SectorDisbursements()
+                                    {
+                                        Sector = sector.Sector.SectorName,
+                                        Disbursements = ((yearDisbursements / 100) * sector.FundsPercentage)
+                                    });
+                                }
+                                List<LocationDisbursements> locationDisbursements = new List<LocationDisbursements>();
+                                foreach (var location in project.Locations)
+                                {
+                                    locationDisbursements.Add(new LocationDisbursements()
+                                    {
+                                        Location = location.Location.Location,
+                                        Disbursements = ((yearDisbursements / 100) * location.FundsPercentage)
+                                    });
+                                }
+
                                 expectedDisbursements.Add(new ProjectExpectedDisbursements()
                                 {
                                     Year = year,
-                                    Disbursements = Math.Round((projectBudget.ProjectValue - projectBudget.ActualDisbursements) / yearsLeft)
-                                }); 
+                                    Disbursements = yearDisbursements,
+                                    SectorPercentages = sectorDisbursements,
+                                    LocationPercentages = locationDisbursements
+                                });
                             }
-                        } 
 
+                            for (int year = (upperYearLimit + 1); year <= futureYearsLimit; year++)
+                            {
+                                expectedDisbursements.Add(new ProjectExpectedDisbursements()
+                                {
+                                    Year = year,
+                                    Disbursements = 0,
+                                    SectorPercentages = new List<SectorDisbursements>(),
+                                    LocationPercentages = new List<LocationDisbursements>()
+                                });
+                            }
+                            projectBudget.ExpectedDisbursements = expectedDisbursements;
+                        }
+                        else
+                        {
+                            projectBudget.ActualDisbursements = 0;
+                            projectBudget.ExpectedDisbursements = new List<ProjectExpectedDisbursements>();
+                        }
+                        projectBudgetsList.Add(projectBudget);
                     }
-
-                    
-
+                    budgetReport.Projects = projectBudgetsList;
                 }
                 catch(Exception ex)
                 {

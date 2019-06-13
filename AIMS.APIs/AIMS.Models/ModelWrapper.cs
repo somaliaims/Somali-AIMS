@@ -1111,9 +1111,19 @@ namespace AIMS.Models
         public decimal ActualDisbursements { get; set; } = 0;
         public decimal PlannedDisbursements { get; set; } = 0;
         public ICollection<ProjectFunding> Funding { get; set; }
-        public ICollection<ProjectSectorView> Sectors { get; set; }
-        public ICollection<ProjectLocationDetailView> Locations { get; set; }
         public ICollection<ProjectExpectedDisbursements> ExpectedDisbursements { get; set; }
+    }
+
+    public class SectorDisbursements
+    {
+        public string Sector { get; set; }
+        public decimal Disbursements { get; set; }
+    }
+
+    public class LocationDisbursements
+    {
+        public string Location { get; set; }
+        public decimal Disbursements { get; set; }
     }
 
     public class ProjectFunding
@@ -1125,7 +1135,9 @@ namespace AIMS.Models
     public class ProjectExpectedDisbursements
     {
         public int Year { get; set; }
-        public decimal Disbursements { get; set; }
+        public decimal Disbursements { get; set; } = 0;
+        public ICollection<SectorDisbursements> SectorPercentages { get; set; }
+        public ICollection<LocationDisbursements> LocationPercentages { get; set; }
     }
 
     public class FilteredProjectProfileReport

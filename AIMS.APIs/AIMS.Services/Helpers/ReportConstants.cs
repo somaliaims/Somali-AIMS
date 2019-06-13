@@ -20,9 +20,14 @@ namespace AIMS.Services.Helpers
         public static readonly string PROJECTS_BY_SECTOR_SUBTITLE = "Projects by sectors list";
         public static readonly string PROJECTS_BY_SECTOR_FOOTER = "Projects list from AIMS Somalia";
 
-        //Constants for projects list by sectors
+        //Constants for projects list by locations
         public static readonly string PROJECTS_BY_LOCATION_TITLE = "Projects by locations list";
         public static readonly string PROJECTS_BY_LOCATION_SUBTITLE = "Projects by locations list";
         public static readonly string PROJECTS_BY_LOCATION_FOOTER = "Projects list from AIMS Somalia";
+
+        //Constants for projects budget report
+        public static readonly string PROJECTS_BUDGET_REPORT_TITLE = "Projects budget report";
+        public static readonly string PROJECTS_BUDGET_REPORT_SUBTITLE = "Projects budget year-wise";
+        public static readonly string PROJECTS_BUDGET_REPORT_FOOTER = "Projects budget report from AIMS Somalia";
     }
 }
