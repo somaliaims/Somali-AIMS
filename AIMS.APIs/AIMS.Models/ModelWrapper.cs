@@ -1106,17 +1106,26 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public string Description { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
-        public decimal ProjectCost { get; set; }
-        public decimal ActualDisbursements { get; set; }
-        public decimal PlannedDisbursements { get; set; }
-        public ICollection<ProjectFunderView> Funders { get; set; }
-        public ICollection<ProjectImplementerView> Implementers { get; set; }
+        public decimal ProjectValue { get; set; } = 0;
+        public decimal PreviousYearDisbursements { get; set; } = 0;
+        public decimal ActualDisbursements { get; set; } = 0;
+        public decimal PlannedDisbursements { get; set; } = 0;
+        public ICollection<ProjectFunding> Funding { get; set; }
         public ICollection<ProjectSectorView> Sectors { get; set; }
         public ICollection<ProjectLocationDetailView> Locations { get; set; }
-        public ICollection<ProjectDisbursementView> Disbursements { get; set; }
+        public ICollection<ProjectExpectedDisbursements> ExpectedDisbursements { get; set; }
+    }
+
+    public class ProjectFunding
+    {
+        public string FundType { get; set; }
+        public decimal Amount { get; set; }
+    }
+
+    public class ProjectExpectedDisbursements
+    {
+        public int Year { get; set; }
+        public decimal Disbursements { get; set; }
     }
 
     public class FilteredProjectProfileReport
@@ -1176,6 +1185,15 @@ namespace AIMS.Models
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
         public List<int> LocationIds { get; set; } = new List<int>();
+    }
+
+    public class SearchProjectsByBudgetModel
+    {
+        public string Title { get; set; } = null;
+        public List<int> SectorIds { get; set; } = new List<int>();
+        public List<int> LocationIds { get; set; } = new List<int>();
+        public int StartingYear { get; set; } = 0;
+        public int EndingYear { get; set; } = 0;
     }
 
     public class ProjectViewForSector
