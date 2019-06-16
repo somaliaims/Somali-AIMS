@@ -66,6 +66,8 @@ namespace AIMS.APIs.Controllers
 
             string adminEmail = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
                                 .GetValue<String>("Email:Smtp:AdminEmail");
+            string apiUrl = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
+                                .GetValue<String>("Email:Smtp:AdminEmail");
             var response = userService.Add(user, adminEmail);
             if (!response.Success)
             {

@@ -16,7 +16,7 @@ namespace AIMS.Services.Helpers
         /// <param name="emailList"></param>
         /// <param name="organizationName"></param>
         /// <returns></returns>
-        ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName, string message);
+        ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName, string subject, string message);
 
         /// <summary>
         /// Send emails to users
@@ -47,7 +47,7 @@ namespace AIMS.Services.Helpers
             emailFrom = adminEmail;
         }
 
-        public ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName, string message)
+        public ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName, string subject, string message)
         {
             ActionResponse response = new ActionResponse();
             MailMessage mailMessage = new MailMessage();
@@ -71,7 +71,7 @@ namespace AIMS.Services.Helpers
                 string emailMessage = this.GetUserRegistrationMessageForAdmin(organizationName, message);
                 mailMessage.To.Add(managersEmailString);
                 mailMessage.Body = emailMessage;
-                mailMessage.Subject = "New User Registration";
+                mailMessage.Subject = subject;
                 client.Send(mailMessage);
             }
 
@@ -80,7 +80,7 @@ namespace AIMS.Services.Helpers
                 string emailMessage = this.GetUserRegistrationMessageForUser(organizationName, message);
                 mailMessage.To.Add(usersEmailString);
                 mailMessage.Body = emailMessage;
-                mailMessage.Subject = "New User Registration for " + organizationName;
+                mailMessage.Subject = subject;
                 client.Send(mailMessage);
             }
             return response;
@@ -139,7 +139,7 @@ namespace AIMS.Services.Helpers
         private string FormatMessage(string title, string message)
         {
             List<string> messageList = new List<string>();
-            messageList.Add("<h2>" + title + "</h2>");
+            messageList.Add("<h3>Dear user,</h3>");
             messageList.Add(message);
             return (String.Join(string.Empty, messageList));
         }
@@ -147,7 +147,7 @@ namespace AIMS.Services.Helpers
         private string GetUserRegistrationMessageForAdmin(string organizationName, string message = null)
         {
             List<string> messageList = new List<string>();
-            messageList.Add("<h1>New User Registration for " + organizationName + "</h1>");
+            messageList.Add("<h3>Dear user,</h3><p>New User Registration for " + organizationName + "</p>");
             if (message != null)
             {
                 messageList.Add("<p>" + message + "</p>");
@@ -164,7 +164,7 @@ namespace AIMS.Services.Helpers
         private string GetUserRegistrationMessageForUser(string organizationName, string message = null)
         {
             List<string> messageList = new List<string>();
-            messageList.Add("<h1>Dear AIMS User</h1>");
+            messageList.Add("<h3>Dear user</h3>");
 
             if (message != null)
             {
@@ -182,7 +182,7 @@ namespace AIMS.Services.Helpers
         private string GetPasswordResetMessage(string email, string fullName, string token, string url)
         {
             List<string> messageList = new List<string>();
-            messageList.Add("<h1>Dear AIMS User (" + fullName + ")</h1>");
+            messageList.Add("<h3>Dear user</h3>");
             messageList.Add("<p>We have received a password reset request for your email. If it was not you, please ignore this email.</p>");
             messageList.Add("<p>Click on the link below and follow the instructions to reset password. This link will expire in two hours</p>");
             messageList.Add("<p><a target='_blank' href='" + url + token + "'>Password Reset Link</a></p>");

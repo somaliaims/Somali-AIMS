@@ -409,6 +409,8 @@ namespace AIMS.Models
         public EmailMessageType MessageType { get; set; }
         [MaxLength(100)]
         public string TypeDefinition { get; set; }
+        [MaxLength(200)]
+        public string Subject { get; set; } = "No subject";
         [MaxLength(1000)]
         public string Message { get; set; } = null;
     }

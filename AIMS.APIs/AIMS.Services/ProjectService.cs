@@ -1175,15 +1175,16 @@ namespace AIMS.Services
                                 smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                             }
 
-                            string message = "";
+                            string subject = "", message = "";
                             var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewProjectToOrg);
                             if (emailMessage != null)
                             {
+                                subject = emailMessage.Subject;
                                 message = emailMessage.Message;
                             }
                             message += mHelper.ProjectToOrganizationMessage(funder.OrganizationName);
                             IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                            emailHelper.SendEmailToUsers(emailAddresses, "New project", "New project for " + funder.OrganizationName, message);
+                            emailHelper.SendEmailToUsers(emailAddresses, "New project", subject, message);
                         }
                     }
                     project.DateUpdated = DateTime.Now;

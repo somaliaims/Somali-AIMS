@@ -67,6 +67,7 @@ namespace AIMS.Services
                         Id = message.Id,
                         TypeDefinition = message.TypeDefinition,
                         MessageType = message.MessageType,
+                        Subject = message.Subject,
                         Message = message.Message
                     });
                 }
@@ -87,6 +88,7 @@ namespace AIMS.Services
                         Id = message.Id,
                         TypeDefinition = message.TypeDefinition,
                         MessageType = message.MessageType,
+                        Subject = message.Subject,
                         Message = message.Message
                     });
                 }
@@ -103,7 +105,7 @@ namespace AIMS.Services
                 {
                     return new EmailMessageView() { };
                 }
-                return new EmailMessageView() { Id = emailMessage.Id, TypeDefinition = emailMessage.TypeDefinition, MessageType = emailMessage.MessageType, Message = emailMessage.Message };
+                return new EmailMessageView() { Id = emailMessage.Id, TypeDefinition = emailMessage.TypeDefinition, MessageType = emailMessage.MessageType, Subject = emailMessage.Subject, Message = emailMessage.Message };
             }
         }
 
@@ -126,6 +128,7 @@ namespace AIMS.Services
                         var newEmailMessage = unitWork.EmailMessagesRepository.Insert(new EFEmailMessages()
                         {
                             MessageType = model.MessageType,
+                            Subject = model.Subject,
                             Message = model.Message
                         });
                         response.ReturnedId = newEmailMessage.Id;
@@ -156,6 +159,7 @@ namespace AIMS.Services
                 }
 
                 response.Message = true.ToString();
+                emailMessage.Subject = model.Subject;
                 emailMessage.Message = model.Message;
                 unitWork.EmailMessagesRepository.Update(emailMessage);
                 unitWork.Save();

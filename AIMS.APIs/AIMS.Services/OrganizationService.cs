@@ -313,9 +313,10 @@ namespace AIMS.Services
                             unitWork.Save();
                         }
 
-                        string message = "";
+                        string subject = "", message = "";
                         if (emailMessage != null)
                         {
+                            subject = emailMessage.Subject;
                             message = emailMessage.Message;
                         }
 
@@ -360,7 +361,7 @@ namespace AIMS.Services
                                 });
                             }
                             IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
-                            emailHelper.SendEmailToUsers(emailAddresses, "Organizations merged", "Organizations merged", message);
+                            emailHelper.SendEmailToUsers(emailAddresses, "Organizations merged", subject, message);
                         }
                         
                         

@@ -370,7 +370,6 @@ namespace AIMS.Services
                             new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.FundingType" });
 
 
-                    
                     foreach (var project in projectProfileList)
                     {
                         ProjectBudgetView projectBudget = new ProjectBudgetView();
@@ -379,6 +378,7 @@ namespace AIMS.Services
 
                         projectBudget.Id = project.Id;
                         projectBudget.Title = project.Title;
+                        projectBudget.PreviousYear = (currentYear - 1);
                         if (project.Funders.Count > 0)
                         {
                             List<ProjectFunding> projectFunding = new List<ProjectFunding>();

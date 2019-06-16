@@ -520,10 +520,11 @@ namespace AIMS.Services
                                         smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                                     }
 
-                                    string message = "";
+                                    string subject = "", message = "";
                                     var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ChangedMappingEffectedProject);
                                     if (emailMessage != null)
                                     {
+                                        subject = emailMessage.Subject;
                                         message = emailMessage.Message;
                                     }
 
@@ -532,7 +533,7 @@ namespace AIMS.Services
                                     string newSectorName = newSector != null ? newSector.SectorName : null;
                                     message += mHelper.ChangedMappingAffectedProjectsMessage(projectNames, oldSectorName, newSectorName);
                                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                                    emailHelper.SendEmailToUsers(emailAddresses, "Sector mapping changed", "Sector mapping changed", message);
+                                    emailHelper.SendEmailToUsers(emailAddresses, "Sector mapping changed", subject, message);
                                 }
                             }
                         }

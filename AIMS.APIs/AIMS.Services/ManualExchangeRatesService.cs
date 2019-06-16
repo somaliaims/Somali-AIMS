@@ -100,13 +100,24 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                TimeSpan dateDifference = new TimeSpan();
+                int differencePreviousDays = 0, differenceFutureDays = 0;
                 var manualRate = unitWork.ManualRatesRepository.GetOne(r => r.Dated.Date == dated.Date);
                 if (manualRate == null)
                 {
                     manualRate = unitWork.ManualRatesRepository.GetOneOrderByDescending(r => r.Dated.Date < dated.Date);
+                    var previousDate = manualRate.Dated;
+                    dateDifference = dated - previousDate;
+                    differencePreviousDays = dateDifference.Days;
+
                     if (manualRate == null)
                     {
-                        manualRate = unitWork.ManualRatesRepository.GetOneOrderByAscending(r => r.Dated.Date > dated.Date);
+                        var futureManualRate = unitWork.ManualRatesRepository.GetOneOrderByAscending(r => r.Dated.Date > dated.Date);
+                        var futureDate = manualRate.Dated;
+                        dateDifference = futureDate - dated;
+                        differenceFutureDays = dateDifference.Days;
+
+                        manualRate = (differenceFutureDays < differencePreviousDays) ? futureManualRate : manualRate;
                     }
                 }
                 return mapper.Map<ManualRatesView>(manualRate);

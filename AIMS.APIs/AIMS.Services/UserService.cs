@@ -386,13 +386,13 @@ namespace AIMS.Services
                             smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                         }
 
-                        string message = "";
+                        string message = "", subject = "";
                         var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewUser);
                         if (emailMessage != null)
                         {
+                            subject = emailMessage.Subject;
                             message = emailMessage.Message;
                         }
-
                         mHelper = new MessageHelper();
                         //Add notification
                         unitWork.NotificationsRepository.Insert(new EFUserNotifications()
@@ -409,7 +409,7 @@ namespace AIMS.Services
 
                         message += mHelper.NewUserForOrganization(organization.OrganizationName);
                         IEmailHelper emailHelper = new EmailHelper(adminEmail, smtpSettingsModel);
-                        emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, message);
+                        emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, subject, message);
                     }
                     response.ReturnedId = newUser.Id;
                 }

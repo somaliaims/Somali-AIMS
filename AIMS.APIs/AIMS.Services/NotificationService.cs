@@ -143,16 +143,17 @@ namespace AIMS.Services
 
                 if (newSectors > 0)
                 {
-                    string message = "";
+                    string subject = "", message = "";
                     var emailMessage = (from m in messages
                                       where m.MessageType == EmailMessageType.NewIATISector
                                       select m).FirstOrDefault();
-                    if (emailMessage != null)
-                    {
-                        message = emailMessage.Message;
-                    }
+                if (emailMessage != null)
+                {
+                    subject = emailMessage.Subject;
+                    message = emailMessage.Message;
+                }
 
-                    ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                ISMTPSettingsService smtpService = new SMTPSettingsService(context);
                     var smtpSettings = smtpService.GetPrivate();
                     SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
                     if (smtpSettings != null)
@@ -181,7 +182,7 @@ namespace AIMS.Services
                     message += mHelper.NewIATISectorsAdded(newSectors);
                     if (emailAddresses.Count > 0)
                     {
-                        emailHelper.SendEmailToUsers(emailAddresses, "New IATI Sectors", "New IATI Sectors", message);
+                        emailHelper.SendEmailToUsers(emailAddresses, "New IATI Sectors", subject, message);
                     }
 
                     /*unitWork.NotificationsRepository.Insert(new EFUserNotifications()

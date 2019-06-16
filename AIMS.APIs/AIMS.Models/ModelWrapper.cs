@@ -493,6 +493,7 @@ namespace AIMS.Models
         public string OrganizationName { get; set; }
         //public int OrganizationTypeId { get; set; }
         public bool IsNewOrganization { get; set; }
+        public string LoginUrl { get; set; }
     }
 
     public class EditUserOrganization
@@ -1107,6 +1108,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public decimal ProjectValue { get; set; } = 0;
+        public int PreviousYear { get; set; }
         public decimal PreviousYearDisbursements { get; set; } = 0;
         public decimal ActualDisbursements { get; set; } = 0;
         public decimal PlannedDisbursements { get; set; } = 0;
@@ -1313,6 +1315,9 @@ namespace AIMS.Models
     public class EmailMessageModel
     {
         public EmailMessageType MessageType { get; set; }
+        [MaxLength(200)]
+        public string Subject { get; set; }
+        [MaxLength(1000)]
         public string Message { get; set; }
     }
 
@@ -1321,6 +1326,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public EmailMessageType MessageType { get; set; }
         public string TypeDefinition { get; set; }
+        public string Subject { get; set; }
         public string Message { get; set; }
     }
 }
