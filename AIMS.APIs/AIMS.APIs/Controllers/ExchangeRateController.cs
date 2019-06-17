@@ -68,7 +68,8 @@ namespace AIMS.APIs.Controllers
             bool isTodaysDate = false;
             if (dated.Date > DateTime.Now.Date)
             {
-                return BadRequest("Invalid date provided. Currency rates cannot be fetched for future dates");
+                dated = DateTime.Now;
+                isTodaysDate = true;
             }
             else if(dated.Date == DateTime.Now.Date)
             {
