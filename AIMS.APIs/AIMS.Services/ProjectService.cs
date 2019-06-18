@@ -1280,11 +1280,11 @@ namespace AIMS.Services
 
                     var funders = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.ProjectId == model.ProjectId);
                     decimal totalFunds = (from funds in funders
-                                          select funds.Amount).Sum();
+                                          select (funds.Amount * (1 / funds.ExchangeRate))).Sum();
 
                     var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.ProjectId == model.ProjectId);
                     decimal totalDisbursement = ((from disbursement in disbursements
-                                                  select disbursement.Amount).Sum()) + model.Amount;
+                                                  select (disbursement.Amount * (1 / disbursement.ExchangeRate))).Sum()) + (model.Amount * (1 / model.ExchangeRate));
 
                     if (totalDisbursement > totalFunds)
                     {

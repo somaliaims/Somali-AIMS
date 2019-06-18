@@ -116,7 +116,7 @@ namespace AIMS.APIs.Scheduler
                 }
 
                 //File cleanup
-                string excelFiles = sWebRootFolder + "/ExcelSheets";
+                string excelFiles = sWebRootFolder + "/ExcelFiles";
                 if (Directory.Exists(excelFiles))
                 {
                     string[] files = Directory.GetFiles(excelFiles);

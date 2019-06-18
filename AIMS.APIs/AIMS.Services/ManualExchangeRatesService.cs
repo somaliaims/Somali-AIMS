@@ -110,15 +110,12 @@ namespace AIMS.Services
                     dateDifference = dated - previousDate;
                     differencePreviousDays = dateDifference.Days;
 
-                    if (manualRate == null)
-                    {
-                        var futureManualRate = unitWork.ManualRatesRepository.GetOneOrderByAscending(r => r.Dated.Date > dated.Date);
-                        var futureDate = manualRate.Dated;
-                        dateDifference = futureDate - dated;
-                        differenceFutureDays = dateDifference.Days;
+                    var futureManualRate = unitWork.ManualRatesRepository.GetOneOrderByDescending(r => r.Dated.Date > dated.Date);
+                    var futureDate = futureManualRate.Dated;
+                    dateDifference = futureDate - dated;
+                    differenceFutureDays = dateDifference.Days;
 
-                        manualRate = (differenceFutureDays < differencePreviousDays) ? futureManualRate : manualRate;
-                    }
+                    manualRate = (differenceFutureDays < differencePreviousDays) ? futureManualRate : manualRate;
                 }
                 return mapper.Map<ManualRatesView>(manualRate);
             }
