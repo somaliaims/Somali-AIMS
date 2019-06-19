@@ -76,11 +76,11 @@ namespace AIMS.Services
                             new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
-                    if (model.StartingYear >= 2000 && model.EndingYear >= 2000)
+                    if (model.StartingYear >= 1970 && model.EndingYear >= 1970)
                     {
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear)),
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.EndDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear)),
                             new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
@@ -193,6 +193,14 @@ namespace AIMS.Services
                                 {
                                     if (project.Disbursements.Count() > 0)
                                     {
+                                        if (model.StartingYear >= 1970 && model.EndingYear >= 1970)
+                                        {
+                                            project.Disbursements = (from d in project.Disbursements
+                                                                     where Convert.ToDateTime(d.Dated).Year >= model.StartingYear &&
+                                                                     Convert.ToDateTime(d.Dated).Year <= model.EndingYear
+                                                                     select d).ToList();
+                                        }
+                                        
                                         decimal projectDisbursements = project.Disbursements.Select(d => (d.Amount * d.ExchangeRate)).Sum();
                                         totalDisbursements = Math.Round(totalDisbursements, 2, MidpointRounding.AwayFromZero);
                                         totalDisbursements += projectDisbursements;
@@ -500,7 +508,7 @@ namespace AIMS.Services
                     {
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear)),
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.EndDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear)),
                             new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
@@ -613,6 +621,13 @@ namespace AIMS.Services
                                 {
                                     if (project.Disbursements.Count() > 0)
                                     {
+                                        if (model.StartingYear >= 1970 && model.EndingYear >= 1970)
+                                        {
+                                            project.Disbursements = (from d in project.Disbursements
+                                                                     where Convert.ToDateTime(d.Dated).Year >= model.StartingYear &&
+                                                                     Convert.ToDateTime(d.Dated).Year <= model.EndingYear
+                                                                     select d).ToList();
+                                        }
                                         decimal projectDisbursements = project.Disbursements.Select(d=> (d.Amount * (d.ExchangeRate < 1 ? (1 / d.ExchangeRate) : d.ExchangeRate))).Sum();
                                         totalDisbursements += projectDisbursements;
                                         totalDisbursements = decimal.Round(totalDisbursements, 2, MidpointRounding.AwayFromZero);
