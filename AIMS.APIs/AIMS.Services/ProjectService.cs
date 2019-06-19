@@ -464,6 +464,9 @@ namespace AIMS.Services
                 {
                     foreach (var project in projectProfileList)
                     {
+                        var projectDisbursements = (from d in project.Disbursements
+                                                    orderby d.Dated descending
+                                                    select d);
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
@@ -473,7 +476,7 @@ namespace AIMS.Services
                         profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                         profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
-                        profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);
+                        profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(projectDisbursements);
                         profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
                         profileView.CustomFields = mapper.Map<List<ProjectCustomFieldsView>>(project.CustomFields);
                     }
@@ -886,7 +889,9 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var disbursements = unitWork.ProjectDisbursementsRepository.GetMany(s => s.ProjectId == id);
+                var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.ProjectId == id);
+                disbursements = (disbursements != null && disbursements.Count() > 0) ? 
+                                    (from d in disbursements orderby d.Dated descending select d) : disbursements;
                 return mapper.Map<List<ProjectDisbursementView>>(disbursements);
             }
         }
