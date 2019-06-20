@@ -1240,14 +1240,26 @@ namespace AIMS.Services
                         response.Success = false;
                     }
 
-                    unitWork.ProjectImplementersRepository.Insert(new EFProjectImplementers()
+                    var isImplementerExists = unitWork.ProjectImplementersRepository.GetOne(i => i.ProjectId == model.ProjectId && i.ImplementerId == model.ImplementerId);
+
+                    if (isImplementerExists != null)
                     {
-                        Project = project,
-                        Implementer = implementer,
-                    });
-                    project.DateUpdated = DateTime.Now;
-                    unitWork.ProjectRepository.Update(project);
-                    unitWork.Save();
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.AlreadyExists("Implementer");
+                        response.Success = false;
+                        return response;
+                    }
+                    else
+                    {
+                        unitWork.ProjectImplementersRepository.Insert(new EFProjectImplementers()
+                        {
+                            Project = project,
+                            Implementer = implementer,
+                        });
+                        project.DateUpdated = DateTime.Now;
+                        unitWork.ProjectRepository.Update(project);
+                        unitWork.Save();
+                    }
                 }
                 catch (Exception ex)
                 {

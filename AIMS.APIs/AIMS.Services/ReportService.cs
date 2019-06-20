@@ -209,7 +209,7 @@ namespace AIMS.Services
                                         var startDate = DateTime.Now;
                                         int months = helper.GetMonthDifference(startDate, endDate);
 
-                                        project.ActualDisbursements = ((projectDisbursements / 100) * location.FundsPercentage);
+                                        project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * location.FundsPercentage), MidpointRounding.AwayFromZero);
                                         if (months > 0)
                                         {
                                             project.PlannedDisbursements = Math.Round((project.ProjectCost - projectDisbursements) / months);
@@ -303,7 +303,7 @@ namespace AIMS.Services
                                         var startDate = DateTime.Now;
                                         int months = helper.GetMonthDifference(startDate, endDate);
 
-                                        project.ActualDisbursements = ((projectDisbursements / 100) * location.FundsPercentage);
+                                        project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * location.FundsPercentage), MidpointRounding.AwayFromZero );
                                         if (months > 0)
                                         {
                                             project.PlannedDisbursements = Math.Round((project.ProjectCost - project.ActualDisbursements) / months);
@@ -636,7 +636,7 @@ namespace AIMS.Services
                                         var startDate = DateTime.Now;
                                         int months = helper.GetMonthDifference(startDate, endDate);
 
-                                        project.ActualDisbursements = ((projectDisbursements / 100) * sector.FundsPercentage);
+                                        project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero);
                                         if (months > 0)
                                         {
                                             project.PlannedDisbursements = Math.Round((project.ProjectCost - projectDisbursements) / months);
@@ -729,7 +729,7 @@ namespace AIMS.Services
                                         var startDate = DateTime.Now;
                                         int months = helper.GetMonthDifference(startDate, endDate);
 
-                                        project.ActualDisbursements = ((projectDisbursements / 100) * sector.FundsPercentage);
+                                        project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero);
                                         if (months > 0)
                                         {
                                             project.PlannedDisbursements = Math.Round((project.ProjectCost - project.ActualDisbursements) / months);
