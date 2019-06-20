@@ -525,6 +525,7 @@ namespace AIMS.Models
         public string Location { get; set; }
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
+        public decimal FundsPercentage { get; set; }
     }
 
     public class LocationModel

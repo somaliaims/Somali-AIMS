@@ -252,6 +252,26 @@ namespace AIMS.Models
         public DateTime? Dated { get; set; }
     }
 
+    public class EFProjectFunderRequests
+    {
+        [ForeignKey("Funder")]
+        public int FunderId { get; set; }
+        public EFOrganization Funder { get; set; }
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
+        [ForeignKey("FundingType")]
+        public int FundingTypeId { get; set; }
+        public EFFundingTypes FundingType { get; set; }
+        [Column(TypeName = "decimal(11 ,2)")]
+        public decimal Amount { get; set; }
+        public string Currency { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
+        public decimal ExchangeRate { get; set; }
+        public DateTime? Dated { get; set; }
+        public DateTime RequestDate { get; set; }
+    }
+
     public class EFProjectImplementers
     {
         [ForeignKey("Implementer")]
@@ -260,6 +280,17 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
+    }
+
+    public class EFProjectImplementerRequests
+    {
+        [ForeignKey("Implementer")]
+        public int ImplementerId { get; set; }
+        public EFOrganization Implementer { get; set; }
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
+        public DateTime RequestDate { get; set; }
     }
 
     public class EFReportSubscriptions
