@@ -150,7 +150,7 @@ namespace AIMS.APIs.Controllers
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
             }
-            if (organizationId != 0)
+            if (organizationId == 0)
             {
                 return BadRequest("Unauthorized user access to api");
             }
