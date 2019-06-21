@@ -29,16 +29,10 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFProjectFunders>()
                 .HasKey(f => new { f.ProjectId, f.FunderId, f.FundingTypeId });
 
-            modelBuilder.Entity<EFProjectFunderRequests>()
-                .HasKey(f => new { f.ProjectId, f.FunderId, f.FundingTypeId });
-
             modelBuilder.Entity<EFSector>()
                 .HasOne(s => s.ParentSector);
 
             modelBuilder.Entity<EFProjectImplementers>()
-                .HasKey(i => new { i.ProjectId, i.ImplementerId });
-
-            modelBuilder.Entity<EFProjectImplementerRequests>()
                 .HasKey(i => new { i.ProjectId, i.ImplementerId });
 
             modelBuilder.Entity<EFProjectSectors>()
@@ -73,6 +67,9 @@ namespace AIMS.DAL.EF
 
             modelBuilder.Entity<EFSectorMappings>()
                 .HasKey(m => new { m.SectorId, m.MappedSectorId });
+
+            modelBuilder.Entity<EFProjectMembershipRequests>()
+                .HasKey(m => new { m.ProjectId, m.UserEmail });
                 
         }
 
@@ -111,8 +108,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFExchangeRatesAPIsCount> ExchangeRatesAPIsCount { get; set; }
         public DbSet<EFEnvelope> Envelope { get; set; }
         public DbSet<EFEmailMessages> EmailMessages { get; set; }
-        public DbSet<EFProjectFunderRequests> FunderRequests { get; set; }
-        public DbSet<EFProjectImplementerRequests> ImplementerRequests { get; set; }
+        public DbSet<EFProjectMembershipRequests> ProjectMembershipRequests { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime

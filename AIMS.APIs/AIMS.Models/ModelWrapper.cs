@@ -1330,4 +1330,22 @@ namespace AIMS.Models
         public string Subject { get; set; }
         public string Message { get; set; }
     }
+
+    public class ProjectMembershipRequestModel
+    {
+        [Required]
+        public int ProjectId { get; set; }
+        [Required]
+        [EmailAddress]
+        public string UserEmail { get; set; }
+    }
+
+    public class ProjectMembershipRequestView
+    {
+        public int ProjectId { get; set; }
+        public string Project { get; set; }
+        public string UserOrganization { get; set; }
+        public string Dated { get; set; }
+        public bool IsApproved { get; set; }
+    }
 }

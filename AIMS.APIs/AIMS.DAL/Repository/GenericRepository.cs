@@ -246,7 +246,7 @@ namespace AIMS.DAL.Repository
         {
             IQueryable<TEntity> query = this.DbSet;
             query = include.Aggregate(query, (current, inc) => current.Include(inc));
-            return query.Where(predicate);
+            return query.Where(predicate).AsQueryable();
         }
 
         public IQueryable<TEntity> GetWithIncludeOrderBy(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate, Func<TEntity, string> orderBy, params string[] include)
@@ -266,7 +266,7 @@ namespace AIMS.DAL.Repository
         {
             IQueryable<TEntity> query = this.DbSet;
             query = include.Aggregate(query, (current, inc) => current.Include(inc));
-            return await Task<IQueryable<TEntity>>.Run(() => query.Where(predicate)).ConfigureAwait(false);
+            return await Task<IQueryable<TEntity>>.Run(() => query.Where(predicate).AsQueryable()).ConfigureAwait(false);
         }
 
         /// <summary>
