@@ -178,6 +178,12 @@ namespace AIMS.Services.Helpers
         /// <param name="newSector"></param>
         /// <returns></returns>
         string ChangedMappingAffectedProjectsMessage(List<string> affectedProjects, string oldSector, string newSector);
+
+        /// <summary>
+        /// Gets message for an invalid attempt to approve a funder
+        /// </summary>
+        /// <returns></returns>
+        string GetInvalidFunderApprovalMessage();
     }
 
     public class MessageHelper : IMessageHelper
@@ -196,6 +202,7 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_PERCENTAGE = "Invalid value provided for percentage.";
         private readonly string ALREADY_EXISTS = " provided is already entered once.";
         private readonly string INVALID_DATE = "Invalid value provided for date";
+        private readonly string INVALID_FUNDER_APPROVAL = "You are not authorized to approve the provided funder";
         private readonly string INVALID_OPTIONS_COUNT = "Invalid number of options provided for the type of field";
         private readonly string INVALID_SECTOR_TYPE_DELETION = "A sector type cannot be deleted untill all the sector under the type is deleted";
         private readonly string INVALID_DISBURSEMENTS = "You cannot add more disbursements than the project total value. Please increase the project funding amount before adding more disbursements.";
@@ -315,7 +322,12 @@ namespace AIMS.Services.Helpers
         {
             return ("<p>" + sectorCount + " new sectors added from IATI</p>");
         }
-        
+
+        public string GetInvalidFunderApprovalMessage()
+        {
+            return (INVALID_FUNDER_APPROVAL);
+        }
+
         public string OrganizationsMergedMessage(List<string> organizations, string newOrganization)
         {
             List<string> formattedMessageList = new List<string>();

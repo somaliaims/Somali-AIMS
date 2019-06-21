@@ -254,8 +254,12 @@ namespace AIMS.Models
 
     public class EFProjectMembershipRequests
     {
+        [ForeignKey("Project")]
         public int ProjectId { get; set; }
-        public string UserEmail { get; set; }
+        public EFProject Project { get; set; }
+        [ForeignKey("User")]
+        public int UserId { get; set; }
+        public EFUser User { get; set; }
         public DateTime Dated { get; set; }
         public bool IsApproved { get; set; }
     }

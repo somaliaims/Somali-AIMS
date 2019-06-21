@@ -69,7 +69,7 @@ namespace AIMS.DAL.EF
                 .HasKey(m => new { m.SectorId, m.MappedSectorId });
 
             modelBuilder.Entity<EFProjectMembershipRequests>()
-                .HasKey(m => new { m.ProjectId, m.UserEmail });
+                .HasKey(m => new { m.ProjectId, m.UserId });
                 
         }
 
