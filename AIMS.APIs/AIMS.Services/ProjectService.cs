@@ -249,6 +249,13 @@ namespace AIMS.Services
         IEnumerable<ProjectMarkersView> GetProjectMarkers(int id);
 
         /// <summary>
+        /// Gets users projects
+        /// </summary>
+        /// <param name="funderId"></param>
+        /// <returns></returns>
+        IEnumerable<UserProjectsView> GetUserProjects(int funderId);
+
+        /// <summary>
         /// Deletes project location
         /// </summary>
         /// <param name="projectId"></param>
@@ -911,6 +918,22 @@ namespace AIMS.Services
             {
                 var markers = unitWork.ProjectMarkersRepository.GetMany(d => d.ProjectId == id);
                 return mapper.Map<List<ProjectMarkersView>>(markers);
+            }
+        }
+
+        public IEnumerable<UserProjectsView> GetUserProjects(int funderId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var funderProjectsIds = unitWork.ProjectFundersRepository.GetProjection(f => f.FunderId == funderId, f => f.ProjectId).ToList();
+                var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ImplementerId == funderId, i => i.ProjectId).ToList();
+                var combinedProjectIds = funderProjectsIds.Union(implementerProjectIds);
+                List<UserProjectsView> projectIds = new List<UserProjectsView>();
+                foreach(var id in combinedProjectIds)
+                {
+                    projectIds.Add(new UserProjectsView() { Id = id });
+                }
+                return projectIds;
             }
         }
 

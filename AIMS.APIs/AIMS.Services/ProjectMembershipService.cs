@@ -20,6 +20,13 @@ namespace AIMS.Services
         IEnumerable<ProjectMembershipRequestView> GetRequestsForFunder(int funderId);
 
         /// <summary>
+        /// Gets list of projects for which membership is approved
+        /// </summary>
+        /// <param name="funderId"></param>
+        /// <returns></returns>
+        IEnumerable<int> GetProjectsMembership(int funderId);
+
+        /// <summary>
         /// Adds new project membership request
         /// </summary>
         /// <param name="model"></param>
@@ -60,6 +67,24 @@ namespace AIMS.Services
                                         select f.ProjectId).ToList<int>();
                 var requests = unitWork.ProjectMembershipRepository.GetWithInclude(r => projectIds.Contains(r.ProjectId) && r.IsApproved == false, new string[] { "Project", "Organization" });
                 return mapper.Map<List<ProjectMembershipRequestView>>(requests);
+            }
+        }
+
+        public IEnumerable<int> GetProjectsMembership(int funderId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<int> approvedProjectIds = new List<int>();
+                var funderProjects = unitWork.ProjectFundersRepository.GetManyQueryable(p => p.FunderId == funderId);
+                List<int> projectIds = (from f in funderProjects
+                                        select f.ProjectId).ToList<int>();
+                var requests = unitWork.ProjectMembershipRepository.GetManyQueryable(r => projectIds.Contains(r.ProjectId) && r.IsApproved == true);
+                if (requests != null)
+                {
+                    approvedProjectIds = (from r in requests
+                                          select r.ProjectId).ToList<int>();
+                }
+                return approvedProjectIds;
             }
         }
 

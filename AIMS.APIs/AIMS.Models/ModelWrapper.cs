@@ -1348,4 +1348,9 @@ namespace AIMS.Models
         public string Dated { get; set; }
         public bool IsApproved { get; set; }
     }
+
+    public class UserProjectsView
+    {
+        public int Id { get; set; }
+    }
 }

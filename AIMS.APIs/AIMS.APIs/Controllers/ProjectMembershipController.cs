@@ -32,6 +32,28 @@ namespace AIMS.APIs.Controllers
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
             }
+            else
+            {
+                return BadRequest("Invalid attempt");
+            }
+            var requests = service.GetRequestsForFunder(organizationId);
+            return Ok(requests);
+        }
+
+        [HttpGet]
+        [Route("GetUserApprovedRequests")]
+        public IActionResult GetUserApprovedRequests()
+        {
+            int organizationId = 0;
+            var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            if (!string.IsNullOrEmpty(organizationIdVal))
+            {
+                organizationId = Convert.ToInt32(organizationIdVal);
+            }
+            else
+            {
+                return BadRequest("Invalid attempt");
+            }
             var requests = service.GetRequestsForFunder(organizationId);
             return Ok(requests);
         }

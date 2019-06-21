@@ -141,6 +141,24 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("GetUserProjects")]
+        public IActionResult GetUserProjects()
+        {
+            int organizationId = 0;
+            var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            if (!string.IsNullOrEmpty(organizationIdVal))
+            {
+                organizationId = Convert.ToInt32(organizationIdVal);
+            }
+            if (organizationId != 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var userProjects = projectService.GetUserProjects(organizationId);
+            return Ok(userProjects);
+        }
+
+        [HttpGet]
         [Route("GetLocationProjects/{id}")]
         public IActionResult GetLocationProjects(int id)
         {
