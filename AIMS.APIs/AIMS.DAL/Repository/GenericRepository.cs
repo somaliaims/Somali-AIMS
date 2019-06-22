@@ -199,7 +199,15 @@ namespace AIMS.DAL.Repository
         /// <returns></returns>
         public TEntity Get(Func<TEntity, Boolean> where)
         {
-            return DbSet.Where(where).FirstOrDefault<TEntity>();
+            if (DbSet.Any())
+            {
+                return DbSet.Where(where).FirstOrDefault<TEntity>();
+            }
+            else
+            {
+                return null;
+            }
+            
         }
 
         public async Task<TEntity> GetAsync(Func<TEntity, Boolean> where)

@@ -75,6 +75,10 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFProjectCustomFields, ProjectCustomFieldsView>()
                 .ForMember(c => c.FieldTitle, opts => opts.MapFrom(source => source.CustomField.FieldTitle));
 
+            CreateMap<EFProjectMembershipRequests, ProjectMembershipRequestView>()
+                .ForMember(m => m.Project, opts => opts.MapFrom(source => source.Project.Title))
+                .ForMember(m => m.UserOrganization, opts => opts.MapFrom(source => source.User.Organization.OrganizationName));
+
         }
     }
 }

@@ -68,7 +68,7 @@ namespace AIMS.DAL.UnitOfWork
             {
                 if (this.projectMembershipRepository == null)
                     this.projectMembershipRepository = new GenericRepository<EFProjectMembershipRequests>(context);
-                return this.ProjectMembershipRepository;
+                return this.projectMembershipRepository;
             }
         }
 

@@ -63,9 +63,13 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var funderProjects = unitWork.ProjectFundersRepository.GetManyQueryable(p => p.FunderId == funderId);
-                List<int> projectIds = (from f in funderProjects
+                List<int> funderProjectIds = (from f in funderProjects
                                         select f.ProjectId).ToList<int>();
-                var requests = unitWork.ProjectMembershipRepository.GetWithInclude(r => projectIds.Contains(r.ProjectId) && r.IsApproved == false, new string[] { "Project", "Organization" });
+                var implementerProjects = unitWork.ProjectImplementersRepository.GetManyQueryable(p => p.ImplementerId == funderId);
+                List<int> implementerProjectIds = (from i in implementerProjects
+                                            select i.ProjectId).ToList<int>();
+                List<int> projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
+                var requests = unitWork.ProjectMembershipRepository.GetWithInclude(r => projectIds.Contains(r.ProjectId) && r.IsApproved == false, new string[] { "Project", "User", "User.Organization" });
                 return mapper.Map<List<ProjectMembershipRequestView>>(requests);
             }
         }
@@ -94,7 +98,7 @@ namespace AIMS.Services
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
-
+                
                 try
                 {
                     var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
@@ -115,7 +119,7 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var isRequestExists = unitWork.ProjectMembershipRepository.GetOne(r => r.ProjectId == model.ProjectId && r.UserId == user.Id);
+                    var isRequestExists = unitWork.ProjectMembershipRepository.GetOne(r => (r.ProjectId == model.ProjectId && r.UserId == user.Id));
                     if (isRequestExists != null)
                     {
                         isRequestExists.Dated = DateTime.Now;
@@ -132,6 +136,7 @@ namespace AIMS.Services
                         });
                     }
                     unitWork.Save();
+                    
                 }
                 catch (Exception ex)
                 {
