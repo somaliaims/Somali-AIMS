@@ -100,16 +100,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                int count = unitWork.NotificationsRepository.GetProjectionCount(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin || uType == UserTypes.Manager), n => n.Id);
-                var funderProjects = unitWork.ProjectFundersRepository.GetManyQueryable(p => p.FunderId == organizationId);
-                List<int> funderProjectIds = (from f in funderProjects
-                                              select f.ProjectId).ToList<int>();
-                var implementerProjects = unitWork.ProjectImplementersRepository.GetManyQueryable(p => p.ImplementerId == organizationId);
-                List<int> implementerProjectIds = (from i in implementerProjects
-                                                   select i.ProjectId).ToList<int>();
-                List<int> projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
-                int requestsCount = unitWork.ProjectMembershipRepository.GetProjectionCount(r => projectIds.Contains(r.ProjectId) && r.IsApproved == false, r => r.ProjectId);
-                return (count + requestsCount);
+                return unitWork.NotificationsRepository.GetProjectionCount(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin || uType == UserTypes.Manager), n => n.Id);
             }
         }
 

@@ -1177,8 +1177,12 @@ namespace AIMS.Services
                             ExchangeRate = model.ExchangeRate,
                             Dated = model.Dated
                         });
+                        project.DateUpdated = DateTime.Now;
+                        unitWork.ProjectRepository.Update(project);
+                        unitWork.Save();
 
-                        var users = unitWork.UserRepository.GetManyQueryable(u => u.OrganizationId == userOrganizationId);
+                        var projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(f => f.ProjectId == model.ProjectId, f => f.FunderId);
+                        var users = unitWork.UserRepository.GetManyQueryable(u => projectFunderIds.Contains(u.OrganizationId));
                         List<EmailAddress> emailAddresses = new List<EmailAddress>();
 
                         foreach(var user in users)
@@ -1212,12 +1216,10 @@ namespace AIMS.Services
                             }
                             message += mHelper.ProjectToOrganizationMessage(funder.OrganizationName);
                             IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                            emailHelper.SendEmailToUsers(emailAddresses, "New project", subject, message);
+                            emailHelper.SendEmailToUsers(emailAddresses, subject, "Dear user,", message);
                         }
                     }
-                    project.DateUpdated = DateTime.Now;
-                    unitWork.ProjectRepository.Update(project);
-                    unitWork.Save();
+                    
                     
                    /*unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                     {
