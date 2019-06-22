@@ -45,7 +45,8 @@ namespace AIMS.Models
         UserInactive = 3,
         ChangedMappingEffectedProject = 4,
         NewIATISector = 5,
-        OrganizationMerged = 6
+        OrganizationMerged = 6,
+        NewOrgToProject = 7
     }
 
     public enum DataTransactions

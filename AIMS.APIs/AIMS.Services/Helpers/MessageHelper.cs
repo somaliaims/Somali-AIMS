@@ -65,6 +65,13 @@ namespace AIMS.Services.Helpers
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="organization"></param>
+        /// <returns></returns>
+        string NewOrganizationForProject(string organization);
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="sectorCount"></param>
         /// <returns></returns>
         string NewIATISectorsAdded(int sectorCount);
@@ -340,7 +347,12 @@ namespace AIMS.Services.Helpers
             formattedMessageList.Add("<h4>New organization</h4><p>" + newOrganization + "</p>");
             return (String.Join("", formattedMessageList));
         }
-        
+
+        public string NewOrganizationForProject(string organization)
+        {
+            return ("<h4>Requesting organization</h4><p>" + organization + "</p>");
+        }
+
         public string ChangedMappingAffectedProjectsMessage(List<string> affectedProjects, string oldSector, string newSector)
         {
             List<string> formattedMessageList = new List<string>();

@@ -136,7 +136,50 @@ namespace AIMS.Services
                         });
                     }
                     unitWork.Save();
-                    
+
+                    //Send email to all members of the funder
+                    var projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(p => p.ProjectId == model.ProjectId, p => p.FunderId);
+                    var users = unitWork.UserRepository.GetManyQueryable(u => projectFunderIds.Contains(u.OrganizationId));
+                    var requestingUser = unitWork.UserRepository.GetWithInclude(u => u.Id == user.Id, new string[] { "Organization" }).FirstOrDefault();
+                    string requestingOrganization = requestingUser != null ? requestingUser.Organization.OrganizationName : null;
+
+                    List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                    foreach (var u in users)
+                    {
+                        usersEmailList.Add(new EmailAddress()
+                        {
+                            Email = u.Email,
+                        });
+
+                        if (usersEmailList.Count > 0)
+                        {
+                            //Send emails
+                            ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                            var smtpSettings = smtpService.GetPrivate();
+                            SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                            if (smtpSettings != null)
+                            {
+                                smtpSettingsModel.Host = smtpSettings.Host;
+                                smtpSettingsModel.Port = smtpSettings.Port;
+                                smtpSettingsModel.Username = smtpSettings.Username;
+                                smtpSettingsModel.Password = smtpSettings.Password;
+                                smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                            }
+
+                            string message = "", subject = "";
+                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewOrgToProject);
+                            if (emailMessage != null)
+                            {
+                                subject = emailMessage.Subject;
+                                message = emailMessage.Message;
+                            }
+
+                            mHelper = new MessageHelper();
+                            message += mHelper.NewOrganizationForProject(requestingOrganization);
+                            IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                            emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
