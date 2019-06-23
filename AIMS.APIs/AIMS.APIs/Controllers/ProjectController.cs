@@ -145,7 +145,7 @@ namespace AIMS.APIs.Controllers
         public IActionResult GetUserProjects()
         {
             int organizationId = 0;
-            var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            string organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
             if (!string.IsNullOrEmpty(organizationIdVal))
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
@@ -154,7 +154,17 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Unauthorized user access to api");
             }
-            var userProjects = projectService.GetUserProjects(organizationId);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(organizationIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var userProjects = projectService.GetUserProjects(userId, organizationId);
             return Ok(userProjects);
         }
 

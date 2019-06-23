@@ -87,7 +87,7 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("ApproveRequest")]
-        public IActionResult ApproveRequest([FromBody] ProjectMembershipRequestModel model)
+        public IActionResult ApproveRequest([FromBody] ProjectRequestStatusModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -95,12 +95,17 @@ namespace AIMS.APIs.Controllers
             }
 
             int organizationId = 0;
-            var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            string organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
             if (!string.IsNullOrEmpty(organizationIdVal))
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
             }
-            var response = service.ApproveMembershipRequest(model, organizationId);
+            string userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return BadRequest("Unauthorized request");
+            }
+            var response = service.ApproveMembershipRequest(model.UserId, model.ProjectId, organizationId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -110,7 +115,7 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("UnApproveRequest")]
-        public IActionResult UnApproveRequest([FromBody] ProjectMembershipRequestModel model)
+        public IActionResult UnApproveRequest([FromBody] ProjectRequestStatusModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -123,7 +128,12 @@ namespace AIMS.APIs.Controllers
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
             }
-            var response = service.UnApproveMembershipRequest(model, organizationId);
+            string userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return BadRequest("Unauthorized request");
+            }
+            var response = service.UnApproveMembershipRequest(model.UserId, model.ProjectId, organizationId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

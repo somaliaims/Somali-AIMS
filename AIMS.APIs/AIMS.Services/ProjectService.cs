@@ -253,7 +253,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="funderId"></param>
         /// <returns></returns>
-        IEnumerable<UserProjectsView> GetUserProjects(int funderId);
+        IEnumerable<UserProjectsView> GetUserProjects(int userId, int funderId);
 
         /// <summary>
         /// Deletes project location
@@ -921,13 +921,15 @@ namespace AIMS.Services
             }
         }
 
-        public IEnumerable<UserProjectsView> GetUserProjects(int funderId)
+        public IEnumerable<UserProjectsView> GetUserProjects(int userId, int funderId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 var funderProjectsIds = unitWork.ProjectFundersRepository.GetProjection(f => f.FunderId == funderId, f => f.ProjectId).ToList();
                 var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ImplementerId == funderId, i => i.ProjectId).ToList();
+                var membershipProjectIds = unitWork.ProjectMembershipRepository.GetProjection(m => m.UserId == userId, m => m.ProjectId);
                 var combinedProjectIds = funderProjectsIds.Union(implementerProjectIds);
+                combinedProjectIds = combinedProjectIds.Union(membershipProjectIds);
                 List<UserProjectsView> projectIds = new List<UserProjectsView>();
                 foreach(var id in combinedProjectIds)
                 {

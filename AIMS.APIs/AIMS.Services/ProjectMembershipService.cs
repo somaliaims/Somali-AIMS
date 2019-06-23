@@ -38,14 +38,14 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse ApproveMembershipRequest(ProjectMembershipRequestModel model, int funderId);
+        ActionResponse ApproveMembershipRequest(int userId, int projectId, int funderId);
 
         /// <summary>
         /// Un-Approves membership request
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse UnApproveMembershipRequest(ProjectMembershipRequestModel model, int funderId);
+        ActionResponse UnApproveMembershipRequest(int userId, int projectId, int funderId);
     }
     public class ProjectMembershipService : IProjectMembershipService
     {
@@ -190,14 +190,14 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ApproveMembershipRequest(ProjectMembershipRequestModel model, int funderId)
+        public ActionResponse ApproveMembershipRequest(int userId, int projectId, int funderId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
 
-                var isFunderOwner = unitWork.ProjectFundersRepository.GetOne(f => f.FunderId == funderId && f.ProjectId == model.ProjectId);
+                var isFunderOwner = unitWork.ProjectFundersRepository.GetOne(f => f.FunderId == funderId && f.ProjectId == projectId);
                 if (isFunderOwner == null)
                 {
                     mHelper = new MessageHelper();
@@ -206,7 +206,7 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var user = unitWork.UserRepository.GetOne(u => u.Email == model.UserEmail);
+                var user = unitWork.UserRepository.GetOne(u => u.Id == userId);
                 if (user == null)
                 {
                     mHelper = new MessageHelper();
@@ -214,7 +214,7 @@ namespace AIMS.Services
                     response.Success = false;
                     return response;
                 }
-                var isRequestExists = unitWork.ProjectMembershipRepository.GetOne(r => r.ProjectId == model.ProjectId && r.UserId == user.Id);
+                var isRequestExists = unitWork.ProjectMembershipRepository.GetOne(r => r.ProjectId == projectId && r.UserId == user.Id);
                 if (isRequestExists == null)
                 {
                     mHelper = new MessageHelper();
@@ -229,14 +229,14 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse UnApproveMembershipRequest(ProjectMembershipRequestModel model, int funderId)
+        public ActionResponse UnApproveMembershipRequest(int userId, int projectId, int funderId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
 
-                var isFunderOwner = unitWork.ProjectFundersRepository.GetOne(f => f.FunderId == funderId && f.ProjectId == model.ProjectId);
+                var isFunderOwner = unitWork.ProjectFundersRepository.GetOne(f => f.FunderId == funderId && f.ProjectId == projectId);
                 if (isFunderOwner == null)
                 {
                     mHelper = new MessageHelper();
@@ -245,7 +245,7 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var user = unitWork.UserRepository.GetOne(u => u.Email == model.UserEmail);
+                var user = unitWork.UserRepository.GetOne(u => u.Id == userId);
                 if (user == null)
                 {
                     mHelper = new MessageHelper();
@@ -253,7 +253,7 @@ namespace AIMS.Services
                     response.Success = false;
                     return response;
                 }
-                var isRequestExists = unitWork.ProjectMembershipRepository.GetOne(r => r.ProjectId == model.ProjectId && r.UserId == user.Id);
+                var isRequestExists = unitWork.ProjectMembershipRepository.GetOne(r => r.ProjectId == projectId && r.UserId == user.Id);
                 if (isRequestExists == null)
                 {
                     mHelper = new MessageHelper();

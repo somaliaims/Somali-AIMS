@@ -1343,11 +1343,22 @@ namespace AIMS.Models
     public class ProjectMembershipRequestView
     {
         public int ProjectId { get; set; }
+        public int UserId { get; set; }
         public string Project { get; set; }
         public string UserOrganization { get; set; }
         public string Dated { get; set; }
         public bool IsApproved { get; set; }
     }
+
+    public class ProjectRequestStatusModel
+    {
+        [Required]
+        public int UserId { get; set; }
+        [Required]
+        public int ProjectId { get; set; }
+    }
+        
+
 
     public class UserProjectsView
     {
