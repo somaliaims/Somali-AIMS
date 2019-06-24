@@ -180,7 +180,7 @@ namespace AIMS.Services
                         }
 
                         string message = "", subject = "";
-                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewOrgToProject);
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectPermissionGranted);
                         if (emailMessage != null)
                         {
                             subject = emailMessage.Subject;
@@ -277,7 +277,7 @@ namespace AIMS.Services
                     }
 
                     string message = "", subject = "";
-                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewOrgToProject);
+                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectPermissionDenied);
                     if (emailMessage != null)
                     {
                         subject = emailMessage.Subject;
@@ -317,6 +317,16 @@ namespace AIMS.Services
                     response.Success = false;
                     return response;
                 }
+
+                var project = unitWork.ProjectRepository.GetOne(p => p.Id == projectId);
+                if (project == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
                 var isRequestExists = unitWork.ProjectMembershipRepository.GetOne(r => r.ProjectId == projectId && r.UserId == user.Id);
                 if (isRequestExists == null)
                 {
@@ -327,6 +337,43 @@ namespace AIMS.Services
                 }
                 unitWork.ProjectMembershipRepository.Delete(isRequestExists);
                 unitWork.Save();
+
+                //Send status email
+                string requestedProject = project.Title;
+                List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                usersEmailList.Add(new EmailAddress()
+                {
+                    Email = user.Email,
+                });
+
+                if (usersEmailList.Count > 0)
+                {
+                    //Send emails
+                    ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                    var smtpSettings = smtpService.GetPrivate();
+                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                    if (smtpSettings != null)
+                    {
+                        smtpSettingsModel.Host = smtpSettings.Host;
+                        smtpSettingsModel.Port = smtpSettings.Port;
+                        smtpSettingsModel.Username = smtpSettings.Username;
+                        smtpSettingsModel.Password = smtpSettings.Password;
+                        smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                    }
+
+                    string message = "", subject = "";
+                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectPermissionDenied);
+                    if (emailMessage != null)
+                    {
+                        subject = emailMessage.Subject;
+                        message = emailMessage.Message;
+                    }
+
+                    mHelper = new MessageHelper();
+                    message += mHelper.ProjectPermissionDenied(requestedProject);
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message);
+                }
                 return response;
             }
         }
