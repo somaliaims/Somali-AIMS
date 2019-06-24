@@ -151,6 +151,18 @@ namespace AIMS.Services
                             Email = u.Email,
                         });
 
+                        if (usersEmailList.Count == 0)
+                        {
+                            var projectOwner = unitWork.UserRepository.GetOne(o => o.Id == project.CreatedById);
+                            if (projectOwner != null)
+                            {
+                                usersEmailList.Add(new EmailAddress()
+                                {
+                                    Email = projectOwner.Email
+                                });
+                            }
+                        }
+
                         if (usersEmailList.Count > 0)
                         {
                             //Send emails

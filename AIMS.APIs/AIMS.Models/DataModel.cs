@@ -160,6 +160,8 @@ namespace AIMS.Models
         public ICollection<EFProjectDocuments> Documents { get; set; }
         public ICollection<EFProjectCustomFields> CustomFields { get; set; }
         public DateTime DateUpdated { get; set; }
+        public int? CreatedById { get; set; }
+        public EFUser CreatedBy { get; set; } = null;
     }
 
     public class EFEnvelope

@@ -99,7 +99,7 @@ namespace AIMS.Services
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        Task<ActionResponse> AddAsync(ProjectModel project);
+        Task<ActionResponse> AddAsync(ProjectModel project, int userId);
 
         /// <summary>
         /// Updates a project
@@ -939,7 +939,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> AddAsync(ProjectModel model)
+        public async Task<ActionResponse> AddAsync(ProjectModel model, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -957,7 +957,8 @@ namespace AIMS.Services
                                 Description = model.Description,
                                 StartDate = model.StartDate,
                                 EndDate = model.EndDate,
-                                DateUpdated = DateTime.Now
+                                DateUpdated = DateTime.Now,
+                                CreatedById = userId
                             });
                             await unitWork.SaveAsync();
 
@@ -985,6 +986,15 @@ namespace AIMS.Services
                             {
                                 unitWork.FinancialYearRepository.InsertMultiple(entityList);
                             }
+
+                            //Add user organization to valid funders
+                            unitWork.ProjectMembershipRepository.Insert(new EFProjectMembershipRequests()
+                            {
+                                ProjectId = newProject.Id,
+                                UserId = userId,
+                                Dated = DateTime.Now,
+                                IsApproved = true
+                            });
                             await unitWork.SaveAsync();
                             response.ReturnedId = newProject.Id;
                             transaction.Commit();

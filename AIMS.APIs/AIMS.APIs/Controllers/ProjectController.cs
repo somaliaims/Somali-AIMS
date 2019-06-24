@@ -156,7 +156,7 @@ namespace AIMS.APIs.Controllers
             }
             string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             int userId = 0;
-            if (!string.IsNullOrEmpty(organizationIdVal))
+            if (!string.IsNullOrEmpty(userIdVal))
             {
                 userId = Convert.ToInt32(userIdVal);
             }
@@ -213,7 +213,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = await projectService.AddAsync(project);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = await projectService.AddAsync(project, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
