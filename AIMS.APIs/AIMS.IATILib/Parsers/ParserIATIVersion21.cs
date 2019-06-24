@@ -107,6 +107,8 @@ namespace AIMS.IATILib.Parsers
             string message = "";
             try
             {
+                DateTime todaysDate = DateTime.Now;
+                DateTime parsedDate = DateTime.Now;
                 string currency = "";
                 if (activities != null)
                 {
@@ -119,30 +121,16 @@ namespace AIMS.IATILib.Parsers
                     foreach (var activity in activities)
                     {
                         string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "", defaultFinanceType = "";
-                        if (activity.HasAttributes)
-                        {
-                            if (activity.Attribute("default-currency") != null)
-                            {
-                                currency = activity.Attribute("default-currency").Value;
-                            }
 
-                            if (activity.Element("title") != null && activity.Element("title").Element("narrative") != null)
-                            {
-                                projectTitle = activity.Element("title").Element("narrative")?.Value;
-                            }
-                        }
-
-                        var financeType = activity.Element("default-finance-type");
-                        if (financeType != null)
+                        var activityStatus = activity.Element("activity-status");
+                        if (activityStatus.Attribute("code") != null)
                         {
-                            var financeCode = financeType.Attribute("Code")?.Value;
-                            if (!string.IsNullOrEmpty(financeCode))
+                            int activityStatusVal = 0;
+                            if (int.TryParse(activityStatus.Attribute("code")?.Value, out activityStatusVal))
                             {
-                                if (financeTypes != null)
+                                if (activityStatusVal == 4 || activityStatusVal == 5)
                                 {
-                                    defaultFinanceType = (from f in financeTypes
-                                                          where f.Code.Equals(financeCode)
-                                                          select f.Name).FirstOrDefault();
+                                    continue;
                                 }
                             }
                         }
@@ -183,6 +171,47 @@ namespace AIMS.IATILib.Parsers
                                 endDate = endPlanned;
                             }
                         }
+
+                        if (!string.IsNullOrEmpty(endDate))
+                        {
+                            if (DateTime.TryParse(endDate, out parsedDate))
+                            {
+                                TimeSpan timeSpan = todaysDate - parsedDate;
+                                if (timeSpan.Days > 365)
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                        
+                        if (activity.HasAttributes)
+                        {
+                            if (activity.Attribute("default-currency") != null)
+                            {
+                                currency = activity.Attribute("default-currency").Value;
+                            }
+
+                            if (activity.Element("title") != null && activity.Element("title").Element("narrative") != null)
+                            {
+                                projectTitle = activity.Element("title").Element("narrative")?.Value;
+                            }
+                        }
+
+                        var financeType = activity.Element("default-finance-type");
+                        if (financeType != null)
+                        {
+                            var financeCode = financeType.Attribute("Code")?.Value;
+                            if (!string.IsNullOrEmpty(financeCode))
+                            {
+                                if (financeTypes != null)
+                                {
+                                    defaultFinanceType = (from f in financeTypes
+                                                          where f.Code.Equals(financeCode)
+                                                          select f.Name).FirstOrDefault();
+                                }
+                            }
+                        }
+
 
                         //Extracting participating organizations
                         var organizations = activity.Elements("participating-org");
@@ -632,34 +661,22 @@ namespace AIMS.IATILib.Parsers
                 string currency = "";
                 if (activities != null)
                 {
+                    DateTime todaysDate = DateTime.Now;
+                    DateTime parsedDate = DateTime.Now;
                     int activityCounter = 1;
                     foreach (var activity in activities)
                     {
                         string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "", defaultFinanceType = "";
-                        if (activity.HasAttributes)
-                        {
-                            if (activity.Attribute("default-currency") != null)
-                            {
-                                currency = activity.Attribute("default-currency").Value;
-                            }
 
-                            if (activity.Element("title") != null && activity.Element("title").Element("narrative") != null)
-                            {
-                                projectTitle = activity.Element("title").Element("narrative")?.Value;
-                            }
-                        }
-
-                        var financeType = activity.Element("default-finance-type");
-                        if (financeType != null)
+                        var activityStatus = activity.Element("activity-status");
+                        if (activityStatus.Attribute("code") != null)
                         {
-                            var financeCode = financeType.Attribute("Code")?.Value;
-                            if (!string.IsNullOrEmpty(financeCode))
+                            int activityStatusVal = 0;
+                            if (int.TryParse(activityStatus.Attribute("code")?.Value, out activityStatusVal))
                             {
-                                if (financeTypes != null)
+                                if (activityStatusVal == 4 || activityStatusVal == 5)
                                 {
-                                    defaultFinanceType = (from f in financeTypes
-                                                          where f.Code.Equals(financeCode)
-                                                          select f.Name).FirstOrDefault();
+                                    continue;
                                 }
                             }
                         }
@@ -703,6 +720,46 @@ namespace AIMS.IATILib.Parsers
                         if (string.IsNullOrEmpty(startDate))
                         {
                             startDate = "N/A";
+                        }
+
+                        if (!string.IsNullOrEmpty(endDate))
+                        {
+                            if (DateTime.TryParse(endDate, out parsedDate))
+                            {
+                                TimeSpan timeSpan = todaysDate - parsedDate;
+                                if (timeSpan.Days > 365)
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+
+                        if (activity.HasAttributes)
+                        {
+                            if (activity.Attribute("default-currency") != null)
+                            {
+                                currency = activity.Attribute("default-currency").Value;
+                            }
+
+                            if (activity.Element("title") != null && activity.Element("title").Element("narrative") != null)
+                            {
+                                projectTitle = activity.Element("title").Element("narrative")?.Value;
+                            }
+                        }
+
+                        var financeType = activity.Element("default-finance-type");
+                        if (financeType != null)
+                        {
+                            var financeCode = financeType.Attribute("Code")?.Value;
+                            if (!string.IsNullOrEmpty(financeCode))
+                            {
+                                if (financeTypes != null)
+                                {
+                                    defaultFinanceType = (from f in financeTypes
+                                                          where f.Code.Equals(financeCode)
+                                                          select f.Name).FirstOrDefault();
+                                }
+                            }
                         }
 
                         string trimmedTitle = Regex.Replace(projectTitle, @"\s+", " ");
