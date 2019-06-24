@@ -36,6 +36,8 @@ namespace AIMS.APIs
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ChangedMappingEffectedProject, TypeDefinition = "Sector mapping updated", Message = "Sector mapping updated" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewIATISector, TypeDefinition = "Sector added from IATI", Message = "New sector/s added from IATI" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewOrgToProject, TypeDefinition = "New organization request for project", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectPermissionGranted, TypeDefinition = "Project permission approved/granted", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectPermissionDenied, TypeDefinition = "Project permission unapproved/denied", Message = "" });
                     context.SaveChanges();
                 }
 

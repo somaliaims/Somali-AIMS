@@ -64,10 +64,10 @@ namespace AIMS.Services
             {
                 var funderProjects = unitWork.ProjectFundersRepository.GetManyQueryable(p => p.FunderId == funderId);
                 List<int> funderProjectIds = (from f in funderProjects
-                                        select f.ProjectId).ToList<int>();
+                                              select f.ProjectId).ToList<int>();
                 var implementerProjects = unitWork.ProjectImplementersRepository.GetManyQueryable(p => p.ImplementerId == funderId);
                 List<int> implementerProjectIds = (from i in implementerProjects
-                                            select i.ProjectId).ToList<int>();
+                                                   select i.ProjectId).ToList<int>();
                 List<int> projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
                 var requests = unitWork.ProjectMembershipRepository.GetWithInclude(r => projectIds.Contains(r.ProjectId) && r.IsApproved == false, new string[] { "Project", "User", "User.Organization" });
                 return mapper.Map<List<ProjectMembershipRequestView>>(requests);
@@ -98,7 +98,7 @@ namespace AIMS.Services
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
-                
+
                 try
                 {
                     var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
@@ -150,47 +150,46 @@ namespace AIMS.Services
                         {
                             Email = u.Email,
                         });
-
-                        if (usersEmailList.Count == 0)
+                    }
+                    if (usersEmailList.Count == 0)
+                    {
+                        var projectOwner = unitWork.UserRepository.GetOne(o => o.Id == project.CreatedById);
+                        if (projectOwner != null)
                         {
-                            var projectOwner = unitWork.UserRepository.GetOne(o => o.Id == project.CreatedById);
-                            if (projectOwner != null)
+                            usersEmailList.Add(new EmailAddress()
                             {
-                                usersEmailList.Add(new EmailAddress()
-                                {
-                                    Email = projectOwner.Email
-                                });
-                            }
+                                Email = projectOwner.Email
+                            });
+                        }
+                    }
+
+                    if (usersEmailList.Count > 0)
+                    {
+                        //Send emails
+                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                        var smtpSettings = smtpService.GetPrivate();
+                        SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                        if (smtpSettings != null)
+                        {
+                            smtpSettingsModel.Host = smtpSettings.Host;
+                            smtpSettingsModel.Port = smtpSettings.Port;
+                            smtpSettingsModel.Username = smtpSettings.Username;
+                            smtpSettingsModel.Password = smtpSettings.Password;
+                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                         }
 
-                        if (usersEmailList.Count > 0)
+                        string message = "", subject = "";
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewOrgToProject);
+                        if (emailMessage != null)
                         {
-                            //Send emails
-                            ISMTPSettingsService smtpService = new SMTPSettingsService(context);
-                            var smtpSettings = smtpService.GetPrivate();
-                            SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
-                            if (smtpSettings != null)
-                            {
-                                smtpSettingsModel.Host = smtpSettings.Host;
-                                smtpSettingsModel.Port = smtpSettings.Port;
-                                smtpSettingsModel.Username = smtpSettings.Username;
-                                smtpSettingsModel.Password = smtpSettings.Password;
-                                smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
-                            }
-
-                            string message = "", subject = "";
-                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewOrgToProject);
-                            if (emailMessage != null)
-                            {
-                                subject = emailMessage.Subject;
-                                message = emailMessage.Message;
-                            }
-
-                            mHelper = new MessageHelper();
-                            message += mHelper.NewOrganizationForProject(requestingOrganization);
-                            IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                            emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message);
+                            subject = emailMessage.Subject;
+                            message = emailMessage.Message;
                         }
+
+                        mHelper = new MessageHelper();
+                        message += mHelper.NewOrganizationForProject(requestingOrganization);
+                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                        emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message);
                     }
                 }
                 catch (Exception ex)
@@ -226,6 +225,16 @@ namespace AIMS.Services
                     response.Success = false;
                     return response;
                 }
+
+                var project = unitWork.ProjectRepository.GetOne(p => p.Id == projectId);
+                if (user == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
                 var isRequestExists = unitWork.ProjectMembershipRepository.GetOne(r => r.ProjectId == projectId && r.UserId == user.Id);
                 if (isRequestExists == null)
                 {
@@ -237,6 +246,43 @@ namespace AIMS.Services
                 isRequestExists.IsApproved = true;
                 unitWork.ProjectMembershipRepository.Update(isRequestExists);
                 unitWork.Save();
+
+                //Send status email
+                string requestedProject = project.Title;
+                List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                usersEmailList.Add(new EmailAddress()
+                {
+                    Email = user.Email,
+                });
+
+                if (usersEmailList.Count > 0)
+                {
+                    //Send emails
+                    ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                    var smtpSettings = smtpService.GetPrivate();
+                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                    if (smtpSettings != null)
+                    {
+                        smtpSettingsModel.Host = smtpSettings.Host;
+                        smtpSettingsModel.Port = smtpSettings.Port;
+                        smtpSettingsModel.Username = smtpSettings.Username;
+                        smtpSettingsModel.Password = smtpSettings.Password;
+                        smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                    }
+
+                    string message = "", subject = "";
+                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewOrgToProject);
+                    if (emailMessage != null)
+                    {
+                        subject = emailMessage.Subject;
+                        message = emailMessage.Message;
+                    }
+
+                    mHelper = new MessageHelper();
+                    message += mHelper.ProjectPermissionGranted(requestedProject);
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message);
+                }
                 return response;
             }
         }

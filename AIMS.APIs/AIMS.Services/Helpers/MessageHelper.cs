@@ -72,6 +72,13 @@ namespace AIMS.Services.Helpers
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="project"></param>
+        /// <returns></returns>
+        string ProjectPermissionGranted(string project);
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="sectorCount"></param>
         /// <returns></returns>
         string NewIATISectorsAdded(int sectorCount);
@@ -351,6 +358,11 @@ namespace AIMS.Services.Helpers
         public string NewOrganizationForProject(string organization)
         {
             return ("<h4>Requesting organization</h4><p>" + organization + "</p>");
+        }
+
+        public string ProjectPermissionGranted(string project)
+        {
+            return ("<h4>Permission granted for project</h4><p>" + project + "</p>");
         }
 
         public string ChangedMappingAffectedProjectsMessage(List<string> affectedProjects, string oldSector, string newSector)

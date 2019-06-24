@@ -46,7 +46,9 @@ namespace AIMS.Models
         ChangedMappingEffectedProject = 4,
         NewIATISector = 5,
         OrganizationMerged = 6,
-        NewOrgToProject = 7
+        NewOrgToProject = 7,
+        ProjectPermissionGranted = 8,
+        ProjectPermissionDenied = 9
     }
 
     public enum DataTransactions
