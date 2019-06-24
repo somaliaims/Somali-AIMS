@@ -132,7 +132,6 @@ namespace AIMS.Services
                 {
                     int rowCounter = 0, totalColumns = 5, groupHeaderColumns = 2;
                     decimal grandTotalFunding = 0, grandTotalDisbursement = 0;
-
                     
                     IWorkbook workbook;
                     workbook = new XSSFWorkbook();
@@ -233,8 +232,8 @@ namespace AIMS.Services
                         totalFunding = Math.Round(sector.TotalFunding, MidpointRounding.AwayFromZero);
                         totalDisbursements = Math.Round(sector.TotalDisbursements, MidpointRounding.AwayFromZero);
                         row = excelSheet.CreateRow(++rowCounter);
-                        grandTotalFunding += sector.TotalFunding;
-                        grandTotalDisbursement += sector.TotalDisbursements;
+                        grandTotalFunding += Math.Round(sector.TotalFunding, MidpointRounding.AwayFromZero);
+                        grandTotalDisbursement += Math.Round(sector.TotalDisbursements, MidpointRounding.AwayFromZero);
 
                         var groupTitleCell = row.CreateCell(0, CellType.String);
                         excelSheet.AddMergedRegion(new CellRangeAddress(
@@ -422,8 +421,8 @@ namespace AIMS.Services
                     foreach (var location in report.LocationProjectsList)
                     {
                         row = excelSheet.CreateRow(++rowCounter);
-                        grandTotalFunding += location.TotalFunding;
-                        grandTotalDisbursement += location.TotalDisbursements;
+                        grandTotalFunding += Math.Round(location.TotalFunding, MidpointRounding.AwayFromZero);
+                        grandTotalDisbursement += Math.Round(location.TotalDisbursements, MidpointRounding.AwayFromZero);
 
                         var groupTitleCell = row.CreateCell(0, CellType.String);
                         excelSheet.AddMergedRegion(new CellRangeAddress(
@@ -503,7 +502,7 @@ namespace AIMS.Services
 
         private string ApplyThousandFormat(decimal number)
         {
-            return (number.ToString("#,##0.00"));
+            return (Math.Round(number).ToString("#,##0.00"));
         }
     }
 }

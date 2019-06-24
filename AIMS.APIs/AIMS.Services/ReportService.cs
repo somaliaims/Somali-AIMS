@@ -262,7 +262,7 @@ namespace AIMS.Services
                                                     select project).ToList<ProjectProfileView>();
 
                             decimal totalFunding = 0, totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0, locationPercentage = 0;
-                            totalFunding = decimal.Round(totalFunding, 2, MidpointRounding.AwayFromZero);
+                            totalFunding = Math.Round(totalFunding, MidpointRounding.AwayFromZero);
                             foreach (var project in locationProjects)
                             {
                                 if (project.Locations != null)
@@ -274,8 +274,8 @@ namespace AIMS.Services
                                     if (project.Funders.Count() > 0)
                                     {
                                         var fundingTotal = project.Funders.Select(f => (f.Amount * f.ExchangeRate)).Sum();
-                                        fundingTotal = Math.Round(fundingTotal, 2, MidpointRounding.AwayFromZero);
-                                        project.ProjectCost = ((fundingTotal / 100) * location.FundsPercentage);
+                                        fundingTotal = Math.Round(fundingTotal, MidpointRounding.AwayFromZero);
+                                        project.ProjectCost = Math.Round(((fundingTotal / 100) * location.FundsPercentage), MidpointRounding.AwayFromZero);
                                         totalFunding += fundingTotal;
                                     }
                                 }
@@ -283,7 +283,7 @@ namespace AIMS.Services
 
                             if (totalFunding > 0)
                             {
-                                totalFundingPercentage = ((totalFunding / 100) * location.FundsPercentage);
+                                totalFundingPercentage = Math.Round(((totalFunding / 100) * location.FundsPercentage), MidpointRounding.AwayFromZero);
                             }
 
                             foreach (var project in locationProjects)
@@ -306,7 +306,7 @@ namespace AIMS.Services
                                         project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * location.FundsPercentage), MidpointRounding.AwayFromZero );
                                         if (months > 0)
                                         {
-                                            project.PlannedDisbursements = Math.Round((project.ProjectCost - project.ActualDisbursements) / months);
+                                            project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements) / months), MidpointRounding.AwayFromZero);
                                             if (project.PlannedDisbursements < 0)
                                             {
                                                 project.PlannedDisbursements = 0;
@@ -318,7 +318,7 @@ namespace AIMS.Services
 
                             if (totalDisbursements > 0)
                             {
-                                totalDisbursementsPercentage = ((totalDisbursements / 100) * location.FundsPercentage);
+                                totalDisbursementsPercentage = Math.Round(((totalDisbursements / 100) * location.FundsPercentage), MidpointRounding.AwayFromZero);
                             }
 
                             foreach (var project in locationProjects)
@@ -336,8 +336,8 @@ namespace AIMS.Services
                                 });
                             }
 
-                            projectsByLocation.TotalFunding = Math.Round(totalFundingPercentage, 2, MidpointRounding.AwayFromZero);
-                            projectsByLocation.TotalDisbursements = Math.Round(totalDisbursementsPercentage, 2, MidpointRounding.AwayFromZero);
+                            projectsByLocation.TotalFunding = Math.Round(totalFundingPercentage, MidpointRounding.AwayFromZero);
+                            projectsByLocation.TotalDisbursements = Math.Round(totalDisbursementsPercentage, MidpointRounding.AwayFromZero);
                             projectsByLocation.Projects = projectsListForLocation;
                             locationProjectsList.Add(projectsByLocation);
                             projectIds.Clear();
@@ -398,7 +398,7 @@ namespace AIMS.Services
                                                Amount = g.Sum()
                                            }).ToList();
 
-                            projectBudget.ProjectValue = projectBudget.Funding.Sum(f => f.Amount);
+                            projectBudget.ProjectValue = Math.Round(projectBudget.Funding.Sum(f => f.Amount), MidpointRounding.AwayFromZero);
                         }
                         else
                         {
@@ -408,13 +408,13 @@ namespace AIMS.Services
                         
                         if (project.Disbursements.Count > 0)
                         {
-                            projectBudget.PreviousYearDisbursements = (from d in project.Disbursements
+                            projectBudget.PreviousYearDisbursements = Math.Round((from d in project.Disbursements
                                                                        where d.Dated.Year == previousYear
-                                                                       select (d.Amount * d.ExchangeRate)).Sum();
+                                                                       select (d.Amount * d.ExchangeRate)).Sum(), MidpointRounding.AwayFromZero);
 
-                            projectBudget.ActualDisbursements = (from d in project.Disbursements
+                            projectBudget.ActualDisbursements = Math.Round((from d in project.Disbursements
                                                                  where d.Dated.Year == currentYear
-                                                                 select (d.Amount * d.ExchangeRate)).Sum();
+                                                                 select (d.Amount * d.ExchangeRate)).Sum(), MidpointRounding.AwayFromZero);
 
                             List<ProjectExpectedDisbursements> expectedDisbursements = new List<ProjectExpectedDisbursements>();
                             for (int year = currentYear; year <= upperYearLimit; year++)
@@ -426,7 +426,7 @@ namespace AIMS.Services
                                     sectorDisbursements.Add(new SectorDisbursements()
                                     {
                                         Sector = sector.Sector.SectorName,
-                                        Disbursements = ((yearDisbursements / 100) * sector.FundsPercentage)
+                                        Disbursements = Math.Round(((yearDisbursements / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero)
                                     });
                                 }
                                 List<LocationDisbursements> locationDisbursements = new List<LocationDisbursements>();
@@ -435,7 +435,7 @@ namespace AIMS.Services
                                     locationDisbursements.Add(new LocationDisbursements()
                                     {
                                         Location = location.Location.Location,
-                                        Disbursements = ((yearDisbursements / 100) * location.FundsPercentage)
+                                        Disbursements = Math.Round(((yearDisbursements / 100) * location.FundsPercentage), MidpointRounding.AwayFromZero)
                                     });
                                 }
 
@@ -605,16 +605,16 @@ namespace AIMS.Services
                                 {
                                     if (project.Funders.Count() > 0)
                                     {
-                                        var fundingTotal = project.Funders.Select(f => (f.Amount * (f.ExchangeRate < 1 ? (1 / f.ExchangeRate) : f.ExchangeRate))).Sum();
-                                        fundingTotal = decimal.Round(fundingTotal, 2, MidpointRounding.AwayFromZero);
-                                        project.ProjectCost = ((fundingTotal / 100) * sector.FundsPercentage);
+                                        var fundingTotal = Math.Round(project.Funders.Select(f => (f.Amount * (f.ExchangeRate < 1 ? (1 / f.ExchangeRate) : f.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
+                                        fundingTotal = Math.Round(fundingTotal, MidpointRounding.AwayFromZero);
+                                        project.ProjectCost = Math.Round(((fundingTotal / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero);
                                         totalFunding += fundingTotal;
                                     }
                                 }
 
                                 if (totalFunding > 0)
                                 {
-                                    totalFundingPercentage += ((totalFunding / 100) * sector.FundsPercentage);
+                                    totalFundingPercentage += Math.Round(((totalFunding / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero);
                                 }
 
                                 foreach (var project in sectorProjects)
@@ -628,9 +628,9 @@ namespace AIMS.Services
                                                                      Convert.ToDateTime(d.Dated).Year <= model.EndingYear
                                                                      select d).ToList();
                                         }
-                                        decimal projectDisbursements = project.Disbursements.Select(d=> (d.Amount * (d.ExchangeRate < 1 ? (1 / d.ExchangeRate) : d.ExchangeRate))).Sum();
+                                        decimal projectDisbursements = Math.Round(project.Disbursements.Select(d=> (d.Amount * (d.ExchangeRate < 1 ? (1 / d.ExchangeRate) : d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
                                         totalDisbursements += projectDisbursements;
-                                        totalDisbursements = decimal.Round(totalDisbursements, 2, MidpointRounding.AwayFromZero);
+                                        totalDisbursements = Math.Round(totalDisbursements, MidpointRounding.AwayFromZero);
                                         UtilityHelper helper = new UtilityHelper();
                                         var endDate = Convert.ToDateTime(project.EndDate);
                                         var startDate = DateTime.Now;
@@ -639,7 +639,7 @@ namespace AIMS.Services
                                         project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero);
                                         if (months > 0)
                                         {
-                                            project.PlannedDisbursements = Math.Round((project.ProjectCost - projectDisbursements) / months);
+                                            project.PlannedDisbursements = Math.Round(((project.ProjectCost - projectDisbursements) / months), MidpointRounding.AwayFromZero);
                                             if (project.PlannedDisbursements < 0)
                                             {
                                                 project.PlannedDisbursements = 0;
@@ -650,7 +650,7 @@ namespace AIMS.Services
 
                                 if (totalDisbursements > 0)
                                 {
-                                    totalDisbursementsPercentage = ((totalDisbursements / 100) * sector.FundsPercentage);
+                                    totalDisbursementsPercentage = Math.Round(((totalDisbursements / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero);
                                 }
 
                                 foreach (var project in sectorProjects)
@@ -699,9 +699,9 @@ namespace AIMS.Services
 
                                     if (project.Funders.Count() > 0)
                                     {
-                                        var fundingTotal = project.Funders.Select(f => (f.Amount * (f.ExchangeRate < 1 ? (1 / f.ExchangeRate) : f.ExchangeRate))).Sum();
-                                        fundingTotal = decimal.Round(fundingTotal, 2, MidpointRounding.AwayFromZero);
-                                        project.ProjectCost = ((fundingTotal / 100) * sector.FundsPercentage);
+                                        var fundingTotal = Math.Round(project.Funders.Select(f => (f.Amount * (f.ExchangeRate < 1 ? (1 / f.ExchangeRate) : f.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
+                                        fundingTotal = Math.Round(fundingTotal, MidpointRounding.AwayFromZero);
+                                        project.ProjectCost = Math.Round(((fundingTotal / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero);
                                         totalFunding += fundingTotal;
                                     }
                                 }
@@ -709,7 +709,7 @@ namespace AIMS.Services
 
                             if (totalFunding > 0)
                             {
-                                totalFundingPercentage = ((totalFunding / 100) * sector.FundsPercentage);
+                                totalFundingPercentage = Math.Round(((totalFunding / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero);
                             }
 
                             foreach (var project in sectorProjects)
@@ -721,9 +721,9 @@ namespace AIMS.Services
                                                         select s.FundsPercentage).FirstOrDefault();
                                     if (project.Disbursements.Count() > 0)
                                     {
-                                        decimal projectDisbursements = project.Disbursements.Select(d => (d.Amount * (d.ExchangeRate < 1 ? (1 / d.ExchangeRate) : d.ExchangeRate))).Sum();
+                                        decimal projectDisbursements = Math.Round(project.Disbursements.Select(d => (d.Amount * (d.ExchangeRate < 1 ? (1 / d.ExchangeRate) : d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
                                         totalDisbursements += projectDisbursements;
-                                        totalDisbursements = decimal.Round(totalDisbursements, 2, MidpointRounding.AwayFromZero);
+                                        totalDisbursements = Math.Round(totalDisbursements, MidpointRounding.AwayFromZero);
                                         UtilityHelper helper = new UtilityHelper();
                                         var endDate = Convert.ToDateTime(project.EndDate);
                                         var startDate = DateTime.Now;
@@ -732,7 +732,7 @@ namespace AIMS.Services
                                         project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero);
                                         if (months > 0)
                                         {
-                                            project.PlannedDisbursements = Math.Round((project.ProjectCost - project.ActualDisbursements) / months);
+                                            project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements) / months), MidpointRounding.AwayFromZero);
                                             if (project.PlannedDisbursements < 0)
                                             {
                                                 project.PlannedDisbursements = 0;
@@ -744,7 +744,7 @@ namespace AIMS.Services
 
                             if (totalDisbursements > 0)
                             {
-                                totalDisbursementsPercentage = ((totalDisbursements / 100) *  sector.FundsPercentage);
+                                totalDisbursementsPercentage = Math.Round(((totalDisbursements / 100) *  sector.FundsPercentage), MidpointRounding.AwayFromZero);
                             }
 
                             foreach(var project in sectorProjects)
