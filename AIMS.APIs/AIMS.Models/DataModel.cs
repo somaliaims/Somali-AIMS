@@ -265,6 +265,7 @@ namespace AIMS.Models
         [ForeignKey("User")]
         public int UserId { get; set; }
         public EFUser User { get; set; }
+        public int OrganizationId { get; set; } = 0;
         public DateTime Dated { get; set; }
         public bool IsApproved { get; set; }
     }

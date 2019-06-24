@@ -131,6 +131,7 @@ namespace AIMS.Services
                         {
                             Project = project,
                             User = user,
+                            OrganizationId = user.OrganizationId,
                             Dated = DateTime.Now,
                             IsApproved = false
                         });
@@ -235,16 +236,21 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var isRequestExists = unitWork.ProjectMembershipRepository.GetOne(r => r.ProjectId == projectId && r.UserId == user.Id);
-                if (isRequestExists == null)
+                var requests = unitWork.ProjectMembershipRepository.GetManyQueryable(r => r.ProjectId == projectId && r.OrganizationId == user.OrganizationId);
+                if (requests == null)
                 {
                     mHelper = new MessageHelper();
                     response.Message = mHelper.GetNotFound("Membership Request");
                     response.Success = false;
                     return response;
                 }
-                isRequestExists.IsApproved = true;
-                unitWork.ProjectMembershipRepository.Update(isRequestExists);
+
+                foreach(var request in requests)
+                {
+                    request.IsApproved = true;
+                    unitWork.ProjectMembershipRepository.Update(request);
+                }
+                
                 unitWork.Save();
 
                 //Send status email

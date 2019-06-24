@@ -77,6 +77,7 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFProjectMembershipRequests, ProjectMembershipRequestView>()
                 .ForMember(m => m.Project, opts => opts.MapFrom(source => source.Project.Title))
+                .ForMember(m => m.UserEmail, opts => opts.MapFrom(source => source.User.Email))
                 .ForMember(m => m.UserOrganization, opts => opts.MapFrom(source => source.User.Organization.OrganizationName));
 
         }
