@@ -108,15 +108,15 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
-        [Route("AddIATISector")]
-        public IActionResult AddIATISector([FromBody] IATINewSectorModel model)
+        [Route("AddSectorWithMapping")]
+        public IActionResult AddSectorWithMapping([FromBody] MappingSectorModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = sectorService.AddIATISector(model);
+            var response = sectorService.AddSectorWithMapping(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

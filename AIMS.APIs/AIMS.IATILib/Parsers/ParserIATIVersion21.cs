@@ -122,7 +122,7 @@ namespace AIMS.IATILib.Parsers
                     {
                         string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "", defaultFinanceType = "";
 
-                        var activityStatus = activity.Element("activity-status");
+                        /*var activityStatus = activity.Element("activity-status");
                         if (activityStatus.Attribute("code") != null)
                         {
                             int activityStatusVal = 0;
@@ -133,7 +133,7 @@ namespace AIMS.IATILib.Parsers
                                     continue;
                                 }
                             }
-                        }
+                        }*/
 
                         //Extracting dates
                         var dates = activity.Elements("activity-date");
@@ -172,7 +172,7 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
-                        if (!string.IsNullOrEmpty(endDate))
+                        /*if (!string.IsNullOrEmpty(endDate))
                         {
                             if (DateTime.TryParse(endDate, out parsedDate))
                             {
@@ -182,7 +182,7 @@ namespace AIMS.IATILib.Parsers
                                     continue;
                                 }
                             }
-                        }
+                        }*/
                         
                         if (activity.HasAttributes)
                         {

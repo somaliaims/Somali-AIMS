@@ -77,7 +77,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse AddIATISector(IATINewSectorModel model);
+        ActionResponse AddSectorWithMapping(MappingSectorModel model);
 
         /// <summary>
         /// Sets the provided sector as child
@@ -295,7 +295,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddIATISector(IATINewSectorModel model)
+        public ActionResponse AddSectorWithMapping(MappingSectorModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -303,7 +303,8 @@ namespace AIMS.Services
                 IMessageHelper mHelper;
                 try
                 {
-                    var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsSourceType == true);
+                    EFSector primarySector = null;
+                    var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.Id == model.SectorTypeId);
                     if (sectorType == null)
                     {
                         mHelper = new MessageHelper();
@@ -312,10 +313,18 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var isSectorCreated = unitWork.SectorRepository.GetOne(s => s.SectorName.ToLower() == model.SectorName.ToLower().Trim());
-                    if (isSectorCreated != null)
+                    if (model.SectorId != 0)
                     {
-                        response.ReturnedId = isSectorCreated.Id;
+                        primarySector = unitWork.SectorRepository.GetOne(s => s.Id == model.SectorId);
+                    }
+                    else
+                    {
+                        primarySector = unitWork.SectorRepository.GetOne(s => s.SectorName.ToLower() == model.SectorName.ToLower().Trim());
+                    }
+                    
+                    if (primarySector != null)
+                    {
+                        response.ReturnedId = primarySector.Id;
                     }
                     else
                     {

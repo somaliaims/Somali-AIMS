@@ -1232,7 +1232,6 @@ namespace AIMS.Services
                         }
                     }
                     
-                    
                    /*unitWork.NotificationsRepository.Insert(new EFUserNotifications()
                     {
                         UserType = UserTypes.Standard,

@@ -348,9 +348,19 @@ namespace AIMS.Models
         public string SectorName { get; set; }
     }
 
-    public class IATINewSectorModel
+    public class SearchSectorMappingModel
+    {
+        [Required]
+        [MinLength(2)]
+        public string Sector { get; set; }
+    }
+
+    public class MappingSectorModel
     {
         public int? ParentId { get; set; }
+        [Required]
+        public int SectorTypeId { get; set; }
+        public int? SectorId { get; set; } = 0;
         [Required]
         public string SectorName { get; set; }
         [Required]
@@ -763,6 +773,8 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         [Required]
         public int SectorId { get; set; }
+        [Required]
+        public int MappingId { get; set; }
         [Required]
         public decimal FundsPercentage { get; set; }
     }

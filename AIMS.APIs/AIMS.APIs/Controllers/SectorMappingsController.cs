@@ -44,15 +44,15 @@ namespace AIMS.APIs.Controllers
             return Ok(sectors);
         }
 
-        [HttpGet]
-        [Route("GetSectorMappingsByName/{sectorName}")]
-        public IActionResult GetSectorMappingsByName(string sectorName)
+        [HttpPost]
+        [Route("GetSectorMappingsByName")]
+        public IActionResult GetSectorMappingsByName([FromBody] SearchSectorMappingModel model)
         {
-            if (string.IsNullOrEmpty(sectorName))
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid sector name provided");
+                return BadRequest(ModelState);
             }
-            var sectors = mappingService.GetSectorMappings(sectorName);
+            var sectors = mappingService.GetSectorMappings(model.Sector);
             return Ok(sectors);
         }
 

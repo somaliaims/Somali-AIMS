@@ -125,7 +125,9 @@ namespace AIMS.Models
 
     public class EFSectorMappings
     {
+        //This is about other sector types
         public int SectorId { get; set; }
+         //This is primary sector
         public int MappedSectorId { get; set; }
         public int SectorTypeId { get; set; }
     }
