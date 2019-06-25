@@ -203,7 +203,7 @@ namespace AIMS.Services
                     //Header columns row
                     row = excelSheet.CreateRow(++rowCounter);
                     var projectCol = row.CreateCell(0);
-                    projectCol.SetCellValue("Projects");
+                    projectCol.SetCellValue("Project");
                     projectCol.CellStyle = headerStyle;
 
                     var funderCol = row.CreateCell(1);
