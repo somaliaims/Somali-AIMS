@@ -133,6 +133,7 @@ namespace AIMS.APIs
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IExcelGeneratorService, ExcelGeneratorService>();
             services.AddScoped<IProjectMembershipService, ProjectMembershipService>();
+            services.AddScoped<IContactService, ContactService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();
