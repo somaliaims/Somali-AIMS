@@ -5,6 +5,12 @@ using System.Text;
 
 namespace AIMS.Models
 {
+    public enum ContactEmailType
+    {
+        Help = 1,
+        Information = 2
+    }
+
     public class ActionResponse
     {
         public int ReturnedId { get; set; } = 0;
@@ -353,6 +359,24 @@ namespace AIMS.Models
         [Required]
         [MinLength(2)]
         public string Sector { get; set; }
+    }
+
+    public class ContactEmailRequestModel
+    {
+        [Required]
+        public ContactEmailType EmailType { get; set; }
+        [Required]
+        public string SenderName { get; set; }
+        public int? ProjectId { get; set; } = 0;
+        [Required]
+        [EmailAddress]
+        public string SenderEmail { get; set; }
+        [Required]
+        [MaxLength(100)]
+        public string Subject { get; set; }
+        [MaxLength(800)]
+        public string Message { get; set; }
+
     }
 
     public class MappingSectorModel

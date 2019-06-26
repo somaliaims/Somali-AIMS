@@ -35,5 +35,15 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(true);
         }
+
+        [HttpPost("ContactRequest")]
+        public IActionResult SendContactEmailRequest([FromBody] ContactEmailRequestModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            return Ok();
+        }
     }
 }

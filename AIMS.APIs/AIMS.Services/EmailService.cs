@@ -15,6 +15,13 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <returns></returns>
         ActionResponse SendEmailToUsers(EmailModel model);
+
+        /// <summary>
+        /// Sends contact email to users
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse SendContactEmail(ContactEmailRequestModel model);
     }
 
     public class EmailService : IEmailService
@@ -48,6 +55,12 @@ namespace AIMS.Services
         {
             ActionResponse response = new ActionResponse();
             response = emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Title, model.Message);
+            return response;
+        }
+
+        public ActionResponse SendContactEmail(ContactEmailRequestModel model)
+        {
+            ActionResponse response = new ActionResponse();
             return response;
         }
     }
