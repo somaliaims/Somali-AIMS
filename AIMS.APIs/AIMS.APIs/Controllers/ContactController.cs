@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AIMS.Models;
 using AIMS.Services;
@@ -30,6 +31,14 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Data is not in valid format");
             }
 
+            if (string.IsNullOrEmpty(model.SenderEmail))
+            {
+                model.SenderEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                if (string.IsNullOrEmpty(model.SenderEmail))
+                {
+                    return BadRequest("Unauthorized user access to api");
+                }
+            }
             List<EmailAddress> usersEmails = null;
             if (model.EmailType == ContactEmailType.Help)
             {
@@ -48,7 +57,14 @@ namespace AIMS.APIs.Controllers
             ActionResponse response = null;
             if (usersEmails.Count > 0)
             {
-                response = emailService.SendContactEmail(model);
+                EmailModel emailModel = new EmailModel()
+                {
+                    Title = "",
+                    Subject = model.Subject,
+                    Message = model.Message,
+                    EmailsList = usersEmails
+                };
+                response = emailService.SendContactEmail(emailModel, model.SenderName, model.SenderEmail, model.ProjectTitle, model.EmailType);
                 if (!response.Success)
                 {
                     return BadRequest(response.Message);

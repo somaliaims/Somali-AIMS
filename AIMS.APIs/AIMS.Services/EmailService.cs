@@ -21,13 +21,15 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse SendContactEmail(ContactEmailRequestModel model);
+        ActionResponse SendContactEmail(EmailModel model, string senderName, string sendEmail, string projectTitle, ContactEmailType emailType);
     }
 
     public class EmailService : IEmailService
     {
         IEmailHelper emailHelper;
         AIMSDbContext context;
+        private readonly string INFORMATION_REQUEST = "SomaliAIMS information request:";
+        private readonly string HELP_REQUEST = "SomaliAIMS help request:";
 
         public EmailService(AIMSDbContext cntxt)
         {
@@ -54,14 +56,23 @@ namespace AIMS.Services
         public ActionResponse SendEmailToUsers(EmailModel model)
         {
             ActionResponse response = new ActionResponse();
-            response = emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Title, model.Message);
-            return response;
+            return emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Title, model.Message);
         }
 
-        public ActionResponse SendContactEmail(ContactEmailRequestModel model)
+        public ActionResponse SendContactEmail(EmailModel model, string senderName, string sendEmail, string projectTitle, ContactEmailType emailType)
         {
             ActionResponse response = new ActionResponse();
-            return response;
+            if (emailType == ContactEmailType.Help)
+            {
+                model.Subject = HELP_REQUEST + model.Subject;
+            }
+            else if (emailType == ContactEmailType.Information)
+            {
+                model.Subject = INFORMATION_REQUEST + model.Subject;
+                model.Message = "<h4>Information request for project (" + projectTitle + ")</h4>" + model.Message;
+            }
+            return emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Subject, model.Message);
         }
+
     }
 }

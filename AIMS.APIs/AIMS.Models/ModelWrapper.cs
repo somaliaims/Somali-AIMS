@@ -368,7 +368,7 @@ namespace AIMS.Models
         [Required]
         public string SenderName { get; set; }
         public int? ProjectId { get; set; } = 0;
-        [Required]
+        public string ProjectTitle { get; set; } = null;
         [EmailAddress]
         public string SenderEmail { get; set; }
         [Required]

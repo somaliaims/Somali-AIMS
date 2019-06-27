@@ -49,6 +49,20 @@ namespace AIMS.Services
                         Email = email
                     });
                 }
+                if (emailAddressList.Count == 0)
+                {
+                    var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == id, new string[] { "CreatedBy" }).FirstOrDefault();
+                    if (project != null)
+                    {
+                        if (project.CreatedBy != null)
+                        {
+                            emailAddressList.Add(new EmailAddress()
+                            {
+                                Email = project.CreatedBy.Email
+                            });
+                        }
+                    }
+                }
                 return emailAddressList;
             }
         }
