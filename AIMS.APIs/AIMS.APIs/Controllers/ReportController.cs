@@ -6,6 +6,7 @@ using AIMS.Models;
 using AIMS.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace AIMS.APIs.Controllers
 {
@@ -15,18 +16,22 @@ namespace AIMS.APIs.Controllers
     {
         IReportService reportService;
         IExcelGeneratorService excelService;
+        IConfiguration configuration;
+        string clientUrl = "";
 
-        public ReportController(IReportService service, IExcelGeneratorService eService)
+        public ReportController(IReportService service, IExcelGeneratorService eService, IConfiguration config)
         {
-            this.reportService = service;
-            this.excelService = eService;
+            reportService = service;
+            excelService = eService;
+            configuration = config;
+            clientUrl = configuration["ClientUrl"]; 
         }
 
         [HttpGet]
         [Route("GetProjectsBudgetReport")]
         public async Task<IActionResult> GetProjectsBudgetReport()
         {
-            var report = await reportService.GetProjectsBudgetReport();
+            var report = await reportService.GetProjectsBudgetReport(clientUrl);
             return Ok(report);
         }
 
@@ -39,7 +44,7 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var report = await reportService.GetProjectsBySectors(model);
+            var report = await reportService.GetProjectsBySectors(model, clientUrl);
             var response = excelService.GenerateSectorProjectsReport(report);
             if (response.Success)
             {
@@ -57,7 +62,7 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var report = await reportService.GetProjectsByLocations(model);
+            var report = await reportService.GetProjectsByLocations(model, clientUrl);
             var response = excelService.GenerateLocationProjectsReport(report);
             if (response.Success)
             {

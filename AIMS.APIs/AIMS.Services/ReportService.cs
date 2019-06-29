@@ -25,16 +25,16 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ProjectProfileReportBySector> GetProjectsBySectors(SearchProjectsBySectorModel model);
+        Task<ProjectProfileReportBySector> GetProjectsBySectors(SearchProjectsBySectorModel model, string reportUrl);
 
         /// <summary>
         /// Search matching projects by sector wise grouped for the provided criteria
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model);
+        Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model, string reportUrl);
 
-        Task<ProjectsBudgetReport> GetProjectsBudgetReport();
+        Task<ProjectsBudgetReport> GetProjectsBudgetReport(string reportUrl);
     }
 
     public class ReportService : IReportService
@@ -49,19 +49,26 @@ namespace AIMS.Services
         }
 
 
-        public async Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model)
+        public async Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model, string reportUrl)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ProjectProfileReportByLocation locationProjectsReport = new ProjectProfileReportByLocation();
                 try
                 {
+                    IQueryStringGenerator queryStringGenerator = new QueryStringGenerator();
+                    string queryString = queryStringGenerator.GetQueryStringForLocationsReport(model);
+                    if (!string.IsNullOrEmpty(queryString))
+                    {
+                        reportUrl += reportUrl + "?query=" + queryString;
+                    }
                     locationProjectsReport.ReportSettings = new Report()
                     {
                         Title = ReportConstants.PROJECTS_BY_LOCATION_TITLE,
                         SubTitle = ReportConstants.PROJECTS_BY_LOCATION_SUBTITLE,
                         Footer = ReportConstants.PROJECTS_BY_LOCATION_FOOTER,
-                        Dated = DateTime.Now.ToLongDateString()
+                        Dated = DateTime.Now.ToLongDateString(),
+                        ReportUrl = reportUrl
                     };
 
                     DateTime dated = new DateTime();
@@ -353,7 +360,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ProjectsBudgetReport> GetProjectsBudgetReport()
+        public async Task<ProjectsBudgetReport> GetProjectsBudgetReport(string reportUrl)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -366,7 +373,8 @@ namespace AIMS.Services
                         Title = ReportConstants.PROJECTS_BUDGET_REPORT_TITLE,
                         SubTitle = ReportConstants.PROJECTS_BUDGET_REPORT_SUBTITLE,
                         Footer = ReportConstants.PROJECTS_BUDGET_REPORT_FOOTER,
-                        Dated = DateTime.Now.ToLongDateString()
+                        Dated = DateTime.Now.ToLongDateString(),
+                        ReportUrl = reportUrl
                     };
 
                     int currentYear = DateTime.Now.Year;
@@ -477,19 +485,26 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ProjectProfileReportBySector> GetProjectsBySectors(SearchProjectsBySectorModel model)
+        public async Task<ProjectProfileReportBySector> GetProjectsBySectors(SearchProjectsBySectorModel model, string reportUrl)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ProjectProfileReportBySector sectorProjectsReport = new ProjectProfileReportBySector();
                 try
                 {
+                    IQueryStringGenerator queryStringGenerator = new QueryStringGenerator();
+                    string queryString = queryStringGenerator.GetQueryStringForSectorsReport(model);
+                    if (!string.IsNullOrEmpty(queryString))
+                    {
+                        reportUrl += reportUrl + "?query=" + queryString;
+                    }
                     sectorProjectsReport.ReportSettings = new Report()
                     {
                         Title = ReportConstants.PROJECTS_BY_SECTOR_TITLE,
                         SubTitle = ReportConstants.PROJECTS_BY_SECTOR_SUBTITLE,
                         Footer = ReportConstants.PROJECTS_BY_SECTOR_FOOTER,
-                        Dated = DateTime.Now.ToLongDateString()
+                        Dated = DateTime.Now.ToLongDateString(),
+                        ReportUrl = reportUrl
                     };
 
                     DateTime dated = new DateTime();

@@ -1116,6 +1116,7 @@ namespace AIMS.Models
     public class Report
     {
         public string Title { get; set; }
+        public string ReportUrl { get; set; }
         public string ExcelReportName { get; set; }
         public string SubTitle { get; set; }
         public string Dated { get; set; }
