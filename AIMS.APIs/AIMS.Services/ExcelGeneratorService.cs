@@ -298,6 +298,19 @@ namespace AIMS.Services
 
                     var grandPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Numeric);
                     grandPlannedDisbursementTotalCell.SetCellValue("");
+
+                    var emptyRow = excelSheet.CreateRow(++rowCounter);
+                    var emptyCell = row.CreateCell(0, CellType.String);
+                    emptyCell.SetCellValue("");
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns));
+
+                    var linkRow = excelSheet.CreateRow(++rowCounter);
+                    var linkCell = row.CreateCell(0, CellType.String);
+                    emptyCell.SetCellValue("Live report: <a href='" + report.ReportSettings.ReportUrl + "'>" + report.ReportSettings.ReportUrl + "</a>");
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns));
+
                     workbook.Write(fs);
                 }
                 response.Message = sFileName;
@@ -487,7 +500,19 @@ namespace AIMS.Services
 
                     var grandPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Numeric);
                     grandPlannedDisbursementTotalCell.SetCellValue("");
-                    
+
+                    var emptyRow = excelSheet.CreateRow(++rowCounter);
+                    var emptyCell = row.CreateCell(0, CellType.String);
+                    emptyCell.SetCellValue("");
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns));
+
+                    var linkRow = excelSheet.CreateRow(++rowCounter);
+                    var linkCell = row.CreateCell(0, CellType.String);
+                    emptyCell.SetCellValue("Live report: <a href='" + report.ReportSettings.ReportUrl + "'>" + report.ReportSettings.ReportUrl + "</a>");
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns));
+
                     workbook.Write(fs);
                 }
                 response.Message = sFileName;
