@@ -58,9 +58,11 @@ namespace AIMS.Services
                 {
                     IQueryStringGenerator queryStringGenerator = new QueryStringGenerator();
                     string queryString = queryStringGenerator.GetQueryStringForLocationsReport(model);
+                    reportUrl += ReportConstants.LOCATION_REPORT_URL;
+
                     if (!string.IsNullOrEmpty(queryString))
                     {
-                        reportUrl += reportUrl + "?query=" + queryString;
+                        reportUrl += "?query=" + queryString;
                     }
                     locationProjectsReport.ReportSettings = new Report()
                     {
@@ -374,7 +376,7 @@ namespace AIMS.Services
                         SubTitle = ReportConstants.PROJECTS_BUDGET_REPORT_SUBTITLE,
                         Footer = ReportConstants.PROJECTS_BUDGET_REPORT_FOOTER,
                         Dated = DateTime.Now.ToLongDateString(),
-                        ReportUrl = reportUrl
+                        ReportUrl = reportUrl + ReportConstants.BUDGET_REPORT_URL
                     };
 
                     int currentYear = DateTime.Now.Year;
@@ -494,9 +496,11 @@ namespace AIMS.Services
                 {
                     IQueryStringGenerator queryStringGenerator = new QueryStringGenerator();
                     string queryString = queryStringGenerator.GetQueryStringForSectorsReport(model);
+                    reportUrl += ReportConstants.SECTOR_REPORT_URL;
+
                     if (!string.IsNullOrEmpty(queryString))
                     {
-                        reportUrl += reportUrl + "?query=" + queryString;
+                        reportUrl += "?query=" + queryString;
                     }
                     sectorProjectsReport.ReportSettings = new Report()
                     {

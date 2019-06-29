@@ -43,7 +43,7 @@ namespace AIMS.Services.Helpers
                 queryString += queryString.Length > 0 ? ("&sectors=" + sectorIdsStr) : ("sectors=" + sectorIdsStr);
             }
 
-            if (string.IsNullOrEmpty(model.Title))
+            if (!string.IsNullOrEmpty(model.Title))
             {
                 queryString += queryString.Length > 0 ? ("&title=" + model.Title) : ("title=" + model.Title);
             }
@@ -74,7 +74,7 @@ namespace AIMS.Services.Helpers
                 queryString += queryString.Length > 0 ? ("&locations=" + locationIdsStr) : ("locations=" + locationIdsStr);
             }
 
-            if (string.IsNullOrEmpty(model.Title))
+            if (!string.IsNullOrEmpty(model.Title))
             {
                 queryString += queryString.Length > 0 ? ("&title=" + model.Title) : ("title=" + model.Title);
             }

@@ -140,38 +140,38 @@ namespace AIMS.Services
                     //Setting styles for different cell types
                     ICellStyle titleStyle = workbook.CreateCellStyle();
                     IFont fontTitle = workbook.CreateFont();
-                    fontTitle.Color = IndexedColors.DarkGreen.Index;
+                    fontTitle.Color = IndexedColors.DarkBlue.Index;
                     fontTitle.IsBold = true;
                     fontTitle.FontHeightInPoints = 16;
                     titleStyle.SetFont(fontTitle);
                     titleStyle.Alignment = HorizontalAlignment.CenterSelection;
                     titleStyle.VerticalAlignment = VerticalAlignment.Center;
 
-                    ICellStyle footerStyle = workbook.CreateCellStyle();
-                    IFont footerFontTitle = workbook.CreateFont();
-                    footerFontTitle.Color = IndexedColors.DarkGreen.Index;
-                    footerFontTitle.IsBold = true;
-                    fontTitle.FontHeightInPoints = 16;
-                    footerStyle.SetFont(fontTitle);
-                    footerStyle.Alignment = HorizontalAlignment.Center;
-                    footerStyle.VerticalAlignment = VerticalAlignment.Center;
+                    ICellStyle linkStyle = workbook.CreateCellStyle();
+                    IFont linkFont = workbook.CreateFont();
+                    linkFont.Color = IndexedColors.DarkBlue.Index;
+                    linkFont.IsBold = true;
+                    linkFont.FontHeightInPoints = 14;
+                    linkStyle.SetFont(linkFont);
+                    linkStyle.Alignment = HorizontalAlignment.CenterSelection;
+                    linkStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle headerStyle = workbook.CreateCellStyle();
                     IFont fontHeader = workbook.CreateFont();
                     fontHeader.Color = IndexedColors.Black.Index;
                     fontHeader.IsBold = true;
-                    headerStyle.SetFont(fontTitle);
-                    fontTitle.Boldweight = 11;
-                    fontTitle.FontHeight = 11;
-                    fontTitle.FontHeightInPoints = 11;
+                    fontHeader.FontHeightInPoints = 12;
+                    headerStyle.SetFont(fontHeader);
                     headerStyle.Alignment = HorizontalAlignment.Center;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
+
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
                     IFont groupFontHeader = workbook.CreateFont();
                     groupFontHeader.Color = IndexedColors.DarkYellow.Index;
+                    groupFontHeader.FontHeightInPoints = 12;
                     groupFontHeader.IsBold = true;
-                    groupHeaderStyle.SetFont(fontTitle);
+                    groupHeaderStyle.SetFont(groupFontHeader);
                     groupHeaderStyle.Alignment = HorizontalAlignment.Center;
                     groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
@@ -284,30 +284,36 @@ namespace AIMS.Services
                     row = excelSheet.CreateRow(++rowCounter);
                     var footerCell = row.CreateCell(0, CellType.String);
                     footerCell.SetCellValue("Grand totals: ");
+                    footerCell.CellStyle = headerStyle;
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, groupHeaderColumns));
-                    footerCell.CellStyle = footerStyle;
+                    
 
                     var grandFundTotalCell = row.CreateCell(3, CellType.Numeric);
                     grandFundTotalCell.SetCellValue(ApplyThousandFormat(grandTotalFunding));
-                    grandFundTotalCell.CellStyle = footerStyle;
+                    grandFundTotalCell.CellStyle = headerStyle;
 
                     var grandDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
                     grandDisbursementTotalCell.SetCellValue(ApplyThousandFormat(grandTotalDisbursement));
-                    grandDisbursementTotalCell.CellStyle = footerStyle;
+                    grandDisbursementTotalCell.CellStyle = headerStyle;
 
-                    var grandPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Numeric);
-                    grandPlannedDisbursementTotalCell.SetCellValue("");
+                    var grandPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Blank);
+                    grandPlannedDisbursementTotalCell.CellStyle = headerStyle;
 
-                    var emptyRow = excelSheet.CreateRow(++rowCounter);
-                    var emptyCell = row.CreateCell(0, CellType.String);
-                    emptyCell.SetCellValue("");
+                    row = excelSheet.CreateRow(++rowCounter);
+                    var emptyCell = row.CreateCell(0, CellType.Blank);
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns));
 
-                    var linkRow = excelSheet.CreateRow(++rowCounter);
+                    row = excelSheet.CreateRow(++rowCounter);
                     var linkCell = row.CreateCell(0, CellType.String);
-                    emptyCell.SetCellValue("Live report: <a href='" + report.ReportSettings.ReportUrl + "'>" + report.ReportSettings.ReportUrl + "</a>");
+                    XSSFHyperlink urlLink = new XSSFHyperlink(HyperlinkType.Url)
+                    {
+                        Address = report.ReportSettings.ReportUrl
+                    };
+                    linkCell.SetCellValue("Click to view latest report");
+                    linkCell.Hyperlink = (urlLink);
+                    linkCell.CellStyle = linkStyle;
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns));
 
@@ -345,38 +351,38 @@ namespace AIMS.Services
                     //Setting styles for different cell types
                     ICellStyle titleStyle = workbook.CreateCellStyle();
                     IFont fontTitle = workbook.CreateFont();
-                    fontTitle.Color = IndexedColors.DarkGreen.Index;
+                    fontTitle.Color = IndexedColors.DarkBlue.Index;
                     fontTitle.IsBold = true;
-                    titleStyle.SetFont(fontTitle);
                     fontTitle.FontHeightInPoints = 16;
+                    titleStyle.SetFont(fontTitle);
                     titleStyle.Alignment = HorizontalAlignment.CenterSelection;
                     titleStyle.VerticalAlignment = VerticalAlignment.Center;
 
-                    ICellStyle footerStyle = workbook.CreateCellStyle();
-                    IFont footerFontTitle = workbook.CreateFont();
-                    footerFontTitle.Color = IndexedColors.DarkGreen.Index;
-                    footerFontTitle.IsBold = true;
-                    fontTitle.FontHeightInPoints = 16;
-                    footerStyle.SetFont(fontTitle);
-                    footerStyle.Alignment = HorizontalAlignment.Center;
-                    footerStyle.VerticalAlignment = VerticalAlignment.Center;
+                    ICellStyle linkStyle = workbook.CreateCellStyle();
+                    IFont linkFont = workbook.CreateFont();
+                    linkFont.Color = IndexedColors.DarkBlue.Index;
+                    linkFont.IsBold = true;
+                    linkFont.FontHeightInPoints = 14;
+                    linkStyle.SetFont(linkFont);
+                    linkStyle.Alignment = HorizontalAlignment.CenterSelection;
+                    linkStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle headerStyle = workbook.CreateCellStyle();
                     IFont fontHeader = workbook.CreateFont();
                     fontHeader.Color = IndexedColors.Black.Index;
                     fontHeader.IsBold = true;
-                    headerStyle.SetFont(fontTitle);
-                    fontTitle.Boldweight = 11;
-                    fontTitle.FontHeight = 11;
-                    fontTitle.FontHeightInPoints = 11;
+                    fontHeader.FontHeightInPoints = 12;
+                    headerStyle.SetFont(fontHeader);
                     headerStyle.Alignment = HorizontalAlignment.Center;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
+
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
                     IFont groupFontHeader = workbook.CreateFont();
                     groupFontHeader.Color = IndexedColors.DarkYellow.Index;
+                    groupFontHeader.FontHeightInPoints = 12;
                     groupFontHeader.IsBold = true;
-                    groupHeaderStyle.SetFont(fontTitle);
+                    groupHeaderStyle.SetFont(groupFontHeader);
                     groupHeaderStyle.Alignment = HorizontalAlignment.Center;
                     groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
@@ -486,30 +492,36 @@ namespace AIMS.Services
                     row = excelSheet.CreateRow(++rowCounter);
                     var footerCell = row.CreateCell(0, CellType.String);
                     footerCell.SetCellValue("Grand totals: ");
+                    footerCell.CellStyle = headerStyle;
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, groupHeaderColumns));
-                    footerCell.CellStyle = footerStyle;
+                    
 
                     var grandFundTotalCell = row.CreateCell(3, CellType.Numeric);
                     grandFundTotalCell.SetCellValue(ApplyThousandFormat(grandTotalFunding));
-                    grandFundTotalCell.CellStyle = footerStyle;
+                    grandFundTotalCell.CellStyle = headerStyle;
 
                     var grandDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
                     grandDisbursementTotalCell.SetCellValue(ApplyThousandFormat(grandTotalDisbursement));
-                    grandDisbursementTotalCell.CellStyle = footerStyle;
+                    grandDisbursementTotalCell.CellStyle = headerStyle;
 
-                    var grandPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Numeric);
-                    grandPlannedDisbursementTotalCell.SetCellValue("");
+                    var grandPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Blank);
+                    grandPlannedDisbursementTotalCell.CellStyle = headerStyle;
 
-                    var emptyRow = excelSheet.CreateRow(++rowCounter);
-                    var emptyCell = row.CreateCell(0, CellType.String);
-                    emptyCell.SetCellValue("");
+                    row = excelSheet.CreateRow(++rowCounter);
+                    var emptyCell = row.CreateCell(0, CellType.Blank);
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns));
 
-                    var linkRow = excelSheet.CreateRow(++rowCounter);
+                    row = excelSheet.CreateRow(++rowCounter);
                     var linkCell = row.CreateCell(0, CellType.String);
-                    emptyCell.SetCellValue("Live report: <a href='" + report.ReportSettings.ReportUrl + "'>" + report.ReportSettings.ReportUrl + "</a>");
+                    XSSFHyperlink urlLink = new XSSFHyperlink(HyperlinkType.Url)
+                    {
+                        Address = report.ReportSettings.ReportUrl
+                    };
+                    linkCell.SetCellValue("Click to view latest report");
+                    linkCell.Hyperlink = (urlLink);
+                    linkCell.CellStyle = linkStyle;
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns));
 
