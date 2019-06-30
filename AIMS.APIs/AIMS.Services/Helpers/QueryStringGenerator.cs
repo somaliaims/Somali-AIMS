@@ -31,62 +31,62 @@ namespace AIMS.Services.Helpers
 
         public string GetQueryStringForSectorsReport(SearchProjectsBySectorModel model)
         {
-            string queryString = "";
+            string queryString = "?load=true";
             if (model.OrganizationIds.Count > 0)
             {
-                queryString = "orgs" + string.Join(",", model.OrganizationIds);
+                queryString += "&orgs=" + string.Join(",", model.OrganizationIds);
             }
 
             if (model.SectorIds.Count > 0)
             {
                 string sectorIdsStr = string.Join(",", model.SectorIds);
-                queryString += queryString.Length > 0 ? ("&sectors=" + sectorIdsStr) : ("sectors=" + sectorIdsStr);
+                queryString += ("&sectors=" + sectorIdsStr);
             }
 
             if (!string.IsNullOrEmpty(model.Title))
             {
-                queryString += queryString.Length > 0 ? ("&title=" + model.Title) : ("title=" + model.Title);
+                queryString += ("&title=" + model.Title);
             }
 
             if (model.StartingYear > 0)
             {
-                queryString += queryString.Length > 0 ? ("&syear=" + model.StartingYear) : ("syear=" + model.StartingYear);
+                queryString += ("&syear=" + model.StartingYear);
             }
 
             if (model.EndingYear > 0)
             {
-                queryString += queryString.Length > 0 ? ("&eyear=" + model.EndingYear) : ("eyear=" + model.EndingYear);
+                queryString += ("&eyear=" + model.EndingYear);
             }
             return queryString;
         }
 
         public string GetQueryStringForLocationsReport(SearchProjectsByLocationModel model)
         {
-            string queryString = "";
+            string queryString = "?load=true";
             if (model.OrganizationIds.Count > 0)
             {
-                queryString = "orgs" + string.Join(",", model.OrganizationIds);
+                queryString += "&orgs=" + string.Join(",", model.OrganizationIds);
             }
 
             if (model.LocationIds.Count > 0)
             {
                 string locationIdsStr = string.Join(",", model.LocationIds);
-                queryString += queryString.Length > 0 ? ("&locations=" + locationIdsStr) : ("locations=" + locationIdsStr);
+                queryString += ("&locations=" + locationIdsStr);
             }
 
             if (!string.IsNullOrEmpty(model.Title))
             {
-                queryString += queryString.Length > 0 ? ("&title=" + model.Title) : ("title=" + model.Title);
+                queryString += ("&title=" + model.Title);
             }
 
             if (model.StartingYear > 0)
             {
-                queryString += queryString.Length > 0 ? ("&syear=" + model.StartingYear) : ("syear=" + model.StartingYear);
+                queryString += ("&syear=" + model.StartingYear);
             }
 
             if (model.EndingYear > 0)
             {
-                queryString += queryString.Length > 0 ? ("&eyear=" + model.EndingYear) : ("eyear=" + model.EndingYear);
+                queryString += ("&eyear=" + model.EndingYear);
             }
             return queryString;
         }

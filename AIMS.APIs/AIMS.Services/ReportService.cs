@@ -62,7 +62,7 @@ namespace AIMS.Services
 
                     if (!string.IsNullOrEmpty(queryString))
                     {
-                        reportUrl += "?query=" + queryString;
+                        reportUrl += queryString;
                     }
                     locationProjectsReport.ReportSettings = new Report()
                     {
@@ -376,7 +376,7 @@ namespace AIMS.Services
                         SubTitle = ReportConstants.PROJECTS_BUDGET_REPORT_SUBTITLE,
                         Footer = ReportConstants.PROJECTS_BUDGET_REPORT_FOOTER,
                         Dated = DateTime.Now.ToLongDateString(),
-                        ReportUrl = reportUrl + ReportConstants.BUDGET_REPORT_URL
+                        ReportUrl = reportUrl + ReportConstants.BUDGET_REPORT_URL + "?load=true"
                     };
 
                     int currentYear = DateTime.Now.Year;
@@ -500,7 +500,7 @@ namespace AIMS.Services
 
                     if (!string.IsNullOrEmpty(queryString))
                     {
-                        reportUrl += "?query=" + queryString;
+                        reportUrl += queryString;
                     }
                     sectorProjectsReport.ReportSettings = new Report()
                     {
