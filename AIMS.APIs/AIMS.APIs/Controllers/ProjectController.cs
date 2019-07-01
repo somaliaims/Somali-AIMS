@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AIMS.APIs.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    
     [Route("api/[controller]")]
     [ApiController]
     public class ProjectController : ControllerBase
@@ -204,7 +204,7 @@ namespace AIMS.APIs.Controllers
             return Ok(projects);
         }
 
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ProjectModel project)
         {
@@ -231,6 +231,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("MergeProjects")]
         public async Task<IActionResult> MergeProjects([FromBody] MergeProjectsModel model)
@@ -248,6 +249,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("ExtractProjectsByIds")]
         public async Task<IActionResult> ExtractProjectsByIds([FromBody] int[] ids)
@@ -261,6 +263,7 @@ namespace AIMS.APIs.Controllers
             return Ok(projects);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddProjectLocation")]
         public IActionResult AddProjectLocation([FromBody] ProjectLocationModel model)
@@ -278,6 +281,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddProjectSector")]
         public IActionResult AddProjectSector([FromBody] ProjectSectorModel model)
@@ -295,6 +299,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddProjectFunder")]
         public IActionResult AddProjectFunder([FromBody] ProjectFunderModel model)
@@ -318,6 +323,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddProjectImplementer")]
         public IActionResult AddProjectImplementer([FromBody] ProjectImplementerModel model)
@@ -335,6 +341,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddProjectDisbursement")]
         public IActionResult AddProjectDisbursement([FromBody] ProjectDisbursementModel model)
@@ -352,6 +359,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddProjectDocument")]
         public IActionResult AddProjectDocument([FromBody] ProjectDocumentModel model)
@@ -369,6 +377,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddProjectCustomField")]
         public IActionResult AddProjectCustomField([FromBody] ProjectCustomFieldModel model)
@@ -386,6 +395,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut]
         [Route("EditProjectCustomField")]
         public IActionResult EditProjectCustomField([FromBody] ProjectCustomFieldModel model)
@@ -403,6 +413,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("SearchProjectsByCriteria")]
         public async Task<IActionResult> SearchProjectsByCriteria([FromBody] SearchProjectModel model)
@@ -416,6 +427,7 @@ namespace AIMS.APIs.Controllers
             return Ok(projects);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("SearchProjectsViewByCriteria")]
         public async Task<IActionResult> SearchProjectsViewByCriteria([FromBody] SearchProjectModel model)
@@ -429,6 +441,7 @@ namespace AIMS.APIs.Controllers
             return Ok(projects);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] ProjectModel project)
         {
@@ -445,6 +458,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete]
         [Route("DeleteProjectLocation/{projectId}/{locationId}")]
         public IActionResult DeleteProjectLocation(int projectId, int locationId)
@@ -458,6 +472,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete]
         [Route("DeleteProjectSector/{projectId}/{sectorId}")]
         public IActionResult DeleteProjectSector(int projectId, int sectorId)
@@ -475,6 +490,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete]
         [Route("DeleteProjectFunder/{projectId}/{funderId}")]
         public IActionResult DeleteProjectFunder(int projectId, int funderId)
@@ -492,6 +508,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete]
         [Route("DeleteProjectImplementer/{projectId}/{implementerId}")]
         public IActionResult DeleteProjectImplementer(int projectId, int implementerId)
@@ -508,6 +525,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete]
         [Route("DeleteProjectCustomField/{projectId}/{customFieldId}")]
         public IActionResult DeleteProjectCustomField(int projectId, int customFieldId)
@@ -525,6 +543,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete]
         [Route("DeleteProjectDisbursement/{id}")]
         public IActionResult DeleteProjectDisbursement(int id)
@@ -541,6 +560,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete]
         [Route("DeleteProjectDocument/{id}")]
         public IActionResult DeleteProjectDocument(int id)
