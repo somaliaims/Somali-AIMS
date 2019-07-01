@@ -26,17 +26,23 @@ namespace AIMS.APIs.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            int organizationId = 0;
+            int organizationId = 0, userId = 0;
             var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!string.IsNullOrEmpty(organizationIdVal))
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
             }
-            else
+            if(!string.IsNullOrEmpty(userIdVal))
             {
-                return BadRequest("Invalid attempt");
+                userId = Convert.ToInt32(userIdVal);
             }
-            var requests = service.GetRequestsForFunder(organizationId);
+
+            if (organizationId < 1 || userId < 1)
+            {
+                return BadRequest("Invalid request");
+            }
+            var requests = service.GetRequestsForFunder(organizationId, userId);
             return Ok(requests);
         }
 
@@ -44,17 +50,23 @@ namespace AIMS.APIs.Controllers
         [Route("GetUserApprovedRequests")]
         public IActionResult GetUserApprovedRequests()
         {
-            int organizationId = 0;
+            int organizationId = 0, userId = 0;
             var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!string.IsNullOrEmpty(organizationIdVal))
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
             }
-            else
+            if (!string.IsNullOrEmpty(userIdVal))
             {
-                return BadRequest("Invalid attempt");
+                userId = Convert.ToInt32(userIdVal);
             }
-            var requests = service.GetRequestsForFunder(organizationId);
+
+            if (organizationId < 1 || userId < 1)
+            {
+                return BadRequest("Invalid request");
+            }
+            var requests = service.GetRequestsForFunder(organizationId, userId);
             return Ok(requests);
         }
 
@@ -94,18 +106,23 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            int organizationId = 0;
+            int organizationId = 0, ownerId = 0;
             string organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
             if (!string.IsNullOrEmpty(organizationIdVal))
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
             }
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                ownerId = Convert.ToInt32(userIdVal);
+            }
             string userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-            if (string.IsNullOrEmpty(userEmail))
+            if (string.IsNullOrEmpty(userEmail) || ownerId == 0)
             {
                 return BadRequest("Unauthorized request");
             }
-            var response = service.ApproveMembershipRequest(model.UserId, model.ProjectId, organizationId);
+            var response = service.ApproveMembershipRequest(model.UserId, model.ProjectId, organizationId, ownerId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -122,18 +139,23 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            int organizationId = 0;
+            int organizationId = 0, ownerId = 0;
             var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
             if (!string.IsNullOrEmpty(organizationIdVal))
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
+            }
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                ownerId = Convert.ToInt32(userIdVal);
             }
             string userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(userEmail))
             {
                 return BadRequest("Unauthorized request");
             }
-            var response = service.UnApproveMembershipRequest(model.UserId, model.ProjectId, organizationId);
+            var response = service.UnApproveMembershipRequest(model.UserId, model.ProjectId, organizationId, ownerId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

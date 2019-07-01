@@ -17,7 +17,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="projectIds"></param>
         /// <returns></returns>
-        IEnumerable<ProjectMembershipRequestView> GetRequestsForFunder(int funderId);
+        IEnumerable<ProjectMembershipRequestView> GetRequestsForFunder(int funderId, int userId);
 
         /// <summary>
         /// Gets list of projects for which membership is approved
@@ -38,14 +38,14 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse ApproveMembershipRequest(int userId, int projectId, int funderId);
+        ActionResponse ApproveMembershipRequest(int userId, int projectId, int funderId, int ownerId);
 
         /// <summary>
         /// Un-Approves membership request
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse UnApproveMembershipRequest(int userId, int projectId, int funderId);
+        ActionResponse UnApproveMembershipRequest(int userId, int projectId, int funderId, int ownerId);
     }
     public class ProjectMembershipService : IProjectMembershipService
     {
@@ -58,17 +58,20 @@ namespace AIMS.Services
             mapper = autoMapper;
         }
 
-        public IEnumerable<ProjectMembershipRequestView> GetRequestsForFunder(int funderId)
+        public IEnumerable<ProjectMembershipRequestView> GetRequestsForFunder(int funderId, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var funderProjects = unitWork.ProjectFundersRepository.GetManyQueryable(p => p.FunderId == funderId);
-                List<int> funderProjectIds = (from f in funderProjects
-                                              select f.ProjectId).ToList<int>();
-                var implementerProjects = unitWork.ProjectImplementersRepository.GetManyQueryable(p => p.ImplementerId == funderId);
-                List<int> implementerProjectIds = (from i in implementerProjects
-                                                   select i.ProjectId).ToList<int>();
-                List<int> projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
+                var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == funderId, p => p.FunderId);
+                var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == funderId, p => p.ImplementerId);
+                var userOwnedProjects = unitWork.ProjectRepository.GetProjection(p => p.CreatedById == userId, p => p.Id);
+                var projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
+                List<int> userOwnedProjectIds = new List<int>(); 
+                foreach(var pid in userOwnedProjects)
+                {
+                    userOwnedProjectIds.Add((int)pid);
+                }
+                projectIds = projectIds.Union(userOwnedProjectIds).ToList<int>();
                 var requests = unitWork.ProjectMembershipRepository.GetWithInclude(r => projectIds.Contains(r.ProjectId) && r.IsApproved == false, new string[] { "Project", "User", "User.Organization" });
                 return mapper.Map<List<ProjectMembershipRequestView>>(requests);
             }
@@ -180,7 +183,7 @@ namespace AIMS.Services
                         }
 
                         string message = "", subject = "";
-                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectPermissionGranted);
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewOrgToProject);
                         if (emailMessage != null)
                         {
                             subject = emailMessage.Subject;
@@ -202,20 +205,26 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ApproveMembershipRequest(int userId, int projectId, int funderId)
+        public ActionResponse ApproveMembershipRequest(int userId, int projectId, int funderId, int ownerId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
 
-                var isFunderOwner = unitWork.ProjectFundersRepository.GetOne(f => f.FunderId == funderId && f.ProjectId == projectId);
-                if (isFunderOwner == null)
+                var isUserOwner = unitWork.ProjectRepository.GetOne(p => (p.Id == projectId && p.CreatedById == ownerId));
+                if (isUserOwner == null)
                 {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.GetInvalidFunderApprovalMessage();
-                    response.Success = false;
-                    return response;
+                    var isFunderOwner = unitWork.ProjectFundersRepository.GetOne(f => f.FunderId == funderId && f.ProjectId == projectId);
+                    var isImplementerOwner = unitWork.ProjectImplementersRepository.GetOne(i => i.ImplementerId == funderId && i.ProjectId == projectId);
+
+                    if (isFunderOwner == null && isImplementerOwner == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetInvalidFunderApprovalMessage();
+                        response.Success = false;
+                        return response;
+                    }
                 }
 
                 var user = unitWork.UserRepository.GetOne(u => u.Id == userId);
@@ -277,7 +286,7 @@ namespace AIMS.Services
                     }
 
                     string message = "", subject = "";
-                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectPermissionDenied);
+                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectPermissionGranted);
                     if (emailMessage != null)
                     {
                         subject = emailMessage.Subject;
@@ -293,20 +302,26 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse UnApproveMembershipRequest(int userId, int projectId, int funderId)
+        public ActionResponse UnApproveMembershipRequest(int userId, int projectId, int funderId, int ownerId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
 
-                var isFunderOwner = unitWork.ProjectFundersRepository.GetOne(f => f.FunderId == funderId && f.ProjectId == projectId);
-                if (isFunderOwner == null)
+                var isUserOwner = unitWork.ProjectRepository.GetOne(p => (p.Id == projectId && p.CreatedById == ownerId));
+                if (isUserOwner == null)
                 {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.GetInvalidFunderApprovalMessage();
-                    response.Success = false;
-                    return response;
+                    var isFunderOwner = unitWork.ProjectFundersRepository.GetOne(f => f.FunderId == funderId && f.ProjectId == projectId);
+                    var isImplementerOwner = unitWork.ProjectImplementersRepository.GetOne(i => i.ImplementerId == funderId && i.ProjectId == projectId);
+
+                    if (isFunderOwner == null && isImplementerOwner == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetInvalidFunderApprovalMessage();
+                        response.Success = false;
+                        return response;
+                    }
                 }
 
                 var user = unitWork.UserRepository.GetOne(u => u.Id == userId);
