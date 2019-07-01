@@ -927,7 +927,7 @@ namespace AIMS.Services
             {
                 var funderProjectsIds = unitWork.ProjectFundersRepository.GetProjection(f => f.FunderId == funderId, f => f.ProjectId).ToList();
                 var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ImplementerId == funderId, i => i.ProjectId).ToList();
-                var membershipProjectIds = unitWork.ProjectMembershipRepository.GetProjection(m => m.UserId == userId, m => m.ProjectId);
+                var membershipProjectIds = unitWork.ProjectMembershipRepository.GetProjection(m => (m.UserId == userId && m.IsApproved == true), m => m.ProjectId);
                 var combinedProjectIds = funderProjectsIds.Union(implementerProjectIds);
                 combinedProjectIds = combinedProjectIds.Union(membershipProjectIds);
                 List<UserProjectsView> projectIds = new List<UserProjectsView>();
