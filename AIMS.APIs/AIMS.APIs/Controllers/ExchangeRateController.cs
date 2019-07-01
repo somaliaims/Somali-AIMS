@@ -90,7 +90,19 @@ namespace AIMS.APIs.Controllers
                 string dateStr = dated.Day < 10 ? "0" + dated.Day : dated.Day.ToString();
                 string datedStr = dated.Year + "-" + monthStr + "-" + dateStr;
                 ratesView = (isTodaysDate) ? await ratesHttpService.GetRatesAsync(apiKey) : await ratesHttpService.GetRatesForDateAsync(datedStr, apiKey);
-                ratesService.SaveCurrencyRates(ratesView.Rates, dated);
+                if (ratesView.Rates != null)
+                {
+                    ratesService.SaveCurrencyRates(ratesView.Rates, dated);
+                }
+                else
+                {
+                    if (dated >= (dated.AddDays(-14)))
+                    dated = (dated.AddDays(-15));
+                    monthStr = dated.Month < 10 ? "0" + dated.Month : dated.Month.ToString();
+                    dateStr = dated.Day < 10 ? "0" + dated.Day : dated.Day.ToString();
+                    datedStr = dated.Year + "-" + monthStr + "-" + dateStr;
+                    ratesView = await ratesHttpService.GetRatesForDateAsync(datedStr, apiKey);
+                }
             }
             return Ok(ratesView);
         }
