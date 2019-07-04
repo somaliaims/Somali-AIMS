@@ -71,6 +71,12 @@ namespace AIMS.IATILib.Parsers
         public string Role { get; set; }
     }
 
+    public class IATIOrganizationView
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
     public class IATIOrganizationModel
     {
         public string Name { get; set; }
@@ -183,6 +189,7 @@ namespace AIMS.IATILib.Parsers
         public string DefaultFinanceType { get; set; }
         public string DefaultCurrency { get; set; }
         public string Description { get; set; }
+        public ICollection<IATIOrganizationView> Organizations { get; set; }
     }
 
 

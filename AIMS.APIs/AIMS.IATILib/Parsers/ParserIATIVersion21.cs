@@ -183,7 +183,7 @@ namespace AIMS.IATILib.Parsers
                                 }
                             }
                         }*/
-                        
+
                         if (activity.HasAttributes)
                         {
                             if (activity.Attribute("default-currency") != null)
@@ -328,7 +328,7 @@ namespace AIMS.IATILib.Parsers
                                                            && t.TransactionType == transactionType
                                                            select t).FirstOrDefault();
 
-                                
+
                                 if (isTransactionExists != null)
                                 {
                                     string newValue = transaction.Element("value")?.Value;
@@ -351,8 +351,8 @@ namespace AIMS.IATILib.Parsers
                                     if (financeDisplayType == FinanceDisplayType.Disbursement)
                                     {
                                         var isDisbursementExists = (from f in disbursementTransactions
-                                                               where currency == f.Currency
-                                                               select f).FirstOrDefault();
+                                                                    where currency == f.Currency
+                                                                    select f).FirstOrDefault();
 
                                         if (isDisbursementExists != null)
                                         {
@@ -663,7 +663,7 @@ namespace AIMS.IATILib.Parsers
                 {
                     DateTime todaysDate = DateTime.Now;
                     DateTime parsedDate = DateTime.Now;
-                    int activityCounter = 1;
+                    int activityCounter = 1, orgCounter = 1;
                     foreach (var activity in activities)
                     {
                         string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "", defaultFinanceType = "";
@@ -747,6 +747,16 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
+                        string trimmedTitle = Regex.Replace(projectTitle, @"\s+", " ");
+                        var isProjectAdded = (from p in projectsList
+                                              where p.TrimmedTitle.Contains(trimmedTitle, StringComparison.OrdinalIgnoreCase)
+                                              select p).FirstOrDefault();
+
+                        if (isProjectAdded != null)
+                        {
+                            continue;
+                        }
+
                         var financeType = activity.Element("default-finance-type");
                         if (financeType != null)
                         {
@@ -762,32 +772,80 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
-                        string trimmedTitle = Regex.Replace(projectTitle, @"\s+", " ");
-                        var isProjectAdded = (from p in projectsList
-                                              where p.TrimmedTitle.Contains(trimmedTitle, StringComparison.OrdinalIgnoreCase)
-                                              select p).FirstOrDefault();
+                        //Extracting participating organizations
+                        var organizations = activity.Elements("participating-org");
+                        List<IATIOrganizationView> organizationList = new List<IATIOrganizationView>();
 
-                        if (isProjectAdded == null)
+                        if (organizations != null)
                         {
-                            var validStartDate = new DateTime();
-                            var validEndDate = new DateTime();
-                            bool isValidStartDate = DateTime.TryParse(startDate, out validStartDate);
-                            bool isValidEndDate = DateTime.TryParse(endDate, out validEndDate);
-
-                            projectsList.Add(new IATIProject()
+                            foreach (var organization in organizations)
                             {
-                                Id = activityCounter,
-                                DefaultCurrency = currency,
-                                DefaultFinanceType = defaultFinanceType,
-                                IATIIdentifier = activity.Element("iati-identifier")?.Value,
-                                Title = projectTitle,
-                                TrimmedTitle = trimmedTitle,
-                                Description = activity.Element("description")?.Value,
-                                StartDate = isValidStartDate ? Convert.ToDateTime(startDate).ToLongDateString() : null,
-                                EndDate = isValidEndDate ? Convert.ToDateTime(endDate).ToLongDateString() : null
-                            });
-                            ++activityCounter;
+
+                                if (organization.HasAttributes)
+                                {
+                                    var narratives = organization.Elements("narrative");
+                                    string organizationName = "";
+
+                                    if (narratives != null)
+                                    {
+                                        if (narratives.Count() > 0)
+                                        {
+                                            if (narratives.FirstOrDefault().HasAttributes)
+                                            {
+                                                organizationName = (from n in narratives
+                                                                    where n.FirstAttribute.Value == "en"
+                                                                    select n.Value).FirstOrDefault();
+                                            }
+                                            else
+                                            {
+                                                if (organization.HasElements && organization.Element("narrative") != null)
+                                                {
+                                                    organizationName = organization.Element("narrative")?.Value;
+                                                    organizationName = organizationName != null ? organizationName.Trim() : organizationName;
+                                                }
+                                            }
+                                        }
+
+                                        if (!string.IsNullOrEmpty(organizationName))
+                                        {
+                                            var isOrganizationExists = (from o in organizationList
+                                                                        where o.Name.ToLower() == organizationName.ToLower()
+                                                                        select o).FirstOrDefault();
+
+                                            if (isOrganizationExists == null && !string.IsNullOrEmpty(organizationName))
+                                            {
+                                                organizationList.Add(new IATIOrganizationView()
+                                                {
+                                                    Id = orgCounter,
+                                                    Name = organizationName,
+                                                });
+                                            }
+                                            ++orgCounter;
+                                        }
+                                    }
+                                }
+                            }
                         }
+
+                        var validStartDate = new DateTime();
+                        var validEndDate = new DateTime();
+                        bool isValidStartDate = DateTime.TryParse(startDate, out validStartDate);
+                        bool isValidEndDate = DateTime.TryParse(endDate, out validEndDate);
+
+                        projectsList.Add(new IATIProject()
+                        {
+                            Id = activityCounter,
+                            DefaultCurrency = currency,
+                            DefaultFinanceType = defaultFinanceType,
+                            IATIIdentifier = activity.Element("iati-identifier")?.Value,
+                            Title = projectTitle,
+                            TrimmedTitle = trimmedTitle,
+                            Description = activity.Element("description")?.Value,
+                            StartDate = isValidStartDate ? Convert.ToDateTime(startDate).ToLongDateString() : "N/a",
+                            EndDate = isValidEndDate ? Convert.ToDateTime(endDate).ToLongDateString() : "N/a",
+                            Organizations = organizationList
+                        });
+                        ++activityCounter;
                     }
                 }
             }

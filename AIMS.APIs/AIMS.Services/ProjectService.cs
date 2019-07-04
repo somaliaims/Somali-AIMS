@@ -1347,7 +1347,7 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                    var newDisbursement = unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                     {
                         Project = project,
                         Dated = model.Dated,
@@ -1358,6 +1358,7 @@ namespace AIMS.Services
                     project.DateUpdated = DateTime.Now;
                     unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
+                    response.ReturnedId = newDisbursement.Id;
                 }
                 catch (Exception ex)
                 {
