@@ -237,6 +237,21 @@ namespace AIMS.Models
         public string OrganizationName { get; set; }
     }
 
+    public class OrganizationAbstractView
+    {
+        public string Name { get; set; }
+    }
+
+    public class LocationAbstractView
+    {
+        public string Name { get; set; }
+    }
+
+    public class SectorAbstractView
+    {
+        public string Name { get; set; }
+    }
+
     public class OrganizationModel
     {
         [Required]
@@ -595,6 +610,19 @@ namespace AIMS.Models
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public string DateUpdated { get; set; }
+    }
+
+    public class ProjectAbstractView
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public IEnumerable<SectorAbstractView> Sectors { get; set; }
+        public IEnumerable<LocationAbstractView> Locations { get; set; }
+        public IEnumerable<OrganizationAbstractView> Organizations { get; set; }
+        
     }
 
     public class EnvelopeModel

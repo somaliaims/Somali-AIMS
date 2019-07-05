@@ -31,6 +31,13 @@ namespace AIMS.APIs.Controllers
             return Ok(projects);
         }
 
+        [HttpGet("GetAllWithDetail")]
+        public async Task<IActionResult> GetAllWithDetail()
+        {
+            var projects = await projectService.GetAllDetailAsync();
+            return Ok(projects);
+        }
+
         [HttpGet]
         [Route("GetById/{id}")]
         public IActionResult Get(int id)

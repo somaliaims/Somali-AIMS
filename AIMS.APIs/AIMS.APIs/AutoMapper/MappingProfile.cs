@@ -80,6 +80,11 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(m => m.UserEmail, opts => opts.MapFrom(source => source.User.Email))
                 .ForMember(m => m.UserOrganization, opts => opts.MapFrom(source => source.User.Organization.OrganizationName));
 
+            CreateMap<EFProjectLocations, LocationAbstractView>()
+                .ForMember(l => l.Name, opts => opts.MapFrom(source => source.Location.Location));
+
+            CreateMap<EFProjectSectors, SectorAbstractView>()
+                .ForMember(s => s.Name, opts => opts.MapFrom(source => source.Sector.SectorName));
         }
     }
 }

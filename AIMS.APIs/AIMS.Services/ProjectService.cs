@@ -21,6 +21,12 @@ namespace AIMS.Services
         IEnumerable<ProjectView> GetAll();
 
         /// <summary>
+        /// Gets all with abstract level details
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<ProjectAbstractView>> GetAllDetailAsync();
+
+        /// <summary>
         /// Gets project details for the provided id
         /// </summary>
         /// <param name="id"></param>
@@ -356,6 +362,43 @@ namespace AIMS.Services
                             orderby p.DateUpdated descending
                             select p);
                 return await Task<IEnumerable<ProjectView>>.Run(() => mapper.Map<List<ProjectView>>(projects)).ConfigureAwait(false);
+            }
+        }
+
+        public async Task<IEnumerable<ProjectAbstractView>> GetAllDetailAsync()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<ProjectAbstractView> projectsList = new List<ProjectAbstractView>();
+                var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                foreach(var project in projects)
+                {
+                    IEnumerable<string> funderNames = (from f in project.Funders
+                                                                    select f.Funder.OrganizationName);
+                    IEnumerable<string> implementerNames = (from i in project.Implementers
+                                                     select i.Implementer.OrganizationName);
+                    IEnumerable<string> organizations = funderNames.Union(implementerNames);
+
+                    List<OrganizationAbstractView> organizationsList = new List<OrganizationAbstractView>();
+                    foreach(string org in organizations)
+                    {
+                        organizationsList.Add(new OrganizationAbstractView()
+                        {
+                            Name = org
+                        });
+                    }
+                    projectsList.Add(new ProjectAbstractView()
+                    {
+                        Id = project.Id,
+                        Title = project.Title,
+                        StartDate = project.StartDate.ToString(),
+                        EndDate = project.EndDate.ToString(),
+                        Organizations = organizationsList,
+                        Locations = mapper.Map<List<LocationAbstractView>>(project.Locations),
+                        Sectors = mapper.Map<List<SectorAbstractView>>(project.Sectors)
+                    });
+                }
+                return await Task<IEnumerable<ProjectAbstractView>>.Run(() => projectsList).ConfigureAwait(false);
             }
         }
 

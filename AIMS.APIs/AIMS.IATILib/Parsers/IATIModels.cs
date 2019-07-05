@@ -33,7 +33,7 @@ namespace AIMS.IATILib.Parsers
 
     public class IATISectorView
     {
-        public string SectorName { get; set; }
+        public string Name { get; set; }
     }
 
     public class IATICountry

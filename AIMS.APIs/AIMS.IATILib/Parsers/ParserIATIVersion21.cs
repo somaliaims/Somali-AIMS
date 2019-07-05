@@ -842,14 +842,14 @@ namespace AIMS.IATILib.Parsers
                                 }
 
                                 var isSectorExists = (from s in sectors
-                                                      where s.SectorName.ToLower() == sectorName.ToLower()
+                                                      where s.Name.ToLower() == sectorName.ToLower()
                                                       select s).FirstOrDefault();
 
                                 if (isSectorExists == null && !string.IsNullOrEmpty(sectorName))
                                 {
                                     sectors.Add(new IATISectorView()
                                     {
-                                        SectorName = sectorName,
+                                        Name = sectorName,
                                     });
                                 }
                             }
