@@ -827,6 +827,74 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
+                        var aSectors = activity.Elements("sector");
+                        List<IATISectorView> sectors = new List<IATISectorView>();
+                        if (aSectors != null)
+                        {
+                            foreach (var sector in aSectors)
+                            {
+                                string sectorName = "";
+                                var setorNarrative = sector.Element("narrative");
+                                if (setorNarrative != null)
+                                {
+                                    sectorName = sector.Element("narrative")?.Value;
+                                    sectorName = sectorName != null ? sectorName.Trim() : sectorName;
+                                }
+
+                                var isSectorExists = (from s in sectors
+                                                      where s.SectorName.ToLower() == sectorName.ToLower()
+                                                      select s).FirstOrDefault();
+
+                                if (isSectorExists == null && !string.IsNullOrEmpty(sectorName))
+                                {
+                                    sectors.Add(new IATISectorView()
+                                    {
+                                        SectorName = sectorName,
+                                    });
+                                }
+                            }
+                        }
+
+                        var aLocations = activity.Elements("location");
+                        List<IATILocationView> locations = new List<IATILocationView>();
+                        if (aLocations != null)
+                        {
+                            foreach (var location in aLocations)
+                            {
+                                string locationName = "";
+                                XElement nameElement = (from name in location.Descendants("name")
+                                                        select name).FirstOrDefault();
+
+                                if (nameElement != null)
+                                {
+                                    XElement narrative = (from narr in nameElement.Descendants("narrative")
+                                                          select narr).FirstOrDefault();
+
+                                    if (narrative != null)
+                                    {
+                                        locationName = narrative?.Value;
+                                    }
+                                    else
+                                    {
+                                        locationName = nameElement?.Value;
+                                    }
+                                    locationName = locationName != null ? locationName.Trim() : locationName;
+                                }
+
+                                var isLocationExists = (from l in locations
+                                                        where l.Name.ToLower() == locationName.ToLower()
+                                                        select l).FirstOrDefault();
+
+                                if (isLocationExists == null && !string.IsNullOrEmpty(locationName))
+                                {
+                                    locations.Add(new IATILocationView()
+                                    {
+                                        Name = locationName,
+                                    });
+                                }
+                            }
+                        }
+
                         var validStartDate = new DateTime();
                         var validEndDate = new DateTime();
                         bool isValidStartDate = DateTime.TryParse(startDate, out validStartDate);
@@ -843,7 +911,9 @@ namespace AIMS.IATILib.Parsers
                             Description = activity.Element("description")?.Value,
                             StartDate = isValidStartDate ? Convert.ToDateTime(startDate).ToLongDateString() : "N/a",
                             EndDate = isValidEndDate ? Convert.ToDateTime(endDate).ToLongDateString() : "N/a",
-                            Organizations = organizationList
+                            Organizations = organizationList,
+                            Locations = locations,
+                            Sectors = sectors
                         });
                         ++activityCounter;
                     }

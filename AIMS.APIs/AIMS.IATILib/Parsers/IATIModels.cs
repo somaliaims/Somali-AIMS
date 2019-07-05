@@ -31,6 +31,11 @@ namespace AIMS.IATILib.Parsers
         public string Name { get; set; }
     }
 
+    public class IATISectorView
+    {
+        public string SectorName { get; set; }
+    }
+
     public class IATICountry
     {
         public string Code { get; set; }
@@ -61,6 +66,11 @@ namespace AIMS.IATILib.Parsers
         public string Name { get; set; }
         public string Latitude { get; set; }
         public string Longitude { get; set; }
+    }
+
+    public class IATILocationView
+    {
+        public string Name { get; set; }
     }
 
     public class IATIOrganization
@@ -190,6 +200,8 @@ namespace AIMS.IATILib.Parsers
         public string DefaultCurrency { get; set; }
         public string Description { get; set; }
         public ICollection<IATIOrganizationView> Organizations { get; set; }
+        public ICollection<IATILocationView> Locations { get; set; }
+        public ICollection<IATISectorView> Sectors { get; set; }
     }
 
 
