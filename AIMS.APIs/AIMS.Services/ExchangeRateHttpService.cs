@@ -4,6 +4,7 @@ using AIMS.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -58,8 +59,9 @@ namespace AIMS.Services
                 ratesStr = ratesStr.Replace("}", "");
                 ratesView.Rates = this.GetRatesList(ratesStr);
             }
-            catch(Exception)
+            catch(Exception ex)
             {
+                string error = ex.Message;
             }
             return await Task<List<CurrencyWithRates>>.Run(() => ratesView).ConfigureAwait(false);
         }
@@ -131,14 +133,15 @@ namespace AIMS.Services
             if (ratesStr.Length > 0)
             {
                 string[] rateRows = ratesStr.Split(",");
-                for(int row=0; row < rateRows.Length; row++)
+                string currency = "";
+                decimal rate = 0;
+                for (int row = 0; row < rateRows.Length; row++)
                 {
                     string[] currencyRate = rateRows[row].Split(":");
                     if (currencyRate.Length > 1)
                     {
-                        string currency = currencyRate[0];
-                        decimal rate = Convert.ToDecimal(currencyRate[1]);
-
+                        currency = currencyRate[0];
+                        rate = Decimal.Parse(currencyRate[1], NumberStyles.Float);
                         ratesList.Add(new CurrencyWithRates()
                         {
                             Currency = currency,

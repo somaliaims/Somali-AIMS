@@ -909,8 +909,8 @@ namespace AIMS.IATILib.Parsers
                             Title = projectTitle,
                             TrimmedTitle = trimmedTitle,
                             Description = activity.Element("description")?.Value,
-                            StartDate = isValidStartDate ? Convert.ToDateTime(startDate).ToLongDateString() : "N/a",
-                            EndDate = isValidEndDate ? Convert.ToDateTime(endDate).ToLongDateString() : "N/a",
+                            StartDate = isValidStartDate ? Convert.ToDateTime(startDate).ToShortDateString() : "N/a",
+                            EndDate = isValidEndDate ? Convert.ToDateTime(endDate).ToShortDateString() : "N/a",
                             Organizations = organizationList,
                             Locations = locations,
                             Sectors = sectors
