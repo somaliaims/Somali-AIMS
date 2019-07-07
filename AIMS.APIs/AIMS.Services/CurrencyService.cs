@@ -136,11 +136,9 @@ namespace AIMS.Services
 
         public DefaultCurrencyView GetDefaultCurrency()
         {
-            using (var unitWork = new UnitOfWork(context))
-            {
-                var defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
-                return defaultCurrency == null ? null : new DefaultCurrencyView() { Id = defaultCurrency.Id, Currency = defaultCurrency.Currency, CurrencyName = defaultCurrency.CurrencyName };
-            }
+            var unitWork = new UnitOfWork(context);
+            var defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
+            return defaultCurrency == null ? null : new DefaultCurrencyView() { Id = defaultCurrency.Id, Currency = defaultCurrency.Currency, CurrencyName = defaultCurrency.CurrencyName };
         }
 
         public DefaultCurrencyView GetNationalCurrency()
