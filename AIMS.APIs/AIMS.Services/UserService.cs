@@ -111,7 +111,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse ActivateUserAccount(UserApprovalModel model);
+        ActionResponse ActivateUserAccount(UserApprovalModel model, string loginUrl);
 
         /// <summary>
         /// 
@@ -338,7 +338,7 @@ namespace AIMS.Services
                         UserType = UserTypes.Standard,
                         Organization = organization,
                         Password = passwordHash,
-                        IsApproved = true,
+                        IsApproved = false,
                         RegistrationDate = DateTime.Now
                     });
                     unitWork.Save();
@@ -404,6 +404,7 @@ namespace AIMS.Services
                             Organization = organization,
                             Message = message,
                             TreatmentId = newUser.Id,
+                            Email = newUser.Email,
                             Dated = DateTime.Now,
                             IsSeen = false,
                             NotificationType = NotificationTypes.NewUser
@@ -432,7 +433,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ActivateUserAccount(UserApprovalModel model)
+        public ActionResponse ActivateUserAccount(UserApprovalModel model, string loginUrl)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -512,7 +513,8 @@ namespace AIMS.Services
                         subject = emailMessage.Subject;
                         message = emailMessage.Message;
                     }
-
+                    mHelper = new MessageHelper();
+                    message = mHelper.FormUserApprovedMessage(message, loginUrl);
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
                     emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message);
                 }

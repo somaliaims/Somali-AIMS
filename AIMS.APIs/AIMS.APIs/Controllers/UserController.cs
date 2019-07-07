@@ -174,7 +174,9 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var response = userService.ActivateUserAccount(model);
+            string loginUrl = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
+                                .GetValue<String>("LoginUrl");
+            var response = userService.ActivateUserAccount(model, loginUrl);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -267,7 +269,9 @@ namespace AIMS.APIs.Controllers
 
             int approvedById = Convert.ToInt32(userIdVal);
             model.ApprovedById = approvedById;
-            var response = userService.ActivateUserAccount(model);
+            string loginUrl = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
+                                .GetValue<String>("LoginUrl");
+            var response = userService.ActivateUserAccount(model, loginUrl);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

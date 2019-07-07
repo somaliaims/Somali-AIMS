@@ -201,6 +201,14 @@ namespace AIMS.Services.Helpers
         string ChangedMappingAffectedProjectsMessage(List<string> affectedProjects, string oldSector, string newSector);
 
         /// <summary>
+        /// Formats user approval message
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        string FormUserApprovedMessage(string message, string url);
+
+        /// <summary>
         /// Gets message for an invalid attempt to approve a funder
         /// </summary>
         /// <returns></returns>
@@ -332,6 +340,11 @@ namespace AIMS.Services.Helpers
         public string ProjectToOrganizationMessage(string organization)
         {
             return ("<h4>Organization name</h4><p>" + organization  + "</p>");
+        }
+
+        public string FormUserApprovedMessage(string message, string url)
+        {
+            return (message + "<p>Click on url below to login now: </p><p>" + url + "</p>");
         }
 
         public string NewUserRegisteredMessage(string email)

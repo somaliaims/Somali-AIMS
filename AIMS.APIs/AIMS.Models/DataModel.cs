@@ -300,6 +300,7 @@ namespace AIMS.Models
         public UserTypes UserType { get; set; }
         [ForeignKey("Organization")]
         public int? OrganizationId { get; set; }
+        public string Email { get; set; } = null;
         public int TreatmentId { get; set; }
         public EFOrganization Organization { get; set; }
         public string Message { get; set; }
