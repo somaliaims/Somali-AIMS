@@ -38,7 +38,34 @@ namespace AIMS.APIs.Controllers
         [Route("GetProjectsBudgetReport")]
         public async Task<IActionResult> GetProjectsBudgetReport()
         {
-            var report = await reportService.GetProjectsBudgetReport(clientUrl);
+            var defaultCurrencyObj = currencyService.GetDefaultCurrency();
+            if (defaultCurrencyObj == null)
+            {
+                return BadRequest("Default currency is not set. Please contact administrator");
+            }
+
+            string defaultCurrency = defaultCurrencyObj.Currency;
+            decimal exchangeRate = 1;
+            if (!string.IsNullOrEmpty(defaultCurrency))
+            {
+                var dated = DateTime.Now;
+                var rates = await ratesService.GetCurrencyRatesForDate(dated);
+                if (rates.Rates == null)
+                {
+                    string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                    rates = await ratesHttpService.GetRatesAsync(apiKey);
+                    if (rates.Rates != null)
+                    {
+                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                    }
+                }
+                else
+                {
+                    exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                }
+            }
+            var report = await reportService.GetProjectsBudgetReport(clientUrl, defaultCurrency, exchangeRate);
             return Ok(report);
         }
 
@@ -51,14 +78,15 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var defaultCurrency = currencyService.GetDefaultCurrency();
-            if (defaultCurrency == null)
+            var defaultCurrencyObj = currencyService.GetDefaultCurrency();
+            if (defaultCurrencyObj == null)
             {
                 return BadRequest("Default currency is not set. Please contact administrator");
             }
 
+            string defaultCurrency = defaultCurrencyObj.Currency;
             decimal exchangeRate = 1;
-            if (!string.IsNullOrEmpty(defaultCurrency.Currency))
+            if (!string.IsNullOrEmpty(defaultCurrency))
             {
                 var dated = DateTime.Now;
                 var rates = await ratesService.GetCurrencyRatesForDate(dated);
@@ -69,15 +97,15 @@ namespace AIMS.APIs.Controllers
                     if (rates.Rates != null)
                     {
                         ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
-                        exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency.Currency, rates.Rates);
+                        exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
                     }
                 }
                 else
                 {
-                    exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency.Currency, rates.Rates);
+                    exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
                 }
             }
-            var report = await reportService.GetProjectsBySectors(model, clientUrl);
+            var report = await reportService.GetProjectsBySectors(model, clientUrl, defaultCurrency, exchangeRate);
             var response = excelService.GenerateSectorProjectsReport(report);
             if (response.Success)
             {
@@ -95,7 +123,34 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var report = await reportService.GetProjectsByLocations(model, clientUrl);
+            var defaultCurrencyObj = currencyService.GetDefaultCurrency();
+            if (defaultCurrencyObj == null)
+            {
+                return BadRequest("Default currency is not set. Please contact administrator");
+            }
+
+            string defaultCurrency = defaultCurrencyObj.Currency;
+            decimal exchangeRate = 1;
+            if (!string.IsNullOrEmpty(defaultCurrency))
+            {
+                var dated = DateTime.Now;
+                var rates = await ratesService.GetCurrencyRatesForDate(dated);
+                if (rates.Rates == null)
+                {
+                    string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                    rates = await ratesHttpService.GetRatesAsync(apiKey);
+                    if (rates.Rates != null)
+                    {
+                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                    }
+                }
+                else
+                {
+                    exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                }
+            }
+            var report = await reportService.GetProjectsByLocations(model, clientUrl, defaultCurrency, exchangeRate);
             var response = excelService.GenerateLocationProjectsReport(report);
             if (response.Success)
             {

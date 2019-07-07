@@ -32,9 +32,16 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model, string reportUrl);
+        Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model, string reportUrl, string defaultCurrency, decimal exchangeRate);
 
-        Task<ProjectsBudgetReport> GetProjectsBudgetReport(string reportUrl);
+        /// <summary>
+        /// Gets projects budget report
+        /// </summary>
+        /// <param name="reportUrl"></param>
+        /// <param name="defaultCurrency"></param>
+        /// <param name="exchangeRate"></param>
+        /// <returns></returns>
+        Task<ProjectsBudgetReport> GetProjectsBudgetReport(string reportUrl, string defaultCurrency, decimal exchangeRate);
 
         /// <summary>
         /// Internal function for extracting rate of default currency
@@ -57,7 +64,7 @@ namespace AIMS.Services
         }
 
 
-        public async Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model, string reportUrl)
+        public async Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model, string reportUrl, string defaultCurrency, decimal exchangeRate)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -370,7 +377,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ProjectsBudgetReport> GetProjectsBudgetReport(string reportUrl)
+        public async Task<ProjectsBudgetReport> GetProjectsBudgetReport(string reportUrl, string defaultCurrency, decimal exchangeRate)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -632,7 +639,7 @@ namespace AIMS.Services
                                 {
                                     if (project.Funders.Count() > 0)
                                     {
-                                        var fundingTotal = Math.Round(project.Funders.Select(f => (f.Amount * ((f.ExchangeRate < 1) ? (1 / f.ExchangeRate) : f.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
+                                        var fundingTotal = Math.Round(project.Funders.Select(f => (f.Amount * f.ExchangeRate)).Sum(), MidpointRounding.AwayFromZero);
                                         fundingTotal = Math.Round(fundingTotal, MidpointRounding.AwayFromZero);
                                         project.ProjectCost = Math.Round(((fundingTotal / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero);
                                         totalFunding += fundingTotal;
@@ -655,7 +662,7 @@ namespace AIMS.Services
                                                                      Convert.ToDateTime(d.Dated).Year <= model.EndingYear
                                                                      select d).ToList();
                                         }
-                                        decimal projectDisbursements = Math.Round(project.Disbursements.Select(d=> (d.Amount * (d.ExchangeRate < 1 ? (1 / d.ExchangeRate) : d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
+                                        decimal projectDisbursements = Math.Round(project.Disbursements.Select(d=> (d.Amount * d.ExchangeRate)).Sum(), MidpointRounding.AwayFromZero);
                                         totalDisbursements += projectDisbursements;
                                         totalDisbursements = Math.Round(totalDisbursements, MidpointRounding.AwayFromZero);
                                         UtilityHelper helper = new UtilityHelper();
@@ -726,7 +733,7 @@ namespace AIMS.Services
 
                                     if (project.Funders.Count() > 0)
                                     {
-                                        var fundingTotal = Math.Round(project.Funders.Select(f => (f.Amount * (f.ExchangeRate < 1 ? (1 / f.ExchangeRate) : f.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
+                                        var fundingTotal = Math.Round(project.Funders.Select(f => (f.Amount * f.ExchangeRate)).Sum(), MidpointRounding.AwayFromZero);
                                         fundingTotal = Math.Round(fundingTotal, MidpointRounding.AwayFromZero);
                                         project.ProjectCost = Math.Round(((fundingTotal / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero);
                                         totalFunding += fundingTotal;
@@ -748,7 +755,7 @@ namespace AIMS.Services
                                                         select s.FundsPercentage).FirstOrDefault();
                                     if (project.Disbursements.Count() > 0)
                                     {
-                                        decimal projectDisbursements = Math.Round(project.Disbursements.Select(d => (d.Amount * (d.ExchangeRate < 1 ? (1 / d.ExchangeRate) : d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
+                                        decimal projectDisbursements = Math.Round(project.Disbursements.Select(d => (d.Amount * d.ExchangeRate)).Sum(), MidpointRounding.AwayFromZero);
                                         totalDisbursements += projectDisbursements;
                                         totalDisbursements = Math.Round(totalDisbursements, MidpointRounding.AwayFromZero);
                                         UtilityHelper helper = new UtilityHelper();

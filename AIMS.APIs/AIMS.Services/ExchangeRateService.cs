@@ -97,42 +97,41 @@ namespace AIMS.Services
 
         public ActionResponse SaveCurrencyRates(List<CurrencyWithRates> ratesList, DateTime dated)
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            ActionResponse response = new ActionResponse();
+
+            if (ratesList.Count > 0)
             {
-                ActionResponse response = new ActionResponse();
-
-                if (ratesList.Count > 0)
+                string ratesJson = JsonConvert.SerializeObject(ratesList);
+                var exchangeRate = unitWork.ExchangeRatesRepository.GetOne(e => e.Dated.Date == dated.Date);
+                if (exchangeRate == null)
                 {
-                    string ratesJson = JsonConvert.SerializeObject(ratesList);
-                    var exchangeRate = unitWork.ExchangeRatesRepository.GetOne(e => e.Dated.Date == dated.Date);
-                    if (exchangeRate == null)
+                    unitWork.ExchangeRatesRepository.Insert(new EFExchangeRates()
                     {
-                        unitWork.ExchangeRatesRepository.Insert(new EFExchangeRates()
-                        {
-                            ExchangeRatesJson = ratesJson,
-                            Dated = dated
-                        });
-                        unitWork.Save();
-                    }
-
-                    var apisCountObj = unitWork.ExchangeRatesAPIsRepository.GetOne(a => (a.Dated.Year == dated.Year && a.Dated.Month == dated.Month));
-                    if (apisCountObj != null)
-                    {
-                        apisCountObj.Count++;
-                        unitWork.ExchangeRatesAPIsRepository.Update(apisCountObj);
-                    }
-                    else
-                    {
-                        unitWork.ExchangeRatesAPIsRepository.Insert(new EFExchangeRatesAPIsCount()
-                        {
-                            Count = 1,
-                            Dated = dated
-                        });
-                    }
+                        ExchangeRatesJson = ratesJson,
+                        Dated = dated
+                    });
                     unitWork.Save();
                 }
-                return response;
+
+                var apisCountObj = unitWork.ExchangeRatesAPIsRepository.GetOne(a => (a.Dated.Year == dated.Year && a.Dated.Month == dated.Month));
+                if (apisCountObj != null)
+                {
+                    apisCountObj.Count++;
+                    unitWork.ExchangeRatesAPIsRepository.Update(apisCountObj);
+                }
+                else
+                {
+                    unitWork.ExchangeRatesAPIsRepository.Insert(new EFExchangeRatesAPIsCount()
+                    {
+                        Count = 1,
+                        Dated = dated
+                    });
+                }
+                unitWork.Save();
+
             }
+            return response;
         }
 
         public ActionResponse SaveCurrencyRatesManual(List<CurrencyWithRates> ratesList)
