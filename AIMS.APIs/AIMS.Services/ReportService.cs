@@ -25,7 +25,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ProjectProfileReportBySector> GetProjectsBySectors(SearchProjectsBySectorModel model, string reportUrl);
+        Task<ProjectProfileReportBySector> GetProjectsBySectors(SearchProjectsBySectorModel model, string reportUrl, string defaultCurrency, decimal exchangeRate);
 
         /// <summary>
         /// Search matching projects by sector wise grouped for the provided criteria
@@ -35,6 +35,14 @@ namespace AIMS.Services
         Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model, string reportUrl);
 
         Task<ProjectsBudgetReport> GetProjectsBudgetReport(string reportUrl);
+
+        /// <summary>
+        /// Internal function for extracting rate of default currency
+        /// </summary>
+        /// <param name="currency"></param>
+        /// <param name="ratesList"></param>
+        /// <returns></returns>
+        decimal GetExchangeRateForCurrency(string currency, List<CurrencyWithRates> ratesList);
     }
 
     public class ReportService : IReportService
@@ -487,7 +495,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ProjectProfileReportBySector> GetProjectsBySectors(SearchProjectsBySectorModel model, string reportUrl)
+        public async Task<ProjectProfileReportBySector> GetProjectsBySectors(SearchProjectsBySectorModel model, string reportUrl, string defaultCurrency, decimal exchangeRate)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -624,7 +632,7 @@ namespace AIMS.Services
                                 {
                                     if (project.Funders.Count() > 0)
                                     {
-                                        var fundingTotal = Math.Round(project.Funders.Select(f => (f.Amount * (f.ExchangeRate < 1 ? (1 / f.ExchangeRate) : f.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
+                                        var fundingTotal = Math.Round(project.Funders.Select(f => (f.Amount * ((f.ExchangeRate < 1) ? (1 / f.ExchangeRate) : f.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
                                         fundingTotal = Math.Round(fundingTotal, MidpointRounding.AwayFromZero);
                                         project.ProjectCost = Math.Round(((fundingTotal / 100) * sector.FundsPercentage), MidpointRounding.AwayFromZero);
                                         totalFunding += fundingTotal;
@@ -796,6 +804,13 @@ namespace AIMS.Services
                 }
                 return await Task<ProjectProfileReportBySector>.Run(() => sectorProjectsReport).ConfigureAwait(false);
             }
+        }
+
+        public decimal GetExchangeRateForCurrency(string currency, List<CurrencyWithRates> ratesList)
+        {
+            return (from rate in ratesList
+                                    where rate.Currency.Equals(currency)
+                                    select rate.Rate).FirstOrDefault();
         }
 
     }

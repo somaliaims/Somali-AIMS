@@ -17,13 +17,20 @@ namespace AIMS.APIs.Controllers
         IReportService reportService;
         IExcelGeneratorService excelService;
         IConfiguration configuration;
+        IExchangeRateService ratesService;
+        IExchangeRateHttpService ratesHttpService;
+        ICurrencyService currencyService;
         string clientUrl = "";
 
-        public ReportController(IReportService service, IExcelGeneratorService eService, IConfiguration config)
+        public ReportController(IReportService service, IExcelGeneratorService eService, IConfiguration config,
+            IExchangeRateHttpService exRatesHttpService, IExchangeRateService exRatesService, ICurrencyService curService)
         {
             reportService = service;
             excelService = eService;
             configuration = config;
+            ratesService = exRatesService;
+            ratesHttpService = exRatesHttpService;
+            currencyService = curService;
             clientUrl = configuration["ClientUrl"]; 
         }
 
@@ -44,6 +51,32 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
+            var defaultCurrency = currencyService.GetDefaultCurrency();
+            if (defaultCurrency == null)
+            {
+                return BadRequest("Default currency is not set. Please contact administrator");
+            }
+
+            decimal exchangeRate = 1;
+            if (!string.IsNullOrEmpty(defaultCurrency.Currency))
+            {
+                var dated = DateTime.Now;
+                var rates = await ratesService.GetCurrencyRatesForDate(dated);
+                if (rates.Rates == null)
+                {
+                    string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                    rates = await ratesHttpService.GetRatesAsync(apiKey);
+                    if (rates.Rates != null)
+                    {
+                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency.Currency, rates.Rates);
+                    }
+                }
+                else
+                {
+                    exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency.Currency, rates.Rates);
+                }
+            }
             var report = await reportService.GetProjectsBySectors(model, clientUrl);
             var response = excelService.GenerateSectorProjectsReport(report);
             if (response.Success)
