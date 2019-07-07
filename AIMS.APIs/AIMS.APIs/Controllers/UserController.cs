@@ -126,7 +126,18 @@ namespace AIMS.APIs.Controllers
             model.Password = sHelper.GetPasswordHash(model.Password);
             var foundUser = userService.AuthenticateUser(model.Email, model.Password);
 
-            if (!string.IsNullOrEmpty(foundUser.Email))
+            if (foundUser.OrganizationId != 0 && !foundUser.IsApproved)
+            {
+                UserReturnView uView = new UserReturnView()
+                {
+                    Token = null,
+                    UserType = 0,
+                    OrganizationId = foundUser.OrganizationId,
+                    IsApproved = false
+                };
+                return Ok(uView);
+            }
+            else if (!string.IsNullOrEmpty(foundUser.Email))
             {
                 TokenModel tModel = new TokenModel()
                 {
@@ -145,10 +156,12 @@ namespace AIMS.APIs.Controllers
                 {
                     Token = jwtToken,
                     UserType = foundUser.UserType,
-                    OrganizationId = foundUser.OrganizationId
+                    OrganizationId = foundUser.OrganizationId,
+                    IsApproved = foundUser.IsApproved
                 };
                 return Ok(uView);
             }
+            
             ErrorModel errModel = new ErrorModel() { Error = "Username/Password provided is invalid" };
             return Ok(errModel);
         }

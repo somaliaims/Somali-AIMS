@@ -186,24 +186,27 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 UserAuthenticationView foundUser = new UserAuthenticationView();
-                var findUser = unitWork.UserRepository.GetWithInclude(u => u.Email.Equals(email) && u.Password.Equals(password),
-                    new string[] { "Organization" });
+                var findUser = unitWork.UserRepository.GetOne(u => u.Email.Equals(email) && u.Password.Equals(password));
 
                 if (findUser != null)
                 {
-                    foreach (var user in findUser)
+                    if (!findUser.IsApproved)
                     {
-                        foundUser.Id = user.Id;
-                        foundUser.Email = user.Email;
-                        foundUser.UserType = user.UserType;
-                        foundUser.OrganizationId = user.Organization.Id;
-
-                        user.LastLogin = DateTime.Now;
-                        unitWork.UserRepository.Update(user);
-                        unitWork.Save();
-                        break;
+                        foundUser.OrganizationId = findUser.OrganizationId;
+                        foundUser.IsApproved = false;
                     }
+                    else
+                    {
+                        foundUser.Id = findUser.Id;
+                        foundUser.Email = findUser.Email;
+                        foundUser.UserType = findUser.UserType;
+                        foundUser.OrganizationId = findUser.OrganizationId;
+                        foundUser.IsApproved = true;
 
+                        findUser.LastLogin = DateTime.Now;
+                        unitWork.UserRepository.Update(findUser);
+                        unitWork.Save();
+                    }
                 }
                 return foundUser;
             }
@@ -480,8 +483,39 @@ namespace AIMS.Services
 
                 unitWork.UserRepository.Update(userAccount);
                 unitWork.NotificationsRepository.Delete(notification);
-
                 unitWork.Save();
+
+                List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                usersEmailList.Add(new EmailAddress()
+                {
+                    Email = userAccount.Email
+                });
+                if (usersEmailList.Count > 0)
+                {
+                    //Send emails
+                    ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                    var smtpSettings = smtpService.GetPrivate();
+                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                    if (smtpSettings != null)
+                    {
+                        smtpSettingsModel.Host = smtpSettings.Host;
+                        smtpSettingsModel.Port = smtpSettings.Port;
+                        smtpSettingsModel.Username = smtpSettings.Username;
+                        smtpSettingsModel.Password = smtpSettings.Password;
+                        smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                    }
+
+                    string message = "", subject = "";
+                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.UserApproved);
+                    if (emailMessage != null)
+                    {
+                        subject = emailMessage.Subject;
+                        message = emailMessage.Message;
+                    }
+
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message);
+                }
                 response.ReturnedId = userAccount.Id;
                 return response;
             }

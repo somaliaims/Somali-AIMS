@@ -469,6 +469,7 @@ namespace AIMS.Models
         public string Email { get; set; }
         public int OrganizationId { get; set; }
         public UserTypes UserType { get; set; }
+        public bool IsApproved { get; set; }
     }
 
     public class UserReturnView
@@ -476,6 +477,7 @@ namespace AIMS.Models
         public string Token { get; set; }
         public int OrganizationId { get; set; }
         public UserTypes UserType { get; set; }
+        public bool IsApproved { get; set; }
     }
 
     public class EmailsModel

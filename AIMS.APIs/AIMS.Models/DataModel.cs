@@ -48,7 +48,8 @@ namespace AIMS.Models
         OrganizationMerged = 6,
         NewOrgToProject = 7,
         ProjectPermissionGranted = 8,
-        ProjectPermissionDenied = 9
+        ProjectPermissionDenied = 9,
+        UserApproved = 10
     }
 
     public enum DataTransactions
