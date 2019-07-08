@@ -1439,7 +1439,20 @@ namespace AIMS.Models
         public ICollection<LocationProject> Projects { get; set; }
     }
 
+    public class SectorWithProjects
+    {
+        public int SectorId { get; set; }
+        public string Sector { get; set; }
+        public ICollection<SectorProject> Projects { get; set; }
+    }
+
     public class LocationProject
+    {
+        public int ProjectId { get; set; }
+        public decimal FundsPercentage { get; set; }
+    }
+
+    public class SectorProject
     {
         public int ProjectId { get; set; }
         public decimal FundsPercentage { get; set; }
