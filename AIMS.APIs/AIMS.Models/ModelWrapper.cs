@@ -1426,11 +1426,22 @@ namespace AIMS.Models
         [Required]
         public int ProjectId { get; set; }
     }
-        
-
 
     public class UserProjectsView
     {
         public int Id { get; set; }
+    }
+
+    public class LocationProjects
+    {
+        public int LocationId { get; set; }
+        public string Location { get; set; }
+        public ICollection<LocationProject> Projects { get; set; }
+    }
+
+    public class LocationProject
+    {
+        public int ProjectId { get; set; }
+        public decimal FundsPercentage { get; set; }
     }
 }
