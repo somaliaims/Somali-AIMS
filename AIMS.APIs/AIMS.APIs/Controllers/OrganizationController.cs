@@ -80,6 +80,22 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [HttpPut]
+        [Route("RenameOrganization/{id}")]
+        public async Task<IActionResult> RenameOrganization(int id, [FromBody] OrganizationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = await organizationService.RenameOrganization(id, model.Name);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] OrganizationModel model)
         {

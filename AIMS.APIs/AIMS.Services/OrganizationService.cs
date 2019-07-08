@@ -56,6 +56,14 @@ namespace AIMS.Services
         Task<ActionResponse> DeleteAsync(int id, int newId = 0);
 
         /// <summary>
+        /// Renames an organization
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="newName"></param>
+        /// <returns></returns>
+        Task<ActionResponse> RenameOrganization(int id, string newName);
+
+        /// <summary>
         /// Merges two organizations
         /// </summary>
         /// <param name="model"></param>
@@ -203,6 +211,74 @@ namespace AIMS.Services
             }
         }
 
+        public async Task<ActionResponse> RenameOrganization(int id, string newName)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                if (string.IsNullOrEmpty(newName))
+                {
+                    response.Success = false;
+                    response.Message = "Invalid name provided for organization";
+                    return response;
+                }
+
+                var organization = unitWork.OrganizationRepository.GetByID(id);
+                if (organization == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Organization");
+                    response.Success = false;
+                    return response;
+                }
+
+                string oldName = organization.OrganizationName;
+                organization.OrganizationName = newName;
+                unitWork.OrganizationRepository.Update(organization);
+                unitWork.Save();
+
+                string subject = "", message = "";
+                var users = unitWork.UserRepository.GetManyQueryable(u => u.OrganizationId == id);
+                if (users != null)
+                {
+                    List<EmailAddress> emailsList = (from u in users
+                                                     select new EmailAddress()
+                                                     {
+                                                         Email = u.Email
+                                                     }).ToList();
+
+                    if (emailsList.Count > 0)
+                    {
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.OrganizationMerged);
+                        if (emailMessage != null)
+                        {
+                            subject = emailMessage.Subject;
+                            message = emailMessage.Message;
+                        }
+
+                        mHelper = new MessageHelper();
+                        message += mHelper.OrganizationRenamedMessage(oldName, newName);
+                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                        var smtpSettings = smtpService.GetPrivate();
+                        SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                        if (smtpSettings != null)
+                        {
+                            smtpSettingsModel.Host = smtpSettings.Host;
+                            smtpSettingsModel.Port = smtpSettings.Port;
+                            smtpSettingsModel.Username = smtpSettings.Username;
+                            smtpSettingsModel.Password = smtpSettings.Password;
+                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                        }
+                        IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
+                        emailHelper.SendEmailToUsers(emailsList, "Organization renamed", subject, message);
+                    }
+                }
+                
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+            }
+        }
+
         public async Task<ActionResponse> MergeOrganizations(MergeOrganizationModel model)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -257,8 +333,6 @@ namespace AIMS.Services
 
                         var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => orgIds.Contains(f.FunderId));
                         List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
-
-                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.OrganizationMerged);
                         foreach (var funder in projectFunders)
                         {
                             fundersList.Add(new EFProjectFunders()
@@ -314,6 +388,7 @@ namespace AIMS.Services
                         }
 
                         string subject = "", message = "";
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.OrganizationMerged);
                         if (emailMessage != null)
                         {
                             subject = emailMessage.Subject;
@@ -322,18 +397,7 @@ namespace AIMS.Services
 
                         mHelper = new MessageHelper();
                         message += mHelper.OrganizationsMergedMessage(organizationNames, newOrganization.OrganizationName);
-                        //Send notifications and email
-                        /*unitWork.NotificationsRepository.Insert(new EFUserNotifications()
-                        {
-                            NotificationType = NotificationTypes.OrganizationMerged,
-                            Message = message,
-                            Dated = DateTime.Now,
-                            OrganizationId = newOrganization.Id,
-                            IsSeen = false,
-                            TreatmentId = 0,
-                        });
-                        unitWork.Save();*/
-
+                        
                         //Send email
                         ISMTPSettingsService smtpService = new SMTPSettingsService(context);
                         var smtpSettings = smtpService.GetPrivate();
@@ -363,8 +427,6 @@ namespace AIMS.Services
                             IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
                             emailHelper.SendEmailToUsers(emailAddresses, "Organizations merged", subject, message);
                         }
-                        
-                        
                     }
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                 });

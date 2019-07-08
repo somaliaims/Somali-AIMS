@@ -192,6 +192,14 @@ namespace AIMS.Services.Helpers
         string OrganizationsMergedMessage(List<string> organizations, string newOrganization);
 
         /// <summary>
+        /// Formats rename organization message
+        /// </summary>
+        /// <param name="oldName"></param>
+        /// <param name="newName"></param>
+        /// <returns></returns>
+        string OrganizationRenamedMessage(string oldName, string newName);
+
+        /// <summary>
         /// Formats sector mapping changed message
         /// </summary>
         /// <param name="affectedProjects"></param>
@@ -372,6 +380,16 @@ namespace AIMS.Services.Helpers
             }
             formattedMessageList.Add("</ul>");
             formattedMessageList.Add("<h4>New organization</h4><p>" + newOrganization + "</p>");
+            return (String.Join("", formattedMessageList));
+        }
+
+        public string OrganizationRenamedMessage(string oldName, string newName)
+        {
+            List<string> formattedMessageList = new List<string>();
+            formattedMessageList.Add("<h4>Organizations renamed</h4><ul>");
+            formattedMessageList.Add("<li><b>Old name: " + oldName + "</b></li>");
+            formattedMessageList.Add("<li><b>New name: " + newName + "</b></li>");
+            formattedMessageList.Add("</ul>");
             return (String.Join("", formattedMessageList));
         }
 

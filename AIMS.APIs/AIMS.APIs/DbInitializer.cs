@@ -28,6 +28,19 @@ namespace AIMS.APIs
             {
                 // Run Migrations
                 context.Database.Migrate();
+                /*
+                    NewUser = 1,
+                    NewProjectToOrg = 2,
+                    UserInactive = 3,
+                    ChangedMappingEffectedProject = 4,
+                    NewIATISector = 5,
+                    OrganizationMerged = 6,
+                    NewOrgToProject = 7,
+                    ProjectPermissionGranted = 8,
+                    ProjectPermissionDenied = 9,
+                    UserApproved = 10,
+                    OrganizationRenamed = 11
+                */
                 if (context.EmailMessages.Count() == 0)
                 {
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewUser, TypeDefinition = "New user registration", Message = "New user registered" });
@@ -35,9 +48,13 @@ namespace AIMS.APIs
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.UserInactive, TypeDefinition = "User inactive", Message = "User is inactive" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ChangedMappingEffectedProject, TypeDefinition = "Sector mapping updated", Message = "Sector mapping updated" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewIATISector, TypeDefinition = "Sector added from IATI", Message = "New sector/s added from IATI" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.OrganizationMerged, TypeDefinition = "Organization merged", Message = "Organization merged" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewOrgToProject, TypeDefinition = "New organization request for project", Message = "" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectPermissionGranted, TypeDefinition = "Project permission approved/granted", Message = "" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectPermissionDenied, TypeDefinition = "Project permission unapproved/denied", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.UserApproved, TypeDefinition = "User account approved", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.OrganizationRenamed, TypeDefinition = "Organization renamed", Message = "" });
+
                     context.SaveChanges();
                 }
 
