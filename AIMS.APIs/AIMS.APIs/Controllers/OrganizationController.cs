@@ -81,7 +81,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPut]
-        [Route("RenameOrganization/{id}")]
+        [Route("Rename/{id}")]
         public async Task<IActionResult> RenameOrganization(int id, [FromBody] OrganizationModel model)
         {
             if (!ModelState.IsValid)
