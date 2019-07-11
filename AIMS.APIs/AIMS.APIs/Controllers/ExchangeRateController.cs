@@ -101,6 +101,7 @@ namespace AIMS.APIs.Controllers
                     monthStr = dated.Month < 10 ? "0" + dated.Month : dated.Month.ToString();
                     dateStr = dated.Day < 10 ? "0" + dated.Day : dated.Day.ToString();
                     datedStr = dated.Year + "-" + monthStr + "-" + dateStr;
+                    ratesView.Dated = dated.ToShortDateString();
                     ratesView = await ratesHttpService.GetRatesForDateAsync(datedStr, apiKey);
                 }
             }

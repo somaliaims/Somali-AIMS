@@ -307,16 +307,9 @@ namespace AIMS.Services
         {
             var unitWork = new UnitOfWork(context);
             ExchangeRatesView ratesView = new ExchangeRatesView();
-            bool isExRateAuto = false;
-            var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(r => r.Id != 0);
-
-            if (exRateSettings != null)
-            {
-                isExRateAuto = exRateSettings.IsAutomatic;
-            }
-
             List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
             var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
+            ratesView.Dated = dated.ToShortDateString();
             ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
 
             var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => c.Id != 0);
