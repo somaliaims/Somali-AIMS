@@ -1237,6 +1237,30 @@ namespace AIMS.Models
         public IEnumerable<ProjectsBySector> SectorProjectsList { get; set; }
     }
 
+    public class TimeSeriesReportByYear
+    {
+        public Report ReportSettings { get; set; }
+        public IEnumerable<ProjectsByYear> YearlyProjectsList { get; set; }
+    }
+
+    public class ProjectsByYear
+    {
+        public int Year { get; set; }
+        public IEnumerable<ProjectsByYear> YearProjectsList { get; set; }
+    }
+
+    public class ProjectViewForYear
+    {
+        public string Title { get; set; }
+        public string Funders { get; set; }
+        public string Implementers { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public decimal ProjectCost { get; set; }
+        public decimal ActualDisbursements { get; set; }
+        public decimal PlannedDisbursements { get; set; }
+    }
+
     public class ProjectsByLocation
     {
         public string LocationName { get; set; }
@@ -1268,6 +1292,16 @@ namespace AIMS.Models
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
         public List<int> LocationIds { get; set; } = new List<int>();
+    }
+
+    public class SearchProjectsByYearModel
+    {
+        public string Title { get; set; } = null;
+        public List<int> OrganizationIds { get; set; } = new List<int>();
+        public int StartingYear { get; set; } = 0;
+        public int EndingYear { get; set; } = 0;
+        public List<int> LocationIds { get; set; } = new List<int>();
+        public List<int> SectorIds { get; set; } = new List<int>();
     }
 
     public class SearchProjectsByBudgetModel
