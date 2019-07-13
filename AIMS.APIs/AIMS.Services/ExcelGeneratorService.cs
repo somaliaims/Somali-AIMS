@@ -550,7 +550,7 @@ namespace AIMS.Services
             try
             {
                 string sWebRootFolder = hostingEnvironment.WebRootPath + "/ExcelFiles/";
-                string sFileName = @"LocationProjects-" + DateTime.UtcNow.Ticks.ToString() + ".xlsx";
+                string sFileName = @"YearProjects-" + DateTime.UtcNow.Ticks.ToString() + ".xlsx";
                 FileInfo file = new FileInfo(Path.Combine(sWebRootFolder, sFileName));
                 var memory = new MemoryStream();
                 using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
@@ -614,7 +614,7 @@ namespace AIMS.Services
 
                     row = excelSheet.CreateRow(++rowCounter);
                     var titleCell = row.CreateCell(0, CellType.String);
-                    titleCell.SetCellValue("SomaliAIMS location report - generated on " + DateTime.Now.ToLongDateString());
+                    titleCell.SetCellValue("SomaliAIMS year-wise projects report - generated on " + DateTime.Now.ToLongDateString());
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns));
                     titleCell.CellStyle = titleStyle;

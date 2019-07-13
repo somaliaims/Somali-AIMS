@@ -749,8 +749,8 @@ namespace AIMS.Services
 
                     if (model.OrganizationIds.Count > 0)
                     {
-                        var projectIdsFunders = unitWork.ProjectFundersRepository.GetProjection(f => model.OrganizationIds.Contains(f.FunderId), f => f.FunderId);
-                        var projectIdsImplementers = unitWork.ProjectImplementersRepository.GetProjection(f => model.OrganizationIds.Contains(f.ImplementerId), i => i.ImplementerId);
+                        var projectIdsFunders = unitWork.ProjectFundersRepository.GetProjection(f => model.OrganizationIds.Contains(f.FunderId), f => f.ProjectId);
+                        var projectIdsImplementers = unitWork.ProjectImplementersRepository.GetProjection(f => model.OrganizationIds.Contains(f.ImplementerId), i => i.ProjectId);
                         var projectIdsList = projectIdsFunders.Union(projectIdsImplementers);
 
                         if (projectProfileList == null)
