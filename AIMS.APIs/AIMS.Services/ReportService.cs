@@ -704,7 +704,7 @@ namespace AIMS.Services
                 {
                     IQueryStringGenerator queryStringGenerator = new QueryStringGenerator();
                     string queryString = queryStringGenerator.GetQueryStringForTimeSeriesReport(model);
-                    reportUrl += ReportConstants.SECTOR_REPORT_URL;
+                    reportUrl += ReportConstants.YEARLY_REPORT_URL;
 
                     if (!string.IsNullOrEmpty(queryString))
                     {
