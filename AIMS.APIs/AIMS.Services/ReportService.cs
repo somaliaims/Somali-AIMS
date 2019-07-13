@@ -42,7 +42,7 @@ namespace AIMS.Services
         /// <param name="defaultCurrency"></param>
         /// <param name="exchangeRate"></param>
         /// <returns></returns>
-        //Task<TimeSeriesReportByYear> GetProjectsByYear(SearchProjectsByYearModel model, string reportUrl, string defaultCurrency, decimal exchangeRate);
+        Task<TimeSeriesReportByYear> GetProjectsByYear(SearchProjectsByYearModel model, string reportUrl, string defaultCurrency, decimal exchangeRate);
 
         /// <summary>
         /// Gets projects budget report
@@ -695,7 +695,7 @@ namespace AIMS.Services
             }
         }
 
-        /*public async Task<TimeSeriesReportByYear> GetProjectsByYear(SearchProjectsByYearModel model, string reportUrl, string defaultCurrency, decimal exchangeRate)
+        public async Task<TimeSeriesReportByYear> GetProjectsByYear(SearchProjectsByYearModel model, string reportUrl, string defaultCurrency, decimal exchangeRate)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -723,7 +723,7 @@ namespace AIMS.Services
                     int year = dated.Year;
                     int month = dated.Month;
                     IQueryable<EFProject> projectProfileList = null;
-                    IQueryable<EFProjectSectors> projectSectors = null;
+                    IEnumerable<int> financialYears = null;
 
                     if (!string.IsNullOrEmpty(model.Title))
                     {
@@ -749,15 +749,8 @@ namespace AIMS.Services
 
                     if (model.OrganizationIds.Count > 0)
                     {
-                        var projectFunders = unitWork.ProjectFundersRepository.GetMany(f => model.OrganizationIds.Contains(f.FunderId));
-                        var projectIdsFunders = (from pFunder in projectFunders
-                                                 select pFunder.ProjectId).ToList<int>().Distinct();
-
-                        var projectImplementers = unitWork.ProjectImplementersRepository.GetMany(f => model.OrganizationIds.Contains(f.ImplementerId));
-                        var projectIdsImplementers = (from pImplementer in projectImplementers
-                                                      select pImplementer.ProjectId).ToList<int>().Distinct();
-
-
+                        var projectIdsFunders = unitWork.ProjectFundersRepository.GetProjection(f => model.OrganizationIds.Contains(f.FunderId), f => f.FunderId);
+                        var projectIdsImplementers = unitWork.ProjectImplementersRepository.GetProjection(f => model.OrganizationIds.Contains(f.ImplementerId), i => i.ImplementerId);
                         var projectIdsList = projectIdsFunders.Union(projectIdsImplementers);
 
                         if (projectProfileList == null)
@@ -781,16 +774,33 @@ namespace AIMS.Services
 
                     if (model.SectorIds.Count > 0)
                     {
-                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains(p.SectorId), new string[] { "Sector" });
+                        var projectIds = unitWork.ProjectSectorsRepository.GetProjection(p => model.SectorIds.Contains(p.SectorId), p => p.ProjectId);
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id)
+                            , new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = from project in projectProfileList
+                                                 where projectIds.Contains(project.Id)
+                                                 select project;
+                        }
+                    }
+
+                    if (model.StartingYear > 0 && model.EndingYear > 0)
+                    {
+                        financialYears = unitWork.FinancialYearRepository.GetProjection(y => (y.FinancialYear >= model.StartingYear && y.FinancialYear <= model.EndingYear), y => y.FinancialYear);
+                    }
+                    else if (model.StartingYear > 0 && model.EndingYear == 0)
+                    {
+                        financialYears = unitWork.FinancialYearRepository.GetProjection(y => (y.FinancialYear >= model.StartingYear), y => y.FinancialYear);
                     }
                     else
                     {
-                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => p.ProjectId != 0, new string[] { "Sector" });
+                        financialYears = unitWork.FinancialYearRepository.GetProjection(y => (y.FinancialYear != 0), y => y.FinancialYear);
                     }
-
-                    projectSectors = from pSector in projectSectors
-                                     orderby pSector.Sector.SectorName
-                                     select pSector;
+                    
 
                     List<ProjectProfileView> projectsList = new List<ProjectProfileView>();
                     foreach (var project in projectProfileList)
@@ -811,37 +821,31 @@ namespace AIMS.Services
                     List<ProjectsBySector> sectorProjectsList = new List<ProjectsBySector>();
                     ProjectsBySector projectsBySector = null;
 
-                    int totalSectors = projectSectors.Count();
-                    List<ProjectViewForSector> projectsListForSector = null;
-                    ICollection<SectorWithProjects> sectorsByProjects = new List<SectorWithProjects>();
+                    int totalYears = financialYears.Count();
+                    List<ProjectViewForYear> projectsListForYear = null;
+                    ICollection<YearWithProjects> yearProjects = new List<YearWithProjects>();
 
-                    foreach (var sec in projectSectors)
+                    foreach (var yr in financialYears)
                     {
-                        int secId = sec.SectorId;
-                        var isSectorIdsExist = (from secIds in sectorsByProjects
-                                                where secIds.SectorId.Equals(sec.SectorId)
-                                                select secIds).FirstOrDefault();
+                        var isYearExists = (from y in yearProjects
+                                                where y.Equals(yr)
+                                                select y).FirstOrDefault();
 
-                        if (isSectorIdsExist == null)
+                        if (isYearExists == null)
                         {
-                            sectorsByProjects.Add(new SectorWithProjects()
+                            yearProjects.Add(new YearWithProjects()
                             {
-                                SectorId = sec.SectorId,
-                                Sector = sec.Sector.SectorName,
-                                Projects = (from secProject in projectSectors
-                                            where sec.SectorId.Equals(secId)
-                                            select new SectorProject
-                                            {
-                                                ProjectId = secProject.ProjectId,
-                                                FundsPercentage = secProject.FundsPercentage
-                                            }).ToList<SectorProject>()
+                                Year = yr,
+                                Projects = (from p in projectProfileList
+                                            where p.StartDate.Year == yr
+                                            select p.Id).ToList<int>()
                             });
                         }
                     }
 
-                    foreach (var sectorByProject in sectorsByProjects)
+                    foreach (var yearProject in yearProjects)
                     {
-                        projectsBySector = new ProjectsBySector();
+                        projectsByYear = new ProjectsBySector();
                         projectsBySector.SectorName = sectorByProject.Sector;
                         int currentSectorId = sectorByProject.SectorId;
 
@@ -940,7 +944,7 @@ namespace AIMS.Services
                 }
                 return await Task<TimeSeriesReportByYear>.Run(() => sectorProjectsReport).ConfigureAwait(false);
             }
-        }*/
+        }
 
         public decimal GetExchangeRateForCurrency(string currency, List<CurrencyWithRates> ratesList)
         {

@@ -1246,7 +1246,9 @@ namespace AIMS.Models
     public class ProjectsByYear
     {
         public int Year { get; set; }
-        public IEnumerable<ProjectsByYear> YearProjectsList { get; set; }
+        public decimal TotalFunding { get; set; }
+        public decimal TotalDisbursements { get; set; }
+        public IEnumerable<ProjectViewForYear> Projects { get; set; }
     }
 
     public class ProjectViewForYear
@@ -1478,6 +1480,12 @@ namespace AIMS.Models
         public int SectorId { get; set; }
         public string Sector { get; set; }
         public ICollection<SectorProject> Projects { get; set; }
+    }
+
+    public class YearWithProjects
+    {
+        public int Year { get; set; }
+        public ICollection<int> Projects { get; set; }
     }
 
     public class LocationProject
