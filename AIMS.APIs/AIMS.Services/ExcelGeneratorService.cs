@@ -35,6 +35,13 @@ namespace AIMS.Services
         /// <param name="report"></param>
         /// <returns></returns>
         ActionResponse GenerateLocationProjectsReport(ProjectProfileReportByLocation report);
+
+        /// <summary>
+        /// Generates excel for yearly projects report
+        /// </summary>
+        /// <param name="report"></param>
+        /// <returns></returns>
+        ActionResponse GenerateYearlyProjectsReport(TimeSeriesReportByYear report);
     }
 
     public class ExcelGeneratorService : IExcelGeneratorService
@@ -534,6 +541,12 @@ namespace AIMS.Services
                 response.Message = ex.Message;
                 response.Success = false;
             }
+            return response;
+        }
+
+        public ActionResponse GenerateYearlyProjectsReport(TimeSeriesReportByYear report)
+        {
+            ActionResponse response = new ActionResponse();
             return response;
         }
 

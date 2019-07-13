@@ -30,6 +30,11 @@ namespace AIMS.Services.Helpers
         public static readonly string PROJECTS_BY_LOCATION_SUBTITLE = "Projects by locations list";
         public static readonly string PROJECTS_BY_LOCATION_FOOTER = "Projects list from AIMS Somalia";
 
+        //Constants for time series report projects by year
+        public static readonly string TIME_SERIES_REPORT_TITLE = "Projects yearly report";
+        public static readonly string TIME_SERIES_REPORT_SUBTITLE = "Projects report year-wise";
+        public static readonly string TIME_SERIES_REPORT_FOOTER = "Projects yearly report from AIMS Somalia";
+
         //Constants for projects budget report
         public static readonly string PROJECTS_BUDGET_REPORT_TITLE = "Projects budget report";
         public static readonly string PROJECTS_BUDGET_REPORT_SUBTITLE = "Projects budget year-wise";
