@@ -820,7 +820,7 @@ namespace AIMS.Services
 
                     ProjectsByYear projectsByYear = null;
                     int totalYears = financialYears.Count();
-                    List<ProjectsByYear> projectsListForYear = null;
+                    List<ProjectsByYear> projectsListForYear = new List<ProjectsByYear>();
                     List<ProjectViewForYear> projectsViewForYear = new List<ProjectViewForYear>();
                     ICollection<YearWithProjects> yearProjects = new List<YearWithProjects>();
 
@@ -899,10 +899,24 @@ namespace AIMS.Services
                             });
                         }
 
-                        projectsByYear.TotalFunding = totalFunding;
-                        projectsByYear.TotalDisbursements = totalDisbursements;
-                        projectsByYear.Projects = projectsViewForYear;
-                        projectsListForYear.Add(projectsByYear);
+                        if (projectsByYear != null)
+                        {
+                            projectsByYear.Year = currentYearId;
+                            projectsByYear.TotalFunding = totalFunding;
+                            projectsByYear.TotalDisbursements = totalDisbursements;
+                            projectsByYear.Projects = projectsViewForYear;
+                            projectsListForYear.Add(projectsByYear);
+                        }
+                        else
+                        {
+                            projectsListForYear.Add(new ProjectsByYear()
+                            {
+                                Year = currentYearId,
+                                Projects = new List<ProjectViewForYear>(),
+                                TotalFunding = 0,
+                                TotalDisbursements = 0,
+                            });
+                        }
                     }
                     timeSeriesReportByYear.YearlyProjectsList = projectsListForYear;
                 }
