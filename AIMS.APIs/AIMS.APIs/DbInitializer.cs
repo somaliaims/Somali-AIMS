@@ -28,19 +28,6 @@ namespace AIMS.APIs
             {
                 // Run Migrations
                 context.Database.Migrate();
-                /*
-                    NewUser = 1,
-                    NewProjectToOrg = 2,
-                    UserInactive = 3,
-                    ChangedMappingEffectedProject = 4,
-                    NewIATISector = 5,
-                    OrganizationMerged = 6,
-                    NewOrgToProject = 7,
-                    ProjectPermissionGranted = 8,
-                    ProjectPermissionDenied = 9,
-                    UserApproved = 10,
-                    OrganizationRenamed = 11
-                */
                 if (context.EmailMessages.Count() == 0)
                 {
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewUser, TypeDefinition = "New user registration", Message = "New user registered" });
@@ -118,10 +105,28 @@ namespace AIMS.APIs
                     context.SaveChanges();
                 }
 
+                EFSectorTypes somaliSectorType = null;
+                EFSector otherSector = null;
                 if (context.SectorTypes.Count() == 0)
                 {
-                    context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Somali Sectors", IsPrimary = true });
+                    somaliSectorType = context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Somali Sectors", IsPrimary = true }).Entity;
+                    otherSector = context.Sectors.Add(new EFSector()
+                    {
+                        SectorType = somaliSectorType,
+                        SectorName = "Other",
+                        ParentSector = null
+                    }).Entity;
                     context.SaveChanges();
+                }
+
+                if (context.Locations.Count() == 0)
+                {
+                    context.Locations.Add(new EFLocation()
+                    {
+                        Location = "Other",
+                        Longitude = 0,
+                        Latitude = 0
+                    });
                 }
 
                 if (context.Organizations.Count() == 0)
