@@ -331,7 +331,6 @@ namespace AIMS.Services
                     }
 
                     string passwordHash = sHelper.GetPasswordHash(model.Password);
-                    //TODO: Set approved to false to make it approved through notification
                     var newUser = unitWork.UserRepository.Insert(new EFUser()
                     {
                         Email = model.Email,
@@ -343,7 +342,6 @@ namespace AIMS.Services
                     });
                     unitWork.Save();
                     //Get emails for all the users
-                    //TODO: To bind the email and notifications with user account creation
                     var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) && u.IsApproved == true);
                     List<EmailsModel> usersEmailList = new List<EmailsModel>();
                     foreach (var user in users)
@@ -358,19 +356,16 @@ namespace AIMS.Services
                         }
                     }
 
-                    if (usersEmailList.Count == 0)
+                    var managerUsers = unitWork.UserRepository.GetMany(u => u.UserType == UserTypes.Manager || u.UserType == UserTypes.SuperAdmin);
+                    foreach (var user in managerUsers)
                     {
-                        var managerUsers = unitWork.UserRepository.GetMany(u => u.UserType == UserTypes.Manager || u.UserType == UserTypes.SuperAdmin);
-                        foreach (var user in managerUsers)
+                        if (user.Email != model.Email)
                         {
-                            if (user.Email != model.Email)
+                            usersEmailList.Add(new EmailsModel()
                             {
-                                usersEmailList.Add(new EmailsModel()
-                                {
-                                    Email = user.Email,
-                                    UserType = user.UserType
-                                });
-                            }
+                                Email = user.Email,
+                                UserType = user.UserType
+                            });
                         }
                     }
 
@@ -710,7 +705,7 @@ namespace AIMS.Services
                     unitWork.Save();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.Message = ex.Message;
                 response.Success = false;

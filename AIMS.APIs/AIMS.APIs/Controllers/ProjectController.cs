@@ -47,16 +47,6 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
-        [Route("GetProjectsReport")]
-        public async Task<IActionResult> GetProjectsReport()
-        {
-            var projects = projectService.GetProjectsReport();
-            ExcelGeneratorService eService = new ExcelGeneratorService(this.hostingEnvironment);
-            var response = await eService.GenerateProjectsReportAsync();
-            return Ok(projects);
-        }
-
-        [HttpGet]
         [Route("GetProjectProfileReport/{id}")]
         public async Task<IActionResult> GetProjectProfileReport(int id)
         {

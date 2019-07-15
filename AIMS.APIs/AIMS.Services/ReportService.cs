@@ -197,7 +197,6 @@ namespace AIMS.Services
 
                     foreach (var loc in projectLocations)
                     {
-                        int locId = loc.LocationId;
                         var isLocationIdsExist = (from locIds in locationsByProjects
                                                   where locIds.LocationId.Equals(loc.LocationId)
                                                   select locIds).FirstOrDefault();
@@ -209,7 +208,7 @@ namespace AIMS.Services
                                 LocationId = loc.LocationId,
                                 Location = loc.Location.Location,
                                 Projects = (from locProject in projectLocations
-                                            where loc.LocationId.Equals(locId)
+                                            where locProject.LocationId.Equals(loc.LocationId)
                                             select new LocationProject
                                             {
                                                 ProjectId = locProject.ProjectId,
@@ -248,14 +247,9 @@ namespace AIMS.Services
                                     var fundingTotal = project.Funders.Select(f => (f.Amount * (exchangeRate / f.ExchangeRate))).Sum();
                                     fundingTotal = Math.Round(fundingTotal, MidpointRounding.AwayFromZero);
                                     project.ProjectCost = Math.Round(((fundingTotal / 100) * locationPercentage), MidpointRounding.AwayFromZero);
-                                    totalFunding += fundingTotal;
+                                    totalFundingPercentage += project.ProjectCost;
                                 }
                             }
-                        }
-
-                        if (totalFunding > 0)
-                        {
-                            totalFundingPercentage = Math.Round(((totalFunding / 100) * locationPercentage), MidpointRounding.AwayFromZero);
                         }
 
                         foreach (var project in locationProjects)
@@ -284,13 +278,9 @@ namespace AIMS.Services
                                             project.PlannedDisbursements = 0;
                                         }
                                     }
+                                    totalDisbursementsPercentage += project.ActualDisbursements;
                                 }
                             }
-                        }
-
-                        if (totalDisbursements > 0)
-                        {
-                            totalDisbursementsPercentage = Math.Round(((totalDisbursements / 100) * locationPercentage), MidpointRounding.AwayFromZero);
                         }
 
                         foreach (var project in locationProjects)
@@ -570,7 +560,6 @@ namespace AIMS.Services
 
                     foreach (var sec in projectSectors)
                     {
-                        int secId = sec.SectorId;
                         var isSectorIdsExist = (from secIds in sectorsByProjects
                                                 where secIds.SectorId.Equals(sec.SectorId)
                                                 select secIds).FirstOrDefault();
@@ -582,7 +571,7 @@ namespace AIMS.Services
                                 SectorId = sec.SectorId,
                                 Sector = sec.Sector.SectorName,
                                 Projects = (from secProject in projectSectors
-                                            where sec.SectorId.Equals(secId)
+                                            where secProject.SectorId.Equals(sec.SectorId)
                                             select new SectorProject
                                             {
                                                 ProjectId = secProject.ProjectId,
@@ -606,7 +595,7 @@ namespace AIMS.Services
                                               where projectIds.Contains(project.Id)
                                               select project).ToList<ProjectProfileView>();
 
-                        decimal totalFunding = 0, totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0, sectorPercentage = 0;
+                        decimal totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0, sectorPercentage = 0;
                         foreach (var project in sectorProjects)
                         {
                             if (project.Sectors != null)
@@ -620,14 +609,9 @@ namespace AIMS.Services
                                     var fundingTotal = Math.Round(project.Funders.Select(f => (f.Amount * (exchangeRate / f.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
                                     fundingTotal = Math.Round(fundingTotal, MidpointRounding.AwayFromZero);
                                     project.ProjectCost = Math.Round(((fundingTotal / 100) * sectorPercentage), MidpointRounding.AwayFromZero);
-                                    totalFunding += fundingTotal;
+                                    totalFundingPercentage += project.ProjectCost;
                                 }
                             }
-                        }
-
-                        if (totalFunding > 0)
-                        {
-                            totalFundingPercentage = Math.Round(((totalFunding / 100) * sectorPercentage), MidpointRounding.AwayFromZero);
                         }
 
                         foreach (var project in sectorProjects)
@@ -656,13 +640,9 @@ namespace AIMS.Services
                                             project.PlannedDisbursements = 0;
                                         }
                                     }
+                                    totalDisbursementsPercentage += project.ActualDisbursements; 
                                 }
                             }
-                        }
-
-                        if (totalDisbursements > 0)
-                        {
-                            totalDisbursementsPercentage = Math.Round(((totalDisbursements / 100) * sectorPercentage), MidpointRounding.AwayFromZero);
                         }
 
                         foreach (var project in sectorProjects)
