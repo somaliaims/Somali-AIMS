@@ -133,7 +133,7 @@ namespace AIMS.APIs
                 {
                     //Funders & Implementers
                     var undp = context.Organizations.Add(new EFOrganization() { OrganizationName = "UNDP" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "DFID" });
+                    /*context.Organizations.Add(new EFOrganization() { OrganizationName = "DFID" });
                     context.Organizations.Add(new EFOrganization() { OrganizationName = "USA" });
                     context.Organizations.Add(new EFOrganization() { OrganizationName = "UK" });
                     context.Organizations.Add(new EFOrganization() { OrganizationName = "GEF" });
@@ -250,7 +250,7 @@ namespace AIMS.APIs
                     context.Organizations.Add(new EFOrganization() { OrganizationName = "CESVI" });
                     context.Organizations.Add(new EFOrganization() { OrganizationName = "International Rescue Committee" });
                     context.Organizations.Add(new EFOrganization() { OrganizationName = "Concern World Wide" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Norwegian Refugee Council" });
+                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Norwegian Refugee Council" });*/
 
                     var adminUser = context.Users.Add(new EFUser()
                     {
@@ -264,7 +264,7 @@ namespace AIMS.APIs
 
                     var managerUser = context.Users.Add(new EFUser()
                     {
-                        Email = "raashid.ahmad@gmail.com",
+                        Email = "aims.developer18@gmail.com",
                         Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
                         Organization = undp.Entity,
                         RegistrationDate = DateTime.Now,

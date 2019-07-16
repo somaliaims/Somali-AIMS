@@ -910,6 +910,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public int ProjectId { get; set; }
         public DateTime Dated { get; set; }
+        public DateTime FormattedDate { get; set; }
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRate { get; set; }

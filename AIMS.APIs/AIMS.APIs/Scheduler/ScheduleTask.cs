@@ -36,7 +36,7 @@ namespace AIMS.APIs.Scheduler
 
         //"*/10 * * * *"; 10 mins
         //protected override string Schedule => "*/2 * * * *";
-        protected override string Schedule => "1 0 * * *";
+        protected override string Schedule => "1 0 * * *"; //Expression represents 1 minutes past every night
 
         public override Task ProcessInScope(IServiceProvider serviceProvider)
         {

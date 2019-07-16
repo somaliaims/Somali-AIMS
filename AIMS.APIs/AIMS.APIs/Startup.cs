@@ -105,8 +105,6 @@ namespace AIMS.APIs
                 };
             });
 
-
-
             services.AddAutoMapper(a => a.AddProfile(new MappingProfile()));
             services.AddScoped<ISectorTypesService, SectorTypesService>();
             services.AddScoped<ISectorMappingsService, SectorMappingsService>();
@@ -138,8 +136,7 @@ namespace AIMS.APIs
 
             services.AddHttpClient();
             services.AddHttpClient<IExchangeRateHttpService, ExchangeRateHttpService>();
-            //Need to work on this scheduled task in future
-            //services.AddSingleton<IHostedService, ScheduleTask>();
+            services.AddSingleton<IHostedService, ScheduleTask>();
             services.AddScoped<IViewRenderService, ViewRenderService>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
@@ -176,13 +173,14 @@ namespace AIMS.APIs
             /*Enabling cache and setting expiration time*/
             app.UseMvc();
             app.UseStaticFiles();
-
+            string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot/ExcelFiles");
+            Directory.CreateDirectory(directoryPath);
             app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(
                 Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot/ExcelFiles")),
                 RequestPath = new PathString("/StaticFiles")
-            });
+            }); ;
         }
     }
 }

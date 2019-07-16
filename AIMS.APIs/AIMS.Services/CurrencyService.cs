@@ -248,36 +248,40 @@ namespace AIMS.Services
 
         public ActionResponse AddMultiple(List<CurrencyNamesView> currencyList)
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            ActionResponse response = new ActionResponse();
+            var dbCurrencyList = unitWork.CurrencyRepository.GetAll();
+            List<EFCurrency> newCurrenciesList = new List<EFCurrency>();
+
+            foreach (var currency in currencyList)
             {
-                ActionResponse response = new ActionResponse();
-                var dbCurrencyList = unitWork.CurrencyRepository.GetAll();
-                List<EFCurrency> newCurrenciesList = new List<EFCurrency>();
+                var isCurrencyExists = (from c in dbCurrencyList
+                                        where c.Currency == currency.Code
+                                        select c).FirstOrDefault();
 
-                foreach(var currency in currencyList)
+                if (isCurrencyExists == null)
                 {
-                    var isCurrencyExists = (from c in dbCurrencyList
-                                            where c.Currency == currency.Code
-                                            select c).FirstOrDefault();
-
-                    if (isCurrencyExists == null)
+                    newCurrenciesList.Add(new EFCurrency()
                     {
-                        newCurrenciesList.Add(new EFCurrency()
-                        {
-                            Currency = currency.Code,
-                            CurrencyName = currency.Currency,
-                            Source = CurrencySource.OpenExchange
-                        });
-                    }
+                        Currency = currency.Code,
+                        CurrencyName = currency.Currency,
+                        Source = CurrencySource.OpenExchange
+                    });
                 }
-
-                if (newCurrenciesList.Count > 0)
+                else
                 {
-                    unitWork.CurrencyRepository.InsertMultiple(newCurrenciesList);
-                    unitWork.Save();
+                    isCurrencyExists.CurrencyName = currency.Currency;
+                    isCurrencyExists.Source = CurrencySource.OpenExchange;
+                    unitWork.CurrencyRepository.Update(isCurrencyExists);
                 }
-                return response;
             }
+
+            if (newCurrenciesList.Count > 0)
+            {
+                unitWork.CurrencyRepository.InsertMultiple(newCurrenciesList);
+            }
+            unitWork.Save();
+            return response;
         }
 
         public ActionResponse SetDefault(int currencyId)
