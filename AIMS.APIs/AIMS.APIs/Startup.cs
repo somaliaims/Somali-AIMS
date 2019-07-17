@@ -155,6 +155,9 @@ namespace AIMS.APIs
                 app.UseHsts();
             }
 
+            string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot/ExcelFiles");
+            DirectoryInfo info = Directory.CreateDirectory(directoryPath);
+
             app.UseCors(builder =>
                 builder.AllowAnyOrigin()
                 .AllowAnyHeader()
@@ -173,8 +176,7 @@ namespace AIMS.APIs
             /*Enabling cache and setting expiration time*/
             app.UseMvc();
             app.UseStaticFiles();
-            string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot/ExcelFiles");
-            Directory.CreateDirectory(directoryPath);
+            
             app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(

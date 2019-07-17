@@ -10,7 +10,7 @@ namespace AIMS.Services.Helpers
         public static readonly string SECTOR_REPORT_URL = "sectors-report/";
         public static readonly string LOCATION_REPORT_URL = "locations-report/";
         public static readonly string BUDGET_REPORT_URL = "budget-report/";
-        public static readonly string YEARLY_REPORT_URL = "yearly-projects-report/";
+        public static readonly string YEARLY_REPORT_URL = "time-trend-report/";
 
         //Projects related constants
         public static readonly string PROJECTS_LIST_TITLE = "Projects list";
@@ -32,9 +32,9 @@ namespace AIMS.Services.Helpers
         public static readonly string PROJECTS_BY_LOCATION_FOOTER = "Projects list from AIMS Somalia";
 
         //Constants for time series report projects by year
-        public static readonly string TIME_SERIES_REPORT_TITLE = "Projects yearly report";
-        public static readonly string TIME_SERIES_REPORT_SUBTITLE = "Projects report year-wise";
-        public static readonly string TIME_SERIES_REPORT_FOOTER = "Projects yearly report from AIMS Somalia";
+        public static readonly string TIME_SERIES_REPORT_TITLE = "Time trend report";
+        public static readonly string TIME_SERIES_REPORT_SUBTITLE = "Time trend report";
+        public static readonly string TIME_SERIES_REPORT_FOOTER = "Time trend report from AIMS Somalia";
 
         //Constants for projects budget report
         public static readonly string PROJECTS_BUDGET_REPORT_TITLE = "Projects budget report";

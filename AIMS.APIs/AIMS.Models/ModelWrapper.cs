@@ -1178,12 +1178,20 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public decimal ProjectValue { get; set; } = 0;
-        public int PreviousYear { get; set; }
-        public decimal PreviousYearDisbursements { get; set; } = 0;
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public string StartDateString { get; set; }
+        public string EndDateString { get; set; }
         public decimal ActualDisbursements { get; set; } = 0;
         public decimal PlannedDisbursements { get; set; } = 0;
         public ICollection<ProjectFunding> Funding { get; set; }
-        public ICollection<ProjectExpectedDisbursements> ExpectedDisbursements { get; set; }
+        public ICollection<ProjectDisbursements> Disbursements { get; set; }
+        public int MonthsLeft { get; set; }
+        public int MonthsCurrentYear { get; set; }
+        public decimal MoneyPreviousTwoYears { get; set; }
+        public decimal ExpectedDisbursementsCurrentYear { get; set; }
+        public decimal ExpectedMinusActual { get; set; }
+        //public ICollection<ProjectExpectedDisbursements> ExpectedDisbursements { get; set; }
     }
 
     public class SectorDisbursements
@@ -1202,6 +1210,24 @@ namespace AIMS.Models
     {
         public string FundType { get; set; }
         public decimal Amount { get; set; }
+        public string Currency { get; set; }
+        public decimal ExchangeRateToDefault { get; set; }
+    }
+
+    public class ProjectDisbursements
+    {
+        public string Dated { get; set; }
+        public decimal Amount { get; set; }
+        public string Currency { get; set; }
+        public decimal ExchangeRateToDefault { get; set; }
+    }
+
+    public class ProjectYearlyDisbursements
+    {
+        public int Year { get; set; }
+        public int ActiveMonths { get; set; }
+        public decimal Disbursements { get; set; }
+        public decimal ExpectedDisbursements { get; set; }
     }
 
     public class ProjectExpectedDisbursements

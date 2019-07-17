@@ -375,7 +375,6 @@ namespace AIMS.Services
 
                         projectBudget.Id = project.Id;
                         projectBudget.Title = project.Title;
-                        projectBudget.PreviousYear = (currentYear - 1);
                         if (project.Funders.Count > 0)
                         {
                             List<ProjectFunding> projectFunding = new List<ProjectFunding>();
@@ -397,10 +396,6 @@ namespace AIMS.Services
 
                         if (project.Disbursements.Count > 0)
                         {
-                            projectBudget.PreviousYearDisbursements = Math.Round((from d in project.Disbursements
-                                                                                  where d.Dated.Year == previousYear
-                                                                                  select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
-
                             projectBudget.ActualDisbursements = Math.Round((from d in project.Disbursements
                                                                             where d.Dated.Year == currentYear
                                                                             select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
@@ -447,12 +442,10 @@ namespace AIMS.Services
                                     LocationPercentages = new List<LocationDisbursements>()
                                 });
                             }
-                            projectBudget.ExpectedDisbursements = expectedDisbursements;
                         }
                         else
                         {
                             projectBudget.ActualDisbursements = 0;
-                            projectBudget.ExpectedDisbursements = new List<ProjectExpectedDisbursements>();
                         }
                         projectBudgetsList.Add(projectBudget);
                     }

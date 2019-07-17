@@ -106,15 +106,20 @@ namespace AIMS.Services
                 if (manualRate == null)
                 {
                     manualRate = unitWork.ManualRatesRepository.GetOneOrderByDescending(r => r.Dated.Date < dated.Date);
-                    var previousDate = manualRate.Dated;
-                    dateDifference = dated - previousDate;
-                    differencePreviousDays = dateDifference.Days;
+                    if (manualRate != null)
+                    {
+                        var previousDate = manualRate.Dated;
+                        dateDifference = dated - previousDate;
+                        differencePreviousDays = dateDifference.Days;
+                    }
 
                     var futureManualRate = unitWork.ManualRatesRepository.GetOneOrderByDescending(r => r.Dated.Date > dated.Date);
-                    var futureDate = futureManualRate.Dated;
-                    dateDifference = futureDate - dated;
-                    differenceFutureDays = dateDifference.Days;
-
+                    if (futureManualRate != null)
+                    {
+                        var futureDate = futureManualRate.Dated;
+                        dateDifference = futureDate - dated;
+                        differenceFutureDays = dateDifference.Days;
+                    }
                     manualRate = (differenceFutureDays < differencePreviousDays) ? futureManualRate : manualRate;
                 }
                 return mapper.Map<ManualRatesView>(manualRate);
