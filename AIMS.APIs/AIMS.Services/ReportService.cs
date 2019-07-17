@@ -375,7 +375,80 @@ namespace AIMS.Services
 
                         projectBudget.Id = project.Id;
                         projectBudget.Title = project.Title;
+                        TimeSpan timeSpan = (project.EndDate - DateTime.Now);
+                        
+
+                        List<ProjectFunding> funderList = new List<ProjectFunding>();
+                        List<ProjectDisbursements> disbursementsList = new List<ProjectDisbursements>();
+
+                        decimal projectCost = 0;
                         if (project.Funders.Count > 0)
+                        {
+                            foreach(var funder in project.Funders)
+                            {
+                                decimal calculatedExRate = (exchangeRate / funder.ExchangeRate);
+                                funderList.Add(new ProjectFunding()
+                                {
+                                    Amount = funder.Amount,
+                                    AmountInDefault = (funder.Amount * calculatedExRate),
+                                    Currency = funder.Currency,
+                                    ExchangeRateToDefault = calculatedExRate,
+                                    FundType = funder.FundingType.ToString(),
+                                });
+                                projectCost += ((funder.Amount) * calculatedExRate);
+                            }
+                        }
+                        projectBudget.ProjectValue = projectCost;
+
+                        decimal actualDisbursements = 0;
+                        if (project.Disbursements.Count > 0)
+                        {
+                            foreach(var disbursement in project.Disbursements)
+                            {
+                                decimal calculatedExRate = (exchangeRate / disbursement.ExchangeRate);
+                                disbursementsList.Add(new ProjectDisbursements()
+                                {
+                                    Amount = disbursement.Amount,
+                                    AmountInDefault = (disbursement.Amount * calculatedExRate),
+                                    Currency = disbursement.Currency,
+                                    Dated = disbursement.Dated.ToShortDateString(),
+                                    ExchangeRateToDefault = calculatedExRate
+                                });
+                                actualDisbursements = (disbursement.Amount * calculatedExRate);
+                            }
+                        }
+
+                        List<ProjectYearlyDisbursements> yearlyDisbursements = new List<ProjectYearlyDisbursements>();
+                        for (int year = currentYear - 1; year <= upperYearLimit; year++)
+                        {
+                            decimal yearDisbursements = (from d in disbursementsList
+                                                         select d.AmountInDefault).Sum();
+                            decimal expectedDisbursements = yearsLeft > 0 ? (Math.Round((projectCost - actualDisbursements) / yearsLeft)) : actualDisbursements;
+                            int yearDifferenceStart = currentYear - project.StartDate.Year;
+                            int yearDifferenceEnd = project.EndDate.Year - currentYear;
+                            int activeMonths = 0;
+                            if (yearDifferenceStart < 0)
+                            {
+                                activeMonths = 0;
+                            }
+                            else if (yearDifferenceStart == 0)
+                            {
+                                activeMonths = (ReportConstants.YEAR_MONTHS - project.StartDate.Month);
+                                activeMonths = activeMonths == 0 ? 1 : activeMonths;
+                            }
+                            else if (yearDifferenceEnd == 0)
+                            {
+                                activeMonths = project.EndDate.Month;
+                            }
+                            yearlyDisbursements.Add(new ProjectYearlyDisbursements()
+                            {
+                                Year = currentYear,
+                                Disbursements = yearDisbursements,
+                                ExpectedDisbursements = expectedDisbursements,
+                                ActiveMonths = activeMonths
+                            });
+                        }
+                        /*if (project.Funders.Count > 0)
                         {
                             List<ProjectFunding> projectFunding = new List<ProjectFunding>();
                             projectBudget.Funding = (from f in project.Funders
@@ -446,7 +519,7 @@ namespace AIMS.Services
                         else
                         {
                             projectBudget.ActualDisbursements = 0;
-                        }
+                        }*/
                         projectBudgetsList.Add(projectBudget);
                     }
                     budgetReport.Projects = projectBudgetsList;

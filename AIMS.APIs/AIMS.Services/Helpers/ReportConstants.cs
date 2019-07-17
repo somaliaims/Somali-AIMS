@@ -40,5 +40,7 @@ namespace AIMS.Services.Helpers
         public static readonly string PROJECTS_BUDGET_REPORT_TITLE = "Projects budget report";
         public static readonly string PROJECTS_BUDGET_REPORT_SUBTITLE = "Projects budget year-wise";
         public static readonly string PROJECTS_BUDGET_REPORT_FOOTER = "Projects budget report from AIMS Somalia";
+
+        public static readonly int YEAR_MONTHS = 12;
     }
 }

@@ -1186,12 +1186,12 @@ namespace AIMS.Models
         public decimal PlannedDisbursements { get; set; } = 0;
         public ICollection<ProjectFunding> Funding { get; set; }
         public ICollection<ProjectDisbursements> Disbursements { get; set; }
+        public ICollection<ProjectYearlyDisbursements> YearlyDisbursements { get; set; }
         public int MonthsLeft { get; set; }
         public int MonthsCurrentYear { get; set; }
         public decimal MoneyPreviousTwoYears { get; set; }
         public decimal ExpectedDisbursementsCurrentYear { get; set; }
         public decimal ExpectedMinusActual { get; set; }
-        //public ICollection<ProjectExpectedDisbursements> ExpectedDisbursements { get; set; }
     }
 
     public class SectorDisbursements
@@ -1210,6 +1210,7 @@ namespace AIMS.Models
     {
         public string FundType { get; set; }
         public decimal Amount { get; set; }
+        public decimal AmountInDefault { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRateToDefault { get; set; }
     }
@@ -1218,6 +1219,7 @@ namespace AIMS.Models
     {
         public string Dated { get; set; }
         public decimal Amount { get; set; }
+        public decimal AmountInDefault { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRateToDefault { get; set; }
     }
