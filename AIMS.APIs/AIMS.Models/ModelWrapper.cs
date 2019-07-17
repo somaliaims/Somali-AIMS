@@ -1189,6 +1189,7 @@ namespace AIMS.Models
         public ICollection<ProjectYearlyDisbursements> YearlyDisbursements { get; set; }
         public int MonthsLeft { get; set; }
         public int MonthsCurrentYear { get; set; }
+        public decimal MoneyLeftForYears { get; set; }
         public decimal MoneyPreviousTwoYears { get; set; }
         public decimal ExpectedDisbursementsCurrentYear { get; set; }
         public decimal ExpectedMinusActual { get; set; }
