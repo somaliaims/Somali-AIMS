@@ -459,7 +459,11 @@ namespace AIMS.Services
                             activeMonths = 0;
                             decimal yearDisbursements = (from d in disbursementsList
                                                          select d.AmountInDefault).Sum();
-                            decimal expectedDisbursements = yearsLeft > 0 ? (Math.Round((projectCost - actualDisbursements) / yearsLeft)) : actualDisbursements;
+                            decimal expectedDisbursements = yearsLeft > 0 ? (Math.Round((projectCost - actualDisbursements) / yearsLeft)) : 0;
+                            if (expectedDisbursements < 0)
+                            {
+                                expectedDisbursements = 0;
+                            }
                             if (year > projectStartYear && year < projectEndYear)
                             {
                                 activeMonths = ReportConstants.YEAR_MONTHS;
@@ -483,6 +487,11 @@ namespace AIMS.Services
                                 ExpectedDisbursements = expectedDisbursements,
                                 ActiveMonths = activeMonths
                             });
+
+                            if (year == currentYear)
+                            {
+                                projectBudget.MonthsCurrentYear = activeMonths;
+                            }
                         }
                         projectBudget.MoneyPreviousTwoYears = (from d in yearlyDisbursements
                                                                where (d.Year == (currentYear - 2) ||
