@@ -374,14 +374,24 @@ namespace AIMS.Services
                         int upperYearLimit = project.EndDate.Year;
                         int yearsLeft = upperYearLimit - currentYear;
                         int monthsCurrentYear = 0;
+                        int projectStartYear = project.StartDate.Year;
+                        int projectEndYear = project.EndDate.Year;
 
-                        if (project.EndDate.Year > currentYear)
+                        if (projectEndYear > currentYear && projectStartYear < currentYear)
                         {
                             monthsCurrentYear = ReportConstants.YEAR_MONTHS;
                         }
-                        else if (project.EndDate.Year == currentYear)
+                        else if (projectStartYear < currentYear && projectEndYear == currentYear)
                         {
-                            monthsCurrentYear = project.EndDate.Month;
+                            monthsCurrentYear = (ReportConstants.YEAR_MONTHS - project.EndDate.Month);
+                        }
+                        else if (projectStartYear == currentYear && projectEndYear > currentYear)
+                        {
+                            monthsCurrentYear = (ReportConstants.YEAR_MONTHS - project.StartDate.Month);
+                        }
+                        else if (projectStartYear == currentYear && projectEndYear == currentYear)
+                        {
+                            monthsCurrentYear = utilityHelper.GetMonthDifference(project.StartDate, project.EndDate);
                         }
                         projectBudget.Id = project.Id;
                         projectBudget.Title = project.Title;
@@ -389,7 +399,8 @@ namespace AIMS.Services
                         projectBudget.EndDate = project.EndDate;
                         projectBudget.StartDateString = project.StartDate.ToShortDateString();
                         projectBudget.EndDateString = project.EndDate.ToShortDateString();
-                        projectBudget.MonthsLeft = utilityHelper.GetMonthDifference(project.EndDate, DateTime.Now);
+                        projectBudget.TotalMonths = utilityHelper.GetMonthDifference(project.StartDate, project.EndDate);
+                        projectBudget.MonthsLeft = (project.EndDate <= DateTime.Now) ? 0 : (projectBudget.TotalMonths - (utilityHelper.GetMonthDifference(project.StartDate, DateTime.Now)));
                         
                         List<ProjectFunding> funderList = new List<ProjectFunding>();
                         List<ProjectDisbursements> disbursementsList = new List<ProjectDisbursements>();
@@ -411,12 +422,12 @@ namespace AIMS.Services
                                 projectCost += ((funder.Amount) * calculatedExRate);
                             }
                             fundShares = (from f in project.Funders
-                                                        group f.Amount by f.FundingType.FundingType into g
+                                                        group (f.Amount * (exchangeRate / f.ExchangeRate)) by f.FundingType.FundingType into g
                                                         select new BudgetFundShare()
                                                         {
                                                             FundingType = g.Key,
                                                             Amount = Math.Round(g.Sum(), MidpointRounding.AwayFromZero),
-                                                            Percentage = (Math.Round((g.Sum() / projectCost) * 100))
+                                                            Percentage = Math.Round((((g.Sum()) / projectCost) * 100), 2)
                                                         }).ToList();
                         }
                         projectBudget.ProjectValue = Math.Round(projectCost, MidpointRounding.AwayFromZero);
@@ -441,26 +452,28 @@ namespace AIMS.Services
                         actualDisbursements = Math.Round(actualDisbursements, MidpointRounding.AwayFromZero);
 
                         List<ProjectYearlyDisbursements> yearlyDisbursements = new List<ProjectYearlyDisbursements>();
+                        int activeMonths = 0;
                         for (int year = (currentYear - 1); year <= upperYearLimit; year++)
                         {
+                            activeMonths = 0;
                             decimal yearDisbursements = (from d in disbursementsList
                                                          select d.AmountInDefault).Sum();
                             decimal expectedDisbursements = yearsLeft > 0 ? (Math.Round((projectCost - actualDisbursements) / yearsLeft)) : actualDisbursements;
-                            int yearDifferenceStart = year - project.StartDate.Year;
-                            int yearDifferenceEnd = project.EndDate.Year - year;
-                            int activeMonths = 0;
-                            if (yearDifferenceStart < 0)
+                            if (year > projectStartYear && year < projectEndYear)
+                            {
+                                activeMonths = ReportConstants.YEAR_MONTHS;
+                            }
+                            else if (year < projectStartYear)
                             {
                                 activeMonths = 0;
                             }
-                            else if (yearDifferenceStart == 0)
+                            else if (year > projectStartYear && year == projectEndYear)
                             {
-                                activeMonths = (ReportConstants.YEAR_MONTHS - project.StartDate.Month);
-                                activeMonths = activeMonths == 0 ? 1 : activeMonths;
+                                activeMonths = projectBudget.EndDate.Month;
                             }
-                            else if (yearDifferenceEnd == 0)
+                            else if(year == projectStartYear && year < projectEndYear)
                             {
-                                activeMonths = project.EndDate.Month;
+                                activeMonths = (ReportConstants.YEAR_MONTHS - projectBudget.StartDate.Month);
                             }
                             yearlyDisbursements.Add(new ProjectYearlyDisbursements()
                             {
@@ -471,20 +484,19 @@ namespace AIMS.Services
                             });
                         }
                         projectBudget.MoneyPreviousTwoYears = (from d in yearlyDisbursements
-                                                               where d.Year == (currentYear - 2) ||
-                                                               d.Year == (currentYear - 1)
+                                                               where (d.Year == (currentYear - 2) ||
+                                                               d.Year == (currentYear - 1))
                                                                select d.Disbursements).Sum();
                         projectBudget.MoneyLeftForYears = (from d in yearlyDisbursements
                                                            where d.Year >= currentYear
                                                            select d.Disbursements).Sum();
-                        projectBudget.TotalMonths = (from d in yearlyDisbursements
-                                                     select d.ActiveMonths).Sum();
                         var yearlyDisbursement = (from d in yearlyDisbursements
                                                   where d.Year == currentYear
                                                   select d).FirstOrDefault();
                         if (yearlyDisbursement != null)
                         {
                             projectBudget.ExpectedMinusActual = (yearlyDisbursement.ExpectedDisbursements - yearlyDisbursement.Disbursements);
+                            projectBudget.ExpectedMinusActual = (projectBudget.ExpectedMinusActual > 0) ? projectBudget.ExpectedMinusActual : 0;
                         }
 
                         projectBudget.Funding = funderList;
