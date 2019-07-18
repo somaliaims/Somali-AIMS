@@ -1216,6 +1216,7 @@ namespace AIMS.Models
 
     public class ProjectFunding
     {
+        public string Funder { get; set; }
         public string FundType { get; set; }
         public decimal Amount { get; set; }
         public decimal AmountInDefault { get; set; }

@@ -364,7 +364,7 @@ namespace AIMS.Services
                     List<ProjectBudgetView> projectBudgetsList = new List<ProjectBudgetView>();
 
                     projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndDate.Year >= currentYear,
-                            new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.FundingType" });
+                            new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Funders.FundingType" });
 
 
                     UtilityHelper utilityHelper = new UtilityHelper();
@@ -397,8 +397,8 @@ namespace AIMS.Services
                         projectBudget.Title = project.Title;
                         projectBudget.StartDate = project.StartDate;
                         projectBudget.EndDate = project.EndDate;
-                        projectBudget.StartDateString = project.StartDate.ToShortDateString();
-                        projectBudget.EndDateString = project.EndDate.ToShortDateString();
+                        projectBudget.StartDateString = project.StartDate.ToString("yyyy MMMM");
+                        projectBudget.EndDateString = project.EndDate.ToString("yyyy MMMM");
                         projectBudget.TotalMonths = utilityHelper.GetMonthDifference(project.StartDate, project.EndDate);
                         projectBudget.MonthsLeft = (project.EndDate <= DateTime.Now) ? 0 : (projectBudget.TotalMonths - (utilityHelper.GetMonthDifference(project.StartDate, DateTime.Now)));
                         
@@ -413,6 +413,7 @@ namespace AIMS.Services
                                 decimal calculatedExRate = Math.Round((exchangeRate / funder.ExchangeRate), 3);
                                 funderList.Add(new ProjectFunding()
                                 {
+                                    Funder = funder.Funder.OrganizationName,
                                     Amount = funder.Amount,
                                     AmountInDefault = Math.Round((funder.Amount * calculatedExRate), MidpointRounding.AwayFromZero),
                                     Currency = funder.Currency,
