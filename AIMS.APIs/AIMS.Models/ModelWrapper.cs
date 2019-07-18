@@ -1182,17 +1182,24 @@ namespace AIMS.Models
         public DateTime EndDate { get; set; }
         public string StartDateString { get; set; }
         public string EndDateString { get; set; }
-        public decimal ActualDisbursements { get; set; } = 0;
-        public decimal PlannedDisbursements { get; set; } = 0;
         public ICollection<ProjectFunding> Funding { get; set; }
         public ICollection<ProjectDisbursements> Disbursements { get; set; }
         public ICollection<ProjectYearlyDisbursements> YearlyDisbursements { get; set; }
+        public ICollection<BudgetFundShare> FundShares { get; set; }
+        public int TotalMonths { get; set; }
         public int MonthsLeft { get; set; }
         public int MonthsCurrentYear { get; set; }
-        public decimal MoneyLeftForYears { get; set; }
-        public decimal MoneyPreviousTwoYears { get; set; }
-        public decimal ExpectedDisbursementsCurrentYear { get; set; }
-        public decimal ExpectedMinusActual { get; set; }
+        public decimal MoneyLeftForYears { get; set; } = 0;
+        public decimal MoneyPreviousTwoYears { get; set; } = 0;
+        public decimal ExpectedDisbursementsCurrentYear { get; set; } = 0;
+        public decimal ExpectedMinusActual { get; set; } = 0;
+    }
+
+    public class BudgetFundShare
+    {
+        public string FundingType { get; set; }
+        public decimal Amount { get; set; }
+        public decimal Percentage { get; set; }
     }
 
     public class SectorDisbursements
