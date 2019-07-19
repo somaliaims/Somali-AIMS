@@ -366,6 +366,9 @@ namespace AIMS.Services
                     projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndDate.Year >= currentYear,
                             new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Funders.FundingType" });
 
+                    projectProfileList = (from p in projectProfileList
+                                          orderby p.DateUpdated descending
+                                          select p);
 
                     UtilityHelper utilityHelper = new UtilityHelper();
                     foreach (var project in projectProfileList)
