@@ -221,6 +221,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string GetInvalidFunderApprovalMessage();
+
+        /// <summary>
+        /// Gets message for dependent projects on deleting sector
+        /// </summary>
+        /// <returns></returns>
+        string GetDependentProjectsOnSectorMessage();
     }
 
     public class MessageHelper : IMessageHelper
@@ -239,6 +245,7 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_PERCENTAGE = "Invalid value provided for percentage.";
         private readonly string ALREADY_EXISTS = " provided is already entered once.";
         private readonly string INVALID_DATE = "Invalid value provided for date";
+        private readonly string DEPENDENT_PROJECTS_FOR_SECTOR = "Dependent projects found for the selected sector. Either map another sector or remove sector from the dependent projects";
         private readonly string INVALID_FUNDER_APPROVAL = "You are not authorized to approve the provided funder";
         private readonly string INVALID_OPTIONS_COUNT = "Invalid number of options provided for the type of field";
         private readonly string INVALID_SECTOR_TYPE_DELETION = "A sector type cannot be deleted untill all the sector under the type is deleted";
@@ -343,6 +350,11 @@ namespace AIMS.Services.Helpers
         public string GetInvalidDeletionAttemptSectorType()
         {
             return (INVALID_SECTOR_TYPE_DELETION);
+        }
+
+        public string GetDependentProjectsOnSectorMessage()
+        {
+            return (DEPENDENT_PROJECTS_FOR_SECTOR);
         }
 
         public string ProjectToOrganizationMessage(string organization)

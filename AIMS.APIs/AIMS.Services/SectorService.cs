@@ -440,6 +440,14 @@ namespace AIMS.Services
                 var projectIds = (from s in projectSectors
                                   select s.ProjectId).Distinct().ToList<int>();
 
+                if (projectIds.Count() > 0 && newId == 0)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetDependentProjectsOnSectorMessage();
+                    return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                }
+
                 var sectorsInDb = (from s in projectSectors
                                    select new SectorsKeyView()
                                    {
@@ -492,14 +500,10 @@ namespace AIMS.Services
                             }
                             await unitWork.SaveAsync();
 
-                            if (newId == 0)
-                            {
-                                unitWork.SectorRepository.Delete(sector);
-                            }
-                            else
-                            {
-                                unitWork.ProjectSectorsRepository.InsertMultiple(sectorsList);
-                            }
+                            unitWork.ProjectSectorsRepository.InsertMultiple(sectorsList);
+                            await unitWork.SaveAsync();
+
+                            unitWork.SectorRepository.Delete(sector);
                             await unitWork.SaveAsync();
                             transaction.Commit();
 

@@ -54,6 +54,15 @@ namespace AIMS.Services
         Task<ProjectsBudgetReport> GetProjectsBudgetReport(string reportUrl, string defaultCurrency, decimal exchangeRate);
 
         /// <summary>
+        /// Gets lighter version of projects budget report
+        /// </summary>
+        /// <param name="reportUrl"></param>
+        /// <param name="defaultCurrency"></param>
+        /// <param name="exchangeRate"></param>
+        /// <returns></returns>
+        Task<ProjectsBudgetReportSummary> GetProjectsBudgetReportSummary(string reportUrl, string defaultCurrency, decimal exchangeRate);
+
+        /// <summary>
         /// Internal function for extracting rate of default currency
         /// </summary>
         /// <param name="currency"></param>
@@ -525,6 +534,102 @@ namespace AIMS.Services
                     string message = ex.Message;
                 }
                 return await Task<ProjectsBudgetReport>.Run(() => budgetReport).ConfigureAwait(false);
+            }
+        }
+
+        public async Task<ProjectsBudgetReportSummary> GetProjectsBudgetReportSummary(string reportUrl, string defaultCurrency, decimal exchangeRate)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ProjectsBudgetReportSummary budgetReport = new ProjectsBudgetReportSummary();
+                IQueryable<EFProject> projectProfileList = null;
+                try
+                {
+                    budgetReport.ReportSettings = new Report()
+                    {
+                        Title = ReportConstants.PROJECTS_BUDGET_REPORT_TITLE,
+                        SubTitle = ReportConstants.PROJECTS_BUDGET_REPORT_SUBTITLE,
+                        Footer = ReportConstants.PROJECTS_BUDGET_REPORT_FOOTER,
+                        Dated = DateTime.Now.ToLongDateString(),
+                        ReportUrl = reportUrl + ReportConstants.BUDGET_REPORT_URL + "?load=true"
+                    };
+
+                    int currentYear = DateTime.Now.Year;
+                    int previousYear = (currentYear - 1);
+                    int futureYearsLimit = (currentYear + 3);
+                    List<ProjectBudgetSummaryView> projectBudgetsList = new List<ProjectBudgetSummaryView>();
+
+                    projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndDate.Year >= currentYear,
+                            new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Disbursements" });
+
+                    projectProfileList = (from p in projectProfileList
+                                          orderby p.DateUpdated descending
+                                          select p);
+
+                    UtilityHelper utilityHelper = new UtilityHelper();
+                    foreach (var project in projectProfileList)
+                    {
+                        ProjectBudgetSummaryView projectBudget = new ProjectBudgetSummaryView();
+                        int upperYearLimit = currentYear + 3;
+                        int yearsLeft = upperYearLimit - currentYear;
+                        int projectStartYear = project.StartDate.Year;
+                        projectBudget.Id = project.Id;
+                        projectBudget.Title = project.Title;
+                        List<ProjectDisbursements> disbursementsList = new List<ProjectDisbursements>();
+                        decimal projectCost = 0;
+                        if (project.Funders.Count > 0)
+                        {
+                            projectCost = Math.Round((from f in project.Funders
+                                           select (f.Amount * (exchangeRate / f.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
+                        }
+
+                        List<ProjectYearlyDisbursementsSummary> yearlyDisbursements = new List<ProjectYearlyDisbursementsSummary>();
+                        decimal actualDisbursements = 0, expectedDisbursements = 0, disbursements = 0;
+                        for (int year = (currentYear - 1); year <= upperYearLimit; year++)
+                        {
+                            yearsLeft = upperYearLimit - year;
+                            decimal yearDisbursements = Math.Round((from d in project.Disbursements
+                                                         where d.Dated.Year == year
+                                                         select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
+
+                            if (yearDisbursements == 0 && projectStartYear > year)
+                            {
+                                expectedDisbursements = 0;
+                            }
+                            else
+                            {
+                                actualDisbursements += yearDisbursements;
+                                expectedDisbursements = yearsLeft > 0 ? (Math.Round((projectCost - actualDisbursements) / yearsLeft)) : (projectCost - actualDisbursements);
+                                if (expectedDisbursements < 0)
+                                {
+                                    expectedDisbursements = 0;
+                                }
+                            }
+
+                            disbursements = yearDisbursements + expectedDisbursements;
+                            actualDisbursements += expectedDisbursements;
+                            yearlyDisbursements.Add(new ProjectYearlyDisbursementsSummary()
+                            {
+                                Year = year,
+                                Disbursements = disbursements,
+                                ActualDisbursements = yearDisbursements,
+                                ExpectedDisbursements = expectedDisbursements,
+                            });
+                        }
+                        var yearlyDisbursement = (from d in yearlyDisbursements
+                                                  where d.Year == currentYear
+                                                  select d).FirstOrDefault();
+
+                        projectBudget.YearlyDisbursements = yearlyDisbursements;
+                        projectBudgetsList.Add(projectBudget);
+                    }
+                    budgetReport.Projects = projectBudgetsList;
+                }
+                catch (Exception ex)
+                {
+                    string message = ex.Message;
+                }
+                return await Task<ProjectsBudgetReportSummary>.Run(() => budgetReport).ConfigureAwait(false);
             }
         }
 

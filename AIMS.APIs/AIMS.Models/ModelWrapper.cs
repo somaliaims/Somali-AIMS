@@ -1173,6 +1173,19 @@ namespace AIMS.Models
         public IEnumerable<ProjectBudgetView> Projects { get; set; }
     }
 
+    public class ProjectsBudgetReportSummary
+    {
+        public Report ReportSettings { get; set; }
+        public IEnumerable<ProjectBudgetSummaryView> Projects { get; set; }
+    }
+
+    public class ProjectBudgetSummaryView
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public ICollection<ProjectYearlyDisbursementsSummary> YearlyDisbursements { get; set; }
+    }
+
     public class ProjectBudgetView
     {
         public int Id { get; set; }
@@ -1238,6 +1251,14 @@ namespace AIMS.Models
         public int Year { get; set; }
         public int ActiveMonths { get; set; }
         public decimal Disbursements { get; set; }
+        public decimal ExpectedDisbursements { get; set; }
+    }
+
+    public class ProjectYearlyDisbursementsSummary
+    {
+        public int Year { get; set; }
+        public decimal Disbursements { get; set; }
+        public decimal ActualDisbursements { get; set; }
         public decimal ExpectedDisbursements { get; set; }
     }
 
