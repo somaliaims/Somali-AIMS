@@ -683,7 +683,7 @@ namespace AIMS.Services
                 var memory = new MemoryStream();
                 using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
                 {
-                    int rowCounter = 0, totalColumns = 6;
+                    int rowCounter = 0, totalColumns = 7;
                     IWorkbook workbook;
                     workbook = new XSSFWorkbook();
                     ISheet excelSheet = workbook.CreateSheet("Report");
@@ -750,10 +750,9 @@ namespace AIMS.Services
                         ));
 
                     row = excelSheet.CreateRow(++rowCounter);
-                    var projectCol = row.CreateCell(0);
-                    projectCol.SetCellValue("Years");
-                    projectCol.CellStyle = headerStyle;
-                    int index = 0;
+                    row.CreateCell(0, CellType.Blank);
+                    row.CreateCell(1, CellType.Blank);
+                    int index = 1;
                     foreach(var year in yearsList)
                     {
                         var funderCol = row.CreateCell(++index);
@@ -764,41 +763,40 @@ namespace AIMS.Services
                     
                     foreach (var project in report.Projects)
                     {
-                        index = 0;
-                        row = excelSheet.CreateRow(++rowCounter);
-                        var yearBlankCell = row.CreateCell(0, CellType.Blank);
-                        foreach(var disbursement in project.YearlyDisbursements)
-                        {
-                            var disbursementCol = row.CreateCell(++index);
-                            disbursementCol.SetCellValue(disbursement.Year.ToString());
-                            disbursementCol.CellStyle = headerStyle;
-                        }
-
-                        index = 0;
+                        index = 1;
                         row = excelSheet.CreateRow(++rowCounter);
                         var projectTitleCell = row.CreateCell(0, CellType.String);
                         projectTitleCell.SetCellValue(project.Title);
                         projectTitleCell.CellStyle = groupHeaderStyle;
+                        var tDisbusementCell = row.CreateCell(0, CellType.String);
+                        tDisbusementCell.SetCellValue("Total disbursements");
+                        tDisbusementCell.CellStyle = headerStyle;
                         foreach (var disbursement in project.YearlyDisbursements)
                         {
                             var disbursementCol = row.CreateCell(++index);
-                            disbursementCol.SetCellValue(disbursement.Disbursements.ToString());
+                            disbursementCol.SetCellValue(ApplyThousandFormat(disbursement.Disbursements));
                             disbursementCol.CellStyle = dataCellStyle;
                         }
 
-                        index = 0;
+                        index = 1;
                         row = excelSheet.CreateRow(++rowCounter);
                         var rowOneBlankCell = row.CreateCell(0, CellType.Blank);
+                        var aDisbusementCell = row.CreateCell(0, CellType.String);
+                        aDisbusementCell.SetCellValue("Expected disbursements");
+                        aDisbusementCell.CellStyle = headerStyle;
                         foreach (var disbursement in project.YearlyDisbursements)
                         {
                             var disbursementCol = row.CreateCell(++index);
-                            disbursementCol.SetCellValue(disbursement.ActualDisbursements.ToString());
+                            disbursementCol.SetCellValue(ApplyThousandFormat(disbursement.ActualDisbursements));
                             disbursementCol.CellStyle = dataCellStyle;
                         }
 
-                        index = 0;
+                        index = 1;
                         row = excelSheet.CreateRow(++rowCounter);
                         var rowTwoBlankCell = row.CreateCell(0, CellType.Blank);
+                        var eDisbusementCell = row.CreateCell(0, CellType.String);
+                        eDisbusementCell.SetCellValue("Expected disbursements");
+                        eDisbusementCell.CellStyle = headerStyle;
                         foreach (var disbursement in project.YearlyDisbursements)
                         {
                             var disbursementCol = row.CreateCell(++index);
@@ -841,13 +839,13 @@ namespace AIMS.Services
                     row = excelSheet.CreateRow(++rowCounter);
                     row.CreateCell(0, CellType.Blank);
                     var expectedDisbursementCell = row.CreateCell(1, CellType.Blank);
-                    actualDisbursementCell.SetCellValue("Actual disbursements");
+                    actualDisbursementCell.SetCellValue("Expected disbursements");
                     actualDisbursementCell.CellStyle = headerStyle;
                     index = 1;
                     foreach (var d in report.TotalYearlyDisbursements)
                     {
                         var eDisbursementsCell = row.CreateCell(++index, CellType.Numeric);
-                        eDisbursementsCell.SetCellValue(ApplyThousandFormat(d.TotalDisbursements));
+                        eDisbursementsCell.SetCellValue(ApplyThousandFormat(d.TotalExpectedDisbursements));
                         eDisbursementsCell.CellStyle = dataCellStyle;
                     }
 
