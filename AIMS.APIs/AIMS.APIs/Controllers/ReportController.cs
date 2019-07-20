@@ -101,6 +101,11 @@ namespace AIMS.APIs.Controllers
                 }
             }
             var report = await reportService.GetProjectsBudgetReportSummary(clientUrl, defaultCurrency, exchangeRate);
+            var response = excelService.GenerateProjectBudgetReportSummary(report);
+            if (response.Success)
+            {
+                report.ReportSettings.ExcelReportName = response.Message;
+            }
             return Ok(report);
         }
 

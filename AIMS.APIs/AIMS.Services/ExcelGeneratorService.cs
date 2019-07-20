@@ -4,6 +4,7 @@ using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -40,7 +41,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="report"></param>
         /// <returns></returns>
-        ActionResponse GenerateProjectBudgetReportSummary(ProjectsBudgetReportSummary report, List<int> yearsList);
+        ActionResponse GenerateProjectBudgetReportSummary(ProjectsBudgetReportSummary report);
     }
 
     public class ExcelGeneratorService : IExcelGeneratorService
@@ -71,7 +72,6 @@ namespace AIMS.Services
                     workbook = new XSSFWorkbook();
                     ISheet excelSheet = workbook.CreateSheet("Report");
 
-                    //Setting styles for different cell types
                     ICellStyle titleStyle = workbook.CreateCellStyle();
                     IFont fontTitle = workbook.CreateFont();
                     fontTitle.Color = IndexedColors.DarkBlue.Index;
@@ -127,14 +127,12 @@ namespace AIMS.Services
                         rowCounter, rowCounter, 0, totalColumns));
                     titleCell.CellStyle = titleStyle;
 
-                    //Adding extra line
                     row = excelSheet.CreateRow(++rowCounter);
                     row.CreateCell(0, CellType.Blank);
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns
                         ));
 
-                    //Header columns row
                     row = excelSheet.CreateRow(++rowCounter);
                     var projectCol = row.CreateCell(0);
                     projectCol.SetCellValue("Project");
@@ -281,7 +279,6 @@ namespace AIMS.Services
                     workbook = new XSSFWorkbook();
                     ISheet excelSheet = workbook.CreateSheet("Report");
 
-                    //Setting styles for different cell types
                     ICellStyle titleStyle = workbook.CreateCellStyle();
                     IFont fontTitle = workbook.CreateFont();
                     fontTitle.Color = IndexedColors.DarkBlue.Index;
@@ -337,14 +334,12 @@ namespace AIMS.Services
                         rowCounter, rowCounter, 0, totalColumns));
                     titleCell.CellStyle = titleStyle;
 
-                    //Inserting extra row
                     row = excelSheet.CreateRow(++rowCounter);
                     row.CreateCell(0, CellType.Blank);
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns
                         ));
 
-                    //Header columns row
                     row = excelSheet.CreateRow(++rowCounter);
                     var projectCol = row.CreateCell(0);
                     projectCol.SetCellValue("Projects");
@@ -488,7 +483,6 @@ namespace AIMS.Services
                     workbook = new XSSFWorkbook();
                     ISheet excelSheet = workbook.CreateSheet("Report");
 
-                    //Setting styles for different cell types
                     ICellStyle titleStyle = workbook.CreateCellStyle();
                     IFont fontTitle = workbook.CreateFont();
                     fontTitle.Color = IndexedColors.DarkBlue.Index;
@@ -544,14 +538,12 @@ namespace AIMS.Services
                         rowCounter, rowCounter, 0, totalColumns));
                     titleCell.CellStyle = titleStyle;
 
-                    //Inserting extra row
                     row = excelSheet.CreateRow(++rowCounter);
                     row.CreateCell(0, CellType.Blank);
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns
                         ));
 
-                    //Header columns row
                     row = excelSheet.CreateRow(++rowCounter);
                     var projectCol = row.CreateCell(0);
                     projectCol.SetCellValue("Projects");
@@ -677,24 +669,25 @@ namespace AIMS.Services
             return response;
         }
 
-        public ActionResponse GenerateProjectBudgetReportSummary(ProjectsBudgetReportSummary report, List<int> yearsList)
+        public ActionResponse GenerateProjectBudgetReportSummary(ProjectsBudgetReportSummary report)
         {
             ActionResponse response = new ActionResponse();
             try
             {
+                List<int> yearsList = (from y in report.TotalYearlyDisbursements
+                                       orderby y.Year ascending
+                                       select y.Year).ToList();
+
                 string sFileName = @"ProjectBudget-" + DateTime.UtcNow.Ticks.ToString() + ".xlsx";
                 FileInfo file = new FileInfo(Path.Combine(sWebRootFolder, sFileName));
                 var memory = new MemoryStream();
                 using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
                 {
                     int rowCounter = 0, totalColumns = 6;
-                    //decimal subTotalDisbursement = 0;
-
                     IWorkbook workbook;
                     workbook = new XSSFWorkbook();
                     ISheet excelSheet = workbook.CreateSheet("Report");
 
-                    //Setting styles for different cell types
                     ICellStyle titleStyle = workbook.CreateCellStyle();
                     IFont fontTitle = workbook.CreateFont();
                     fontTitle.Color = IndexedColors.DarkBlue.Index;
@@ -750,20 +743,16 @@ namespace AIMS.Services
                         rowCounter, rowCounter, 0, totalColumns));
                     titleCell.CellStyle = titleStyle;
 
-                    //Inserting extra row
                     row = excelSheet.CreateRow(++rowCounter);
                     row.CreateCell(0, CellType.Blank);
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns
                         ));
 
-                    //Header columns row
                     row = excelSheet.CreateRow(++rowCounter);
-
                     var projectCol = row.CreateCell(0);
                     projectCol.SetCellValue("Years");
                     projectCol.CellStyle = headerStyle;
-
                     int index = 0;
                     foreach(var year in yearsList)
                     {
@@ -825,19 +814,42 @@ namespace AIMS.Services
 
                     row = excelSheet.CreateRow(++rowCounter);
                     var footerYearsBlankOne = row.CreateCell(0, CellType.Blank);
+                    var footerYearsBlankTwo = row.CreateCell(1, CellType.Blank);
                     index = 1;
                     foreach (var year in yearsList)
                     {
-
+                        var yearCell = row.CreateCell(++index, CellType.Numeric);
+                        yearCell.SetCellValue(year);
+                        yearCell.CellStyle = groupHeaderStyle;
                     }
 
-                    var totalTitleCell = row.CreateCell(3, CellType.Blank);
-                    var grandDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
-                    grandDisbursementTotalCell.SetCellValue(ApplyThousandFormat(5));
-                    grandDisbursementTotalCell.CellStyle = headerStyle;
+                    row = excelSheet.CreateRow(++rowCounter);
+                    var totalHeading = row.CreateCell(0, CellType.String);
+                    totalHeading.SetCellValue("Total");
+                    totalHeading.CellStyle = headerStyle;
+                    var actualDisbursementCell = row.CreateCell(1, CellType.Blank);
+                    actualDisbursementCell.SetCellValue("Actual disbursements");
+                    actualDisbursementCell.CellStyle = headerStyle;
+                    index = 1;
+                    foreach(var d in report.TotalYearlyDisbursements)
+                    {
+                        var disbursementCell = row.CreateCell(++index, CellType.Numeric);
+                        disbursementCell.SetCellValue(ApplyThousandFormat(d.TotalDisbursements));
+                        disbursementCell.CellStyle = dataCellStyle;
+                    }
 
-                    var grandPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Blank);
-                    grandPlannedDisbursementTotalCell.CellStyle = headerStyle;
+                    row = excelSheet.CreateRow(++rowCounter);
+                    row.CreateCell(0, CellType.Blank);
+                    var expectedDisbursementCell = row.CreateCell(1, CellType.Blank);
+                    actualDisbursementCell.SetCellValue("Actual disbursements");
+                    actualDisbursementCell.CellStyle = headerStyle;
+                    index = 1;
+                    foreach (var d in report.TotalYearlyDisbursements)
+                    {
+                        var eDisbursementsCell = row.CreateCell(++index, CellType.Numeric);
+                        eDisbursementsCell.SetCellValue(ApplyThousandFormat(d.TotalDisbursements));
+                        eDisbursementsCell.CellStyle = dataCellStyle;
+                    }
 
                     row = excelSheet.CreateRow(++rowCounter);
                     row.CreateCell(0, CellType.Blank);
