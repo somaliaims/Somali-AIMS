@@ -37,9 +37,9 @@ namespace AIMS.Services.Helpers
         public static readonly string TIME_SERIES_REPORT_FOOTER = "Time trend report from AIMS Somalia";
 
         //Constants for projects budget report
-        public static readonly string PROJECTS_BUDGET_REPORT_TITLE = "Projects budget report";
+        public static readonly string PROJECTS_BUDGET_REPORT_TITLE = "Budget report";
         public static readonly string PROJECTS_BUDGET_REPORT_SUBTITLE = "Projects budget year-wise";
-        public static readonly string PROJECTS_BUDGET_REPORT_FOOTER = "Projects budget report from AIMS Somalia";
+        public static readonly string PROJECTS_BUDGET_REPORT_FOOTER = "Budget report from AIMS Somalia";
 
         public static readonly int YEAR_MONTHS = 12;
     }
