@@ -639,6 +639,11 @@ namespace AIMS.Services
                         projectBudget.YearlyDisbursements = yearlyDisbursements;
                         projectBudgetsList.Add(projectBudget);
                     }
+                    foreach(var total in totalDisbursementsSummaryList)
+                    {
+                        total.TotalDisbursements = Math.Round(total.TotalDisbursements, MidpointRounding.AwayFromZero);
+                        total.TotalExpectedDisbursements = Math.Round(total.TotalExpectedDisbursements, MidpointRounding.AwayFromZero);
+                    }
                     budgetReport.TotalYearlyDisbursements = totalDisbursementsSummaryList;
                     budgetReport.Projects = projectBudgetsList;
                 }

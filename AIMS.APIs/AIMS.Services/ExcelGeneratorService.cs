@@ -715,6 +715,14 @@ namespace AIMS.Services
                     headerStyle.Alignment = HorizontalAlignment.Center;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
 
+                    ICellStyle highlightStyle = workbook.CreateCellStyle();
+                    IFont fontHighlight = workbook.CreateFont();
+                    fontHighlight.Color = IndexedColors.DarkBlue.Index;
+                    fontHighlight.FontHeightInPoints = 12;
+                    highlightStyle.SetFont(fontHighlight);
+                    highlightStyle.Alignment = HorizontalAlignment.Center;
+                    highlightStyle.VerticalAlignment = VerticalAlignment.Center;
+
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
                     IFont groupFontHeader = workbook.CreateFont();
@@ -738,7 +746,7 @@ namespace AIMS.Services
 
                     row = excelSheet.CreateRow(++rowCounter);
                     var titleCell = row.CreateCell(0, CellType.String);
-                    titleCell.SetCellValue("SomaliAIMS projects budget report - generated on " + DateTime.Now.ToLongDateString());
+                    titleCell.SetCellValue("SomaliAIMS budget report - generated on " + DateTime.Now.ToLongDateString());
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns));
                     titleCell.CellStyle = titleStyle;
@@ -768,9 +776,9 @@ namespace AIMS.Services
                         var projectTitleCell = row.CreateCell(0, CellType.String);
                         projectTitleCell.SetCellValue(project.Title);
                         projectTitleCell.CellStyle = groupHeaderStyle;
-                        var tDisbusementCell = row.CreateCell(0, CellType.String);
+                        var tDisbusementCell = row.CreateCell(1, CellType.String);
                         tDisbusementCell.SetCellValue("Total disbursements");
-                        tDisbusementCell.CellStyle = headerStyle;
+                        tDisbusementCell.CellStyle = highlightStyle;
                         foreach (var disbursement in project.YearlyDisbursements)
                         {
                             var disbursementCol = row.CreateCell(++index);
@@ -781,9 +789,9 @@ namespace AIMS.Services
                         index = 1;
                         row = excelSheet.CreateRow(++rowCounter);
                         var rowOneBlankCell = row.CreateCell(0, CellType.Blank);
-                        var aDisbusementCell = row.CreateCell(0, CellType.String);
-                        aDisbusementCell.SetCellValue("Expected disbursements");
-                        aDisbusementCell.CellStyle = headerStyle;
+                        var aDisbusementCell = row.CreateCell(1, CellType.String);
+                        aDisbusementCell.SetCellValue("Actual");
+                        aDisbusementCell.CellStyle = highlightStyle;
                         foreach (var disbursement in project.YearlyDisbursements)
                         {
                             var disbursementCol = row.CreateCell(++index);
@@ -794,9 +802,9 @@ namespace AIMS.Services
                         index = 1;
                         row = excelSheet.CreateRow(++rowCounter);
                         var rowTwoBlankCell = row.CreateCell(0, CellType.Blank);
-                        var eDisbusementCell = row.CreateCell(0, CellType.String);
-                        eDisbusementCell.SetCellValue("Expected disbursements");
-                        eDisbusementCell.CellStyle = headerStyle;
+                        var eDisbusementCell = row.CreateCell(1, CellType.String);
+                        eDisbusementCell.SetCellValue("Expected");
+                        eDisbusementCell.CellStyle = highlightStyle;
                         foreach (var disbursement in project.YearlyDisbursements)
                         {
                             var disbursementCol = row.CreateCell(++index);
@@ -824,10 +832,10 @@ namespace AIMS.Services
                     row = excelSheet.CreateRow(++rowCounter);
                     var totalHeading = row.CreateCell(0, CellType.String);
                     totalHeading.SetCellValue("Total");
-                    totalHeading.CellStyle = headerStyle;
+                    totalHeading.CellStyle = groupHeaderStyle;
                     var actualDisbursementCell = row.CreateCell(1, CellType.Blank);
-                    actualDisbursementCell.SetCellValue("Actual disbursements");
-                    actualDisbursementCell.CellStyle = headerStyle;
+                    actualDisbursementCell.SetCellValue("Actual");
+                    actualDisbursementCell.CellStyle = highlightStyle;
                     index = 1;
                     foreach(var d in report.TotalYearlyDisbursements)
                     {
@@ -839,8 +847,8 @@ namespace AIMS.Services
                     row = excelSheet.CreateRow(++rowCounter);
                     row.CreateCell(0, CellType.Blank);
                     var expectedDisbursementCell = row.CreateCell(1, CellType.Blank);
-                    actualDisbursementCell.SetCellValue("Expected disbursements");
-                    actualDisbursementCell.CellStyle = headerStyle;
+                    expectedDisbursementCell.SetCellValue("Expected");
+                    expectedDisbursementCell.CellStyle = highlightStyle;
                     index = 1;
                     foreach (var d in report.TotalYearlyDisbursements)
                     {
