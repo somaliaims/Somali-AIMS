@@ -1177,6 +1177,7 @@ namespace AIMS.Models
     {
         public Report ReportSettings { get; set; }
         public IEnumerable<ProjectBudgetSummaryView> Projects { get; set; }
+        public ICollection<YearlyTotalDisbursementsSummary> TotalYearlyDisbursements { get; set; }
     }
 
     public class ProjectBudgetSummaryView
@@ -1244,6 +1245,13 @@ namespace AIMS.Models
         public decimal AmountInDefault { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRateToDefault { get; set; }
+    }
+
+    public class YearlyTotalDisbursementsSummary
+    {
+        public int Year { get; set; }
+        public decimal TotalDisbursements { get; set; }
+        public decimal TotalExpectedDisbursements { get; set; }
     }
 
     public class ProjectYearlyDisbursements

@@ -567,6 +567,7 @@ namespace AIMS.Services
                                           select p);
 
                     UtilityHelper utilityHelper = new UtilityHelper();
+                    List<YearlyTotalDisbursementsSummary> totalDisbursementsSummaryList = new List<YearlyTotalDisbursementsSummary>();
                     foreach (var project in projectProfileList)
                     {
                         ProjectBudgetSummaryView projectBudget = new ProjectBudgetSummaryView();
@@ -615,14 +616,30 @@ namespace AIMS.Services
                                 ActualDisbursements = yearDisbursements,
                                 ExpectedDisbursements = expectedDisbursements,
                             });
-                        }
-                        var yearlyDisbursement = (from d in yearlyDisbursements
-                                                  where d.Year == currentYear
-                                                  select d).FirstOrDefault();
 
+                            var yearExists = (from s in totalDisbursementsSummaryList
+                                                where s.Year == year
+                                              select s).FirstOrDefault();
+
+                            if (yearExists == null)
+                            {
+                                totalDisbursementsSummaryList.Add(new YearlyTotalDisbursementsSummary()
+                                {
+                                    Year = year,
+                                    TotalDisbursements = yearDisbursements,
+                                    TotalExpectedDisbursements = expectedDisbursements
+                                });
+                            }
+                            else
+                            {
+                                yearExists.TotalDisbursements += yearDisbursements;
+                                yearExists.TotalExpectedDisbursements += expectedDisbursements;
+                            }
+                        }
                         projectBudget.YearlyDisbursements = yearlyDisbursements;
                         projectBudgetsList.Add(projectBudget);
                     }
+                    budgetReport.TotalYearlyDisbursements = totalDisbursementsSummaryList;
                     budgetReport.Projects = projectBudgetsList;
                 }
                 catch (Exception ex)

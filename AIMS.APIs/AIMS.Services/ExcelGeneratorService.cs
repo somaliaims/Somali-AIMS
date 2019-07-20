@@ -688,7 +688,7 @@ namespace AIMS.Services
                 using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
                 {
                     int rowCounter = 0, totalColumns = 6;
-                    decimal subTotalDisbursement = 0;
+                    //decimal subTotalDisbursement = 0;
 
                     IWorkbook workbook;
                     workbook = new XSSFWorkbook();
