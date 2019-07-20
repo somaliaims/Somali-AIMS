@@ -668,6 +668,30 @@ namespace AIMS.IATILib.Parsers
                     {
                         string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "", defaultFinanceType = "";
 
+                        var transactions = activity.Elements("transaction");
+                        if (transactions != null)
+                        {
+                            DateTime transactionDate;
+                            DateTime anYearOldDate = DateTime.Now.AddYears(-1);
+                            bool isIncludeActivity = false;
+                            foreach (var transaction in transactions)
+                            {
+                                if (DateTime.TryParse(transaction.Element("transaction-date")?.Attribute("iso-date")?.Value, out transactionDate))
+                                {
+                                    if (transactionDate > anYearOldDate)
+                                    {
+                                        isIncludeActivity = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!isIncludeActivity)
+                            {
+                                continue;
+                            }
+                        }
+
                         var activityStatus = activity.Element("activity-status");
                         if (activityStatus.Attribute("code") != null)
                         {
