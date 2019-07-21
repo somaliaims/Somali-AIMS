@@ -1805,6 +1805,7 @@ namespace AIMS.Services
                                             fundersList.Add(new EFProjectFunders()
                                             {
                                                 ProjectId = newProject.Id,
+                                                FundingTypeId = funder.FundingTypeId,
                                                 FunderId = funder.FunderId,
                                                 Amount = funder.Amount,
                                                 Currency = funder.Currency,

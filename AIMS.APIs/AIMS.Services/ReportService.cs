@@ -310,7 +310,7 @@ namespace AIMS.Services
                                     project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * locationPercentage), MidpointRounding.AwayFromZero);
                                     if (months > 0)
                                     {
-                                        project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements) / months), MidpointRounding.AwayFromZero);
+                                        project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
                                         if (project.PlannedDisbursements < 0)
                                         {
                                             project.PlannedDisbursements = 0;
@@ -878,7 +878,7 @@ namespace AIMS.Services
                                     project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * sectorPercentage), MidpointRounding.AwayFromZero);
                                     if (months > 0)
                                     {
-                                        project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements) / months), MidpointRounding.AwayFromZero);
+                                        project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
                                         if (project.PlannedDisbursements < 0)
                                         {
                                             project.PlannedDisbursements = 0;
@@ -1128,7 +1128,7 @@ namespace AIMS.Services
                                 project.ActualDisbursements = projectDisbursements;
                                 if (months > 0)
                                 {
-                                    project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements) / months), MidpointRounding.AwayFromZero);
+                                    project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
                                     if (project.PlannedDisbursements < 0)
                                     {
                                         project.PlannedDisbursements = 0;
