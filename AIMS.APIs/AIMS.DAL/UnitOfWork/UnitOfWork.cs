@@ -438,7 +438,7 @@ namespace AIMS.DAL.UnitOfWork
                 {
                     lines.Add(error.ToString());
                 }
-                System.IO.File.AppendAllLines(@"E:\errors.txt", lines);
+                //System.IO.File.AppendAllLines(@"E:\errors.txt", lines);
                 throw e;
             }
         }

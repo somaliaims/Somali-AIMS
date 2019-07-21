@@ -102,9 +102,9 @@ namespace AIMS.Models
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }
         public EFOrganization Organization { get; set; }
-        [ForeignKey("ApprovedById")]
+        /*[ForeignKey("ApprovedById")]
         public int? ApprovedById { get; set; }
-        public EFUser ApprovedBy { get; set; }
+        public EFUser ApprovedBy { get; set; }*/
         public bool IsApproved { get; set; }
         public DateTime? ApprovedOn { get; set; }
         public DateTime RegistrationDate { get; set; }

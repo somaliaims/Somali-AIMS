@@ -474,7 +474,7 @@ namespace AIMS.Services
                 }
 
                 userAccount.IsApproved = true;
-                userAccount.ApprovedBy = approvedByAccount;
+                //userAccount.ApprovedBy = approvedByAccount;
                 userAccount.ApprovedOn = DateTime.Now;
 
                 unitWork.UserRepository.Update(userAccount);
@@ -651,6 +651,9 @@ namespace AIMS.Services
                     response.Message = mHelper.InvalidAccountDeletionAttempt();
                     return response;
                 }
+                //user.ApprovedBy = null;
+                unitWork.UserRepository.Update(user);
+                unitWork.Save();
 
                 unitWork.UserRepository.Delete(user);
                 unitWork.Save();

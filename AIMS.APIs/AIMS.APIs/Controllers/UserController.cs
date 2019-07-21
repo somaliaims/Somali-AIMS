@@ -295,7 +295,11 @@ namespace AIMS.APIs.Controllers
             }
             int userId = Convert.ToInt32(userIdVal);
             var response = userService.Delete(userId, model.Password);
-            return Ok(response);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
         }
     }
 }
