@@ -1890,6 +1890,8 @@ namespace AIMS.Services
                                             {
                                                 ProjectId = newProject.Id,
                                                 Amount = disbursement.Amount,
+                                                Currency = disbursement.Currency,
+                                                ExchangeRate = disbursement.ExchangeRate,
                                                 Dated = disbursement.Dated
                                             });
                                         }
