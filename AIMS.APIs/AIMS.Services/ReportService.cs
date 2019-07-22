@@ -600,10 +600,17 @@ namespace AIMS.Services
                             else
                             {
                                 actualDisbursements += yearDisbursements;
-                                expectedDisbursements = yearsLeft > 0 ? (Math.Round((projectCost - actualDisbursements) / yearsLeft)) : (projectCost - actualDisbursements);
-                                if (expectedDisbursements < 0)
+                                if (year < projectStartYear)
                                 {
                                     expectedDisbursements = 0;
+                                }
+                                else
+                                {
+                                    expectedDisbursements = yearsLeft > 0 ? (Math.Round((projectCost - actualDisbursements) / yearsLeft)) : (projectCost - actualDisbursements);
+                                    if (expectedDisbursements < 0)
+                                    {
+                                        expectedDisbursements = 0;
+                                    }
                                 }
                             }
 
@@ -876,15 +883,12 @@ namespace AIMS.Services
                                     int months = helper.GetMonthDifference(startDate, endDate);
 
                                     project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * sectorPercentage), MidpointRounding.AwayFromZero);
-                                    if (months > 0)
+                                    project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
+                                    if (project.PlannedDisbursements < 0)
                                     {
-                                        project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
-                                        if (project.PlannedDisbursements < 0)
-                                        {
-                                            project.PlannedDisbursements = 0;
-                                        }
+                                        project.PlannedDisbursements = 0;
                                     }
-                                    totalDisbursementsPercentage += project.ActualDisbursements; 
+                                    totalDisbursementsPercentage += project.ActualDisbursements;
                                 }
                             }
                         }
@@ -1126,13 +1130,10 @@ namespace AIMS.Services
                                 int months = helper.GetMonthDifference(startDate, endDate);
 
                                 project.ActualDisbursements = projectDisbursements;
-                                if (months > 0)
+                                project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
+                                if (project.PlannedDisbursements < 0)
                                 {
-                                    project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
-                                    if (project.PlannedDisbursements < 0)
-                                    {
-                                        project.PlannedDisbursements = 0;
-                                    }
+                                    project.PlannedDisbursements = 0;
                                 }
                             }
 

@@ -774,8 +774,9 @@ namespace AIMS.Services
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
-                        profileView.StartDate = project.StartDate.ToLongDateString();
-                        profileView.EndDate = project.EndDate.ToLongDateString();
+                        profileView.StartDate = project.StartDate.ToShortDateString();
+                        profileView.EndDate = project.EndDate.ToShortDateString();
+                        profileView.DateUpdated = project.DateUpdated.ToShortDateString();
                         projectsList.Add(profileView);
                     }
                 }
@@ -987,8 +988,18 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
                 try
                 {
+                    var createdBy = unitWork.UserRepository.GetByID(userId);
+                    if (createdBy == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetUnAuthorizedAccessMessage();
+                        return response;
+                    }
+
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
                     {

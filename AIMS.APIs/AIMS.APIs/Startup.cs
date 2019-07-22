@@ -94,12 +94,12 @@ namespace AIMS.APIs
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
                     ValidateLifetime = false,
                     ValidateIssuerSigningKey = true,
-                    //ValidIssuer = Configuration["JwtIssuer"],
-                    //ValidAudience = Configuration["JwtAudience"],
+                    ValidIssuer = Configuration["JwtIssuer"],
+                    ValidAudience = Configuration["JwtAudience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(Configuration["JwtKey"]))
                 };

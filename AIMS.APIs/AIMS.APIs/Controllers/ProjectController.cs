@@ -410,7 +410,6 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("SearchProjectsByCriteria")]
         public async Task<IActionResult> SearchProjectsByCriteria([FromBody] SearchProjectModel model)
@@ -424,7 +423,6 @@ namespace AIMS.APIs.Controllers
             return Ok(projects);
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("SearchProjectsViewByCriteria")]
         public async Task<IActionResult> SearchProjectsViewByCriteria([FromBody] SearchProjectModel model)
