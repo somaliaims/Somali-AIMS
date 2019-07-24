@@ -235,7 +235,8 @@ namespace AIMS.Services
                                        select e.ManualAmount).Sum();
 
                 var envelopeSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => projectIds.Contains(p.ProjectId), new string[] { "Sector" });
-                foreach(var sector in envelopeSectors)
+                var sectors = unitWork.SectorRepository.GetAll();
+                foreach (var sector in envelopeSectors)
                 {
                     var isSectorExists = (from s in sectorsList
                                           where s.Sector == sector.Sector.SectorName
@@ -309,6 +310,39 @@ namespace AIMS.Services
                             Sector = sector.Sector.SectorName,
                             Percentage = sector.FundsPercentage,
                             YearlyAllocation = allocationList
+                        });
+                    }
+                }
+
+                sectors = (from s in sectors
+                           orderby s.SectorName
+                           select s);
+
+                foreach(var sector in sectors)
+                {
+                    var isSectorExists = (from s in sectorsList
+                                          where s.SectorId == sector.Id
+                                          select s);
+
+                    if (isSectorExists == null)
+                    {
+                        List<SectorYearlyAllocation> allocationsList = new List<SectorYearlyAllocation>();
+                        for(int yr = previousYear; yr < upperThreeYearsLimit; yr++ )
+                        {
+                            allocationsList.Add(new SectorYearlyAllocation()
+                            {
+                                Amount = 0,
+                                ExpectedAmount = 0,
+                                ManualAmount = 0,
+                                Year = yr
+                            });
+                        }
+                        sectorsList.Add(new EnvelopeSectorBreakup()
+                        {
+                            SectorId = sector.Id,
+                            Sector = sector.SectorName,
+                            Percentage = 0,
+                            YearlyAllocation = allocationsList
                         });
                     }
                 }

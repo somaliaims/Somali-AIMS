@@ -586,31 +586,25 @@ namespace AIMS.Services
 
                         List<ProjectYearlyDisbursementsSummary> yearlyDisbursements = new List<ProjectYearlyDisbursementsSummary>();
                         decimal actualDisbursements = 0, expectedDisbursements = 0, disbursements = 0;
-                        for (int year = (currentYear - 1); year <= upperYearLimit; year++)
+                        ++upperYearLimit;
+                        for (int year = (currentYear - 1); year < upperYearLimit; year++)
                         {
                             yearsLeft = upperYearLimit - year;
                             decimal yearDisbursements = Math.Round((from d in project.Disbursements
                                                          where d.Dated.Year == year
                                                          select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
 
-                            if (yearDisbursements == 0 && projectStartYear > year)
+                            if (year < projectStartYear)
                             {
                                 expectedDisbursements = 0;
                             }
                             else
                             {
                                 actualDisbursements += yearDisbursements;
-                                if (year < projectStartYear)
+                                expectedDisbursements = yearsLeft > 0 ? (Math.Round((projectCost - actualDisbursements) / yearsLeft)) : (projectCost - actualDisbursements);
+                                if (expectedDisbursements < 0)
                                 {
                                     expectedDisbursements = 0;
-                                }
-                                else
-                                {
-                                    expectedDisbursements = yearsLeft > 0 ? (Math.Round((projectCost - actualDisbursements) / yearsLeft)) : (projectCost - actualDisbursements);
-                                    if (expectedDisbursements < 0)
-                                    {
-                                        expectedDisbursements = 0;
-                                    }
                                 }
                             }
 
