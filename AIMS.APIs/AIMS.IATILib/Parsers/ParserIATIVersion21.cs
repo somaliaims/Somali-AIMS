@@ -667,7 +667,6 @@ namespace AIMS.IATILib.Parsers
                     foreach (var activity in activities)
                     {
                         string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "", defaultFinanceType = "";
-
                         var transactions = activity.Elements("transaction");
                         if (transactions != null)
                         {
