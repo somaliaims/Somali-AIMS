@@ -4,10 +4,13 @@ using System.Text;
 
 namespace AIMS.Models
 {
-    public class ImportedDataEighteen
+    public class ImportedAidData
     {
         public string ProjectTitle { get; set; }
         public string ReportingOrganization { get; set; }
+        public decimal ProjectValue { get; set; }
+        public string Currency { get; set; }
+        public decimal ExchangeRate { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public string Funders { get; set; }

@@ -14,7 +14,21 @@ namespace AIMS.Services
 {
     public interface IDataImportService
     {
-        List<ImportedDataEighteen> ImportAidDataEighteen(string filePath, IFormFile file);
+        /// <summary>
+        /// Imports past data from 2018 file
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        List<ImportedAidData> ImportAidDataEighteen(string filePath, IFormFile file);
+
+        /// <summary>
+        /// Imports past data from 2017 file
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        List<ImportedAidData> ImportAidDataSeventeen(string filePath);
     }
 
     public class DataImportService : IDataImportService
@@ -39,9 +53,9 @@ namespace AIMS.Services
             };
         }
 
-        public List<ImportedDataEighteen> ImportAidDataEighteen(string filePath, IFormFile file)
+        public List<ImportedAidData> ImportAidDataEighteen(string filePath, IFormFile file)
         {
-            List<ImportedDataEighteen> projectsList = new List<ImportedDataEighteen>();
+            List<ImportedAidData> projectsList = new List<ImportedAidData>();
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 int projectTitleIndex = 3, reportingOrgIndex = 2, startDateIndex = 5, endDateIndex = 6,
@@ -50,6 +64,7 @@ namespace AIMS.Services
 
                 file.CopyTo(stream);
                 stream.Position = 0;
+                
                 XSSFWorkbook hssfwb = new XSSFWorkbook(stream);
                 this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
                 this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(hssfwb);
@@ -57,9 +72,7 @@ namespace AIMS.Services
                 ISheet sheet = hssfwb.GetSheetAt(5);
                 IRow headerRow = sheet.GetRow(0);
                 int cellCount = headerRow.LastCellNum;
-
                 
-                //for (int i = (sheet.FirstRowNum + 1); i <= sheet.LastRowNum; i++)
                 for (int i = (sheet.FirstRowNum + 1); i <= 5; i++)
                     {
                     IRow row = sheet.GetRow(i);
@@ -77,7 +90,7 @@ namespace AIMS.Services
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(yearTwoIndex)), out disbursementValueTwo);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(yearThreeIndex)), out disbursementValueThree);
 
-                    projectsList.Add(new ImportedDataEighteen()
+                    projectsList.Add(new ImportedAidData()
                     {
                         ProjectTitle = this.GetFormattedValue(row.GetCell(projectTitleIndex)),
                         ReportingOrganization = this.GetFormattedValue(row.GetCell(reportingOrgIndex)),
@@ -92,6 +105,64 @@ namespace AIMS.Services
                         RRFMarker = this.GetFormattedValue(row.GetCell(rrfMarkerIndex))
                     });
                 }
+            }
+            return projectsList;
+        }
+
+        public List<ImportedAidData> ImportAidDataSeventeen(string filePath)
+        {
+            int projectTitleIndex = 0, reportingOrgIndex = 9, startDateIndex = 2, endDateIndex = 3,
+                    fundersIndex = 10, implementersIndex = 11, yearOneIndex = 19, yearTwoIndex = 20,
+                    yearThreeIndex = 21, primarySectorIndex = 6, rrfMarkerIndex = 28, currencyIndex = 16, exRateIndex = 17,
+                    projectValueIndex = 18;
+
+            List<ImportedAidData> projectsList = new List<ImportedAidData>();
+            XSSFWorkbook hssfwb = new XSSFWorkbook(filePath);
+            this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
+            this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(hssfwb);
+
+            ISheet sheet = hssfwb.GetSheetAt(1);
+            IRow headerRow = sheet.GetRow(1);
+            int cellCount = headerRow.LastCellNum;
+
+
+            for (int i = (sheet.FirstRowNum + 1); i <= 5; i++)
+            {
+                IRow row = sheet.GetRow(i);
+                if (row == null)
+                {
+                    continue;
+                }
+                if (row.Cells.All(d => d.CellType == CellType.Blank))
+                {
+                    continue;
+                }
+
+                decimal projectValue = 0, exchangeRate = 0, disbursementValueOne = 0, disbursementValueTwo = 0, disbursementValueThree = 0;
+                decimal.TryParse(this.GetFormattedValue(row.GetCell(projectValueIndex)), out projectValue);
+                decimal.TryParse(this.GetFormattedValue(row.GetCell(exRateIndex)), out exchangeRate);
+                decimal.TryParse(this.GetFormattedValue(row.GetCell(yearOneIndex)), out disbursementValueOne);
+                decimal.TryParse(this.GetFormattedValue(row.GetCell(yearTwoIndex)), out disbursementValueTwo);
+                decimal.TryParse(this.GetFormattedValue(row.GetCell(yearThreeIndex)), out disbursementValueThree);
+                
+
+                projectsList.Add(new ImportedAidData()
+                {
+                    ProjectTitle = this.GetFormattedValue(row.GetCell(projectTitleIndex)),
+                    ReportingOrganization = this.GetFormattedValue(row.GetCell(reportingOrgIndex)),
+                    StartDate = this.GetFormattedValue(row.GetCell(startDateIndex)),
+                    EndDate = this.GetFormattedValue(row.GetCell(endDateIndex)),
+                    ProjectValue = projectValue,
+                    Currency = this.GetFormattedValue(row.GetCell(currencyIndex)),
+                    ExchangeRate = exchangeRate,
+                    Funders = this.GetFormattedValue(row.GetCell(fundersIndex)),
+                    Implementers = this.GetFormattedValue(row.GetCell(implementersIndex)),
+                    PreviousYearDisbursements = disbursementValueOne,
+                    CurrentYearDisbursements = disbursementValueTwo,
+                    FutureYearDisbursements = disbursementValueThree,
+                    PrimarySector = this.GetFormattedValue(row.GetCell(primarySectorIndex)),
+                    RRFMarker = this.GetFormattedValue(row.GetCell(rrfMarkerIndex))
+                });
             }
             return projectsList;
         }

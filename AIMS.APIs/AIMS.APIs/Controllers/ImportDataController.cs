@@ -33,6 +33,10 @@ namespace AIMS.APIs.Controllers
                 {
                     var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
                     var filePath = Path.Combine(folderName, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
                     var extractedProjects = service.ImportAidDataEighteen(filePath, file); 
                     return Ok(extractedProjects);
                 }
@@ -46,5 +50,38 @@ namespace AIMS.APIs.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpPost("UploadDataImportFileSeventeen"), DisableRequestSizeLimit]
+        public IActionResult UploadDataImportFileSeventeen()
+        {
+            try
+            {
+                var file = Request.Form.Files[0];
+                var folderName = Path.Combine("wwwroot", "DataImportFiles");
+                var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+                Directory.CreateDirectory(pathToSave);
+                if (file.Length > 0)
+                {
+                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+                    var filePath = Path.Combine(pathToSave, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
+                    var extractedProjects = service.ImportAidDataSeventeen(filePath);
+                    return Ok(extractedProjects);
+                }
+                else
+                {
+                    return BadRequest("Invalid data file provided");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
     }
 }
