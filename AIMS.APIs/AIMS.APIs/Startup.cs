@@ -132,6 +132,7 @@ namespace AIMS.APIs
             services.AddScoped<IExcelGeneratorService, ExcelGeneratorService>();
             services.AddScoped<IProjectMembershipService, ProjectMembershipService>();
             services.AddScoped<IContactService, ContactService>();
+            services.AddScoped<IDataImportService, DataImportService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();

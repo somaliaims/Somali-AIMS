@@ -32,14 +32,8 @@ namespace AIMS.APIs.Controllers
                 if (file.Length > 0)
                 {
                     var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-                    var fullPath = Path.Combine(pathToSave, fileName);
                     var filePath = Path.Combine(folderName, fileName);
-
-                    using (var stream = new FileStream(fullPath, FileMode.Create))
-                    {
-                        file.CopyTo(stream);
-                    }
-                    var extractedProjects = service.ImportAidDataEighteen(filePath); 
+                    var extractedProjects = service.ImportAidDataEighteen(filePath, file); 
                     return Ok(extractedProjects);
                 }
                 else
