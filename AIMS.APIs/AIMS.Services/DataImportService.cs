@@ -1,4 +1,5 @@
-﻿using NPOI.SS.UserModel;
+﻿using AIMS.Models;
+using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace AIMS.Services
 {
     public interface IDataImportService
     {
-
+        ICollection<ImportedDataEighteen> ImportAidDataEighteen(string filePath);
     }
 
     public class DataImportService
@@ -33,8 +34,9 @@ namespace AIMS.Services
             };
         }
 
-        public void ImportAidData(string filePath)
+        public List<ImportedDataEighteen> ImportAidDataEighteen(string filePath)
         {
+            List<ImportedDataEighteen> projectsList = new List<ImportedDataEighteen>();
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 int projectTitleIndex = 3, reportingOrgIndex = 2, startDateIndex = 0, endDateIndex = 0,
@@ -47,6 +49,7 @@ namespace AIMS.Services
                 IRow headerRow = sheet.GetRow(0);
                 int cellCount = headerRow.LastCellNum;
 
+                
                 for (int i = (sheet.FirstRowNum + 1); i <= sheet.LastRowNum; i++)
                 {
                     IRow row = sheet.GetRow(i);
@@ -57,19 +60,30 @@ namespace AIMS.Services
                     if (row.Cells.All(d => d.CellType == CellType.Blank))
                     {
                         continue;
-                    } 
-                    for (int j = row.FirstCellNum; j < cellCount; j++)
-                    {
-                        if (row.GetCell(j) != null)
-                        {
-
-                        }
-                            //sb.Append("<td>" + row.GetCell(j).ToString() + "</td>");
                     }
-                    //sb.AppendLine("</tr>");
+
+                    decimal disbursementValueOne = 0, disbursementValueTwo = 0, disbursementValueThree = 0;
+                    decimal.TryParse(row.GetCell(yearOneIndex).ToString(), out disbursementValueOne);
+                    decimal.TryParse(row.GetCell(yearTwoIndex).ToString(), out disbursementValueTwo);
+                    decimal.TryParse(row.GetCell(yearThreeIndex).ToString(), out disbursementValueThree);
+
+                    projectsList.Add(new ImportedDataEighteen()
+                    {
+                        ProjectTitle = row.GetCell(projectTitleIndex).ToString(),
+                        ReportingOrganization = row.GetCell(reportingOrgIndex).ToString(),
+                        StartDate = row.GetCell(startDateIndex).ToString(),
+                        EndDate = row.GetCell(endDateIndex).ToString(),
+                        Funders = row.GetCell(fundersIndex).ToString(),
+                        Implementers = row.GetCell(implementersIndex).ToString(),
+                        PreviousYearDisbursements =  disbursementValueOne,
+                        CurrentYearDisbursements = disbursementValueTwo,
+                        FutureYearDisbursements = disbursementValueThree,
+                        PrimarySector = row.GetCell(primarySectorIndex).ToString(),
+                        RRFMarker = row.GetCell(rrfMarkerIndex).ToString()
+                    });
                 }
             }
-                
+            return projectsList;
         }
     }
 }

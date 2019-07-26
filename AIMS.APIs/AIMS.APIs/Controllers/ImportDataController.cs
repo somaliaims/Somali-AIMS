@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using AIMS.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,9 +14,14 @@ namespace AIMS.APIs.Controllers
     [ApiController]
     public class ImportDataController : ControllerBase
     {
+        IDataImportService service;
+        public ImportDataController(IDataImportService srvc)
+        {
+            service = srvc;
+        }
 
-        [HttpPost, DisableRequestSizeLimit]
-        public IActionResult UploadDataImportFile()
+        [HttpPost("UploadDataImportFileEighteen"), DisableRequestSizeLimit]
+        public IActionResult UploadDataImportFileEighteen()
         {
             try
             {
@@ -27,17 +33,18 @@ namespace AIMS.APIs.Controllers
                 {
                     var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
                     var fullPath = Path.Combine(pathToSave, fileName);
-                    var dbPath = Path.Combine(folderName, fileName);
+                    var filePath = Path.Combine(folderName, fileName);
 
                     using (var stream = new FileStream(fullPath, FileMode.Create))
                     {
                         file.CopyTo(stream);
                     }
-                    return Ok(new { dbPath });
+                    var extractedProjects = service.ImportAidDataEighteen(filePath); 
+                    return Ok(extractedProjects);
                 }
                 else
                 {
-                    return BadRequest();
+                    return BadRequest("Invalid data file provided");
                 }
             }
             catch (Exception ex)
