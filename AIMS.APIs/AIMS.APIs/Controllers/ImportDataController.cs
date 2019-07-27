@@ -83,5 +83,13 @@ namespace AIMS.APIs.Controllers
         }
 
 
+        public IActionResult GetMatchesForImportedData()
+        {
+            var folderName = Path.Combine("wwwroot", "DataImportFiles");
+            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+            return Ok();
+        }
+
+
     }
 }

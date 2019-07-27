@@ -21,4 +21,11 @@ namespace AIMS.Models
         public string PrimarySector { get; set; }
         public string RRFMarker { get; set; }
     }
+
+    public class ImportedDataMatch
+    {
+        public int TotalProjectsNew { get; set; } = 0;
+        public int TotalProjectsOld { get; set; } = 0;
+        public int TotalMatchedProjects { get; set; } = 0;
+    }
 }

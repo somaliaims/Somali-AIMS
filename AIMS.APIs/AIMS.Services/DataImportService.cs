@@ -29,6 +29,12 @@ namespace AIMS.Services
         /// <param name="file"></param>
         /// <returns></returns>
         List<ImportedAidData> ImportAidDataSeventeen(string filePath);
+
+        /// <summary>
+        /// Gets data matches for both old and new data
+        /// </summary>
+        /// <returns></returns>
+        ImportedDataMatch GetMatchForOldNewData(string fileFolder);
     }
 
     public class DataImportService : IDataImportService
@@ -165,6 +171,59 @@ namespace AIMS.Services
                 });
             }
             return projectsList;
+        }
+
+        public ImportedDataMatch GetMatchForOldNewData(string fileFolder)
+        {
+            ImportedDataMatch dataMatch = new ImportedDataMatch();
+            List<string> oldProjectsList = new List<string>();
+            List<string> newProjectsList = new List<string>();
+
+            string oldDataFile = fileFolder + "/" + "2017-Somalia-Aid-Mapping.xlsx";
+            string newDataFile = fileFolder + "/" + "2018-Somalia-Aid-Mapping.xlsx";
+
+            XSSFWorkbook oldWorkBook = new XSSFWorkbook(oldDataFile);
+            this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
+            this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(oldWorkBook);
+            ISheet sheetOld = oldWorkBook.GetSheetAt(1);
+            IRow headerRowOld = sheetOld.GetRow(1);
+            int projectTitleIndexOld = 0;
+
+            for (int i = (sheetOld.FirstRowNum + 1); i <= sheetOld.LastRowNum; i++)
+            {
+                IRow row = sheetOld.GetRow(i);
+                if (row == null)
+                {
+                    continue;
+                }
+                if (row.Cells.All(d => d.CellType == CellType.Blank))
+                {
+                    continue;
+                }
+                oldProjectsList.Add(this.GetFormattedValue(row.GetCell(projectTitleIndexOld)));
+            }
+
+            XSSFWorkbook newWorkBook = new XSSFWorkbook(oldDataFile);
+            this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
+            this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(newWorkBook);
+            ISheet sheetNew = newWorkBook.GetSheetAt(1);
+            IRow headerRowNew = sheetNew.GetRow(1);
+            int projectTitleIndexNew = 0;
+
+            for (int i = (sheetNew.FirstRowNum + 1); i <= sheetNew.LastRowNum; i++)
+            {
+                IRow row = sheetNew.GetRow(i);
+                if (row == null)
+                {
+                    continue;
+                }
+                if (row.Cells.All(d => d.CellType == CellType.Blank))
+                {
+                    continue;
+                }
+                newProjectsList.Add(this.GetFormattedValue(row.GetCell(projectTitleIndexNew)));
+            }
+            return dataMatch;
         }
 
         private string GetFormattedValue(ICell cell)
