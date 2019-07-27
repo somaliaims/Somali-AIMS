@@ -175,7 +175,6 @@ namespace AIMS.Services
 
         public ImportedDataMatch GetMatchForOldNewData(string fileFolder)
         {
-            ImportedDataMatch dataMatch = new ImportedDataMatch();
             List<string> oldProjectsList = new List<string>();
             List<string> newProjectsList = new List<string>();
 
@@ -223,6 +222,22 @@ namespace AIMS.Services
                 }
                 newProjectsList.Add(this.GetFormattedValue(row.GetCell(projectTitleIndexNew)));
             }
+
+            int matches = 0;
+            foreach(string project in newProjectsList)
+            {
+                var isProjectMatch = (from p in oldProjectsList
+                                      where p.Equals(project, StringComparison.OrdinalIgnoreCase)
+                                      select p).FirstOrDefault();
+                matches += (isProjectMatch != null) ? 1 : 0;
+            }
+
+            ImportedDataMatch dataMatch = new ImportedDataMatch()
+            {
+                TotalProjectsNew = newProjectsList.Count,
+                TotalProjectsOld = oldProjectsList.Count,
+                TotalMatchedProjects = matches
+            };
             return dataMatch;
         }
 
