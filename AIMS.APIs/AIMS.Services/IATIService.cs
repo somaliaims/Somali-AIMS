@@ -394,6 +394,8 @@ namespace AIMS.Services
                     break;
 
                 case "2.01":
+                case "2.02":
+                case "2.03":
                     parser = new ParserIATIVersion21();
                     iatiProjects = parser.ExtractProjects(xDoc);
                     break;

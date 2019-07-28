@@ -137,7 +137,7 @@ namespace AIMS.IATILib.Parsers
 
                         //Extracting dates
                         var dates = activity.Elements("activity-date");
-                        if (dates != null)
+                        if (dates.Any())
                         {
                             foreach (var date in dates)
                             {
@@ -217,15 +217,19 @@ namespace AIMS.IATILib.Parsers
                         var organizations = activity.Elements("participating-org");
                         List<IATIOrganization> organizationList = new List<IATIOrganization>();
 
-                        if (organizations != null)
+                        if (organizations.Any())
                         {
                             foreach (var organization in organizations)
                             {
-                                OrganizationRole role;
+                                OrganizationRole role = OrganizationRole.Accountable;
 
-                                if (organization.HasAttributes && organization.Attribute("role") != null)
+                                if (organization.HasAttributes)
                                 {
-                                    role = (OrganizationRole)Enum.Parse(typeof(OrganizationRole), organization.Attribute("role").Value);
+                                    if (organization.Attribute("role") != null)
+                                    {
+                                        role = (OrganizationRole)Enum.Parse(typeof(OrganizationRole), organization.Attribute("role").Value);
+                                    }
+                                    
                                     var narratives = organization.Elements("narrative");
                                     string organizationName = "";
 
@@ -270,7 +274,7 @@ namespace AIMS.IATILib.Parsers
                         var documents = activity.Elements("document-link");
                         List<IATIDocument> documentsList = new List<IATIDocument>();
 
-                        if (documents != null)
+                        if (documents.Any())
                         {
                             foreach (var document in documents)
                             {
@@ -304,7 +308,7 @@ namespace AIMS.IATILib.Parsers
                         List<IATIFundingTransaction> fundingTransactions = new List<IATIFundingTransaction>();
                         List<IATIDisbursementTransaction> disbursementTransactions = new List<IATIDisbursementTransaction>();
 
-                        if (transactions != null)
+                        if (transactions.Any())
                         {
                             foreach (var transaction in transactions)
                             {
@@ -402,7 +406,7 @@ namespace AIMS.IATILib.Parsers
                         //Extracting budgets
                         var budgets = activity.Elements("budget");
                         List<IATIBudget> budgetsList = new List<IATIBudget>();
-                        if (budgets != null)
+                        if (budgets.Any())
                         {
                             foreach (var budget in budgets)
                             {
@@ -445,7 +449,7 @@ namespace AIMS.IATILib.Parsers
                         //Extracting budgets
                         var disbursements = activity.Elements("planned-disbursement");
                         List<IATIDisbursement> disbursementsList = new List<IATIDisbursement>();
-                        if (disbursements != null)
+                        if (disbursements.Any())
                         {
                             foreach (var disbursement in disbursements)
                             {
@@ -476,7 +480,7 @@ namespace AIMS.IATILib.Parsers
 
                         var recipientCountries = activity.Elements("recipient-country");
                         List<IATICountry> countries = new List<IATICountry>();
-                        if (recipientCountries != null)
+                        if (recipientCountries.Any())
                         {
                             foreach (var country in recipientCountries)
                             {
@@ -492,7 +496,7 @@ namespace AIMS.IATILib.Parsers
                         var recipientRegions = activity.Elements("recipient-region");
                         List<IATIRegion> regions = new List<IATIRegion>();
 
-                        if (recipientRegions != null)
+                        if (recipientRegions.Any())
                         {
                             foreach (var region in recipientRegions)
                             {
@@ -506,7 +510,7 @@ namespace AIMS.IATILib.Parsers
 
                         var aSectors = activity.Elements("sector");
                         List<IATISector> sectors = new List<IATISector>();
-                        if (aSectors != null)
+                        if (aSectors.Any())
                         {
                             foreach (var sector in aSectors)
                             {
@@ -536,7 +540,7 @@ namespace AIMS.IATILib.Parsers
 
                         var aLocations = activity.Elements("location");
                         List<IATILocation> locations = new List<IATILocation>();
-                        if (aLocations != null)
+                        if (aLocations.Any())
                         {
                             foreach (var location in aLocations)
                             {
@@ -659,7 +663,7 @@ namespace AIMS.IATILib.Parsers
             try
             {
                 string currency = "";
-                if (activities != null)
+                if (activities.Any())
                 {
                     DateTime todaysDate = DateTime.Now;
                     DateTime parsedDate = DateTime.Now;
@@ -668,7 +672,7 @@ namespace AIMS.IATILib.Parsers
                     {
                         string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "", defaultFinanceType = "";
                         var transactions = activity.Elements("transaction");
-                        if (transactions != null)
+                        if (transactions.Any())
                         {
                             DateTime transactionDate;
                             DateTime anYearOldDate = DateTime.Now.AddYears(-1);
@@ -706,7 +710,7 @@ namespace AIMS.IATILib.Parsers
 
                         //Extracting dates
                         var dates = activity.Elements("activity-date");
-                        if (dates != null)
+                        if (dates.Any())
                         {
                             foreach (var date in dates)
                             {
@@ -799,7 +803,7 @@ namespace AIMS.IATILib.Parsers
                         var organizations = activity.Elements("participating-org");
                         List<IATIOrganizationView> organizationList = new List<IATIOrganizationView>();
 
-                        if (organizations != null)
+                        if (organizations.Any())
                         {
                             foreach (var organization in organizations)
                             {
@@ -852,7 +856,7 @@ namespace AIMS.IATILib.Parsers
 
                         var aSectors = activity.Elements("sector");
                         List<IATISectorView> sectors = new List<IATISectorView>();
-                        if (aSectors != null)
+                        if (aSectors.Any())
                         {
                             foreach (var sector in aSectors)
                             {
@@ -880,7 +884,7 @@ namespace AIMS.IATILib.Parsers
 
                         var aLocations = activity.Elements("location");
                         List<IATILocationView> locations = new List<IATILocationView>();
-                        if (aLocations != null)
+                        if (aLocations.Any())
                         {
                             foreach (var location in aLocations)
                             {
@@ -958,7 +962,7 @@ namespace AIMS.IATILib.Parsers
                     foreach (var activity in activities)
                     {
                         var aSectors = activity.Elements("sector");
-                        if (aSectors != null)
+                        if (aSectors.Any())
                         {
                             foreach (var sector in aSectors)
                             {
@@ -1012,13 +1016,13 @@ namespace AIMS.IATILib.Parsers
             string message = "";
             try
             {
-                if (activities != null)
+                if (activities.Any())
                 {
                     foreach (var activity in activities)
                     {
                         var aLocations = activity.Elements("location");
                         List<IATILocation> locations = new List<IATILocation>();
-                        if (aLocations != null)
+                        if (aLocations.Any())
                         {
                             foreach (var location in aLocations)
                             {
@@ -1099,12 +1103,12 @@ namespace AIMS.IATILib.Parsers
             string message = "";
             try
             {
-                if (activities != null)
+                if (activities.Any())
                 {
                     foreach (var activity in activities)
                     {
                         var organizations = activity.Elements("participating-org");
-                        if (organizations != null)
+                        if (organizations.Any())
                         {
                             foreach (var organization in organizations)
                             {

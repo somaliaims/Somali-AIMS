@@ -202,12 +202,12 @@ namespace AIMS.Services
                 oldProjectsList.Add(this.GetFormattedValue(row.GetCell(projectTitleIndexOld)));
             }
 
-            XSSFWorkbook newWorkBook = new XSSFWorkbook(oldDataFile);
+            XSSFWorkbook newWorkBook = new XSSFWorkbook(newDataFile);
             this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
             this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(newWorkBook);
-            ISheet sheetNew = newWorkBook.GetSheetAt(1);
+            ISheet sheetNew = newWorkBook.GetSheetAt(5);
             IRow headerRowNew = sheetNew.GetRow(1);
-            int projectTitleIndexNew = 0;
+            int projectTitleIndexNew = 3;
 
             for (int i = (sheetNew.FirstRowNum + 1); i <= sheetNew.LastRowNum; i++)
             {
