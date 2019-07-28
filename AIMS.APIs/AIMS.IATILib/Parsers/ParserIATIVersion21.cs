@@ -718,19 +718,19 @@ namespace AIMS.IATILib.Parsers
                                 {
                                     if (date.Attribute("type").Value.Equals("1"))
                                     {
-                                        startPlanned = date.FirstAttribute?.Value;
+                                        startPlanned = date.Attribute("iso-date")?.Value;
                                     }
                                     else if (date.Attribute("type").Value.Equals("2"))
                                     {
-                                        startDate = date.FirstAttribute?.Value;
+                                        startDate = date.Attribute("iso-date")?.Value;
                                     }
                                     else if (date.Attribute("type").Value.Equals("3"))
                                     {
-                                        endPlanned = date.FirstAttribute?.Value;
+                                        endPlanned = date.Attribute("iso-date")?.Value;
                                     }
                                     else if (date.Attribute("type").Value.Equals("2"))
                                     {
-                                        endDate = date.FirstAttribute?.Value;
+                                        endDate = date.Attribute("iso-date")?.Value;
                                     }
                                 }
                             }
