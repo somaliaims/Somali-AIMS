@@ -80,7 +80,8 @@ namespace AIMS.Services
             {
                 int projectTitleIndex = 3, reportingOrgIndex = 2, startDateIndex = 5, endDateIndex = 6,
                     fundersIndex = 7, implementersIndex = 8, yearOneIndex = 11, yearTwoIndex = 12,
-                    yearThreeIndex = 13, primarySectorIndex = 26, rrfMarkerIndex = 28;
+                    yearThreeIndex = 13, primarySectorIndex = 26, rrfMarkerIndex = 28,
+                    locationLowerIndex = 15, locationUpperIndex = 23;
 
                 file.CopyTo(stream);
                 stream.Position = 0;
@@ -93,7 +94,7 @@ namespace AIMS.Services
                 IRow headerRow = sheet.GetRow(0);
                 int cellCount = headerRow.LastCellNum;
                 
-                for (int i = (sheet.FirstRowNum + 1); i <= 5; i++)
+                for (int i = (sheet.FirstRowNum + 1); i < sheet.LastRowNum; i++)
                     {
                     IRow row = sheet.GetRow(i);
                     if (row == null)
@@ -110,6 +111,18 @@ namespace AIMS.Services
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(yearTwoIndex)), out disbursementValueTwo);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(yearThreeIndex)), out disbursementValueThree);
 
+                    List<ImportedLocation> locationsList = new List<ImportedLocation>();
+                    for (int l = locationLowerIndex; l <= locationUpperIndex; l++)
+                    {
+                        decimal percentage = 0;
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(l)), out percentage);
+                        locationsList.Add(new ImportedLocation()
+                        {
+                            Location = oldDataLocations[l.ToString()],
+                            Percentage = percentage
+                        });
+                    }
+
                     projectsList.Add(new ImportedAidData()
                     {
                         ProjectTitle = this.GetFormattedValue(row.GetCell(projectTitleIndex)),
@@ -122,7 +135,8 @@ namespace AIMS.Services
                         CurrentYearDisbursements = disbursementValueTwo,
                         FutureYearDisbursements = disbursementValueThree,
                         PrimarySector = this.GetFormattedValue(row.GetCell(primarySectorIndex)),
-                        RRFMarker = this.GetFormattedValue(row.GetCell(rrfMarkerIndex))
+                        RRFMarker = this.GetFormattedValue(row.GetCell(rrfMarkerIndex)),
+                        Locations = locationsList
                     });
                 }
             }
@@ -146,7 +160,7 @@ namespace AIMS.Services
             int cellCount = headerRow.LastCellNum;
 
 
-            for (int i = (sheet.FirstRowNum + 1); i <= 5; i++)
+            for (int i = (sheet.FirstRowNum + 1); i < sheet.LastRowNum; i++)
             {
                 IRow row = sheet.GetRow(i);
                 if (row == null)
@@ -169,11 +183,11 @@ namespace AIMS.Services
                 for(int l = locationLowerIndex; l <= locationUpperIndex; l++)
                 {
                     decimal percentage = 0;
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(l)), out percentage);
+                    decimal.TryParse(row.GetCell(l).NumericCellValue.ToString(), out percentage);
                     locationsList.Add(new ImportedLocation()
                     {
-                        Location = oldDataLocations.Get(l),
-                        Percentage = percentage
+                        Location = oldDataLocations[l.ToString()],
+                        Percentage = (percentage * 100)
                     });
                 }
 
