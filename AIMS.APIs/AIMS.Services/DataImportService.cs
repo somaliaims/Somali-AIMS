@@ -39,23 +39,37 @@ namespace AIMS.Services
 
     public class DataImportService : IDataImportService
     {
-        List<string> locationsList;
+        NameValueCollection newDataLocations;
+        NameValueCollection oldDataLocations;
         private DataFormatter dataFormatter;
         private IFormulaEvaluator formulaEvaluator;
 
         public DataImportService()
         {
-            locationsList = new List<string>()
+            oldDataLocations = new NameValueCollection()
             {
-                "FGS",
-                "BRA",
-                "Galmudug",
-                "Hiirshabelle",
-                "Jubaland",
-                "Puntland",
-                "South West",
-                "Somaliland",
-                "Unattributed"
+                { "39", "FGS" },
+                { "40", "BRA" },
+                { "41", "Galmudug" },
+                { "42", "Hiirshabelle" },
+                { "43", "Jubaland" },
+                { "44", "Puntland" },
+                { "45", "South West" },
+                { "46", "Somaliland" },
+                { "47", "Unattributed" }
+            };
+
+            newDataLocations = new NameValueCollection()
+            {
+                { "15", "FGS" },
+                { "16", "BRA" },
+                { "17", "Galmudug" },
+                { "18", "Hiirshabelle" },
+                { "19", "Jubaland" },
+                { "20", "Puntland" },
+                { "21", "South West" },
+                { "22", "Somaliland" },
+                { "23", "Unattributed" }
             };
         }
 
@@ -120,7 +134,7 @@ namespace AIMS.Services
             int projectTitleIndex = 0, reportingOrgIndex = 9, startDateIndex = 2, endDateIndex = 3,
                     fundersIndex = 10, implementersIndex = 11, yearOneIndex = 19, yearTwoIndex = 20,
                     yearThreeIndex = 21, primarySectorIndex = 6, rrfMarkerIndex = 28, currencyIndex = 16, exRateIndex = 17,
-                    projectValueIndex = 18;
+                    projectValueIndex = 18, locationLowerIndex = 39, locationUpperIndex = 47;
 
             List<ImportedAidData> projectsList = new List<ImportedAidData>();
             XSSFWorkbook hssfwb = new XSSFWorkbook(filePath);
@@ -150,7 +164,18 @@ namespace AIMS.Services
                 decimal.TryParse(this.GetFormattedValue(row.GetCell(yearOneIndex)), out disbursementValueOne);
                 decimal.TryParse(this.GetFormattedValue(row.GetCell(yearTwoIndex)), out disbursementValueTwo);
                 decimal.TryParse(this.GetFormattedValue(row.GetCell(yearThreeIndex)), out disbursementValueThree);
-                
+
+                List<ImportedLocation> locationsList = new List<ImportedLocation>();
+                for(int l = locationLowerIndex; l <= locationUpperIndex; l++)
+                {
+                    decimal percentage = 0;
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(l)), out percentage);
+                    locationsList.Add(new ImportedLocation()
+                    {
+                        Location = oldDataLocations.Get(l),
+                        Percentage = percentage
+                    });
+                }
 
                 projectsList.Add(new ImportedAidData()
                 {
@@ -167,7 +192,8 @@ namespace AIMS.Services
                     CurrentYearDisbursements = disbursementValueTwo,
                     FutureYearDisbursements = disbursementValueThree,
                     PrimarySector = this.GetFormattedValue(row.GetCell(primarySectorIndex)),
-                    RRFMarker = this.GetFormattedValue(row.GetCell(rrfMarkerIndex))
+                    RRFMarker = this.GetFormattedValue(row.GetCell(rrfMarkerIndex)),
+                    Locations = locationsList
                 });
             }
             return projectsList;

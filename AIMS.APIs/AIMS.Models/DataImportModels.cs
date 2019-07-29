@@ -20,6 +20,13 @@ namespace AIMS.Models
         public decimal FutureYearDisbursements { get; set; }
         public string PrimarySector { get; set; }
         public string RRFMarker { get; set; }
+        public List<ImportedLocation> Locations { get; set; }
+    }
+
+    public class ImportedLocation
+    {
+        public string Location { get; set; }
+        public decimal Percentage { get; set; }
     }
 
     public class ImportedDataMatch
