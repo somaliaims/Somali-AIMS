@@ -115,11 +115,11 @@ namespace AIMS.Services
                     for (int l = locationLowerIndex; l <= locationUpperIndex; l++)
                     {
                         decimal percentage = 0;
-                        decimal.TryParse(this.GetFormattedValue(row.GetCell(l)), out percentage);
+                        decimal.TryParse(row.GetCell(l).NumericCellValue.ToString(), out percentage);
                         locationsList.Add(new ImportedLocation()
                         {
-                            Location = oldDataLocations[l.ToString()],
-                            Percentage = percentage
+                            Location = newDataLocations[l.ToString()],
+                            Percentage = (percentage * 100 )
                         });
                     }
 
