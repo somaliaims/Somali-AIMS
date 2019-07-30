@@ -77,14 +77,19 @@ namespace AIMS.Services
 
             oldCustomFields = new NameValueCollection()
             {
-
+                { "32", "Gender" },
+                { "33", "Capacity Building" },
+                { "34", "Stabalization" },
+                { "35", "Durable Solutions" },
+                { "36", "Youth" },
+                { "37", "Conflict Sensitivity Analysis" },
             };
 
             newCustomFields = new NameValueCollection()
             {
                 {"36", "Recovery & Resilience" },
                 {"37", "Gender" },
-                {"38", "DurableSolutions" },
+                {"38", "Durable Solutions" },
                 { "40", "Capacity Development" },
                 {"41", "Stabilization" },
                 {"42", "PCVE" },
@@ -229,6 +234,16 @@ namespace AIMS.Services
                     });
                 }
 
+                List<ImportedCustomFields> customFieldsList = new List<ImportedCustomFields>();
+                for (int c = customFieldsLowerIndex; c <= customFieldsUpperIndex; c++)
+                {
+                    customFieldsList.Add(new ImportedCustomFields()
+                    {
+                        CustomField = oldCustomFields[c.ToString()],
+                        Value = this.GetFormattedValue(row.GetCell(c))
+                    });
+                }
+
                 projectsList.Add(new ImportedAidData()
                 {
                     ProjectTitle = this.GetFormattedValue(row.GetCell(projectTitleIndex)),
@@ -244,7 +259,9 @@ namespace AIMS.Services
                     CurrentYearDisbursements = disbursementValueTwo,
                     FutureYearDisbursements = disbursementValueThree,
                     PrimarySector = this.GetFormattedValue(row.GetCell(primarySectorIndex)),
-                    Locations = locationsList
+                    Links = this.GetFormattedValue(row.GetCell(linksIndex)),
+                    Locations = locationsList,
+                    CustomFields = customFieldsList
                 });
             }
             return projectsList;
