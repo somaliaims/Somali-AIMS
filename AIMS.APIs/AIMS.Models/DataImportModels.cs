@@ -40,6 +40,8 @@ namespace AIMS.Models
     {
         public int TotalProjectsNew { get; set; } = 0;
         public int TotalProjectsOld { get; set; } = 0;
+        public int CurrentYearProjectsNew { get; set; } = 0;
+        public int FutureYearProjectsNew { get; set; } = 0;
         public int TotalMatchedProjects { get; set; } = 0;
     }
 }

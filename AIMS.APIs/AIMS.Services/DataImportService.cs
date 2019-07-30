@@ -301,7 +301,8 @@ namespace AIMS.Services
             this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(newWorkBook);
             ISheet sheetNew = newWorkBook.GetSheetAt(5);
             IRow headerRowNew = sheetNew.GetRow(1);
-            int projectTitleIndexNew = 3;
+            int projectTitleIndexNew = 3, endDateIndex = 6, currentYearProjects = 0, futureYearProjects = 0, currentYear = DateTime.Now.Year;
+            DateTime endDate = DateTime.Now;
 
             for (int i = (sheetNew.FirstRowNum + 1); i <= sheetNew.LastRowNum; i++)
             {
@@ -315,6 +316,18 @@ namespace AIMS.Services
                     continue;
                 }
                 newProjectsList.Add(this.GetFormattedValue(row.GetCell(projectTitleIndexNew)));
+                bool isValidDate = DateTime.TryParse(this.GetFormattedValue(row.GetCell(endDateIndex)), out endDate); 
+                if (isValidDate)
+                {
+                    if (endDate.Year == currentYear)
+                    {
+                        ++currentYearProjects;
+                    }
+                    else if (endDate.Year > currentYear)
+                    {
+                        ++futureYearProjects;
+                    }
+                }
             }
 
             int matches = 0;
@@ -326,10 +339,13 @@ namespace AIMS.Services
                 matches += (isProjectMatch != null) ? 1 : 0;
             }
 
+            
             ImportedDataMatch dataMatch = new ImportedDataMatch()
             {
                 TotalProjectsNew = newProjectsList.Count,
                 TotalProjectsOld = oldProjectsList.Count,
+                CurrentYearProjectsNew = currentYearProjects,
+                FutureYearProjectsNew = futureYearProjects,
                 TotalMatchedProjects = matches
             };
             return dataMatch;
