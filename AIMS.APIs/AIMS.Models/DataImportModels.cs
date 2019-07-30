@@ -19,8 +19,15 @@ namespace AIMS.Models
         public decimal CurrentYearDisbursements { get; set; }
         public decimal FutureYearDisbursements { get; set; }
         public string PrimarySector { get; set; }
-        public string RRFMarker { get; set; }
+        public string Links { get; set; }
         public List<ImportedLocation> Locations { get; set; }
+        public List<ImportedCustomFields> CustomFields { get; set; }
+    }
+
+    public class ImportedCustomFields
+    {
+        public string CustomField { get; set; }
+        public string Value { get; set; }
     }
 
     public class ImportedLocation

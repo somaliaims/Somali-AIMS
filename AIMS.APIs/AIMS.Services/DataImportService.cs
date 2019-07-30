@@ -41,6 +41,9 @@ namespace AIMS.Services
     {
         NameValueCollection newDataLocations;
         NameValueCollection oldDataLocations;
+        NameValueCollection oldCustomFields;
+        NameValueCollection newCustomFields;
+
         private DataFormatter dataFormatter;
         private IFormulaEvaluator formulaEvaluator;
 
@@ -71,6 +74,22 @@ namespace AIMS.Services
                 { "22", "Somaliland" },
                 { "23", "Unattributed" }
             };
+
+            oldCustomFields = new NameValueCollection()
+            {
+
+            };
+
+            newCustomFields = new NameValueCollection()
+            {
+                {"36", "Recovery & Resilience" },
+                {"37", "Gender" },
+                {"38", "DurableSolutions" },
+                { "40", "Capacity Development" },
+                {"41", "Stabilization" },
+                {"42", "PCVE" },
+                {"43", "Youth" }
+            };
         }
 
         public List<ImportedAidData> ImportAidDataEighteen(string filePath, IFormFile file)
@@ -80,8 +99,9 @@ namespace AIMS.Services
             {
                 int projectTitleIndex = 3, reportingOrgIndex = 2, startDateIndex = 5, endDateIndex = 6,
                     fundersIndex = 7, implementersIndex = 8, yearOneIndex = 11, yearTwoIndex = 12,
-                    yearThreeIndex = 13, primarySectorIndex = 26, rrfMarkerIndex = 28,
-                    locationLowerIndex = 15, locationUpperIndex = 23;
+                    yearThreeIndex = 13, primarySectorIndex = 26, currencyIndex = 12, exRateIndex = 13,
+                    locationLowerIndex = 15, locationUpperIndex = 23, customFieldsLowerIndex = 36,
+                    customFieldsUpperIndex = 43, linksIndex = 44;
 
                 file.CopyTo(stream);
                 stream.Position = 0;
@@ -106,10 +126,11 @@ namespace AIMS.Services
                         continue;
                     }
 
-                    decimal disbursementValueOne = 0, disbursementValueTwo = 0, disbursementValueThree = 0;
+                    decimal disbursementValueOne = 0, disbursementValueTwo = 0, disbursementValueThree = 0, exchangeRate = 0;
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(yearOneIndex)), out disbursementValueOne);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(yearTwoIndex)), out disbursementValueTwo);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(yearThreeIndex)), out disbursementValueThree);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(exRateIndex)), out exchangeRate);
 
                     List<ImportedLocation> locationsList = new List<ImportedLocation>();
                     for (int l = locationLowerIndex; l <= locationUpperIndex; l++)
@@ -123,6 +144,19 @@ namespace AIMS.Services
                         });
                     }
 
+                    List<ImportedCustomFields> customFieldsList = new List<ImportedCustomFields>();
+                    for (int c = customFieldsLowerIndex; c <= customFieldsUpperIndex; c++)
+                    {
+                        if (c == 39)
+                            continue;
+
+                        customFieldsList.Add(new ImportedCustomFields()
+                        {
+                            CustomField = newCustomFields[c.ToString()],
+                            Value = this.GetFormattedValue(row.GetCell(c))
+                        });
+                    }
+
                     projectsList.Add(new ImportedAidData()
                     {
                         ProjectTitle = this.GetFormattedValue(row.GetCell(projectTitleIndex)),
@@ -130,13 +164,16 @@ namespace AIMS.Services
                         StartDate = this.GetFormattedValue(row.GetCell(startDateIndex)),
                         EndDate = this.GetFormattedValue(row.GetCell(endDateIndex)),
                         Funders = this.GetFormattedValue(row.GetCell(fundersIndex)),
+                        Currency = this.GetFormattedValue(row.GetCell(currencyIndex)),
+                        ExchangeRate = exchangeRate,
                         Implementers = this.GetFormattedValue(row.GetCell(implementersIndex)),
                         PreviousYearDisbursements =  disbursementValueOne,
                         CurrentYearDisbursements = disbursementValueTwo,
                         FutureYearDisbursements = disbursementValueThree,
                         PrimarySector = this.GetFormattedValue(row.GetCell(primarySectorIndex)),
-                        RRFMarker = this.GetFormattedValue(row.GetCell(rrfMarkerIndex)),
-                        Locations = locationsList
+                        Links = this.GetFormattedValue(row.GetCell(linksIndex)),
+                        Locations = locationsList,
+                        CustomFields = customFieldsList,
                     });
                 }
             }
@@ -147,8 +184,9 @@ namespace AIMS.Services
         {
             int projectTitleIndex = 0, reportingOrgIndex = 9, startDateIndex = 2, endDateIndex = 3,
                     fundersIndex = 10, implementersIndex = 11, yearOneIndex = 19, yearTwoIndex = 20,
-                    yearThreeIndex = 21, primarySectorIndex = 6, rrfMarkerIndex = 28, currencyIndex = 16, exRateIndex = 17,
-                    projectValueIndex = 18, locationLowerIndex = 39, locationUpperIndex = 47;
+                    yearThreeIndex = 21, primarySectorIndex = 6, currencyIndex = 16, exRateIndex = 17,
+                    projectValueIndex = 18, locationLowerIndex = 39, locationUpperIndex = 47, linksIndex = 28,
+                    customFieldsLowerIndex = 32, customFieldsUpperIndex = 37;
 
             List<ImportedAidData> projectsList = new List<ImportedAidData>();
             XSSFWorkbook hssfwb = new XSSFWorkbook(filePath);
@@ -206,7 +244,6 @@ namespace AIMS.Services
                     CurrentYearDisbursements = disbursementValueTwo,
                     FutureYearDisbursements = disbursementValueThree,
                     PrimarySector = this.GetFormattedValue(row.GetCell(primarySectorIndex)),
-                    RRFMarker = this.GetFormattedValue(row.GetCell(rrfMarkerIndex)),
                     Locations = locationsList
                 });
             }
