@@ -1,4 +1,5 @@
 ﻿using AIMS.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
@@ -35,10 +36,19 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         ImportedDataMatch GetMatchForOldNewData(string fileFolder);
+
+        /// <summary>
+        /// Generates Excel sheet for the provided file path
+        /// </summary>
+        /// <param name="dataFilePath"></param>
+        /// <returns></returns>
+        string GenerateExcelFileForActiveProjects();
     }
 
     public class DataImportService : IDataImportService
     {
+        private IHostingEnvironment hostingEnvironment;
+        string sWebRootFolder = "";
         NameValueCollection newDataLocations;
         NameValueCollection oldDataLocations;
         NameValueCollection oldCustomFields;
@@ -47,8 +57,9 @@ namespace AIMS.Services
         private DataFormatter dataFormatter;
         private IFormulaEvaluator formulaEvaluator;
 
-        public DataImportService()
+        public DataImportService(IHostingEnvironment _hostingEnvironment)
         {
+            hostingEnvironment = _hostingEnvironment;
             oldDataLocations = new NameValueCollection()
             {
                 { "39", "FGS" },
@@ -349,6 +360,13 @@ namespace AIMS.Services
                 TotalMatchedProjects = matches
             };
             return dataMatch;
+        }
+
+        public string GenerateExcelFileForActiveProjects()
+        {
+            //TODO: To continue based on decisions
+            string filePath = "";
+            return filePath;
         }
 
         private string GetFormattedValue(ICell cell)

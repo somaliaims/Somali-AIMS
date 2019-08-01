@@ -11,6 +11,13 @@ namespace AIMS.Models
         Information = 2
     }
 
+    public enum ProjectSuggestionType
+    {
+        AddData = 1,
+        EditData = 2,
+        AmendData = 3
+    };
+
     public class ActionResponse
     {
         public int ReturnedId { get; set; } = 0;
@@ -374,6 +381,22 @@ namespace AIMS.Models
         [Required]
         [MinLength(2)]
         public string Sector { get; set; }
+    }
+
+    public class ProjectHelpEmail
+    {
+        [Required]
+        public ProjectSuggestionType SuggestionType { get; set; }
+        [Required]
+        public string SenderName { get; set; }
+        [Required]
+        public int ProjectId { get; set; }
+        [Required]
+        public string ProjectTitle { get; set; }
+        [EmailAddress]
+        public string SenderEmail { get; set; }
+        [MaxLength(800)]
+        public string Message { get; set; }
     }
 
     public class ContactEmailRequestModel

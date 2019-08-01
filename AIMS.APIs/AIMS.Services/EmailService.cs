@@ -17,6 +17,13 @@ namespace AIMS.Services
         ActionResponse SendEmailToUsers(EmailModel model);
 
         /// <summary>
+        /// Gets string description for provided suggestion type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        string GetTextForSuggestionType(ProjectSuggestionType type, string projectTitle);
+
+        /// <summary>
         /// Sends contact email to users
         /// </summary>
         /// <param name="model"></param>
@@ -72,6 +79,30 @@ namespace AIMS.Services
                 model.Message = "<h4>Information request for project (" + projectTitle + ")</h4>" + model.Message;
             }
             return emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Subject, model.Message);
+        }
+
+        public string GetTextForSuggestionType(ProjectSuggestionType type, string projectTitle)
+        {
+            string suggestedText = "";
+            switch(type)
+            {
+                case ProjectSuggestionType.AddData:
+                    suggestedText = "Suggestion through AIMS to add some data to the project (<b>" + projectTitle  + "</b>)";
+                    break;
+
+                case ProjectSuggestionType.EditData:
+                    suggestedText = "Suggestion through AIMS to edit some data for the project (<b>" + projectTitle + "</b>)";
+                    break;
+
+                case ProjectSuggestionType.AmendData:
+                    suggestedText = "Suggestion through AIMS for correction of some data for the project (<b>" + projectTitle + "</b>)";
+                    break;
+
+                default:
+                    suggestedText = "Suggestion through AIMS to update data for the project (<b>" + projectTitle + "</b>)";
+                    break;
+            }
+            return suggestedText;
         }
 
     }

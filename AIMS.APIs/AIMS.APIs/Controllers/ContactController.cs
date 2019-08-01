@@ -23,6 +23,40 @@ namespace AIMS.APIs.Controllers
             emailService = eService;
         }
 
+        [HttpPost("SendSuggestionEmailForProject")]
+        public IActionResult SendSuggestionEmailForProject([FromBody] ProjectHelpEmail model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Data is not in valid format");
+            }
+            if (string.IsNullOrEmpty(model.SenderEmail))
+            {
+                model.SenderEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                if (string.IsNullOrEmpty(model.SenderEmail))
+                {
+                    return BadRequest("Unauthorized user access to api");
+                }
+            }
+            List<EmailAddress> emailsList = new List<EmailAddress>();
+            emailsList = service.GetProjectUsersEmails(model.ProjectId).ToList();
+            string messageTail = "<h6>Sender name: " + model.SenderName + "<br/>Sender email: " + model.SenderEmail + "</h6>";
+            model.Message = "<p>" + model.Message + "</p>" + messageTail;
+            EmailModel emailModel = new EmailModel()
+            {
+                EmailsList = emailsList,
+                Title = emailService.GetTextForSuggestionType(model.SuggestionType, model.ProjectTitle),
+                Subject = "Suggestion to improve AIMS project data",
+                Message = model.Message,
+            };
+            ActionResponse response = emailService.SendEmailToUsers(emailModel);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] ContactEmailRequestModel model)
         {
