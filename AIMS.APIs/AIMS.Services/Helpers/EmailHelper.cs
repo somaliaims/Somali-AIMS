@@ -139,6 +139,7 @@ namespace AIMS.Services.Helpers
         private string FormatMessage(string title, string message)
         {
             List<string> messageList = new List<string>();
+            messageList.Add("<h3>" + title + "</h3>");
             messageList.Add("<h3>Dear user,</h3>");
             messageList.Add(message);
             return (String.Join(string.Empty, messageList));

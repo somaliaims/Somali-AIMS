@@ -40,7 +40,7 @@ namespace AIMS.APIs.Controllers
             }
             List<EmailAddress> emailsList = new List<EmailAddress>();
             emailsList = service.GetProjectUsersEmails(model.ProjectId).ToList();
-            string messageTail = "<h6>Sender name: " + model.SenderName + "<br/>Sender email: " + model.SenderEmail + "</h6>";
+            string messageTail = "<p><b>Sender name: " + model.SenderName + "</b><br/><b>Sender email: " + model.SenderEmail + "</b></p>";
             model.Message = "<p>" + model.Message + "</p>" + messageTail;
             EmailModel emailModel = new EmailModel()
             {
