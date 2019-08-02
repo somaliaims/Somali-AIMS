@@ -45,7 +45,7 @@ namespace AIMS.APIs.Controllers
             EmailModel emailModel = new EmailModel()
             {
                 EmailsList = emailsList,
-                Title = emailService.GetTextForSuggestionType(model.SuggestionType, model.ProjectTitle),
+                Title = emailService.GetTextForSuggestionType(model.suggesstionType, model.ProjectTitle),
                 Subject = "Suggestion to improve AIMS project data",
                 Message = model.Message,
             };

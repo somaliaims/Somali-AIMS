@@ -386,7 +386,7 @@ namespace AIMS.Models
     public class ProjectHelpEmail
     {
         [Required]
-        public ProjectSuggestionType SuggestionType { get; set; }
+        public ProjectSuggestionType suggesstionType { get; set; }
         [Required]
         public string SenderName { get; set; }
         [Required]
