@@ -1208,6 +1208,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public ICollection<ProjectYearlyDisbursementsSummary> YearlyDisbursements { get; set; }
+        public ICollection<ProjectYearlyDisbursementsBreakup> DisbursementsBreakup { get; set; }
     }
 
     public class ProjectBudgetView
@@ -1289,6 +1290,11 @@ namespace AIMS.Models
     {
         public int Year { get; set; }
         public decimal Disbursements { get; set; }
+    }
+
+    public class ProjectYearlyDisbursementsBreakup
+    {
+        public int Year { get; set; }
         public decimal ActualDisbursements { get; set; }
         public decimal ExpectedDisbursements { get; set; }
     }

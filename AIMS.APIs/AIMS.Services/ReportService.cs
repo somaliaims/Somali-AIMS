@@ -585,6 +585,7 @@ namespace AIMS.Services
                         }
 
                         List<ProjectYearlyDisbursementsSummary> yearlyDisbursements = new List<ProjectYearlyDisbursementsSummary>();
+                        List<ProjectYearlyDisbursementsBreakup> disbursementsBreakup = new List<ProjectYearlyDisbursementsBreakup>();
                         decimal actualDisbursements = 0, expectedDisbursements = 0, disbursements = 0;
                         ++upperYearLimit;
                         for (int year = (currentYear - 1); year < upperYearLimit; year++)
@@ -614,8 +615,13 @@ namespace AIMS.Services
                             {
                                 Year = year,
                                 Disbursements = disbursements,
-                                ActualDisbursements = yearDisbursements,
-                                ExpectedDisbursements = expectedDisbursements,
+                            });
+
+                            disbursementsBreakup.Add(new ProjectYearlyDisbursementsBreakup()
+                            {
+                                Year = year,
+                                ActualDisbursements = actualDisbursements,
+                                ExpectedDisbursements = expectedDisbursements
                             });
 
                             var yearExists = (from s in totalDisbursementsSummaryList
@@ -638,6 +644,7 @@ namespace AIMS.Services
                             }
                         }
                         projectBudget.YearlyDisbursements = yearlyDisbursements;
+                        projectBudget.DisbursementsBreakup = disbursementsBreakup;
                         projectBudgetsList.Add(projectBudget);
                     }
                     foreach(var total in totalDisbursementsSummaryList)

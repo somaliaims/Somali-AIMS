@@ -48,7 +48,7 @@ namespace AIMS.Services
     public class DataImportService : IDataImportService
     {
         private IHostingEnvironment hostingEnvironment;
-        string sWebRootFolder = "";
+        //string sWebRootFolder = "";
         NameValueCollection newDataLocations;
         NameValueCollection oldDataLocations;
         NameValueCollection oldCustomFields;

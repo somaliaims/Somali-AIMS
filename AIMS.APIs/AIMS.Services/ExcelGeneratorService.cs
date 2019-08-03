@@ -792,7 +792,7 @@ namespace AIMS.Services
                         var aDisbusementCell = row.CreateCell(1, CellType.String);
                         aDisbusementCell.SetCellValue("Actual");
                         aDisbusementCell.CellStyle = highlightStyle;
-                        foreach (var disbursement in project.YearlyDisbursements)
+                        foreach (var disbursement in project.DisbursementsBreakup)
                         {
                             var disbursementCol = row.CreateCell(++index);
                             disbursementCol.SetCellValue(ApplyThousandFormat(disbursement.ActualDisbursements));
@@ -805,7 +805,7 @@ namespace AIMS.Services
                         var eDisbusementCell = row.CreateCell(1, CellType.String);
                         eDisbusementCell.SetCellValue("Expected");
                         eDisbusementCell.CellStyle = highlightStyle;
-                        foreach (var disbursement in project.YearlyDisbursements)
+                        foreach (var disbursement in project.DisbursementsBreakup)
                         {
                             var disbursementCol = row.CreateCell(++index);
                             disbursementCol.SetCellValue(disbursement.ExpectedDisbursements.ToString());
