@@ -620,7 +620,7 @@ namespace AIMS.Services
                             disbursementsBreakup.Add(new ProjectYearlyDisbursementsBreakup()
                             {
                                 Year = year,
-                                ActualDisbursements = actualDisbursements,
+                                ActualDisbursements = yearDisbursements,
                                 ExpectedDisbursements = expectedDisbursements
                             });
 
