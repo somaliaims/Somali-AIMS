@@ -32,6 +32,13 @@ namespace AIMS.APIs.Controllers
             return Ok(organizations);
         }
 
+        [HttpGet("GetUserOrganizations")]
+        public IActionResult GetUserOrganizations()
+        {
+            var organizations = organizationService.GetUserOrganizations();
+            return Ok(organizations);
+        }
+
         [HttpGet]
         [Route("GetById/{id}")]
         public IActionResult Get(int id)

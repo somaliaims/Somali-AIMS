@@ -315,6 +315,12 @@ namespace AIMS.Services
                             response.Message = mHelper.GetNotFound("Organization");
                             return response;
                         }
+                        else
+                        {
+                            organization.SourceType = OrganizationSourceType.User;
+                            unitWork.OrganizationRepository.Update(organization);
+                            unitWork.Save();
+                        }
                     }
                     else
                     {
@@ -323,6 +329,7 @@ namespace AIMS.Services
                             organization = new EFOrganization()
                             {
                                 OrganizationName = model.OrganizationName,
+                                SourceType = OrganizationSourceType.User,
                             };
 
                             unitWork.Save();

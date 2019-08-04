@@ -22,6 +22,12 @@ namespace AIMS.Services
         IEnumerable<OrganizationView> GetAll();
 
         /// <summary>
+        /// Gets all organizations entered by user
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<OrganizationView> GetUserOrganizations();
+
+        /// <summary>
         /// Gets organization by id
         /// </summary>
         /// <param name="id"></param>
@@ -102,6 +108,22 @@ namespace AIMS.Services
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
                 var organizations = unitWork.OrganizationRepository.GetMany(o => o.Id != 0);
+                if (organizations.Count() > 0)
+                {
+                    organizations = (from org in organizations
+                                     orderby org.OrganizationName ascending
+                                     select org);
+                }
+                return mapper.Map<List<OrganizationView>>(organizations);
+            }
+        }
+
+        public IEnumerable<OrganizationView> GetUserOrganizations()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<OrganizationView> organizationsList = new List<OrganizationView>();
+                var organizations = unitWork.OrganizationRepository.GetMany(o => o.SourceType == OrganizationSourceType.User);
                 if (organizations.Count() > 0)
                 {
                     organizations = (from org in organizations

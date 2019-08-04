@@ -13,6 +13,12 @@ namespace AIMS.Models
         Standard = 3
     }
 
+    public enum OrganizationSourceType
+    {
+        IATI = 1,
+        User = 2
+    }
+
     public enum FieldTypes
     {
         DropDown = 1,
@@ -89,6 +95,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string OrganizationName { get; set; }
         public bool IsApproved { get; set; } = true;
+        public OrganizationSourceType SourceType { get; set; } = OrganizationSourceType.IATI;
     }
 
     public class EFUser
