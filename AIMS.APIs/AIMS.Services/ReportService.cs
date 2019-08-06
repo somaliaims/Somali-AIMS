@@ -595,7 +595,7 @@ namespace AIMS.Services
                                                          where d.Dated.Year == year
                                                          select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
 
-                            if (year < projectStartYear)
+                            if (year < currentYear)
                             {
                                 expectedDisbursements = 0;
                             }
