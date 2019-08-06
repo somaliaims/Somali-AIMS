@@ -109,9 +109,6 @@ namespace AIMS.Models
         [ForeignKey("Organization")]
         public int OrganizationId { get; set; }
         public EFOrganization Organization { get; set; }
-        /*[ForeignKey("ApprovedById")]
-        public int? ApprovedById { get; set; }
-        public EFUser ApprovedBy { get; set; }*/
         public bool IsApproved { get; set; }
         public DateTime? ApprovedOn { get; set; }
         public DateTime RegistrationDate { get; set; }
@@ -443,6 +440,7 @@ namespace AIMS.Models
         public string Subject { get; set; } = "No subject";
         [MaxLength(1000)]
         public string Message { get; set; } = null;
+        public string FooterMessage { get; set; } = null;
     }
 
     public class EFPasswordRecoveryRequests

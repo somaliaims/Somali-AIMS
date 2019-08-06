@@ -1520,6 +1520,7 @@ namespace AIMS.Models
         public string Subject { get; set; }
         [MaxLength(1000)]
         public string Message { get; set; }
+        public string FooterMessage { get; set; }
     }
 
     public class EmailMessageView
@@ -1529,6 +1530,7 @@ namespace AIMS.Models
         public string TypeDefinition { get; set; }
         public string Subject { get; set; }
         public string Message { get; set; }
+        public string FooterMessage { get; set; }
     }
 
     public class ProjectMembershipRequestModel

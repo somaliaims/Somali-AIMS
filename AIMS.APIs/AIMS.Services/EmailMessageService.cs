@@ -68,7 +68,8 @@ namespace AIMS.Services
                         TypeDefinition = message.TypeDefinition,
                         MessageType = message.MessageType,
                         Subject = message.Subject,
-                        Message = message.Message
+                        Message = message.Message,
+                        FooterMessage = message.FooterMessage,
                     });
                 }
                 return messagesList;
@@ -89,7 +90,8 @@ namespace AIMS.Services
                         TypeDefinition = message.TypeDefinition,
                         MessageType = message.MessageType,
                         Subject = message.Subject,
-                        Message = message.Message
+                        Message = message.Message,
+                        FooterMessage = message.FooterMessage,
                     });
                 }
                 return await Task<IEnumerable<EmailMessageView>>.Run(() => messagesList).ConfigureAwait(false);
@@ -105,7 +107,7 @@ namespace AIMS.Services
                 {
                     return new EmailMessageView() { };
                 }
-                return new EmailMessageView() { Id = emailMessage.Id, TypeDefinition = emailMessage.TypeDefinition, MessageType = emailMessage.MessageType, Subject = emailMessage.Subject, Message = emailMessage.Message };
+                return new EmailMessageView() { Id = emailMessage.Id, TypeDefinition = emailMessage.TypeDefinition, MessageType = emailMessage.MessageType, Subject = emailMessage.Subject, Message = emailMessage.Message, FooterMessage = emailMessage.FooterMessage };
             }
         }
 
@@ -129,7 +131,8 @@ namespace AIMS.Services
                         {
                             MessageType = model.MessageType,
                             Subject = model.Subject,
-                            Message = model.Message
+                            Message = model.Message,
+                            FooterMessage = model.FooterMessage
                         });
                         response.ReturnedId = newEmailMessage.Id;
                     }
@@ -161,6 +164,7 @@ namespace AIMS.Services
                 response.Message = true.ToString();
                 emailMessage.Subject = model.Subject;
                 emailMessage.Message = model.Message;
+                emailMessage.FooterMessage = model.FooterMessage;
                 unitWork.EmailMessagesRepository.Update(emailMessage);
                 unitWork.Save();
                 return response;
