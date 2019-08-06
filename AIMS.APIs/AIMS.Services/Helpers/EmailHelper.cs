@@ -63,8 +63,11 @@ namespace AIMS.Services.Helpers
             var usersEmailList = (from user in emailList
                                   where user.UserType == UserTypes.Standard
                                   select user.Email);
-            string usersEmailString = String.Join(',', usersEmailList);
+            usersEmailList = (from email in usersEmailList
+                              where !managersEmailList.Contains(email)
+                              select email);
 
+            string usersEmailString = String.Join(',', usersEmailList);
             //Sending bulk email to Managers
             if (managersEmailList.Count() > 0)
             {
@@ -116,7 +119,6 @@ namespace AIMS.Services.Helpers
                 var emailAddresses = (from e in emailsList
                                       select e.Email);
                 var emailAddressString = string.Join(',', emailAddresses);
-
                 MailMessage mailMessage = new MailMessage();
                 foreach (var emailAddress in emailAddresses)
                 {

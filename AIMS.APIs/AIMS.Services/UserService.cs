@@ -265,9 +265,10 @@ namespace AIMS.Services
                         smtpSettingsModel.Port = smtpSettings.Port;
                         smtpSettingsModel.Username = smtpSettings.Username;
                         smtpSettingsModel.Password = smtpSettings.Password;
+                        smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                     }
 
-                    IEmailHelper emailHelper = new EmailHelper(adminEmail, smtpSettingsModel);
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
                     response = emailHelper.SendPasswordRecoveryEmail(model);
                     if (!response.Success)
                     {
@@ -414,7 +415,7 @@ namespace AIMS.Services
                         unitWork.Save();
 
                         message += mHelper.NewUserForOrganization(organization.OrganizationName);
-                        IEmailHelper emailHelper = new EmailHelper(adminEmail, smtpSettingsModel);
+                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
                         emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, subject, message);
                     }
                     response.ReturnedId = newUser.Id;
