@@ -533,12 +533,13 @@ namespace AIMS.Services
                                         smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                                     }
 
-                                    string subject = "", message = "";
+                                    string subject = "", message = "", footerMessage = "";
                                     var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ChangedMappingEffectedProject);
                                     if (emailMessage != null)
                                     {
                                         subject = emailMessage.Subject;
                                         message = emailMessage.Message;
+                                        footerMessage = emailMessage.FooterMessage;
                                     }
 
                                     mHelper = new MessageHelper();

@@ -63,7 +63,7 @@ namespace AIMS.Services
         public ActionResponse SendEmailToUsers(EmailModel model)
         {
             ActionResponse response = new ActionResponse();
-            return emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Title, model.Message);
+            return emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Title, model.Message, model.FooterMessage);
         }
 
         public ActionResponse SendContactEmail(EmailModel model, string senderName, string sendEmail, string projectTitle, ContactEmailType emailType)
@@ -78,7 +78,7 @@ namespace AIMS.Services
                 model.Subject = INFORMATION_REQUEST + model.Subject;
                 model.Message = "<h4>Information request for project (" + projectTitle + ")</h4>" + model.Message;
             }
-            return emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Subject, model.Message);
+            return emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Subject, model.Message, model.FooterMessage);
         }
 
         public string GetTextForSuggestionType(ProjectSuggestionType type, string projectTitle)

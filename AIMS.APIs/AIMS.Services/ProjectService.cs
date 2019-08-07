@@ -1273,29 +1273,19 @@ namespace AIMS.Services
                                 smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                             }
 
-                            string subject = "", message = "";
+                            string subject = "", message = "", footerMessage = "";
                             var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewProjectToOrg);
                             if (emailMessage != null)
                             {
                                 subject = emailMessage.Subject;
                                 message = emailMessage.Message;
+                                footerMessage = emailMessage.FooterMessage;
                             }
                             message += mHelper.ProjectToOrganizationMessage(funder.OrganizationName);
                             IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                            emailHelper.SendEmailToUsers(emailAddresses, subject, "Dear user,", message);
+                            emailHelper.SendEmailToUsers(emailAddresses, subject, "Dear user,", message, footerMessage);
                         }
                     }
-                    
-                   /*unitWork.NotificationsRepository.Insert(new EFUserNotifications()
-                    {
-                        UserType = UserTypes.Standard,
-                        Message = mHelper.OrganizationAsFunderMessage(funder.OrganizationName, project.Title),
-                        OrganizationId = funder.Id,
-                        Dated = DateTime.Now,
-                        TreatmentId = 0,
-                        NotificationType = NotificationTypes.NewProjectToOrg
-                    });*/
-
                 }
                 catch (Exception ex)
                 {

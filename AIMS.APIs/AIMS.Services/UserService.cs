@@ -392,12 +392,13 @@ namespace AIMS.Services
                             smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                         }
 
-                        string message = "", subject = "";
+                        string message = "", subject = "", footerMessage = "";
                         var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewUser);
                         if (emailMessage != null)
                         {
                             subject = emailMessage.Subject;
                             message = emailMessage.Message;
+                            footerMessage = emailMessage.FooterMessage;
                         }
                         mHelper = new MessageHelper();
                         //Add notification
@@ -416,7 +417,7 @@ namespace AIMS.Services
 
                         message += mHelper.NewUserForOrganization(organization.OrganizationName);
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                        emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, subject, message);
+                        emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, subject, message, footerMessage);
                     }
                     response.ReturnedId = newUser.Id;
                 }
@@ -509,17 +510,18 @@ namespace AIMS.Services
                         smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                     }
 
-                    string message = "", subject = "";
+                    string message = "", subject = "", footerMessage = "";
                     var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.UserApproved);
                     if (emailMessage != null)
                     {
                         subject = emailMessage.Subject;
                         message = emailMessage.Message;
+                        footerMessage = emailMessage.FooterMessage;
                     }
                     mHelper = new MessageHelper();
                     message = mHelper.FormUserApprovedMessage(message, loginUrl);
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                    emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message, footerMessage);
                 }
                 response.ReturnedId = userAccount.Id;
                 return response;

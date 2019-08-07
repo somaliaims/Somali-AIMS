@@ -260,7 +260,7 @@ namespace AIMS.Services
                 unitWork.OrganizationRepository.Update(organization);
                 unitWork.Save();
 
-                string subject = "", message = "";
+                string subject = "", message = "", footerMessage = "";
                 var users = unitWork.UserRepository.GetManyQueryable(u => u.OrganizationId == id);
                 if (users != null)
                 {
@@ -277,6 +277,7 @@ namespace AIMS.Services
                         {
                             subject = emailMessage.Subject;
                             message = emailMessage.Message;
+                            footerMessage = emailMessage.FooterMessage;
                         }
 
                         mHelper = new MessageHelper();
@@ -293,7 +294,7 @@ namespace AIMS.Services
                             smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                         }
                         IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
-                        emailHelper.SendEmailToUsers(emailsList, "Organization renamed", subject, message);
+                        emailHelper.SendEmailToUsers(emailsList, "Organization renamed", subject, message, footerMessage);
                     }
                 }
                 
@@ -409,12 +410,13 @@ namespace AIMS.Services
                             unitWork.Save();
                         }
 
-                        string subject = "", message = "";
+                        string subject = "", message = "", footerMessage = "";
                         var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.OrganizationMerged);
                         if (emailMessage != null)
                         {
                             subject = emailMessage.Subject;
                             message = emailMessage.Message;
+                            footerMessage = emailMessage.FooterMessage;
                         }
 
                         mHelper = new MessageHelper();
@@ -447,7 +449,7 @@ namespace AIMS.Services
                                 });
                             }
                             IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
-                            emailHelper.SendEmailToUsers(emailAddresses, "Organizations merged", subject, message);
+                            emailHelper.SendEmailToUsers(emailAddresses, "Organizations merged", subject, message, footerMessage);
                         }
                     }
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);

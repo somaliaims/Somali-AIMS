@@ -45,6 +45,7 @@ namespace AIMS.Models
         public string Title { get; set; }
         [Required]
         public string Message { get; set; }
+        public string FooterMessage { get; set; } = null;
         [Required]
         public List<EmailAddress> EmailsList { get; set; }
     }

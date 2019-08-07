@@ -154,7 +154,7 @@ namespace AIMS.Services
 
                 if (newSectors > 0)
                 {
-                    string subject = "", message = "";
+                    string subject = "", message = "", footerMessage = "";
                     var emailMessage = (from m in messages
                                       where m.MessageType == EmailMessageType.NewIATISector
                                       select m).FirstOrDefault();
@@ -162,6 +162,7 @@ namespace AIMS.Services
                 {
                     subject = emailMessage.Subject;
                     message = emailMessage.Message;
+                    footerMessage = emailMessage.FooterMessage;
                 }
 
                 ISMTPSettingsService smtpService = new SMTPSettingsService(context);
@@ -193,20 +194,8 @@ namespace AIMS.Services
                     message += mHelper.NewIATISectorsAdded(newSectors);
                     if (emailAddresses.Count > 0)
                     {
-                        emailHelper.SendEmailToUsers(emailAddresses, "New IATI Sectors", subject, message);
+                        emailHelper.SendEmailToUsers(emailAddresses, "New IATI Sectors", subject, message, footerMessage);
                     }
-
-                    /*unitWork.NotificationsRepository.Insert(new EFUserNotifications()
-                    {
-                        Message = message,
-                        NotificationType = NotificationTypes.NewIATISector,
-                        Dated = DateTime.Now,
-                        IsSeen = false,
-                        OrganizationId = null,
-                        TreatmentId = 0,
-                        UserType = UserTypes.Manager
-                    });
-                    unitWork.Save();*/
                 }
                 return response;
         }

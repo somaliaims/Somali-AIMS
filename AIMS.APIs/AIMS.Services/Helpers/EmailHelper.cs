@@ -16,7 +16,7 @@ namespace AIMS.Services.Helpers
         /// <param name="emailList"></param>
         /// <param name="organizationName"></param>
         /// <returns></returns>
-        ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName, string subject, string message);
+        ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName, string subject, string message, string footerMessage = null);
 
         /// <summary>
         /// Send emails to users
@@ -26,7 +26,7 @@ namespace AIMS.Services.Helpers
         /// <param name="emailTitle"></param>
         /// <param name="emailMessage"></param>
         /// <returns></returns>
-        ActionResponse SendEmailToUsers(List<EmailAddress> emailsList, string subject, string emailTitle, string emailMessage);
+        ActionResponse SendEmailToUsers(List<EmailAddress> emailsList, string subject, string emailTitle, string emailMessage, string footerMessage = null);
 
         /// <summary>
         /// Sends email to recover password for the provided email
@@ -47,7 +47,7 @@ namespace AIMS.Services.Helpers
             emailFrom = adminEmail;
         }
 
-        public ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName, string subject, string message)
+        public ActionResponse SendNewRegistrationEmail(List<EmailsModel> emailList, string organizationName, string subject, string message, string footerMessage = null)
         {
             ActionResponse response = new ActionResponse();
             MailMessage mailMessage = new MailMessage();
@@ -71,7 +71,7 @@ namespace AIMS.Services.Helpers
             //Sending bulk email to Managers
             if (managersEmailList.Count() > 0)
             {
-                string emailMessage = this.GetUserRegistrationMessageForAdmin(organizationName, message);
+                string emailMessage = this.GetUserRegistrationMessageForAdmin(organizationName, message, footerMessage);
                 mailMessage.To.Add(managersEmailString);
                 mailMessage.Body = emailMessage;
                 mailMessage.Subject = subject;
@@ -80,7 +80,7 @@ namespace AIMS.Services.Helpers
 
             if (usersEmailList.Count() > 0)
             {
-                string emailMessage = this.GetUserRegistrationMessageForUser(organizationName, message);
+                string emailMessage = this.GetUserRegistrationMessageForUser(organizationName, message, footerMessage);
                 mailMessage.To.Add(usersEmailString);
                 mailMessage.Body = emailMessage;
                 mailMessage.Subject = subject;
@@ -111,7 +111,7 @@ namespace AIMS.Services.Helpers
             return response;
         }
 
-        public ActionResponse SendEmailToUsers(List<EmailAddress> emailsList, string subject, string emailTitle, string emailMessage)
+        public ActionResponse SendEmailToUsers(List<EmailAddress> emailsList, string subject, string emailTitle, string emailMessage, string footerMessage = null)
         {
             ActionResponse response = new ActionResponse();
             try
@@ -138,16 +138,18 @@ namespace AIMS.Services.Helpers
             return response;
         }
 
-        private string FormatMessage(string title, string message)
+        private string FormatMessage(string title, string message, string footerMessage = null)
         {
             List<string> messageList = new List<string>();
             messageList.Add("<h3>" + title + "</h3>");
             messageList.Add("<h3>Dear user,</h3>");
+            footerMessage = (footerMessage != null) ? footerMessage : "AIMS Support Team"; 
+            messageList.Add("<h6>" + footerMessage + "</h6>");
             messageList.Add(message);
             return (String.Join(string.Empty, messageList));
         }
 
-        private string GetUserRegistrationMessageForAdmin(string organizationName, string message = null)
+        private string GetUserRegistrationMessageForAdmin(string organizationName, string message = null, string footerMessage = null)
         {
             List<string> messageList = new List<string>();
             messageList.Add("<h3>Dear user,</h3><p>New User Registration for " + organizationName + "</p>");
@@ -160,11 +162,12 @@ namespace AIMS.Services.Helpers
                 messageList.Add("<p>A new user has just submitted the request for registration.</p>");
                 messageList.Add("<p>Please open your notification area using AIMS, and approve/disapprove the request.</p>");
             }
-            messageList.Add("<b>AIMS Support Team</b>");
+            footerMessage = (footerMessage != null) ? footerMessage : "AIMS Support Team";
+            messageList.Add("<h6>" + footerMessage + "</h6>");
             return (String.Join(string.Empty, messageList));
         }
 
-        private string GetUserRegistrationMessageForUser(string organizationName, string message = null)
+        private string GetUserRegistrationMessageForUser(string organizationName, string message = null, string footerMessage = null)
         {
             List<string> messageList = new List<string>();
             messageList.Add("<h3>Dear user</h3>");
@@ -178,7 +181,8 @@ namespace AIMS.Services.Helpers
                 messageList.Add("<p>A new user has just submitted a request for registration into your organization.</p>");
                 messageList.Add("<p>Please open your notification area using AIMS, and approve/disapprove the request.</p>");
             }
-            messageList.Add("<b>AIMS Support Team</b>");
+            footerMessage = (footerMessage != null) ? footerMessage : "AIMS Support Team";
+            messageList.Add("<b>" + footerMessage + "</b>");
             return (String.Join(string.Empty, messageList));
         }
 

@@ -182,18 +182,19 @@ namespace AIMS.Services
                             smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                         }
 
-                        string message = "", subject = "";
+                        string message = "", subject = "", footerMessage = "";
                         var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewOrgToProject);
                         if (emailMessage != null)
                         {
                             subject = emailMessage.Subject;
                             message = emailMessage.Message;
+                            footerMessage = emailMessage.FooterMessage;
                         }
 
                         mHelper = new MessageHelper();
                         message += mHelper.NewOrganizationForProject(requestingOrganization);
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                        emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message);
+                        emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message, footerMessage);
                     }
                 }
                 catch (Exception ex)
@@ -285,18 +286,19 @@ namespace AIMS.Services
                         smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                     }
 
-                    string message = "", subject = "";
+                    string message = "", subject = "", footerMessage = "";
                     var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectPermissionGranted);
                     if (emailMessage != null)
                     {
                         subject = emailMessage.Subject;
                         message = emailMessage.Message;
+                        footerMessage = emailMessage.FooterMessage;
                     }
 
                     mHelper = new MessageHelper();
                     message += mHelper.ProjectPermissionGranted(requestedProject);
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                    emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message, footerMessage);
                 }
                 return response;
             }
@@ -376,18 +378,19 @@ namespace AIMS.Services
                         smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                     }
 
-                    string message = "", subject = "";
+                    string message = "", subject = "", footerMessage = "";
                     var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectPermissionDenied);
                     if (emailMessage != null)
                     {
                         subject = emailMessage.Subject;
                         message = emailMessage.Message;
+                        footerMessage = emailMessage.FooterMessage;
                     }
 
                     mHelper = new MessageHelper();
                     message += mHelper.ProjectPermissionDenied(requestedProject);
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                    emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message, footerMessage);
                 }
                 return response;
             }
