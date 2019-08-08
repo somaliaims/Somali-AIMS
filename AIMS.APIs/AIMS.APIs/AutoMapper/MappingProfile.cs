@@ -88,6 +88,11 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFProjectSectors, SectorAbstractView>()
                 .ForMember(s => s.Name, opts => opts.MapFrom(source => source.Sector.SectorName));
+
+            CreateMap<EFProjectDeletionRequests, ProjectDeletionRequestView>()
+                .ForMember(d => d.UserOrganization, opts => opts.MapFrom(source => source.RequestedBy.Organization.OrganizationName))
+                .ForMember(d => d.UserEmail, opts => opts.MapFrom(source => source.RequestedBy.Email))
+                .ForMember(d => d.Project, opts => opts.MapFrom(source => source.Project.Title));
         }
     }
 }

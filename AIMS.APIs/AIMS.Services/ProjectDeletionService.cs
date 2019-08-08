@@ -2,6 +2,7 @@
 using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,24 +23,32 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         ICollection<ProjectDeletionRequestView> GetDeletionRequests();
+
+        /// <summary>
+        /// Cancels deletion request
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <returns></returns>
+        ActionResponse CancelRequest(int projectId, int userId);
     }
 
     public class ProjectDeletionService
     {
         AIMSDbContext context;
+        IMapper mapper;
 
-        public ProjectDeletionService(AIMSDbContext cntxt)
+        public ProjectDeletionService(AIMSDbContext cntxt, IMapper _mapper)
         {
             context = cntxt;
+            mapper = _mapper;
         }
 
         public ICollection<ProjectDeletionRequestView> GetDeletionRequests()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                List<ProjectDeletionRequestView> requests = new List<ProjectDeletionRequestView>();
                 var projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => p.Status == ProjectDeletionStatus.Requested, new string[] { "User", "Project", "User.Organization" });
-                return requests;
+                return mapper.Map<List<ProjectDeletionRequestView>>(projectRequests);
             }
         }
 
@@ -117,6 +126,30 @@ namespace AIMS.Services
                     }
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
                     emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message, footerMessage);
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse CancelRequest(int projectId, int userId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                var project = unitWork.ProjectRepository.GetByID(projectId);
+                if (project == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Project");
+                    return response;
+                }
+
+                var deletionRequest = unitWork.ProjectDeletionRepository.GetWithInclude(d => d.ProjectId == projectId, new string[] { "User", "User.Organization" });
+                if (deletionRequest != null)
+                {
+
                 }
                 return response;
             }

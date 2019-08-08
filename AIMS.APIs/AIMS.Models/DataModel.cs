@@ -474,6 +474,7 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
+        [ForeignKey("RequestedBy")]
         public int UserId { get; set; }
         public EFUser RequestedBy { get; set; }
         public DateTime RequestedOn { get; set; }
