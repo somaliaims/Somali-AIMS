@@ -31,9 +31,17 @@ namespace AIMS.Services
         /// <param name="projectId"></param>
         /// <returns></returns>
         ActionResponse CancelRequest(int projectId, int userId);
+
+        /// <summary>
+        /// Deletes a project
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        ActionResponse DeleteProject(int projectId, int userId);
     }
 
-    public class ProjectDeletionService
+    public class ProjectDeletionService : IProjectDeletionService
     {
         AIMSDbContext context;
         IMapper mapper;
@@ -68,7 +76,7 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var user = unitWork.UserRepository.GetOne(u => u.Email == model.UserEmail);
+                var user = unitWork.UserRepository.GetOne(u => u.Id == model.UserId);
                 if (user == null)
                 {
                     mHelper = new MessageHelper();
@@ -118,11 +126,12 @@ namespace AIMS.Services
                     }
 
                     string message = "", subject = "", footerMessage = "";
+                    string projectTitle = "<h5>Project title: " + project.Title + "</h5>";
                     var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectDeletionRequest);
                     if (emailMessage != null)
                     {
                         subject = emailMessage.Subject;
-                        message = emailMessage.Message;
+                        message = projectTitle + emailMessage.Message;
                         footerMessage = emailMessage.FooterMessage;
                     }
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
@@ -187,6 +196,104 @@ namespace AIMS.Services
                     deletionRequest.Status = ProjectDeletionStatus.Cancelled;
                     unitWork.ProjectDeletionRepository.Update(deletionRequest);
                     unitWork.Save();
+
+                    var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager, u => u.Email);
+                    List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                    foreach (var email in adminEmails)
+                    {
+                        usersEmailList.Add(new EmailAddress() { Email = email });
+                    }
+
+                    if (usersEmailList.Count > 0)
+                    {
+                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                        var smtpSettings = smtpService.GetPrivate();
+                        SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                        if (smtpSettings != null)
+                        {
+                            smtpSettingsModel.Host = smtpSettings.Host;
+                            smtpSettingsModel.Port = smtpSettings.Port;
+                            smtpSettingsModel.Username = smtpSettings.Username;
+                            smtpSettingsModel.Password = smtpSettings.Password;
+                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                        }
+
+                        string message = "", subject = "", footerMessage = "";
+                        string projectTitle = "<h5>Project title: " + project.Title + "</h5>";
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectDeletionCancelled);
+                        if (emailMessage != null)
+                        {
+                            subject = emailMessage.Subject;
+                            message = projectTitle + emailMessage.Message;
+                            footerMessage = emailMessage.FooterMessage;
+                        }
+                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                        emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message, footerMessage);
+                    }
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse DeleteProject(int projectId, int userId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                var user = unitWork.UserRepository.GetOne(u => (u.UserType == UserTypes.Manager || u.UserType == UserTypes.SuperAdmin) && u.Id == userId);
+                if (user == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetInvalidAccountForProject();
+                    response.Success = false;
+                    return response;
+                }
+
+                var project = unitWork.ProjectRepository.GetByID(projectId);
+                if (project == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
+                unitWork.ProjectRepository.Delete(project);
+                unitWork.Save();
+
+                var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager, u => u.Email);
+                List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                foreach (var email in adminEmails)
+                {
+                    usersEmailList.Add(new EmailAddress() { Email = email });
+                }
+
+                if (usersEmailList.Count > 0)
+                {
+                    ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                    var smtpSettings = smtpService.GetPrivate();
+                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                    if (smtpSettings != null)
+                    {
+                        smtpSettingsModel.Host = smtpSettings.Host;
+                        smtpSettingsModel.Port = smtpSettings.Port;
+                        smtpSettingsModel.Username = smtpSettings.Username;
+                        smtpSettingsModel.Password = smtpSettings.Password;
+                        smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                    }
+
+                    string message = "", subject = "", footerMessage = "";
+                    string projectTitle = "<h5>Project title: " + project.Title + "</h5>";
+                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectDeleted);
+                    if (emailMessage != null)
+                    {
+                        subject = emailMessage.Subject;
+                        message = projectTitle + emailMessage.Message;
+                        footerMessage = emailMessage.FooterMessage;
+                    }
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message, footerMessage);
                 }
                 return response;
             }

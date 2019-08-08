@@ -245,6 +245,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string GetProjectDeletionExistsMessage();
+
+        /// <summary>
+        /// Gets a message for invalid operation on project against the user account
+        /// </summary>
+        /// <returns></returns>
+        string GetInvalidAccountForProject();
     }
 
     public class MessageHelper : IMessageHelper
@@ -271,6 +277,7 @@ namespace AIMS.Services.Helpers
         private readonly string UNAUTHORIZED_ACCESS = "Your account not found. Please logout and login again";
         private readonly string PROJECT_DELETION_EXISTS = "There is already a request in pending to delete this project";
         private readonly string INVALID_PROJECT_EDIT = "You do not have enough permissions to set project status";
+        private readonly string INVALID_ACCOUNT_FOR_PROJECT = "You have provided an invalid user account";
 
         public string GetNotFound(string entity)
         {
@@ -340,6 +347,11 @@ namespace AIMS.Services.Helpers
         public string InvalidProjectMerge()
         {
             return INVALID_PROJECT_MERGE;
+        }
+
+        public string GetInvalidAccountForProject()
+        {
+            return (INVALID_ACCOUNT_FOR_PROJECT);
         }
 
         public string InvalidOrganizationMerge()

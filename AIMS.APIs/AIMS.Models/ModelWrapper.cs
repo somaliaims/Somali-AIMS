@@ -1548,8 +1548,7 @@ namespace AIMS.Models
         [Required]
         public int ProjectId { get; set; }
         [Required]
-        [EmailAddress]
-        public string UserEmail { get; set; }
+        public int UserId { get; set; }
     }
 
     public class ProjectMembershipRequestView
