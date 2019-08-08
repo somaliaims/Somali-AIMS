@@ -16,6 +16,12 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <returns></returns>
         ActionResponse AddRequest(ProjectDeletionRequestModel model);
+
+        /// <summary>
+        /// Gets list of project deletion requests
+        /// </summary>
+        /// <returns></returns>
+        ICollection<ProjectDeletionRequestView> GetDeletionRequests();
     }
 
     public class ProjectDeletionService
@@ -25,6 +31,16 @@ namespace AIMS.Services
         public ProjectDeletionService(AIMSDbContext cntxt)
         {
             context = cntxt;
+        }
+
+        public ICollection<ProjectDeletionRequestView> GetDeletionRequests()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<ProjectDeletionRequestView> requests = new List<ProjectDeletionRequestView>();
+                var projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => p.Status == ProjectDeletionStatus.Requested, new string[] { "User", "Project", "User.Organization" });
+                return requests;
+            }
         }
 
         public ActionResponse AddRequest(ProjectDeletionRequestModel model)
@@ -68,8 +84,40 @@ namespace AIMS.Services
                     StatusUpdatedOn = DateTime.Now,
                     Status = ProjectDeletionStatus.Requested
                 });
-
                 unitWork.Save();
+
+                var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager, u => u.Email);
+                List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                foreach(var email in adminEmails)
+                {
+                    usersEmailList.Add(new EmailAddress() { Email = email });
+                }
+
+                if (usersEmailList.Count > 0)
+                {
+                    ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                    var smtpSettings = smtpService.GetPrivate();
+                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                    if (smtpSettings != null)
+                    {
+                        smtpSettingsModel.Host = smtpSettings.Host;
+                        smtpSettingsModel.Port = smtpSettings.Port;
+                        smtpSettingsModel.Username = smtpSettings.Username;
+                        smtpSettingsModel.Password = smtpSettings.Password;
+                        smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                    }
+
+                    string message = "", subject = "", footerMessage = "";
+                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectDeletionRequest);
+                    if (emailMessage != null)
+                    {
+                        subject = emailMessage.Subject;
+                        message = emailMessage.Message;
+                        footerMessage = emailMessage.FooterMessage;
+                    }
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message, footerMessage);
+                }
                 return response;
             }
         }
