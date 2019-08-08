@@ -13,6 +13,13 @@ namespace AIMS.Models
         Standard = 3
     }
 
+    public enum ProjectDeletionStatus
+    {
+        Requested = 1,
+        Approved = 2,
+        Cancelled = 3
+    }
+
     public enum OrganizationSourceType
     {
         IATI = 1,
@@ -41,7 +48,8 @@ namespace AIMS.Models
         UserInactive = 4,
         ChangedMappingEffectedProject = 5,
         NewIATISector = 6,
-        OrganizationMerged = 7
+        OrganizationMerged = 7,
+        ProjectDeletion = 8
     }
 
     public enum EmailMessageType
@@ -56,7 +64,10 @@ namespace AIMS.Models
         ProjectPermissionGranted = 8,
         ProjectPermissionDenied = 9,
         UserApproved = 10,
-        OrganizationRenamed = 11
+        OrganizationRenamed = 11,
+        ProjectDeletionRequest = 12,
+        ProjectDeleted = 13,
+        ProjectDeletionCancelled = 14
     }
 
     public enum DataTransactions
@@ -456,5 +467,17 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public int FinancialYear { get; set; }
+    }
+
+    public class EFProjectDeletionRequests
+    {
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
+        public int UserId { get; set; }
+        public EFUser RequestedBy { get; set; }
+        public DateTime RequestedOn { get; set; }
+        public DateTime StatusUpdatedOn { get; set; }
+        public ProjectDeletionStatus Status { get; set; }
     }
 }

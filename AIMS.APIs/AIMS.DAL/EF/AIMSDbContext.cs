@@ -70,6 +70,9 @@ namespace AIMS.DAL.EF
 
             modelBuilder.Entity<EFProjectMembershipRequests>()
                 .HasKey(m => new { m.ProjectId, m.UserId });
+
+            modelBuilder.Entity<EFProjectDeletionRequests>()
+                .HasKey(d => new { d.ProjectId, d.UserId });
                 
         }
 
@@ -109,6 +112,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFEnvelope> Envelope { get; set; }
         public DbSet<EFEmailMessages> EmailMessages { get; set; }
         public DbSet<EFProjectMembershipRequests> ProjectMembershipRequests { get; set; }
+        public DbSet<EFProjectDeletionRequests> ProjectDeletionRequests { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime

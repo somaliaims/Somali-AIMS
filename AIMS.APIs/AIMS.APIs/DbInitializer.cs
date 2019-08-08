@@ -41,7 +41,9 @@ namespace AIMS.APIs
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectPermissionDenied, TypeDefinition = "Project permission unapproved/denied", Message = "" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.UserApproved, TypeDefinition = "User account approved", Message = "" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.OrganizationRenamed, TypeDefinition = "Organization renamed", Message = "" });
-
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionRequest, TypeDefinition = "Project deletion request", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionCancelled, TypeDefinition = "Project deletion cancelled", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeleted, TypeDefinition = "Project deleted", Message = "" });
                     context.SaveChanges();
                 }
 
