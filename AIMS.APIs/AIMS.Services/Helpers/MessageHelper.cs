@@ -228,7 +228,17 @@ namespace AIMS.Services.Helpers
         /// <returns></returns>
         string GetDependentProjectsOnSectorMessage();
 
+        /// <summary>
+        /// Gets unauthorized access message
+        /// </summary>
+        /// <returns></returns>
         string GetUnAuthorizedAccessMessage();
+
+        /// <summary>
+        /// Gets message of project deletion already exists
+        /// </summary>
+        /// <returns></returns>
+        string GetProjectDeletionExistsMessage();
     }
 
     public class MessageHelper : IMessageHelper
@@ -253,6 +263,8 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_SECTOR_TYPE_DELETION = "A sector type cannot be deleted untill all the sector under the type is deleted";
         private readonly string INVALID_DISBURSEMENTS = "You cannot add more disbursements than the project total value. Please increase the project funding amount before adding more disbursements.";
         private readonly string UNAUTHORIZED_ACCESS = "Your account not found. Please logout and login again";
+        private readonly string PROJECT_DELETION_EXISTS = "There is already a request in pending to delete this project";
+
         public string GetNotFound(string entity)
         {
             return (entity + NOT_FOUND);
@@ -362,6 +374,11 @@ namespace AIMS.Services.Helpers
         public string GetUnAuthorizedAccessMessage()
         {
             return (UNAUTHORIZED_ACCESS);
+        }
+
+        public string GetProjectDeletionExistsMessage()
+        {
+            return (PROJECT_DELETION_EXISTS);
         }
 
         public string ProjectToOrganizationMessage(string organization)

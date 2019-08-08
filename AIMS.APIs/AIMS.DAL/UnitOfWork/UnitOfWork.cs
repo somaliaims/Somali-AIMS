@@ -46,6 +46,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFEmailMessages> emailMessagesRepository;
         private GenericRepository<EFManualExchangeRates> manualRatesRepository;
         private GenericRepository<EFProjectMembershipRequests> projectMembershipRepository;
+        private GenericRepository<EFProjectDeletionRequests> projectDeletionRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -59,6 +60,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.emailMessagesRepository == null)
                     this.emailMessagesRepository = new GenericRepository<EFEmailMessages>(context);
                 return this.emailMessagesRepository;
+            }
+        }
+
+        public GenericRepository<EFProjectDeletionRequests> ProjectDeletionRepository
+        {
+            get
+            {
+                if (this.projectDeletionRepository == null)
+                    this.projectDeletionRepository = new GenericRepository<EFProjectDeletionRequests>(context);
+                return this.projectDeletionRepository;
             }
         }
 

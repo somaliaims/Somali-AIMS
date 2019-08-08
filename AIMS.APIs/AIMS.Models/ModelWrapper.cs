@@ -1543,6 +1543,15 @@ namespace AIMS.Models
         public string UserEmail { get; set; }
     }
 
+    public class ProjectDeletionRequestModel
+    {
+        [Required]
+        public int ProjectId { get; set; }
+        [Required]
+        [EmailAddress]
+        public string UserEmail { get; set; }
+    }
+
     public class ProjectMembershipRequestView
     {
         public int ProjectId { get; set; }
@@ -1552,6 +1561,18 @@ namespace AIMS.Models
         public string UserOrganization { get; set; }
         public string Dated { get; set; }
         public bool IsApproved { get; set; }
+    }
+
+    public class ProjectDeletionRequestView
+    {
+        public int ProjectId { get; set; }
+        public int UserId { get; set; }
+        public string UserEmail { get; set; }
+        public string Project { get; set; }
+        public string UserOrganization { get; set; }
+        public string RequestDate { get; set; }
+        public string StatusUpdatedOn { get; set; }
+        public string Status { get; set; }
     }
 
     public class ProjectRequestStatusModel
