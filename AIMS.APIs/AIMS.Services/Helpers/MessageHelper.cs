@@ -235,6 +235,12 @@ namespace AIMS.Services.Helpers
         string GetUnAuthorizedAccessMessage();
 
         /// <summary>
+        /// Gets message for invalid project edit attempt
+        /// </summary>
+        /// <returns></returns>
+        string GetInvalidProjectEdit();
+
+        /// <summary>
         /// Gets message of project deletion already exists
         /// </summary>
         /// <returns></returns>
@@ -264,6 +270,7 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_DISBURSEMENTS = "You cannot add more disbursements than the project total value. Please increase the project funding amount before adding more disbursements.";
         private readonly string UNAUTHORIZED_ACCESS = "Your account not found. Please logout and login again";
         private readonly string PROJECT_DELETION_EXISTS = "There is already a request in pending to delete this project";
+        private readonly string INVALID_PROJECT_EDIT = "You do not have enough permissions to set project status";
 
         public string GetNotFound(string entity)
         {
@@ -338,6 +345,11 @@ namespace AIMS.Services.Helpers
         public string InvalidOrganizationMerge()
         {
             return INVALID_ORGANIZATION_MERGE;
+        }
+
+        public string GetInvalidProjectEdit()
+        {
+            return (INVALID_PROJECT_EDIT);
         }
 
         public string InvalidSectorMapping(string sectorType)

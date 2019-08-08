@@ -4,6 +4,7 @@ using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
@@ -146,10 +147,46 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var deletionRequest = unitWork.ProjectDeletionRepository.GetWithInclude(d => d.ProjectId == projectId, new string[] { "User", "User.Organization" });
-                if (deletionRequest != null)
-                {
+                var userOrganizationsList = unitWork.UserRepository.GetProjection(u => u.Id == userId, u => u.OrganizationId);
+                var userOrganizationId = (from orgId in userOrganizationsList
+                                          select orgId).FirstOrDefault();
 
+                int projectOrganizationId = 0;
+                EFProjectDeletionRequests deletionRequest = null;
+                var deletionRequestArr = unitWork.ProjectDeletionRepository.GetWithInclude(d => d.ProjectId == projectId, new string[] { "RequestedBy" });
+                foreach(var delRequest in deletionRequestArr)
+                {
+                    projectOrganizationId = delRequest.RequestedBy.OrganizationId;
+                    deletionRequest = delRequest;
+                }
+
+                bool canEditProject = false;
+                if (projectOrganizationId == userOrganizationId)
+                {
+                    canEditProject = true;
+                }
+                else
+                {
+                    var funderProjectsIds = unitWork.ProjectFundersRepository.GetProjection(f => f.FunderId == userOrganizationId, f => f.ProjectId).ToList();
+                    var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ImplementerId == userOrganizationId, i => i.ProjectId).ToList();
+                    var membershipProjectIds = unitWork.ProjectMembershipRepository.GetProjection(m => (m.UserId == userId && m.IsApproved == true), m => m.ProjectId);
+                    var combinedProjectIds = funderProjectsIds.Union(implementerProjectIds);
+                    combinedProjectIds = combinedProjectIds.Union(membershipProjectIds);
+                    if (!combinedProjectIds.Contains(projectId))
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetInvalidProjectEdit();
+                        return response;
+                    }
+                    canEditProject = true;
+                }
+
+                if (canEditProject)
+                {
+                    deletionRequest.Status = ProjectDeletionStatus.Cancelled;
+                    unitWork.ProjectDeletionRepository.Update(deletionRequest);
+                    unitWork.Save();
                 }
                 return response;
             }
