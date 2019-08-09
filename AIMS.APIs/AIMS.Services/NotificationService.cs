@@ -102,8 +102,8 @@ namespace AIMS.Services
             {
                 int deletionsCount = 0;
                 int count = unitWork.NotificationsRepository.GetProjectionCount(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin || uType == UserTypes.Manager), n => n.Id);
-                var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == organizationId, p => p.FunderId);
-                var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == organizationId, p => p.ImplementerId);
+                var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == organizationId, p => p.ProjectId);
+                var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == organizationId, p => p.ProjectId);
                 var userOwnedProjects = unitWork.ProjectRepository.GetProjection(p => p.CreatedById == userId, p => p.Id);
                 var projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
                 List<int> userOwnedProjectIds = new List<int>();

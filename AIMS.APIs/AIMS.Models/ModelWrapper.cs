@@ -1569,7 +1569,7 @@ namespace AIMS.Models
         public string UserEmail { get; set; }
         public string Project { get; set; }
         public string UserOrganization { get; set; }
-        public string RequestDate { get; set; }
+        public string RequestedOn { get; set; }
         public string StatusUpdatedOn { get; set; }
         public string Status { get; set; }
     }

@@ -39,6 +39,14 @@ namespace AIMS.Services
         ActionResponse CancelRequest(int projectId, int userId);
 
         /// <summary>
+        /// Approve deletion request
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        ActionResponse ApproveRequest(int projectId, int userId);
+
+        /// <summary>
         /// Deletes a project
         /// </summary>
         /// <param name="projectId"></param>
@@ -65,8 +73,8 @@ namespace AIMS.Services
                 IEnumerable<EFProjectDeletionRequests> projectRequests = null;
                 if (uType == UserTypes.Standard)
                 {
-                    var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == orgId, p => p.FunderId);
-                    var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == orgId, p => p.ImplementerId);
+                    var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == orgId, p => p.ProjectId);
+                    var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == orgId, p => p.ProjectId);
                     var userOwnedProjects = unitWork.ProjectRepository.GetProjection(p => p.CreatedById == userId, p => p.Id);
                     var projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
                     List<int> userOwnedProjectIds = new List<int>();
@@ -75,11 +83,11 @@ namespace AIMS.Services
                         userOwnedProjectIds.Add((int)pid);
                     }
                     projectIds = projectIds.Union(userOwnedProjectIds).ToList<int>();
-                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => (p.Status == ProjectDeletionStatus.Requested && projectIds.Contains(p.ProjectId)), new string[] { "User", "Project", "User.Organization" });
+                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => (p.Status == ProjectDeletionStatus.Requested && p.UserId != userId && projectIds.Contains(p.ProjectId)), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
                 }
                 else if (uType == UserTypes.Manager || uType == UserTypes.SuperAdmin)
                 {
-                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => (p.Status == ProjectDeletionStatus.Approved || (p.Status == ProjectDeletionStatus.Requested && p.RequestedOn <= DateTime.Now.AddDays(-7))), new string[] { "User", "Project", "User.Organization" });
+                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => (p.Status == ProjectDeletionStatus.Approved || (p.Status == ProjectDeletionStatus.Requested && p.RequestedOn <= DateTime.Now.AddDays(-7))), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
                 }
                 return mapper.Map<List<ProjectDeletionRequestView>>(projectRequests);
             }
@@ -128,9 +136,23 @@ namespace AIMS.Services
                 });
                 unitWork.Save();
 
+                //List<int> orgIds = new List<int>();
+                //orgIds.Add(user.OrganizationId);
+
+                var projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(f => f.ProjectId == project.Id, f => f.FunderId);
+                var projectImplementerIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ProjectId == project.Id, i => i.ImplementerId);
+                var orgIds = projectFunderIds.Union(projectImplementerIds).ToList();
+                if (!orgIds.Contains(user.OrganizationId))
+                {
+                    orgIds.Add(user.OrganizationId);
+                }
+
+                var userEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Standard && orgIds.Contains(u.OrganizationId), u => u.Email);
                 var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager, u => u.Email);
+                var allEmails = userEmails.Union(adminEmails);
+
                 List<EmailAddress> usersEmailList = new List<EmailAddress>();
-                foreach(var email in adminEmails)
+                foreach(var email in allEmails)
                 {
                     usersEmailList.Add(new EmailAddress() { Email = email });
                 }
@@ -171,6 +193,100 @@ namespace AIMS.Services
             {
                 var projectIds = unitWork.ProjectDeletionRepository.GetProjection(p => p.Status == ProjectDeletionStatus.Requested, p => p.ProjectId);
                 return new List<int>(projectIds);
+            }
+        }
+
+        public ActionResponse ApproveRequest(int projectId, int userId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                var project = unitWork.ProjectRepository.GetByID(projectId);
+                if (project == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Project");
+                    return response;
+                }
+
+                var userOrganizationsList = unitWork.UserRepository.GetProjection(u => u.Id == userId, u => u.OrganizationId);
+                var userOrganizationId = (from orgId in userOrganizationsList
+                                          select orgId).FirstOrDefault();
+
+                int projectOrganizationId = 0;
+                EFProjectDeletionRequests deletionRequest = null;
+                var deletionRequestArr = unitWork.ProjectDeletionRepository.GetWithInclude(d => d.ProjectId == projectId, new string[] { "RequestedBy" });
+                foreach (var delRequest in deletionRequestArr)
+                {
+                    projectOrganizationId = delRequest.RequestedBy.OrganizationId;
+                    deletionRequest = delRequest;
+                }
+
+                bool canEditProject = false;
+                if (projectOrganizationId == userOrganizationId)
+                {
+                    canEditProject = true;
+                }
+                else
+                {
+                    var funderProjectsIds = unitWork.ProjectFundersRepository.GetProjection(f => f.FunderId == userOrganizationId, f => f.ProjectId).ToList();
+                    var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ImplementerId == userOrganizationId, i => i.ProjectId).ToList();
+                    var membershipProjectIds = unitWork.ProjectMembershipRepository.GetProjection(m => (m.UserId == userId && m.IsApproved == true), m => m.ProjectId);
+                    var combinedProjectIds = funderProjectsIds.Union(implementerProjectIds);
+                    combinedProjectIds = combinedProjectIds.Union(membershipProjectIds);
+                    if (!combinedProjectIds.Contains(projectId))
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetInvalidProjectEdit();
+                        return response;
+                    }
+                    canEditProject = true;
+                }
+
+                if (canEditProject)
+                {
+                    deletionRequest.Status = ProjectDeletionStatus.Approved;
+                    unitWork.ProjectDeletionRepository.Update(deletionRequest);
+                    unitWork.Save();
+
+                    var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager, u => u.Email);
+                    List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                    foreach (var email in adminEmails)
+                    {
+                        usersEmailList.Add(new EmailAddress() { Email = email });
+                    }
+
+                    if (usersEmailList.Count > 0)
+                    {
+                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                        var smtpSettings = smtpService.GetPrivate();
+                        SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                        if (smtpSettings != null)
+                        {
+                            smtpSettingsModel.Host = smtpSettings.Host;
+                            smtpSettingsModel.Port = smtpSettings.Port;
+                            smtpSettingsModel.Username = smtpSettings.Username;
+                            smtpSettingsModel.Password = smtpSettings.Password;
+                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                        }
+
+                        string message = "", subject = "", footerMessage = "";
+                        string projectTitle = "<h5>Project title: " + project.Title + "</h5>";
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectDeletionApproved);
+                        if (emailMessage != null)
+                        {
+                            subject = emailMessage.Subject;
+                            message = projectTitle + emailMessage.Message;
+                            footerMessage = emailMessage.FooterMessage;
+                        }
+                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                        emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message, footerMessage);
+                    }
+                }
+                return response;
             }
         }
 

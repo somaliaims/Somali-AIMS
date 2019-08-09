@@ -67,7 +67,8 @@ namespace AIMS.Models
         OrganizationRenamed = 11,
         ProjectDeletionRequest = 12,
         ProjectDeleted = 13,
-        ProjectDeletionCancelled = 14
+        ProjectDeletionApproved = 14,
+        ProjectDeletionCancelled = 15
     }
 
     public enum DataTransactions

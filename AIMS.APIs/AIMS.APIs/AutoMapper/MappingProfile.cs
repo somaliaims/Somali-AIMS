@@ -92,7 +92,10 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFProjectDeletionRequests, ProjectDeletionRequestView>()
                 .ForMember(d => d.UserOrganization, opts => opts.MapFrom(source => source.RequestedBy.Organization.OrganizationName))
                 .ForMember(d => d.UserEmail, opts => opts.MapFrom(source => source.RequestedBy.Email))
-                .ForMember(d => d.Project, opts => opts.MapFrom(source => source.Project.Title));
+                .ForMember(d => d.Project, opts => opts.MapFrom(source => source.Project.Title))
+                .ForMember(d => d.RequestedOn, opts => opts.MapFrom(source => source.RequestedOn.ToShortDateString()))
+                .ForMember(d => d.StatusUpdatedOn, opts => opts.MapFrom(source => source.StatusUpdatedOn.ToShortDateString()));
+
         }
     }
 }
