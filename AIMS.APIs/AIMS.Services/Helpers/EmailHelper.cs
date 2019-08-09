@@ -144,8 +144,8 @@ namespace AIMS.Services.Helpers
             messageList.Add("<h3>" + title + "</h3>");
             messageList.Add("<h3>Dear user,</h3>");
             footerMessage = (footerMessage != null) ? footerMessage : "AIMS Support Team"; 
-            messageList.Add("<h6>" + footerMessage + "</h6>");
             messageList.Add(message);
+            messageList.Add("<h5>" + footerMessage + "</h5>");
             return (String.Join(string.Empty, messageList));
         }
 
@@ -163,7 +163,7 @@ namespace AIMS.Services.Helpers
                 messageList.Add("<p>Please open your notification area using AIMS, and approve/disapprove the request.</p>");
             }
             footerMessage = (footerMessage != null) ? footerMessage : "AIMS Support Team";
-            messageList.Add("<h6>" + footerMessage + "</h6>");
+            messageList.Add("<h5>" + footerMessage + "</h5>");
             return (String.Join(string.Empty, messageList));
         }
 
@@ -182,7 +182,7 @@ namespace AIMS.Services.Helpers
                 messageList.Add("<p>Please open your notification area using AIMS, and approve/disapprove the request.</p>");
             }
             footerMessage = (footerMessage != null) ? footerMessage : "AIMS Support Team";
-            messageList.Add("<b>" + footerMessage + "</b>");
+            messageList.Add("<h5>" + footerMessage + "</h5>");
             return (String.Join(string.Empty, messageList));
         }
 
@@ -193,7 +193,7 @@ namespace AIMS.Services.Helpers
             messageList.Add("<p>We have received a password reset request for your email. If it was not you, please ignore this email.</p>");
             messageList.Add("<p>Click on the link below and follow the instructions to reset password. This link will expire in two hours</p>");
             messageList.Add("<p><a target='_blank' href='" + url + token + "'>Password Reset Link</a></p>");
-            messageList.Add("<b>AIMS Support Team</b>");
+            messageList.Add("<h5>AIMS Support Team</h5>");
             return (String.Join(string.Empty, messageList));
         }
 

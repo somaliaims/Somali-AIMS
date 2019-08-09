@@ -100,6 +100,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                int deletionsCount = 0;
                 int count = unitWork.NotificationsRepository.GetProjectionCount(n => (n.OrganizationId == organizationId && n.UserType == uType && n.TreatmentId != userId) || (uType == UserTypes.SuperAdmin || uType == UserTypes.Manager), n => n.Id);
                 var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == organizationId, p => p.FunderId);
                 var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == organizationId, p => p.ImplementerId);
@@ -112,7 +113,15 @@ namespace AIMS.Services
                 }
                 projectIds = projectIds.Union(userOwnedProjectIds).ToList<int>();
                 int requestsCount = unitWork.ProjectMembershipRepository.GetProjectionCount(r => projectIds.Contains(r.ProjectId) && r.IsApproved == false, r => r.ProjectId);
-                return (count + requestsCount);
+                if (uType == UserTypes.Standard)
+                {
+                    deletionsCount = unitWork.ProjectDeletionRepository.GetProjectionCount(d => (d.Status == ProjectDeletionStatus.Requested && projectIds.Contains(d.ProjectId)), d => d.ProjectId);
+                }
+                else if (uType == UserTypes.Manager || uType == UserTypes.SuperAdmin)
+                {
+                    deletionsCount = unitWork.ProjectDeletionRepository.GetProjectionCount(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn <= DateTime.Now.AddDays(-7) && d.Status == ProjectDeletionStatus.Requested)), d => d.ProjectId);
+                }
+                return (count + requestsCount + deletionsCount);
             }
         }
 

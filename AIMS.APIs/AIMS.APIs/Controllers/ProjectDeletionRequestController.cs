@@ -40,7 +40,7 @@ namespace AIMS.APIs.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] ProjectDeletionRequestModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
