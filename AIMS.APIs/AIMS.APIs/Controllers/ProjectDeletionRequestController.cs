@@ -30,6 +30,13 @@ namespace AIMS.APIs.Controllers
             return Ok(requests);
         }
 
+        [HttpGet("GetProjectIds")]
+        public IActionResult GetProjectIds()
+        {
+            var projectIds = service.GetActiveProjectIds();
+            return Ok(projectIds);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] ProjectDeletionRequestModel model)
         {
@@ -59,15 +66,6 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(response.Message);
             }
-            /*else if (string.IsNullOrEmpty(userTypeStr))
-            {
-                return BadRequest("Unauthorized user access to api");
-            }
-            UserTypes userType = (UserTypes) Convert.ToInt32(userTypeStr);
-            if ((userType != UserTypes.Manager) || (userType != UserTypes.SuperAdmin))
-            {
-                return BadRequest("");
-            }*/
             return Ok(true);
         }
 

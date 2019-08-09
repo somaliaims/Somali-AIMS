@@ -133,6 +133,7 @@ namespace AIMS.APIs
             services.AddScoped<IProjectMembershipService, ProjectMembershipService>();
             services.AddScoped<IContactService, ContactService>();
             services.AddScoped<IDataImportService, DataImportService>();
+            services.AddScoped<IProjectDeletionService, ProjectDeletionService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();

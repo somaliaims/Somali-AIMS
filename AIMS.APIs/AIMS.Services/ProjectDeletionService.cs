@@ -26,6 +26,12 @@ namespace AIMS.Services
         ICollection<ProjectDeletionRequestView> GetDeletionRequests();
 
         /// <summary>
+        /// Gets list of project ids only that are active for deletion request
+        /// </summary>
+        /// <returns></returns>
+        ICollection<int> GetActiveProjectIds();
+
+        /// <summary>
         /// Cancels deletion request
         /// </summary>
         /// <param name="projectId"></param>
@@ -138,6 +144,15 @@ namespace AIMS.Services
                     emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message, footerMessage);
                 }
                 return response;
+            }
+        }
+
+        public ICollection<int> GetActiveProjectIds()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var projectIds = unitWork.ProjectDeletionRepository.GetProjection(p => p.Status == ProjectDeletionStatus.Requested, p => p.ProjectId);
+                return new List<int>(projectIds);
             }
         }
 
