@@ -23,7 +23,7 @@ namespace AIMS.Services
         /// Gets list of project deletion requests
         /// </summary>
         /// <returns></returns>
-        ICollection<ProjectDeletionRequestView> GetDeletionRequests();
+        ICollection<ProjectDeletionRequestView> GetDeletionRequests(UserTypes uType, int userId, int orgId);
 
         /// <summary>
         /// Gets list of project ids only that are active for deletion request
@@ -58,11 +58,29 @@ namespace AIMS.Services
             mapper = _mapper;
         }
 
-        public ICollection<ProjectDeletionRequestView> GetDeletionRequests()
+        public ICollection<ProjectDeletionRequestView> GetDeletionRequests(UserTypes uType, int userId, int orgId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => p.Status == ProjectDeletionStatus.Requested, new string[] { "User", "Project", "User.Organization" });
+                IEnumerable<EFProjectDeletionRequests> projectRequests = null;
+                if (uType == UserTypes.Standard)
+                {
+                    var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == orgId, p => p.FunderId);
+                    var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == orgId, p => p.ImplementerId);
+                    var userOwnedProjects = unitWork.ProjectRepository.GetProjection(p => p.CreatedById == userId, p => p.Id);
+                    var projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
+                    List<int> userOwnedProjectIds = new List<int>();
+                    foreach (var pid in userOwnedProjects)
+                    {
+                        userOwnedProjectIds.Add((int)pid);
+                    }
+                    projectIds = projectIds.Union(userOwnedProjectIds).ToList<int>();
+                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => (p.Status == ProjectDeletionStatus.Requested && projectIds.Contains(p.ProjectId)), new string[] { "User", "Project", "User.Organization" });
+                }
+                else if (uType == UserTypes.Manager || uType == UserTypes.SuperAdmin)
+                {
+                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => (p.Status == ProjectDeletionStatus.Approved || (p.Status == ProjectDeletionStatus.Requested && p.RequestedOn <= DateTime.Now.AddDays(-7))), new string[] { "User", "Project", "User.Organization" });
+                }
                 return mapper.Map<List<ProjectDeletionRequestView>>(projectRequests);
             }
         }

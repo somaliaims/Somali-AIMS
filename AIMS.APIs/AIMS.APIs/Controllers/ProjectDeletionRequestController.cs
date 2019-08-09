@@ -26,7 +26,31 @@ namespace AIMS.APIs.Controllers
         [HttpGet("GetActiveRequests")]
         public IActionResult GetActiveRequests()
         {
-            var requests = service.GetDeletionRequests();
+            int userId = 0, organizationId = 0;
+            string userTypeStr = User.FindFirst(ClaimTypes.Role)?.Value;
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string userOrgVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            if (string.IsNullOrEmpty(userTypeStr))
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            if (string.IsNullOrEmpty(userIdVal))
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            if (string.IsNullOrEmpty(userOrgVal))
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+
+            userId = Convert.ToInt32(userIdVal);
+            organizationId = Convert.ToInt32(userOrgVal);
+            UserTypes userType = (UserTypes)Convert.ToInt32(userTypeStr);
+            if ((userType != UserTypes.Manager) || (userType != UserTypes.SuperAdmin))
+            {
+                return BadRequest("You are not authorized to delete a project");
+            }
+            var requests = service.GetDeletionRequests(userType, userId, organizationId);
             return Ok(requests);
         }
 
@@ -50,8 +74,8 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid project id provided");
             }
 
-            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             int userId = 0;
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!string.IsNullOrEmpty(userIdVal))
             {
                 userId = Convert.ToInt32(userIdVal);
