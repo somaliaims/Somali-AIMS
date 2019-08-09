@@ -115,7 +115,7 @@ namespace AIMS.Services
                 int requestsCount = unitWork.ProjectMembershipRepository.GetProjectionCount(r => projectIds.Contains(r.ProjectId) && r.IsApproved == false, r => r.ProjectId);
                 if (uType == UserTypes.Standard)
                 {
-                    deletionsCount = unitWork.ProjectDeletionRepository.GetProjectionCount(d => (d.Status == ProjectDeletionStatus.Requested && projectIds.Contains(d.ProjectId)), d => d.ProjectId);
+                    deletionsCount = unitWork.ProjectDeletionRepository.GetProjectionCount(d => (d.Status == ProjectDeletionStatus.Requested && d.UserId != userId && projectIds.Contains(d.ProjectId)), d => d.ProjectId);
                 }
                 else if (uType == UserTypes.Manager || uType == UserTypes.SuperAdmin)
                 {
