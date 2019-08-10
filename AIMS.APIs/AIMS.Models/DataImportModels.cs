@@ -44,4 +44,12 @@ namespace AIMS.Models
         public int FutureYearProjectsNew { get; set; } = 0;
         public int TotalMatchedProjects { get; set; } = 0;
     }
+
+    public class ActiveProject
+    {
+        public string ProjectTitle { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public string IsMatched { get; set; }
+    }
 }

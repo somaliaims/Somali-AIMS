@@ -42,7 +42,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="dataFilePath"></param>
         /// <returns></returns>
-        string GenerateExcelFileForActiveProjects();
+        string GenerateExcelFileForActiveProjects(string fileFolder);
     }
 
     public class DataImportService : IDataImportService
@@ -362,10 +362,99 @@ namespace AIMS.Services
             return dataMatch;
         }
 
-        public string GenerateExcelFileForActiveProjects()
+        public string GenerateExcelFileForActiveProjects(string fileFolder)
         {
             //TODO: To continue based on decisions
             string filePath = "";
+            List<string> oldProjectsList = new List<string>();
+            List<string> newProjectsList = new List<string>();
+            List<ActiveProject> activeProjectsList = new List<ActiveProject>();
+
+            string oldDataFile = fileFolder + "/" + "2017-Somalia-Aid-Mapping.xlsx";
+            string newDataFile = fileFolder + "/" + "2018-Somalia-Aid-Mapping.xlsx";
+
+            XSSFWorkbook oldWorkBook = new XSSFWorkbook(oldDataFile);
+            this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
+            this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(oldWorkBook);
+            ISheet sheetOld = oldWorkBook.GetSheetAt(1);
+            IRow headerRowOld = sheetOld.GetRow(1);
+            int projectTitleIndexOld = 0;
+
+            for (int i = (sheetOld.FirstRowNum + 1); i <= sheetOld.LastRowNum; i++)
+            {
+                IRow row = sheetOld.GetRow(i);
+                if (row == null)
+                {
+                    continue;
+                }
+                if (row.Cells.All(d => d.CellType == CellType.Blank))
+                {
+                    continue;
+                }
+                oldProjectsList.Add(this.GetFormattedValue(row.GetCell(projectTitleIndexOld)));
+            }
+
+            XSSFWorkbook newWorkBook = new XSSFWorkbook(newDataFile);
+            this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
+            this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(newWorkBook);
+            ISheet sheetNew = newWorkBook.GetSheetAt(5);
+            IRow headerRowNew = sheetNew.GetRow(1);
+            int projectTitleIndexNew = 3, endDateIndex = 6, currentYearProjects = 0, futureYearProjects = 0, currentYear = DateTime.Now.Year;
+            string projectTitle = "";
+            DateTime endDate = DateTime.Now;
+
+            for (int i = (sheetNew.FirstRowNum + 1); i <= sheetNew.LastRowNum; i++)
+            {
+                IRow row = sheetNew.GetRow(i);
+                if (row == null)
+                {
+                    continue;
+                }
+                if (row.Cells.All(d => d.CellType == CellType.Blank))
+                {
+                    continue;
+                }
+
+                projectTitle = this.GetFormattedValue(row.GetCell(projectTitleIndexNew));
+                newProjectsList.Add(projectTitle);
+                bool isValidDate = DateTime.TryParse(this.GetFormattedValue(row.GetCell(endDateIndex)), out endDate);
+                if (isValidDate)
+                {
+                    if (endDate.Year >= currentYear)
+                    {
+                        activeProjectsList.Add(new ActiveProject()
+                        {
+                            ProjectTitle = projectTitle,
+                            EndDate = endDate.ToShortDateString(),
+                            IsMatched = "No"
+                        });
+                    }
+                    
+                    if (endDate.Year == currentYear)
+                    {
+                        ++currentYearProjects;
+                    }
+                    else if (endDate.Year > currentYear)
+                    {
+                        ++futureYearProjects;
+                    }
+                }
+            }
+
+            int matches = 0;
+            foreach (string project in newProjectsList)
+            {
+                var isProjectMatch = (from p in oldProjectsList
+                                      where p.Equals(project, StringComparison.OrdinalIgnoreCase)
+                                      select p).FirstOrDefault();
+                matches += (isProjectMatch != null) ? 1 : 0;
+            }
+
+            foreach (var project in activeProjectsList)
+            {
+
+            }
+            
             return filePath;
         }
 
