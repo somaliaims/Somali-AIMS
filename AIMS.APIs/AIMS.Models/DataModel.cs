@@ -78,6 +78,19 @@ namespace AIMS.Models
         Deleted = 3
     }
 
+    public enum ExchangeRateSources
+    {
+        OpenExchange = 1,
+        CentralBank = 2,
+        Manual = 3
+    }
+
+    public enum ExchangeRateUsageSection
+    {
+        DataEntry = 1,
+        Reportint = 2
+    }
+
     public class EFFundingTypes
     {
         public int Id { get; set; }
@@ -309,6 +322,13 @@ namespace AIMS.Models
         public int ReportId { get; set; }
         public EFStaticReports Report { get; set; }
     }    
+
+    public class EFExchangeRatesUsageSettings
+    {
+        public ExchangeRateSources Source { get; set; }
+        public ExchangeRateUsageSection UsageSection { get; set; }
+        public int Order { get; set; }
+    }
 
     public class EFUserNotifications
     {
