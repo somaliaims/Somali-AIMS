@@ -89,7 +89,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
-        [HttpPut("ApproveRequest/{projectId}")]
+        [HttpGet("ApproveRequest/{projectId}")]
         public IActionResult ApproveRequest(int projectId)
         {
             if (projectId <= 0)
@@ -114,7 +114,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
-        [HttpPut("CancelRequest/{projectId}")]
+        [HttpGet("CancelRequest/{projectId}")]
         public IActionResult CancelRequest(int projectId)
         {
             if (projectId <= 0)

@@ -136,9 +136,6 @@ namespace AIMS.Services
                 });
                 unitWork.Save();
 
-                //List<int> orgIds = new List<int>();
-                //orgIds.Add(user.OrganizationId);
-
                 var projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(f => f.ProjectId == project.Id, f => f.FunderId);
                 var projectImplementerIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ProjectId == project.Id, i => i.ImplementerId);
                 var orgIds = projectFunderIds.Union(projectImplementerIds).ToList();
