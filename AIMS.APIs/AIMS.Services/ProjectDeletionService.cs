@@ -249,9 +249,20 @@ namespace AIMS.Services
                     unitWork.ProjectDeletionRepository.Update(deletionRequest);
                     unitWork.Save();
 
+                    var projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(f => f.ProjectId == project.Id, f => f.FunderId);
+                    var projectImplementerIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ProjectId == project.Id, i => i.ImplementerId);
+                    var orgIds = projectFunderIds.Union(projectImplementerIds).ToList();
+                    if (!orgIds.Contains(userOrganizationId))
+                    {
+                        orgIds.Add(userOrganizationId);
+                    }
+
+                    var userEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Standard && orgIds.Contains(u.OrganizationId), u => u.Email);
                     var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager, u => u.Email);
+                    var allEmails = userEmails.Union(adminEmails);
+
                     List<EmailAddress> usersEmailList = new List<EmailAddress>();
-                    foreach (var email in adminEmails)
+                    foreach (var email in allEmails)
                     {
                         usersEmailList.Add(new EmailAddress() { Email = email });
                     }
@@ -343,9 +354,20 @@ namespace AIMS.Services
                     unitWork.ProjectDeletionRepository.Update(deletionRequest);
                     unitWork.Save();
 
+                    var projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(f => f.ProjectId == project.Id, f => f.FunderId);
+                    var projectImplementerIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ProjectId == project.Id, i => i.ImplementerId);
+                    var orgIds = projectFunderIds.Union(projectImplementerIds).ToList();
+                    if (!orgIds.Contains(userOrganizationId))
+                    {
+                        orgIds.Add(userOrganizationId);
+                    }
+
+                    var userEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Standard && orgIds.Contains(u.OrganizationId), u => u.Email);
                     var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager, u => u.Email);
+                    var allEmails = userEmails.Union(adminEmails);
+
                     List<EmailAddress> usersEmailList = new List<EmailAddress>();
-                    foreach (var email in adminEmails)
+                    foreach (var email in allEmails)
                     {
                         usersEmailList.Add(new EmailAddress() { Email = email });
                     }
@@ -408,9 +430,26 @@ namespace AIMS.Services
                 unitWork.ProjectRepository.Delete(project);
                 unitWork.Save();
 
+                int userOrganizationId = 0;
+                var deletionRequest = unitWork.ProjectDeletionRepository.GetWithInclude(p => p.ProjectId == projectId, new string[] { "RequestedBy" }).FirstOrDefault();
+                if (deletionRequest != null)
+                {
+                    userOrganizationId = deletionRequest.RequestedBy.OrganizationId;
+                }
+                var projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(f => f.ProjectId == project.Id, f => f.FunderId);
+                var projectImplementerIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ProjectId == project.Id, i => i.ImplementerId);
+                var orgIds = projectFunderIds.Union(projectImplementerIds).ToList();
+                if (!orgIds.Contains(userOrganizationId) && userOrganizationId != 0)
+                {
+                    orgIds.Add(userOrganizationId);
+                }
+
+                var userEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Standard && orgIds.Contains(u.OrganizationId), u => u.Email);
                 var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager, u => u.Email);
+                var allEmails = userEmails.Union(adminEmails);
+
                 List<EmailAddress> usersEmailList = new List<EmailAddress>();
-                foreach (var email in adminEmails)
+                foreach (var email in allEmails)
                 {
                     usersEmailList.Add(new EmailAddress() { Email = email });
                 }
