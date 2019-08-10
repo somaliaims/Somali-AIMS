@@ -91,6 +91,15 @@ namespace AIMS.APIs.Controllers
             return Ok(dataResult);
         }
 
+        [HttpGet("GenerateExcelForActiveProjects")]
+        public IActionResult GenerateExcelForActiveProjects()
+        {
+            var folderName = Path.Combine("wwwroot", "DataImportFiles");
+            var pathToFiles = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+            string fileName = service.GenerateExcelFileForActiveProjects(pathToFiles);
+            return Ok(fileName);
+        }
+
 
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using NPOI.SS.UserModel;
+using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
@@ -48,7 +49,7 @@ namespace AIMS.Services
     public class DataImportService : IDataImportService
     {
         private IHostingEnvironment hostingEnvironment;
-        //string sWebRootFolder = "";
+        string sWebRootFolder = "";
         NameValueCollection newDataLocations;
         NameValueCollection oldDataLocations;
         NameValueCollection oldCustomFields;
@@ -60,6 +61,9 @@ namespace AIMS.Services
         public DataImportService(IHostingEnvironment _hostingEnvironment)
         {
             hostingEnvironment = _hostingEnvironment;
+            sWebRootFolder = hostingEnvironment.WebRootPath + "/ExcelFiles/";
+            Directory.CreateDirectory(sWebRootFolder);
+
             oldDataLocations = new NameValueCollection()
             {
                 { "39", "FGS" },
@@ -364,8 +368,6 @@ namespace AIMS.Services
 
         public string GenerateExcelFileForActiveProjects(string fileFolder)
         {
-            //TODO: To continue based on decisions
-            string filePath = "";
             List<string> oldProjectsList = new List<string>();
             List<string> newProjectsList = new List<string>();
             List<ActiveProject> activeProjectsList = new List<ActiveProject>();
@@ -452,10 +454,144 @@ namespace AIMS.Services
 
             foreach (var project in activeProjectsList)
             {
+                var matchedProjects = (from p in oldProjectsList
+                                        where p.Equals(project.ProjectTitle, StringComparison.OrdinalIgnoreCase)
+                                        select p);
 
+                if (matchedProjects.Any())
+                {
+                    project.IsMatched = "Yes";
+                }
             }
-            
-            return filePath;
+
+            string sFileName = @"MatchinProjects-" + DateTime.UtcNow.Ticks.ToString() + ".xlsx";
+            FileInfo file = new FileInfo(Path.Combine(sWebRootFolder, sFileName));
+            var memory = new MemoryStream();
+            using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
+            {
+                int rowCounter = 0, totalColumns = 7;
+                IWorkbook workbook;
+                workbook = new XSSFWorkbook();
+                ISheet excelSheet = workbook.CreateSheet("Report");
+
+                ICellStyle titleStyle = workbook.CreateCellStyle();
+                IFont fontTitle = workbook.CreateFont();
+                fontTitle.Color = IndexedColors.DarkBlue.Index;
+                fontTitle.IsBold = true;
+                fontTitle.FontHeightInPoints = 16;
+                titleStyle.SetFont(fontTitle);
+                titleStyle.Alignment = HorizontalAlignment.CenterSelection;
+                titleStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                ICellStyle linkStyle = workbook.CreateCellStyle();
+                IFont linkFont = workbook.CreateFont();
+                linkFont.Color = IndexedColors.DarkBlue.Index;
+                linkFont.IsBold = true;
+                linkFont.FontHeightInPoints = 14;
+                linkStyle.SetFont(linkFont);
+                linkStyle.Alignment = HorizontalAlignment.CenterSelection;
+                linkStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                ICellStyle headerStyle = workbook.CreateCellStyle();
+                IFont fontHeader = workbook.CreateFont();
+                fontHeader.Color = IndexedColors.Black.Index;
+                fontHeader.IsBold = true;
+                fontHeader.FontHeightInPoints = 12;
+                headerStyle.SetFont(fontHeader);
+                headerStyle.Alignment = HorizontalAlignment.Center;
+                headerStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                ICellStyle highlightStyle = workbook.CreateCellStyle();
+                IFont fontHighlight = workbook.CreateFont();
+                fontHighlight.Color = IndexedColors.DarkBlue.Index;
+                fontHighlight.FontHeightInPoints = 12;
+                highlightStyle.SetFont(fontHighlight);
+                highlightStyle.Alignment = HorizontalAlignment.Center;
+                highlightStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
+                IFont groupFontHeader = workbook.CreateFont();
+                groupFontHeader.Color = IndexedColors.DarkYellow.Index;
+                groupFontHeader.FontHeightInPoints = 12;
+                groupFontHeader.IsBold = true;
+                groupHeaderStyle.SetFont(groupFontHeader);
+                groupHeaderStyle.Alignment = HorizontalAlignment.Center;
+                groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                ICellStyle dataCellStyle = workbook.CreateCellStyle();
+                dataCellStyle.WrapText = true;
+                dataCellStyle.Alignment = HorizontalAlignment.Center;
+                dataCellStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                IRow row = excelSheet.CreateRow(rowCounter);
+                row.CreateCell(0, CellType.Blank);
+                excelSheet.AddMergedRegion(new CellRangeAddress(
+                    rowCounter, rowCounter, 0, totalColumns
+                    ));
+
+                row = excelSheet.CreateRow(++rowCounter);
+                var titleCell = row.CreateCell(0, CellType.String);
+                titleCell.SetCellValue("SomaliAIMS projects report for import - generated on " + DateTime.Now.ToLongDateString());
+                excelSheet.AddMergedRegion(new CellRangeAddress(
+                    rowCounter, rowCounter, 0, totalColumns));
+                titleCell.CellStyle = titleStyle;
+
+                row = excelSheet.CreateRow(++rowCounter);
+                row.CreateCell(0, CellType.Blank);
+                excelSheet.AddMergedRegion(new CellRangeAddress(
+                    rowCounter, rowCounter, 0, totalColumns
+                    ));
+
+                row = excelSheet.CreateRow(++rowCounter);
+                row.CreateCell(0, CellType.Blank);
+
+                var cellSerial = row.CreateCell(1, CellType.String);
+                cellSerial.SetCellValue("Serial");
+                cellSerial.CellStyle = headerStyle;
+
+                var projectCell = row.CreateCell(2, CellType.String);
+                projectCell.SetCellValue("Project title");
+                projectCell.CellStyle = headerStyle;
+
+                var endDateCell = row.CreateCell(3, CellType.String);
+                endDateCell.SetCellValue("End date");
+                endDateCell.CellStyle = headerStyle;
+
+                var isMatchedCell = row.CreateCell(4, CellType.String);
+                isMatchedCell.SetCellValue("Matched with 2017");
+                isMatchedCell.CellStyle = headerStyle;
+
+                int rowIndex = 0;
+                foreach (var project in activeProjectsList)
+                {
+                    int colIndex = 0;
+                    row = excelSheet.CreateRow(++rowCounter);
+                    row.CreateCell(colIndex, CellType.Blank);
+
+                    var serialCell = row.CreateCell(++colIndex, CellType.Numeric);
+                    serialCell.SetCellValue(++rowIndex);
+                    serialCell.CellStyle = dataCellStyle;
+
+                    var projectTitleCell = row.CreateCell(++colIndex, CellType.String);
+                    projectTitleCell.SetCellValue(project.ProjectTitle);
+                    projectTitleCell.CellStyle = dataCellStyle;
+
+                    var projectEnddateCell = row.CreateCell(++colIndex, CellType.String);
+                    projectEnddateCell.SetCellValue(project.EndDate);
+                    projectEnddateCell.CellStyle = dataCellStyle;
+
+                    var isMatchedDataCell = row.CreateCell(++colIndex, CellType.String);
+                    isMatchedDataCell.SetCellValue(project.IsMatched);
+                    isMatchedDataCell.CellStyle = dataCellStyle;
+                }
+                workbook.Write(fs);
+                return sFileName;
+            }
+        }
+
+        private string ApplyThousandFormat(decimal number)
+        {
+            return (Math.Round(number).ToString("#,##0.00"));
         }
 
         private string GetFormattedValue(ICell cell)
