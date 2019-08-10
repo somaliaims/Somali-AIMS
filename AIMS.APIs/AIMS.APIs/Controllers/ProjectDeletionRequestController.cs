@@ -163,7 +163,7 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Unauthorized user access to api");
             }
             UserTypes userType = (UserTypes) Convert.ToInt32(userTypeStr);
-            if ((userType != UserTypes.Manager) || (userType != UserTypes.SuperAdmin))
+            if ((userType != UserTypes.Manager) && (userType != UserTypes.SuperAdmin))
             {
                 return BadRequest("You are not authorized to delete a project");
             }
