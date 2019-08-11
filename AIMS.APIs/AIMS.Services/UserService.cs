@@ -579,7 +579,35 @@ namespace AIMS.Services
                 user.Password = sHelper.GetPasswordHash(password);
                 unitWork.UserRepository.Update(user);
                 unitWork.Save();
-                response.Message = "1";
+
+                //Send emails
+                ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                var smtpSettings = smtpService.GetPrivate();
+                SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                usersEmailList.Add(new EmailAddress()
+                {
+                    Email = user.Email
+                });
+                if (smtpSettings != null)
+                {
+                    smtpSettingsModel.Host = smtpSettings.Host;
+                    smtpSettingsModel.Port = smtpSettings.Port;
+                    smtpSettingsModel.Username = smtpSettings.Username;
+                    smtpSettingsModel.Password = smtpSettings.Password;
+                    smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                }
+                string message = "", subject = "", footerMessage = "";
+                var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ResetPassword);
+                if (emailMessage != null)
+                {
+                    subject = emailMessage.Subject;
+                    message = emailMessage.Message;
+                    footerMessage = emailMessage.FooterMessage;
+                }
+                IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
+                response.Message = true.ToString();
                 return response;
             }
         }
