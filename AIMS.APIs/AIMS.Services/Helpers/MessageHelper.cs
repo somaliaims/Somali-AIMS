@@ -247,6 +247,12 @@ namespace AIMS.Services.Helpers
         string GetProjectDeletionExistsMessage();
 
         /// <summary>
+        /// Gets message for project deletion already approved
+        /// </summary>
+        /// <returns></returns>
+        string GetProjectDeletionApprovedMessage();
+
+        /// <summary>
         /// Gets a message for invalid operation on project against the user account
         /// </summary>
         /// <returns></returns>
@@ -278,6 +284,7 @@ namespace AIMS.Services.Helpers
         private readonly string PROJECT_DELETION_EXISTS = "There is already a request in pending to delete this project";
         private readonly string INVALID_PROJECT_EDIT = "You do not have enough permissions to set project status";
         private readonly string INVALID_ACCOUNT_FOR_PROJECT = "You have provided an invalid user account";
+        private readonly string PROJECT_DELETION_APPROVED = "The project you are requesting to delete is approved for deletion and under consideration";
 
         public string GetNotFound(string entity)
         {
@@ -403,6 +410,11 @@ namespace AIMS.Services.Helpers
         public string GetProjectDeletionExistsMessage()
         {
             return (PROJECT_DELETION_EXISTS);
+        }
+
+        public string GetProjectDeletionApprovedMessage()
+        {
+            return (PROJECT_DELETION_APPROVED);
         }
 
         public string ProjectToOrganizationMessage(string organization)

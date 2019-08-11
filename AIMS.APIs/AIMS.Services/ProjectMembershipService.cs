@@ -194,7 +194,7 @@ namespace AIMS.Services
                         mHelper = new MessageHelper();
                         message += mHelper.NewOrganizationForProject(requestingOrganization);
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                        emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message, footerMessage);
+                        emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                     }
                 }
                 catch (Exception ex)
@@ -298,7 +298,7 @@ namespace AIMS.Services
                     mHelper = new MessageHelper();
                     message += mHelper.ProjectPermissionGranted(requestedProject);
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                    emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message, footerMessage);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                 }
                 return response;
             }
@@ -390,7 +390,7 @@ namespace AIMS.Services
                     mHelper = new MessageHelper();
                     message += mHelper.ProjectPermissionDenied(requestedProject);
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                    emailHelper.SendEmailToUsers(usersEmailList, subject, "Dear user,", message, footerMessage);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                 }
                 return response;
             }

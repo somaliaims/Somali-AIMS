@@ -1283,7 +1283,7 @@ namespace AIMS.Services
                             }
                             message += mHelper.ProjectToOrganizationMessage(funder.OrganizationName);
                             IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                            emailHelper.SendEmailToUsers(emailAddresses, subject, "Dear user,", message, footerMessage);
+                            emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
                         }
                     }
                 }

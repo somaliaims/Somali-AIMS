@@ -45,6 +45,7 @@ namespace AIMS.APIs
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionCancelled, TypeDefinition = "Project deletion cancelled", Message = "" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionApproved, TypeDefinition = "Project deletion approved", Message = "" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeleted, TypeDefinition = "Project deleted", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ResetPassword, TypeDefinition = "Reset Password", Message = "Your password is reset successfully" });
                     context.SaveChanges();
                 }
 

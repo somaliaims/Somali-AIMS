@@ -203,7 +203,7 @@ namespace AIMS.Services
                     message += mHelper.NewIATISectorsAdded(newSectors);
                     if (emailAddresses.Count > 0)
                     {
-                        emailHelper.SendEmailToUsers(emailAddresses, "New IATI Sectors", subject, message, footerMessage);
+                        emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
                     }
                 }
                 return response;

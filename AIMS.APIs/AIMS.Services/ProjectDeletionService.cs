@@ -117,8 +117,8 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var isRequestExists = unitWork.ProjectDeletionRepository.GetOne(p => p.ProjectId == project.Id && p.Status == ProjectDeletionStatus.Requested);
-                if (isRequestExists != null)
+                var isRequestExists = unitWork.ProjectDeletionRepository.GetOne(p => p.ProjectId == project.Id);
+                if (isRequestExists != null && isRequestExists.Status == ProjectDeletionStatus.Requested)
                 {
                     mHelper = new MessageHelper();
                     response.Success = false;
@@ -126,14 +126,33 @@ namespace AIMS.Services
                     return response;
                 }
 
-                unitWork.ProjectDeletionRepository.Insert(new EFProjectDeletionRequests()
+                if (isRequestExists != null && isRequestExists.Status == ProjectDeletionStatus.Approved)
                 {
-                    Project = project,
-                    RequestedBy = user,
-                    RequestedOn = DateTime.Now,
-                    StatusUpdatedOn = DateTime.Now,
-                    Status = ProjectDeletionStatus.Requested
-                });
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetProjectDeletionApprovedMessage();
+                    return response;
+                }
+
+                if (isRequestExists != null && isRequestExists.Status == ProjectDeletionStatus.Cancelled)
+                {
+                    isRequestExists.Status = ProjectDeletionStatus.Requested;
+                    isRequestExists.RequestedOn = DateTime.Now;
+                    isRequestExists.StatusUpdatedOn = DateTime.Now;
+                    isRequestExists.RequestedBy = user;
+                    unitWork.ProjectDeletionRepository.Update(isRequestExists);
+                }
+                else
+                {
+                    unitWork.ProjectDeletionRepository.Insert(new EFProjectDeletionRequests()
+                    {
+                        Project = project,
+                        RequestedBy = user,
+                        RequestedOn = DateTime.Now,
+                        StatusUpdatedOn = DateTime.Now,
+                        Status = ProjectDeletionStatus.Requested
+                    });
+                }
                 unitWork.Save();
 
                 var projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(f => f.ProjectId == project.Id, f => f.FunderId);
@@ -178,7 +197,7 @@ namespace AIMS.Services
                         footerMessage = emailMessage.FooterMessage;
                     }
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                    emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message, footerMessage);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                 }
                 return response;
             }
@@ -291,7 +310,7 @@ namespace AIMS.Services
                             footerMessage = emailMessage.FooterMessage;
                         }
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                        emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message, footerMessage);
+                        emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                     }
                 }
                 return response;
@@ -396,7 +415,7 @@ namespace AIMS.Services
                             footerMessage = emailMessage.FooterMessage;
                         }
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                        emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message, footerMessage);
+                        emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                     }
                 }
                 return response;
@@ -478,7 +497,7 @@ namespace AIMS.Services
                         footerMessage = emailMessage.FooterMessage;
                     }
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                    emailHelper.SendEmailToUsers(usersEmailList, subject, subject, message, footerMessage);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                 }
                 return response;
             }

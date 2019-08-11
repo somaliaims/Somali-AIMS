@@ -547,7 +547,7 @@ namespace AIMS.Services
                                     string newSectorName = newSector != null ? newSector.SectorName : null;
                                     message += mHelper.ChangedMappingAffectedProjectsMessage(projectNames, oldSectorName, newSectorName);
                                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                                    emailHelper.SendEmailToUsers(emailAddresses, "Sector mapping changed", subject, message);
+                                    emailHelper.SendEmailToUsers(emailAddresses, subject, "", message);
                                 }
                             }
                         }

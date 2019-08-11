@@ -294,7 +294,7 @@ namespace AIMS.Services
                             smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
                         }
                         IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
-                        emailHelper.SendEmailToUsers(emailsList, "Organization renamed", subject, message, footerMessage);
+                        emailHelper.SendEmailToUsers(emailsList, subject, "", message, footerMessage);
                     }
                 }
                 
@@ -449,7 +449,7 @@ namespace AIMS.Services
                                 });
                             }
                             IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
-                            emailHelper.SendEmailToUsers(emailAddresses, "Organizations merged", subject, message, footerMessage);
+                            emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
                         }
                     }
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
