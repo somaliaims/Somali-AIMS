@@ -318,6 +318,14 @@ namespace AIMS.Services
                                     }
                                     totalDisbursementsPercentage += project.ActualDisbursements;
                                 }
+                                else
+                                {
+                                    project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
+                                    if (project.PlannedDisbursements < 0)
+                                    {
+                                        project.PlannedDisbursements = 0;
+                                    }
+                                }
                             }
                         }
 
@@ -883,13 +891,24 @@ namespace AIMS.Services
                                     var startDate = DateTime.Now;
                                     int months = helper.GetMonthDifference(startDate, endDate);
 
-                                    project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * sectorPercentage), MidpointRounding.AwayFromZero);
+                                    if (projectDisbursements == 0)
+                                    {
+                                        project.ActualDisbursements = 0;
+                                    }
+                                    else
+                                    {
+                                        project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * sectorPercentage), MidpointRounding.AwayFromZero);
+                                    }
                                     project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
                                     if (project.PlannedDisbursements < 0)
                                     {
                                         project.PlannedDisbursements = 0;
                                     }
                                     totalDisbursementsPercentage += project.ActualDisbursements;
+                                }
+                                else
+                                {
+                                    project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
                                 }
                             }
                         }
@@ -1136,6 +1155,10 @@ namespace AIMS.Services
                                 {
                                     project.PlannedDisbursements = 0;
                                 }
+                            }
+                            else
+                            {
+                                project.PlannedDisbursements = Math.Round(((project.ProjectCost - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
                             }
 
                             projectsViewForYear.Add(new ProjectViewForYear()
