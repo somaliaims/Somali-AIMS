@@ -540,12 +540,13 @@ namespace AIMS.Services
                 }
 
                 var organizationTypesVocabs = this.GetDeserializedOrgTypes(orgTypesJson);
-                var organizationTypes = unitWork.OrganizationTypesRepository.GetProjection(o => o.Id != 0, o => o.TypeName).ToList<string>();
+                var organizationTypes = unitWork.OrganizationTypesRepository.GetManyQueryable(o => o.Id != 0);
                 var organizationsList = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
                 var orgNames = (from o in organizationsList
                                 select o.OrganizationName.Trim()).ToList<string>();
 
                 List<EFOrganization> newIATIOrganizations = new List<EFOrganization>();
+                int withOutTypeCount = 0;
                 foreach (var org in organizations)
                 {
                     if (!string.IsNullOrEmpty(org.Name) && !string.IsNullOrWhiteSpace(org.Name))
@@ -568,8 +569,19 @@ namespace AIMS.Services
 
                             if (isOrganizationInList == null && isOrganizationInDb == null)
                             {
+                                int orgCode = org.Code;
+                                EFOrganizationTypes orgType = null;
+                                string orgTypeName = (from v in organizations
+                                                        where v.Code == org.Code
+                                                        select v.Name).FirstOrDefault();
+                                orgType = (from t in organizationTypes
+                                                      where t.TypeName.Equals(orgTypeName, StringComparison.OrdinalIgnoreCase)
+                                                      select t).FirstOrDefault();
+
+                                withOutTypeCount = (orgType == null) ? withOutTypeCount : (withOutTypeCount + 1);
                                 newIATIOrganizations.Add(new EFOrganization()
                                 {
+                                    OrganizationType = orgType,
                                     OrganizationName = org.Name,
                                 });
                             }

@@ -232,7 +232,12 @@ namespace AIMS.IATILib.Parsers
                                     
                                     var narratives = organization.Elements("narrative");
                                     string organizationName = "";
+                                    int code = 0;
 
+                                    if (organization.Attribute("type") != null)
+                                    {
+                                        int.TryParse(organization.Attribute("type")?.Value, out code);
+                                    }
                                     if (narratives.Count() > 0)
                                     {
                                         if (narratives.FirstOrDefault().HasAttributes)
@@ -260,6 +265,7 @@ namespace AIMS.IATILib.Parsers
                                         organizationList.Add(new IATIOrganization()
                                         {
                                             Id = orgCounter,
+                                            Code = code,
                                             Project = projectTitle,
                                             Name = organizationName,
                                             Role = role.ToString()
@@ -802,16 +808,20 @@ namespace AIMS.IATILib.Parsers
                         //Extracting participating organizations
                         var organizations = activity.Elements("participating-org");
                         List<IATIOrganizationView> organizationList = new List<IATIOrganizationView>();
-
                         if (organizations.Any())
                         {
                             foreach (var organization in organizations)
                             {
-
                                 if (organization.HasAttributes)
                                 {
                                     var narratives = organization.Elements("narrative");
                                     string organizationName = "";
+                                    int code = 0;
+
+                                    if (organization.Attribute("type") != null)
+                                    {
+                                        int.TryParse(organization.Attribute("type")?.Value, out code);
+                                    }
 
                                     if (narratives != null)
                                     {
@@ -844,6 +854,7 @@ namespace AIMS.IATILib.Parsers
                                                 organizationList.Add(new IATIOrganizationView()
                                                 {
                                                     Id = orgCounter,
+                                                    Code = code,
                                                     Name = organizationName,
                                                 });
                                             }
@@ -1116,6 +1127,12 @@ namespace AIMS.IATILib.Parsers
                                 {
                                     var narratives = organization.Elements("narrative");
                                     string organizationName = "";
+                                    int code = 0;
+
+                                    if (organization.Attribute("type") != null)
+                                    {
+                                        int.TryParse(organization.Attribute("type")?.Value, out code);
+                                    }
 
                                     if (narratives.Count() > 0)
                                     {
@@ -1145,6 +1162,7 @@ namespace AIMS.IATILib.Parsers
                                         {
                                             organizationsList.Add(new IATIOrganizationModel()
                                             {
+                                                Code = code,
                                                 Name = organizationName,
                                             });
                                         }
