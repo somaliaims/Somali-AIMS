@@ -122,6 +122,9 @@ namespace AIMS.Models
         public string OrganizationName { get; set; }
         public bool IsApproved { get; set; } = true;
         public OrganizationSourceType SourceType { get; set; } = OrganizationSourceType.IATI;
+        [ForeignKey("OrganizationType")]
+        public int OrganizationTypeId { get; set; }
+        public EFOrganizationTypes OrganizationType { get; set; } = null;
     }
 
     public class EFUser

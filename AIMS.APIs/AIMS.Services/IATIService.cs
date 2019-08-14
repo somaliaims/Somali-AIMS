@@ -124,16 +124,36 @@ namespace AIMS.Services
         string ExtractSectorsVocabJson(string json);
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+
+        string ExtractOrganizationTypesVocabJson(string json);
+        /// <summary>
+        /// Extracts organization vocabulary json
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        string ExtractOrganizationsVocabJson(string json);
+
+        /// <summary>
         /// Gets all the organizations
         /// </summary>
         /// <returns></returns>
         ICollection<IATIOrganization> GetOrganizations();
 
         /// <summary>
+        /// Extract and save organization types from IATI to DB
+        /// </summary>
+        /// <returns></returns>
+        ActionResponse ExtractAndSaveOrganizationTypes(string json);
+
+        /// <summary>
         /// Extracts and save organizations from IATI to DB
         /// </summary>
         /// <returns></returns>
-        ActionResponse ExtractAndSaveOrganizations(string dataFilePath);
+        ActionResponse ExtractAndSaveOrganizations(string dataFilePath, string orgTypesJson);
 
         /// <summary>
         /// Extracts and save locations from IATI to DB
@@ -374,6 +394,49 @@ namespace AIMS.Services
             return sVocabJson;
         }
 
+        public string ExtractOrganizationTypesVocabJson(string json)
+        {
+            string sVocabJson = null;
+            List<IATIOrganizationTypeVocabulary> orgTypesVocabs = new List<IATIOrganizationTypeVocabulary>();
+            JObject jObject = JObject.Parse(json);
+            var tCodesArray = jObject["data"].ToArray();
+            if (tCodesArray.Length > 0)
+            {
+                foreach (var tCode in tCodesArray)
+                {
+                    orgTypesVocabs.Add(new IATIOrganizationTypeVocabulary()
+                    {
+                        Code = (int)tCode["code"],
+                        Name = (string)tCode["name"]
+                    });
+                }
+                sVocabJson = JsonConvert.SerializeObject(orgTypesVocabs);
+            }
+            return sVocabJson;
+        }
+
+        public string ExtractOrganizationsVocabJson(string json)
+        {
+            string sVocabJson = null;
+            List<IATISectorsVocabulary> sectorVocabs = new List<IATISectorsVocabulary>();
+            JObject jObject = JObject.Parse(json);
+            var tCodesArray = jObject["data"].ToArray();
+            if (tCodesArray.Length > 0)
+            {
+                foreach (var tCode in tCodesArray)
+                {
+                    sectorVocabs.Add(new IATISectorsVocabulary()
+                    {
+                        Code = (int)tCode["code"],
+                        Name = (string)tCode["name"]
+                    });
+                }
+                var unitWork = new UnitOfWork(context);
+                sVocabJson = JsonConvert.SerializeObject(sectorVocabs);
+            }
+            return sVocabJson;
+        }
+
         public ICollection<IATIProject> GetProjects(string dataFilePath)
         {
             ICollection<IATIProject> iatiProjects = new List<IATIProject>();
@@ -403,7 +466,49 @@ namespace AIMS.Services
             return iatiProjects;
         }
 
-        public ActionResponse ExtractAndSaveOrganizations(string dataFilePath)
+        public ActionResponse ExtractAndSaveOrganizationTypes(string json)
+        {
+            var unitWork = new UnitOfWork(context);
+            ActionResponse response = new ActionResponse();
+
+            try
+            {
+                List<IATIOrganizationTypeVocabulary> orgTypesList = new List<IATIOrganizationTypeVocabulary>();
+                if (!string.IsNullOrEmpty(json))
+                {
+                    List<EFOrganizationTypes> newOrganizationTypes = new List<EFOrganizationTypes>();
+                    orgTypesList = this.GetDeserializedOrgTypes(json);
+                    if (orgTypesList.Any())
+                    {
+                        List<string> orgTypesDb = unitWork.OrganizationTypesRepository.GetProjection(o => o.Id != 0, o => o.TypeName).ToList<string>();
+                        foreach(var type in orgTypesList)
+                        {
+                            if (orgTypesDb.Contains(type.Name, StringComparer.OrdinalIgnoreCase))
+                            {
+                                newOrganizationTypes.Add(new EFOrganizationTypes()
+                                {
+                                    TypeName = type.Name
+                                });
+                            }
+                        }
+
+                        if (newOrganizationTypes.Count > 0)
+                        {
+                            unitWork.OrganizationTypesRepository.InsertMultiple(newOrganizationTypes);
+                            unitWork.Save();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public ActionResponse ExtractAndSaveOrganizations(string dataFilePath, string orgTypesJson)
         {
             var unitWork = new UnitOfWork(context);
             ActionResponse response = new ActionResponse();
@@ -434,6 +539,8 @@ namespace AIMS.Services
                         break;
                 }
 
+                var organizationTypesVocabs = this.GetDeserializedOrgTypes(orgTypesJson);
+                var organizationTypes = unitWork.OrganizationTypesRepository.GetProjection(o => o.Id != 0, o => o.TypeName).ToList<string>();
                 var organizationsList = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
                 var orgNames = (from o in organizationsList
                                 select o.OrganizationName.Trim()).ToList<string>();
@@ -905,6 +1012,16 @@ namespace AIMS.Services
                 unitWork.Save();
                 return response;
             }
+        }
+
+        private List<IATIOrganizationTypeVocabulary> GetDeserializedOrgTypes(string json)
+        {
+            List<IATIOrganizationTypeVocabulary> orgTypesList = new List<IATIOrganizationTypeVocabulary>();
+            if (!string.IsNullOrEmpty(json))
+            {
+                return JsonConvert.DeserializeObject<List<IATIOrganizationTypeVocabulary>>(json);
+            }
+            return orgTypesList;
         }
 
         /*private async Task<List<IATITransactionTypes>> GetTransactionTypes(string url)

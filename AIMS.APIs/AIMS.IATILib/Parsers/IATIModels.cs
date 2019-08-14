@@ -31,6 +31,12 @@ namespace AIMS.IATILib.Parsers
         public string Name { get; set; }
     }
 
+    public class IATIOrganizationTypeVocabulary
+    {
+        public int Code { get; set; }
+        public string Name { get; set; }
+    }
+
     public class IATISectorView
     {
         public string Name { get; set; }
