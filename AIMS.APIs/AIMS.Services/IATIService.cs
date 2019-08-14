@@ -483,7 +483,7 @@ namespace AIMS.Services
                         List<string> orgTypesDb = unitWork.OrganizationTypesRepository.GetProjection(o => o.Id != 0, o => o.TypeName).ToList<string>();
                         foreach(var type in orgTypesList)
                         {
-                            if (orgTypesDb.Contains(type.Name, StringComparer.OrdinalIgnoreCase))
+                            if (!orgTypesDb.Contains(type.Name, StringComparer.OrdinalIgnoreCase))
                             {
                                 newOrganizationTypes.Add(new EFOrganizationTypes()
                                 {
@@ -505,6 +505,7 @@ namespace AIMS.Services
                 response.Success = false;
                 response.Message = ex.Message;
             }
+            
             return response;
         }
 
@@ -571,7 +572,7 @@ namespace AIMS.Services
                             {
                                 int orgCode = org.Code;
                                 EFOrganizationTypes orgType = null;
-                                string orgTypeName = (from v in organizations
+                                string orgTypeName = (from v in organizationTypesVocabs
                                                         where v.Code == org.Code
                                                         select v.Name).FirstOrDefault();
                                 orgType = (from t in organizationTypes
@@ -579,11 +580,22 @@ namespace AIMS.Services
                                                       select t).FirstOrDefault();
 
                                 withOutTypeCount = (orgType == null) ? withOutTypeCount : (withOutTypeCount + 1);
-                                newIATIOrganizations.Add(new EFOrganization()
+                                if (orgType != null)
                                 {
-                                    OrganizationType = orgType,
-                                    OrganizationName = org.Name,
-                                });
+                                    newIATIOrganizations.Add(new EFOrganization()
+                                    {
+                                        OrganizationType = orgType,
+                                        OrganizationName = org.Name,
+                                    });
+                                }
+                                else
+                                {
+                                    newIATIOrganizations.Add(new EFOrganization()
+                                    {
+                                        OrganizationName = org.Name,
+                                    });
+                                }
+                                
                             }
                         }
                     }
@@ -593,6 +605,7 @@ namespace AIMS.Services
                 {
                     unitWork.OrganizationRepository.InsertMultiple(newIATIOrganizations);
                     unitWork.Save();
+                    response.Message = withOutTypeCount.ToString();
                     response.ReturnedId = newIATIOrganizations.Count;
                 }
             }

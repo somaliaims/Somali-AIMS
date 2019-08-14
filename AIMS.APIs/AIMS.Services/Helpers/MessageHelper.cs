@@ -91,6 +91,14 @@ namespace AIMS.Services.Helpers
         string NewIATISectorsAdded(int sectorCount);
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="newOrgs"></param>
+        /// <param name="withoutType"></param>
+        /// <returns></returns>
+        string NewIATIOrganizationsMessage(int newOrgs, int withoutType);
+
+        /// <summary>
         /// Gets invalid percentage message
         /// </summary>
         /// <returns></returns>
@@ -319,6 +327,15 @@ namespace AIMS.Services.Helpers
         public string NewIATISectorsAdded(int sectorCount)
         {
             return ("<p>" + sectorCount + " new IATI sectors added.</p>");
+        }
+
+        public string NewIATIOrganizationsMessage(int newOrgs, int withoutType)
+        {
+            if (withoutType > 0)
+            {
+                return ("<p>" + newOrgs + " new organizations added from IATI out of which " + withoutType + " are without sector types.</p>");
+            }
+            return ("<p>" + newOrgs + " new organizations added from IATI</p>");
         }
 
         public string EmailNotFound(string email)

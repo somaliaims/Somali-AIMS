@@ -58,11 +58,11 @@ namespace AIMS.APIs.Scheduler
                 string xml = "", json = "", transactionTypesJson = "", financeTypesJson = "", sectorsVocabJson = "",
                     organizationTypesJson = "";
 
-                using (var client = new WebClient())
+                /*using (var client = new WebClient())
                 {
                     xml = client.DownloadString(url);
                 }
-                File.WriteAllText(filePath, xml);
+                File.WriteAllText(filePath, xml);*/
 
                 using (var client = new WebClient())
                 {
@@ -114,7 +114,8 @@ namespace AIMS.APIs.Scheduler
                     var sectorResponse = service.ExtractAndSaveIATISectors(filePath, sectorsVocabPath);
                     service.ExtractAndSaveLocations(filePath);
                     service.ExtractAndSaveOrganizationTypes(cleanedOrgTypesVocabJson);
-                    service.ExtractAndSaveOrganizations(filePath, cleanedOrgTypesVocabJson);
+                    var orgResponse = service.ExtractAndSaveOrganizations(filePath, cleanedOrgTypesVocabJson);
+                    notificationService.SendNotificationsForNewOrganizations(orgResponse.ReturnedId, Convert.ToInt32(orgResponse.Message));
                     notificationService.SendNotificationsForNewSectors(sectorResponse.ReturnedId);
 
                     var currencyList = httpService.ParseAndExtractCurrencyList(json);

@@ -47,10 +47,18 @@ namespace AIMS.Services
         ActionResponse Add(NotificationModel model);
 
         /// <summary>
-        /// Sends notifications for new data, organizations, sectors
+        /// Sends notifications for new IATI data for sectors
         /// </summary>
         /// <returns></returns>
         ActionResponse SendNotificationsForNewSectors(int newSectors);
+
+        /// <summary>
+        /// Sends notifications for new iati data for organizations
+        /// </summary>
+        /// <param name="newOrganizations"></param>
+        /// <param name="orgnazationsWithoutType"></param>
+        /// <returns></returns>
+        ActionResponse SendNotificationsForNewOrganizations(int newOrganizations, int orgnazationsWithoutType);
 
         /// <summary>
         /// Sets notifications as read
@@ -207,6 +215,60 @@ namespace AIMS.Services
                     }
                 }
                 return response;
+        }
+
+        public ActionResponse SendNotificationsForNewOrganizations(int newOrganizations, int organizationsWithoutType)
+        {
+            var unitWork = new UnitOfWork(context);
+            ActionResponse response = new ActionResponse();
+            var messages = unitWork.EmailMessagesRepository.GetAll();
+
+            if (newOrganizations > 0)
+            {
+                string subject = "", message = "", footerMessage = "";
+                var emailMessage = (from m in messages
+                                    where m.MessageType == EmailMessageType.NewIATIOrganization
+                                    select m).FirstOrDefault();
+                if (emailMessage != null)
+                {
+                    subject = emailMessage.Subject;
+                    message = emailMessage.Message;
+                    footerMessage = emailMessage.FooterMessage;
+                }
+
+                ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                var smtpSettings = smtpService.GetPrivate();
+                SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                if (smtpSettings != null)
+                {
+                    smtpSettingsModel.Host = smtpSettings.Host;
+                    smtpSettingsModel.Port = smtpSettings.Port;
+                    smtpSettingsModel.Username = smtpSettings.Username;
+                    smtpSettingsModel.Password = smtpSettings.Password;
+                    smtpSettings.AdminEmail = smtpSettings.AdminEmail;
+                }
+
+                IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
+                var users = unitWork.UserRepository.GetManyQueryable(u => u.UserType == UserTypes.Manager);
+                var emails = (from u in users
+                              select u.Email);
+                List<EmailAddress> emailAddresses = new List<EmailAddress>();
+                foreach (var email in emails)
+                {
+                    emailAddresses.Add(new EmailAddress()
+                    {
+                        Email = email
+                    });
+                }
+
+                IMessageHelper mHelper = new MessageHelper();
+                message += mHelper.NewIATIOrganizationsMessage(newOrganizations, organizationsWithoutType);
+                if (emailAddresses.Count > 0)
+                {
+                    emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
+                }
+            }
+            return response;
         }
 
         public async Task<ActionResponse> MarkNotificationsReadAsync(NotificationUpdateModel model)

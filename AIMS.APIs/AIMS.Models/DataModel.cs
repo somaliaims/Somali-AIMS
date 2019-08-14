@@ -69,7 +69,8 @@ namespace AIMS.Models
         ProjectDeleted = 13,
         ProjectDeletionApproved = 14,
         ProjectDeletionCancelled = 15,
-        ResetPassword = 16
+        ResetPassword = 16,
+        NewIATIOrganization = 17
     }
 
     public enum DataTransactions
@@ -123,8 +124,8 @@ namespace AIMS.Models
         public bool IsApproved { get; set; } = true;
         public OrganizationSourceType SourceType { get; set; } = OrganizationSourceType.IATI;
         [ForeignKey("OrganizationType")]
-        public int OrganizationTypeId { get; set; }
-        public EFOrganizationTypes OrganizationType { get; set; } = null;
+        public int? OrganizationTypeId { get; set; }
+        public virtual EFOrganizationTypes OrganizationType { get; set; }
     }
 
     public class EFUser
