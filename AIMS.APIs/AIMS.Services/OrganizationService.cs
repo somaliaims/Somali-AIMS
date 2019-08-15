@@ -22,6 +22,12 @@ namespace AIMS.Services
         IEnumerable<OrganizationView> GetAll();
 
         /// <summary>
+        /// Gets list of organizations having type
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<OrganizationView> GetWithType();
+
+        /// <summary>
         /// Gets all organizations entered by user
         /// </summary>
         /// <returns></returns>
@@ -107,7 +113,23 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
-                var organizations = unitWork.OrganizationRepository.GetMany(o => o.Id != 0);
+                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.Id != 0, new string[] { "OrganizationType" });
+                if (organizations.Count() > 0)
+                {
+                    organizations = (from org in organizations
+                                     orderby org.OrganizationName ascending
+                                     select org);
+                }
+                return mapper.Map<List<OrganizationView>>(organizations);
+            }
+        }
+
+        public IEnumerable<OrganizationView> GetWithType()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<OrganizationView> organizationsList = new List<OrganizationView>();
+                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.OrganizationTypeId != 0, new string[] { "OrganizationType" });
                 if (organizations.Count() > 0)
                 {
                     organizations = (from org in organizations
@@ -123,7 +145,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
-                var organizations = unitWork.OrganizationRepository.GetMany(o => o.SourceType == OrganizationSourceType.User);
+                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.SourceType == OrganizationSourceType.User, new string[] { "OrganizationType" });
                 if (organizations.Count() > 0)
                 {
                     organizations = (from org in organizations
@@ -138,7 +160,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var organizationList = unitWork.OrganizationRepository.GetMany(o => o.Id.Equals(id));
+                var organizationList = unitWork.OrganizationRepository.GetWithInclude(o => o.Id.Equals(id), new string[] { "OrganizationType" });
                 EFOrganization organization = null;
                 foreach (var org in organizationList)
                 {
@@ -153,7 +175,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
-                var organizations = unitWork.OrganizationRepository.GetMany(o => o.OrganizationName.Contains(criteria));
+                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.OrganizationName.Contains(criteria), new string[] { "OrganizationType" });
                 if (organizations.Count() > 0)
                 {
                     organizations = (from org in organizations
@@ -168,7 +190,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var organizations = await unitWork.OrganizationRepository.GetAllAsync();
+                var organizations = await unitWork.OrganizationRepository.GetWithIncludeAsync(o => o.Id != 0, new string[] { "OrganizationType" });
                 if (organizations.Count() > 0)
                 {
                     organizations = (from org in organizations

@@ -259,57 +259,70 @@ namespace AIMS.APIs
                     context.Organizations.Add(new EFOrganization() { OrganizationName = "Concern World Wide" });
                     context.Organizations.Add(new EFOrganization() { OrganizationName = "Norwegian Refugee Council" });*/
 
-                    var managerUser = context.Users.Add(new EFUser()
+                    if (context.Users.Count() == 0)
                     {
-                        Email = "aims.developer18@gmail.com",
-                        Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-                        Organization = undp.Entity,
-                        RegistrationDate = DateTime.Now,
-                        IsApproved = true,
-                        UserType = UserTypes.Manager
-                    });
+                        var managerUser = context.Users.Add(new EFUser()
+                        {
+                            Email = "raashid.ahmad@gmail.com",
+                            Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                            Organization = undp.Entity,
+                            RegistrationDate = DateTime.Now,
+                            IsApproved = true,
+                            UserType = UserTypes.Manager
+                        });
 
-                    context.Users.Add(new EFUser()
-                    {
-                        Email = "work@mattgeddes.co.uk",
-                        Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-                        Organization = mgec.Entity,
-                        RegistrationDate = DateTime.Now,
-                        IsApproved = true,
-                        UserType = UserTypes.Manager
-                    });
+                        /*var managerUser = context.Users.Add(new EFUser()
+                        {
+                            Email = "aims.developer18@gmail.com",
+                            Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                            Organization = undp.Entity,
+                            RegistrationDate = DateTime.Now,
+                            IsApproved = true,
+                            UserType = UserTypes.Manager
+                        });
 
-                    context.Users.Add(new EFUser()
-                    {
-                        Email = "mohammedgele22@qq.com",
-                        Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-                        Organization = mop.Entity,
-                        RegistrationDate = DateTime.Now,
-                        IsApproved = true,
-                        UserType = UserTypes.Manager
-                    });
+                        context.Users.Add(new EFUser()
+                        {
+                            Email = "work@mattgeddes.co.uk",
+                            Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                            Organization = mgec.Entity,
+                            RegistrationDate = DateTime.Now,
+                            IsApproved = true,
+                            UserType = UserTypes.Manager
+                        });
 
-                    context.Users.Add(new EFUser()
-                    {
-                        Email = "pau.blanquer@undp.org",
-                        Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-                        Organization = undp.Entity,
-                        RegistrationDate = DateTime.Now,
-                        IsApproved = true,
-                        UserType = UserTypes.Manager
-                    });
+                        context.Users.Add(new EFUser()
+                        {
+                            Email = "mohammedgele22@qq.com",
+                            Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                            Organization = mop.Entity,
+                            RegistrationDate = DateTime.Now,
+                            IsApproved = true,
+                            UserType = UserTypes.Manager
+                        });
 
-                    context.Users.Add(new EFUser()
-                    {
-                        Email = "sarah.cramer@one.un.org",
-                        Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-                        Organization = undp.Entity,
-                        RegistrationDate = DateTime.Now,
-                        IsApproved = true,
-                        UserType = UserTypes.Manager
-                    });
+                        context.Users.Add(new EFUser()
+                        {
+                            Email = "pau.blanquer@undp.org",
+                            Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                            Organization = undp.Entity,
+                            RegistrationDate = DateTime.Now,
+                            IsApproved = true,
+                            UserType = UserTypes.Manager
+                        });
 
-                    context.SaveChanges();
+                        context.Users.Add(new EFUser()
+                        {
+                            Email = "sarah.cramer@one.un.org",
+                            Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                            Organization = undp.Entity,
+                            RegistrationDate = DateTime.Now,
+                            IsApproved = true,
+                            UserType = UserTypes.Manager
+                        });*/
+
+                        context.SaveChanges();
+                    }
                 }
             }
             catch (Exception ex)

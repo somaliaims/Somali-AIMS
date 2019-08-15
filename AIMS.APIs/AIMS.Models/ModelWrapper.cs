@@ -242,6 +242,8 @@ namespace AIMS.Models
     public class OrganizationView
     {
         public int Id { get; set; }
+        public int OrganizationTypeId { get; set; }
+        public string OrganizationType { get; set; }
         public string OrganizationName { get; set; }
     }
 

@@ -58,11 +58,11 @@ namespace AIMS.APIs.Scheduler
                 string xml = "", json = "", transactionTypesJson = "", financeTypesJson = "", sectorsVocabJson = "",
                     organizationTypesJson = "";
 
-                /*using (var client = new WebClient())
+                using (var client = new WebClient())
                 {
                     xml = client.DownloadString(url);
                 }
-                File.WriteAllText(filePath, xml);*/
+                File.WriteAllText(filePath, xml);
 
                 using (var client = new WebClient())
                 {

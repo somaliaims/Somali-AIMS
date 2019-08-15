@@ -333,7 +333,7 @@ namespace AIMS.Services.Helpers
         {
             if (withoutType > 0)
             {
-                return ("<p>" + newOrgs + " new organizations added from IATI out of which " + withoutType + " are without sector types.</p>");
+                return ("<p>" + newOrgs + " new organizations added from IATI out of which " + withoutType + " are without organization types.</p>");
             }
             return ("<p>" + newOrgs + " new organizations added from IATI</p>");
         }
