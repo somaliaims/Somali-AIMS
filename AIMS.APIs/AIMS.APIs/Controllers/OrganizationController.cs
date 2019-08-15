@@ -32,6 +32,13 @@ namespace AIMS.APIs.Controllers
             return Ok(organizations);
         }
 
+        [HttpGet("GetWithTypes")]
+        public IActionResult GetOrganizationsWithTypes()
+        {
+            var organizations = organizationService.GetWithType();
+            return Ok(organizations);
+        }
+
         [HttpGet("GetUserOrganizations")]
         public IActionResult GetUserOrganizations()
         {
