@@ -466,9 +466,11 @@ namespace AIMS.Services
                              where s.Id == newId
                              select s).FirstOrDefault();
 
-                var projects = unitWork.ProjectRepository.GetManyQueryable(p => projectIds.Contains(p.Id));
+                var projects = unitWork.ProjectRepository.GetWithInclude(p => projectIds.Contains(p.Id), new string[] { "CreatedBy" });
                 List<string> projectNames = (from p in projects
                                              select p.Title).ToList<string>();
+                var emails = (from p in projects
+                              select p.CreatedBy.Email);
                 try
                 {
                     var strategy = context.Database.CreateExecutionStrategy();
@@ -509,7 +511,7 @@ namespace AIMS.Services
 
                             if (projectNames.Count > 0)
                             {
-                                var users = unitWork.UserRepository.GetManyQueryable(u => u.UserType == UserTypes.Manager);
+                                var users = unitWork.UserRepository.GetManyQueryable(u => u.UserType == UserTypes.Manager || u.UserType == UserTypes.SuperAdmin);
                                 List<EmailAddress> emailAddresses = new List<EmailAddress>();
                                 foreach(var user in users)
                                 {
@@ -517,6 +519,21 @@ namespace AIMS.Services
                                     {
                                         Email = user.Email
                                     });
+                                }
+
+                                foreach(var email in emails)
+                                {
+                                    var isEmailExists = (from e in emailAddresses
+                                                         where e.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
+                                                         select e).FirstOrDefault();
+
+                                    if (isEmailExists == null)
+                                    {
+                                        emailAddresses.Add(new EmailAddress()
+                                        {
+                                            Email = email
+                                        });
+                                    }
                                 }
 
                                 if (emailAddresses.Count > 0)

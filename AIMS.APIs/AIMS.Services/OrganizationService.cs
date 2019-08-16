@@ -525,6 +525,27 @@ namespace AIMS.Services
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                 }
 
+                var userAccounts = unitWork.UserRepository.GetManyQueryable(u => u.OrganizationId == id);
+                if (userAccounts.Any() && newId == 0)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetUserAccountsUnderOrgMessage();
+                    return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                }
+
+                var projectFundersList = await unitWork.ProjectFundersRepository.GetManyQueryableAsync(f => ( f.FunderId == id || f.FunderId == newId));
+                var projectIds = (from s in projectFundersList
+                                  select s.ProjectId).Distinct().ToList<int>();
+
+                if (projectIds.Count() > 0 && newId == 0)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetDependentProjectsOnOrganizationMessage();
+                    return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                }
+
                 EFOrganization newOrganization = null;
                 EFOrganization oldOrganization = (from org in organizations
                                                   where org.Id == id
@@ -534,12 +555,19 @@ namespace AIMS.Services
                                    where org.Id == newId
                                    select org).FirstOrDefault();
 
+                var projects = unitWork.ProjectRepository.GetWithInclude(p => projectIds.Contains(p.Id), new string[] { "CreatedBy" });
+                List<string> projectNames = (from p in projects
+                                             select p.Title).ToList<string>();
+                var emails = (from p in projects
+                              select p.CreatedBy.Email);
+
+
                 var strategy = context.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
                 {
                     using (var transaction = context.Database.BeginTransaction())
                     {
-                        var projectFundersList = await unitWork.ProjectFundersRepository.GetManyQueryableAsync(p => (p.FunderId == id || p.FunderId == newId));
+                        //var projectFundersList = await unitWork.ProjectFundersRepository.GetManyQueryableAsync(p => (p.FunderId == id || p.FunderId == newId));
                         var projectImplementersList = await unitWork.ProjectImplementersRepository.GetManyQueryableAsync(i => (i.ImplementerId == id || i.ImplementerId == newId));
                         List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
                         List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
@@ -610,19 +638,82 @@ namespace AIMS.Services
                             }
                             unitWork.ProjectImplementersRepository.Delete(implementer);
                         }
-                        await unitWork.SaveAsync();
 
-                        if (newId == 0)
+                        
+                        if (newId != 0)
                         {
-                            unitWork.OrganizationRepository.Delete(oldOrganization);
+                            foreach(var userAccount in userAccounts)
+                            {
+                                userAccount.OrganizationId = newId;
+                                unitWork.UserRepository.Update(userAccount);
+                            }
                         }
-                        else
-                        {
-                            unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
-                            unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
-                        }
+                        await unitWork.SaveAsync();
+                            
+                        unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
+                        unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
+                        unitWork.OrganizationRepository.Delete(oldOrganization);
                         await unitWork.SaveAsync();
                         transaction.Commit();
+
+                        if (projectNames.Count > 0)
+                        {
+                            var users = unitWork.UserRepository.GetManyQueryable(u => u.UserType == UserTypes.Manager || u.UserType == UserTypes.SuperAdmin);
+                            List<EmailAddress> emailAddresses = new List<EmailAddress>();
+                            foreach (var user in users)
+                            {
+                                emailAddresses.Add(new EmailAddress()
+                                {
+                                    Email = user.Email
+                                });
+                            }
+
+                            foreach (var email in emails)
+                            {
+                                var isEmailExists = (from e in emailAddresses
+                                                     where e.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
+                                                     select e).FirstOrDefault();
+
+                                if (isEmailExists == null)
+                                {
+                                    emailAddresses.Add(new EmailAddress()
+                                    {
+                                        Email = email
+                                    });
+                                }
+                            }
+
+                            if (emailAddresses.Count > 0)
+                            {
+                                ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                                var smtpSettings = smtpService.GetPrivate();
+                                SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                                if (smtpSettings != null)
+                                {
+                                    smtpSettingsModel.Host = smtpSettings.Host;
+                                    smtpSettingsModel.Port = smtpSettings.Port;
+                                    smtpSettingsModel.Username = smtpSettings.Username;
+                                    smtpSettingsModel.Password = smtpSettings.Password;
+                                    smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                                }
+
+                                string subject = "", message = "", footerMessage = "";
+                                var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ChangedMappingEffectedProject);
+                                if (emailMessage != null)
+                                {
+                                    subject = emailMessage.Subject;
+                                    message = emailMessage.Message;
+                                    footerMessage = emailMessage.FooterMessage;
+                                }
+
+                                mHelper = new MessageHelper();
+                                string oldSectorName = oldOrganization != null ? oldOrganization.OrganizationName : null;
+                                string newSectorName = newOrganization != null ? newOrganization.OrganizationName : null;
+                                message += mHelper.ChangedMappingAffectedProjectsMessage(projectNames, oldSectorName, newSectorName);
+                                IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                                emailHelper.SendEmailToUsers(emailAddresses, subject, "", message);
+                            }
+                        }
                     }
                 });
 

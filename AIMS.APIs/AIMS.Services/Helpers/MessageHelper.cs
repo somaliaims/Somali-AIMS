@@ -237,6 +237,12 @@ namespace AIMS.Services.Helpers
         string GetDependentProjectsOnSectorMessage();
 
         /// <summary>
+        /// Gets message for dependent projects on deleting organization
+        /// </summary>
+        /// <returns></returns>
+        string GetDependentProjectsOnOrganizationMessage();
+
+        /// <summary>
         /// Gets unauthorized access message
         /// </summary>
         /// <returns></returns>
@@ -265,6 +271,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string GetInvalidAccountForProject();
+
+        /// <summary>
+        /// Gets a message for user accounts associated with organization
+        /// </summary>
+        /// <returns></returns>
+        string GetUserAccountsUnderOrgMessage();
     }
 
     public class MessageHelper : IMessageHelper
@@ -293,6 +305,8 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_PROJECT_EDIT = "You do not have enough permissions to set project status";
         private readonly string INVALID_ACCOUNT_FOR_PROJECT = "You have provided an invalid user account";
         private readonly string PROJECT_DELETION_APPROVED = "The project you are requesting to delete is approved for deletion and under consideration";
+        private readonly string DEPENDENT_PROJECTS_FOR_ORGANIZATION = "Dependent projects found for the selected organization. Either map another organization or remove organization (funder/implementer) from the dependent projects";
+        private readonly string USER_ACCOUNTS_ASSOCIATED_WITH_ORGANIZATION = "There are user accounts associated with this organization. Either map this organizaiton to another or delete user accounts first in order to delete the organizaiton";
 
         public string GetNotFound(string entity)
         {
@@ -419,6 +433,11 @@ namespace AIMS.Services.Helpers
             return (DEPENDENT_PROJECTS_FOR_SECTOR);
         }
 
+        public string GetDependentProjectsOnOrganizationMessage()
+        {
+            return (DEPENDENT_PROJECTS_FOR_ORGANIZATION);
+        }
+
         public string GetUnAuthorizedAccessMessage()
         {
             return (UNAUTHORIZED_ACCESS);
@@ -432,6 +451,11 @@ namespace AIMS.Services.Helpers
         public string GetProjectDeletionApprovedMessage()
         {
             return (PROJECT_DELETION_APPROVED);
+        }
+
+        public string GetUserAccountsUnderOrgMessage()
+        {
+            return (USER_ACCOUNTS_ASSOCIATED_WITH_ORGANIZATION);
         }
 
         public string ProjectToOrganizationMessage(string organization)
