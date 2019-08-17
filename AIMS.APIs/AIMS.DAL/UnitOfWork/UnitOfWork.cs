@@ -424,7 +424,7 @@ namespace AIMS.DAL.UnitOfWork
             }
         }
 
-        public GenericRepository<EFExchangeRatesUsageSettings> ExRatesUsageSettingsRepository
+        public GenericRepository<EFExchangeRatesUsageSettings> ExRatesUsageRepository
         {
             get
             {

@@ -167,6 +167,21 @@ namespace AIMS.Models
         public string Rates { get; set; }
     }
 
+    public class ExchangeRatesUsageModel
+    {
+        public ExchangeRateSources Source { get; set; }
+        public ExchangeRateUsageSection UsageSection { get; set; }
+        public int Order { get; set; }
+    }
+
+    public class ExchangeRatesUsageView
+    {
+        public int Id { get; set; }
+        public string Source { get; set; }
+        public string UsageSection { get; set; }
+        public int Order { get; set; }
+    }
+
     public class ExchangeRatesView
     {
         public string Dated { get; set; }

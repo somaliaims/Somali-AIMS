@@ -277,6 +277,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string GetUserAccountsUnderOrgMessage();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string GetExRateOrderExistsMessage();
     }
 
     public class MessageHelper : IMessageHelper
@@ -307,6 +313,7 @@ namespace AIMS.Services.Helpers
         private readonly string PROJECT_DELETION_APPROVED = "The project you are requesting to delete is approved for deletion and under consideration";
         private readonly string DEPENDENT_PROJECTS_FOR_ORGANIZATION = "Dependent projects found for the selected organization. Either map another organization or remove organization (funder/implementer) from the dependent projects";
         private readonly string USER_ACCOUNTS_ASSOCIATED_WITH_ORGANIZATION = "There are user accounts associated with this organization. Either map this organizaiton to another or delete user accounts first in order to delete the organizaiton";
+        private readonly string EXRATE_ORDER_EXISTS = "Exchange rate usage order you provided already exits, provide a different one";
 
         public string GetNotFound(string entity)
         {
@@ -481,6 +488,11 @@ namespace AIMS.Services.Helpers
         public string GetInvalidFunderApprovalMessage()
         {
             return (INVALID_FUNDER_APPROVAL);
+        }
+
+        public string GetExRateOrderExistsMessage()
+        {
+            return (EXRATE_ORDER_EXISTS);
         }
 
         public string OrganizationsMergedMessage(List<string> organizations, string newOrganization)

@@ -99,6 +99,9 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(d => d.RequestedOn, opts => opts.MapFrom(source => source.RequestedOn.ToShortDateString()))
                 .ForMember(d => d.StatusUpdatedOn, opts => opts.MapFrom(source => source.StatusUpdatedOn.ToShortDateString()));
 
+            CreateMap<EFExchangeRatesUsageSettings, ExchangeRatesUsageView>()
+                .ForMember(e => e.Source, opts => opts.MapFrom(source => source.Source.ToString()))
+                .ForMember(e => e.UsageSection, opts => opts.MapFrom(source => source.UsageSection.ToString()));
         }
     }
 }
