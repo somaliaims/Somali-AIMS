@@ -90,7 +90,7 @@ namespace AIMS.Models
     public enum ExchangeRateUsageSection
     {
         DataEntry = 1,
-        Reportint = 2
+        Reporting = 2
     }
 
     public class EFFundingTypes

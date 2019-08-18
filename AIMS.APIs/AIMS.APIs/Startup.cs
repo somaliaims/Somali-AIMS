@@ -134,11 +134,12 @@ namespace AIMS.APIs
             services.AddScoped<IContactService, ContactService>();
             services.AddScoped<IDataImportService, DataImportService>();
             services.AddScoped<IProjectDeletionService, ProjectDeletionService>();
+            services.AddScoped<IExchangeRatesUsageService, ExchangeRatesUsageService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();
             services.AddHttpClient<IExchangeRateHttpService, ExchangeRateHttpService>();
-            services.AddSingleton<IHostedService, ScheduleTask>();
+            //services.AddSingleton<IHostedService, ScheduleTask>();
             services.AddScoped<IViewRenderService, ViewRenderService>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
