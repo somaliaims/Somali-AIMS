@@ -75,7 +75,8 @@ namespace AIMS.DAL.EF
                 .HasKey(d => new { d.ProjectId, d.UserId });
 
             modelBuilder.Entity<EFExchangeRatesUsageSettings>()
-                .HasKey(e => new { e.Source, e.UsageSection, e.Order });
+                .HasIndex(e => new { e.Source, e.UsageSection })
+                .IsUnique();
         }
 
         //Creating DB Tables for the Objects

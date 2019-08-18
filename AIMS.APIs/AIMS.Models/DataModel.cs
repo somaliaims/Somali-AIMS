@@ -330,6 +330,7 @@ namespace AIMS.Models
 
     public class EFExchangeRatesUsageSettings
     {
+        public int Id { get; set; }
         public ExchangeRateSources Source { get; set; }
         public ExchangeRateUsageSection UsageSection { get; set; }
         public int Order { get; set; }

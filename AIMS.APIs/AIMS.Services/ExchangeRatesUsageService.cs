@@ -30,14 +30,22 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse AddOrUpdate(ExchangeRatesUsageModel model);
+        ActionResponse Add(ExchangeRatesUsageModel model);
+
+        /// <summary>
+        /// Updates ex rate usage
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse Update(int id, ExchangeRatesUsageModel model);
 
         /// <summary>
         /// Deletes ex rates usage
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ActionResponse Delete(ExchangeRateSources source, ExchangeRateUsageSection usageSection);
+        ActionResponse Delete(int id);
     }
 
     public class ExchangeRatesUsageService : IExchangeRatesUsageService
@@ -69,7 +77,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddOrUpdate(ExchangeRatesUsageModel model)
+        public ActionResponse Add(ExchangeRatesUsageModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -112,13 +120,47 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Delete(ExchangeRateSources source, ExchangeRateUsageSection usageSection)
+        public ActionResponse Update(int id, ExchangeRatesUsageModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 IMessageHelper mHelper;
                 ActionResponse response = new ActionResponse();
-                var exRateUsageExist = unitWork.ExRatesUsageRepository.GetOne(e => e.Source == source && e.UsageSection == usageSection);
+                var exRatesUsageList = unitWork.ExRatesUsageRepository.GetAll();
+
+                var isExRateUsageExists = (from e in exRatesUsageList
+                                           where e.Source == model.Source && e.UsageSection == model.UsageSection
+                                           select e).FirstOrDefault();
+
+                var isOrderExists = (from e in exRatesUsageList
+                                     where e.Order == model.Order
+                                     select e).FirstOrDefault();
+
+                if (isOrderExists != null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetExRateOrderExistsMessage();
+                    return response;
+                }
+
+                if (isExRateUsageExists != null)
+                {
+                    isExRateUsageExists.Order = model.Order;
+                    unitWork.ExRatesUsageRepository.Update(isExRateUsageExists);
+                }
+                unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse Delete(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                var exRateUsageExist = unitWork.ExRatesUsageRepository.GetOne(e => e.Id == id);
                 if (exRateUsageExist == null)
                 {
                     mHelper = new MessageHelper();
@@ -128,6 +170,7 @@ namespace AIMS.Services
                 }
 
                 unitWork.ExRatesUsageRepository.Delete(exRateUsageExist);
+                unitWork.Save();
                 return response;
             }
         }

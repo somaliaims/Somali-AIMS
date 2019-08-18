@@ -41,7 +41,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var response = service.AddOrUpdate(model);
+            var response = service.Add(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -49,10 +49,25 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
-        [HttpDelete("{source}/{usageSection}")]
-        public IActionResult Delete(ExchangeRateSources source, ExchangeRateUsageSection usageSection)
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] ExchangeRatesUsageModel model)
         {
-            var response = service.Delete(source, usageSection);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = service.Update(id, model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var response = service.Delete(id);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
