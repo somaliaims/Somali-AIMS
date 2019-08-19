@@ -188,6 +188,23 @@ namespace AIMS.Models
         public List<CurrencyWithRates> Rates { get; set; }
     }
 
+    public class ExchangeRateForCurrency
+    {
+        public string Currency { get; set; }
+        public decimal ExchangeRate { get; set; }
+        public string Dated { get; set; }
+        public bool IsError { get; set; }
+        public string ErrorMessage { get; set; }
+    }
+
+    public class ExRateFinderModel
+    {
+        [Required]
+        public string Currency { get; set; }
+        [Required]
+        public DateTime Dated { get; set; }
+    }
+
     public class CurrencyNamesView
     {
         public string Code { get; set; }

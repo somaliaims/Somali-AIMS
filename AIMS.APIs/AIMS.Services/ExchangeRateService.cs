@@ -80,6 +80,14 @@ namespace AIMS.Services
         Task<ExchangeRatesView> GetCurrencyRatesForDate(DateTime dated);
 
         /// <summary>
+        /// Gets an average rate for the provided currency and date
+        /// </summary>
+        /// <param name="dated"></param>
+        /// <param name="currency"></param>
+        /// <returns></returns>
+        Task<ExchangeRateForCurrency> GetAverageCurrencyRatesForDate(DateTime dated, string currency);
+
+        /// <summary>
         /// Get apis calls count for current month
         /// </summary>
         /// <returns></returns>
@@ -207,6 +215,105 @@ namespace AIMS.Services
                 apiKey = exRateSettings.APIKeyOpenExchangeRates;
             }
             return apiKey;
+        }
+
+        public async Task<ExchangeRateForCurrency> GetAverageCurrencyRatesForDate(DateTime dated, string currency)
+        {
+            var unitWork = new UnitOfWork(context);
+            ExchangeRateForCurrency exRateForCurrency = new ExchangeRateForCurrency() { Currency = currency, Dated = dated.ToShortDateString(), ErrorMessage = null, IsError = false };
+            try
+            {
+                int dateYear = dated.Year;
+                int month = dated.Month;
+                int startingDayOfMonth = 1, endingDayOfMonth = 30;
+                int fyStartingMonth = 7, fyEndingMonth = 6;
+                int proposedYear = dated.Year;
+                DateTime startDate, endDate;
+
+                if (month <= fyEndingMonth)
+                {
+                    --proposedYear;
+                    startDate = new DateTime(proposedYear, fyStartingMonth, startingDayOfMonth);
+                    endDate = new DateTime(dateYear, fyEndingMonth, endingDayOfMonth);
+                }
+                else
+                {
+                    ++proposedYear;
+                    startDate = new DateTime(dateYear, fyStartingMonth, startingDayOfMonth);
+                    endDate = new DateTime(proposedYear, fyEndingMonth, endingDayOfMonth);
+                }
+
+                var exRateUsageOrder = unitWork.ExRatesUsageRepository.GetManyQueryable(u => u.UsageSection == ExchangeRateUsageSection.DataEntry);
+                int orderForOpenExchange = 0, orderForCentralBank = 0;
+                if (exRateUsageOrder.Any())
+                {
+                    orderForOpenExchange = (from u in exRateUsageOrder
+                                            where u.Source == ExchangeRateSources.OpenExchange
+                                            select u.Order).FirstOrDefault();
+
+                    orderForCentralBank = (from u in exRateUsageOrder
+                                           where u.Source == ExchangeRateSources.CentralBank
+                                           select u.Order).FirstOrDefault();
+                }
+
+                if (orderForOpenExchange == 1 || orderForCentralBank > 1)
+                {
+                    var exRates = unitWork.ManualRatesRepository.GetManyQueryable(r => r.Dated == dated || r.Dated == DateTime.Now);
+                    if (exRates.Any())
+                    {
+                        var rateForExactDate = (from r in exRates
+                                                where r.Dated == dated
+                                                select r).FirstOrDefault();
+
+                        if (rateForExactDate != null)
+                        {
+                            exRateForCurrency.ExchangeRate = rateForExactDate.ExchangeRate;
+                        }
+                        else
+                        {
+                            var rateForTodaysDate = (from r in exRates
+                                                     where r.Dated == DateTime.Now
+                                                     select r).FirstOrDefault();
+
+                            if (rateForTodaysDate != null)
+                            {
+                                exRateForCurrency.ExchangeRate = rateForTodaysDate.ExchangeRate;
+                            }
+                        }
+                    }
+                }
+
+                if (exRateForCurrency.ExchangeRate == 0)
+                {
+                    var exRates = unitWork.ManualRatesRepository.GetManyQueryable(e => e.Dated >= startDate && e.Dated <= e.Dated);
+                    if (exRates.Any())
+                    {
+                        var exRateCalculated = (from rate in exRates
+                                            where (rate.Dated > startDate)
+                                            orderby rate.Dated ascending
+                                            select rate).FirstOrDefault();
+
+                        if (exRateCalculated == null)
+                        {
+                            exRateCalculated = (from rate in exRates
+                                                where (rate.Dated < startDate)
+                                                orderby rate.Dated descending
+                                                select rate).FirstOrDefault();
+                        }
+
+                        if (exRateCalculated != null)
+                        {
+                            exRateForCurrency.ExchangeRate = exRateCalculated.ExchangeRate;
+                        }
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                exRateForCurrency.IsError = true;
+                exRateForCurrency.ErrorMessage = ex.Message;
+            }
+            return await Task<ExchangeRateForCurrency>.Run(() => exRateForCurrency).ConfigureAwait(false);
         }
 
         public async Task<ExchangeRatesView> GetLatestCurrencyRates()

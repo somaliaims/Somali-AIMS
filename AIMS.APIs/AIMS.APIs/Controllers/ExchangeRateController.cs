@@ -45,6 +45,48 @@ namespace AIMS.APIs.Controllers
             return Ok(ratesView);
         }
 
+        [HttpPost("GetAverageCurrencyRateForDate")]
+        public async Task<IActionResult> GetAverageCurrencyRateForDate([FromBody] ExRateFinderModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            ExchangeRatesView ratesView = null;
+            int count = ratesService.GetAPIsCallsCount();
+            if (count >= 999)
+            {
+                return Ok(null);
+            }
+
+            if (model.Dated > DateTime.Now)
+            {
+                ratesView = await ratesService.GetCurrencyRatesForDate(DateTime.Now);
+            }
+            else
+            {
+                ratesView = await ratesService.GetCurrencyRatesForDate(model.Dated);
+            }
+            
+            if (ratesView.Rates == null)
+            {
+                string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                ratesView = await ratesHttpService.GetRatesAsync(apiKey);
+                if (ratesView.Rates != null)
+                {
+                    ratesService.SaveCurrencyRates(ratesView.Rates, DateTime.Now);
+                }
+            }
+
+            var response = await ratesService.GetAverageCurrencyRatesForDate(model.Dated, model.Currency);
+            if (response.IsError)
+            {
+                return BadRequest(response.ErrorMessage);
+            }
+            return Ok(response);
+        }
+
         [HttpGet("GetManualExchangeRates")]
         public IActionResult GetManualExchangeRates()
         {
