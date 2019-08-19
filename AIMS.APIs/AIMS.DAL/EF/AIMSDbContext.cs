@@ -77,6 +77,10 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFExchangeRatesUsageSettings>()
                 .HasIndex(e => new { e.Source, e.UsageSection })
                 .IsUnique();
+
+            modelBuilder.Entity<EFProjectExpectedDisbursements>()
+                .HasIndex(e => new { e.ProjectId, e.Year })
+                .IsUnique();
         }
 
         //Creating DB Tables for the Objects
@@ -95,6 +99,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFProjectLocations> ProjectLocations { get; set; }
         public DbSet<EFProjectSectors> ProjectSectors { get; set; }
         public DbSet<EFProjectDisbursements> ProjectDisbursements { get; set; }
+        public DbSet<EFProjectExpectedDisbursements> ExpectedDisbursements { get; set; }
         public DbSet<EFProjectDocuments> ProjectDocuments { get; set; }
         public DbSet<EFProjectMarkers> ProjectMarkers { get; set; }
         public DbSet<EFProjectCustomFields> ProjectCustomFields { get; set; }
@@ -117,6 +122,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFProjectMembershipRequests> ProjectMembershipRequests { get; set; }
         public DbSet<EFProjectDeletionRequests> ProjectDeletionRequests { get; set; }
         public DbSet<EFExchangeRatesUsageSettings> ExchangeRatesUsageSettings { get; set; }
+        public DbSet<EFHelp> Help { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime

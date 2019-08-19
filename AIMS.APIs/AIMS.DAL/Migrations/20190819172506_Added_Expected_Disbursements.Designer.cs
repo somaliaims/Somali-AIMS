@@ -4,14 +4,16 @@ using AIMS.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    partial class AIMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190819172506_Added_Expected_Disbursements")]
+    partial class Added_Expected_Disbursements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,21 +201,6 @@ namespace AIMS.DAL.Migrations
                     b.ToTable("FundingTypes");
                 });
 
-            modelBuilder.Entity("AIMS.Models.EFHelp", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("Entity");
-
-                    b.Property<string>("HelpInfoJson");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Help");
-                });
-
             modelBuilder.Entity("AIMS.Models.EFIATIData", b =>
                 {
                     b.Property<int>("Id")
@@ -377,8 +364,6 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<DateTime>("EndDate");
 
-                    b.Property<int>("FundingTypeId");
-
                     b.Property<DateTime>("StartDate");
 
                     b.Property<string>("Title")
@@ -387,8 +372,6 @@ namespace AIMS.DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
-
-                    b.HasIndex("FundingTypeId");
 
                     b.ToTable("Projects");
                 });
@@ -479,8 +462,7 @@ namespace AIMS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<decimal>("ExpectedDisbursements")
-                        .HasColumnType("decimal(11, 2)");
+                    b.Property<decimal>("ExpectedDisbursements");
 
                     b.Property<int>("ProjectId");
 
@@ -801,11 +783,6 @@ namespace AIMS.DAL.Migrations
                     b.HasOne("AIMS.Models.EFUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById");
-
-                    b.HasOne("AIMS.Models.EFFundingTypes", "FundingType")
-                        .WithMany()
-                        .HasForeignKey("FundingTypeId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("AIMS.Models.EFProjectCustomFields", b =>

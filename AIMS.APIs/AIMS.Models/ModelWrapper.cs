@@ -682,7 +682,7 @@ namespace AIMS.Models
         public IEnumerable<SectorAbstractView> Sectors { get; set; }
         public IEnumerable<LocationAbstractView> Locations { get; set; }
         public IEnumerable<OrganizationAbstractView> Organizations { get; set; }
-        
+
     }
 
     public class EnvelopeModel
@@ -986,6 +986,16 @@ namespace AIMS.Models
         public string Currency { get; set; }
         [Required]
         public decimal ExchangeRate { get; set; }
+    }
+
+    public class ExpectedDisbursementModel
+    {
+        [Required]
+        public int ProjectId { get; set; }
+        [Required]
+        public int Year { get; set; }
+        [Required]
+        public decimal ExpectedDisbursement { get; set; }
     }
 
 
@@ -1364,7 +1374,7 @@ namespace AIMS.Models
 
     public class ProjectProfileReportBySector
     {
-        public Report ReportSettings { get; set; } 
+        public Report ReportSettings { get; set; }
         public IEnumerable<ProjectsBySector> SectorProjectsList { get; set; }
     }
 
@@ -1651,5 +1661,45 @@ namespace AIMS.Models
     {
         public int ProjectId { get; set; }
         public decimal FundsPercentage { get; set; }
+    }
+
+    /*Help for data entry model*/
+    public class ProjectHelp
+    {
+        public string Title { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public string Description { get; set; }
+        public string ProjectValue { get; set; }
+    }
+
+    public class ProjectFunderHelp
+    {
+        public string Funder { get; set; }
+    }
+
+    public class ProjectImplementerHelp
+    {
+        public string Implementer { get; set; }
+    }
+
+    public class ProjectDocumentHelp
+    {
+        public string Document { get; set; }
+        public string DocumentUrl { get; set; }
+    }
+
+    public class ProjectDisbursementHelp
+    {
+        public string Dated { get; set; }
+        public string Amount { get; set; }
+        public string Currency { get; set; }
+        public string ExchangeRate { get; set; }
+    }
+
+    public class ExpectedDisbursementHelp
+    {
+        public string Year { get; set; }
+        public string Disbursement { get; set; }
     }
 }

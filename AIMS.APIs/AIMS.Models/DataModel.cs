@@ -73,6 +73,16 @@ namespace AIMS.Models
         NewIATIOrganization = 17
     }
 
+    public enum HelpForEntity
+    {
+        Project = 1,
+        ProjectFunders = 2,
+        ProjectImplementers = 3,
+        ProjectDocuments = 4,
+        ProjectDisbursements = 5,
+        ProjectExpectedDisbursements = 6,
+    }
+
     public enum DataTransactions
     {
         Inserted = 1,
@@ -126,6 +136,13 @@ namespace AIMS.Models
         [ForeignKey("OrganizationType")]
         public int? OrganizationTypeId { get; set; }
         public virtual EFOrganizationTypes OrganizationType { get; set; }
+    }
+
+    public class EFHelp
+    {
+        public int Id { get; set; }
+        public HelpForEntity Entity { get; set; }
+        public string HelpInfoJson { get; set; }
     }
 
     public class EFUser
@@ -192,6 +209,9 @@ namespace AIMS.Models
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        [ForeignKey("FundingType")]
+        public int FundingTypeId { get; set; }
+        public EFFundingTypes FundingType { get; set; } 
         public ICollection<EFProjectSectors> Sectors { get; set; }
         public ICollection<EFProjectLocations> Locations { get; set; }
         public ICollection<EFProjectDisbursements> Disbursements { get; set; }
@@ -228,6 +248,18 @@ namespace AIMS.Models
         public string Currency { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; }
+    }
+
+    public class EFProjectExpectedDisbursements
+    {
+        [Key]
+        public int Id { get; set; }
+        public int Year { get; set; }
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
+        [Column(TypeName = "decimal(11, 2)")]
+        public decimal ExpectedDisbursements { get; set; }
     }
 
     public class EFProjectSectors

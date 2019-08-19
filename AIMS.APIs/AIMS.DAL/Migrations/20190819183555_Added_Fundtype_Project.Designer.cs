@@ -4,14 +4,16 @@ using AIMS.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    partial class AIMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190819183555_Added_Fundtype_Project")]
+    partial class Added_Fundtype_Project
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -197,21 +199,6 @@ namespace AIMS.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FundingTypes");
-                });
-
-            modelBuilder.Entity("AIMS.Models.EFHelp", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("Entity");
-
-                    b.Property<string>("HelpInfoJson");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Help");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFIATIData", b =>
