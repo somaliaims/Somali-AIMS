@@ -436,6 +436,7 @@ namespace AIMS.Models
         public string FieldTitle { get; set; }
         public FieldTypes FieldType { get; set; }
         public string Values { get; set; }
+        public string Help { get; set; }
     }
 
     public class EFProjectCustomFields

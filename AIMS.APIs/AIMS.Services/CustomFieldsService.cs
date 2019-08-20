@@ -201,6 +201,7 @@ namespace AIMS.Services
                         isCustomFieldCreated.FieldTitle = model.FieldTitle;
                         isCustomFieldCreated.FieldType = model.FieldType;
                         isCustomFieldCreated.Values = model.Values;
+                        isCustomFieldCreated.Help = model.Help;
                         unitWork.CustomFieldRepository.Update(isCustomFieldCreated);
                         unitWork.Save();
                         response.ReturnedId = isCustomFieldCreated.Id;
@@ -212,6 +213,7 @@ namespace AIMS.Services
                            FieldTitle = model.FieldTitle,
                            FieldType = model.FieldType,
                            Values = model.Values,
+                           Help = model.Help
                         });
                         unitWork.Save();
                         response.ReturnedId = newCustomField.Id;
@@ -279,6 +281,7 @@ namespace AIMS.Services
                 customField.FieldTitle = model.FieldTitle;
                 customField.FieldType = model.FieldType;
                 customField.Values = model.Values;
+                customField.Help = model.Help;
                 unitWork.CustomFieldRepository.Update(customField);
                 unitWork.Save();
                 response.Message = true.ToString();
