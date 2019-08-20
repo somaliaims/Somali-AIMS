@@ -48,10 +48,22 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFManualExchangeRates> manualRatesRepository;
         private GenericRepository<EFProjectMembershipRequests> projectMembershipRepository;
         private GenericRepository<EFProjectDeletionRequests> projectDeletionRepository;
+        private GenericRepository<EFHelp> helpRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
             context = dbContext;
+        }
+
+
+        public GenericRepository<EFHelp> HelpRepository
+        {
+            get
+            {
+                if (this.helpRepository == null)
+                    this.helpRepository = new GenericRepository<EFHelp>(context);
+                return this.helpRepository;
+            }
         }
 
         public GenericRepository<EFEmailMessages> EmailMessagesRepository

@@ -209,9 +209,6 @@ namespace AIMS.Models
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        [ForeignKey("FundingType")]
-        public int FundingTypeId { get; set; }
-        public EFFundingTypes FundingType { get; set; } 
         public ICollection<EFProjectSectors> Sectors { get; set; }
         public ICollection<EFProjectLocations> Locations { get; set; }
         public ICollection<EFProjectDisbursements> Disbursements { get; set; }

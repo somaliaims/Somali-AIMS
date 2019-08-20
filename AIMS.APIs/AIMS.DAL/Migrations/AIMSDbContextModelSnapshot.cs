@@ -377,8 +377,6 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<DateTime>("EndDate");
 
-                    b.Property<int>("FundingTypeId");
-
                     b.Property<DateTime>("StartDate");
 
                     b.Property<string>("Title")
@@ -387,8 +385,6 @@ namespace AIMS.DAL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
-
-                    b.HasIndex("FundingTypeId");
 
                     b.ToTable("Projects");
                 });
@@ -500,8 +496,6 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("FunderId");
 
-                    b.Property<int>("FundingTypeId");
-
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(11 ,2)");
 
@@ -512,7 +506,9 @@ namespace AIMS.DAL.Migrations
                     b.Property<decimal>("ExchangeRate")
                         .HasColumnType("decimal(9, 2)");
 
-                    b.HasKey("ProjectId", "FunderId", "FundingTypeId");
+                    b.Property<int>("FundingTypeId");
+
+                    b.HasKey("ProjectId", "FunderId");
 
                     b.HasIndex("FunderId");
 
@@ -801,11 +797,6 @@ namespace AIMS.DAL.Migrations
                     b.HasOne("AIMS.Models.EFUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById");
-
-                    b.HasOne("AIMS.Models.EFFundingTypes", "FundingType")
-                        .WithMany()
-                        .HasForeignKey("FundingTypeId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("AIMS.Models.EFProjectCustomFields", b =>
