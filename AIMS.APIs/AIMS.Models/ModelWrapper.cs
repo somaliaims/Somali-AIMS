@@ -1666,40 +1666,55 @@ namespace AIMS.Models
     /*Help for data entry model*/
     public class ProjectHelp
     {
+        [Required]
         public string Title { get; set; }
+        [Required]
         public string StartDate { get; set; }
+        [Required]
         public string EndDate { get; set; }
+        [Required]
         public string Description { get; set; }
+        [Required]
         public string ProjectValue { get; set; }
     }
 
     public class ProjectFunderHelp
     {
+        [Required]
         public string Funder { get; set; }
     }
 
     public class ProjectImplementerHelp
     {
+        [Required]
         public string Implementer { get; set; }
     }
 
     public class ProjectDocumentHelp
     {
+        [Required]
         public string Document { get; set; }
+        [Required]
         public string DocumentUrl { get; set; }
     }
 
     public class ProjectDisbursementHelp
     {
+        [Required]
         public string Dated { get; set; }
+        [Required]
         public string Amount { get; set; }
+        [Required]
         public string Currency { get; set; }
+        [Required]
         public string ExchangeRate { get; set; }
     }
 
     public class ExpectedDisbursementHelp
     {
+        [Required]
         public string Year { get; set; }
+        [Required]
         public string Disbursement { get; set; }
     }
 }

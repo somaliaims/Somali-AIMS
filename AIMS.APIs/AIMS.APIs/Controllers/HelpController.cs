@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AIMS.Models;
 using AIMS.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -53,6 +54,96 @@ namespace AIMS.APIs.Controllers
         public IActionResult GetProjectDocumentsFields()
         {
             return Ok(service.GetHelpForProjectDocumentsFields());
+        }
+
+        [HttpPost("AddProjectHelp")]
+        public IActionResult AddProjectHelp([FromBody] ProjectHelp model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = service.AddHelpForProject(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost("AddProjectFunderHelp")]
+        public IActionResult AddProjectFunderHelp([FromBody] ProjectFunderHelp model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = service.AddHelpForProjectFunder(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost("AddProjectImplementerHelp")]
+        public IActionResult AddProjectImplementerHelp([FromBody] ProjectImplementerHelp model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = service.AddHelpForProjectImplementer(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost("AddProjectDisbursementHelp")]
+        public IActionResult AddProjectDisbursementHelp([FromBody] ProjectDisbursementHelp model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = service.AddHelpForProjectDisbursement(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost("AddProjectExpectedDisbursementHelp")]
+        public IActionResult AddProjectExpectedDisbursementHelp([FromBody] ExpectedDisbursementHelp model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = service.AddHelpForProjectExpectedDisbursements(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost("AddProjectDocumentHelp")]
+        public IActionResult AddProjectDocumentHelp([FromBody] ProjectDocumentHelp model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = service.AddHelpForProjectDocument(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
         }
     }
 }

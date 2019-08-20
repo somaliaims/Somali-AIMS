@@ -46,6 +46,48 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         ProjectDocumentHelp GetHelpForProjectDocumentsFields();
+
+        /// <summary>
+        /// Adds help for project
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddHelpForProject(ProjectHelp model);
+
+        /// <summary>
+        /// Adds help for project funder
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddHelpForProjectFunder(ProjectFunderHelp model);
+
+        /// <summary>
+        /// Adds help for project implementer
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddHelpForProjectImplementer(ProjectImplementerHelp model);
+
+        /// <summary>
+        /// Adds help for project disbursements
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddHelpForProjectDisbursement(ProjectDisbursementHelp model);
+
+        /// <summary>
+        /// Adds help for project expected disbusements
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddHelpForProjectExpectedDisbursements(ExpectedDisbursementHelp model);
+
+        /// <summary>
+        /// Adds help for project document
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddHelpForProjectDocument(ProjectDocumentHelp model);
     }
 
     public class HelpService : IHelpService
@@ -158,6 +200,192 @@ namespace AIMS.Services
                     }
                 }
                 return help;
+            }
+        }
+
+        public ActionResponse AddHelpForProject(ProjectHelp model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.Project);
+                    if (projectHelp != null)
+                    {
+                        projectHelp.HelpInfoJson = JsonConvert.SerializeObject(model);
+                    }
+                    else
+                    {
+                        unitWork.HelpRepository.Insert(new EFHelp()
+                        {
+                            Entity = HelpForEntity.Project,
+                            HelpInfoJson = JsonConvert.SerializeObject(model)
+                        });
+                    }
+                    unitWork.Save();
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddHelpForProjectFunder(ProjectFunderHelp model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectFunders);
+                    if (projectHelp != null)
+                    {
+                        projectHelp.HelpInfoJson = JsonConvert.SerializeObject(model);
+                    }
+                    else
+                    {
+                        unitWork.HelpRepository.Insert(new EFHelp()
+                        {
+                            Entity = HelpForEntity.ProjectFunders,
+                            HelpInfoJson = JsonConvert.SerializeObject(model)
+                        });
+                    }
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddHelpForProjectImplementer(ProjectImplementerHelp model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectImplementers);
+                    if (projectHelp != null)
+                    {
+                        projectHelp.HelpInfoJson = JsonConvert.SerializeObject(model);
+                    }
+                    else
+                    {
+                        unitWork.HelpRepository.Insert(new EFHelp()
+                        {
+                            Entity = HelpForEntity.ProjectImplementers,
+                            HelpInfoJson = JsonConvert.SerializeObject(model)
+                        });
+                    }
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddHelpForProjectDisbursement(ProjectDisbursementHelp model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectDisbursements);
+                    if (projectHelp != null)
+                    {
+                        projectHelp.HelpInfoJson = JsonConvert.SerializeObject(model);
+                    }
+                    else
+                    {
+                        unitWork.HelpRepository.Insert(new EFHelp()
+                        {
+                            Entity = HelpForEntity.ProjectDisbursements,
+                            HelpInfoJson = JsonConvert.SerializeObject(model)
+                        });
+                    }
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddHelpForProjectExpectedDisbursements(ExpectedDisbursementHelp model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectExpectedDisbursements);
+                    if (projectHelp != null)
+                    {
+                        projectHelp.HelpInfoJson = JsonConvert.SerializeObject(model);
+                    }
+                    else
+                    {
+                        unitWork.HelpRepository.Insert(new EFHelp()
+                        {
+                            Entity = HelpForEntity.ProjectExpectedDisbursements,
+                            HelpInfoJson = JsonConvert.SerializeObject(model)
+                        });
+                    }
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddHelpForProjectDocument(ProjectDocumentHelp model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectDocuments);
+                    if (projectHelp != null)
+                    {
+                        projectHelp.HelpInfoJson = JsonConvert.SerializeObject(model);
+                    }
+                    else
+                    {
+                        unitWork.HelpRepository.Insert(new EFHelp()
+                        {
+                            Entity = HelpForEntity.ProjectDocuments,
+                            HelpInfoJson = JsonConvert.SerializeObject(model)
+                        });
+                    }
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
             }
         }
 
