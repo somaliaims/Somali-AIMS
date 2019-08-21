@@ -328,6 +328,18 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <returns></returns>
         Task<ActionResponse> MergeProjectsAsync(MergeProjectsModel model);
+
+        /// <summary>
+        /// Gets count for active projects
+        /// </summary>
+        /// <returns></returns>
+        int GetActiveProjectsCount();
+
+        /// <summary>
+        /// Gets current year disbursements
+        /// </summary>
+        /// <returns></returns>
+        decimal GetCurrentYearDisbursements();
     }
 
     public class ProjectService : IProjectService
@@ -362,6 +374,21 @@ namespace AIMS.Services
                             orderby p.DateUpdated descending
                             select p);
                 return await Task<IEnumerable<ProjectView>>.Run(() => mapper.Map<List<ProjectView>>(projects)).ConfigureAwait(false);
+            }
+        }
+
+        public decimal GetCurrentYearDisbursements()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                Decimal disbursementValue = 0;
+                var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.Dated.Year == DateTime.Now.Year);
+                if (disbursements.Any())
+                {
+                    disbursementValue = (from d in disbursements
+                                         select (d.Amount * d.ExchangeRate)).Sum();
+                }
+                return disbursementValue;
             }
         }
 
@@ -468,6 +495,14 @@ namespace AIMS.Services
             {
                 var project = unitWork.ProjectRepository.GetByID(id);
                 return mapper.Map<ProjectModelView>(project);
+            }
+        }
+
+        public int GetActiveProjectsCount()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                return unitWork.ProjectRepository.GetProjection(p => p.Id != 0, p => p.Id).Count();
             }
         }
 

@@ -49,6 +49,12 @@ namespace AIMS.APIs.Controllers
             return Ok(users);
         }
 
+        [HttpGet("GetActiveUsersCount")]
+        public IActionResult GetActiveUsersCount()
+        {
+            return Ok(userService.GetActiveUserCount());
+        }
+
         [HttpGet("GetManagerUsers")]
         public IActionResult GetManagerUsers()
         {

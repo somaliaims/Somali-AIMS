@@ -338,6 +338,18 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [HttpGet("GetActiveProjectsCount")]
+        public IActionResult GetActiveProjectsCount()
+        {
+            return Ok(projectService.GetActiveProjectsCount());
+        }
+
+        [HttpGet("GetCurrentYearDisbursements")]
+        public IActionResult GetCurrentYearDisbursements()
+        {
+            return Ok(projectService.GetCurrentYearDisbursements());
+        }
+
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddProjectDisbursement")]

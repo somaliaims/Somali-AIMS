@@ -95,6 +95,12 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         ActionResponse Approve(int id);
+
+        /// <summary>
+        /// Gets list of organizations
+        /// </summary>
+        /// <returns></returns>
+        int GetOrganizationsCount();
     }
 
     public class OrganizationService : IOrganizationService
@@ -121,6 +127,14 @@ namespace AIMS.Services
                                      select org);
                 }
                 return mapper.Map<List<OrganizationView>>(organizations);
+            }
+        }
+
+        public int GetOrganizationsCount()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                return unitWork.OrganizationRepository.GetProjection(o => o.Id != 0, o => o.Id).Count();
             }
         }
 

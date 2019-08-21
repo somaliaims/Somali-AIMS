@@ -124,6 +124,12 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         Task<ActionResponse> SetNotificationsForUsersAsync();
+
+        /// <summary>
+        /// Gets count for active users
+        /// </summary>
+        /// <returns></returns>
+        int GetActiveUserCount();
     }
 
     public class UserService : IUserService
@@ -145,6 +151,14 @@ namespace AIMS.Services
                 var users = unitWork.UserRepository.GetWithInclude(u => u.Id != 0, new string[] { "Organization" });
                 usersList = mapper.Map<List<UserView>>(users);
                 return usersList;
+            }
+        }
+
+        public int GetActiveUserCount()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                return unitWork.UserRepository.GetProjection(u => u.IsApproved == true, u => u.Id).Count();
             }
         }
 
