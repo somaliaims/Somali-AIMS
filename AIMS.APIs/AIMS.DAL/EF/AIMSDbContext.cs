@@ -123,6 +123,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFProjectDeletionRequests> ProjectDeletionRequests { get; set; }
         public DbSet<EFExchangeRatesUsageSettings> ExchangeRatesUsageSettings { get; set; }
         public DbSet<EFHelp> Help { get; set; }
+        public DbSet<EFHomePageSettings> HomePageSettings { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime

@@ -538,4 +538,12 @@ namespace AIMS.Models
         public DateTime StatusUpdatedOn { get; set; }
         public ProjectDeletionStatus Status { get; set; }
     }
+
+    public class EFHomePageSettings
+    {
+        public int Id { get; set; }
+        public string AIMSTitle { get; set; }
+        public string IntroductoryHeading { get; set; }
+        public string IntroductoryParagraph { get; set; }
+    }
 }

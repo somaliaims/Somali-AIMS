@@ -1719,4 +1719,11 @@ namespace AIMS.Models
         [Required]
         public string Disbursement { get; set; }
     }
+
+    public class HomePageModel
+    {
+        public string AIMSTitle { get; set; }
+        public string IntroductoryHeading { get; set; }
+        public string IntroductoryParagraph { get; set; }
+    }
 }

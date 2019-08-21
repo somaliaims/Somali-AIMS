@@ -49,12 +49,23 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFProjectMembershipRequests> projectMembershipRepository;
         private GenericRepository<EFProjectDeletionRequests> projectDeletionRepository;
         private GenericRepository<EFHelp> helpRepository;
+        private GenericRepository<EFHomePageSettings> homePageRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
             context = dbContext;
         }
 
+
+        public GenericRepository<EFHomePageSettings> HomePageRepository
+        {
+            get
+            {
+                if (this.homePageRepository == null)
+                    this.homePageRepository = new GenericRepository<EFHomePageSettings>(context);
+                return this.homePageRepository;
+            }
+        }
 
         public GenericRepository<EFHelp> HelpRepository
         {
