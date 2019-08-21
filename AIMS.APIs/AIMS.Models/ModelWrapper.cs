@@ -1723,7 +1723,7 @@ namespace AIMS.Models
     public class HomePageModel
     {
         public string AIMSTitle { get; set; }
-        public string IntroductoryHeading { get; set; }
-        public string IntroductoryParagraph { get; set; }
+        public string IntroductionHeading { get; set; }
+        public string IntroductionText { get; set; }
     }
 }

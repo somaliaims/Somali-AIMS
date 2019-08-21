@@ -61,15 +61,15 @@ namespace AIMS.Services
                         unitWork.HomePageRepository.Insert(new EFHomePageSettings()
                         {
                             AIMSTitle = model.AIMSTitle,
-                            IntroductoryHeading = model.IntroductoryHeading,
-                            IntroductoryParagraph = model.IntroductoryParagraph
+                            IntroductionHeading = model.IntroductionHeading,
+                            IntroductionText = model.IntroductionText
                         });
                     }
                     else
                     {
                         settings.AIMSTitle = model.AIMSTitle;
-                        settings.IntroductoryHeading = model.IntroductoryHeading;
-                        settings.IntroductoryParagraph = model.IntroductoryParagraph;
+                        settings.IntroductionHeading = model.IntroductionHeading;
+                        settings.IntroductionText = model.IntroductionText;
                         unitWork.HomePageRepository.Update(settings);
                     }
                 }
