@@ -209,6 +209,8 @@ namespace AIMS.Models
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        [Column(TypeName = "decimal(11, 2)")]
+        public decimal ProjectValue { get; set; }
         public ICollection<EFProjectSectors> Sectors { get; set; }
         public ICollection<EFProjectLocations> Locations { get; set; }
         public ICollection<EFProjectDisbursements> Disbursements { get; set; }

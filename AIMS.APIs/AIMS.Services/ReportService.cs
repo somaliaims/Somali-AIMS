@@ -69,6 +69,12 @@ namespace AIMS.Services
         /// <param name="ratesList"></param>
         /// <returns></returns>
         decimal GetExchangeRateForCurrency(string currency, List<CurrencyWithRates> ratesList);
+
+        /// <summary>
+        /// Gets projects summary against the location
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<ProjectSummary> GetLatestProjectsSummary();
     }
 
     public class ReportService : IReportService
@@ -82,6 +88,28 @@ namespace AIMS.Services
             mapper = autoMapper;
         }
 
+        public IEnumerable<ProjectSummary> GetLatestProjectsSummary()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<ProjectSummary> summaryList = new List<ProjectSummary>();
+                var projects = unitWork.ProjectRepository.GetWithInclude(p => p.EndDate >= DateTime.Now, new string[] { "Disbursements" })
+                    .OrderByDescending(p => p.DateUpdated).Take(10);
+
+                foreach(var project in projects)
+                {
+                    var disbursements = (from p in project.Disbursements
+                                         select (p.Amount * p.ExchangeRate)).Sum();
+                    summaryList.Add(new ProjectSummary()
+                    {
+                        Project = project.Title,
+                        Funding = project.ProjectValue,
+                        Disbursement = disbursements
+                    });
+                }
+                return summaryList;
+            }
+        }
 
         public async Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model, string reportUrl, string defaultCurrency, decimal exchangeRate)
         {

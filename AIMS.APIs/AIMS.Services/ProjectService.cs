@@ -1046,6 +1046,7 @@ namespace AIMS.Services
                                 Description = model.Description,
                                 StartDate = model.StartDate,
                                 EndDate = model.EndDate,
+                                ProjectValue = model.ProjectValue,
                                 DateUpdated = DateTime.Now,
                                 CreatedById = userId
                             });
@@ -1572,6 +1573,7 @@ namespace AIMS.Services
                 projectObj.Description = model.Description;
                 projectObj.StartDate = model.StartDate;
                 projectObj.EndDate = model.EndDate;
+                projectObj.ProjectValue = model.ProjectValue;
                 projectObj.DateUpdated = DateTime.Now;
 
                 unitWork.ProjectRepository.Update(projectObj);

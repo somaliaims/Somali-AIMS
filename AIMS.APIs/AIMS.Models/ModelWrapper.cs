@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace AIMS.Models
@@ -755,6 +756,7 @@ namespace AIMS.Models
         public string Description { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
+        public decimal ProjectValue { get; set; }
         public ICollection<ProjectFunderView> Funders { get; set; }
         public ICollection<ProjectImplementerView> Implementers { get; set; }
         public ICollection<SectorView> Sectors { get; set; }
@@ -788,9 +790,14 @@ namespace AIMS.Models
         public string Title { get; set; }
         [Required]
         public string Description { get; set; }
+        [Required]
         public DateTime StartDate { get; set; }
+        [Required]
         public DateTime EndDate { get; set; }
-        public int ProjectTypeId { get; set; }
+        [Required]
+        [Column(TypeName = "decimal(11,2)")]
+        public decimal ProjectValue { get; set; }
+        public int FundingTypeId { get; set; }
     }
 
     public class MergeProjectsModel
@@ -1364,6 +1371,7 @@ namespace AIMS.Models
         public IEnumerable<ProjectsByLocation> LocationProjectsList { get; set; }
     }
 
+
     public class ProjectsBySector
     {
         public string SectorName { get; set; }
@@ -1725,5 +1733,12 @@ namespace AIMS.Models
         public string AIMSTitle { get; set; }
         public string IntroductionHeading { get; set; }
         public string IntroductionText { get; set; }
+    }
+
+    public class ProjectSummary
+    {
+        public string Project { get; set; }
+        public decimal Funding { get; set; }
+        public decimal Disbursement { get; set; }
     }
 }
