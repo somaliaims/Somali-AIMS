@@ -292,14 +292,14 @@ namespace AIMS.Services
                                     if (model.StartingYear >= 2000)
                                     {
                                         project.Disbursements = (from d in project.Disbursements
-                                                                 where d.Dated.Year >= model.StartingYear
+                                                                 where d.Year >= model.StartingYear
                                                                  select d).ToList();
                                     }
 
                                     if (model.EndingYear >= 2000)
                                     {
                                         project.Disbursements = (from d in project.Disbursements
-                                                                 where d.Dated.Year <= model.EndingYear
+                                                                 where d.Year <= model.EndingYear
                                                                  select d).ToList();
                                     }
 
@@ -660,14 +660,14 @@ namespace AIMS.Services
                                     if (model.StartingYear >= 2000)
                                     {
                                         project.Disbursements = (from d in project.Disbursements
-                                                           where d.Dated.Year >= model.StartingYear
+                                                           where d.Year >= model.StartingYear
                                                            select d).ToList();
                                     }
 
                                     if (model.EndingYear >= 2000)
                                     {
                                         project.Disbursements = (from d in project.Disbursements
-                                                           where d.Dated.Year <= model.EndingYear
+                                                           where d.Year <= model.EndingYear
                                                            select d).ToList();
                                     }
 
@@ -895,14 +895,14 @@ namespace AIMS.Services
                                 if (model.StartingYear >= 2000)
                                 {
                                     project.Disbursements = (from d in project.Disbursements
-                                                       where d.Dated.Year >= model.StartingYear
+                                                       where d.Year >= model.StartingYear
                                                        select d).ToList();
                                 }
 
                                 if (model.EndingYear >= 2000)
                                 {
                                     project.Disbursements = (from d in project.Disbursements
-                                                       where d.Dated.Year <= model.EndingYear
+                                                       where d.Year <= model.EndingYear
                                                        select d).ToList();
                                 }
                                 decimal projectDisbursements = Math.Round(project.Disbursements.Select(d => (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);

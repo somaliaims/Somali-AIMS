@@ -449,16 +449,18 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<string>("Currency");
 
-                    b.Property<DateTime>("Dated");
-
                     b.Property<decimal>("ExchangeRate")
                         .HasColumnType("decimal(9, 2)");
 
                     b.Property<int>("ProjectId");
 
+                    b.Property<int?>("YearId");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
+
+                    b.HasIndex("YearId");
 
                     b.ToTable("ProjectDisbursements");
                 });
@@ -806,6 +808,10 @@ namespace AIMS.DAL.Migrations
                         .WithMany("Disbursements")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("AIMS.Models.EFFinancialYears", "Year")
+                        .WithMany()
+                        .HasForeignKey("YearId");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFProjectDocuments", b =>

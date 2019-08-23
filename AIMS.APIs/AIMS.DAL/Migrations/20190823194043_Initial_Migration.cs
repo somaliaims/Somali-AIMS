@@ -573,7 +573,7 @@ namespace AIMS.DAL.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     ProjectId = table.Column<int>(nullable: false),
-                    Dated = table.Column<DateTime>(nullable: false),
+                    YearId = table.Column<int>(nullable: true),
                     Amount = table.Column<decimal>(type: "decimal(11, 2)", nullable: false),
                     Currency = table.Column<string>(nullable: true),
                     ExchangeRate = table.Column<decimal>(type: "decimal(9, 2)", nullable: false)
@@ -587,6 +587,12 @@ namespace AIMS.DAL.Migrations
                         principalTable: "Projects",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProjectDisbursements_FinancialYears_YearId",
+                        column: x => x.YearId,
+                        principalTable: "FinancialYears",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -804,6 +810,11 @@ namespace AIMS.DAL.Migrations
                 name: "IX_ProjectDisbursements_ProjectId",
                 table: "ProjectDisbursements",
                 column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectDisbursements_YearId",
+                table: "ProjectDisbursements",
+                column: "YearId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectDocuments_ProjectId",

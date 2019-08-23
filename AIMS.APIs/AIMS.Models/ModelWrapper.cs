@@ -757,6 +757,7 @@ namespace AIMS.Models
         public string StartingFinancialYear { get; set; }
         public string EndingFinancialYear { get; set; }
         public decimal ProjectValue { get; set; }
+        public string ProjectCurrency { get; set; }
         public ICollection<ProjectFunderView> Funders { get; set; }
         public ICollection<ProjectImplementerView> Implementers { get; set; }
         public ICollection<SectorView> Sectors { get; set; }
@@ -797,6 +798,7 @@ namespace AIMS.Models
         [Required]
         [Column(TypeName = "decimal(11,2)")]
         public decimal ProjectValue { get; set; }
+        public string ProjectCurrency { get; set; }
         public int FundingTypeId { get; set; }
     }
 

@@ -1010,7 +1010,16 @@ namespace AIMS.Services
                     {
                         mHelper = new MessageHelper();
                         response.Success = false;
-                        response.Message = mHelper.GetNotFound("Provided financial year");
+                        response.Message = mHelper.GetNotFound("Financial Year");
+                        return response;
+                    }
+
+                    var currency = unitWork.CurrencyRepository.GetOne(c => c.Currency == model.ProjectCurrency);
+                    if (currency == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Currency");
                         return response;
                     }
 
@@ -1033,6 +1042,7 @@ namespace AIMS.Services
                                 StartingFinancialYear = startingFinancialYear,
                                 EndingFinancialYear = endingFinancialYears,
                                 ProjectValue = model.ProjectValue,
+                                ProjectCurrency = model.ProjectCurrency,
                                 DateUpdated = DateTime.Now,
                                 CreatedById = userId
                             });
@@ -1048,27 +1058,6 @@ namespace AIMS.Services
                             await unitWork.SaveAsync();
                             response.ReturnedId = newProject.Id;
                             transaction.Commit();
-
-                            /*ISMTPSettingsService smtpService = new SMTPSettingsService(context);
-                            var smtpSettings = smtpService.GetPrivate();
-                            SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
-                            if (smtpSettings != null)
-                            {
-                                smtpSettingsModel.Host = smtpSettings.Host;
-                                smtpSettingsModel.Port = smtpSettings.Port;
-                                smtpSettingsModel.Username = smtpSettings.Username;
-                                smtpSettingsModel.Password = smtpSettings.Password;
-                            }
-
-                            string message = "";
-                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewProjectToOrg);
-                            if (emailMessage != null)
-                            {
-                                message = emailMessage.Message;
-                            }
-
-                            IMessageHelper mHelper = new MessageHelper();
-                            message += mHelper.ProjectToOrganizationMessage(org);*/
                         }
                     });
                 }
@@ -1488,7 +1477,16 @@ namespace AIMS.Services
                 {
                     mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("Provided financial year");
+                    response.Message = mHelper.GetNotFound("Financial Year");
+                    return response;
+                }
+
+                var currency = unitWork.CurrencyRepository.GetOne(c => c.Currency == model.ProjectCurrency);
+                if (currency == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Currency");
                     return response;
                 }
 
@@ -1504,6 +1502,7 @@ namespace AIMS.Services
                 projectObj.StartingFinancialYear = startingFinancialYear;
                 projectObj.EndingFinancialYear = endingFinancialYears;
                 projectObj.ProjectValue = model.ProjectValue;
+                projectObj.ProjectCurrency = model.ProjectCurrency;
                 projectObj.DateUpdated = DateTime.Now;
 
                 unitWork.ProjectRepository.Update(projectObj);

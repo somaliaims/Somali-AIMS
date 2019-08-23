@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    [Migration("20190823183502_Initial_Migration")]
+    [Migration("20190823194043_Initial_Migration")]
     partial class Initial_Migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -451,16 +451,18 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<string>("Currency");
 
-                    b.Property<DateTime>("Dated");
-
                     b.Property<decimal>("ExchangeRate")
                         .HasColumnType("decimal(9, 2)");
 
                     b.Property<int>("ProjectId");
 
+                    b.Property<int?>("YearId");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
+
+                    b.HasIndex("YearId");
 
                     b.ToTable("ProjectDisbursements");
                 });
@@ -808,6 +810,10 @@ namespace AIMS.DAL.Migrations
                         .WithMany("Disbursements")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("AIMS.Models.EFFinancialYears", "Year")
+                        .WithMany()
+                        .HasForeignKey("YearId");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFProjectDocuments", b =>
