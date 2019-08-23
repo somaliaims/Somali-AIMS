@@ -200,7 +200,7 @@ namespace AIMS.Services
                             implementerDataCell.CellStyle = dataCellStyle;
 
                             var projectCostDataCell = row.CreateCell(3);
-                            projectCostDataCell.SetCellValue(ApplyThousandFormat(project.ProjectCost));
+                            projectCostDataCell.SetCellValue(ApplyThousandFormat(project.ProjectValue));
                             projectCostDataCell.CellStyle = dataCellStyle;
 
                             var actualDisbursementDataCell = row.CreateCell(4);
@@ -404,7 +404,7 @@ namespace AIMS.Services
                             implementerDataCell.CellStyle = dataCellStyle;
 
                             var projectCostDataCell = row.CreateCell(3);
-                            projectCostDataCell.SetCellValue(ApplyThousandFormat(project.ProjectCost));
+                            projectCostDataCell.SetCellValue(ApplyThousandFormat(project.ProjectValue));
                             projectCostDataCell.CellStyle = dataCellStyle;
 
                             var actualDisbursementDataCell = row.CreateCell(4);
@@ -608,7 +608,7 @@ namespace AIMS.Services
                             implementerDataCell.CellStyle = dataCellStyle;
 
                             var projectCostDataCell = row.CreateCell(3);
-                            projectCostDataCell.SetCellValue(ApplyThousandFormat(project.ProjectCost));
+                            projectCostDataCell.SetCellValue(ApplyThousandFormat(project.ProjectValue));
                             projectCostDataCell.CellStyle = dataCellStyle;
 
                             var actualDisbursementDataCell = row.CreateCell(4);

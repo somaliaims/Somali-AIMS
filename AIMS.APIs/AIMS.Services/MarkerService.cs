@@ -13,144 +13,144 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AIMS.Services
 {
-    public interface ICustomFieldsService
+    public interface IMarkersService
     {
         /// <summary>
-        /// Gets all customFields
+        /// Gets all markers
         /// </summary>
         /// <returns></returns>
-        IEnumerable<CustomFieldView> GetAll();
+        IEnumerable<MarkerView> GetAll();
 
         /// <summary>
         /// Gets list of active fields
         /// </summary>
         /// <returns></returns>
-        IEnumerable<CustomFieldView> GetActiveFields();
+        IEnumerable<MarkerView> GetActiveFields();
 
         /// <summary>
-        /// Get matching customFields for the criteria
+        /// Get matching markers for the criteria
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        IEnumerable<CustomFieldView> GetMatching(string criteria);
+        IEnumerable<MarkerView> GetMatching(string criteria);
 
         /// <summary>
-        /// Gets the customField for the provided id
+        /// Gets the marker for the provided id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
 
-        CustomFieldView Get(int id);
+        MarkerView Get(int id);
         /// <summary>
-        /// Gets all customFields async
+        /// Gets all markers async
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<CustomFieldView>> GetAllAsync();
+        Task<IEnumerable<MarkerView>> GetAllAsync();
 
         /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(CustomFieldModel customField);
+        ActionResponse Add(MarkerModel marker);
 
         /// <summary>
-        /// Updates a customField
+        /// Updates a marker
         /// </summary>
-        /// <param name="customField"></param>
+        /// <param name="marker"></param>
         /// <returns></returns>
-        ActionResponse Update(int id, CustomFieldModel customField);
+        ActionResponse Update(int id, MarkerModel marker);
 
         /// <summary>
-        /// Deletes a customField
+        /// Deletes a marker
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         Task<ActionResponse> DeleteAsync(int id);
     }
 
-    public class CustomFieldsService : ICustomFieldsService
+    public class MarkersService : IMarkersService
     {
         AIMSDbContext context;
         IMapper mapper;
 
-        public CustomFieldsService(AIMSDbContext cntxt, IMapper autoMapper)
+        public MarkersService(AIMSDbContext cntxt, IMapper autoMapper)
         {
             context = cntxt;
             mapper = autoMapper;
         }
 
-        public IEnumerable<CustomFieldView> GetAll()
+        public IEnumerable<MarkerView> GetAll()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var customFields = unitWork.CustomFieldRepository.GetAll();
-                if (customFields != null)
+                var markers = unitWork.MarkerRepository.GetAll();
+                if (markers != null)
                 {
-                    customFields = (from c in customFields
+                    markers = (from c in markers
                                   orderby c.FieldTitle ascending
                                   select c);
                 }
-                return mapper.Map<List<CustomFieldView>>(customFields);
+                return mapper.Map<List<MarkerView>>(markers);
             }
         }
 
-        public IEnumerable<CustomFieldView> GetActiveFields()
+        public IEnumerable<MarkerView> GetActiveFields()
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 var dated = DateTime.Now;
-                var customFields = unitWork.CustomFieldRepository.GetManyQueryable(c => c.Id != 0);
-                if (customFields != null)
+                var markers = unitWork.MarkerRepository.GetManyQueryable(c => c.Id != 0);
+                if (markers != null)
                 {
-                    customFields = (from c in customFields
+                    markers = (from c in markers
                                     orderby c.FieldTitle ascending
                                     select c);
                 }
-                return mapper.Map<List<CustomFieldView>>(customFields);
+                return mapper.Map<List<MarkerView>>(markers);
             }
         }
 
-        public async Task<IEnumerable<CustomFieldView>> GetAllAsync()
+        public async Task<IEnumerable<MarkerView>> GetAllAsync()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var customFields = await unitWork.CustomFieldRepository.GetAllAsync();
-                if (customFields != null)
+                var markers = await unitWork.MarkerRepository.GetAllAsync();
+                if (markers != null)
                 {
-                    customFields = (from c in customFields
+                    markers = (from c in markers
                                   orderby c.FieldTitle ascending
                                   select c);
                 }
-                return await Task<IEnumerable<CustomFieldView>>.Run(() => mapper.Map<List<CustomFieldView>>(customFields)).ConfigureAwait(false);
+                return await Task<IEnumerable<MarkerView>>.Run(() => mapper.Map<List<MarkerView>>(markers)).ConfigureAwait(false);
             }
         }
 
-        public CustomFieldView Get(int id)
+        public MarkerView Get(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var customField = unitWork.CustomFieldRepository.GetByID(id);
-                return mapper.Map<CustomFieldView>(customField);
+                var marker = unitWork.MarkerRepository.GetByID(id);
+                return mapper.Map<MarkerView>(marker);
             }
         }
 
-        public IEnumerable<CustomFieldView> GetMatching(string criteria)
+        public IEnumerable<MarkerView> GetMatching(string criteria)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                List<CustomFieldView> customFieldsList = new List<CustomFieldView>();
-                var customFields = unitWork.CustomFieldRepository.GetMany(o => o.FieldTitle.Contains(criteria, StringComparison.OrdinalIgnoreCase));
-                if (customFields != null)
+                List<MarkerView> markersList = new List<MarkerView>();
+                var markers = unitWork.MarkerRepository.GetMany(o => o.FieldTitle.Contains(criteria, StringComparison.OrdinalIgnoreCase));
+                if (markers != null)
                 {
-                    customFields = (from c in customFields
+                    markers = (from c in markers
                                   orderby c.FieldTitle ascending
                                   select c);
                 }
-                return mapper.Map<List<CustomFieldView>>(customFields);
+                return mapper.Map<List<MarkerView>>(markers);
             }
         }
 
-        public ActionResponse Add(CustomFieldModel model)
+        public ActionResponse Add(MarkerModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -158,10 +158,10 @@ namespace AIMS.Services
                 try
                 {
                     IMessageHelper mHelper;
-                    List<CustomFieldValues> valuesList = new List<CustomFieldValues>();
+                    List<MarkerValues> valuesList = new List<MarkerValues>();
                     if (!string.IsNullOrEmpty(model.Values))
                     {
-                       valuesList = JsonConvert.DeserializeObject<List<CustomFieldValues>>(model.Values);
+                       valuesList = JsonConvert.DeserializeObject<List<MarkerValues>>(model.Values);
                     }
 
                     switch (model.FieldType)
@@ -191,24 +191,24 @@ namespace AIMS.Services
                             break;
                     }
                     
-                    var customFields = unitWork.CustomFieldRepository.GetManyQueryable(l => (l.FieldTitle.ToLower() == model.FieldTitle.ToLower()));
-                    var isCustomFieldCreated = (from c in customFields
+                    var markers = unitWork.MarkerRepository.GetManyQueryable(l => (l.FieldTitle.ToLower() == model.FieldTitle.ToLower()));
+                    var isMarkerCreated = (from c in markers
                                              where c.FieldTitle.ToLower() == model.FieldTitle
                                              select c).FirstOrDefault();
 
-                    if (isCustomFieldCreated != null)
+                    if (isMarkerCreated != null)
                     {
-                        isCustomFieldCreated.FieldTitle = model.FieldTitle;
-                        isCustomFieldCreated.FieldType = model.FieldType;
-                        isCustomFieldCreated.Values = model.Values;
-                        isCustomFieldCreated.Help = model.Help;
-                        unitWork.CustomFieldRepository.Update(isCustomFieldCreated);
+                        isMarkerCreated.FieldTitle = model.FieldTitle;
+                        isMarkerCreated.FieldType = model.FieldType;
+                        isMarkerCreated.Values = model.Values;
+                        isMarkerCreated.Help = model.Help;
+                        unitWork.MarkerRepository.Update(isMarkerCreated);
                         unitWork.Save();
-                        response.ReturnedId = isCustomFieldCreated.Id;
+                        response.ReturnedId = isMarkerCreated.Id;
                     }
                     else
                     {
-                        var newCustomField = unitWork.CustomFieldRepository.Insert(new EFCustomFields()
+                        var newMarker = unitWork.MarkerRepository.Insert(new EFMarkers()
                         {
                            FieldTitle = model.FieldTitle,
                            FieldType = model.FieldType,
@@ -216,7 +216,7 @@ namespace AIMS.Services
                            Help = model.Help
                         });
                         unitWork.Save();
-                        response.ReturnedId = newCustomField.Id;
+                        response.ReturnedId = newMarker.Id;
                     }
                     unitWork.Save();
                 }
@@ -229,26 +229,26 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Update(int id, CustomFieldModel model)
+        public ActionResponse Update(int id, MarkerModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
-                var customField = unitWork.CustomFieldRepository.GetByID(id);
+                var marker = unitWork.MarkerRepository.GetByID(id);
 
-                if (customField == null)
+                if (marker == null)
                 {
                     mHelper = new MessageHelper();
-                    response.Message = mHelper.GetNotFound("CustomField");
+                    response.Message = mHelper.GetNotFound("Marker");
                     response.Success = false;
                     return response;
                 }
 
-                List<CustomFieldValues> valuesList = new List<CustomFieldValues>();
+                List<MarkerValues> valuesList = new List<MarkerValues>();
                 if (!string.IsNullOrEmpty(model.Values))
                 {
-                    valuesList = JsonConvert.DeserializeObject<List<CustomFieldValues>>(model.Values);
+                    valuesList = JsonConvert.DeserializeObject<List<MarkerValues>>(model.Values);
                 }
 
                 switch (model.FieldType)
@@ -278,11 +278,11 @@ namespace AIMS.Services
                         break;
                 }
 
-                customField.FieldTitle = model.FieldTitle;
-                customField.FieldType = model.FieldType;
-                customField.Values = model.Values;
-                customField.Help = model.Help;
-                unitWork.CustomFieldRepository.Update(customField);
+                marker.FieldTitle = model.FieldTitle;
+                marker.FieldType = model.FieldType;
+                marker.Values = model.Values;
+                marker.Help = model.Help;
+                unitWork.MarkerRepository.Update(marker);
                 unitWork.Save();
                 response.Message = true.ToString();
                 response.ReturnedId = id;
@@ -295,12 +295,12 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var customField = await unitWork.CustomFieldRepository.GetByIDAsync(id);
-                if (customField == null)
+                var marker = await unitWork.MarkerRepository.GetByIDAsync(id);
+                if (marker == null)
                 {
                     IMessageHelper mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("CustomField");
+                    response.Message = mHelper.GetNotFound("Marker");
                     return response;
                 }
 
@@ -309,12 +309,12 @@ namespace AIMS.Services
                 {
                     using (var transaction = context.Database.BeginTransaction())
                     {
-                        var projectCustomFields = unitWork.ProjectCustomFieldsRepository.GetManyQueryable(c => c.CustomFieldId == id);
-                        foreach(var cField in projectCustomFields)
+                        var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(c => c.MarkerId == id);
+                        foreach(var cField in projectMarkers)
                         {
-                            unitWork.ProjectCustomFieldsRepository.Delete(cField);
+                            unitWork.ProjectMarkersRepository.Delete(cField);
                         }
-                        unitWork.CustomFieldRepository.Delete(customField);
+                        unitWork.MarkerRepository.Delete(marker);
                         await unitWork.SaveAsync();
                         transaction.Commit();
                     }

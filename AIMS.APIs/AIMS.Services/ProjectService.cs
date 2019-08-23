@@ -182,14 +182,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse AddUpdateProjectCustomField(ProjectCustomFieldModel model);
-
-        /// <summary>
-        /// Adds marker to a project
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        ActionResponse AddProjectMarker(ProjectMarkersModel model);
+        ActionResponse AddUpdateProjectMarker(ProjectMarkerModel model);
 
         /// <summary>
         /// Gets funders for the provided project id
@@ -231,7 +224,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="fieldId"></param>
         /// <returns></returns>
-        IEnumerable<ProjectView> GetCustomFieldProjects(int fieldId);
+        IEnumerable<ProjectView> GetMarkerProjects(int fieldId);
 
         /// <summary>
         /// Gets project disbursements
@@ -246,13 +239,6 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         IEnumerable<ProjectDocumentView> GetProjectDocuments(int id);
-
-        /// <summary>
-        /// Gets project markers
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        IEnumerable<ProjectMarkersView> GetProjectMarkers(int id);
 
         /// <summary>
         /// Gets users projects
@@ -299,7 +285,7 @@ namespace AIMS.Services
         /// <param name="projectId"></param>
         /// <param name="customFieldId"></param>
         /// <returns></returns>
-        ActionResponse DeleteProjectCustomField(int projectId, int customFieldId);
+        ActionResponse DeleteProjectMarker(int projectId, int customFieldId);
 
         /// <summary>
         /// Deletes the disbursement with the provided id
@@ -314,13 +300,6 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         ActionResponse DeleteProjectDocument(int id);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        ActionResponse DeleteProjectMarker(int id);
 
         /// <summary>
         /// Merges the provided projects and their relevant data
@@ -418,8 +397,8 @@ namespace AIMS.Services
                     {
                         Id = project.Id,
                         Title = project.Title,
-                        StartDate = project.StartDate.ToString(),
-                        EndDate = project.EndDate.ToString(),
+                        StartingFinancialYear = project.StartingFinancialYear.ToString(),
+                        EndingFinancialYear = project.EndingFinancialYear.ToString(),
                         Organizations = organizationsList,
                         Locations = mapper.Map<List<LocationAbstractView>>(project.Locations),
                         Sectors = mapper.Map<List<SectorAbstractView>>(project.Sectors)
@@ -475,11 +454,11 @@ namespace AIMS.Services
             }
         }
 
-        public IEnumerable<ProjectView> GetCustomFieldProjects(int fieldId)
+        public IEnumerable<ProjectView> GetMarkerProjects(int fieldId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var fieldProjects = unitWork.ProjectCustomFieldsRepository.GetManyQueryable(p => p.CustomFieldId == fieldId);
+                var fieldProjects = unitWork.ProjectMarkersRepository.GetManyQueryable(p => p.MarkerId == fieldId);
 
                 var projectIds = (from f in fieldProjects
                                   select f.ProjectId).Distinct().ToList<int>();
@@ -542,7 +521,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Funders.FundingType", "Implementers", "Implementers.Implementer", "Documents", "CustomFields.CustomField" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Funders.FundingType", "Implementers", "Implementers.Implementer", "Documents", "Markers.Marker" });
                 ProjectProfileView profileView = new ProjectProfileView();
 
                 if (projectProfileList != null)
@@ -555,15 +534,15 @@ namespace AIMS.Services
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
-                        profileView.StartDate = project.StartDate.ToLongDateString();
-                        profileView.EndDate = project.EndDate.ToLongDateString();
+                        profileView.StartingFinancialYear = project.StartingFinancialYear.ToString();
+                        profileView.EndingFinancialYear = project.EndingFinancialYear.ToString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
                         profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                         profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
                         profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(projectDisbursements);
                         profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
-                        profileView.CustomFields = mapper.Map<List<ProjectCustomFieldsView>>(project.CustomFields);
+                        profileView.Markers = mapper.Map<List<ProjectMarkersView>>(project.Markers);
                     }
                 }
                 ProjectProfileReport projectProfileReport = new ProjectProfileReport()
@@ -600,14 +579,14 @@ namespace AIMS.Services
                     {
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.StartDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear)
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.EndingFinancialYear.FinancialYear <= model.EndingYear)
                             , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
                             projectProfileList = (from project in projectProfileList
-                                                  where project.StartDate.Year >= model.StartingYear &&
-                                                  project.EndDate.Year <= model.EndingYear
+                                                  where project.StartingFinancialYear.FinancialYear >= model.StartingYear &&
+                                                  project.EndingFinancialYear.FinancialYear <= model.EndingYear
                                                   select project);
                         }
                     }
@@ -679,7 +658,7 @@ namespace AIMS.Services
                     if (projectProfileList == null)
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase)
-                            , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "CustomFields.CustomField" });
+                            , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Markers.Marker" });
                     }
 
                     foreach (var project in projectProfileList)
@@ -688,15 +667,15 @@ namespace AIMS.Services
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
-                        profileView.StartDate = project.StartDate.ToLongDateString();
-                        profileView.EndDate = project.EndDate.ToLongDateString();
+                        profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
+                        profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
                         profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                         profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
                         profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);
                         profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
-                        profileView.CustomFields = mapper.Map<List<ProjectCustomFieldsView>>(project.CustomFields);
+                        profileView.Markers = mapper.Map<List<ProjectMarkersView>>(project.Markers);
 
                         projectsList.Add(profileView);
                     }
@@ -726,13 +705,13 @@ namespace AIMS.Services
                     {
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetManyQueryableAsync(p => (p.StartDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear));
+                            projectProfileList = await unitWork.ProjectRepository.GetManyQueryableAsync(p => (p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.EndingFinancialYear.FinancialYear <= model.EndingYear));
                         }
                         else
                         {
                             projectProfileList = (from project in projectProfileList
-                                                  where project.StartDate.Year >= model.StartingYear &&
-                                                  project.EndDate.Year <= model.EndingYear
+                                                  where project.StartingFinancialYear.FinancialYear >= model.StartingYear &&
+                                                  project.EndingFinancialYear.FinancialYear <= model.EndingYear
                                                   select project);
                         }
                     }
@@ -809,8 +788,8 @@ namespace AIMS.Services
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
-                        profileView.StartDate = project.StartDate.ToShortDateString();
-                        profileView.EndDate = project.EndDate.ToShortDateString();
+                        profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
+                        profileView.EndingFinancialYear = project.EndingFinancialYear.ToString();
                         profileView.DateUpdated = project.DateUpdated.ToShortDateString();
                         projectsList.Add(profileView);
                     }
@@ -826,7 +805,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "CustomFields.CustomField" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers.Marker" });
                 List<ProjectProfileView> profileViewList = new List<ProjectProfileView>();
 
                 if (projectProfileList != null)
@@ -838,15 +817,15 @@ namespace AIMS.Services
                             Id = project.Id,
                             Title = project.Title,
                             Description = project.Description,
-                            StartDate = project.StartDate.ToLongDateString(),
-                            EndDate = project.EndDate.ToLongDateString(),
+                            StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
+                            EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
                             Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors),
                             Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations),
                             Funders = mapper.Map<List<ProjectFunderView>>(project.Funders),
                             Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers),
                             Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements),
                             Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents),
-                            CustomFields = mapper.Map<List<ProjectCustomFieldsView>>(project.CustomFields)
+                            Markers = mapper.Map<List<ProjectMarkersView>>(project.Markers)
                         });
                     }
                 }
@@ -889,8 +868,8 @@ namespace AIMS.Services
                             profileView.Id = project.Id;
                             profileView.Title = project.Title;
                             profileView.Description = project.Description;
-                            profileView.StartDate = project.StartDate.ToLongDateString();
-                            profileView.EndDate = project.EndDate.ToLongDateString();
+                            profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
+                            profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                             profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
                             profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                             profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
@@ -988,15 +967,6 @@ namespace AIMS.Services
             {
                 var documents = unitWork.ProjectDocumentRepository.GetMany(d => d.ProjectId == id);
                 return mapper.Map<List<ProjectDocumentView>>(documents);
-            }
-        }
-
-        public IEnumerable<ProjectMarkersView> GetProjectMarkers(int id)
-        {
-            using (var unitWork = new UnitOfWork(context))
-            {
-                var markers = unitWork.ProjectMarkersRepository.GetMany(d => d.ProjectId == id);
-                return mapper.Map<List<ProjectMarkersView>>(markers);
             }
         }
 
@@ -1250,34 +1220,14 @@ namespace AIMS.Services
                         response.Success = false;
                         return response;
                     }
-                    var fundingType = unitWork.FundingTypeRepository.GetByID(model.FundingTypeId);
-                    if (fundingType == null)
-                    {
-                        response.Message = mHelper.GetNotFound("Grant type");
-                        response.Success = false;
-                        return response;
-                    }
 
-                    var projectFunder = unitWork.ProjectFundersRepository.GetOne(f => f.ProjectId == model.ProjectId && f.FunderId == model.FunderId && f.FundingTypeId == model.FundingTypeId);
-                    if (projectFunder != null)
+                    var projectFunder = unitWork.ProjectFundersRepository.GetOne(f => f.ProjectId == model.ProjectId && f.FunderId == model.FunderId);
+                    if (projectFunder == null)
                     {
-                        projectFunder.Amount = model.Amount;
-                        projectFunder.Currency = model.Currency;
-                        projectFunder.ExchangeRate = model.ExchangeRate;
-                        projectFunder.Dated = model.Dated;
-                        unitWork.ProjectFundersRepository.Update(projectFunder);
-                    }
-                    else
-                    {
-                        unitWork.ProjectFundersRepository.Insert(new EFProjectFunders()
+                        projectFunder = unitWork.ProjectFundersRepository.Insert(new EFProjectFunders()
                         {
                             Project = project,
                             Funder = funder,
-                            FundingType = fundingType,
-                            Amount = model.Amount,
-                            Currency = model.Currency,
-                            ExchangeRate = model.ExchangeRate,
-                            Dated = model.Dated
                         });
                         project.DateUpdated = DateTime.Now;
                         unitWork.ProjectRepository.Update(project);
@@ -1412,8 +1362,7 @@ namespace AIMS.Services
                     }
 
                     var funders = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.ProjectId == model.ProjectId);
-                    decimal totalFunds = (from funds in funders
-                                          select (funds.Amount * (1 / funds.ExchangeRate))).Sum();
+                    decimal totalFunds = project.ProjectValue;
 
                     var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.ProjectId == model.ProjectId);
                     decimal totalDisbursement = ((from disbursement in disbursements
@@ -1485,24 +1434,24 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddUpdateProjectCustomField(ProjectCustomFieldModel model)
+        public ActionResponse AddUpdateProjectMarker(ProjectMarkerModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var customField = unitWork.ProjectCustomFieldsRepository.GetOne(p => p.ProjectId == model.ProjectId && p.CustomFieldId == model.CustomFieldId);
+                    var customField = unitWork.ProjectMarkersRepository.GetOne(p => p.ProjectId == model.ProjectId && p.MarkerId == model.MarkerId);
                     if (customField != null)
                     {
                         customField.Values = model.Values;
                     }
                     else
                     {
-                        unitWork.ProjectCustomFieldsRepository.Insert(new EFProjectCustomFields()
+                        unitWork.ProjectMarkersRepository.Insert(new EFProjectMarkers()
                         {
                             ProjectId = model.ProjectId,
-                            CustomFieldId = model.CustomFieldId,
+                            MarkerId = model.MarkerId,
                             FieldType = model.FieldType,
                             Values = model.Values
                         });
@@ -1514,42 +1463,6 @@ namespace AIMS.Services
                     response.Message = ex.Message;
                 }
                 unitWork.Save();
-                return response;
-            }
-        }
-
-        public ActionResponse AddProjectMarker(ProjectMarkersModel model)
-        {
-            using (var unitWork = new UnitOfWork(context))
-            {
-                ActionResponse response = new ActionResponse();
-                IMessageHelper mHelper;
-
-                try
-                {
-                    var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
-                    if (project == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Project");
-                        response.Success = false;
-                    }
-
-                    unitWork.ProjectMarkersRepository.Insert(new EFProjectMarkers()
-                    {
-                        Project = project,
-                        Marker = model.Marker,
-                        Percentage = model.Percentage
-                    });
-                    project.DateUpdated = DateTime.Now;
-                    unitWork.ProjectRepository.Update(project);
-                    unitWork.Save();
-                }
-                catch (Exception ex)
-                {
-                    response.Success = false;
-                    response.Message = ex.Message;
-                }
                 return response;
             }
         }
@@ -1667,14 +1580,14 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse DeleteProjectCustomField(int projectId, int customFieldId)
+        public ActionResponse DeleteProjectMarker(int projectId, int customFieldId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectCustomField = unitWork.ProjectCustomFieldsRepository.Get(f => f.ProjectId == projectId && f.CustomFieldId == customFieldId);
+                var projectMarker = unitWork.ProjectMarkersRepository.Get(f => f.ProjectId == projectId && f.MarkerId == customFieldId);
                 IMessageHelper mHelper;
-                if (projectCustomField == null)
+                if (projectMarker == null)
                 {
                     mHelper = new MessageHelper();
                     response.Message = mHelper.GetNotFound("Project Custom Field");
@@ -1682,7 +1595,7 @@ namespace AIMS.Services
                     return response;
                 }
 
-                unitWork.ProjectCustomFieldsRepository.Delete(projectCustomField);
+                unitWork.ProjectMarkersRepository.Delete(projectMarker);
                 unitWork.Save();
                 return response;
             }
@@ -1733,27 +1646,6 @@ namespace AIMS.Services
                 }
 
                 unitWork.ProjectDocumentRepository.Delete(projectDocument);
-                unitWork.Save();
-                return response;
-            }
-        }
-
-        public ActionResponse DeleteProjectMarker(int id)
-        {
-            using (var unitWork = new UnitOfWork(context))
-            {
-                ActionResponse response = new ActionResponse();
-                var projectMarker = unitWork.ProjectMarkersRepository.GetByID(id);
-                IMessageHelper mHelper;
-                if (projectMarker == null)
-                {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.GetNotFound("Project Marker");
-                    response.Success = false;
-                    return response;
-                }
-
-                unitWork.ProjectMarkersRepository.Delete(projectMarker);
                 unitWork.Save();
                 return response;
             }
@@ -1843,11 +1735,7 @@ namespace AIMS.Services
                                             fundersList.Add(new EFProjectFunders()
                                             {
                                                 ProjectId = newProject.Id,
-                                                FundingTypeId = funder.FundingTypeId,
                                                 FunderId = funder.FunderId,
-                                                Amount = funder.Amount,
-                                                Currency = funder.Currency,
-                                                ExchangeRate = funder.ExchangeRate
                                             });
                                         }
                                     }

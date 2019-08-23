@@ -44,12 +44,6 @@ namespace AIMS.APIs.Controllers
             return Ok(service.GetHelpForProjectDisbursementFields());
         }
 
-        [HttpGet("GetExpectedDisbursementsFields")]
-        public IActionResult GetExpectedDisbursementsFields()
-        {
-            return Ok(service.GetHelpForProjectExpectedDisbursementFields());
-        }
-
         [HttpGet("GetProjectDocumentsFields")]
         public IActionResult GetProjectDocumentsFields()
         {
@@ -109,21 +103,6 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
             var response = service.AddHelpForProjectDisbursement(model);
-            if (!response.Success)
-            {
-                return BadRequest(response.Message);
-            }
-            return Ok(true);
-        }
-
-        [HttpPost("AddProjectExpectedDisbursementHelp")]
-        public IActionResult AddProjectExpectedDisbursementHelp([FromBody] ExpectedDisbursementHelp model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var response = service.AddHelpForProjectExpectedDisbursements(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

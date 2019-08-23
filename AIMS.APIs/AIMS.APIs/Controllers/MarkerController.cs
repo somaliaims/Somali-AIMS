@@ -11,11 +11,11 @@ namespace AIMS.APIs.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CustomFieldController : ControllerBase
+    public class MarkerController : ControllerBase
     {
-        ICustomFieldsService service;
+        IMarkersService service;
 
-        public CustomFieldController(ICustomFieldsService cService)
+        public MarkerController(IMarkersService cService)
         {
             service = cService;
         }
@@ -42,7 +42,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] CustomFieldModel model)
+        public IActionResult Post([FromBody] MarkerModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -58,7 +58,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] CustomFieldModel model)
+        public IActionResult Put(int id, [FromBody] MarkerModel model)
         {
             if (!ModelState.IsValid)
             {

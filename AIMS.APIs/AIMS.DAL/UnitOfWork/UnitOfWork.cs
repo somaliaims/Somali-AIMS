@@ -32,7 +32,6 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFIATISettings> iatiSettingsRepository;
         private GenericRepository<EFPasswordRecoveryRequests> passwordRecoveryRepository;
         private GenericRepository<EFProjectLocations> projectLocationsRepository;
-        private GenericRepository<EFProjectMarkers> projectMarkersRepository;
         private GenericRepository<EFFinancialYears> financialYearRepository;
         private GenericRepository<EFStaticReports> reportsRepository;
         private GenericRepository<EFReportSubscriptions> reportSubscriptionsRepository;
@@ -42,8 +41,8 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFExchangeRatesUsageSettings> exRatesUsageSettingsRepository;
         private GenericRepository<EFExchangeRatesAPIsCount> exRatesAPIsRepository;
         private GenericRepository<EFEnvelope> envelopeDataRepository;
-        private GenericRepository<EFCustomFields> customFieldRepository;
-        private GenericRepository<EFProjectCustomFields> projectCustomFieldsRepository;
+        private GenericRepository<EFMarkers> markerRepository;
+        private GenericRepository<EFProjectMarkers> projectMarkersRepository;
         private GenericRepository<EFEmailMessages> emailMessagesRepository;
         private GenericRepository<EFManualExchangeRates> manualRatesRepository;
         private GenericRepository<EFProjectMembershipRequests> projectMembershipRepository;
@@ -137,23 +136,23 @@ namespace AIMS.DAL.UnitOfWork
             }
         }
 
-        public GenericRepository<EFCustomFields> CustomFieldRepository
+        public GenericRepository<EFMarkers> MarkerRepository
         {
             get
             {
-                if (this.customFieldRepository == null)
-                    this.customFieldRepository = new GenericRepository<EFCustomFields>(context);
-                return this.customFieldRepository;
+                if (this.markerRepository == null)
+                    this.markerRepository = new GenericRepository<EFMarkers>(context);
+                return this.markerRepository;
             }
         }
 
-        public GenericRepository<EFProjectCustomFields> ProjectCustomFieldsRepository
+        public GenericRepository<EFProjectMarkers> ProjectMarkersRepository
         {
             get
             {
-                if (this.projectCustomFieldsRepository == null)
-                    this.projectCustomFieldsRepository = new GenericRepository<EFProjectCustomFields>(context);
-                return this.projectCustomFieldsRepository;
+                if (this.projectMarkersRepository == null)
+                    this.projectMarkersRepository = new GenericRepository<EFProjectMarkers>(context);
+                return this.projectMarkersRepository;
             }
         }
 
@@ -334,16 +333,6 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.implementersRepository == null)
                     this.implementersRepository = new GenericRepository<EFProjectImplementers>(context);
                 return this.implementersRepository;
-            }
-        }
-
-        public GenericRepository<EFProjectMarkers> ProjectMarkersRepository
-        {
-            get
-            {
-                if (this.projectMarkersRepository == null)
-                    this.projectMarkersRepository = new GenericRepository<EFProjectMarkers>(context);
-                return this.projectMarkersRepository;
             }
         }
 

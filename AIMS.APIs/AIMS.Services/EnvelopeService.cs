@@ -109,8 +109,8 @@ namespace AIMS.Services
                     projectIds = (from p in funderProjects
                                   select p.ProjectId).ToList<int>();
 
-                    projectValue = (from p in funderProjects
-                                          select (p.Amount * p.ExchangeRate)).Sum();
+                    //To calculate and fix
+                    projectValue = 0;
 
                     if (defaultCurrency != envelope.Currency && envelope.Currency != null)
                     {

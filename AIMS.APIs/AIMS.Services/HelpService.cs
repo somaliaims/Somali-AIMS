@@ -36,12 +36,6 @@ namespace AIMS.Services
         ProjectDisbursementHelp GetHelpForProjectDisbursementFields();
 
         /// <summary>
-        /// Gets help for list of fields under project expected disbursement
-        /// </summary>
-        /// <returns></returns>
-        ExpectedDisbursementHelp GetHelpForProjectExpectedDisbursementFields();
-
-        /// <summary>
         /// Gets help for list of fields under project documents
         /// </summary>
         /// <returns></returns>
@@ -74,13 +68,6 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <returns></returns>
         ActionResponse AddHelpForProjectDisbursement(ProjectDisbursementHelp model);
-
-        /// <summary>
-        /// Adds help for project expected disbusements
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        ActionResponse AddHelpForProjectExpectedDisbursements(ExpectedDisbursementHelp model);
 
         /// <summary>
         /// Adds help for project document
@@ -163,23 +150,6 @@ namespace AIMS.Services
                     if (!string.IsNullOrEmpty(projectHelp.HelpInfoJson))
                     {
                         help = JsonConvert.DeserializeObject<ProjectDisbursementHelp>(projectHelp.HelpInfoJson);
-                    }
-                }
-                return help;
-            }
-        }
-
-        public ExpectedDisbursementHelp GetHelpForProjectExpectedDisbursementFields()
-        {
-            using (var unitWork = new UnitOfWork(context))
-            {
-                ExpectedDisbursementHelp help = new ExpectedDisbursementHelp();
-                var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectExpectedDisbursements);
-                if (projectHelp != null)
-                {
-                    if (!string.IsNullOrEmpty(projectHelp.HelpInfoJson))
-                    {
-                        help = JsonConvert.DeserializeObject<ExpectedDisbursementHelp>(projectHelp.HelpInfoJson);
                     }
                 }
                 return help;
@@ -313,37 +283,6 @@ namespace AIMS.Services
                         unitWork.HelpRepository.Insert(new EFHelp()
                         {
                             Entity = HelpForEntity.ProjectDisbursements,
-                            HelpInfoJson = JsonConvert.SerializeObject(model)
-                        });
-                    }
-                    unitWork.Save();
-                }
-                catch (Exception ex)
-                {
-                    response.Success = false;
-                    response.Message = ex.Message;
-                }
-                return response;
-            }
-        }
-
-        public ActionResponse AddHelpForProjectExpectedDisbursements(ExpectedDisbursementHelp model)
-        {
-            using (var unitWork = new UnitOfWork(context))
-            {
-                ActionResponse response = new ActionResponse();
-                try
-                {
-                    var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectExpectedDisbursements);
-                    if (projectHelp != null)
-                    {
-                        projectHelp.HelpInfoJson = JsonConvert.SerializeObject(model);
-                    }
-                    else
-                    {
-                        unitWork.HelpRepository.Insert(new EFHelp()
-                        {
-                            Entity = HelpForEntity.ProjectExpectedDisbursements,
                             HelpInfoJson = JsonConvert.SerializeObject(model)
                         });
                     }

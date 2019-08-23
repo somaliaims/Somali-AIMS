@@ -207,8 +207,11 @@ namespace AIMS.Models
         [MaxLength(1000)]
         public string Title { get; set; }
         public string Description { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public EFFinancialYears StartingFinancialYear { get; set; }
+        public EFFinancialYears EndingFinancialYear { get; set; }
+        [ForeignKey("FundingTypeId")]
+        public int FundingTypeId { get; set; }
+        public EFFundingTypes FundingType { get; set; }
         [Column(TypeName = "decimal(11, 2)")]
         public decimal ProjectValue { get; set; }
         public ICollection<EFProjectSectors> Sectors { get; set; }
@@ -217,7 +220,7 @@ namespace AIMS.Models
         public ICollection<EFProjectFunders> Funders { get; set; }
         public ICollection<EFProjectImplementers> Implementers { get; set; }
         public ICollection<EFProjectDocuments> Documents { get; set; }
-        public ICollection<EFProjectCustomFields> CustomFields { get; set; }
+        public ICollection<EFProjectMarkers> Markers { get; set; }
         public DateTime DateUpdated { get; set; }
         public int? CreatedById { get; set; }
         public EFUser CreatedBy { get; set; } = null;
@@ -249,18 +252,6 @@ namespace AIMS.Models
         public decimal ExchangeRate { get; set; }
     }
 
-    public class EFProjectExpectedDisbursements
-    {
-        [Key]
-        public int Id { get; set; }
-        public int Year { get; set; }
-        [ForeignKey("Project")]
-        public int ProjectId { get; set; }
-        public EFProject Project { get; set; }
-        [Column(TypeName = "decimal(11, 2)")]
-        public decimal ExpectedDisbursements { get; set; }
-    }
-
     public class EFProjectSectors
     {
         public int ProjectId { get; set; }
@@ -270,18 +261,6 @@ namespace AIMS.Models
         public EFSector Sector { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal FundsPercentage { get; set; }
-    }
-
-    public class EFProjectMarkers
-    {
-        [Key]
-        public int Id { get; set; }
-        [ForeignKey("Project")]
-        public int ProjectId { get; set; }
-        public EFProject Project { get; set; }
-        public string Marker { get; set; }
-        [Column(TypeName = "decimal(9, 2)")]
-        public decimal Percentage { get; set; }
     }
 
     public class EFProjectDocuments
@@ -315,15 +294,6 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
-        [ForeignKey("FundingType")]
-        public int FundingTypeId { get; set; }
-        public EFFundingTypes FundingType { get; set; }
-        [Column(TypeName = "decimal(11 ,2)")]
-        public decimal Amount { get; set; }
-        public string Currency { get; set; }
-        [Column(TypeName = "decimal(9, 2)")]
-        public decimal ExchangeRate { get; set; }
-        public DateTime? Dated { get; set; }
     }
 
     public class EFProjectMembershipRequests
@@ -431,7 +401,7 @@ namespace AIMS.Models
         public int Count { get; set; }
     }
 
-    public class EFCustomFields
+    public class EFMarkers
     {
         [Key]
         public int Id { get; set; }
@@ -441,13 +411,13 @@ namespace AIMS.Models
         public string Help { get; set; }
     }
 
-    public class EFProjectCustomFields
+    public class EFProjectMarkers
     {
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
-        [ForeignKey("CustomField")]
-        public int CustomFieldId { get; set; }
-        public EFCustomFields CustomField { get; set; }
+        [ForeignKey("Marker")]
+        public int MarkerId { get; set; }
+        public EFMarkers Marker { get; set; }
         public FieldTypes FieldType { get; set; }
         public string Values { get; set; }
     }

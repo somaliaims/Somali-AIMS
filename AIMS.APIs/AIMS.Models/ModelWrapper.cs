@@ -668,8 +668,8 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
+        public string StartingFinancialYear { get; set; }
+        public string EndingFinancialYear { get; set; }
         public string DateUpdated { get; set; }
     }
 
@@ -678,8 +678,8 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
+        public string StartingFinancialYear { get; set; }
+        public string EndingFinancialYear { get; set; }
         public IEnumerable<SectorAbstractView> Sectors { get; set; }
         public IEnumerable<LocationAbstractView> Locations { get; set; }
         public IEnumerable<OrganizationAbstractView> Organizations { get; set; }
@@ -754,8 +754,8 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
+        public string StartingFinancialYear { get; set; }
+        public string EndingFinancialYear { get; set; }
         public decimal ProjectValue { get; set; }
         public ICollection<ProjectFunderView> Funders { get; set; }
         public ICollection<ProjectImplementerView> Implementers { get; set; }
@@ -770,9 +770,9 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
-        public decimal ProjectCost { get; set; }
+        public string StartingFinancialYear { get; set; }
+        public string EndingFinancialYear { get; set; }
+        public decimal ProjectValue { get; set; }
         public decimal ActualDisbursements { get; set; }
         public decimal PlannedDisbursements { get; set; }
         public ICollection<ProjectFunderView> Funders { get; set; }
@@ -781,7 +781,7 @@ namespace AIMS.Models
         public ICollection<ProjectLocationDetailView> Locations { get; set; }
         public ICollection<ProjectDisbursementView> Disbursements { get; set; }
         public ICollection<ProjectDocumentView> Documents { get; set; }
-        public ICollection<ProjectCustomFieldsView> CustomFields { get; set; }
+        public ICollection<ProjectMarkersView> Markers { get; set; }
     }
 
     public class ProjectModel
@@ -791,9 +791,9 @@ namespace AIMS.Models
         [Required]
         public string Description { get; set; }
         [Required]
-        public DateTime StartDate { get; set; }
+        public int StartingFinancialYear { get; set; }
         [Required]
-        public DateTime EndDate { get; set; }
+        public int EndingFinancialYear { get; set; }
         [Required]
         [Column(TypeName = "decimal(11,2)")]
         public decimal ProjectValue { get; set; }
@@ -807,9 +807,9 @@ namespace AIMS.Models
         public string Title { get; set; }
         public string Description { get; set; }
         [Required]
-        public DateTime StartDate { get; set; }
+        public int StartingFinancialYear { get; set; }
         [Required]
-        public DateTime EndDate { get; set; }
+        public int EndingFinancialYear { get; set; }
         [Required]
         public List<int> ProjectsIds { get; set; }
     }
@@ -821,12 +821,6 @@ namespace AIMS.Models
     {
         public int FunderId { get; set; }
         public string Funder { get; set; }
-        public int FundingTypeId { get; set; }
-        public string FundingType { get; set; }
-        public decimal Amount { get; set; }
-        public string Currency { get; set; }
-        public decimal ExchangeRate { get; set; }
-        public DateTime Dated { get; set; }
     }
 
     public class ProjectFunderModel
@@ -835,15 +829,6 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         [Required]
         public int FunderId { get; set; }
-        public int FundingTypeId { get; set; }
-        [Required]
-        public decimal Amount { get; set; }
-        [Required]
-        public string Currency { get; set; }
-        [Required]
-        public decimal ExchangeRate { get; set; }
-        [Required]
-        public DateTime Dated { get; set; }
     }
 
     /// <summary>
@@ -949,9 +934,9 @@ namespace AIMS.Models
         public string DocumentUrl { get; set; }
     }
 
-    public class ProjectCustomFieldsView
+    public class ProjectMarkersView
     {
-        public int CustomFieldId { get; set; }
+        public int MarkerId { get; set; }
         public string FieldTitle { get; set; }
         public int ProjectId { get; set; }
         public FieldTypes FieldType { get; set; }
@@ -1006,22 +991,10 @@ namespace AIMS.Models
     }
 
 
-    /// <summary>
-    /// Project markers models
-    /// </summary>
-    public class ProjectMarkersView
-    {
-        public int Id { get; set; }
-        public string Project { get; set; }
-        public string Marker { get; set; }
-        public decimal Percentage { get; set; }
-    }
-
     public class ProjectMarkersModel
     {
         public int ProjectId { get; set; }
-        public string Marker { get; set; }
-        public decimal Percentage { get; set; }
+        public string MarkerId { get; set; }
     }
 
 
@@ -1268,10 +1241,10 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public decimal ProjectValue { get; set; } = 0;
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public string StartDateString { get; set; }
-        public string EndDateString { get; set; }
+        public int StartingFinancialYear { get; set; }
+        public int EndingFinancialYear { get; set; }
+        public string StartingFinancialYearString { get; set; }
+        public string EndingFinancialYearString { get; set; }
         public ICollection<ProjectFunding> Funding { get; set; }
         public ICollection<ProjectDisbursements> Disbursements { get; set; }
         public ICollection<ProjectYearlyDisbursements> YearlyDisbursements { get; set; }
@@ -1405,9 +1378,9 @@ namespace AIMS.Models
         public string Title { get; set; }
         public string Funders { get; set; }
         public string Implementers { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
-        public decimal ProjectCost { get; set; }
+        public string StartingFinancialYear { get; set; }
+        public string EndingFinancialYear { get; set; }
+        public decimal ProjectValue { get; set; }
         public decimal ActualDisbursements { get; set; }
         public decimal PlannedDisbursements { get; set; }
     }
@@ -1469,9 +1442,9 @@ namespace AIMS.Models
         public string Title { get; set; }
         public string Funders { get; set; }
         public string Implementers { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
-        public decimal ProjectCost { get; set; }
+        public string StartingFinancialYear { get; set; }
+        public string EndingFinancialYear { get; set; }
+        public decimal ProjectValue { get; set; }
         public decimal ActualDisbursements { get; set; }
         public decimal PlannedDisbursements { get; set; }
     }
@@ -1481,9 +1454,9 @@ namespace AIMS.Models
         public string Title { get; set; }
         public string Funders { get; set; }
         public string Implementers { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
-        public decimal ProjectCost { get; set; }
+        public string StartingFinancialYear { get; set; }
+        public string EndingFinancialYear { get; set; }
+        public decimal ProjectValue { get; set; }
         public decimal ActualDisbursements { get; set; }
         public decimal PlannedDisbursements { get; set; }
     }
@@ -1498,7 +1471,7 @@ namespace AIMS.Models
         public List<int> LocationIds { get; set; } = new List<int>();
     }
 
-    public class CustomFieldModel
+    public class MarkerModel
     {
         public int Id { get; set; }
         [Required]
@@ -1509,25 +1482,25 @@ namespace AIMS.Models
         public string Help { get; set; }
     }
 
-    public class CustomFieldValues
+    public class MarkerValues
     {
         public int Id { get; set; }
         public string Value { get; set; }
     }
 
-    public class ProjectCustomFieldModel
+    public class ProjectMarkerModel
     {
         [Required]
         public int ProjectId { get; set; }
         [Required]
-        public int CustomFieldId { get; set; }
+        public int MarkerId { get; set; }
         [Required]
         public FieldTypes FieldType { get; set; }
         [Required]
         public string Values { get; set; }
     }
 
-    public class CustomFieldView
+    public class MarkerView
     {
         public int Id { get; set; }
         public string FieldTitle { get; set; }
@@ -1679,9 +1652,9 @@ namespace AIMS.Models
         [Required]
         public string Title { get; set; }
         [Required]
-        public string StartDate { get; set; }
+        public string StartingFinancialYear { get; set; }
         [Required]
-        public string EndDate { get; set; }
+        public string EndingFinancialYear { get; set; }
         [Required]
         public string Description { get; set; }
         [Required]
@@ -1718,14 +1691,6 @@ namespace AIMS.Models
         public string Currency { get; set; }
         [Required]
         public string ExchangeRate { get; set; }
-    }
-
-    public class ExpectedDisbursementHelp
-    {
-        [Required]
-        public string Year { get; set; }
-        [Required]
-        public string Disbursement { get; set; }
     }
 
     public class HomePageModel

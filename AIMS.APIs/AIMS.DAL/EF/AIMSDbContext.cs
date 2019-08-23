@@ -48,8 +48,8 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFReportSubscriptions>()
                 .HasKey(r => new { r.UserId, r.ReportId });
 
-            modelBuilder.Entity<EFProjectCustomFields>()
-                .HasKey(c => new { c.ProjectId, c.CustomFieldId });
+            modelBuilder.Entity<EFProjectMarkers>()
+                .HasKey(m => new { m.ProjectId, m.MarkerId });
 
             modelBuilder.Entity<EFSectorMappings>()
                 .HasKey(m => new { m.SectorId, m.MappedSectorId });
@@ -77,10 +77,6 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFExchangeRatesUsageSettings>()
                 .HasIndex(e => new { e.Source, e.UsageSection })
                 .IsUnique();
-
-            modelBuilder.Entity<EFProjectExpectedDisbursements>()
-                .HasIndex(e => new { e.ProjectId, e.Year })
-                .IsUnique();
         }
 
         //Creating DB Tables for the Objects
@@ -92,17 +88,15 @@ namespace AIMS.DAL.EF
         public DbSet<EFSectorMappings> SectorMappings { get; set; }
         public DbSet<EFSector> Sectors { get; set; }
         public DbSet<EFLocation> Locations { get; set; }
-        public DbSet<EFCustomFields> CustomFields { get; set; }
+        public DbSet<EFMarkers> Markers { get; set; }
         public DbSet<EFProject> Projects { get; set; }
         public DbSet<EFProjectFunders> ProjectFunders { get; set; }
         public DbSet<EFProjectImplementers> ProjectImplementers { get; set; }
         public DbSet<EFProjectLocations> ProjectLocations { get; set; }
         public DbSet<EFProjectSectors> ProjectSectors { get; set; }
         public DbSet<EFProjectDisbursements> ProjectDisbursements { get; set; }
-        public DbSet<EFProjectExpectedDisbursements> ExpectedDisbursements { get; set; }
         public DbSet<EFProjectDocuments> ProjectDocuments { get; set; }
         public DbSet<EFProjectMarkers> ProjectMarkers { get; set; }
-        public DbSet<EFProjectCustomFields> ProjectCustomFields { get; set; }
         public DbSet<EFReportSubscriptions> ReportSubscriptions { get; set; }
         public DbSet<EFUserNotifications> UserNotifications { get; set; }
         public DbSet<EFLogs> Logs { get; set; }

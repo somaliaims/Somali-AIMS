@@ -118,9 +118,6 @@ namespace AIMS.Services
                     {
                         Project = project,
                         Funder = funder,
-                        Amount = model.Amount,
-                        Currency = model.Currency,
-                        ExchangeRate = model.ExchangeRate
                     });
                     response.ReturnedId = newProjectFunder.FunderId;
                     unitWork.Save();

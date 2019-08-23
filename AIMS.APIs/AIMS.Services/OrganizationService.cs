@@ -398,9 +398,6 @@ namespace AIMS.Services
                             {
                                 ProjectId = funder.ProjectId,
                                 FunderId = newOrganization.Id,
-                                Amount = funder.Amount,
-                                ExchangeRate = funder.ExchangeRate,
-                                Currency = funder.Currency
                             });
                             unitWork.ProjectFundersRepository.Delete(funder);
                         }
@@ -623,9 +620,6 @@ namespace AIMS.Services
                                 {
                                     ProjectId = funder.ProjectId,
                                     FunderId = newId,
-                                    Amount = funder.Amount,
-                                    ExchangeRate = funder.ExchangeRate,
-                                    Currency = funder.Currency
                                 });
                             }
                             unitWork.ProjectFundersRepository.Delete(funder);
