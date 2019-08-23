@@ -190,14 +190,14 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
-        [Route("GetCustomFieldProjects/{id}")]
-        public IActionResult GetCustomFieldProjects(int id)
+        [Route("GetMarkerProjects/{id}")]
+        public IActionResult GetMarkerProjects(int id)
         {
             if (id <= 0)
             {
                 return BadRequest("Invalid id provided");
             }
-            var projects = projectService.GetCustomFieldProjects(id);
+            var projects = projectService.GetMarkerProjects(id);
             return Ok(projects);
         }
 
@@ -388,15 +388,15 @@ namespace AIMS.APIs.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
-        [Route("AddProjectCustomField")]
-        public IActionResult AddProjectCustomField([FromBody] ProjectCustomFieldModel model)
+        [Route("AddProjectMarker")]
+        public IActionResult AddProjectMarker([FromBody] ProjectMarkerModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = projectService.AddUpdateProjectCustomField(model);
+            var response = projectService.AddUpdateProjectMarker(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -406,15 +406,15 @@ namespace AIMS.APIs.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut]
-        [Route("EditProjectCustomField")]
-        public IActionResult EditProjectCustomField([FromBody] ProjectCustomFieldModel model)
+        [Route("EditProjectMarker")]
+        public IActionResult EditProjectMarker([FromBody] ProjectMarkerModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = projectService.AddUpdateProjectCustomField(model);
+            var response = projectService.AddUpdateProjectMarker(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -534,15 +534,15 @@ namespace AIMS.APIs.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete]
-        [Route("DeleteProjectCustomField/{projectId}/{customFieldId}")]
-        public IActionResult DeleteProjectCustomField(int projectId, int customFieldId)
+        [Route("DeleteProjectMarker/{projectId}/{customFieldId}")]
+        public IActionResult DeleteProjectMarker(int projectId, int customFieldId)
         {
             if (projectId <= 0 || customFieldId <= 0)
             {
                 return BadRequest("Invalid Ids provided");
             }
 
-            var response = projectService.DeleteProjectCustomField(projectId, customFieldId);
+            var response = projectService.DeleteProjectMarker(projectId, customFieldId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

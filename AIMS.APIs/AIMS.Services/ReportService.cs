@@ -84,7 +84,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<ProjectSummary> summaryList = new List<ProjectSummary>();
-                var projects = unitWork.ProjectRepository.GetWithInclude(p => p.EndDate >= DateTime.Now, new string[] { "Disbursements" })
+                var projects = unitWork.ProjectRepository.GetWithInclude(p => p.EndingFinancialYear.FinancialYear >= DateTime.Now.Year, new string[] { "EndingFinancialYear", "Disbursements" })
                     .OrderByDescending(p => p.DateUpdated).Take(10);
 
                 foreach(var project in projects)
@@ -143,14 +143,14 @@ namespace AIMS.Services
                     {
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.EndDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear)),
-                            new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.EndingFinancialYear.FinancialYear <= model.EndingYear)),
+                            new string[] { "StartingFinancialYear","EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
                             projectProfileList = from project in projectProfileList
-                                                 where project.StartDate.Year >= model.StartingYear
-                                                 && project.EndDate.Year <= model.EndingYear
+                                                 where project.StartingFinancialYear.FinancialYear >= model.StartingYear
+                                                 && project.EndingFinancialYear.FinancialYear <= model.EndingYear
                                                  select project;
                         }
                     }
@@ -171,7 +171,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
-                            , new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -196,8 +196,8 @@ namespace AIMS.Services
 
                     if (projectProfileList == null)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndDate.Year >= year && p.EndDate.Month >= month),
-                            new string[] { "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.StartingFinancialYear.FinancialYear >= year),
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     List<ProjectProfileView> projectsList = new List<ProjectProfileView>();
@@ -207,8 +207,8 @@ namespace AIMS.Services
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
-                        profileView.StartDate = project.StartDate.ToLongDateString();
-                        profileView.EndDate = project.EndDate.ToLongDateString();
+                        profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
+                        profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                         profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
@@ -307,19 +307,9 @@ namespace AIMS.Services
                                     totalDisbursements += projectDisbursements;
 
                                     UtilityHelper helper = new UtilityHelper();
-                                    var endDate = Convert.ToDateTime(project.EndDate);
-                                    var startDate = DateTime.Now;
-                                    int months = helper.GetMonthDifference(startDate, endDate);
 
                                     project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * locationPercentage), MidpointRounding.AwayFromZero);
-                                    if (months > 0)
-                                    {
-                                        project.PlannedDisbursements = Math.Round(((project.ProjectValue - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
-                                        if (project.PlannedDisbursements < 0)
-                                        {
-                                            project.PlannedDisbursements = 0;
-                                        }
-                                    }
+                                    //project.PlannedDisbursements (To work on)
                                     totalDisbursementsPercentage += project.ActualDisbursements;
                                 }
                                 else
@@ -338,8 +328,8 @@ namespace AIMS.Services
                             projectsListForLocation.Add(new ProjectViewForLocation()
                             {
                                 Title = project.Title,
-                                StartDate = project.StartDate,
-                                EndDate = project.EndDate,
+                                StartingFinancialYear = project.StartingFinancialYear,
+                                EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
                                 ProjectValue = project.ProjectValue,
@@ -384,8 +374,8 @@ namespace AIMS.Services
                     int futureYearsLimit = (currentYear + 3);
                     List<ProjectBudgetSummaryView> projectBudgetsList = new List<ProjectBudgetSummaryView>();
 
-                    projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndDate.Year >= currentYear,
-                            new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Disbursements" });
+                    projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndingFinancialYear.FinancialYear >= currentYear,
+                            new string[] { "StartingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Disbursements" });
 
                     projectProfileList = (from p in projectProfileList
                                           orderby p.DateUpdated descending
@@ -398,7 +388,7 @@ namespace AIMS.Services
                         ProjectBudgetSummaryView projectBudget = new ProjectBudgetSummaryView();
                         int upperYearLimit = currentYear + 3;
                         int yearsLeft = upperYearLimit - currentYear;
-                        int projectStartYear = project.StartDate.Year;
+                        int projectStartYear = project.StartingFinancialYear.FinancialYear;
                         projectBudget.Id = project.Id;
                         projectBudget.Title = project.Title;
                         List<ProjectDisbursements> disbursementsList = new List<ProjectDisbursements>();
@@ -413,7 +403,7 @@ namespace AIMS.Services
                             projectCost = project.ProjectValue;
                             yearsLeft = upperYearLimit - year;
                             decimal yearDisbursements = Math.Round((from d in project.Disbursements
-                                                         where d.Dated.Year == year
+                                                         where d.Year.FinancialYear == year
                                                          select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
 
                             if (year < currentYear)
@@ -517,21 +507,21 @@ namespace AIMS.Services
                     if (!string.IsNullOrEmpty(model.Title))
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase),
-                            new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     if (model.StartingYear >= 2000 && model.EndingYear >= 2000)
                     {
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.EndDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear)),
-                            new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.EndingFinancialYear.FinancialYear <= model.EndingYear)),
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
                             projectProfileList = from project in projectProfileList
-                                                 where project.StartDate.Year >= model.StartingYear
-                                                 && project.EndDate.Year <= model.EndingYear
+                                                 where project.StartingFinancialYear.FinancialYear >= model.StartingYear
+                                                 && project.EndingFinancialYear.FinancialYear <= model.EndingYear
                                                  select project;
                         }
                     }
@@ -552,7 +542,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
-                            , new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -564,8 +554,8 @@ namespace AIMS.Services
 
                     if (projectProfileList == null)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndDate.Year >= year && p.EndDate.Month >= month),
-                            new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndingFinancialYear.FinancialYear >= year),
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     if (model.SectorIds.Count > 0)
@@ -588,8 +578,8 @@ namespace AIMS.Services
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
-                        profileView.StartDate = project.StartDate.ToLongDateString();
-                        profileView.EndDate = project.EndDate.ToLongDateString();
+                        profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
+                        profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                         profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
@@ -685,9 +675,6 @@ namespace AIMS.Services
                                     totalDisbursements += projectDisbursements;
                                     totalDisbursements = Math.Round(totalDisbursements, MidpointRounding.AwayFromZero);
                                     UtilityHelper helper = new UtilityHelper();
-                                    var endDate = Convert.ToDateTime(project.EndDate);
-                                    var startDate = DateTime.Now;
-                                    int months = helper.GetMonthDifference(startDate, endDate);
 
                                     if (projectDisbursements == 0)
                                     {
@@ -716,8 +703,8 @@ namespace AIMS.Services
                             projectsListForSector.Add(new ProjectViewForSector()
                             {
                                 Title = project.Title,
-                                StartDate = project.StartDate,
-                                EndDate = project.EndDate,
+                                StartingFinancialYear = project.StartingFinancialYear,
+                                EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
                                 ProjectValue = project.ProjectValue,
@@ -781,14 +768,14 @@ namespace AIMS.Services
                     {
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.EndDate.Year >= model.StartingYear && p.EndDate.Year <= model.EndingYear)),
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.EndingFinancialYear.FinancialYear >= model.StartingYear || p.EndingFinancialYear.FinancialYear <= model.EndingYear)),
                             new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
                             projectProfileList = from project in projectProfileList
-                                                 where project.StartDate.Year >= model.StartingYear
-                                                 && project.EndDate.Year <= model.EndingYear
+                                                 where project.StartingFinancialYear.FinancialYear >= model.StartingYear
+                                                 && project.EndingFinancialYear.FinancialYear <= model.EndingYear
                                                  select project;
                         }
                     }
@@ -802,7 +789,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
-                            , new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -814,8 +801,8 @@ namespace AIMS.Services
 
                     if (projectProfileList == null)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndDate.Year >= year && p.EndDate.Month >= month),
-                            new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndingFinancialYear.FinancialYear >= year),
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     if (model.SectorIds.Count > 0)
@@ -824,7 +811,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id)
-                            , new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -855,8 +842,8 @@ namespace AIMS.Services
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
-                        profileView.StartDate = project.StartDate.ToLongDateString();
-                        profileView.EndDate = project.EndDate.ToLongDateString();
+                        profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
+                        profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                         profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
@@ -882,7 +869,7 @@ namespace AIMS.Services
                             {
                                 Year = yr,
                                 Projects = (from p in projectProfileList
-                                            where p.StartDate.Year == yr
+                                            where p.StartingFinancialYear.FinancialYear == yr
                                             select p.Id).ToList<int>()
                             });
                         }
@@ -922,10 +909,6 @@ namespace AIMS.Services
                                 totalDisbursements += projectDisbursements;
                                 totalDisbursements = Math.Round(totalDisbursements, MidpointRounding.AwayFromZero);
                                 UtilityHelper helper = new UtilityHelper();
-                                var endDate = Convert.ToDateTime(project.EndDate);
-                                var startDate = DateTime.Now;
-                                int months = helper.GetMonthDifference(startDate, endDate);
-
                                 project.ActualDisbursements = projectDisbursements;
                                 project.PlannedDisbursements = Math.Round(((project.ProjectValue - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
                                 if (project.PlannedDisbursements < 0)
@@ -941,8 +924,8 @@ namespace AIMS.Services
                             projectsViewForYear.Add(new ProjectViewForYear()
                             {
                                 Title = project.Title,
-                                StartDate = project.StartDate,
-                                EndDate = project.EndDate,
+                                StartingFinancialYear = project.StartingFinancialYear,
+                                EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
                                 ProjectValue = project.ProjectValue,

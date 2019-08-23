@@ -244,7 +244,7 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
-        public DateTime Dated { get; set; }
+        public EFFinancialYears Year { get; set; }
         [Column(TypeName = "decimal(11, 2)")]
         public decimal Amount { get; set; }
         public string Currency { get; set; }

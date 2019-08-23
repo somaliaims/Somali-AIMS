@@ -361,7 +361,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 Decimal disbursementValue = 0;
-                var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.Dated.Year == DateTime.Now.Year);
+                var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == DateTime.Now.Year, new string[] { "Year" });
                 if (disbursements.Any())
                 {
                     disbursementValue = (from d in disbursements
@@ -521,7 +521,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Funders.FundingType", "Implementers", "Implementers.Implementer", "Documents", "Markers.Marker" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Funders.FundingType", "Implementers", "Implementers.Implementer", "Documents", "Markers.Marker" });
                 ProjectProfileView profileView = new ProjectProfileView();
 
                 if (projectProfileList != null)
@@ -529,7 +529,7 @@ namespace AIMS.Services
                     foreach (var project in projectProfileList)
                     {
                         var projectDisbursements = (from d in project.Disbursements
-                                                    orderby d.Dated descending
+                                                    orderby d.Year.FinancialYear descending
                                                     select d);
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
@@ -954,9 +954,9 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.ProjectId == id);
+                var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
                 disbursements = (disbursements != null && disbursements.Count() > 0) ? 
-                                    (from d in disbursements orderby d.Dated descending select d) : disbursements;
+                                    (from d in disbursements orderby d.Year.FinancialYear descending select d) : disbursements;
                 return mapper.Map<List<ProjectDisbursementView>>(disbursements);
             }
         }
@@ -1005,6 +1005,22 @@ namespace AIMS.Services
                         return response;
                     }
 
+                    var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => (f.FinancialYear == model.StartingFinancialYear || f.FinancialYear == model.EndingFinancialYear));
+                    if (financialYears.Count() < 2)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Provided financial year");
+                        return response;
+                    }
+
+                    var startingFinancialYear = (from fy in financialYears
+                                                 where fy.FinancialYear == model.StartingFinancialYear
+                                                 select fy).FirstOrDefault();
+                    var endingFinancialYears = (from fy in financialYears
+                                                where fy.FinancialYear == model.EndingFinancialYear
+                                                select fy).FirstOrDefault();
+
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
                     {
@@ -1014,39 +1030,13 @@ namespace AIMS.Services
                             {
                                 Title = model.Title,
                                 Description = model.Description,
-                                StartDate = model.StartDate,
-                                EndDate = model.EndDate,
+                                StartingFinancialYear = startingFinancialYear,
+                                EndingFinancialYear = endingFinancialYears,
                                 ProjectValue = model.ProjectValue,
                                 DateUpdated = DateTime.Now,
                                 CreatedById = userId
                             });
                             await unitWork.SaveAsync();
-
-                            List<int> yearsList = new List<int>();
-                            yearsList.Add(model.StartDate.Year);
-                            yearsList.Add(model.EndDate.Year);
-
-                            var fYears = await unitWork.FinancialYearRepository.GetAllAsync();
-                            List<int> financialYears = (from year in fYears
-                                                        select year.FinancialYear).ToList<int>();
-
-                            List<EFFinancialYears> entityList = new List<EFFinancialYears>();
-                            foreach (int year in yearsList)
-                            {
-                                if (!financialYears.Contains(year))
-                                {
-                                    entityList.Add(new EFFinancialYears()
-                                    {
-                                        FinancialYear = year
-                                    });
-                                }
-                            }
-
-                            if (entityList.Count > 0)
-                            {
-                                unitWork.FinancialYearRepository.InsertMultiple(entityList);
-                            }
-
                             //Add user organization to valid funders
                             unitWork.ProjectMembershipRepository.Insert(new EFProjectMembershipRequests()
                             {
@@ -1351,6 +1341,7 @@ namespace AIMS.Services
                         mHelper = new MessageHelper();
                         response.Message = mHelper.GetNotFound("Project");
                         response.Success = false;
+                        return response;
                     }
 
                     var currency = unitWork.CurrencyRepository.GetOne(c => c.Currency == model.Currency);
@@ -1359,6 +1350,16 @@ namespace AIMS.Services
                         mHelper = new MessageHelper();
                         response.Message = mHelper.GetNotFound("Currency");
                         response.Success = false;
+                        return response;
+                    }
+
+                    var financialYear = unitWork.FinancialYearRepository.GetOne(f => f.FinancialYear == model.Year);
+                    if (financialYear == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Financial Year");
+                        response.Success = false;
+                        return response;
                     }
 
                     var funders = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.ProjectId == model.ProjectId);
@@ -1379,7 +1380,7 @@ namespace AIMS.Services
                     var newDisbursement = unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                     {
                         Project = project,
-                        Dated = model.Dated,
+                        Year = financialYear,
                         Amount = model.Amount,
                         Currency = model.Currency,
                         ExchangeRate = model.ExchangeRate
@@ -1482,10 +1483,26 @@ namespace AIMS.Services
                     return response;
                 }
 
+                var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => (f.FinancialYear == model.StartingFinancialYear || f.FinancialYear == model.EndingFinancialYear));
+                if (financialYears.Count() < 2)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Provided financial year");
+                    return response;
+                }
+
+                var startingFinancialYear = (from fy in financialYears
+                                             where fy.FinancialYear == model.StartingFinancialYear
+                                             select fy).FirstOrDefault();
+                var endingFinancialYears = (from fy in financialYears
+                                            where fy.FinancialYear == model.EndingFinancialYear
+                                            select fy).FirstOrDefault();
+
                 projectObj.Title = model.Title;
                 projectObj.Description = model.Description;
-                projectObj.StartDate = model.StartDate;
-                projectObj.EndDate = model.EndDate;
+                projectObj.StartingFinancialYear = startingFinancialYear;
+                projectObj.EndingFinancialYear = endingFinancialYears;
                 projectObj.ProjectValue = model.ProjectValue;
                 projectObj.DateUpdated = DateTime.Now;
 
@@ -1666,6 +1683,22 @@ namespace AIMS.Services
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                 }
 
+                var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => (f.FinancialYear == model.StartingFinancialYear || f.FinancialYear == model.EndingFinancialYear));
+                if (financialYears.Count() < 2)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Provided financial year");
+                    return response;
+                }
+
+                var startingFinancialYear = (from fy in financialYears
+                                             where fy.FinancialYear == model.StartingFinancialYear
+                                             select fy).FirstOrDefault();
+                var endingFinancialYear = (from fy in financialYears
+                                            where fy.FinancialYear == model.EndingFinancialYear
+                                            select fy).FirstOrDefault();
+
                 var strategy = context.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
                 {
@@ -1676,40 +1709,13 @@ namespace AIMS.Services
                         {
                             Title = model.Title,
                             Description = model.Description,
-                            StartDate = model.StartDate,
-                            EndDate = model.EndDate
+                            StartingFinancialYear = startingFinancialYear,
+                            EndingFinancialYear = endingFinancialYear
                         });
                         await unitWork.SaveAsync();
 
-                        //To check if there is a need to add financial year
-                        List<int> yearsList = new List<int>();
-                        yearsList.Add(model.StartDate.Year);
-                        yearsList.Add(model.EndDate.Year);
-
-                        var fYears = await unitWork.FinancialYearRepository.GetAllAsync();
-                        List<int> financialYears = (from year in fYears
-                                                    select year.FinancialYear).ToList<int>();
-
-                        List<EFFinancialYears> entityList = new List<EFFinancialYears>();
-                        foreach (int year in yearsList)
-                        {
-                            if (!financialYears.Contains(year))
-                            {
-                                entityList.Add(new EFFinancialYears()
-                                {
-                                    FinancialYear = year
-                                });
-                            }
-                        }
-
-                        if (entityList.Count > 0)
-                        {
-                            unitWork.FinancialYearRepository.InsertMultiple(entityList);
-                        }
-                        await unitWork.SaveAsync();
-
                         var projectsToBeMerged = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectsIds.Contains(p.Id),
-                            new string[] { "Funders", "Implementers", "Sectors", "Locations", "Disbursements", "Documents" });
+                            new string[] { "Funders", "Implementers", "Sectors", "Locations", "Disbursements", "Disbursements.Year", "Documents" });
 
                         if (projectsToBeMerged != null)
                         {
@@ -1807,7 +1813,7 @@ namespace AIMS.Services
                                         var disbursementExists = (from d in disbursementsList
                                                                   where d.ProjectId == newProject.Id &&
                                                                   d.Amount == disbursement.Amount &&
-                                                                  d.Dated.Date == disbursement.Dated.Date
+                                                                  d.Year.FinancialYear == disbursement.Year.FinancialYear
                                                                   select d).FirstOrDefault();
 
                                         if (disbursementExists == null)
@@ -1818,7 +1824,7 @@ namespace AIMS.Services
                                                 Amount = disbursement.Amount,
                                                 Currency = disbursement.Currency,
                                                 ExchangeRate = disbursement.ExchangeRate,
-                                                Dated = disbursement.Dated
+                                                Year = disbursement.Year
                                             });
                                         }
                                         

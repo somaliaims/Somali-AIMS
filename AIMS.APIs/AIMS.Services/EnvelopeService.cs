@@ -118,12 +118,12 @@ namespace AIMS.Services
                     }
                 }
 
-                var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => projectIds.Contains(d.ProjectId));
+                var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => projectIds.Contains(d.ProjectId), new string[] { "FinancialYear" });
                 if (disbursements.Count() > 0)
                 {
                     disbursements = (from disbursement in disbursements
-                                     where (disbursement.Dated.Year >= previousYear && disbursement.Dated.Year <= upperThreeYearsLimit)
-                                     orderby disbursement.Dated
+                                     where (disbursement.Year.FinancialYear >= previousYear && disbursement.Year.FinancialYear <= upperThreeYearsLimit)
+                                     orderby disbursement.Year.FinancialYear
                                      select disbursement);
                 }
 
@@ -137,10 +137,10 @@ namespace AIMS.Services
                     yearsLeft = upperThreeYearsLimit - year;
 
                     decimal actualAmount = (funderCurrency != envelope.Currency && envelope.Currency != null) ? (envelope.ExchangeRate * disbursement.Amount) : disbursement.Amount;
-                    if (year != disbursement.Dated.Year)
+                    if (year != disbursement.Year.FinancialYear)
                     {
                         var isEnvelopeExists = (from e in envelopeList
-                                                where e.Year == disbursement.Dated.Year
+                                                where e.Year == disbursement.Year.FinancialYear
                                                 select e).FirstOrDefault();
 
                         if (isEnvelopeExists == null)
@@ -156,7 +156,7 @@ namespace AIMS.Services
                             isEnvelopeExists.ActualAmount = actualAmount;
                         }
                     }
-                    year = disbursement.Dated.Year;
+                    year = disbursement.Year.FinancialYear;
 
                     if (disbursement == lastElement)
                     {

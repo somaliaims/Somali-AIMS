@@ -38,13 +38,13 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFLocation, LocationView>().ReverseMap();
 
             CreateMap<EFProject, ProjectView>()
-                .ForMember(p => p.StartDate, opts => opts.MapFrom(source => source.StartDate.ToShortDateString()))
-                .ForMember(p => p.EndDate, opts => opts.MapFrom(source => source.EndDate.ToShortDateString()))
+                .ForMember(p => p.StartingFinancialYear, opts => opts.MapFrom(source => source.StartingFinancialYear.FinancialYear.ToString()))
+                .ForMember(p => p.EndingFinancialYear, opts => opts.MapFrom(source => source.EndingFinancialYear.FinancialYear.ToString()))
                 .ForMember(p => p.DateUpdated, opts => opts.MapFrom(source => source.DateUpdated.ToShortDateString()));
 
             CreateMap<EFProject, ProjectModelView>()
-                .ForMember(p => p.StartDate, opts => opts.MapFrom(source => source.StartDate.ToShortDateString()))
-                .ForMember(p => p.EndDate, opts => opts.MapFrom(source => source.EndDate.ToShortDateString()));
+                .ForMember(p => p.StartingFinancialYear, opts => opts.MapFrom(source => source.StartingFinancialYear.FinancialYear.ToString() ))
+                .ForMember(p => p.EndingFinancialYear, opts => opts.MapFrom(source => source.EndingFinancialYear.FinancialYear.ToString()));
 
             CreateMap<EFProjectLocations, LocationView>()
                 .ForMember(l => l.Id, opts => opts.MapFrom(source => source.Location.Id))
@@ -69,7 +69,7 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(f => f.Funder, opts => opts.MapFrom(source => source.Funder.OrganizationName));
 
             CreateMap<EFProjectDisbursements, ProjectDisbursementView>()
-                .ForMember(d => d.FormattedDate, opts => opts.MapFrom(source => source.Dated.ToShortDateString()));
+                .ForMember(d => d.Year, opts => opts.MapFrom(source => source.Year.FinancialYear));
 
             CreateMap<EFProjectImplementers, ProjectImplementerView>()
                 .ForMember(i => i.ImplementerId, opts => opts.MapFrom(source => source.Implementer.Id))
@@ -77,8 +77,8 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFIATISettings, IATISettings>().ReverseMap();
 
-            CreateMap<EFProjectCustomFields, ProjectCustomFieldsView>()
-                .ForMember(c => c.FieldTitle, opts => opts.MapFrom(source => source.CustomField.FieldTitle));
+            CreateMap<EFMarkers, ProjectMarkersView>()
+                .ForMember(c => c.FieldTitle, opts => opts.MapFrom(source => source.FieldTitle));
 
             CreateMap<EFProjectMembershipRequests, ProjectMembershipRequestView>()
                 .ForMember(m => m.Project, opts => opts.MapFrom(source => source.Project.Title))

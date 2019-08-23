@@ -959,8 +959,7 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public int ProjectId { get; set; }
-        public DateTime Dated { get; set; }
-        public DateTime FormattedDate { get; set; }
+        public int Year { get; set; }
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRate { get; set; }
@@ -971,7 +970,7 @@ namespace AIMS.Models
         [Required]
         public int ProjectId { get; set; }
         [Required]
-        public DateTime Dated { get; set; }
+        public int Year { get; set; }
         [Required]
         public decimal Amount { get; set; }
         [Required]
