@@ -55,6 +55,12 @@ namespace AIMS.APIs.Controllers
             return Ok(currency);
         }
 
+        [HttpGet("GetForUser")]
+        public IActionResult GetForUser()
+        {
+            return Ok(currencyService.GetForUser());
+        }
+
         [HttpGet]
         [Route("GetNational")]
         public IActionResult GetNational()

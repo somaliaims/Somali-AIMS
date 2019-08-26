@@ -20,6 +20,12 @@ namespace AIMS.Services
         IEnumerable<CurrencyView> GetAll();
 
         /// <summary>
+        /// Gets list of currencies available for user in the current financial year
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<CurrencyView> GetForUser();
+
+        /// <summary>
         /// Get matching currencies for the criteria
         /// </summary>
         /// <param name="criteria"></param>
@@ -115,6 +121,20 @@ namespace AIMS.Services
                                   orderby c.CurrencyName ascending
                                   select c);
                 }
+                return mapper.Map<List<CurrencyView>>(currencies);
+            }
+        }
+
+        public IEnumerable<CurrencyView> GetForUser()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var currencies = unitWork.CurrencyRepository.GetAll();
+                var availableCurrencies = unitWork.ManualRatesRepository.GetProjection(m => m.Year == DateTime.Now.Year, m => m.Currency);
+                currencies = (from c in currencies
+                              where availableCurrencies.Contains(c.Currency)
+                              orderby c.Currency
+                              select c);
                 return mapper.Map<List<CurrencyView>>(currencies);
             }
         }

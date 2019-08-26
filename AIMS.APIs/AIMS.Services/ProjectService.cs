@@ -1005,6 +1005,15 @@ namespace AIMS.Services
                         return response;
                     }
 
+                    var fundingType = unitWork.FundingTypeRepository.GetOne(f => f.Id == model.FundingTypeId);
+                    if (fundingType == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Funding Type");
+                        return response;
+                    }
+
                     var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => (f.FinancialYear == model.StartingFinancialYear || f.FinancialYear == model.EndingFinancialYear));
                     if (financialYears.Count() < 2)
                     {
@@ -1039,6 +1048,7 @@ namespace AIMS.Services
                             {
                                 Title = model.Title,
                                 Description = model.Description,
+                                FundingType = fundingType,
                                 StartingFinancialYear = startingFinancialYear,
                                 EndingFinancialYear = endingFinancialYears,
                                 ProjectValue = model.ProjectValue,
