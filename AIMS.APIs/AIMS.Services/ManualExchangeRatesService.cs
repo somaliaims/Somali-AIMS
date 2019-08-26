@@ -29,7 +29,7 @@ namespace AIMS.Services
         /// Gets the rate for the specified date
         /// </summary>
         /// <returns></returns>
-        ManualRatesView GetByDate(DateTime dated);
+        ManualRatesView GetByYear(int year);
 
         /// <summary>
         /// Adds new manual rate
@@ -74,7 +74,7 @@ namespace AIMS.Services
                 if (rates != null)
                 {
                     rates = (from r in rates
-                                  orderby r.Dated descending
+                                  orderby r.Year descending
                                   select r);
                 }
                 return mapper.Map<List<ManualRatesView>>(rates);
@@ -85,43 +85,22 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var rates = unitWork.ManualRatesRepository.GetManyQueryable(e => e.NationalCurrency == currencyCode);
+                var rates = unitWork.ManualRatesRepository.GetManyQueryable(e => e.Currency == currencyCode);
                 if (rates != null)
                 {
                     rates = (from r in rates
-                             orderby r.Dated descending
+                             orderby r.Year descending
                              select r);
                 }
                 return mapper.Map<List<ManualRatesView>>(rates);
             }
         }
 
-        public ManualRatesView GetByDate(DateTime dated)
+        public ManualRatesView GetByYear(int year)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                TimeSpan dateDifference = new TimeSpan();
-                int differencePreviousDays = 0, differenceFutureDays = 0;
-                var manualRate = unitWork.ManualRatesRepository.GetOne(r => r.Dated.Date == dated.Date);
-                if (manualRate == null)
-                {
-                    manualRate = unitWork.ManualRatesRepository.GetOneOrderByDescending(r => r.Dated.Date < dated.Date);
-                    if (manualRate != null)
-                    {
-                        var previousDate = manualRate.Dated;
-                        dateDifference = dated - previousDate;
-                        differencePreviousDays = dateDifference.Days;
-                    }
-
-                    var futureManualRate = unitWork.ManualRatesRepository.GetOneOrderByDescending(r => r.Dated.Date > dated.Date);
-                    if (futureManualRate != null)
-                    {
-                        var futureDate = futureManualRate.Dated;
-                        dateDifference = futureDate - dated;
-                        differenceFutureDays = dateDifference.Days;
-                    }
-                    manualRate = (differenceFutureDays < differencePreviousDays) ? futureManualRate : manualRate;
-                }
+                var manualRate = unitWork.ManualRatesRepository.GetOne(r => r.Year == year);
                 return mapper.Map<ManualRatesView>(manualRate);
             }
         }
@@ -131,8 +110,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var manualRate = unitWork.ManualRatesRepository.GetOne(r => r.Dated.Date == model.Dated.Date && r.DefaultCurrency == model.DefaultCurrency
-                && r.NationalCurrency == model.NationalCurrency);
+                var manualRate = unitWork.ManualRatesRepository.GetOne(r => r.Year == model.Year && r.Currency == model.Currency);
 
                 if (manualRate != null)
                 {
@@ -143,9 +121,8 @@ namespace AIMS.Services
                 {
                     unitWork.ManualRatesRepository.Insert(new EFManualExchangeRates()
                     {
-                        DefaultCurrency = model.DefaultCurrency,
-                        NationalCurrency = model.NationalCurrency,
-                        Dated = model.Dated,
+                        Currency = model.Currency,
+                        Year = model.Year,
                         ExchangeRate = model.ExchangeRate
                     });
                 }
@@ -182,8 +159,7 @@ namespace AIMS.Services
                 if (manualRate != null)
                 {
                     manualRate.ExchangeRate = model.ExchangeRate;
-                    manualRate.DefaultCurrency = model.DefaultCurrency;
-                    manualRate.NationalCurrency = model.NationalCurrency;
+                    manualRate.Currency = model.Currency;
                     unitWork.ManualRatesRepository.Update(manualRate);
                 }
 

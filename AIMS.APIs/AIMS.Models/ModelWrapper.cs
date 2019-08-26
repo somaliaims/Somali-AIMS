@@ -112,11 +112,9 @@ namespace AIMS.Models
         [Required]
         public decimal ExchangeRate { get; set; }
         [Required]
-        public string DefaultCurrency { get; set; }
+        public string Currency { get; set; }
         [Required]
-        public string NationalCurrency { get; set; }
-        [Required]
-        public DateTime Dated { get; set; }
+        public int Year { get; set; }
     }
 
     public class ManualRatesView

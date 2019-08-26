@@ -90,7 +90,6 @@ namespace AIMS.APIs
                     context.ExchangeRatesSettings.Add(new EFExchangeRatesSettings()
                     {
                         APIKeyOpenExchangeRates = "ce2f27af4d414969bfe05b7285a01dec",
-                        IsAutomatic = true,
                         ManualExchangeRates = null,
                         ManualExchangeRateSource = "Central Bank"
                     });

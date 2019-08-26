@@ -454,9 +454,8 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        public string DefaultCurrency { get; set; }
-        public string NationalCurrency { get; set; }
-        public DateTime Dated { get; set; }
+        public string Currency { get; set; }
+        public int Year { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; }
     }
@@ -464,10 +463,11 @@ namespace AIMS.Models
     public class EFExchangeRatesSettings
     {
         public int Id { get; set; }
-        public bool IsAutomatic { get; set; }
         public string APIKeyOpenExchangeRates { get; set; }
         public string ManualExchangeRates { get; set; }
         public string ManualExchangeRateSource { get; set; } = null;
+        public int FinancialYearStartingMonth { get; set; }
+        public int FinancialYearEndingMonth { get; set; }
     }
 
     public class EFEmailMessages

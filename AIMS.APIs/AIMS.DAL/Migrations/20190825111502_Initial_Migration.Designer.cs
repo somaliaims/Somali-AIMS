@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    [Migration("20190823194043_Initial_Migration")]
+    [Migration("20190825111502_Initial_Migration")]
     partial class Initial_Migration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -399,6 +399,8 @@ namespace AIMS.DAL.Migrations
                     b.Property<int?>("EndingFinancialYearId");
 
                     b.Property<int>("FundingTypeId");
+
+                    b.Property<string>("ProjectCurrency");
 
                     b.Property<decimal>("ProjectValue")
                         .HasColumnType("decimal(11, 2)");

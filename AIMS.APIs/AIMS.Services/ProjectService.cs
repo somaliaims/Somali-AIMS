@@ -376,7 +376,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<ProjectAbstractView> projectsList = new List<ProjectAbstractView>();
-                var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                 foreach(var project in projects)
                 {
                     IEnumerable<string> funderNames = (from f in project.Funders
@@ -397,8 +397,8 @@ namespace AIMS.Services
                     {
                         Id = project.Id,
                         Title = project.Title,
-                        StartingFinancialYear = project.StartingFinancialYear.ToString(),
-                        EndingFinancialYear = project.EndingFinancialYear.ToString(),
+                        StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
+                        EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
                         Organizations = organizationsList,
                         Locations = mapper.Map<List<LocationAbstractView>>(project.Locations),
                         Sectors = mapper.Map<List<SectorAbstractView>>(project.Sectors)

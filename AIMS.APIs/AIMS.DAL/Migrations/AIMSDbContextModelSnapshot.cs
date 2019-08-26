@@ -398,6 +398,8 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("FundingTypeId");
 
+                    b.Property<string>("ProjectCurrency");
+
                     b.Property<decimal>("ProjectValue")
                         .HasColumnType("decimal(11, 2)");
 

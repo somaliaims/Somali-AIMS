@@ -258,11 +258,11 @@ namespace AIMS.Services
 
                 if (orderForOpenExchange == 1 || orderForCentralBank > 1)
                 {
-                    var exRates = unitWork.ManualRatesRepository.GetManyQueryable(r => r.Dated == dated || r.Dated == DateTime.Now);
+                    var exRates = unitWork.ManualRatesRepository.GetManyQueryable(r => r.Year == dated.Year || r.Year == DateTime.Now.Year);
                     if (exRates.Any())
                     {
                         var rateForExactDate = (from r in exRates
-                                                where r.Dated == dated
+                                                where r.Year == dated.Year
                                                 select r).FirstOrDefault();
 
                         if (rateForExactDate != null)
@@ -272,7 +272,7 @@ namespace AIMS.Services
                         else
                         {
                             var rateForTodaysDate = (from r in exRates
-                                                     where r.Dated == DateTime.Now
+                                                     where r.Year == DateTime.Now.Year
                                                      select r).FirstOrDefault();
 
                             if (rateForTodaysDate != null)
@@ -285,19 +285,19 @@ namespace AIMS.Services
 
                 if (exRateForCurrency.ExchangeRate == 0)
                 {
-                    var exRates = unitWork.ManualRatesRepository.GetManyQueryable(e => e.Dated >= startDate && e.Dated <= e.Dated);
+                    var exRates = unitWork.ManualRatesRepository.GetManyQueryable(e => e.Year >= startDate.Year);
                     if (exRates.Any())
                     {
                         var exRateCalculated = (from rate in exRates
-                                            where (rate.Dated > startDate)
-                                            orderby rate.Dated ascending
+                                            where (rate.Year > startDate.Year)
+                                            orderby rate.Year ascending
                                             select rate).FirstOrDefault();
 
                         if (exRateCalculated == null)
                         {
                             exRateCalculated = (from rate in exRates
-                                                where (rate.Dated < startDate)
-                                                orderby rate.Dated descending
+                                                where (rate.Year < startDate.Year)
+                                                orderby rate.Year descending
                                                 select rate).FirstOrDefault();
                         }
 
@@ -321,18 +321,11 @@ namespace AIMS.Services
             var unitWork = new UnitOfWork(context);
 
             ExchangeRatesView ratesView = new ExchangeRatesView();
-            bool isExRateAuto = false;
             IQueryable<EFCurrency> currencies = null;
             try
             {
                 var exRateSettings = unitWork.ExRatesSettingsRepository.GetOne(r => r.Id != 0);
-                if (exRateSettings != null)
-                {
-                    isExRateAuto = exRateSettings.IsAutomatic;
-                }
-
-                if (isExRateAuto)
-                {
+                
                     List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
                     DateTime dated = DateTime.Now;
                     ratesView.Dated = dated.Date.ToString();
@@ -369,15 +362,6 @@ namespace AIMS.Services
                             }
                         }
                     }
-                }
-                else if (exRateSettings != null)
-                {
-                    string exRatesManual = exRateSettings.ManualExchangeRates;
-                    if (!string.IsNullOrEmpty(exRatesManual))
-                    {
-                        ratesView.Rates = JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRatesManual);
-                    }
-                }
 
                 if (currencies != null && currencies.Count() > 0)
                 {
@@ -443,7 +427,6 @@ namespace AIMS.Services
                 ExchangeRatesSettingsView settingsView = new ExchangeRatesSettingsView();
                 if (exRateSettings != null)
                 {
-                    settingsView.IsAutomatic = exRateSettings.IsAutomatic;
                     settingsView.IsOpenExchangeKeySet = !string.IsNullOrEmpty(exRateSettings.APIKeyOpenExchangeRates) ? true : false;
                     settingsView.ManualCurrencyRates = exRateSettings.ManualExchangeRates == null ? null : JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRateSettings.ManualExchangeRates);
                     settingsView.ManualExchangeRateSource = exRateSettings.ManualExchangeRateSource;
@@ -491,7 +474,6 @@ namespace AIMS.Services
                     response.Success = false;
                     return response;
                 }
-                exRateSettings.IsAutomatic = autoExchangeRates;
                 unitWork.ExRatesSettingsRepository.Update(exRateSettings);
                 unitWork.Save();
                 return response;

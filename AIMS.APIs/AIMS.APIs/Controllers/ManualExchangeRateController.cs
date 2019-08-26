@@ -40,10 +40,10 @@ namespace AIMS.APIs.Controllers
             return Ok(rates);
         }
 
-        [HttpGet("GetByDate/{dated}")]
-        public IActionResult GetByDated(DateTime dated)
+        [HttpGet("GetByYear/{year}")]
+        public IActionResult GetByYear(int year)
         {
-            var rate = service.GetByDate(dated);
+            var rate = service.GetByYear(year);
             return Ok(rate);
         }
 

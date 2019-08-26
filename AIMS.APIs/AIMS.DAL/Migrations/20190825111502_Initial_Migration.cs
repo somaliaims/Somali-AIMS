@@ -453,6 +453,7 @@ namespace AIMS.DAL.Migrations
                     EndingFinancialYearId = table.Column<int>(nullable: true),
                     FundingTypeId = table.Column<int>(nullable: false),
                     ProjectValue = table.Column<decimal>(type: "decimal(11, 2)", nullable: false),
+                    ProjectCurrency = table.Column<string>(nullable: true),
                     DateUpdated = table.Column<DateTime>(nullable: false),
                     CreatedById = table.Column<int>(nullable: true)
                 },
