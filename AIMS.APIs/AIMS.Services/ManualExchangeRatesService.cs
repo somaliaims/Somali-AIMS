@@ -122,6 +122,7 @@ namespace AIMS.Services
                     unitWork.ManualRatesRepository.Insert(new EFManualExchangeRates()
                     {
                         Currency = model.Currency,
+                        DefaultCurrency = model.DefaultCurrency,
                         Year = model.Year,
                         ExchangeRate = model.ExchangeRate
                     });
@@ -160,6 +161,7 @@ namespace AIMS.Services
                 {
                     manualRate.ExchangeRate = model.ExchangeRate;
                     manualRate.Currency = model.Currency;
+                    manualRate.DefaultCurrency = model.DefaultCurrency;
                     unitWork.ManualRatesRepository.Update(manualRate);
                 }
 

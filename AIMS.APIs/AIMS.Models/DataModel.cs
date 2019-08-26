@@ -458,6 +458,7 @@ namespace AIMS.Models
         public int Year { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; }
+        public string DefaultCurrency { get; set; }
     }
 
     public class EFExchangeRatesSettings
