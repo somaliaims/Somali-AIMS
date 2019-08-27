@@ -771,11 +771,14 @@ namespace AIMS.Models
     public class ProjectProfileView
     {
         public int Id { get; set; }
+        public int FundingTypeId { get; set; }
+        public string FundingType { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string StartingFinancialYear { get; set; }
         public string EndingFinancialYear { get; set; }
         public decimal ProjectValue { get; set; }
+        public string ProjectCurrency { get; set; }
         public decimal ActualDisbursements { get; set; }
         public decimal PlannedDisbursements { get; set; }
         public ICollection<ProjectFunderView> Funders { get; set; }

@@ -521,7 +521,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Funders.FundingType", "Implementers", "Implementers.Implementer", "Documents", "Markers.Marker" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id.Equals(id), new string[] { "StartingFinancialYear", "EndingFinancialYear", "FundingType", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers.Marker" });
                 ProjectProfileView profileView = new ProjectProfileView();
 
                 if (projectProfileList != null)
@@ -533,9 +533,13 @@ namespace AIMS.Services
                                                     select d);
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
+                        profileView.FundingTypeId = project.FundingTypeId;
+                        profileView.FundingType = project.FundingType.FundingType;
+                        profileView.ProjectValue = project.ProjectValue;
+                        profileView.ProjectCurrency = project.ProjectCurrency;
                         profileView.Description = project.Description;
-                        profileView.StartingFinancialYear = project.StartingFinancialYear.ToString();
-                        profileView.EndingFinancialYear = project.EndingFinancialYear.ToString();
+                        profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
+                        profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
                         profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
