@@ -1216,6 +1216,18 @@ namespace AIMS.Services
 
                     var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => model.ProjectId == model.ProjectId);
                     List<EFProjectFunders> newFunders = new List<EFProjectFunders>();
+                    var fundersToDelete = (from f in projectFunders
+                                           where !model.FunderIds.Contains(f.FunderId)
+                                           select f);
+
+                    if (fundersToDelete.Any())
+                    {
+                        foreach (var delFunder in fundersToDelete)
+                        {
+                            unitWork.ProjectFundersRepository.Delete(delFunder);
+                        }
+                        unitWork.Save();
+                    }
 
                     foreach (var funder in funders)
                     {
@@ -1234,11 +1246,6 @@ namespace AIMS.Services
                                 ProjectId = model.ProjectId
                             });
                         }
-                    }
-
-                    foreach(var delFunder in projectFunders)
-                    {
-                        unitWork.ProjectFundersRepository.Delete(delFunder);
                     }
 
                     if (projectFunders.Any())
@@ -1270,7 +1277,7 @@ namespace AIMS.Services
 
                     if (emailAddresses.Count > 0)
                     {
-                        /*ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
                         var smtpSettings = smtpService.GetPrivate();
                         SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
                         if (smtpSettings != null)
@@ -1290,7 +1297,9 @@ namespace AIMS.Services
                             message = emailMessage.Message;
                             footerMessage = emailMessage.FooterMessage;
                         }
-                        message += mHelper.ProjectToOrganizationMessage(funder.OrganizationName);
+                        
+                        //To fix this issue
+                        /*message += mHelper.ProjectToOrganizationMessage(funder.OrganizationName);
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
                         emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);*/
                     }
