@@ -269,6 +269,46 @@ namespace AIMS.APIs
                             IsApproved = true,
                             UserType = UserTypes.Manager
                         });
+
+                        context.Users.Add(new EFUser()
+                        {
+                            Email = "work@mattgeddes.co.uk",
+                            Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                            Organization = mgec.Entity,
+                            RegistrationDate = DateTime.Now,
+                            IsApproved = true,
+                            UserType = UserTypes.Standard
+                        });
+
+                        context.Users.Add(new EFUser()
+                        {
+                            Email = "ict@mop.gov.so",
+                            Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                            Organization = mop.Entity,
+                            RegistrationDate = DateTime.Now,
+                            IsApproved = true,
+                            UserType = UserTypes.Standard
+                        });
+
+                        context.Users.Add(new EFUser()
+                        {
+                            Email = "pau.blanquer@undp.org",
+                            Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                            Organization = undp.Entity,
+                            RegistrationDate = DateTime.Now,
+                            IsApproved = true,
+                            UserType = UserTypes.Standard
+                        });
+
+                        context.Users.Add(new EFUser()
+                        {
+                            Email = "sarah.cramer@one.un.org",
+                            Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                            Organization = undp.Entity,
+                            RegistrationDate = DateTime.Now,
+                            IsApproved = true,
+                            UserType = UserTypes.Standard
+                        });
                         context.SaveChanges();
                     }
                 }

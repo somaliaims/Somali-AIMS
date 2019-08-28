@@ -97,7 +97,7 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    IMessageHelper mHelper = new MessageHelper();
+                    /*IMessageHelper mHelper = new MessageHelper();
                     var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
                     if (project == null)
                     {
@@ -120,7 +120,7 @@ namespace AIMS.Services
                         Funder = funder,
                     });
                     response.ReturnedId = newProjectFunder.FunderId;
-                    unitWork.Save();
+                    unitWork.Save();*/
                 }
                 catch (Exception ex)
                 {
@@ -136,7 +136,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectFunder = unitWork.ProjectFundersRepository.Get(pf => pf.FunderId.Equals(model.FunderId) && pf.ProjectId.Equals(model.ProjectId));
+                /*var projectFunder = unitWork.ProjectFundersRepository.Get(pf => pf.FunderId.Equals(model.FunderId) && pf.ProjectId.Equals(model.ProjectId));
                 if (projectFunder == null)
                 {
                     IMessageHelper mHelper = new MessageHelper();
@@ -147,7 +147,7 @@ namespace AIMS.Services
 
                 unitWork.ProjectFundersRepository.Delete(projectFunder);
                 unitWork.Save();
-                response.Message = "1";
+                response.Message = "1";*/
                 return response;
             }
         }

@@ -336,7 +336,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projects = unitWork.ProjectRepository.GetAll();
+                var projects = unitWork.ProjectRepository.GetWithInclude(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                 projects = (from p in projects
                             orderby p.DateUpdated descending
                             select p);
@@ -348,7 +348,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projects = await unitWork.ProjectRepository.GetAllAsync();
+                var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                 projects = (from p in projects
                             orderby p.DateUpdated descending
                             select p);
@@ -1039,7 +1039,7 @@ namespace AIMS.Services
                     var startingFinancialYear = (from fy in financialYears
                                                  where fy.FinancialYear == model.StartingFinancialYear
                                                  select fy).FirstOrDefault();
-                    var endingFinancialYears = (from fy in financialYears
+                    var endingFinancialYear = (from fy in financialYears
                                                 where fy.FinancialYear == model.EndingFinancialYear
                                                 select fy).FirstOrDefault();
 
@@ -1054,7 +1054,7 @@ namespace AIMS.Services
                                 Description = model.Description,
                                 FundingType = fundingType,
                                 StartingFinancialYear = startingFinancialYear,
-                                EndingFinancialYear = endingFinancialYears,
+                                EndingFinancialYear = endingFinancialYear,
                                 ProjectValue = model.ProjectValue,
                                 ProjectCurrency = model.ProjectCurrency,
                                 DateUpdated = DateTime.Now,
@@ -1206,65 +1206,95 @@ namespace AIMS.Services
                         response.Success = false;
                         return response;
                     }
-                    var funder = unitWork.OrganizationRepository.GetByID(model.FunderId);
-                    if (funder == null)
+                    var funders = unitWork.OrganizationRepository.GetManyQueryable(o => model.FunderIds.Contains(o.Id));
+                    if (funders.Count() < model.FunderIds.Count())
                     {
-                        response.Message = mHelper.GetNotFound("Funder");
+                        response.Message = mHelper.GetNotFound("Funder/s");
                         response.Success = false;
                         return response;
                     }
 
-                    var projectFunder = unitWork.ProjectFundersRepository.GetOne(f => f.ProjectId == model.ProjectId && f.FunderId == model.FunderId);
-                    if (projectFunder == null)
+                    var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => model.ProjectId == model.ProjectId);
+                    List<EFProjectFunders> newFunders = new List<EFProjectFunders>();
+
+                    foreach (var funder in funders)
                     {
-                        projectFunder = unitWork.ProjectFundersRepository.Insert(new EFProjectFunders()
-                        {
-                            Project = project,
-                            Funder = funder,
-                        });
-                        project.DateUpdated = DateTime.Now;
-                        unitWork.ProjectRepository.Update(project);
-                        unitWork.Save();
+                        var isFunderInDB = (from f in projectFunders
+                                            where f.ProjectId == model.ProjectId && f.FunderId == funder.Id
+                                            select f).FirstOrDefault();
+                        var isFunderAdded = (from f in newFunders
+                                             where f.ProjectId == model.ProjectId && f.FunderId == funder.Id
+                                             select f).FirstOrDefault();
 
-                        var projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(f => f.ProjectId == model.ProjectId, f => f.FunderId);
-                        var users = unitWork.UserRepository.GetManyQueryable(u => projectFunderIds.Contains(u.OrganizationId));
-                        List<EmailAddress> emailAddresses = new List<EmailAddress>();
-
-                        foreach(var user in users)
+                        if (isFunderInDB == null && isFunderAdded == null)
                         {
-                            emailAddresses.Add(new EmailAddress()
+                            newFunders.Add(new EFProjectFunders()
                             {
-                                Email = user.Email
+                                FunderId = funder.Id,
+                                ProjectId = model.ProjectId
                             });
                         }
-
-                        if (emailAddresses.Count > 0)
-                        {
-                            ISMTPSettingsService smtpService = new SMTPSettingsService(context);
-                            var smtpSettings = smtpService.GetPrivate();
-                            SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
-                            if (smtpSettings != null)
-                            {
-                                smtpSettingsModel.Host = smtpSettings.Host;
-                                smtpSettingsModel.Port = smtpSettings.Port;
-                                smtpSettingsModel.Username = smtpSettings.Username;
-                                smtpSettingsModel.Password = smtpSettings.Password;
-                                smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
-                            }
-
-                            string subject = "", message = "", footerMessage = "";
-                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewProjectToOrg);
-                            if (emailMessage != null)
-                            {
-                                subject = emailMessage.Subject;
-                                message = emailMessage.Message;
-                                footerMessage = emailMessage.FooterMessage;
-                            }
-                            message += mHelper.ProjectToOrganizationMessage(funder.OrganizationName);
-                            IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                            emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
-                        }
                     }
+
+                    foreach(var delFunder in projectFunders)
+                    {
+                        unitWork.ProjectFundersRepository.Delete(delFunder);
+                    }
+
+                    if (projectFunders.Any())
+                    {
+                        unitWork.Save();
+                    }
+
+                    if (newFunders.Count() > 0)
+                    {
+                        unitWork.ProjectFundersRepository.InsertMultiple(newFunders);
+                        unitWork.Save();
+                    }
+                    project.DateUpdated = DateTime.Now;
+                    unitWork.ProjectRepository.Update(project);
+                    unitWork.Save();
+
+                    var projectFunderIds = (from f in funders
+                                            select f.Id).ToList<int>();
+                    var users = unitWork.UserRepository.GetManyQueryable(u => projectFunderIds.Contains(u.OrganizationId));
+                    List<EmailAddress> emailAddresses = new List<EmailAddress>();
+
+                    foreach (var user in users)
+                    {
+                        emailAddresses.Add(new EmailAddress()
+                        {
+                            Email = user.Email
+                        });
+                    }
+
+                    if (emailAddresses.Count > 0)
+                    {
+                        /*ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                        var smtpSettings = smtpService.GetPrivate();
+                        SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                        if (smtpSettings != null)
+                        {
+                            smtpSettingsModel.Host = smtpSettings.Host;
+                            smtpSettingsModel.Port = smtpSettings.Port;
+                            smtpSettingsModel.Username = smtpSettings.Username;
+                            smtpSettingsModel.Password = smtpSettings.Password;
+                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                        }
+
+                        string subject = "", message = "", footerMessage = "";
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewProjectToOrg);
+                        if (emailMessage != null)
+                        {
+                            subject = emailMessage.Subject;
+                            message = emailMessage.Message;
+                            footerMessage = emailMessage.FooterMessage;
+                        }
+                        message += mHelper.ProjectToOrganizationMessage(funder.OrganizationName);
+                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                        emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);*/
+                    }
+                
                 }
                 catch (Exception ex)
                 {

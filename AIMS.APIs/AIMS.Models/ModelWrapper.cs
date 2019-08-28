@@ -835,7 +835,7 @@ namespace AIMS.Models
         [Required]
         public int ProjectId { get; set; }
         [Required]
-        public int FunderId { get; set; }
+        public List<int> FunderIds { get; set; }
     }
 
     /// <summary>
@@ -1665,6 +1665,10 @@ namespace AIMS.Models
         public string Description { get; set; }
         [Required]
         public string ProjectValue { get; set; }
+        [Required]
+        public string ProjectCurrency { get; set; }
+        [Required]
+        public string FundingType { get; set; }
     }
 
     public class ProjectFunderHelp
