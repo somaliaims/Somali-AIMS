@@ -175,7 +175,7 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <param name="organization"></param>
         /// <returns></returns>
-        string ProjectToOrganizationMessage(string organization);
+        string ProjectToOrganizationMessage(string project, string organizations);
 
         /// <summary>
         /// Formats new user registration message
@@ -465,9 +465,9 @@ namespace AIMS.Services.Helpers
             return (USER_ACCOUNTS_ASSOCIATED_WITH_ORGANIZATION);
         }
 
-        public string ProjectToOrganizationMessage(string organization)
+        public string ProjectToOrganizationMessage(string project, string organizations)
         {
-            return ("<h4>Organization name</h4><p>" + organization  + "</p>");
+            return ("<h4>Following organizations are added to the project (" + project + ")</h4><p>" + organizations  + "</p>");
         }
 
         public string FormUserApprovedMessage(string message, string url)

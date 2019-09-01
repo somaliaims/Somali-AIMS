@@ -1198,6 +1198,7 @@ namespace AIMS.Services
 
                 try
                 {
+                    List<int> updatedFunderIds = new List<int>();
                     mHelper = new MessageHelper();
                     var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
                     if (project == null)
@@ -1219,7 +1220,9 @@ namespace AIMS.Services
                     var fundersToDelete = (from f in projectFunders
                                            where !model.FunderIds.Contains(f.FunderId)
                                            select f);
-
+                    var alreadyFunderIds = (from f in fundersToDelete
+                                            select f.FunderId).ToList<int>();
+                    updatedFunderIds = (model.FunderIds.Except(alreadyFunderIds).ToList<int>());
                     if (fundersToDelete.Any())
                     {
                         foreach (var delFunder in fundersToDelete)
@@ -1263,10 +1266,13 @@ namespace AIMS.Services
                     unitWork.Save();
 
                     var projectFunderIds = (from f in funders
+                                            where updatedFunderIds.Contains(f.Id)
                                             select f.Id).ToList<int>();
                     var users = unitWork.UserRepository.GetManyQueryable(u => projectFunderIds.Contains(u.OrganizationId));
                     List<EmailAddress> emailAddresses = new List<EmailAddress>();
-
+                    var updatedOrganizationNames = (from o in funders
+                                                    where updatedFunderIds.Contains(o.Id)
+                                                    select o.OrganizationName).ToList<string>();
                     foreach (var user in users)
                     {
                         emailAddresses.Add(new EmailAddress()
@@ -1298,10 +1304,9 @@ namespace AIMS.Services
                             footerMessage = emailMessage.FooterMessage;
                         }
                         
-                        //To fix this issue
-                        /*message += mHelper.ProjectToOrganizationMessage(funder.OrganizationName);
+                        message += mHelper.ProjectToOrganizationMessage(project.Title, string.Join(",", updatedOrganizationNames));
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                        emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);*/
+                        emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
                     }
                 
                 }
