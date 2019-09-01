@@ -1308,7 +1308,6 @@ namespace AIMS.Services
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
                         emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
                     }
-                
                 }
                 catch (Exception ex)
                 {
@@ -1328,6 +1327,7 @@ namespace AIMS.Services
 
                 try
                 {
+                    List<int> updatedImplementerIds = new List<int>();
                     var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
                     if (project == null)
                     {
@@ -1335,33 +1335,109 @@ namespace AIMS.Services
                         response.Message = mHelper.GetNotFound("Project");
                         response.Success = false;
                     }
-                    var implementer = unitWork.OrganizationRepository.GetByID(model.ImplementerId);
-                    if (implementer == null)
+
+                    var implementers = unitWork.OrganizationRepository.GetManyQueryable(o => model.ImplementerIds.Contains(o.Id));
+                    if (implementers.Count() < model.ImplementerIds.Count())
                     {
                         mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Implementer");
-                        response.Success = false;
-                    }
-
-                    var isImplementerExists = unitWork.ProjectImplementersRepository.GetOne(i => i.ProjectId == model.ProjectId && i.ImplementerId == model.ImplementerId);
-
-                    if (isImplementerExists != null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.AlreadyExists("Implementer");
+                        response.Message = mHelper.GetNotFound("Implementer/s");
                         response.Success = false;
                         return response;
                     }
-                    else
+
+                    var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(f => model.ProjectId == model.ProjectId);
+                    List<EFProjectImplementers> newImplementers = new List<EFProjectImplementers>();
+                    var implementersToDelete = (from i in projectImplementers
+                                           where !model.ImplementerIds.Contains(i.ImplementerId)
+                                           select i);
+                    var alreadyImplementerIds = (from i in implementersToDelete
+                                            select i.ImplementerId).ToList<int>();
+                    updatedImplementerIds = (model.ImplementerIds.Except(alreadyImplementerIds).ToList<int>());
+                    if (implementersToDelete.Any())
                     {
-                        unitWork.ProjectImplementersRepository.Insert(new EFProjectImplementers()
+                        foreach (var delImplementer in implementersToDelete)
                         {
-                            Project = project,
-                            Implementer = implementer,
-                        });
-                        project.DateUpdated = DateTime.Now;
-                        unitWork.ProjectRepository.Update(project);
+                            unitWork.ProjectImplementersRepository.Delete(delImplementer);
+                        }
                         unitWork.Save();
+                    }
+
+                    foreach (var implementer in implementers)
+                    {
+                        var isImplementerInDB = (from i in projectImplementers
+                                            where i.ProjectId == model.ProjectId && i.ImplementerId == implementer.Id
+                                            select i).FirstOrDefault();
+                        var isImplementerAdded = (from i in newImplementers
+                                             where i.ProjectId == model.ProjectId && i.ImplementerId == implementer.Id
+                                             select i).FirstOrDefault();
+
+                        if (isImplementerInDB == null && isImplementerAdded == null)
+                        {
+                            newImplementers.Add(new EFProjectImplementers()
+                            {
+                                ImplementerId = implementer.Id,
+                                ProjectId = model.ProjectId
+                            });
+                        }
+                    }
+
+                    if (projectImplementers.Any())
+                    {
+                        unitWork.Save();
+                    }
+
+                    if (newImplementers.Count() > 0)
+                    {
+                        unitWork.ProjectImplementersRepository.InsertMultiple(newImplementers);
+                        unitWork.Save();
+                    }
+                    project.DateUpdated = DateTime.Now;
+                    unitWork.ProjectRepository.Update(project);
+                    unitWork.Save();
+
+                    var projectImplementerIds = (from i in implementers
+                                            where updatedImplementerIds.Contains(i.Id)
+                                            select i.Id).ToList<int>();
+                    var users = unitWork.UserRepository.GetManyQueryable(u => projectImplementerIds.Contains(u.OrganizationId));
+                    List<EmailAddress> emailAddresses = new List<EmailAddress>();
+                    var updatedOrganizationNames = (from i in implementers
+                                                    where updatedImplementerIds.Contains(i.Id)
+                                                    select i.OrganizationName).ToList<string>();
+                    foreach (var user in users)
+                    {
+                        emailAddresses.Add(new EmailAddress()
+                        {
+                            Email = user.Email
+                        });
+                    }
+
+                    if (emailAddresses.Count > 0)
+                    {
+                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                        var smtpSettings = smtpService.GetPrivate();
+                        SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                        if (smtpSettings != null)
+                        {
+                            smtpSettingsModel.Host = smtpSettings.Host;
+                            smtpSettingsModel.Port = smtpSettings.Port;
+                            smtpSettingsModel.Username = smtpSettings.Username;
+                            smtpSettingsModel.Password = smtpSettings.Password;
+                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                        }
+
+                        string subject = "", message = "", footerMessage = "";
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewProjectToOrg);
+                        if (emailMessage != null)
+                        {
+                            subject = emailMessage.Subject;
+                            message = emailMessage.Message;
+                            footerMessage = emailMessage.FooterMessage;
+                        }
+
+                        mHelper = new MessageHelper();
+                        message += mHelper.ProjectToOrganizationMessage(project.Title, string.Join(",", updatedOrganizationNames));
+                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                        emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
                     }
                 }
                 catch (Exception ex)

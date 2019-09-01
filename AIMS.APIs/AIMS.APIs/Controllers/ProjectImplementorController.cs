@@ -28,26 +28,28 @@ namespace AIMS.APIs.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            var organizations = projectImplementerService.GetAll();
-            return Ok(organizations);
+            //var organizations = projectImplementerService.GetAll();
+            //return Ok(organizations);
+            return Ok();
         }
 
         [HttpGet]
         [Route("GetProjectImplementers/{id}")]
         public IActionResult GetProjectImplementers(int id)
         {
-            if (id <= 0)
+            /*if (id <= 0)
             {
                 return BadRequest("Invalid Implementer id provided");
             }
             var implementers = projectImplementerService.GetProjectImplementers(id);
-            return Ok(implementers);
+            return Ok(implementers);*/
+            return Ok();
         }
 
         [HttpPost]
         public IActionResult Post([FromBody] ProjectImplementerModel model)
         {
-            if (!ModelState.IsValid)
+            /*if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -57,14 +59,15 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(response.Message);
             }
-            return Ok(response.ReturnedId);
+            return Ok(response.ReturnedId);*/
+            return Ok();
         }
 
         [HttpPost]
         [Route("RemoveImplementer")]
         public IActionResult RemoveImplementer([FromBody] ProjectImplementerModel model)
         {
-            if (!ModelState.IsValid)
+            /*if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -74,7 +77,8 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(response.Message);
             }
-            return Ok("1");
+            return Ok(true);*/
+            return Ok();
         }
     }
 }

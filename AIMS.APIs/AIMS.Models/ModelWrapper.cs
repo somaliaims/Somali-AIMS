@@ -905,7 +905,7 @@ namespace AIMS.Models
         [Required]
         public int ProjectId { get; set; }
         [Required]
-        public int ImplementerId { get; set; }
+        public List<int> ImplementerIds { get; set; }
     }
 
 

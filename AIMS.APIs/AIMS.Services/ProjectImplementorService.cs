@@ -12,7 +12,7 @@ namespace AIMS.Services
 {
     public interface IProjectImplementerService
     {
-        /// <summary>
+        /*/// <summary>
         /// Gets all projectImplementers
         /// </summary>
         /// <returns></returns>
@@ -49,12 +49,12 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ActionResponse Delete(int id);
+        ActionResponse Delete(int id);*/
     }
 
     public class ProjectImplementerService
     {
-        AIMSDbContext context;
+        /*AIMSDbContext context;
         IMapper mapper;
 
         public ProjectImplementerService(AIMSDbContext cntxt, IMapper autoMapper)
@@ -170,6 +170,6 @@ namespace AIMS.Services
                 unitWork.Save();
                 return response;
             }
-        }
+        }*/
     }
 }
