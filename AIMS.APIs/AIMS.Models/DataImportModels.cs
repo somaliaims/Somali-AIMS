@@ -42,7 +42,7 @@ namespace AIMS.Models
         public decimal CurrentYearPlannedDisbursements { get; set; }
         public decimal FutureYearPlannedDisbursements { get; set; }
         public string Sector { get; set; }
-        public string Links { get; set; }
+        public List<ImportedDocumentLinks> DocumentLinks { get; set; }
         public List<ImportedLocation> Locations { get; set; }
         public List<ImportedCustomFields> CustomFields { get; set; }
     }

@@ -154,7 +154,7 @@ namespace AIMS.Services
                     endYearIndex = 4, funderIndex = 6, implementerIndex = 7, currencyIndex = 9, projectCostIndex = 10,
                     previousMinusYearIndex = 11, previousYearIndex = 12, currentYearIndex = 13, currentYearPlannedIndex = 14,
                     futureYearPlannedIndex = 15, locationLowerIndex = 18, locationUpperIndex = 26, markerLowerIndex = 28,
-                    markerUpperIndex = 34;
+                    markerUpperIndex = 34, documentLinkIndex = 40, documentDescriptionIndex = 41;
 
                 file.CopyTo(stream);
                 stream.Position = 0;
@@ -213,12 +213,22 @@ namespace AIMS.Services
                     }
 
                     List<ImportedDocumentLinks> documentsList = new List<ImportedDocumentLinks>();
-
+                    var documentLink = this.GetFormattedValue(row.GetCell(documentLinkIndex));
+                    var documentDescription = this.GetFormattedValue(row.GetCell(documentDescriptionIndex));
+                    if (!string.IsNullOrEmpty(documentLink) || !string.IsNullOrEmpty(documentDescription))
+                    {
+                        documentsList.Add(new ImportedDocumentLinks()
+                        {
+                            DocumentUrl = documentLink,
+                            DocumentTitle = documentDescription
+                        });
+                    }
 
                     projectsList.Add(new NewImportedAidData()
                     {
                         ProjectTitle = this.GetFormattedValue(row.GetCell(projectTitleIndex)),
                         ProjectDescription = this.GetFormattedValue(row.GetCell(projectDescriptionIndex)),
+                        ProjectValue = Convert.ToInt32(this.GetFormattedValue(row.GetCell(projectCostIndex))),
                         StartYear = this.GetFormattedValue(row.GetCell(startYearIndex)),
                         EndYear = this.GetFormattedValue(row.GetCell(endYearIndex)),
                         Funders = this.GetFormattedValue(row.GetCell(funderIndex)),
@@ -233,6 +243,7 @@ namespace AIMS.Services
                         Sector = this.GetFormattedValue(row.GetCell(sectorIndex)),
                         Locations = locationsList,
                         CustomFields = customFieldsList,
+                        DocumentLinks = documentsList
                     });
                 }
             }
