@@ -33,6 +33,13 @@ namespace AIMS.Services
         List<ImportedAidData> ImportAidDataSeventeen(string filePath);
 
         /// <summary>
+        /// Imports data for testing
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        List<NewImportedAidData> ImportLatestAidData(string filePath, IFormFile file);
+
+        /// <summary>
         /// Gets data matches for both old and new data
         /// </summary>
         /// <returns></returns>
@@ -54,6 +61,8 @@ namespace AIMS.Services
         NameValueCollection oldDataLocations;
         NameValueCollection oldCustomFields;
         NameValueCollection newCustomFields;
+        NameValueCollection latestDataLocations;
+        NameValueCollection latestCustomFields;
 
         private DataFormatter dataFormatter;
         private IFormulaEvaluator formulaEvaluator;
@@ -90,11 +99,35 @@ namespace AIMS.Services
                 { "23", "Unattributed" }
             };
 
+            latestDataLocations = new NameValueCollection()
+            {
+                { "18", "FGS" },
+                { "19", "BRA" },
+                { "20", "Galmudug" },
+                { "21", "Hiirshabelle" },
+                { "22", "Jubaland" },
+                { "23", "Puntland" },
+                { "24", "South West" },
+                { "25", "Somaliland" },
+                { "26", "Unattributed" }
+            };
+
+            latestCustomFields = new NameValueCollection()
+            {
+                { "28", "GENDER MARKER" },
+                { "20", "CAPACITY DEVELOPMENT MARKER" },
+                { "30", "STABALIZATION/CRESTA" },
+                { "31", "DURABLE SOLUTIONS" },
+                { "32", "YOUTH MARKER" },
+                { "33", "PCVE MARKER" },
+                { "34", "RRF MARKER" },
+            };
+
             oldCustomFields = new NameValueCollection()
             {
                 { "32", "Gender" },
                 { "33", "Capacity Building" },
-                { "34", "Stabalization" },
+                { "34", "Stabalization/Cresta" },
                 { "35", "Durable Solutions" },
                 { "36", "Youth" },
                 { "37", "Conflict Sensitivity Analysis" },
@@ -110,6 +143,100 @@ namespace AIMS.Services
                 {"42", "PCVE" },
                 {"43", "Youth" }
             };
+        }
+
+        public List<NewImportedAidData> ImportLatestAidData(string filePath, IFormFile file)
+        {
+            List<NewImportedAidData> projectsList = new List<NewImportedAidData>();
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                int projectTitleIndex = 0, projectDescriptionIndex = 1, sectorIndex = 2, startYearIndex = 3,
+                    endYearIndex = 4, funderIndex = 6, implementerIndex = 7, currencyIndex = 9, projectCostIndex = 10,
+                    previousMinusYearIndex = 11, previousYearIndex = 12, currentYearIndex = 13, currentYearPlannedIndex = 14,
+                    futureYearPlannedIndex = 15, locationLowerIndex = 18, locationUpperIndex = 26, markerLowerIndex = 28,
+                    markerUpperIndex = 34;
+
+                file.CopyTo(stream);
+                stream.Position = 0;
+
+                XSSFWorkbook hssfwb = new XSSFWorkbook(stream);
+                this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
+                this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(hssfwb);
+
+                ISheet sheet = hssfwb.GetSheetAt(3);
+                IRow headerRow = sheet.GetRow(0);
+                int cellCount = headerRow.LastCellNum;
+
+                for (int i = (sheet.FirstRowNum + 1); i < sheet.LastRowNum; i++)
+                {
+                    IRow row = sheet.GetRow(i);
+                    if (row == null)
+                    {
+                        continue;
+                    }
+                    if (row.Cells.All(d => d.CellType == CellType.Blank))
+                    {
+                        continue;
+                    }
+
+                    decimal disbursementsPreviousMinusYear = 0, disbursementsPreviousYear = 0, disbursementsCurrentYear = 0, 
+                        exchangeRate = 0, disbursementsPlannedCurrentYear = 0, disbursementsPlannedFutureYear = 0;
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(previousMinusYearIndex)), out disbursementsPreviousMinusYear);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(previousYearIndex)), out disbursementsPreviousYear);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(currentYearIndex)), out disbursementsCurrentYear);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(currentYearPlannedIndex)), out disbursementsPlannedCurrentYear);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(futureYearPlannedIndex)), out disbursementsPlannedFutureYear);
+
+                    List<ImportedLocation> locationsList = new List<ImportedLocation>();
+                    for (int l = locationLowerIndex; l <= locationUpperIndex; l++)
+                    {
+                        decimal percentage = 0;
+                        decimal.TryParse(row.GetCell(l).NumericCellValue.ToString(), out percentage);
+                        locationsList.Add(new ImportedLocation()
+                        {
+                            Location = newDataLocations[l.ToString()],
+                            Percentage = (percentage * 100)
+                        });
+                    }
+
+                    List<ImportedCustomFields> customFieldsList = new List<ImportedCustomFields>();
+                    for (int c = markerLowerIndex; c <= markerUpperIndex; c++)
+                    {
+                        if (c == 39)
+                            continue;
+
+                        customFieldsList.Add(new ImportedCustomFields()
+                        {
+                            CustomField = newCustomFields[c.ToString()],
+                            Value = this.GetFormattedValue(row.GetCell(c))
+                        });
+                    }
+
+                    List<ImportedDocumentLinks> documentsList = new List<ImportedDocumentLinks>();
+
+
+                    projectsList.Add(new NewImportedAidData()
+                    {
+                        ProjectTitle = this.GetFormattedValue(row.GetCell(projectTitleIndex)),
+                        ProjectDescription = this.GetFormattedValue(row.GetCell(projectDescriptionIndex)),
+                        StartYear = this.GetFormattedValue(row.GetCell(startYearIndex)),
+                        EndYear = this.GetFormattedValue(row.GetCell(endYearIndex)),
+                        Funders = this.GetFormattedValue(row.GetCell(funderIndex)),
+                        Currency = this.GetFormattedValue(row.GetCell(currencyIndex)),
+                        ExchangeRate = exchangeRate,
+                        Implementers = this.GetFormattedValue(row.GetCell(implementerIndex)),
+                        PreviousMinusYearDisbursements = Convert.ToDecimal(this.GetFormattedValue(row.GetCell(previousMinusYearIndex))),
+                        PreviousYearDisbursements = Convert.ToDecimal(this.GetFormattedValue(row.GetCell(previousYearIndex))),
+                        CurrentYearDisbursements = Convert.ToDecimal(this.GetFormattedValue(row.GetCell(currentYearIndex))),
+                        CurrentYearPlannedDisbursements = Convert.ToDecimal(this.GetFormattedValue(row.GetCell(currentYearPlannedIndex))),
+                        FutureYearPlannedDisbursements = Convert.ToDecimal(this.GetFormattedValue(row.GetCell(futureYearPlannedIndex))),
+                        Sector = this.GetFormattedValue(row.GetCell(sectorIndex)),
+                        Locations = locationsList,
+                        CustomFields = customFieldsList,
+                    });
+                }
+            }
+            return projectsList;
         }
 
         public List<ImportedAidData> ImportAidDataEighteen(string filePath, IFormFile file)
