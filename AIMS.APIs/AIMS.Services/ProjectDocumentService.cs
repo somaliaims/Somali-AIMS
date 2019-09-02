@@ -12,7 +12,7 @@ namespace AIMS.Services
 {
     public interface IProjectDocumentService
     {
-        /// <summary>
+        /*/// <summary>
         /// Gets all documents for the provided project id
         /// </summary>
         /// <returns></returns>
@@ -35,12 +35,12 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="projectDocument"></param>
         /// <returns></returns>
-        ActionResponse Update(int id, ProjectDocumentModel model);
+        ActionResponse Update(int id, ProjectDocumentModel model);*/
     }
 
     public class ProjectDocumentService : IProjectDocumentService
     {
-        AIMSDbContext context;
+        /*AIMSDbContext context;
         IMapper mapper;
 
         public ProjectDocumentService(AIMSDbContext cntxt, IMapper autoMapper)
@@ -125,6 +125,6 @@ namespace AIMS.Services
                 response.Message = "1";
                 return response;
             }
-        }
+        }*/
     }
 }

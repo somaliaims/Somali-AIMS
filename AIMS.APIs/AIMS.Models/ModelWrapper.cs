@@ -675,6 +675,15 @@ namespace AIMS.Models
         public string DateUpdated { get; set; }
     }
 
+    public class LatestProjectView
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public decimal ProjectCost { get; set; }
+        public string StartingFinancialYear { get; set; }
+        public string EndingFinancialYear { get; set; }
+    }
+
     public class ProjectAbstractView
     {
         public int Id { get; set; }
@@ -952,9 +961,12 @@ namespace AIMS.Models
 
     public class ProjectDocumentModel
     {
-        public int Id { get; set; }
         public int ProjectId { get; set; }
-        public string Project { get; set; }
+        public List<DocumentModel> Documents { get; set; }
+    }
+
+    public class DocumentModel
+    {
         public string DocumentTitle { get; set; }
         public string DocumentUrl { get; set; }
     }

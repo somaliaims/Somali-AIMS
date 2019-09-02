@@ -47,6 +47,12 @@ namespace AIMS.Services
         Task<ProjectProfileReport> GetProjectProfileReportAsync(int id);
 
         /// <summary>
+        /// Gets latest list of projects
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<LatestProjectView> GetLatest();
+
+        /// <summary>
         /// Get project reports filtered through sector id
         /// </summary>
         /// <param name="sectorId"></param>
@@ -353,6 +359,27 @@ namespace AIMS.Services
                             orderby p.DateUpdated descending
                             select p);
                 return await Task<IEnumerable<ProjectView>>.Run(() => mapper.Map<List<ProjectView>>(projects)).ConfigureAwait(false);
+            }
+        }
+
+        public IEnumerable<LatestProjectView> GetLatest()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<LatestProjectView> projects = new List<LatestProjectView>();
+                var latestProjects = unitWork.ProjectRepository.GetWithIncludeOrderByDescending(p => p.Id != 0, p => p.DateUpdated, 10, new string[] { "Funders", "Funders.Funder", "StartingFinancialYear", "EndingFinancialYear" });
+                foreach(var project in latestProjects)
+                {
+                    projects.Add(new LatestProjectView()
+                    {
+                        Id = project.Id,
+                        Title = project.Title,
+                        StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
+                        EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
+                        ProjectCost = project.ProjectValue
+                    });
+                }
+                return projects;
             }
         }
 
@@ -1539,12 +1566,33 @@ namespace AIMS.Services
                         response.Success = false;
                     }
 
-                    unitWork.ProjectDocumentRepository.Insert(new EFProjectDocuments()
+                    var documents = unitWork.ProjectDocumentRepository.GetManyQueryable(d => d.ProjectId == model.ProjectId);
+                    var documentNames = (from d in documents
+                                         select d.DocumentTitle).ToList<string>();
+                    var documentUrls = (from d in documents
+                                        select d.DocumentUrl).ToList<string>();
+
+                    List<EFProjectDocuments> newDocuments = new List<EFProjectDocuments>();
+                    foreach(var document in model.Documents)
                     {
-                        Project = project,
-                        DocumentTitle = model.DocumentTitle,
-                        DocumentUrl = model.DocumentUrl
-                    });
+                        if (!documentNames.Contains(document.DocumentTitle, StringComparer.OrdinalIgnoreCase) 
+                            && !documentUrls.Contains(document.DocumentUrl, StringComparer.OrdinalIgnoreCase))
+                        {
+                            newDocuments.Add(new EFProjectDocuments()
+                            {
+                                Project = project,
+                                DocumentTitle = document.DocumentTitle,
+                                DocumentUrl = document.DocumentUrl
+                            });
+                        }
+                    }
+
+                    if (newDocuments.Count > 0)
+                    {
+                        unitWork.ProjectDocumentRepository.InsertMultiple(newDocuments);
+                        unitWork.Save();
+                    }
+
                     project.DateUpdated = DateTime.Now;
                     unitWork.ProjectRepository.Update(project);
                     unitWork.Save();

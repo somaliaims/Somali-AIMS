@@ -177,9 +177,30 @@ namespace AIMS.DAL.Repository
             return DbSet.Where(where).AsQueryable();
         }
 
-        public virtual IQueryable<TEntity> GetManyQueryableOrderBy(Func<TEntity, bool> where, Func<TEntity, bool> orderBy)
+        public virtual IEnumerable<TEntity> GetManyQueryableOrderBy<T>(Expression<Func<TEntity, T>> order, int skip, int take,
+            params Expression<Func<TEntity, T>>[] includes)
         {
-            return DbSet.Where(where).OrderBy(orderBy).AsQueryable();
+            IQueryable<TEntity> query = DbSet;
+            foreach (var include in includes)
+            {
+                query = DbSet.Include(include);
+            }
+
+            IEnumerable<TEntity> data = query.OrderBy(order).Skip(skip).Take(take).AsQueryable();
+            return data;
+        }
+
+        public virtual IEnumerable<TEntity> GetManyQueryableOrderByDescending<T>(Expression<Func<TEntity, T>> order, int skip, int take,
+            params Expression<Func<TEntity, T>>[] includes)
+        {
+            IQueryable<TEntity> query = DbSet;
+            foreach (var include in includes)
+            {
+                query = DbSet.Include(include);
+            }
+
+            IEnumerable<TEntity> data = query.OrderByDescending(order).Skip(skip).Take(take).AsQueryable();
+            return data;
         }
 
         public virtual async Task<IQueryable<TEntity>> GetManyQueryableAsync(Func<TEntity, bool> where)
@@ -257,11 +278,18 @@ namespace AIMS.DAL.Repository
             return query.Where(predicate).AsQueryable();
         }
 
-        public IQueryable<TEntity> GetWithIncludeOrderBy(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate, Func<TEntity, string> orderBy, params string[] include)
+        public IQueryable<TEntity> GetWithIncludeOrderBy(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate, Func<TEntity, DateTime> orderBy, int take, params string[] include)
         {
             IQueryable<TEntity> query = this.DbSet;
             query = include.Aggregate(query, (current, inc) => current.Include(inc));
-            return query.Where(predicate).OrderBy(orderBy).AsQueryable();
+            return query.Where(predicate).OrderBy(orderBy).Take(take).AsQueryable();
+        }
+
+        public IQueryable<TEntity> GetWithIncludeOrderByDescending(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate, Func<TEntity, DateTime> orderBy, int take, params string[] include)
+        {
+            IQueryable<TEntity> query = this.DbSet;
+            query = include.Aggregate(query, (current, inc) => current.Include(inc));
+            return query.Where(predicate).OrderByDescending(orderBy).Take(take).AsQueryable();
         }
 
         /// <summary>

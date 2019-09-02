@@ -34,8 +34,13 @@ namespace AIMS.APIs.Controllers
         [HttpGet("GetAllWithDetail")]
         public async Task<IActionResult> GetAllWithDetail()
         {
-            var projects = await projectService.GetAllDetailAsync();
-            return Ok(projects);
+            return Ok(await projectService.GetAllDetailAsync());
+        }
+
+        [HttpGet("GetLatest")]
+        public IActionResult GetLatest()
+        {
+            return Ok(projectService.GetLatest());
         }
 
         [HttpGet]
