@@ -152,7 +152,7 @@ namespace AIMS.Services
             {
                 int projectTitleIndex = 0, projectDescriptionIndex = 1, sectorIndex = 2, startYearIndex = 3,
                     endYearIndex = 4, funderIndex = 6, implementerIndex = 7, currencyIndex = 9, projectCostIndex = 10,
-                    previousMinusYearIndex = 11, previousYearIndex = 12, currentYearIndex = 13, currentYearPlannedIndex = 14,
+                    previousMinusYearIndex = 12, previousYearIndex = 13, currentYearIndex = 14, currentYearPlannedIndex = 15,
                     futureYearPlannedIndex = 15, locationLowerIndex = 18, locationUpperIndex = 26, markerLowerIndex = 28,
                     markerUpperIndex = 34, documentLinkIndex = 40, documentDescriptionIndex = 41;
 
@@ -163,11 +163,11 @@ namespace AIMS.Services
                 this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
                 this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(hssfwb);
 
-                ISheet sheet = hssfwb.GetSheetAt(3);
+                ISheet sheet = hssfwb.GetSheetAt(2);
                 IRow headerRow = sheet.GetRow(0);
                 int cellCount = headerRow.LastCellNum;
 
-                for (int i = (sheet.FirstRowNum + 1); i < sheet.LastRowNum; i++)
+                for (int i = (sheet.FirstRowNum); i < sheet.LastRowNum; i++)
                 {
                     IRow row = sheet.GetRow(i);
                     if (row == null)
@@ -197,6 +197,13 @@ namespace AIMS.Services
                             Location = newDataLocations[l.ToString()],
                             Percentage = (percentage * 100)
                         });
+
+                        decimal totalPercentage = (from loc in locationsList
+                                                   select loc.Percentage).Sum();
+                        if (totalPercentage == 100)
+                        {
+                            break;
+                        }
                     }
 
                     List<ImportedCustomFields> customFieldsList = new List<ImportedCustomFields>();
@@ -207,7 +214,7 @@ namespace AIMS.Services
 
                         customFieldsList.Add(new ImportedCustomFields()
                         {
-                            CustomField = newCustomFields[c.ToString()],
+                            CustomField = latestCustomFields[c.ToString()],
                             Value = this.GetFormattedValue(row.GetCell(c))
                         });
                     }
@@ -224,22 +231,35 @@ namespace AIMS.Services
                         });
                     }
 
+                    int startingYear = 0, endingYear = 0;
+                    decimal projectCost = 0, previousMinusYearDisbursements = 0, previousYearDisbursements = 0,
+                        currentYearDisbursements = 0, currentYearPlannedDisbursements = 0, futureYearPlannedDisbursements = 0;
+
+                    int.TryParse(this.GetFormattedValue(row.GetCell(startYearIndex)), out startingYear);
+                    int.TryParse(this.GetFormattedValue(row.GetCell(endYearIndex)), out endingYear);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(previousMinusYearIndex)), out previousMinusYearDisbursements);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(previousYearIndex)), out previousYearDisbursements);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(currentYearIndex)), out currentYearDisbursements);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(currentYearPlannedIndex)), out currentYearPlannedDisbursements);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(futureYearPlannedIndex)), out futureYearPlannedDisbursements);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(projectCostIndex)), out projectCost);
+
                     projectsList.Add(new NewImportedAidData()
                     {
                         ProjectTitle = this.GetFormattedValue(row.GetCell(projectTitleIndex)),
                         ProjectDescription = this.GetFormattedValue(row.GetCell(projectDescriptionIndex)),
-                        ProjectValue = Convert.ToInt32(this.GetFormattedValue(row.GetCell(projectCostIndex))),
-                        StartYear = this.GetFormattedValue(row.GetCell(startYearIndex)),
-                        EndYear = this.GetFormattedValue(row.GetCell(endYearIndex)),
+                        ProjectValue = projectCost,
+                        StartYear = startingYear.ToString(),
+                        EndYear = endingYear.ToString(),
                         Funders = this.GetFormattedValue(row.GetCell(funderIndex)),
                         Currency = this.GetFormattedValue(row.GetCell(currencyIndex)),
                         ExchangeRate = exchangeRate,
                         Implementers = this.GetFormattedValue(row.GetCell(implementerIndex)),
-                        PreviousMinusYearDisbursements = Convert.ToDecimal(this.GetFormattedValue(row.GetCell(previousMinusYearIndex))),
-                        PreviousYearDisbursements = Convert.ToDecimal(this.GetFormattedValue(row.GetCell(previousYearIndex))),
-                        CurrentYearDisbursements = Convert.ToDecimal(this.GetFormattedValue(row.GetCell(currentYearIndex))),
-                        CurrentYearPlannedDisbursements = Convert.ToDecimal(this.GetFormattedValue(row.GetCell(currentYearPlannedIndex))),
-                        FutureYearPlannedDisbursements = Convert.ToDecimal(this.GetFormattedValue(row.GetCell(futureYearPlannedIndex))),
+                        PreviousMinusYearDisbursements = previousMinusYearDisbursements,
+                        PreviousYearDisbursements = previousYearDisbursements,
+                        CurrentYearDisbursements = currentYearDisbursements,
+                        CurrentYearPlannedDisbursements = currentYearPlannedDisbursements,
+                        FutureYearPlannedDisbursements = futureYearPlannedDisbursements,
                         Sector = this.GetFormattedValue(row.GetCell(sectorIndex)),
                         Locations = locationsList,
                         CustomFields = customFieldsList,
