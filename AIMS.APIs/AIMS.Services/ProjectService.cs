@@ -258,7 +258,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="projects"></param>
         /// <returns></returns>
-        ActionResponse ImportProjects(List<NewImportedAidData> projects);
+        Task<ActionResponse> ImportProjects(List<NewImportedAidData> projects);
 
         /// <summary>
         /// Deletes project location
@@ -1118,7 +1118,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ImportProjects(List<NewImportedAidData> projects)
+        public async Task<ActionResponse> ImportProjects(List<NewImportedAidData> projects)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -1136,37 +1136,115 @@ namespace AIMS.Services
                 }
 
                 var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(p => p.Id != 0);
+                var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
                 try
                 {
-                    foreach (var project in projects)
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        startingFinancialYear = (from y in financialYears
-                                                 where y.FinancialYear == Convert.ToInt32(project.StartYear)
-                                                 select y).FirstOrDefault();
-                        if (startingFinancialYear == null)
+                        using (var transaction = context.Database.BeginTransaction())
                         {
-                            startingFinancialYear = new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.StartYear) };
-                        }
 
-                        endingFinancialYear = (from y in financialYears
-                                               where y.FinancialYear == Convert.ToInt32(project.StartYear)
-                                               select y).FirstOrDefault();
-                        if (endingFinancialYear == null)
-                        {
-                            endingFinancialYear = new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.EndYear) };
-                        }
+                            foreach (var project in projects)
+                            {
+                                startingFinancialYear = (from y in financialYears
+                                                         where y.FinancialYear == Convert.ToInt32(project.StartYear)
+                                                         select y).FirstOrDefault();
+                                if (startingFinancialYear == null)
+                                {
+                                    startingFinancialYear = new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.StartYear) };
+                                }
 
-                        var newProject = unitWork.ProjectRepository.Insert(new EFProject()
-                        {
-                            Title = project.ProjectTitle,
-                            ProjectCurrency = project.Currency,
-                            ProjectValue = project.ProjectValue,
-                            Description = project.ProjectDescription,
-                            StartingFinancialYear = startingFinancialYear,
-                            EndingFinancialYear = endingFinancialYear,
-                            CreatedBy = user
-                        });
-                    }
+                                endingFinancialYear = (from y in financialYears
+                                                       where y.FinancialYear == Convert.ToInt32(project.StartYear)
+                                                       select y).FirstOrDefault();
+                                if (endingFinancialYear == null)
+                                {
+                                    endingFinancialYear = new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.EndYear) };
+                                }
+
+                                var newProject = unitWork.ProjectRepository.Insert(new EFProject()
+                                {
+                                    Title = project.ProjectTitle,
+                                    ProjectCurrency = project.Currency,
+                                    ProjectValue = project.ProjectValue,
+                                    Description = project.ProjectDescription,
+                                    StartingFinancialYear = startingFinancialYear,
+                                    EndingFinancialYear = endingFinancialYear,
+                                    CreatedBy = user
+                                });
+                                await unitWork.SaveAsync();
+                                
+                                List<EFProjectFunders> projectFunders = new List<EFProjectFunders>();
+                                if (!string.IsNullOrEmpty(project.Funders))
+                                {
+                                    string[] funderNames = project.Funders.Split(",");
+                                    foreach(string funderName in funderNames)
+                                    {
+                                        var organization = (from org in organizations
+                                                            where org.OrganizationName.Equals(funderName, StringComparison.OrdinalIgnoreCase)
+                                                            select org).FirstOrDefault();
+                                        if (organization == null)
+                                        {
+                                            organization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                            {
+                                                OrganizationName = funderName,
+                                                OrganizationTypeId = 1,
+                                                SourceType = OrganizationSourceType.User,
+                                                IsApproved = true
+                                            });
+                                            unitWork.Save();
+                                        }
+                                        projectFunders.Add(new EFProjectFunders() { Project = newProject, Funder = organization });
+                                    }
+                                }
+
+                                if (projectFunders.Count > 0)
+                                {
+                                    unitWork.ProjectFundersRepository.InsertMultiple(projectFunders);
+                                    await unitWork.SaveAsync();
+                                }
+
+                                List<EFProjectImplementers> projectImplementers = new List<EFProjectImplementers>();
+                                if (!string.IsNullOrEmpty(project.Implementers))
+                                {
+                                    string[] implementerNames = project.Implementers.Split(",");
+                                    foreach (string implementerName in implementerNames)
+                                    {
+                                        var organization = (from org in organizations
+                                                            where org.OrganizationName.Equals(implementerName, StringComparison.OrdinalIgnoreCase)
+                                                            select org).FirstOrDefault();
+                                        if (organization == null)
+                                        {
+                                            organization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                            {
+                                                OrganizationName = implementerName,
+                                                OrganizationTypeId = 1,
+                                                SourceType = OrganizationSourceType.User,
+                                                IsApproved = true
+                                            });
+                                            unitWork.Save();
+                                        }
+                                        projectImplementers.Add(new EFProjectImplementers() { Project = newProject, Implementer = organization });
+                                    }
+                                }
+
+                                if (projectImplementers.Count > 0)
+                                {
+                                    unitWork.ProjectImplementersRepository.InsertMultiple(projectImplementers);
+                                    await unitWork.SaveAsync();
+                                }
+
+                                if (project.DocumentLinks.Count > 0)
+                                {
+                                    foreach(var document in project.DocumentLinks)
+                                    {
+
+                                    }
+                                }
+                            }
+                        }
+                    });
                 }
                 catch(Exception ex)
                 {
