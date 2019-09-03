@@ -1135,6 +1135,7 @@ namespace AIMS.Services
                     return response;
                 }
 
+                int currentYear = DateTime.Now.Year;
                 var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(p => p.Id != 0);
                 var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
                 var ndpSectors = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == 1);
@@ -1144,6 +1145,46 @@ namespace AIMS.Services
 
                 List<EFSector> ndpSectorsList = new List<EFSector>();
                 List<EFLocation> locationsList = new List<EFLocation>();
+                EFFinancialYears previousMinusFinancialYear = null;
+                EFFinancialYears previousFinancialYear = null;
+                EFFinancialYears currentFinancialYear = null;
+                EFFinancialYears futureFinancialYear = null;
+
+                previousMinusFinancialYear = (from fy in financialYears
+                                              where fy.FinancialYear == (currentYear - 2)
+                                              select fy).FirstOrDefault();
+                if (previousMinusFinancialYear == null)
+                {
+                    previousMinusFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 2) });
+                    unitWork.Save();
+                }
+
+                previousFinancialYear = (from fy in financialYears
+                                              where fy.FinancialYear == (currentYear - 1)
+                                              select fy).FirstOrDefault();
+                if (previousFinancialYear == null)
+                {
+                    previousFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 1) });
+                    unitWork.Save();
+                }
+
+                currentFinancialYear = (from fy in financialYears
+                                              where fy.FinancialYear == (currentYear)
+                                              select fy).FirstOrDefault();
+                if (currentFinancialYear == null)
+                {
+                    currentFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear) });
+                    unitWork.Save();
+                }
+
+                futureFinancialYear = (from fy in financialYears
+                                              where fy.FinancialYear == (currentYear + 1)
+                                              select fy).FirstOrDefault();
+                if (futureFinancialYear == null)
+                {
+                    futureFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 1) });
+                    unitWork.Save();
+                }
 
                 foreach (var sector in ndpSectors)
                 {
@@ -1187,7 +1228,8 @@ namespace AIMS.Services
                                     StartingFinancialYear = startingFinancialYear,
                                     EndingFinancialYear = endingFinancialYear,
                                     CreatedBy = user,
-                                    FundingType = fundingType
+                                    FundingType = fundingType,
+                                    DateUpdated = DateTime.Now
                                 });
                                 await unitWork.SaveAsync();
                                 
@@ -1298,32 +1340,37 @@ namespace AIMS.Services
                                     await unitWork.SaveAsync();
                                 }
 
-                                
                                 if (project.Locations.Count > 0)
                                 {
                                     List<EFProjectLocations> newProjectLocations = new List<EFProjectLocations>();
                                     decimal fundsPercentage = 0;
                                     foreach (var location in project.Locations)
                                     {
-                                        var dbLocation = (from loc in locationsList
-                                                          where location.Location.Equals(project)
-                                                          select loc).FirstOrDefault();
-                                        if (dbLocation == null)
+                                        if (!string.IsNullOrEmpty(location.Location))
                                         {
-                                            dbLocation = unitWork.LocationRepository.Insert(new EFLocation()
+                                            var dbLocation = (from loc in locationsList
+                                                              where location.Location.Equals(project)
+                                                              select loc).FirstOrDefault();
+                                            if (dbLocation == null)
                                             {
-                                                Location = location.Location
-                                            });
-                                            await unitWork.SaveAsync();
-                                        }
+                                                dbLocation = unitWork.LocationRepository.Insert(new EFLocation()
+                                                {
+                                                    Location = location.Location
+                                                });
+                                                await unitWork.SaveAsync();
+                                            }
 
-                                        fundsPercentage += location.Percentage;
-                                        newProjectLocations.Add(new EFProjectLocations()
-                                        {
-                                            Project = newProject,
-                                            Location = dbLocation,
-                                            FundsPercentage = location.Percentage
-                                        });
+                                            if (location.Percentage > 0)
+                                            {
+                                                fundsPercentage += location.Percentage;
+                                                newProjectLocations.Add(new EFProjectLocations()
+                                                {
+                                                    Project = newProject,
+                                                    Location = dbLocation,
+                                                    FundsPercentage = location.Percentage
+                                                });
+                                            }
+                                        }
 
                                         if (fundsPercentage == 100)
                                         {
@@ -1336,6 +1383,41 @@ namespace AIMS.Services
                                         await unitWork.SaveAsync();
                                     }
                                 }
+
+                                //Insert disbursements
+                                unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                {
+                                    Project = newProject,
+                                    Year = previousMinusFinancialYear,
+                                    Amount = project.PreviousMinusYearDisbursements,
+                                    Currency = project.Currency,
+                                    ExchangeRate = 1
+                                });
+                                unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                {
+                                    Project = newProject,
+                                    Year = previousFinancialYear,
+                                    Amount = project.PreviousYearDisbursements,
+                                    Currency = project.Currency,
+                                    ExchangeRate = 1
+                                });
+                                unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                {
+                                    Project = newProject,
+                                    Year = currentFinancialYear,
+                                    Amount = project.CurrentYearDisbursements,
+                                    Currency = project.Currency,
+                                    ExchangeRate = 1
+                                });
+                                unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                {
+                                    Project = newProject,
+                                    Year = futureFinancialYear,
+                                    Amount = project.FutureYearPlannedDisbursements,
+                                    Currency = project.Currency,
+                                    ExchangeRate = 1
+                                });
+                                await unitWork.SaveAsync();
                             }
                             transaction.Commit();
                         }
