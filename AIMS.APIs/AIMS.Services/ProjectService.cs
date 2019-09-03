@@ -1126,7 +1126,7 @@ namespace AIMS.Services
                 IMessageHelper mHelper;
                 EFFinancialYears startingFinancialYear = null;
                 EFFinancialYears endingFinancialYear = null;
-                EFUser user = unitWork.UserRepository.GetOne(u => u.UserType == UserTypes.SuperAdmin);
+                EFUser user = unitWork.UserRepository.GetOne(u => u.UserType == UserTypes.Manager);
                 if (user == null)
                 {
                     mHelper = new MessageHelper();
@@ -1137,6 +1137,19 @@ namespace AIMS.Services
 
                 var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(p => p.Id != 0);
                 var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
+                var ndpSectors = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == 1);
+                var locations = unitWork.LocationRepository.GetManyQueryable(l => l.Id != 0);
+                var fundingType = unitWork.FundingTypeRepository.GetOne(f => f.Id == 1);
+                var organizationType = unitWork.OrganizationTypesRepository.GetOne(o => o.Id == 1);
+
+                List<EFSector> ndpSectorsList = new List<EFSector>();
+                List<EFLocation> locationsList = new List<EFLocation>();
+
+                foreach (var sector in ndpSectors)
+                {
+                    ndpSectorsList.Add(sector);
+                }
+
                 try
                 {
                     var strategy = context.Database.CreateExecutionStrategy();
@@ -1152,7 +1165,8 @@ namespace AIMS.Services
                                                          select y).FirstOrDefault();
                                 if (startingFinancialYear == null)
                                 {
-                                    startingFinancialYear = new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.StartYear) };
+                                    startingFinancialYear = unitWork.FinancialYearRepository.Insert( new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.StartYear) });
+                                    unitWork.Save();
                                 }
 
                                 endingFinancialYear = (from y in financialYears
@@ -1160,7 +1174,8 @@ namespace AIMS.Services
                                                        select y).FirstOrDefault();
                                 if (endingFinancialYear == null)
                                 {
-                                    endingFinancialYear = new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.EndYear) };
+                                    endingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.EndYear) });
+                                    unitWork.Save();
                                 }
 
                                 var newProject = unitWork.ProjectRepository.Insert(new EFProject()
@@ -1171,7 +1186,8 @@ namespace AIMS.Services
                                     Description = project.ProjectDescription,
                                     StartingFinancialYear = startingFinancialYear,
                                     EndingFinancialYear = endingFinancialYear,
-                                    CreatedBy = user
+                                    CreatedBy = user,
+                                    FundingType = fundingType
                                 });
                                 await unitWork.SaveAsync();
                                 
@@ -1235,14 +1251,93 @@ namespace AIMS.Services
                                     await unitWork.SaveAsync();
                                 }
 
+                                List<EFProjectDocuments> projectDocuments = new List<EFProjectDocuments>();
                                 if (project.DocumentLinks.Count > 0)
                                 {
                                     foreach(var document in project.DocumentLinks)
                                     {
+                                        projectDocuments.Add(new EFProjectDocuments()
+                                        {
+                                            DocumentTitle = document.DocumentTitle,
+                                            DocumentUrl = document.DocumentUrl,
+                                            Project = newProject
+                                        });
+                                    }
+                                }
 
+                                if (projectDocuments.Count > 0)
+                                {
+                                    unitWork.ProjectDocumentRepository.InsertMultiple(projectDocuments);
+                                    await unitWork.SaveAsync();
+                                }
+
+                                if (!string.IsNullOrEmpty(project.Sector))
+                                {
+                                    var dbSector = (from sector in ndpSectorsList
+                                                    where sector.SectorName.Equals(project.Sector, StringComparison.OrdinalIgnoreCase)
+                                                    select sector).FirstOrDefault();
+                                    if (dbSector == null)
+                                    {
+                                        dbSector = unitWork.SectorRepository.Insert(new EFSector()
+                                        {
+                                            SectorTypeId = 1,
+                                            SectorName = project.Sector,
+                                            ParentSector = null,
+                                            TimeStamp = DateTime.Now
+                                        });
+                                    }
+                                    await unitWork.SaveAsync();
+                                    ndpSectorsList.Add(dbSector);
+
+                                    unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
+                                    {
+                                        Project = newProject,
+                                        Sector = dbSector,
+                                        FundsPercentage = 100
+                                    });
+                                    await unitWork.SaveAsync();
+                                }
+
+                                
+                                if (project.Locations.Count > 0)
+                                {
+                                    List<EFProjectLocations> newProjectLocations = new List<EFProjectLocations>();
+                                    decimal fundsPercentage = 0;
+                                    foreach (var location in project.Locations)
+                                    {
+                                        var dbLocation = (from loc in locationsList
+                                                          where location.Location.Equals(project)
+                                                          select loc).FirstOrDefault();
+                                        if (dbLocation == null)
+                                        {
+                                            dbLocation = unitWork.LocationRepository.Insert(new EFLocation()
+                                            {
+                                                Location = location.Location
+                                            });
+                                            await unitWork.SaveAsync();
+                                        }
+
+                                        fundsPercentage += location.Percentage;
+                                        newProjectLocations.Add(new EFProjectLocations()
+                                        {
+                                            Project = newProject,
+                                            Location = dbLocation,
+                                            FundsPercentage = location.Percentage
+                                        });
+
+                                        if (fundsPercentage == 100)
+                                        {
+                                            break;
+                                        }
+                                    }
+                                    if (newProjectLocations.Count > 0)
+                                    {
+                                        unitWork.ProjectLocationsRepository.InsertMultiple(newProjectLocations);
+                                        await unitWork.SaveAsync();
                                     }
                                 }
                             }
+                            transaction.Commit();
                         }
                     });
                 }

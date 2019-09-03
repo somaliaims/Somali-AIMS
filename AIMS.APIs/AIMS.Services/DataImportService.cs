@@ -167,7 +167,7 @@ namespace AIMS.Services
                 IRow headerRow = sheet.GetRow(0);
                 int cellCount = headerRow.LastCellNum;
 
-                for (int i = (sheet.FirstRowNum); i < sheet.LastRowNum; i++)
+                for (int i = (sheet.FirstRowNum + 1); i < sheet.LastRowNum; i++)
                 {
                     IRow row = sheet.GetRow(i);
                     if (row == null)
@@ -191,7 +191,7 @@ namespace AIMS.Services
                     for (int l = locationLowerIndex; l <= locationUpperIndex; l++)
                     {
                         decimal percentage = 0;
-                        decimal.TryParse(row.GetCell(l).NumericCellValue.ToString(), out percentage);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(l)), out percentage);
                         locationsList.Add(new ImportedLocation()
                         {
                             Location = newDataLocations[l.ToString()],
@@ -243,6 +243,8 @@ namespace AIMS.Services
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(currentYearPlannedIndex)), out currentYearPlannedDisbursements);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(futureYearPlannedIndex)), out futureYearPlannedDisbursements);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(projectCostIndex)), out projectCost);
+                    projectCost = (previousMinusYearDisbursements + previousYearDisbursements + currentYearDisbursements +
+                        currentYearPlannedDisbursements + futureYearPlannedDisbursements);
 
                     projectsList.Add(new NewImportedAidData()
                     {

@@ -15,9 +15,11 @@ namespace AIMS.APIs.Controllers
     public class ImportDataController : ControllerBase
     {
         IDataImportService service;
-        public ImportDataController(IDataImportService srvc)
+        IProjectService projectService;
+        public ImportDataController(IDataImportService dataImportService, IProjectService projService)
         {
-            service = srvc;
+            service = dataImportService;
+            projectService = projService;
         }
 
         [HttpPost("UploadDataImportFileEighteen"), DisableRequestSizeLimit]
@@ -83,7 +85,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost("ImportLatestData"), DisableRequestSizeLimit]
-        public IActionResult ImportLatestData()
+        public async Task<IActionResult> ImportLatestData()
         {
             try
             {
@@ -100,6 +102,14 @@ namespace AIMS.APIs.Controllers
                         file.CopyTo(stream);
                     }
                     var extractedProjects = service.ImportLatestAidData(filePath, file);
+                    if (extractedProjects.Count > 0)
+                    {
+                        var response = await projectService.ImportProjects(extractedProjects);
+                        if (!response.Success)
+                        {
+                            return BadRequest(response.Message);
+                        }
+                    }
                     return Ok(extractedProjects);
                 }
                 else
