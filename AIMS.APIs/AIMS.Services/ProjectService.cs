@@ -254,6 +254,13 @@ namespace AIMS.Services
         IEnumerable<UserProjectsView> GetUserProjects(int userId, int funderId);
 
         /// <summary>
+        /// Imports projects from Excel extracted template
+        /// </summary>
+        /// <param name="projects"></param>
+        /// <returns></returns>
+        ActionResponse ImportProjects(List<NewImportedAidData> projects);
+
+        /// <summary>
         /// Deletes project location
         /// </summary>
         /// <param name="projectId"></param>
@@ -1108,6 +1115,65 @@ namespace AIMS.Services
                     response.Message = ex.Message;
                 }
                 return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+            }
+        }
+
+        public ActionResponse ImportProjects(List<NewImportedAidData> projects)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                EFFinancialYears startingFinancialYear = null;
+                EFFinancialYears endingFinancialYear = null;
+                EFUser user = unitWork.UserRepository.GetOne(u => u.UserType == UserTypes.SuperAdmin);
+                if (user == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetUnAuthorizedAccessMessage();
+                    return response;
+                }
+
+                var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(p => p.Id != 0);
+                try
+                {
+                    foreach (var project in projects)
+                    {
+                        startingFinancialYear = (from y in financialYears
+                                                 where y.FinancialYear == Convert.ToInt32(project.StartYear)
+                                                 select y).FirstOrDefault();
+                        if (startingFinancialYear == null)
+                        {
+                            startingFinancialYear = new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.StartYear) };
+                        }
+
+                        endingFinancialYear = (from y in financialYears
+                                               where y.FinancialYear == Convert.ToInt32(project.StartYear)
+                                               select y).FirstOrDefault();
+                        if (endingFinancialYear == null)
+                        {
+                            endingFinancialYear = new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.EndYear) };
+                        }
+
+                        var newProject = unitWork.ProjectRepository.Insert(new EFProject()
+                        {
+                            Title = project.ProjectTitle,
+                            ProjectCurrency = project.Currency,
+                            ProjectValue = project.ProjectValue,
+                            Description = project.ProjectDescription,
+                            StartingFinancialYear = startingFinancialYear,
+                            EndingFinancialYear = endingFinancialYear,
+                            CreatedBy = user
+                        });
+                    }
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
             }
         }
 
