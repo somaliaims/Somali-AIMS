@@ -506,7 +506,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var project = unitWork.ProjectRepository.GetByID(id);
+                var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == id, new string[] { "StartingFinancialYear", "EndingFinancialYear" }).FirstOrDefault();
                 return mapper.Map<ProjectModelView>(project);
             }
         }
