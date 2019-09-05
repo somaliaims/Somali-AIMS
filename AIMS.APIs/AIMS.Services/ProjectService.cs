@@ -994,7 +994,7 @@ namespace AIMS.Services
             {
                 var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
                 disbursements = (disbursements != null && disbursements.Count() > 0) ? 
-                                    (from d in disbursements orderby d.Year.FinancialYear descending select d) : disbursements;
+                                    (from d in disbursements orderby d.Year.FinancialYear select d) : disbursements;
                 return mapper.Map<List<ProjectDisbursementView>>(disbursements);
             }
         }
@@ -1839,6 +1839,7 @@ namespace AIMS.Services
 
                     var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => f.FinancialYear >= (currentYear - 2));
                     var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.ProjectId == model.ProjectId);
+                    List<EFProjectDisbursements> newDisbursementsList = new List<EFProjectDisbursements>();
 
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
@@ -1850,6 +1851,10 @@ namespace AIMS.Services
                                 var isDisbursementInDB = (from d in disbursements
                                                           where d.Year.FinancialYear == disbursement.Year && d.DisbursementType == disbursement.DisbursementType
                                                           select d).FirstOrDefault();
+                                var isDisbursementInList = (from d in newDisbursementsList
+                                                            where d.Year.FinancialYear == disbursement.Year && d.DisbursementType == disbursement.DisbursementType
+                                                            select d).FirstOrDefault();
+
                                 var financialYear = (from fy in financialYears
                                                      where fy.FinancialYear == disbursement.Year
                                                      select fy).FirstOrDefault();
@@ -1864,17 +1869,25 @@ namespace AIMS.Services
                                 }
                                 else
                                 {
-                                    var newDisbursement = unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    if (isDisbursementInList == null)
                                     {
-                                        Project = project,
-                                        Year = financialYear,
-                                        Amount = disbursement.Amount,
-                                        Currency = model.Currency,
-                                        ExchangeRate = model.ExchangeRate,
-                                        DisbursementType = disbursement.DisbursementType
-                                    });
-                                    
+                                        var newDisbursement = unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                        {
+                                            Project = project,
+                                            Year = financialYear,
+                                            Amount = disbursement.Amount,
+                                            Currency = model.Currency,
+                                            ExchangeRate = model.ExchangeRate,
+                                            DisbursementType = disbursement.DisbursementType
+                                        });
+                                        newDisbursementsList.Add(newDisbursement);
+                                    }
                                 }
+                            }
+
+                            if (newDisbursementsList.Count > 0)
+                            {
+                                await unitWork.SaveAsync();
                             }
                         }
                     });

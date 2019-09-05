@@ -979,6 +979,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public int ProjectId { get; set; }
         public int Year { get; set; }
+        public DisbursementTypes DisbursementType { get; set; }
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRate { get; set; }
