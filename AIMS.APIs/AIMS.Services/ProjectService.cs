@@ -1899,7 +1899,7 @@ namespace AIMS.Services
                         if (!documentNames.Contains(document.DocumentTitle, StringComparer.OrdinalIgnoreCase) 
                             && !documentUrls.Contains(document.DocumentUrl, StringComparer.OrdinalIgnoreCase))
                         {
-                            newDocuments.Add(new EFProjectDocuments()
+                            unitWork.ProjectDocumentRepository.Insert(new EFProjectDocuments()
                             {
                                 Project = project,
                                 DocumentTitle = document.DocumentTitle,
@@ -1910,7 +1910,6 @@ namespace AIMS.Services
 
                     if (newDocuments.Count > 0)
                     {
-                        unitWork.ProjectDocumentRepository.InsertMultiple(newDocuments);
                         unitWork.Save();
                     }
 
