@@ -988,14 +988,19 @@ namespace AIMS.Models
     {
         [Required]
         public int ProjectId { get; set; }
+        public string Currency { get; set; }
+        public decimal ExchangeRate { get; set; }
+        public List<YearDisbursements> YearlyDisbursements { get; set; }
+    }
+
+    public class YearDisbursements
+    {
         [Required]
         public int Year { get; set; }
         [Required]
+        public DisbursementTypes  DisbursementType { get; set; }
+        [Required]
         public decimal Amount { get; set; }
-        [Required]
-        public string Currency { get; set; }
-        [Required]
-        public decimal ExchangeRate { get; set; }
     }
 
     public class ExpectedDisbursementModel

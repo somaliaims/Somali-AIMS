@@ -13,6 +13,13 @@ namespace AIMS.Models
         Standard = 3
     }
 
+    public enum DisbursementTypes
+    {
+        Actual = 1,
+        Planned = 2
+    }
+
+
     public enum ProjectDeletionStatus
     {
         Requested = 1,
@@ -247,6 +254,7 @@ namespace AIMS.Models
         public EFProject Project { get; set; }
         public EFFinancialYears Year { get; set; }
         [Column(TypeName = "decimal(11, 2)")]
+        public DisbursementTypes DisbursementType { get; set; }
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         [Column(TypeName = "decimal(9, 2)")]

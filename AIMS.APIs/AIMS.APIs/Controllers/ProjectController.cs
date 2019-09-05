@@ -358,14 +358,14 @@ namespace AIMS.APIs.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddProjectDisbursement")]
-        public IActionResult AddProjectDisbursement([FromBody] ProjectDisbursementModel model)
+        public async Task<IActionResult> AddProjectDisbursement([FromBody] ProjectDisbursementModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = projectService.AddProjectDisbursement(model);
+            var response = await projectService.AddProjectDisbursement(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

@@ -174,7 +174,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse AddProjectDisbursement(ProjectDisbursementModel model);
+        Task<ActionResponse> AddProjectDisbursement(ProjectDisbursementModel model);
 
         /// <summary>
         /// Adds document to a project
@@ -1797,7 +1797,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddProjectDisbursement(ProjectDisbursementModel model)
+        public async Task<ActionResponse> AddProjectDisbursement(ProjectDisbursementModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -1806,6 +1806,7 @@ namespace AIMS.Services
 
                 try
                 {
+                    int currentYear = DateTime.Now.Year;
                     var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
                     if (project == null)
                     {
@@ -1815,32 +1816,11 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var currency = unitWork.CurrencyRepository.GetOne(c => c.Currency == model.Currency);
-                    if (currency == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Currency");
-                        response.Success = false;
-                        return response;
-                    }
+                    decimal projectValue = project.ProjectValue;
+                    decimal totalDisbursements = (from d in model.YearlyDisbursements
+                                                select (d.Amount * (1 / model.ExchangeRate))).Sum();
 
-                    var financialYear = unitWork.FinancialYearRepository.GetOne(f => f.FinancialYear == model.Year);
-                    if (financialYear == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Financial Year");
-                        response.Success = false;
-                        return response;
-                    }
-
-                    var funders = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.ProjectId == model.ProjectId);
-                    decimal totalFunds = project.ProjectValue;
-
-                    var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.ProjectId == model.ProjectId);
-                    decimal totalDisbursement = ((from disbursement in disbursements
-                                                  select (disbursement.Amount * (1 / disbursement.ExchangeRate))).Sum()) + (model.Amount * (1 / model.ExchangeRate));
-
-                    if (totalDisbursement > totalFunds)
+                    if (totalDisbursements > projectValue)
                     {
                         mHelper = new MessageHelper();
                         response.Message = mHelper.InvalidDisbursement();
@@ -1848,25 +1828,63 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var newDisbursement = unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                    var disbursementCurrency = unitWork.CurrencyRepository.GetOne(c => c.Currency == model.Currency);
+                    if (disbursementCurrency == null)
                     {
-                        Project = project,
-                        Year = financialYear,
-                        Amount = model.Amount,
-                        Currency = model.Currency,
-                        ExchangeRate = model.ExchangeRate
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Currency");
+                        response.Success = false;
+                        return response;
+                    }
+
+                    var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => f.FinancialYear >= (currentYear - 2));
+                    var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.ProjectId == model.ProjectId);
+
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
+                    {
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            foreach(var disbursement in model.YearlyDisbursements)
+                            {
+                                var isDisbursementInDB = (from d in disbursements
+                                                          where d.Year.FinancialYear == disbursement.Year && d.DisbursementType == disbursement.DisbursementType
+                                                          select d).FirstOrDefault();
+                                var financialYear = (from fy in financialYears
+                                                     where fy.FinancialYear == disbursement.Year
+                                                     select fy).FirstOrDefault();
+
+                                if (isDisbursementInDB != null)
+                                {
+                                    isDisbursementInDB.Amount = disbursement.Amount;
+                                    isDisbursementInDB.Currency = model.Currency;
+                                    isDisbursementInDB.ExchangeRate = model.ExchangeRate;
+                                    unitWork.ProjectDisbursementsRepository.Update(isDisbursementInDB);
+                                    await unitWork.SaveAsync();
+                                }
+                                else
+                                {
+                                    var newDisbursement = unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    {
+                                        Project = project,
+                                        Year = financialYear,
+                                        Amount = disbursement.Amount,
+                                        Currency = model.Currency,
+                                        ExchangeRate = model.ExchangeRate,
+                                        DisbursementType = disbursement.DisbursementType
+                                    });
+                                    
+                                }
+                            }
+                        }
                     });
-                    project.DateUpdated = DateTime.Now;
-                    unitWork.ProjectRepository.Update(project);
-                    unitWork.Save();
-                    response.ReturnedId = newDisbursement.Id;
                 }
                 catch (Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
                 }
-                return response;
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
 
@@ -2205,7 +2223,6 @@ namespace AIMS.Services
                 {
                     using (var transaction = context.Database.BeginTransaction())
                     {
-                        //Add project
                         var newProject = unitWork.ProjectRepository.Insert(new EFProject()
                         {
                             Title = model.Title,
