@@ -153,7 +153,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse AddProjectSector(ProjectSectorModel model);
+        Task<ActionResponse> AddProjectSector(ProjectSectorModel model);
 
         /// <summary>
         /// Adds funder to a project
@@ -1485,7 +1485,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddProjectSector(ProjectSectorModel model)
+        public async Task<ActionResponse> AddProjectSector(ProjectSectorModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -1494,6 +1494,8 @@ namespace AIMS.Services
 
                 try
                 {
+                    List<int> sectorIds = new List<int>();
+                    List<int> mappingIds = new List<int>();
                     var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
                     if (project == null)
                     {
@@ -1501,49 +1503,109 @@ namespace AIMS.Services
                         response.Message = mHelper.GetNotFound("Project");
                         response.Success = false;
                     }
-                    var sector = unitWork.SectorRepository.GetByID(model.SectorId);
-                    if (sector == null)
+
+                    if (model.ProjectSectors.Any())
+                    {
+                        mappingIds = (from s in model.ProjectSectors
+                                      select s.MappingId).ToList<int>();
+                        sectorIds = (from s in model.ProjectSectors
+                                     select s.SectorId).ToList<int>();
+                    }
+                    var allSectors = unitWork.SectorRepository.GetWithInclude(s => sectorIds.Contains(s.Id) || mappingIds.Contains(s.Id), new string[] { "SectorType" });
+                    var sectors = (from s in allSectors
+                                   where sectorIds.Contains(s.Id)
+                                   select s);
+                    var mappingSectors = (from s in allSectors
+                                          where mappingIds.Contains(s.Id) && s.SectorType.IsPrimary == true
+                                          select s);
+
+                    if (sectors.Count() < sectorIds.Count)
                     {
                         mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Sector");
+                        response.Message = mHelper.GetNotFound("Sector/s");
                         response.Success = false;
                     }
 
-                    var projectSector = unitWork.ProjectSectorsRepository.Get(s => (s.ProjectId.Equals(model.ProjectId) && (s.SectorId.Equals(model.SectorId))));
+                    var projectSectors = unitWork.ProjectSectorsRepository.GetManyQueryable(s => (s.ProjectId.Equals(model.ProjectId)));
 
-                    if (projectSector != null)
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        decimal percentage = projectSector.FundsPercentage + model.FundsPercentage;
-                        if (percentage > 100)
+                        using (var transaction = context.Database.BeginTransaction())
                         {
-                            mHelper = new MessageHelper();
-                            response.Message = mHelper.InvalidPercentage();
-                            response.Success = false;
-                            return response;
+                            int newSectors = 0;
+                            foreach (var sector in model.ProjectSectors)
+                            {
+                                var isProjectSectorExists = (from s in projectSectors
+                                                             where s.SectorId == sector.SectorId && s.ProjectId == model.ProjectId
+                                                             select s).FirstOrDefault();
+                                if (isProjectSectorExists != null)
+                                {
+                                    isProjectSectorExists.FundsPercentage = sector.FundsPercentage;
+                                    unitWork.ProjectSectorsRepository.Update(isProjectSectorExists);
+                                    await unitWork.SaveAsync();
+                                }
+                                else
+                                {
+                                    unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
+                                    {
+                                        ProjectId = model.ProjectId,
+                                        SectorId = sector.SectorId,
+                                        FundsPercentage = sector.FundsPercentage
+                                    });
+                                    ++newSectors;
+                                }
+                            }
+
+                            if (newSectors > 0)
+                            {
+                                await unitWork.SaveAsync();
+                            }
+                            
+                            var sectorMappings = unitWork.SectorMappingsRepository.GetManyQueryable(s => sectorIds.Contains(s.SectorId));
+                            int newMappings = 0;
+                            foreach (var mapping in model.ProjectSectors)
+                            {
+                                var isMappingExists = (from m in sectorMappings
+                                                       where m.SectorId == mapping.SectorId && m.MappedSectorId == mapping.MappingId
+                                                       select m);
+                                if (isMappingExists == null)
+                                {
+                                    var sectorType = (from s in sectors
+                                                      where s.Id == mapping.SectorId
+                                                      select s.SectorType).FirstOrDefault();
+
+                                    if (sectorType != null)
+                                    {
+                                        unitWork.SectorMappingsRepository.Insert(new EFSectorMappings()
+                                        {
+                                            SectorId = mapping.SectorId,
+                                            MappedSectorId = mapping.MappingId,
+                                            SectorTypeId = sectorType.Id
+                                        });
+                                        ++newMappings;
+                                    }
+                                }
+                            }
+                            if (newMappings > 0)
+                            {
+                                await unitWork.SaveAsync();
+                            }
+
+                            project.DateUpdated = DateTime.Now;
+                            unitWork.ProjectRepository.Update(project);
+                            await unitWork.SaveAsync();
+                            transaction.Commit();
                         }
-
-                        projectSector.FundsPercentage += model.FundsPercentage;
-                        unitWork.ProjectSectorsRepository.Update(projectSector);
-                    }
-                    else
-                    {
-                        unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
-                        {
-                            Project = project,
-                            Sector = sector,
-                            FundsPercentage = model.FundsPercentage,
-                        });
-                    }
-                    project.DateUpdated = DateTime.Now;
-                    unitWork.ProjectRepository.Update(project);
-                    unitWork.Save();
+                    });
+                    
                 }
                 catch (Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
                 }
-                return response;
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
 

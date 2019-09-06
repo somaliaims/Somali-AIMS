@@ -286,14 +286,14 @@ namespace AIMS.APIs.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddProjectSector")]
-        public IActionResult AddProjectSector([FromBody] ProjectSectorModel model)
+        public async Task<IActionResult> AddProjectSector([FromBody] ProjectSectorModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = projectService.AddProjectSector(model);
+            var response = await projectService.AddProjectSector(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

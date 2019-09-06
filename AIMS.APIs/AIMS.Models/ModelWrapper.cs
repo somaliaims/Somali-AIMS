@@ -895,8 +895,15 @@ namespace AIMS.Models
     {
         [Required]
         public int ProjectId { get; set; }
+        public List<ProjectSector> ProjectSectors { get; set; } 
+    }
+
+    public class ProjectSector
+    {
         [Required]
         public int SectorId { get; set; }
+        [Required]
+        public string SectorName { get; set; }
         [Required]
         public int MappingId { get; set; }
         [Required]
