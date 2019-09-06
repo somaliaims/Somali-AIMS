@@ -221,6 +221,8 @@ namespace AIMS.Models
         public EFFundingTypes FundingType { get; set; }
         [Column(TypeName = "decimal(11, 2)")]
         public decimal ProjectValue { get; set; }
+        [Column(TypeName = "decimal(9, 2)")]
+        public decimal ExchangeRate { get; set; }
         public string ProjectCurrency { get; set; }
         public ICollection<EFProjectSectors> Sectors { get; set; }
         public ICollection<EFProjectLocations> Locations { get; set; }
@@ -255,6 +257,7 @@ namespace AIMS.Models
         public EFFinancialYears Year { get; set; }
         [Column(TypeName = "decimal(11, 2)")]
         public DisbursementTypes DisbursementType { get; set; }
+        [Column(TypeName = "decimal(11, 2)")]
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         [Column(TypeName = "decimal(9, 2)")]

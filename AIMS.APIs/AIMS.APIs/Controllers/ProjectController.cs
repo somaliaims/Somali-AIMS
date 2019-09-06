@@ -370,7 +370,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(response.Message);
             }
-            return Ok(response.ReturnedId);
+            return Ok(true);
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]

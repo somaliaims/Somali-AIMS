@@ -560,11 +560,20 @@ namespace AIMS.Services
 
                 if (projectProfileList != null)
                 {
+                    IOrderedEnumerable<EFProjectDisbursements> projectDisbursements = null;
                     foreach (var project in projectProfileList)
                     {
-                        var projectDisbursements = (from d in project.Disbursements
-                                                    orderby d.Year.FinancialYear descending
+                        if (project.Disbursements.Any())
+                        {
+                            projectDisbursements = (from d in project.Disbursements
+                                                        orderby d.Year.FinancialYear ascending
+                                                        select d);
+                            projectDisbursements = (from d in project.Disbursements
+                                                    orderby d.DisbursementType ascending
                                                     select d);
+                        }
+                        
+
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.FundingTypeId = project.FundingTypeId;
@@ -993,8 +1002,8 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
-                disbursements = (disbursements != null && disbursements.Count() > 0) ? 
-                                    (from d in disbursements orderby d.Year.FinancialYear select d) : disbursements;
+                disbursements = (disbursements.Count() > 0) ? 
+                                    (from d in disbursements orderby d.Year.FinancialYear ascending select d) : disbursements;
                 return mapper.Map<List<ProjectDisbursementView>>(disbursements);
             }
         }
@@ -1090,6 +1099,7 @@ namespace AIMS.Services
                                 StartingFinancialYear = startingFinancialYear,
                                 EndingFinancialYear = endingFinancialYear,
                                 ProjectValue = model.ProjectValue,
+                                ExchangeRate = model.ExchangeRate,
                                 ProjectCurrency = model.ProjectCurrency,
                                 DateUpdated = DateTime.Now,
                                 CreatedById = userId
@@ -1838,7 +1848,7 @@ namespace AIMS.Services
                     }
 
                     var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => f.FinancialYear >= (currentYear - 2));
-                    var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.ProjectId == model.ProjectId);
+                    var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == model.ProjectId, new string[] {  "Year" });
                     List<EFProjectDisbursements> newDisbursementsList = new List<EFProjectDisbursements>();
 
                     var strategy = context.Database.CreateExecutionStrategy();
@@ -1846,11 +1856,17 @@ namespace AIMS.Services
                     {
                         using (var transaction = context.Database.BeginTransaction())
                         {
+                            EFProjectDisbursements isDisbursementInDB = null;
                             foreach(var disbursement in model.YearlyDisbursements)
                             {
-                                var isDisbursementInDB = (from d in disbursements
+                                isDisbursementInDB = null;
+                                if (disbursements.Any())
+                                {
+                                    isDisbursementInDB = (from d in disbursements
                                                           where d.Year.FinancialYear == disbursement.Year && d.DisbursementType == disbursement.DisbursementType
                                                           select d).FirstOrDefault();
+                                }
+                                
                                 var isDisbursementInList = (from d in newDisbursementsList
                                                             where d.Year.FinancialYear == disbursement.Year && d.DisbursementType == disbursement.DisbursementType
                                                             select d).FirstOrDefault();
@@ -1889,6 +1905,7 @@ namespace AIMS.Services
                             {
                                 await unitWork.SaveAsync();
                             }
+                            transaction.Commit();
                         }
                     });
                 }
@@ -2035,6 +2052,7 @@ namespace AIMS.Services
                 projectObj.StartingFinancialYear = startingFinancialYear;
                 projectObj.EndingFinancialYear = endingFinancialYears;
                 projectObj.ProjectValue = model.ProjectValue;
+                projectObj.ExchangeRate = model.ExchangeRate;
                 projectObj.ProjectCurrency = model.ProjectCurrency;
                 projectObj.DateUpdated = DateTime.Now;
 
