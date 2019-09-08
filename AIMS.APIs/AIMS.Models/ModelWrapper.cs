@@ -896,6 +896,14 @@ namespace AIMS.Models
         [Required]
         public int ProjectId { get; set; }
         public List<ProjectSector> ProjectSectors { get; set; } 
+        public List<SectorMappings> NewMappings { get; set; }
+    }
+
+    public class SectorMappings
+    {
+        public int SectorTypeId { get; set; }
+        public int SectorId { get; set; }
+        public int MappingId { get; set; }
     }
 
     public class ProjectSector

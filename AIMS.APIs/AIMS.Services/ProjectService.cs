@@ -1517,7 +1517,7 @@ namespace AIMS.Services
                     if (isError)
                     {
                         mHelper = new MessageHelper();
-                        response.Message = mHelper.GetInvalidAttempt("Sector id");
+                        response.Message = mHelper.GetInvalidAttempt("Sector Id");
                         response.Success = false;
                         return response;
                     }
@@ -1583,34 +1583,45 @@ namespace AIMS.Services
                                 await unitWork.SaveAsync();
                             }
                             
-                            var sectorMappings = unitWork.SectorMappingsRepository.GetManyQueryable(s => sectorIds.Contains(s.SectorId));
-                            int newMappings = 0;
-                            foreach (var mapping in model.ProjectSectors)
+                            if (model.NewMappings.Count() > 0)
                             {
-                                var isMappingExists = (from m in sectorMappings
-                                                       where m.SectorId == mapping.SectorId && m.MappedSectorId == mapping.MappingId
-                                                       select m);
-                                if (isMappingExists == null)
-                                {
-                                    var sectorType = (from s in sectors
-                                                      where s.Id == mapping.SectorId
-                                                      select s.SectorType).FirstOrDefault();
+                                var defaultSectorId = unitWork.SectorTypesRepository.GetProjection(s => s.IsPrimary == true, s => s.Id).FirstOrDefault();
+                                var newFoundMappings = (from m in model.NewMappings
+                                                        where m.SectorTypeId != defaultSectorId
+                                                        select m);
 
-                                    if (sectorType != null)
+                                if (newFoundMappings.Count() > 0)
+                                {
+                                    var sectorMappings = unitWork.SectorMappingsRepository.GetManyQueryable(s => sectorIds.Contains(s.SectorId));
+                                    int newMappings = 0;
+                                    foreach (var mapping in newFoundMappings)
                                     {
-                                        unitWork.SectorMappingsRepository.Insert(new EFSectorMappings()
+                                        var isMappingExists = (from m in sectorMappings
+                                                               where m.SectorId == mapping.SectorId && m.MappedSectorId == mapping.MappingId
+                                                               select m).FirstOrDefault();
+                                        if (isMappingExists == null)
                                         {
-                                            SectorId = mapping.SectorId,
-                                            MappedSectorId = mapping.MappingId,
-                                            SectorTypeId = sectorType.Id
-                                        });
-                                        ++newMappings;
+                                            var sectorType = (from s in sectors
+                                                              where s.Id == mapping.SectorId
+                                                              select s.SectorType).FirstOrDefault();
+
+                                            if (sectorType != null)
+                                            {
+                                                unitWork.SectorMappingsRepository.Insert(new EFSectorMappings()
+                                                {
+                                                    SectorId = mapping.SectorId,
+                                                    MappedSectorId = mapping.MappingId,
+                                                    SectorTypeId = sectorType.Id
+                                                });
+                                                ++newMappings;
+                                            }
+                                        }
+                                    }
+                                    if (newMappings > 0)
+                                    {
+                                        await unitWork.SaveAsync();
                                     }
                                 }
-                            }
-                            if (newMappings > 0)
-                            {
-                                await unitWork.SaveAsync();
                             }
 
                             project.DateUpdated = DateTime.Now;

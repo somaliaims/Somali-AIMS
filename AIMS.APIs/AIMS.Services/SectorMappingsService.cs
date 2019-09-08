@@ -136,7 +136,7 @@ namespace AIMS.Services
 
                 if (sectorType != null)
                 {
-                    var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => (m.SectorId == id && m.SectorTypeId == sectorType.Id));
+                    var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => (m.SectorId == id));
                     List<int> mappingIds = new List<int>();
                     if (mappings != null)
                     {
