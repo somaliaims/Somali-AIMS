@@ -875,6 +875,11 @@ namespace AIMS.Models
     {
         [Required]
         public int ProjectId { get; set; }
+        public List<ProjectLocation> ProjectLocations { get; set; }
+    }
+
+    public class ProjectLocation
+    {
         [Required]
         public int LocationId { get; set; }
         [Required]

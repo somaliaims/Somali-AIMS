@@ -268,14 +268,14 @@ namespace AIMS.APIs.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddProjectLocation")]
-        public IActionResult AddProjectLocation([FromBody] ProjectLocationModel model)
+        public async Task<IActionResult> AddProjectLocation([FromBody] ProjectLocationModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = projectService.AddProjectLocation(model);
+            var response = await projectService.AddProjectLocation(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

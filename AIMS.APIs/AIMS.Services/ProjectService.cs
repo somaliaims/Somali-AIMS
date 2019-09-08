@@ -146,7 +146,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name=""></param>
         /// <returns></returns>
-        ActionResponse AddProjectLocation(ProjectLocationModel model);
+        Task<ActionResponse> AddProjectLocation(ProjectLocationModel model);
 
         /// <summary>
         /// Adds sector to a project
@@ -1442,7 +1442,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddProjectLocation(ProjectLocationModel model)
+        public async Task<ActionResponse> AddProjectLocation(ProjectLocationModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -1458,30 +1458,64 @@ namespace AIMS.Services
                         response.Message = mHelper.GetNotFound("Project");
                         response.Success = false;
                     }
-                    var location = unitWork.LocationRepository.GetByID(model.LocationId);
-                    if (location == null)
+                    var locationIds = (from l in model.ProjectLocations
+                                       select l.LocationId).ToList<int>();
+                    var locations = unitWork.LocationRepository.GetManyQueryable(l => locationIds.Contains(l.Id));
+                    if (locations.Count() < locationIds.Count)
                     {
                         mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("Location");
+                        response.Message = mHelper.GetNotFound("Location/s");
                         response.Success = false;
                     }
 
-                    unitWork.ProjectLocationsRepository.Insert(new EFProjectLocations()
+
+                    var projectLocations = unitWork.ProjectLocationsRepository.GetManyQueryable(s => (s.ProjectId.Equals(model.ProjectId)));
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        Project = project,
-                        Location = location,
-                        FundsPercentage = model.FundsPercentage,
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            int newLocations = 0;
+                            foreach (var location in model.ProjectLocations)
+                            {
+                                var isProjectLocationExists = (from l in projectLocations
+                                                             where l.LocationId == location.LocationId && l.ProjectId == model.ProjectId
+                                                             select l).FirstOrDefault();
+                                if (isProjectLocationExists != null)
+                                {
+                                    isProjectLocationExists.FundsPercentage = location.FundsPercentage;
+                                    unitWork.ProjectLocationsRepository.Update(isProjectLocationExists);
+                                    await unitWork.SaveAsync();
+                                }
+                                else
+                                {
+                                    unitWork.ProjectLocationsRepository.Insert(new EFProjectLocations()
+                                    {
+                                        ProjectId = model.ProjectId,
+                                        LocationId = location.LocationId,
+                                        FundsPercentage = location.FundsPercentage
+                                    });
+                                    ++newLocations;
+                                }
+                            }
+
+                            if (newLocations > 0)
+                            {
+                                await unitWork.SaveAsync();
+                            }
+                            project.DateUpdated = DateTime.Now;
+                            unitWork.ProjectRepository.Update(project);
+                            await unitWork.SaveAsync();
+                            transaction.Commit();
+                        }
                     });
-                    project.DateUpdated = DateTime.Now;
-                    unitWork.ProjectRepository.Update(project);
-                    unitWork.Save();
                 }
                 catch (Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
                 }
-                return response;
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
 
@@ -1548,7 +1582,6 @@ namespace AIMS.Services
                     }
 
                     var projectSectors = unitWork.ProjectSectorsRepository.GetManyQueryable(s => (s.ProjectId.Equals(model.ProjectId)));
-
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
                     {
