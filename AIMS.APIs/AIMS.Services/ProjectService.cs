@@ -1504,6 +1504,24 @@ namespace AIMS.Services
                         response.Success = false;
                     }
 
+                    bool isError = false;
+                    foreach(var sector in model.ProjectSectors)
+                    {
+                        if (sector.SectorId == 0 && sector.MappingId == 0)
+                        {
+                            isError = true;
+                            break;
+                        }
+                    }
+
+                    if (isError)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetInvalidAttempt("Sector id");
+                        response.Success = false;
+                        return response;
+                    }
+
                     if (model.ProjectSectors.Any())
                     {
                         mappingIds = (from s in model.ProjectSectors
@@ -1518,8 +1536,11 @@ namespace AIMS.Services
                     var mappingSectors = (from s in allSectors
                                           where mappingIds.Contains(s.Id) && s.SectorType.IsPrimary == true
                                           select s);
+                    int sectorIdsCount = (from id in sectorIds
+                                          where id != 0
+                                          select id).Count();
 
-                    if (sectors.Count() < sectorIds.Count)
+                    if (sectors.Count() < sectorIdsCount)
                     {
                         mHelper = new MessageHelper();
                         response.Message = mHelper.GetNotFound("Sector/s");
@@ -1537,7 +1558,7 @@ namespace AIMS.Services
                             foreach (var sector in model.ProjectSectors)
                             {
                                 var isProjectSectorExists = (from s in projectSectors
-                                                             where s.SectorId == sector.SectorId && s.ProjectId == model.ProjectId
+                                                             where s.SectorId == sector.MappingId && s.ProjectId == model.ProjectId
                                                              select s).FirstOrDefault();
                                 if (isProjectSectorExists != null)
                                 {
@@ -1550,7 +1571,7 @@ namespace AIMS.Services
                                     unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
                                     {
                                         ProjectId = model.ProjectId,
-                                        SectorId = sector.SectorId,
+                                        SectorId = sector.MappingId,
                                         FundsPercentage = sector.FundsPercentage
                                     });
                                     ++newSectors;

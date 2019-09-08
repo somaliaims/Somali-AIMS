@@ -903,7 +903,7 @@ namespace AIMS.Models
         [Required]
         public int SectorId { get; set; }
         [Required]
-        public string SectorName { get; set; }
+        public string Sector { get; set; }
         [Required]
         public int MappingId { get; set; }
         [Required]
