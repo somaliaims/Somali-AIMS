@@ -85,7 +85,7 @@ namespace AIMS.Services
         /// <param name="dated"></param>
         /// <param name="currency"></param>
         /// <returns></returns>
-        Task<ExchangeRateForCurrency> GetAverageCurrencyRatesForDate(DateTime dated, string currency);
+        Task<IEnumerable<CurrencyWithRates>> GetAverageCurrencyRatesForDate(DateTime dated);
 
         /// <summary>
         /// Get apis calls count for current month
@@ -137,7 +137,40 @@ namespace AIMS.Services
                     });
                 }
                 unitWork.Save();
+                int year = dated.Year;
+                var exchangeRates = unitWork.ManualRatesRepository.GetManyQueryable(r => r.Year == year);
+                string defaultCurrency = unitWork.CurrencyRepository.GetProjection(c => c.IsDefault == true, c => c.Currency).FirstOrDefault();
+                if (exchangeRates.Any())
+                {
+                    int entriesUpdated = 0;
+                    foreach (var rate in exchangeRates)
+                    {
+                        string currency = rate.Currency;
+                        string rateDefaultCurrency = rate.DefaultCurrency;
+                        decimal newExRate = (from nRate in ratesList
+                                             where nRate.Currency == currency
+                                             select nRate.Rate).FirstOrDefault();
 
+                        if (rateDefaultCurrency == defaultCurrency)
+                        {
+                            if (newExRate > 0)
+                            {
+                                rate.ExchangeRate = ((rate.ExchangeRate + newExRate) / 2);
+                                unitWork.ManualRatesRepository.Update(rate);
+                                ++entriesUpdated;
+                            }
+                        }
+                        else
+                        {
+                            if (newExRate > 0)
+                            {
+                                rate.ExchangeRate = newExRate;
+                                unitWork.ManualRatesRepository.Update(rate);
+                                ++entriesUpdated;
+                            }
+                        }
+                    }
+                }
             }
             return response;
         }
@@ -217,10 +250,10 @@ namespace AIMS.Services
             return apiKey;
         }
 
-        public async Task<ExchangeRateForCurrency> GetAverageCurrencyRatesForDate(DateTime dated, string currency)
+        public async Task<IEnumerable<CurrencyWithRates>> GetAverageCurrencyRatesForDate(DateTime dated)
         {
             var unitWork = new UnitOfWork(context);
-            ExchangeRateForCurrency exRateForCurrency = new ExchangeRateForCurrency() { Currency = currency, Dated = dated.ToShortDateString(), ErrorMessage = null, IsError = false };
+            List<CurrencyWithRates> exchangeRates = new List<CurrencyWithRates>();
             try
             {
                 int dateYear = dated.Year;
@@ -242,78 +275,48 @@ namespace AIMS.Services
                     startDate = new DateTime(dateYear, fyStartingMonth, startingDayOfMonth);
                     endDate = new DateTime(proposedYear, fyEndingMonth, endingDayOfMonth);
                 }
-
-                var exRateUsageOrder = unitWork.ExRatesUsageRepository.GetManyQueryable(u => u.UsageSection == ExchangeRateUsageSection.DataEntry);
-                int orderForOpenExchange = 0, orderForCentralBank = 0;
-                if (exRateUsageOrder.Any())
+                IQueryable<EFManualExchangeRates> exRates = unitWork.ManualRatesRepository.GetManyQueryable(r => r.Year == dated.Year || r.Year == DateTime.Now.Year);
+                var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => c.Id != 0);
+                if (exRates.Any())
                 {
-                    orderForOpenExchange = (from u in exRateUsageOrder
-                                            where u.Source == ExchangeRateSources.OpenExchange
-                                            select u.Order).FirstOrDefault();
+                    foreach(var exRate in exRates)
+                    {
+                        string currencyName = (from cur in currencies
+                                               where cur.Currency.Equals(exRate.Currency)
+                                               select cur.CurrencyName).FirstOrDefault();
 
-                    orderForCentralBank = (from u in exRateUsageOrder
-                                           where u.Source == ExchangeRateSources.CentralBank
-                                           select u.Order).FirstOrDefault();
+                        exchangeRates.Add(new CurrencyWithRates()
+                        {
+                            Currency = exRate.Currency,
+                            CurrencyName = currencyName,
+                            Rate = exRate.ExchangeRate
+                        });
+                    }
                 }
-
-                if (orderForOpenExchange == 1 || orderForCentralBank > 1)
+                else
                 {
-                    var exRates = unitWork.ManualRatesRepository.GetManyQueryable(r => r.Year == dated.Year || r.Year == DateTime.Now.Year);
+                    exRates = unitWork.ManualRatesRepository.GetManyQueryable(e => e.Year >= startDate.Year);
                     if (exRates.Any())
                     {
-                        var rateForExactDate = (from r in exRates
-                                                where r.Year == dated.Year
-                                                select r).FirstOrDefault();
-
-                        if (rateForExactDate != null)
+                        foreach (var exRate in exRates)
                         {
-                            exRateForCurrency.ExchangeRate = rateForExactDate.ExchangeRate;
-                        }
-                        else
-                        {
-                            var rateForTodaysDate = (from r in exRates
-                                                     where r.Year == DateTime.Now.Year
-                                                     select r).FirstOrDefault();
-
-                            if (rateForTodaysDate != null)
+                            string currencyName = (from cur in currencies
+                                                   where cur.Currency.Equals(exRate.Currency)
+                                                   select cur.CurrencyName).FirstOrDefault();
+                            exchangeRates.Add(new CurrencyWithRates()
                             {
-                                exRateForCurrency.ExchangeRate = rateForTodaysDate.ExchangeRate;
-                            }
-                        }
-                    }
-                }
-
-                if (exRateForCurrency.ExchangeRate == 0)
-                {
-                    var exRates = unitWork.ManualRatesRepository.GetManyQueryable(e => e.Year >= startDate.Year);
-                    if (exRates.Any())
-                    {
-                        var exRateCalculated = (from rate in exRates
-                                            where (rate.Year > startDate.Year)
-                                            orderby rate.Year ascending
-                                            select rate).FirstOrDefault();
-
-                        if (exRateCalculated == null)
-                        {
-                            exRateCalculated = (from rate in exRates
-                                                where (rate.Year < startDate.Year)
-                                                orderby rate.Year descending
-                                                select rate).FirstOrDefault();
-                        }
-
-                        if (exRateCalculated != null)
-                        {
-                            exRateForCurrency.ExchangeRate = exRateCalculated.ExchangeRate;
+                                Currency = exRate.Currency,
+                                CurrencyName = currencyName,
+                                Rate = exRate.ExchangeRate
+                            });
                         }
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception)
             {
-                exRateForCurrency.IsError = true;
-                exRateForCurrency.ErrorMessage = ex.Message;
             }
-            return await Task<ExchangeRateForCurrency>.Run(() => exRateForCurrency).ConfigureAwait(false);
+            return await Task<ExchangeRateForCurrency>.Run(() => exchangeRates).ConfigureAwait(false);
         }
 
         public async Task<ExchangeRatesView> GetLatestCurrencyRates()

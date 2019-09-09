@@ -203,8 +203,6 @@ namespace AIMS.Models
     public class ExRateFinderModel
     {
         [Required]
-        public string Currency { get; set; }
-        [Required]
         public DateTime Dated { get; set; }
     }
 

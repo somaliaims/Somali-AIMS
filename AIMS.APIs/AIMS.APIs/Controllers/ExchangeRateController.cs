@@ -79,12 +79,8 @@ namespace AIMS.APIs.Controllers
                 }
             }
 
-            var response = await ratesService.GetAverageCurrencyRatesForDate(model.Dated, model.Currency);
-            if (response.IsError)
-            {
-                return BadRequest(response.ErrorMessage);
-            }
-            return Ok(response);
+            var rates = await ratesService.GetAverageCurrencyRatesForDate(model.Dated);
+            return Ok(rates);
         }
 
         [HttpGet("GetManualExchangeRates")]
