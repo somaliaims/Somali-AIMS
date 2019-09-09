@@ -170,6 +170,11 @@ namespace AIMS.Services
                             }
                         }
                     }
+
+                    if (entriesUpdated > 0)
+                    {
+                        unitWork.Save();
+                    }
                 }
             }
             return response;

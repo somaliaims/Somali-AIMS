@@ -580,6 +580,7 @@ namespace AIMS.Services
                         profileView.FundingType = project.FundingType.FundingType;
                         profileView.ProjectValue = project.ProjectValue;
                         profileView.ProjectCurrency = project.ProjectCurrency;
+                        profileView.ExchangeRate = project.ExchangeRate;
                         profileView.Description = project.Description;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();

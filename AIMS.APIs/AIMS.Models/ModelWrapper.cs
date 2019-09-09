@@ -787,6 +787,7 @@ namespace AIMS.Models
         public string EndingFinancialYear { get; set; }
         public decimal ProjectValue { get; set; }
         public string ProjectCurrency { get; set; }
+        public decimal ExchangeRate { get; set; }
         public decimal ActualDisbursements { get; set; }
         public decimal PlannedDisbursements { get; set; }
         public ICollection<ProjectFunderView> Funders { get; set; }
