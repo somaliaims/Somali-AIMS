@@ -856,7 +856,7 @@ namespace AIMS.Models
     /// </summary>
     public class ProjectLocationView
     {
-        public int Id { get; set; }
+        public int LocationId { get; set; }
         public string Project { get; set; }
         public string Location { get; set; }
         public decimal FundsPercentage { get; set; }
@@ -864,7 +864,7 @@ namespace AIMS.Models
 
     public class ProjectLocationDetailView
     {
-        public int Id { get; set; }
+        public int LocationId { get; set; }
         public string Location { get; set; }
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }

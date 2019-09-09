@@ -268,7 +268,7 @@ namespace AIMS.Services
                             if (project.Locations != null)
                             {
                                 locationPercentage = (from l in project.Locations
-                                                      where l.Id == currentLocationId
+                                                      where l.LocationId == currentLocationId
                                                       select l.FundsPercentage).FirstOrDefault();
 
                                 projectTotalPercentage += Convert.ToInt32(locationPercentage);
@@ -285,7 +285,7 @@ namespace AIMS.Services
                             if (project.Locations != null)
                             {
                                 locationPercentage = (from l in project.Locations
-                                                      where l.Id == currentLocationId
+                                                      where l.LocationId == currentLocationId
                                                       select l.FundsPercentage).FirstOrDefault();
                                 if (project.Disbursements.Count() > 0)
                                 {

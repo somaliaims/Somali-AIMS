@@ -1483,7 +1483,7 @@ namespace AIMS.Services
                                                              select l).FirstOrDefault();
                                 if (isProjectLocationExists != null)
                                 {
-                                    isProjectLocationExists.FundsPercentage = location.FundsPercentage;
+                                    isProjectLocationExists.FundsPercentage += location.FundsPercentage;
                                     unitWork.ProjectLocationsRepository.Update(isProjectLocationExists);
                                     await unitWork.SaveAsync();
                                 }
@@ -1595,7 +1595,7 @@ namespace AIMS.Services
                                                              select s).FirstOrDefault();
                                 if (isProjectSectorExists != null)
                                 {
-                                    isProjectSectorExists.FundsPercentage = sector.FundsPercentage;
+                                    isProjectSectorExists.FundsPercentage += sector.FundsPercentage;
                                     unitWork.ProjectSectorsRepository.Update(isProjectSectorExists);
                                     await unitWork.SaveAsync();
                                 }
