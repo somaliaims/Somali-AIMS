@@ -578,6 +578,9 @@ namespace AIMS.Services
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
+                        profileView.ProjectCurrency = project.ProjectCurrency;
+                        profileView.ProjectValue = project.ProjectValue;
+                        profileView.ExchangeRate = project.ExchangeRate;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
@@ -671,29 +674,22 @@ namespace AIMS.Services
                                                            select d).ToList();
                                     }
 
-                                    decimal projectDisbursements = Math.Round(project.Disbursements.Select(d => (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
-                                    totalDisbursements += projectDisbursements;
-                                    totalDisbursements = Math.Round(totalDisbursements, MidpointRounding.AwayFromZero);
-                                    UtilityHelper helper = new UtilityHelper();
+                                    decimal actualDisbursements = (from d in project.Disbursements
+                                                                   where d.DisbursementType == DisbursementTypes.Actual
+                                                                   select (d.Amount * d.ExchangeRate)).FirstOrDefault();
+                                    decimal plannedDisbursements = (from d in project.Disbursements
+                                                                    where d.DisbursementType == DisbursementTypes.Planned
+                                                                    select (d.Amount * d.ExchangeRate)).FirstOrDefault();
+                                    totalDisbursements = (actualDisbursements + plannedDisbursements);
 
-                                    if (projectDisbursements == 0)
-                                    {
-                                        project.ActualDisbursements = 0;
-                                    }
-                                    else
-                                    {
-                                        project.ActualDisbursements = Math.Round(((projectDisbursements / 100) * sectorPercentage), MidpointRounding.AwayFromZero);
-                                    }
-                                    project.PlannedDisbursements = Math.Round(((project.ProjectValue - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
+                                    UtilityHelper helper = new UtilityHelper();
+                                    project.ActualDisbursements = Math.Round(((actualDisbursements / 100) * sectorPercentage), MidpointRounding.AwayFromZero);
+                                    project.PlannedDisbursements = Math.Round(((plannedDisbursements / 100) * sectorPercentage), MidpointRounding.AwayFromZero);
                                     if (project.PlannedDisbursements < 0)
                                     {
                                         project.PlannedDisbursements = 0;
                                     }
                                     totalDisbursementsPercentage += project.ActualDisbursements;
-                                }
-                                else
-                                {
-                                    project.PlannedDisbursements = Math.Round(((project.ProjectValue - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
                                 }
                             }
                         }
