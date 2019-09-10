@@ -43,7 +43,7 @@ namespace AIMS.Services
         /// <param name="exchangeRate"></param>
         /// <returns></returns>
         Task<TimeSeriesReportByYear> GetProjectsByYear(SearchProjectsByYearModel model, string reportUrl, string defaultCurrency, decimal exchangeRate);
-        
+
         /// <summary>
         /// Gets lighter version of projects budget report
         /// </summary>
@@ -87,7 +87,7 @@ namespace AIMS.Services
                 var projects = unitWork.ProjectRepository.GetWithInclude(p => p.EndingFinancialYear.FinancialYear >= DateTime.Now.Year, new string[] { "EndingFinancialYear", "Disbursements" })
                     .OrderByDescending(p => p.DateUpdated).Take(10);
 
-                foreach(var project in projects)
+                foreach (var project in projects)
                 {
                     var disbursements = (from p in project.Disbursements
                                          select (p.Amount * p.ExchangeRate)).Sum();
@@ -144,7 +144,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.EndingFinancialYear.FinancialYear <= model.EndingYear)),
-                            new string[] { "StartingFinancialYear","EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -304,11 +304,11 @@ namespace AIMS.Services
 
 
                                     decimal actualDisbursements = ((((from d in project.Disbursements
-                                                            where d.DisbursementType == DisbursementTypes.Actual
-                                                            select d.Amount).Sum()) / 100) * locationPercentage);
-                                    decimal plannedDisbursements = ((((from d in project.Disbursements
-                                                                      where d.DisbursementType == DisbursementTypes.Planned
+                                                                      where d.DisbursementType == DisbursementTypes.Actual
                                                                       select d.Amount).Sum()) / 100) * locationPercentage);
+                                    decimal plannedDisbursements = ((((from d in project.Disbursements
+                                                                       where d.DisbursementType == DisbursementTypes.Planned
+                                                                       select d.Amount).Sum()) / 100) * locationPercentage);
 
                                     totalDisbursements += actualDisbursements;
 
@@ -373,7 +373,7 @@ namespace AIMS.Services
                     List<ProjectBudgetSummaryView> projectBudgetsList = new List<ProjectBudgetSummaryView>();
 
                     projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndingFinancialYear.FinancialYear >= currentYear,
-                            new string[] { "StartingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Disbursements" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Disbursements" });
 
                     projectProfileList = (from p in projectProfileList
                                           orderby p.DateUpdated descending
@@ -401,8 +401,8 @@ namespace AIMS.Services
                             projectCost = project.ProjectValue;
                             yearsLeft = upperYearLimit - year;
                             decimal yearDisbursements = Math.Round((from d in project.Disbursements
-                                                         where d.Year.FinancialYear == year
-                                                         select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
+                                                                    where d.Year.FinancialYear == year
+                                                                    select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
 
                             if (year < currentYear)
                             {
@@ -434,7 +434,7 @@ namespace AIMS.Services
                             });
 
                             var yearExists = (from s in totalDisbursementsSummaryList
-                                                where s.Year == year
+                                              where s.Year == year
                                               select s).FirstOrDefault();
 
                             if (yearExists == null)
@@ -456,7 +456,7 @@ namespace AIMS.Services
                         projectBudget.DisbursementsBreakup = disbursementsBreakup;
                         projectBudgetsList.Add(projectBudget);
                     }
-                    foreach(var total in totalDisbursementsSummaryList)
+                    foreach (var total in totalDisbursementsSummaryList)
                     {
                         total.TotalDisbursements = Math.Round(total.TotalDisbursements, MidpointRounding.AwayFromZero);
                         total.TotalExpectedDisbursements = Math.Round(total.TotalExpectedDisbursements, MidpointRounding.AwayFromZero);
@@ -661,15 +661,15 @@ namespace AIMS.Services
                                     if (model.StartingYear >= 2000)
                                     {
                                         project.Disbursements = (from d in project.Disbursements
-                                                           where d.Year >= model.StartingYear
-                                                           select d).ToList();
+                                                                 where d.Year >= model.StartingYear
+                                                                 select d).ToList();
                                     }
 
                                     if (model.EndingYear >= 2000)
                                     {
                                         project.Disbursements = (from d in project.Disbursements
-                                                           where d.Year <= model.EndingYear
-                                                           select d).ToList();
+                                                                 where d.Year <= model.EndingYear
+                                                                 select d).ToList();
                                     }
 
                                     decimal actualDisbursements = (from d in project.Disbursements
@@ -756,7 +756,7 @@ namespace AIMS.Services
                     if (!string.IsNullOrEmpty(model.Title))
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase),
-                            new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     if (model.StartingYear >= 2000 && model.EndingYear >= 2000)
@@ -764,7 +764,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.EndingFinancialYear.FinancialYear >= model.StartingYear || p.EndingFinancialYear.FinancialYear <= model.EndingYear)),
-                            new string[] { "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -828,7 +828,7 @@ namespace AIMS.Services
                     {
                         financialYears = unitWork.FinancialYearRepository.GetProjection(y => (y.FinancialYear != 0), y => y.FinancialYear);
                     }
-                    
+
 
                     List<ProjectProfileView> projectsList = new List<ProjectProfileView>();
                     foreach (var project in projectProfileList)
@@ -837,6 +837,9 @@ namespace AIMS.Services
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
+                        profileView.ProjectValue = project.ProjectValue;
+                        profileView.ProjectCurrency = project.ProjectCurrency;
+                        profileView.ExchangeRate = project.ExchangeRate;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
@@ -855,8 +858,8 @@ namespace AIMS.Services
                     foreach (var yr in financialYears)
                     {
                         var isYearExists = (from y in yearProjects
-                                                where y.Equals(yr)
-                                                select y).FirstOrDefault();
+                                            where y.Equals(yr)
+                                            select y).FirstOrDefault();
 
                         if (isYearExists == null)
                         {
@@ -864,7 +867,7 @@ namespace AIMS.Services
                             {
                                 Year = yr,
                                 Projects = (from p in projectProfileList
-                                            where p.StartingFinancialYear.FinancialYear == yr
+                                            where p.StartingFinancialYear.FinancialYear >= yr || p.EndingFinancialYear.FinancialYear >= yr
                                             select p.Id).ToList<int>()
                             });
                         }
@@ -878,42 +881,35 @@ namespace AIMS.Services
                         projectsViewForYear = new List<ProjectViewForYear>();
                         var projectIds = yearProject.Projects;
                         var yearlyProjectsProfile = (from project in projectsList
-                                              where projectIds.Contains(project.Id)
-                                              select project).ToList<ProjectProfileView>();
+                                                     where projectIds.Contains(project.Id)
+                                                     select project).ToList<ProjectProfileView>();
 
-                        decimal totalFunding = 0, totalDisbursements = 0;
+                        decimal totalFunding = 0, totalDisbursements = 0, totalProjectValue = 0, totalPlannedDisbursements = 0;
                         foreach (var project in yearlyProjectsProfile)
                         {
+                            totalProjectValue += project.ProjectValue;
                             //Disbursements
                             if (project.Disbursements.Count() > 0)
                             {
-                                if (model.StartingYear >= 2000)
-                                {
-                                    project.Disbursements = (from d in project.Disbursements
-                                                       where d.Year >= model.StartingYear
-                                                       select d).ToList();
-                                }
+                                var disbursements = (from d in project.Disbursements
+                                                         select d).ToList();
 
-                                if (model.EndingYear >= 2000)
-                                {
-                                    project.Disbursements = (from d in project.Disbursements
-                                                       where d.Year <= model.EndingYear
-                                                       select d).ToList();
-                                }
-                                decimal projectDisbursements = Math.Round(project.Disbursements.Select(d => (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
+                                decimal projectDisbursements = Math.Round((from d in disbursements
+                                                                           where d.DisbursementType == DisbursementTypes.Actual && d.Year == currentYearId
+                                                                           select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
+                                decimal plannedDisbursements = Math.Round((from d in disbursements
+                                                                           where d.DisbursementType == DisbursementTypes.Planned && d.Year == currentYearId
+                                                                           select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
                                 totalDisbursements += projectDisbursements;
-                                totalDisbursements = Math.Round(totalDisbursements, MidpointRounding.AwayFromZero);
                                 UtilityHelper helper = new UtilityHelper();
                                 project.ActualDisbursements = projectDisbursements;
-                                project.PlannedDisbursements = Math.Round(((project.ProjectValue - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
+                                project.PlannedDisbursements = plannedDisbursements;
                                 if (project.PlannedDisbursements < 0)
                                 {
                                     project.PlannedDisbursements = 0;
                                 }
-                            }
-                            else
-                            {
-                                project.PlannedDisbursements = Math.Round(((project.ProjectValue - project.ActualDisbursements)), MidpointRounding.AwayFromZero);
+                                totalFunding += (project.ActualDisbursements + project.PlannedDisbursements);
+                                totalPlannedDisbursements += project.PlannedDisbursements;
                             }
 
                             projectsViewForYear.Add(new ProjectViewForYear()
@@ -934,6 +930,8 @@ namespace AIMS.Services
                             projectsByYear.Year = currentYearId;
                             projectsByYear.TotalFunding = totalFunding;
                             projectsByYear.TotalDisbursements = totalDisbursements;
+                            projectsByYear.TotalProjectValue = totalProjectValue;
+                            projectsByYear.TotalPlannedDisbursements = totalPlannedDisbursements;
                             projectsByYear.Projects = projectsViewForYear;
                             projectsListForYear.Add(projectsByYear);
                         }

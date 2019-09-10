@@ -1416,8 +1416,10 @@ namespace AIMS.Models
     public class ProjectsByYear
     {
         public int Year { get; set; }
+        public decimal TotalProjectValue { get; set; }
         public decimal TotalFunding { get; set; }
         public decimal TotalDisbursements { get; set; }
+        public decimal TotalPlannedDisbursements { get; set; }
         public IEnumerable<ProjectViewForYear> Projects { get; set; }
     }
 
