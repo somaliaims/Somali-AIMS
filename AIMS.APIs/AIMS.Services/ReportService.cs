@@ -274,8 +274,8 @@ namespace AIMS.Services
                                                       select l.FundsPercentage).FirstOrDefault();
 
                                 projectTotalPercentage += Convert.ToInt32(locationPercentage);
-                                decimal projectValue = Math.Round(((project.ProjectValue / 100) * locationPercentage), MidpointRounding.AwayFromZero);
-                                totalFundingPercentage += projectValue;
+                                project.ProjectPercentValue = Math.Round(((project.ProjectValue / 100) * locationPercentage), MidpointRounding.AwayFromZero);
+                                totalFundingPercentage += project.ProjectPercentValue;
                             }
                         }
 
@@ -330,6 +330,7 @@ namespace AIMS.Services
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
                                 ProjectValue = project.ProjectValue,
+                                ProjectPercentValue = project.ProjectPercentValue,
                                 ActualDisbursements = project.ActualDisbursements,
                                 PlannedDisbursements = project.PlannedDisbursements,
                             });
@@ -642,8 +643,8 @@ namespace AIMS.Services
 
                                 if (project.Funders.Count() > 0)
                                 {
-                                    project.ProjectValue = Math.Round(((project.ProjectValue / 100) * sectorPercentage), MidpointRounding.AwayFromZero);
-                                    totalFundingPercentage += project.ProjectValue;
+                                    project.ProjectPercentValue = Math.Round(((project.ProjectValue / 100) * sectorPercentage), MidpointRounding.AwayFromZero);
+                                    totalFundingPercentage += project.ProjectPercentValue;
                                 }
                             }
                         }
@@ -701,6 +702,7 @@ namespace AIMS.Services
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
                                 ProjectValue = project.ProjectValue,
+                                ProjectPercentValue = project.ProjectPercentValue,
                                 ActualDisbursements = project.ActualDisbursements,
                                 PlannedDisbursements = project.PlannedDisbursements,
                             });

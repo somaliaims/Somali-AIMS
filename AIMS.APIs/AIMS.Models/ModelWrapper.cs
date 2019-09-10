@@ -786,6 +786,7 @@ namespace AIMS.Models
         public string StartingFinancialYear { get; set; }
         public string EndingFinancialYear { get; set; }
         public decimal ProjectValue { get; set; }
+        public decimal ProjectPercentValue { get; set; }
         public string ProjectCurrency { get; set; }
         public decimal ExchangeRate { get; set; }
         public decimal ActualDisbursements { get; set; }
@@ -1492,6 +1493,7 @@ namespace AIMS.Models
         public string StartingFinancialYear { get; set; }
         public string EndingFinancialYear { get; set; }
         public decimal ProjectValue { get; set; }
+        public decimal ProjectPercentValue { get; set; }
         public decimal ActualDisbursements { get; set; }
         public decimal PlannedDisbursements { get; set; }
     }
@@ -1504,6 +1506,7 @@ namespace AIMS.Models
         public string StartingFinancialYear { get; set; }
         public string EndingFinancialYear { get; set; }
         public decimal ProjectValue { get; set; }
+        public decimal ProjectPercentValue { get; set; }
         public decimal ActualDisbursements { get; set; }
         public decimal PlannedDisbursements { get; set; }
     }
