@@ -354,6 +354,10 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                if (exchangeRate == 0)
+                {
+                    exchangeRate = 1;
+                }
                 ProjectsBudgetReportSummary budgetReport = new ProjectsBudgetReportSummary();
                 IQueryable<EFProject> projectProfileList = null;
                 try
@@ -389,6 +393,7 @@ namespace AIMS.Services
                         int projectStartYear = project.StartingFinancialYear.FinancialYear;
                         projectBudget.Id = project.Id;
                         projectBudget.Title = project.Title;
+                       
                         List<ProjectDisbursements> disbursementsList = new List<ProjectDisbursements>();
                         decimal projectCost = 0;
 
@@ -398,25 +403,17 @@ namespace AIMS.Services
                         ++upperYearLimit;
                         for (int year = (currentYear - 1); year < upperYearLimit; year++)
                         {
-                            projectCost = project.ProjectValue;
+                            decimal projectExchangeRate = (project.ExchangeRate == 0) ? 1 : project.ExchangeRate;
+                            projectCost = (project.ProjectValue * (exchangeRate / projectExchangeRate));
                             yearsLeft = upperYearLimit - year;
                             decimal yearDisbursements = Math.Round((from d in project.Disbursements
-                                                                    where d.Year.FinancialYear == year
+                                                                    where d.Year.FinancialYear == year && d.DisbursementType == DisbursementTypes.Actual
                                                                     select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
 
-                            if (year < currentYear)
-                            {
-                                expectedDisbursements = 0;
-                            }
-                            else
-                            {
-                                actualDisbursements += yearDisbursements;
-                                expectedDisbursements = yearsLeft > 0 ? (Math.Round((projectCost - actualDisbursements) / yearsLeft)) : (projectCost - actualDisbursements);
-                                if (expectedDisbursements < 0)
-                                {
-                                    expectedDisbursements = 0;
-                                }
-                            }
+                            actualDisbursements += yearDisbursements;
+                            expectedDisbursements = Math.Round((from d in project.Disbursements
+                                                                where d.Year.FinancialYear == year && d.DisbursementType == DisbursementTypes.Planned
+                                                                select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
 
                             disbursements = yearDisbursements + expectedDisbursements;
                             actualDisbursements += expectedDisbursements;
@@ -476,6 +473,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                exchangeRate = (exchangeRate == 0) ? 1 : exchangeRate;
                 ProjectProfileReportBySector sectorProjectsReport = new ProjectProfileReportBySector();
                 try
                 {
@@ -572,12 +570,13 @@ namespace AIMS.Services
                     List<ProjectProfileView> projectsList = new List<ProjectProfileView>();
                     foreach (var project in projectProfileList)
                     {
+                        decimal projectExchangeRate = (project.ExchangeRate == 0) ? 1 : project.ExchangeRate;
                         ProjectProfileView profileView = new ProjectProfileView();
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
                         profileView.ProjectCurrency = project.ProjectCurrency;
-                        profileView.ProjectValue = project.ProjectValue;
+                        profileView.ProjectValue = (project.ProjectValue * (exchangeRate / projectExchangeRate));
                         profileView.ExchangeRate = project.ExchangeRate;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
@@ -701,7 +700,7 @@ namespace AIMS.Services
                                 EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
-                                ProjectValue = project.ProjectValue,
+                                ProjectValue = (project.ProjectValue * (exchangeRate / project.ExchangeRate)),
                                 ProjectPercentValue = project.ProjectPercentValue,
                                 ActualDisbursements = project.ActualDisbursements,
                                 PlannedDisbursements = project.PlannedDisbursements,
@@ -837,7 +836,7 @@ namespace AIMS.Services
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
-                        profileView.ProjectValue = project.ProjectValue;
+                        profileView.ProjectValue = (project.ProjectValue * (exchangeRate / project.ExchangeRate));
                         profileView.ProjectCurrency = project.ProjectCurrency;
                         profileView.ExchangeRate = project.ExchangeRate;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
@@ -887,7 +886,7 @@ namespace AIMS.Services
                         decimal totalFunding = 0, totalDisbursements = 0, totalProjectValue = 0, totalPlannedDisbursements = 0;
                         foreach (var project in yearlyProjectsProfile)
                         {
-                            totalProjectValue += project.ProjectValue;
+                            totalProjectValue += (project.ProjectValue * (exchangeRate / project.ExchangeRate));
                             //Disbursements
                             if (project.Disbursements.Count() > 0)
                             {
@@ -919,7 +918,7 @@ namespace AIMS.Services
                                 EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
-                                ProjectValue = project.ProjectValue,
+                                ProjectValue = (project.ProjectValue * (exchangeRate / project.ExchangeRate)),
                                 ActualDisbursements = project.ActualDisbursements,
                                 PlannedDisbursements = project.PlannedDisbursements,
                             });

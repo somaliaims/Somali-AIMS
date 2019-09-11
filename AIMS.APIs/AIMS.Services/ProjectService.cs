@@ -1954,9 +1954,9 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    decimal projectValue = project.ProjectValue;
+                    decimal projectValue = (project.ProjectValue * project.ExchangeRate);
                     decimal totalDisbursements = (from d in model.YearlyDisbursements
-                                                select (d.Amount * (1 / model.ExchangeRate))).Sum();
+                                                select (d.Amount * model.ExchangeRate)).Sum();
 
                     if (totalDisbursements > projectValue)
                     {
