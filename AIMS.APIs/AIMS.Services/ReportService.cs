@@ -106,6 +106,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                exchangeRate = (exchangeRate == 0) ? 1 : exchangeRate;
                 ProjectProfileReportByLocation locationProjectsReport = new ProjectProfileReportByLocation();
                 try
                 {
@@ -203,12 +204,13 @@ namespace AIMS.Services
                     List<ProjectProfileView> projectsList = new List<ProjectProfileView>();
                     foreach (var project in projectProfileList)
                     {
+                        decimal projectExchangeRate = (project.ExchangeRate == 0) ? 1 : project.ExchangeRate;
                         ProjectProfileView profileView = new ProjectProfileView();
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.ProjectValue = project.ProjectValue;
                         profileView.ProjectCurrency = project.ProjectCurrency;
-                        profileView.ExchangeRate = project.ExchangeRate;
+                        profileView.ExchangeRate = projectExchangeRate;
                         profileView.Description = project.Description;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
@@ -577,7 +579,7 @@ namespace AIMS.Services
                         profileView.Description = project.Description;
                         profileView.ProjectCurrency = project.ProjectCurrency;
                         profileView.ProjectValue = (project.ProjectValue * (exchangeRate / projectExchangeRate));
-                        profileView.ExchangeRate = project.ExchangeRate;
+                        profileView.ExchangeRate = projectExchangeRate;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
@@ -693,6 +695,7 @@ namespace AIMS.Services
 
                         foreach (var project in sectorProjects)
                         {
+                            decimal projectExchangeRate = (project.ExchangeRate == 0) ? 1 : project.ExchangeRate;
                             projectsListForSector.Add(new ProjectViewForSector()
                             {
                                 Title = project.Title,
@@ -700,7 +703,7 @@ namespace AIMS.Services
                                 EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
-                                ProjectValue = (project.ProjectValue * (exchangeRate / project.ExchangeRate)),
+                                ProjectValue = (project.ProjectValue * (exchangeRate / projectExchangeRate)),
                                 ProjectPercentValue = project.ProjectPercentValue,
                                 ActualDisbursements = project.ActualDisbursements,
                                 PlannedDisbursements = project.PlannedDisbursements,
@@ -832,13 +835,14 @@ namespace AIMS.Services
                     List<ProjectProfileView> projectsList = new List<ProjectProfileView>();
                     foreach (var project in projectProfileList)
                     {
+                        decimal projectExchangeRate = (project.ExchangeRate == 0) ? 1 : project.ExchangeRate;
                         ProjectProfileView profileView = new ProjectProfileView();
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
-                        profileView.ProjectValue = (project.ProjectValue * (exchangeRate / project.ExchangeRate));
+                        profileView.ProjectValue = (project.ProjectValue * (exchangeRate / projectExchangeRate));
                         profileView.ProjectCurrency = project.ProjectCurrency;
-                        profileView.ExchangeRate = project.ExchangeRate;
+                        profileView.ExchangeRate = projectExchangeRate;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
