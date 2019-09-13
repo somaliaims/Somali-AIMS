@@ -1701,19 +1701,55 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    foreach(string funder in model.Funders)
+                    try
                     {
-                        var isOrganizationInDB = (from org in organizations
-                                                  where org.OrganizationName.Equals(funder, StringComparison.OrdinalIgnoreCase)
-                                                  select org).FirstOrDefault();
-
-                        if (isOrganizationInDB == null)
+                        List<EFProjectFunders> newFundersList = new List<EFProjectFunders>();
+                        foreach (string funder in model.Funders)
                         {
-                            isOrganizationInDB = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                            var defaultOrganizationType = unitWork.OrganizationTypesRepository.GetOne(o => o.TypeName == "Default");
+                            if (defaultOrganizationType == null)
                             {
-                                OrganizationName = funder,
-                            });
+                                defaultOrganizationType = unitWork.OrganizationTypesRepository.Insert(new EFOrganizationTypes() { TypeName = "Default" });
+                                unitWork.Save();
+                            }
+                            var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.ProjectId == project.Id);
+                            var isOrganizationInDB = (from org in organizations
+                                                      where org.OrganizationName.Equals(funder, StringComparison.OrdinalIgnoreCase)
+                                                      select org).FirstOrDefault();
+
+                            if (isOrganizationInDB == null)
+                            {
+                                isOrganizationInDB = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                {
+                                    OrganizationType = defaultOrganizationType,
+                                    OrganizationName = funder,
+                                });
+                                unitWork.Save();
+                            }
+
+                            var isFunderInDB = (from f in projectFunders
+                                                where f.ProjectId == project.Id && f.FunderId == isOrganizationInDB.Id
+                                                select f).FirstOrDefault();
+                            var isFunderInList = (from f in newFundersList
+                                                  where f.ProjectId == project.Id && f.FunderId == isOrganizationInDB.Id
+                                                  select f).FirstOrDefault();
+
+                            if (isFunderInDB == null && isFunderInList == null)
+                            {
+                                newFundersList.Add(new EFProjectFunders() { ProjectId = project.Id, FunderId = isOrganizationInDB.Id });
+                            }
                         }
+
+                        if (newFundersList.Count > 0)
+                        {
+                            unitWork.ProjectFundersRepository.InsertMultiple(newFundersList);
+                            unitWork.Save();
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        response.Success = false;
+                        response.Message = ex.Message;
                     }
                 }
                 return response;

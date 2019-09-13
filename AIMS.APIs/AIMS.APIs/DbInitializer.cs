@@ -73,6 +73,11 @@ namespace AIMS.APIs
                     context.SaveChanges();
                 }
 
+                if (context.OrganizationTypes.Count() == 0)
+                {
+                    context.OrganizationTypes.Add(new EFOrganizationTypes() { TypeName = "Default" });
+                }
+
                 if (context.FinancialYears.Count() == 0)
                 {
                     context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2015 });
