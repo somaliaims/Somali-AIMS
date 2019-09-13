@@ -851,6 +851,14 @@ namespace AIMS.Models
         public List<int> FunderIds { get; set; }
     }
 
+    public class ProjectFunderSourceModel
+    {
+        [Required]
+        public int ProjectId { get; set; }
+        [Required]
+        public List<string> Funders { get; set; }
+    }
+
     /// <summary>
     /// Project locations models
     /// </summary>

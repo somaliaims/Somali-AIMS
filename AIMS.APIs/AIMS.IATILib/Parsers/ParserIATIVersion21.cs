@@ -416,6 +416,7 @@ namespace AIMS.IATILib.Parsers
                         {
                             foreach (var budget in budgets)
                             {
+                                string budgetType = (budget.Attribute("type")?.Value == "1") ? "Original" : "Revised";
                                 string budgetStartDate = budget.Element("period-start").Attribute("iso-date")?.Value;
                                 string budgetEndDate = budget.Element("period-end").Attribute("iso-date")?.Value;
                                 string budgetAmountStr = budget.Element("value")?.Value;
@@ -442,6 +443,7 @@ namespace AIMS.IATILib.Parsers
                                     budgetsList.Add(new IATIBudget()
                                     {
                                         Id = budgetCounter,
+                                        budgetType = budgetType,
                                         StartDate = budgetStartDate,
                                         EndDate = budgetEndDate,
                                         Currency = budgetCurrency,

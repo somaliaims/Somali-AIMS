@@ -163,6 +163,14 @@ namespace AIMS.Services
         ActionResponse AddProjectFunder(ProjectFunderModel model, int userOrganizationId);
 
         /// <summary>
+        /// Adds funder to a project with the logic from source
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="userOrganizationId"></param>
+        /// <returns></returns>
+        ActionResponse AddProjectFunderFromSource(ProjectFunderSourceModel model, int userOrganizationId);
+
+        /// <summary>
         /// Adds implementer to a project
         /// </summary>
         /// <param name="model"></param>
@@ -1672,6 +1680,43 @@ namespace AIMS.Services
                     response.Message = ex.Message;
                 }
                 return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+            }
+        }
+
+        public ActionResponse AddProjectFunderFromSource(ProjectFunderSourceModel model, int userOrganizationId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
+                if (model.Funders.Count() > 0)
+                {
+                    var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
+                    if (project == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Project");
+                        return response;
+                    }
+
+                    foreach(string funder in model.Funders)
+                    {
+                        var isOrganizationInDB = (from org in organizations
+                                                  where org.OrganizationName.Equals(funder, StringComparison.OrdinalIgnoreCase)
+                                                  select org).FirstOrDefault();
+
+                        if (isOrganizationInDB == null)
+                        {
+                            isOrganizationInDB = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                            {
+                                OrganizationName = funder,
+                            });
+                        }
+                    }
+                }
+                return response;
             }
         }
 

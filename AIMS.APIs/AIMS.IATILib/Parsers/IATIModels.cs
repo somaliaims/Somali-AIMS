@@ -150,6 +150,7 @@ namespace AIMS.IATILib.Parsers
         public string DefaultCurrency { get; set; }
         public string DefaultFinanceType { get; set; }
         public string Title { get; set; }
+        public string ProjectValue { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public string TrimmedTitle { get; set; }
@@ -175,6 +176,7 @@ namespace AIMS.IATILib.Parsers
     public class IATIBudget
     {
         public int Id { get; set; }
+        public string budgetType { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public decimal Amount { get; set; }
