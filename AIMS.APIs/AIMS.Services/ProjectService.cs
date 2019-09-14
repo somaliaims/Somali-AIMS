@@ -171,6 +171,14 @@ namespace AIMS.Services
         ActionResponse AddProjectFunderFromSource(ProjectFunderSourceModel model, int userOrganizationId);
 
         /// <summary>
+        /// Adds implementer to a project with the logic from souce
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="userOrganizationId"></param>
+        /// <returns></returns>
+        ActionResponse AddProjectImplementerFromSource(ProjectImplementerSourceModel model, int userOrganizationId);
+
+        /// <summary>
         /// Adds implementer to a project
         /// </summary>
         /// <param name="model"></param>
@@ -861,7 +869,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id), new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers.Marker" });
+                var projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ids.Contains(p.Id), new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers.Marker" });
                 List<ProjectProfileView> profileViewList = new List<ProjectProfileView>();
 
                 if (projectProfileList != null)
@@ -1747,6 +1755,79 @@ namespace AIMS.Services
                         }
                     }
                     catch(Exception ex)
+                    {
+                        response.Success = false;
+                        response.Message = ex.Message;
+                    }
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddProjectImplementerFromSource(ProjectImplementerSourceModel model, int userOrganizationId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
+                if (model.Implementers.Count() > 0)
+                {
+                    var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
+                    if (project == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Project");
+                        return response;
+                    }
+
+                    try
+                    {
+                        List<EFProjectImplementers> newImplementersList = new List<EFProjectImplementers>();
+                        foreach (string funder in model.Implementers)
+                        {
+                            var defaultOrganizationType = unitWork.OrganizationTypesRepository.GetOne(o => o.TypeName == "Default");
+                            if (defaultOrganizationType == null)
+                            {
+                                defaultOrganizationType = unitWork.OrganizationTypesRepository.Insert(new EFOrganizationTypes() { TypeName = "Default" });
+                                unitWork.Save();
+                            }
+                            var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(f => f.ProjectId == project.Id);
+                            var isOrganizationInDB = (from org in organizations
+                                                      where org.OrganizationName.Equals(funder, StringComparison.OrdinalIgnoreCase)
+                                                      select org).FirstOrDefault();
+
+                            if (isOrganizationInDB == null)
+                            {
+                                isOrganizationInDB = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                {
+                                    OrganizationType = defaultOrganizationType,
+                                    OrganizationName = funder,
+                                });
+                                unitWork.Save();
+                            }
+
+                            var isImplementerInDB = (from i in projectImplementers
+                                                where i.ProjectId == project.Id && i.ImplementerId == isOrganizationInDB.Id
+                                                select i).FirstOrDefault();
+                            var isImplementerInList = (from i in newImplementersList
+                                                  where i.ProjectId == project.Id && i.ImplementerId == isOrganizationInDB.Id
+                                                  select i).FirstOrDefault();
+
+                            if (isImplementerInDB == null && isImplementerInList == null)
+                            {
+                                newImplementersList.Add(new EFProjectImplementers() { ProjectId = project.Id, ImplementerId = isOrganizationInDB.Id });
+                            }
+                        }
+
+                        if (newImplementersList.Count > 0)
+                        {
+                            unitWork.ProjectImplementersRepository.InsertMultiple(newImplementersList);
+                            unitWork.Save();
+                        }
+                    }
+                    catch (Exception ex)
                     {
                         response.Success = false;
                         response.Message = ex.Message;

@@ -859,6 +859,14 @@ namespace AIMS.Models
         public List<string> Funders { get; set; }
     }
 
+    public class ProjectImplementerSourceModel
+    {
+        [Required]
+        public int ProjectId { get; set; }
+        [Required]
+        public List<string> Implementers { get; set; }
+    }
+
     /// <summary>
     /// Project locations models
     /// </summary>

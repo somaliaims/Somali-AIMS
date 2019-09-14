@@ -351,6 +351,30 @@ namespace AIMS.APIs.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
+        [Route("AddProjectImplementerFromSource")]
+        public IActionResult AddProjectImplementerFromSource([FromBody] ProjectImplementerSourceModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            int organizationId = 0;
+            var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            if (!string.IsNullOrEmpty(organizationIdVal))
+            {
+                organizationId = Convert.ToInt32(organizationIdVal);
+            }
+            var response = projectService.AddProjectImplementerFromSource(model, organizationId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response);
+        }
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
         [Route("AddProjectImplementer")]
         public IActionResult AddProjectImplementer([FromBody] ProjectImplementerModel model)
         {
