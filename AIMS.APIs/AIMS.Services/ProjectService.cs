@@ -880,6 +880,9 @@ namespace AIMS.Services
                         {
                             Id = project.Id,
                             Title = project.Title,
+                            ProjectCurrency = project.ProjectCurrency,
+                            ExchangeRate = project.ExchangeRate,
+                            ProjectValue = project.ProjectValue,
                             Description = project.Description,
                             StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
                             EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),

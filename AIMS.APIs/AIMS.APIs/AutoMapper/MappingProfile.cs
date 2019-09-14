@@ -80,6 +80,9 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFMarkers, ProjectMarkersView>()
                 .ForMember(c => c.FieldTitle, opts => opts.MapFrom(source => source.FieldTitle));
 
+            CreateMap<EFProjectMarkers, ProjectMarkersView>()
+                .ForMember(m => m.FieldTitle, opts => opts.MapFrom(source => source.Marker.FieldTitle));
+
             CreateMap<EFProjectMembershipRequests, ProjectMembershipRequestView>()
                 .ForMember(m => m.Project, opts => opts.MapFrom(source => source.Project.Title))
                 .ForMember(m => m.UserEmail, opts => opts.MapFrom(source => source.User.Email))
