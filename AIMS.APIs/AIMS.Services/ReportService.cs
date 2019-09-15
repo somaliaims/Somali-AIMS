@@ -379,7 +379,7 @@ namespace AIMS.Services
                     List<ProjectBudgetSummaryView> projectBudgetsList = new List<ProjectBudgetSummaryView>();
 
                     projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndingFinancialYear.FinancialYear >= currentYear,
-                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Disbursements" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Disbursements", "Disbursements.Year" });
 
                     projectProfileList = (from p in projectProfileList
                                           orderby p.DateUpdated descending

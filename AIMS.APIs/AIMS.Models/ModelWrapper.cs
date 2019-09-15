@@ -1714,6 +1714,15 @@ namespace AIMS.Models
         public decimal FundsPercentage { get; set; }
     }
 
+    public class HelpViewForProject
+    {
+        public ProjectHelp HelpForProject { get; set; }
+        public ProjectFunderHelp HelpForFunder { get; set; }
+        public ProjectImplementerHelp HelpForImplementer { get; set; }
+        public ProjectDisbursementHelp HelpForDisbursement { get; set; }
+        public ProjectDocumentHelp HelpForDocuments { get; set; }
+    }
+
     /*Help for data entry model*/
     public class ProjectHelp
     {
@@ -1745,6 +1754,21 @@ namespace AIMS.Models
         public string Implementer { get; set; }
     }
 
+    public class ProjectSectorHelp
+    {
+        [Required]
+        public string Sector { get; set; }
+        [Required]
+        public string Percentage { get; set; }
+    }
+
+    public class ProjectLocationHelp
+    {
+        [Required]
+        public string Location { get; set; }
+        [Required]
+        public string Percentage { get; set; }
+    }
     public class ProjectDocumentHelp
     {
         [Required]

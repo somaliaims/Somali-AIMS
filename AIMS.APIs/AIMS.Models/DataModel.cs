@@ -88,6 +88,8 @@ namespace AIMS.Models
         ProjectDocuments = 4,
         ProjectDisbursements = 5,
         ProjectExpectedDisbursements = 6,
+        ProjectSectors = 7,
+        ProjectLocations = 8
     }
 
     public enum DataTransactions

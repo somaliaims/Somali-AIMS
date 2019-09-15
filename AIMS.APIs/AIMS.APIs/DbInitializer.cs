@@ -265,9 +265,19 @@ namespace AIMS.APIs
 
                     if (context.Users.Count() == 0)
                     {
-                        var superUser = context.Users.Add(new EFUser()
+                        context.Users.Add(new EFUser()
                         {
                             Email = "raashid.ahmad@gmail.com",
+                            Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                            Organization = undp.Entity,
+                            RegistrationDate = DateTime.Now,
+                            IsApproved = true,
+                            UserType = UserTypes.Manager
+                        });
+
+                        var superUser = context.Users.Add(new EFUser()
+                        {
+                            Email = "aims.developer18@gmail.com",
                             Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
                             Organization = undp.Entity,
                             RegistrationDate = DateTime.Now,

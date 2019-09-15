@@ -95,6 +95,36 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [HttpPost("AddProjectSectorHelp")]
+        public IActionResult AddProjectSectorHelp([FromBody] ProjectSectorHelp model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = service.AddHelpForProjectSector(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost("AddProjectLocationHelp")]
+        public IActionResult AddProjectLocationHelp([FromBody] ProjectLocationHelp model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = service.AddHelpForProjectLocation(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpPost("AddProjectDisbursementHelp")]
         public IActionResult AddProjectDisbursementHelp([FromBody] ProjectDisbursementHelp model)
         {

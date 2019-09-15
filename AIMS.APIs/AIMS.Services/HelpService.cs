@@ -24,6 +24,18 @@ namespace AIMS.Services
         ProjectFunderHelp GetHelpForProjectFunderFields();
 
         /// <summary>
+        /// Gets help for project locaitons
+        /// </summary>
+        /// <returns></returns>
+        ProjectLocationHelp GetHelpForProjectLocations();
+
+        /// <summary>
+        /// Get help for project sectors
+        /// </summary>
+        /// <returns></returns>
+        ProjectSectorHelp GetHelpForProjectSectors();
+
+        /// <summary>
         /// Gets help for list of fields under project implementer
         /// </summary>
         /// <returns></returns>
@@ -54,6 +66,20 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <returns></returns>
         ActionResponse AddHelpForProjectFunder(ProjectFunderHelp model);
+
+        /// <summary>
+        /// Add help for project sector
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddHelpForProjectSector(ProjectSectorHelp model);
+
+        /// <summary>
+        /// Add help for project location
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse AddHelpForProjectLocation(ProjectLocationHelp model);
 
         /// <summary>
         /// Adds help for project implementer
@@ -116,6 +142,40 @@ namespace AIMS.Services
                     if (!string.IsNullOrEmpty(projectHelp.HelpInfoJson))
                     {
                         help = JsonConvert.DeserializeObject<ProjectFunderHelp>(projectHelp.HelpInfoJson);
+                    }
+                }
+                return help;
+            }
+        }
+
+        public ProjectLocationHelp GetHelpForProjectLocations()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ProjectLocationHelp help = new ProjectLocationHelp();
+                var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectLocations);
+                if (projectHelp != null)
+                {
+                    if (!string.IsNullOrEmpty(projectHelp.HelpInfoJson))
+                    {
+                        help = JsonConvert.DeserializeObject<ProjectLocationHelp>(projectHelp.HelpInfoJson);
+                    }
+                }
+                return help;
+            }
+        }
+
+        public ProjectSectorHelp GetHelpForProjectSectors()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ProjectSectorHelp help = new ProjectSectorHelp();
+                var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectSectors);
+                if (projectHelp != null)
+                {
+                    if (!string.IsNullOrEmpty(projectHelp.HelpInfoJson))
+                    {
+                        help = JsonConvert.DeserializeObject<ProjectSectorHelp>(projectHelp.HelpInfoJson);
                     }
                 }
                 return help;
@@ -221,6 +281,68 @@ namespace AIMS.Services
                         unitWork.HelpRepository.Insert(new EFHelp()
                         {
                             Entity = HelpForEntity.ProjectFunders,
+                            HelpInfoJson = JsonConvert.SerializeObject(model)
+                        });
+                    }
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddHelpForProjectSector(ProjectSectorHelp model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectSectors);
+                    if (projectHelp != null)
+                    {
+                        projectHelp.HelpInfoJson = JsonConvert.SerializeObject(model);
+                    }
+                    else
+                    {
+                        unitWork.HelpRepository.Insert(new EFHelp()
+                        {
+                            Entity = HelpForEntity.ProjectSectors,
+                            HelpInfoJson = JsonConvert.SerializeObject(model)
+                        });
+                    }
+                    unitWork.Save();
+                }
+                catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddHelpForProjectLocation(ProjectLocationHelp model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectLocations);
+                    if (projectHelp != null)
+                    {
+                        projectHelp.HelpInfoJson = JsonConvert.SerializeObject(model);
+                    }
+                    else
+                    {
+                        unitWork.HelpRepository.Insert(new EFHelp()
+                        {
+                            Entity = HelpForEntity.ProjectLocations,
                             HelpInfoJson = JsonConvert.SerializeObject(model)
                         });
                     }
