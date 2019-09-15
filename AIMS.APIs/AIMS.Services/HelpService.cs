@@ -27,13 +27,13 @@ namespace AIMS.Services
         /// Gets help for project locaitons
         /// </summary>
         /// <returns></returns>
-        ProjectLocationHelp GetHelpForProjectLocations();
+        ProjectLocationHelp GetHelpForProjectLocationFields();
 
         /// <summary>
         /// Get help for project sectors
         /// </summary>
         /// <returns></returns>
-        ProjectSectorHelp GetHelpForProjectSectors();
+        ProjectSectorHelp GetHelpForProjectSectorFields();
 
         /// <summary>
         /// Gets help for list of fields under project implementer
@@ -148,7 +148,7 @@ namespace AIMS.Services
             }
         }
 
-        public ProjectLocationHelp GetHelpForProjectLocations()
+        public ProjectLocationHelp GetHelpForProjectLocationFields()
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -165,7 +165,7 @@ namespace AIMS.Services
             }
         }
 
-        public ProjectSectorHelp GetHelpForProjectSectors()
+        public ProjectSectorHelp GetHelpForProjectSectorFields()
         {
             using (var unitWork = new UnitOfWork(context))
             {

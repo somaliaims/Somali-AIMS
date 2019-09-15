@@ -38,6 +38,18 @@ namespace AIMS.APIs.Controllers
             return Ok(service.GetHelpForProjectImpelenterFields());
         }
 
+        [HttpGet("GetProjectSectorFields")]
+        public IActionResult GetProjectSectorFields()
+        {
+            return Ok(service.GetHelpForProjectSectorFields());
+        }
+
+        [HttpGet("GetProjectLocationFields")]
+        public IActionResult GetProjectLocationFields()
+        {
+            return Ok(service.GetHelpForProjectLocationFields());
+        }
+
         [HttpGet("GetProjectDisbursementsFields")]
         public IActionResult GetProjectDisbursementsFields()
         {

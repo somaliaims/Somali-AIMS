@@ -1780,13 +1780,11 @@ namespace AIMS.Models
     public class ProjectDisbursementHelp
     {
         [Required]
-        public string Dated { get; set; }
+        public string Year { get; set; }
         [Required]
-        public string Amount { get; set; }
+        public string DisbursementActual { get; set; }
         [Required]
-        public string Currency { get; set; }
-        [Required]
-        public string ExchangeRate { get; set; }
+        public string DisbursementPlanned { get; set; }
     }
 
     public class HomePageModel
