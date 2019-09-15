@@ -221,7 +221,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ProjectDocumentHelp help = new ProjectDocumentHelp();
-                var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectExpectedDisbursements);
+                var projectHelp = unitWork.HelpRepository.GetOne(h => h.Entity == HelpForEntity.ProjectDocuments);
                 if (projectHelp != null)
                 {
                     if (!string.IsNullOrEmpty(projectHelp.HelpInfoJson))
