@@ -240,13 +240,25 @@ namespace AIMS.Models
 
     public class EFEnvelope
     {
+        public int Id { get; set; }
         [ForeignKey("Funder")]
         public int FunderId { get; set; }
         public EFOrganization Funder { get; set; }
         public string Currency { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; } = 1;
-        public string SectorAmountsBreakup { get; set; }
+    }
+
+    public class EFEnvelopeYearlyBreakup
+    {
+        [ForeignKey("Envelope")]
+        public int EnvelopeId { get; set; }
+        public EFEnvelope Envelope { get; set; }
+        [ForeignKey("Year")]
+        public int YearId { get; set; }
+        public EFFinancialYears Year { get; set; }
+        [Column(TypeName = "decimal(11, 2)")]
+        public decimal Amount { get; set; }
     }
 
     public class EFProjectDisbursements
@@ -423,6 +435,15 @@ namespace AIMS.Models
         public FieldTypes FieldType { get; set; }
         public string Values { get; set; }
         public string Help { get; set; }
+    }
+
+    public class EnvelopeType
+    {
+        [Key]
+        public int Id { get; set; }
+        [Required]
+        [MaxLength(50)]
+        public string TypeName { get; set; }
     }
 
     public class EFProjectMarkers

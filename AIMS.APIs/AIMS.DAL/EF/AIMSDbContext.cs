@@ -54,9 +54,6 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFSectorMappings>()
                 .HasKey(m => new { m.SectorId, m.MappedSectorId });
 
-            modelBuilder.Entity<EFEnvelope>()
-                .HasKey(e => new { e.FunderId });
-
             modelBuilder.Entity<EFUser>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
@@ -77,6 +74,9 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFExchangeRatesUsageSettings>()
                 .HasIndex(e => new { e.Source, e.UsageSection })
                 .IsUnique();
+
+            modelBuilder.Entity<EFEnvelopeYearlyBreakup>()
+                .HasKey(e => new { e.EnvelopeId, e.YearId });
         }
 
         //Creating DB Tables for the Objects
@@ -112,6 +112,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFExchangeRatesSettings> ExchangeRatesSettings { get; set; }
         public DbSet<EFExchangeRatesAPIsCount> ExchangeRatesAPIsCount { get; set; }
         public DbSet<EFEnvelope> Envelope { get; set; }
+        public DbSet<EFEnvelopeYearlyBreakup> EnvelopeYearlyBreakups { get; set; }
         public DbSet<EFEmailMessages> EmailMessages { get; set; }
         public DbSet<EFProjectMembershipRequests> ProjectMembershipRequests { get; set; }
         public DbSet<EFProjectDeletionRequests> ProjectDeletionRequests { get; set; }

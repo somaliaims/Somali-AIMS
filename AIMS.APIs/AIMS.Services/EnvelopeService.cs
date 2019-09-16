@@ -85,10 +85,6 @@ namespace AIMS.Services
                     {
                         envelope.Currency = e.Currency;
                         envelope.ExchangeRate = e.ExchangeRate;
-                        if (!string.IsNullOrEmpty(e.SectorAmountsBreakup))
-                        {
-                            sectorsList = JsonConvert.DeserializeObject<List<EnvelopeSectorBreakup>>(e.SectorAmountsBreakup);
-                        }
                     }
                 }
 
@@ -377,14 +373,12 @@ namespace AIMS.Services
                                     FunderId = funderId,
                                     Currency = model.Currency,
                                     ExchangeRate = model.ExchangeRate,
-                                    SectorAmountsBreakup = JsonConvert.SerializeObject(model.SectorBreakups),
                                 });
                             }
                             else
                             {
                                 envelope.Currency = model.Currency;
                                 envelope.ExchangeRate = model.ExchangeRate;
-                                envelope.SectorAmountsBreakup = JsonConvert.SerializeObject(model.SectorBreakups);
                                 unitWork.EnvelopeRepository.Update(envelope);
                             }
 
