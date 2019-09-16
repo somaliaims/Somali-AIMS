@@ -123,6 +123,7 @@ namespace AIMS.APIs
             services.AddScoped<IReportSubscriptionService, ReportSubscriptionService>();
             services.AddScoped<ICurrencyService, CurrencyService>();
             services.AddScoped<IExchangeRateService, ExchangeRateService>();
+            services.AddScoped<IEnvelopeTypeService, EnvelopeTypeService>();
             services.AddScoped<IEnvelopeService, EnvelopeService>();
             services.AddScoped<IMarkersService, MarkersService>();
             services.AddScoped<IFundingTypeService, FundingTypeService>();

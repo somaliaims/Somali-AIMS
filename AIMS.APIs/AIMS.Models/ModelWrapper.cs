@@ -695,6 +695,19 @@ namespace AIMS.Models
 
     }
 
+    public class EnvelopeTypeModel
+    {
+        [Required]
+        [MaxLength(50)]
+        public string TypeName { get; set; }
+    }
+
+    public class EnvelopeTypeView
+    {
+        public int Id { get; set; }
+        public string TypeName { get; set; }
+    }
+
     public class EnvelopeModel
     {
         [Required]
@@ -702,7 +715,31 @@ namespace AIMS.Models
         public string Currency { get; set; }
         [Required]
         public decimal ExchangeRate { get; set; }
-        public IEnumerable<EnvelopeSectorBreakup> SectorBreakups { get; set; }
+        public IEnumerable<EnvelopeYearlyBreakupModel> EnvelopeBreakups { get; set; }
+    }
+
+    public class EnvelopeYearlyBreakupModel
+    {
+        public int EnvelopeTypeId { get; set; }
+        public int EnvelopeId { get; set; }
+        public int Year { get; set; }
+        public decimal Amount { get; set; }
+    }
+
+    public class EnvelopeYearlyView
+    {
+        public int FunderId { get; set; }
+        public string Funder { get; set; }
+        public string Currency { get; set; }
+        public List<EnvelopeBreakupView> YearlyBreakup { get; set; }
+    }
+
+    public class EnvelopeBreakupView
+    {
+        public int EnvelopeTypeId { get; set; }
+        public string EnvelopeType { get; set; }
+        public int Year { get; set; }
+        public decimal Amount { get; set; }
     }
 
     public class FundBreakup

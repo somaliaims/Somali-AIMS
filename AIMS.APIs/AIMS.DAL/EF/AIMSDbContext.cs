@@ -76,7 +76,7 @@ namespace AIMS.DAL.EF
                 .IsUnique();
 
             modelBuilder.Entity<EFEnvelopeYearlyBreakup>()
-                .HasKey(e => new { e.EnvelopeId, e.YearId });
+                .HasKey(e => new { e.EnvelopeTypeId, e.YearId });
         }
 
         //Creating DB Tables for the Objects
@@ -111,6 +111,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFManualExchangeRates> ManualExchangeRates { get; set; }
         public DbSet<EFExchangeRatesSettings> ExchangeRatesSettings { get; set; }
         public DbSet<EFExchangeRatesAPIsCount> ExchangeRatesAPIsCount { get; set; }
+        public DbSet<EFEnvelopeTypes> EnvelopeTypes { get; set; }
         public DbSet<EFEnvelope> Envelope { get; set; }
         public DbSet<EFEnvelopeYearlyBreakup> EnvelopeYearlyBreakups { get; set; }
         public DbSet<EFEmailMessages> EmailMessages { get; set; }

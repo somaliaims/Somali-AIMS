@@ -40,7 +40,9 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFExchangeRatesSettings> exRatesSettingsRepository;
         private GenericRepository<EFExchangeRatesUsageSettings> exRatesUsageSettingsRepository;
         private GenericRepository<EFExchangeRatesAPIsCount> exRatesAPIsRepository;
+        private GenericRepository<EFEnvelopeTypes> envelopeTypesRepository;
         private GenericRepository<EFEnvelope> envelopeDataRepository;
+        private GenericRepository<EFEnvelopeYearlyBreakup> envelopeBreakupsRepository;
         private GenericRepository<EFMarkers> markerRepository;
         private GenericRepository<EFProjectMarkers> projectMarkersRepository;
         private GenericRepository<EFEmailMessages> emailMessagesRepository;
@@ -156,6 +158,16 @@ namespace AIMS.DAL.UnitOfWork
             }
         }
 
+        public GenericRepository<EFEnvelopeTypes> EnvelopeTypesRepository
+        {
+            get
+            {
+                if (this.envelopeTypesRepository == null)
+                    this.envelopeTypesRepository = new GenericRepository<EFEnvelopeTypes>(context);
+                return this.envelopeTypesRepository;
+            }
+        }
+
         public GenericRepository<EFEnvelope> EnvelopeRepository
         {
             get
@@ -163,6 +175,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.envelopeDataRepository == null)
                     this.envelopeDataRepository = new GenericRepository<EFEnvelope>(context);
                 return this.envelopeDataRepository;
+            }
+        }
+
+        public GenericRepository<EFEnvelopeYearlyBreakup> EnvelopeYearlyBreakupRepository
+        {
+            get
+            {
+                if (this.envelopeBreakupsRepository == null)
+                    this.envelopeBreakupsRepository = new GenericRepository<EFEnvelopeYearlyBreakup>(context);
+                return this.envelopeBreakupsRepository;
             }
         }
 

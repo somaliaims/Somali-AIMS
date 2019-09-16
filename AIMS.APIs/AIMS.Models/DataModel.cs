@@ -238,6 +238,15 @@ namespace AIMS.Models
         public EFUser CreatedBy { get; set; } = null;
     }
 
+    public class EFEnvelopeTypes
+    {
+        [Key]
+        public int Id { get; set; }
+        [Required]
+        [MaxLength(50)]
+        public string TypeName { get; set; }
+    }
+
     public class EFEnvelope
     {
         public int Id { get; set; }
@@ -251,6 +260,9 @@ namespace AIMS.Models
 
     public class EFEnvelopeYearlyBreakup
     {
+        [ForeignKey("EnvelopeType")]
+        public int EnvelopeTypeId { get; set; }
+        public EFEnvelopeTypes EnvelopeType { get; set; }
         [ForeignKey("Envelope")]
         public int EnvelopeId { get; set; }
         public EFEnvelope Envelope { get; set; }
@@ -435,15 +447,6 @@ namespace AIMS.Models
         public FieldTypes FieldType { get; set; }
         public string Values { get; set; }
         public string Help { get; set; }
-    }
-
-    public class EnvelopeType
-    {
-        [Key]
-        public int Id { get; set; }
-        [Required]
-        [MaxLength(50)]
-        public string TypeName { get; set; }
     }
 
     public class EFProjectMarkers
