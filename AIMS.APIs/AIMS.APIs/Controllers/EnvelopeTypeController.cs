@@ -26,6 +26,12 @@ namespace AIMS.APIs.Controllers
             return Ok(service.GetAll());
         }
 
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            return Ok(service.GetById(id));
+        }
+
         [HttpPost]
         public IActionResult Add(EnvelopeTypeModel model)
         {
@@ -41,7 +47,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public IActionResult Put(int id, EnvelopeTypeModel model)
         {
             if (!ModelState.IsValid)

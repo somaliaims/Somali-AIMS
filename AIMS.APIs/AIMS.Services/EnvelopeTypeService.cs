@@ -21,6 +21,13 @@ namespace AIMS.Services
         ICollection<EnvelopeTypeView> GetAll();
 
         /// <summary>
+        /// Gets envelope type by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        EnvelopeTypeView GetById(int id);
+
+        /// <summary>
         /// Adds new envelope type
         /// </summary>
         /// <param name=""></param>
@@ -60,6 +67,14 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 return mapper.Map<List<EnvelopeTypeView>>(unitWork.EnvelopeTypesRepository.GetAll());
+            }
+        }
+
+        public EnvelopeTypeView GetById(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                return mapper.Map<EnvelopeTypeView>(unitWork.EnvelopeTypesRepository.GetByID(id));
             }
         }
 
