@@ -721,7 +721,6 @@ namespace AIMS.Models
     public class EnvelopeYearlyBreakupModel
     {
         public int EnvelopeTypeId { get; set; }
-        public int EnvelopeId { get; set; }
         public int Year { get; set; }
         public decimal Amount { get; set; }
     }

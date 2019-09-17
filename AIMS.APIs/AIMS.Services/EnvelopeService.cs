@@ -71,7 +71,7 @@ namespace AIMS.Services
                 int previousYear = currentYear - 1;
                 int upperYearLimit = currentYear + 1;
                 EnvelopeYearlyView envelopeView = new EnvelopeYearlyView();
-                List<EnvelopeBreakupView> envelopeYearlyBreakupView = new List<EnvelopeBreakupView>();
+                envelopeView.EnvelopeBreakupsByType = new List<EnvelopeBreakupView>();
                 List<int> projectIds = new List<int>();
 
                 var envelopeTypes = unitWork.EnvelopeTypesRepository.GetManyQueryable(e => e.Id != 0);
@@ -103,7 +103,7 @@ namespace AIMS.Services
                     breakupView.EnvelopeTypeId = type.Id;
 
                     List<EnvelopeYearlyBreakUp> yearlyBreakupList = new List<EnvelopeYearlyBreakUp>();
-                    for (int year = previousYear; year < upperYearLimit; year++)
+                    for (int year = previousYear; year <= upperYearLimit; year++)
                     {
                         if (yearlyBreakup != null)
                         {
@@ -179,13 +179,14 @@ namespace AIMS.Services
                             }
                             await unitWork.SaveAsync();
 
-                            var yearlyBreakups = unitWork.EnvelopeYearlyBreakupRepository.GetManyQueryable(e => e.EnvelopeId == envelope.Id);
+                            var yearlyBreakups = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(e => e.EnvelopeId == envelope.Id, new string[] { "Year" });
                             List<EFEnvelopeYearlyBreakup> newYearlyBreakups = new List<EFEnvelopeYearlyBreakup>();
 
                             foreach(var breakup in model.EnvelopeBreakups)
                             {
                                 var isBreakupExists = (from b in yearlyBreakups
-                                                       where b.Year.FinancialYear == breakup.Year && envelope.Id == b.EnvelopeId
+                                                       where b.Year.FinancialYear == breakup.Year && envelope.Id == b.EnvelopeId 
+                                                       && b.EnvelopeTypeId == breakup.EnvelopeTypeId 
                                                        select b).FirstOrDefault();
 
                                 if (isBreakupExists == null)
@@ -199,6 +200,7 @@ namespace AIMS.Services
                                         {
                                             FinancialYear = breakup.Year
                                         });
+                                        unitWork.Save();
                                     }
                                     var envelopeType = (from t in envelopeTypes
                                                         where t.Id == breakup.EnvelopeTypeId
@@ -219,11 +221,12 @@ namespace AIMS.Services
                                 {
                                     isBreakupExists.Amount = breakup.Amount;
                                     unitWork.EnvelopeYearlyBreakupRepository.Update(isBreakupExists);
-                                    await unitWork.SaveAsync();
+                                    unitWork.Save();
                                 }
                             }
                             if (newYearlyBreakups.Count > 0)
                             {
+                                unitWork.EnvelopeYearlyBreakupRepository.InsertMultiple(newYearlyBreakups);
                                 await unitWork.SaveAsync();
                             }
                             transaction.Commit();
