@@ -731,13 +731,18 @@ namespace AIMS.Models
         public int FunderId { get; set; }
         public string Funder { get; set; }
         public string Currency { get; set; }
-        public List<EnvelopeBreakupView> YearlyBreakup { get; set; }
+        public List<EnvelopeBreakupView> EnvelopeBreakupsByType { get; set; }
     }
 
     public class EnvelopeBreakupView
     {
         public int EnvelopeTypeId { get; set; }
         public string EnvelopeType { get; set; }
+        public List<EnvelopeYearlyBreakUp> YearlyBreakup { get; set; }
+    }
+
+    public class EnvelopeYearlyBreakUp
+    {
         public int Year { get; set; }
         public decimal Amount { get; set; }
     }

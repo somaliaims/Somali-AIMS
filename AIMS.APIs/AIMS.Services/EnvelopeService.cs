@@ -71,7 +71,7 @@ namespace AIMS.Services
                 int previousYear = currentYear - 1;
                 int upperYearLimit = currentYear + 1;
                 EnvelopeYearlyView envelopeView = new EnvelopeYearlyView();
-                List<EnvelopeBreakupView> yearlyBreakupList = new List<EnvelopeBreakupView>();
+                List<EnvelopeBreakupView> envelopeYearlyBreakupView = new List<EnvelopeBreakupView>();
                 List<int> projectIds = new List<int>();
 
                 var envelopeTypes = unitWork.EnvelopeTypesRepository.GetManyQueryable(e => e.Id != 0);
@@ -95,21 +95,24 @@ namespace AIMS.Services
 
 
                 IQueryable<EFEnvelopeYearlyBreakup> yearBreakup = null;
-                for (int year = previousYear; year < upperYearLimit; year++)
+
+                foreach (var type in envelopeTypes)
                 {
-                    if (yearlyBreakup != null)
-                    {
-                        yearBreakup = (from yb in yearlyBreakup
-                                       where yb.Year.FinancialYear == year
-                                       select yb);
-                    }
-
-
                     EnvelopeBreakupView breakupView = new EnvelopeBreakupView();
-                    EFEnvelopeYearlyBreakup isBreakupExists = null;
+                    breakupView.EnvelopeType = type.TypeName;
+                    breakupView.EnvelopeTypeId = type.Id;
 
-                    foreach (var type in envelopeTypes)
+                    List<EnvelopeYearlyBreakUp> yearlyBreakupList = new List<EnvelopeYearlyBreakUp>();
+                    for (int year = previousYear; year < upperYearLimit; year++)
                     {
+                        if (yearlyBreakup != null)
+                        {
+                            yearBreakup = (from yb in yearlyBreakup
+                                           where yb.Year.FinancialYear == year
+                                           select yb);
+                        }
+
+                        EFEnvelopeYearlyBreakup isBreakupExists = null;
                         if (yearBreakup != null)
                         {
                             isBreakupExists = (from typeBreakup in yearBreakup
@@ -119,27 +122,24 @@ namespace AIMS.Services
 
                         if (isBreakupExists != null)
                         {
-                            yearlyBreakupList.Add(new EnvelopeBreakupView()
+                            yearlyBreakupList.Add(new EnvelopeYearlyBreakUp()
                             {
-                                EnvelopeType = isBreakupExists.EnvelopeType.TypeName,
-                                EnvelopeTypeId = isBreakupExists.EnvelopeTypeId,
                                 Amount = isBreakupExists.Amount,
-                                Year = isBreakupExists.Year.FinancialYear,
+                                Year = year
                             });
                         }
                         else
                         {
-                            yearlyBreakupList.Add(new EnvelopeBreakupView()
+                            yearlyBreakupList.Add(new EnvelopeYearlyBreakUp()
                             {
-                                EnvelopeType = type.TypeName,
-                                EnvelopeTypeId = type.Id,
                                 Amount = 0,
-                                Year = year
+                                Year = year,
                             });
                         }
                     }
+                    breakupView.YearlyBreakup = yearlyBreakupList;
+                    envelopeView.EnvelopeBreakupsByType.Add(breakupView);
                 }
-                envelopeView.YearlyBreakup = yearlyBreakupList;
                 return envelopeView;
             }
         }
@@ -152,7 +152,6 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    List<EFEnvelope> envelopeList = new List<EFEnvelope>();
                     var envelope = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == funderId);
                     int currentYear = DateTime.Now.Year;
                     var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear >= (currentYear - 1) && y.FinancialYear <= (currentYear + 1));
