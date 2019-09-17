@@ -154,6 +154,9 @@ namespace AIMS.Services
                 {
                     List<EFEnvelope> envelopeList = new List<EFEnvelope>();
                     var envelope = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == funderId);
+                    int currentYear = DateTime.Now.Year;
+                    var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear >= (currentYear - 1) && y.FinancialYear <= (currentYear + 1));
+                    var envelopeTypes = unitWork.EnvelopeTypesRepository.GetManyQueryable(e => e.Id != 0);
 
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
@@ -162,7 +165,7 @@ namespace AIMS.Services
                         {
                             if (envelope == null)
                             {
-                                unitWork.EnvelopeRepository.Insert(new EFEnvelope()
+                                envelope = unitWork.EnvelopeRepository.Insert(new EFEnvelope()
                                 {
                                     FunderId = funderId,
                                     Currency = model.Currency,
@@ -175,8 +178,55 @@ namespace AIMS.Services
                                 envelope.ExchangeRate = model.ExchangeRate;
                                 unitWork.EnvelopeRepository.Update(envelope);
                             }
-
                             await unitWork.SaveAsync();
+
+                            var yearlyBreakups = unitWork.EnvelopeYearlyBreakupRepository.GetManyQueryable(e => e.EnvelopeId == envelope.Id);
+                            List<EFEnvelopeYearlyBreakup> newYearlyBreakups = new List<EFEnvelopeYearlyBreakup>();
+
+                            foreach(var breakup in model.EnvelopeBreakups)
+                            {
+                                var isBreakupExists = (from b in yearlyBreakups
+                                                       where b.Year.FinancialYear == breakup.Year && envelope.Id == b.EnvelopeId
+                                                       select b).FirstOrDefault();
+
+                                if (isBreakupExists == null)
+                                {
+                                    var financialYear = (from fy in financialYears
+                                                         where fy.FinancialYear == breakup.Year
+                                                         select fy).FirstOrDefault();
+                                    if (financialYear == null)
+                                    {
+                                        financialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                        {
+                                            FinancialYear = breakup.Year
+                                        });
+                                    }
+                                    var envelopeType = (from t in envelopeTypes
+                                                        where t.Id == breakup.EnvelopeTypeId
+                                                        select t).FirstOrDefault();
+
+                                    if (envelopeType != null)
+                                    {
+                                        newYearlyBreakups.Add(new EFEnvelopeYearlyBreakup()
+                                        {
+                                            EnvelopeType = envelopeType,
+                                            Year = financialYear,
+                                            Amount = breakup.Amount,
+                                            Envelope = envelope
+                                        });
+                                    }
+                                }
+                                else
+                                {
+                                    isBreakupExists.Amount = breakup.Amount;
+                                    unitWork.EnvelopeYearlyBreakupRepository.Update(isBreakupExists);
+                                    await unitWork.SaveAsync();
+                                }
+                            }
+                            if (newYearlyBreakups.Count > 0)
+                            {
+                                await unitWork.SaveAsync();
+                            }
                             transaction.Commit();
                         }
                     });
