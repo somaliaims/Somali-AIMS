@@ -757,12 +757,9 @@ namespace AIMS.Models
     {
         public int FunderId { get; set; }
         public string FunderName { get; set; }
-        public decimal ExpectedFunds { get; set; }
-        public decimal ActualFunds { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRate { get; set; }
-        public IEnumerable<EnvelopeSectorBreakup> Sectors { get; set; }
-        public IEnumerable<EnvelopeBreakup> EnvelopeBreakups { get; set; }
+        public IEnumerable<EnvelopeBreakupView> YearlyBreakups { get; set; }
     }
 
     public class ProjectMiniView

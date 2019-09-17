@@ -26,7 +26,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="funderId"></param>
         /// <returns></returns>
-        EnvelopeView GetFunderEnvelope(int funderId);
+        EnvelopeYearlyView GetFunderEnvelope(int funderId);
 
         /// <summary>
         /// Adds a new section
@@ -63,290 +63,84 @@ namespace AIMS.Services
             }
         }
 
-        public EnvelopeView GetFunderEnvelope(int funderId)
+        public EnvelopeYearlyView GetFunderEnvelope(int funderId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                string defaultCurrency = "";
-                decimal projectValue = 0, actualFundingAmount = 0, manualFundingAmount = 0;
                 int currentYear = DateTime.Now.Year;
-                string funderCurrency = null;
                 int previousYear = currentYear - 1;
-                int upperThreeYearsLimit = currentYear + 3;
-                EnvelopeView envelope = new EnvelopeView();
-                List<EnvelopeBreakup> envelopeList = new List<EnvelopeBreakup>();
-                List<EnvelopeSectorBreakup> sectorsList = new List<EnvelopeSectorBreakup>();
+                int upperYearLimit = currentYear + 1;
+                EnvelopeYearlyView envelopeView = new EnvelopeYearlyView();
+                List<EnvelopeBreakupView> yearlyBreakupList = new List<EnvelopeBreakupView>();
                 List<int> projectIds = new List<int>();
 
-                var envelopes = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == funderId);
-                if (envelopes != null)
+                var envelopeTypes = unitWork.EnvelopeTypesRepository.GetManyQueryable(e => e.Id != 0);
+                var envelope = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == funderId);
+                IQueryable<EFEnvelopeYearlyBreakup> yearlyBreakup = null;
+                if (envelope != null)
                 {
-                    foreach(var e in envelopes)
+                    envelopeView.Currency = envelope.Currency;
+                    envelopeView.FunderId = funderId;
+
+                    yearlyBreakup = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(
+                        f => f.EnvelopeId == envelope.Id && f.Year.FinancialYear >= previousYear, new string[] { "Year", "EnvelopeType" });
+                }
+
+                if (yearlyBreakup != null)
+                {
+                    yearlyBreakup = (from yb in yearlyBreakup
+                                     orderby yb.Year.FinancialYear ascending
+                                     select yb);
+                }
+
+
+                IQueryable<EFEnvelopeYearlyBreakup> yearBreakup = null;
+                for (int year = previousYear; year < upperYearLimit; year++)
+                {
+                    if (yearlyBreakup != null)
                     {
-                        envelope.Currency = e.Currency;
-                        envelope.ExchangeRate = e.ExchangeRate;
+                        yearBreakup = (from yb in yearlyBreakup
+                                       where yb.Year.FinancialYear == year
+                                       select yb);
                     }
-                }
 
-                var defaultCurrencyObj = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
-                if (defaultCurrencyObj != null)
-                {
-                    defaultCurrency = defaultCurrencyObj.Currency;
-                    if (string.IsNullOrEmpty(envelope.Currency))
+
+                    EnvelopeBreakupView breakupView = new EnvelopeBreakupView();
+                    EFEnvelopeYearlyBreakup isBreakupExists = null;
+
+                    foreach (var type in envelopeTypes)
                     {
-                        envelope.Currency = defaultCurrency;
-                        envelope.ExchangeRate = 1;
-                    }
-                }
-
-                var funderProjects = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.FunderId == funderId);
-                if (funderProjects != null)
-                {
-                    projectIds = (from p in funderProjects
-                                  select p.ProjectId).ToList<int>();
-
-                    //To calculate and fix
-                    projectValue = 0;
-
-                    if (defaultCurrency != envelope.Currency && envelope.Currency != null)
-                    {
-                        projectValue = (projectValue * envelope.ExchangeRate);
-                    }
-                }
-
-                var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => projectIds.Contains(d.ProjectId), new string[] { "FinancialYear" });
-                if (disbursements.Count() > 0)
-                {
-                    disbursements = (from disbursement in disbursements
-                                     where (disbursement.Year.FinancialYear >= previousYear && disbursement.Year.FinancialYear <= upperThreeYearsLimit)
-                                     orderby disbursement.Year.FinancialYear
-                                     select disbursement);
-                }
-
-                int year = 0;
-                int yearsLeft = 0;
-                decimal disbursementsValue = 0;
-                decimal expectedFunds = 0;
-                var lastElement = disbursements.LastOrDefault();
-                foreach (var disbursement in disbursements)
-                {
-                    yearsLeft = upperThreeYearsLimit - year;
-
-                    decimal actualAmount = (funderCurrency != envelope.Currency && envelope.Currency != null) ? (envelope.ExchangeRate * disbursement.Amount) : disbursement.Amount;
-                    if (year != disbursement.Year.FinancialYear)
-                    {
-                        var isEnvelopeExists = (from e in envelopeList
-                                                where e.Year == disbursement.Year.FinancialYear
-                                                select e).FirstOrDefault();
-
-                        if (isEnvelopeExists == null)
+                        if (yearBreakup != null)
                         {
-                            envelopeList.Add(new EnvelopeBreakup()
+                            isBreakupExists = (from typeBreakup in yearBreakup
+                                               where typeBreakup.EnvelopeTypeId == type.Id
+                                               select typeBreakup).FirstOrDefault();
+                        }
+
+                        if (isBreakupExists != null)
+                        {
+                            yearlyBreakupList.Add(new EnvelopeBreakupView()
                             {
-                                Year = year,
-                                ActualAmount = actualAmount,
+                                EnvelopeType = isBreakupExists.EnvelopeType.TypeName,
+                                EnvelopeTypeId = isBreakupExists.EnvelopeTypeId,
+                                Amount = isBreakupExists.Amount,
+                                Year = isBreakupExists.Year.FinancialYear,
                             });
                         }
                         else
                         {
-                            isEnvelopeExists.ActualAmount = actualAmount;
-                        }
-                    }
-                    year = disbursement.Year.FinancialYear;
-
-                    if (disbursement == lastElement)
-                    {
-                        envelopeList.Add(new EnvelopeBreakup()
-                        {
-                            Year = year,
-                            ActualAmount = actualAmount
-                            ,
-                        });
-                    }
-                }
-
-                envelopeList = (from e in envelopeList
-                                        orderby e.Year ascending
-                                        select e).ToList();
-
-                List<EnvelopeBreakup> requiredEnvelopeList = new List<EnvelopeBreakup>();
-                for(int y = previousYear; y <= upperThreeYearsLimit; y++)
-                {
-                    var yearEnvelope = (from e in envelopeList
-                                       where e.Year == y
-                                       select e).FirstOrDefault();
-
-                    disbursementsValue = (from r in requiredEnvelopeList
-                                           where r.Year <= y
-                                           select r.ExpectedAmount).Sum();
-
-                    yearsLeft = upperThreeYearsLimit - y;
-                    expectedFunds = 0;
-                    if (yearsLeft > 1)
-                    {
-                        expectedFunds = Math.Round((projectValue - disbursementsValue) / yearsLeft);
-                    }
-                    else if (yearsLeft == 1)
-                    {
-                        expectedFunds = Math.Round((projectValue - disbursementsValue) / 2);
-                    }
-                    else if(yearsLeft == 0)
-                    {
-                        expectedFunds = Math.Round(projectValue - disbursementsValue);
-                    }
-                    
-
-                    if (yearEnvelope == null)
-                    {
-                        decimal exFunds = 0;
-                        if (y >= currentYear)
-                        {
-                            exFunds = expectedFunds;
-                        }
-                        requiredEnvelopeList.Add(new EnvelopeBreakup()
-                        {
-                            Year = y,
-                            ActualAmount = 0,
-                            ExpectedAmount = exFunds
-                        });
-                    }
-                    else
-                    {
-                        if (yearEnvelope.ExpectedAmount == 0 && yearEnvelope.ActualAmount > 0)
-                        {
-                            yearEnvelope.ExpectedAmount = expectedFunds;
-                        }
-                        else if (yearEnvelope.ActualAmount == 0 && y < currentYear)
-                        {
-                            yearEnvelope.ExpectedAmount = 0;
-                        }
-                        requiredEnvelopeList.Add(yearEnvelope);
-                    }
-                }
-
-                actualFundingAmount = (from e in requiredEnvelopeList
-                                       select e.ActualAmount).Sum();
-
-                manualFundingAmount = (from e in requiredEnvelopeList
-                                       select e.ManualAmount).Sum();
-
-                var envelopeSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => projectIds.Contains(p.ProjectId), new string[] { "Sector" });
-                var sectors = unitWork.SectorRepository.GetAll();
-                foreach (var sector in envelopeSectors)
-                {
-                    var isSectorExists = (from s in sectorsList
-                                          where s.Sector == sector.Sector.SectorName
-                                          select s).FirstOrDefault();
-
-                    if (isSectorExists == null)
-                    {
-                        decimal allocatedAmount = 0;
-                        List<SectorYearlyAllocation> allocationList = new List<SectorYearlyAllocation>();
-                        foreach (var yr in requiredEnvelopeList)
-                        {
-                            allocatedAmount = (from e in requiredEnvelopeList
-                                               where e.Year == yr.Year
-                                               select e.ActualAmount).First();
-
-                            disbursementsValue = (from r in requiredEnvelopeList
-                                                  where r.Year <= yr.Year
-                                                  select r.ExpectedAmount).Sum();
-
-                            yearsLeft = upperThreeYearsLimit - yr.Year;
-                            expectedFunds = 0;
-
-                            expectedFunds = yr.ExpectedAmount;
-                            if (allocatedAmount > 0)
+                            yearlyBreakupList.Add(new EnvelopeBreakupView()
                             {
-                                allocatedAmount = ((allocatedAmount / 100) * sector.FundsPercentage);
-                            }
-
-                            if (expectedFunds > 0)
-                            {
-                                expectedFunds = ((expectedFunds / 100) * sector.FundsPercentage);
-                            }
-
-                            var yearlyAllocations = (from s in sectorsList
-                                                     where (s.SectorId == sector.SectorId)
-                                                     select s.YearlyAllocation).FirstOrDefault();
-
-                            decimal sectorManualAmount = 0;
-                            if (yearlyAllocations != null)
-                            {
-                                sectorManualAmount = (from y in yearlyAllocations
-                                                      where y.Year == yr.Year
-                                                      select y.ManualAmount).FirstOrDefault();
-                            }
-
-                            if (sectorManualAmount == 0)
-                            {
-                                if (expectedFunds > allocatedAmount)
-                                {
-                                    sectorManualAmount = expectedFunds - allocatedAmount;
-                                }
-                            }
-
-                            if (expectedFunds == 0)
-                            {
-                                sectorManualAmount = 0;
-                            }
-                            
-                            allocationList.Add(new SectorYearlyAllocation()
-                            {
-                                Year = yr.Year,
-                                Amount = allocatedAmount,
-                                ExpectedAmount = expectedFunds,
-                                ManualAmount = sectorManualAmount
-                            });
-                        }
-
-                        sectorsList.Add(new EnvelopeSectorBreakup()
-                        {
-                            SectorId = sector.Sector.Id,
-                            Sector = sector.Sector.SectorName,
-                            Percentage = sector.FundsPercentage,
-                            YearlyAllocation = allocationList
-                        });
-                    }
-                }
-
-                sectors = (from s in sectors
-                           orderby s.SectorName
-                           select s);
-
-                foreach(var sector in sectors)
-                {
-                    var isSectorExists = (from s in sectorsList
-                                          where s.SectorId == sector.Id
-                                          select s);
-
-                    if (isSectorExists == null)
-                    {
-                        List<SectorYearlyAllocation> allocationsList = new List<SectorYearlyAllocation>();
-                        for(int yr = previousYear; yr < upperThreeYearsLimit; yr++ )
-                        {
-                            allocationsList.Add(new SectorYearlyAllocation()
-                            {
+                                EnvelopeType = type.TypeName,
+                                EnvelopeTypeId = type.Id,
                                 Amount = 0,
-                                ExpectedAmount = 0,
-                                ManualAmount = 0,
-                                Year = yr
+                                Year = year
                             });
                         }
-                        sectorsList.Add(new EnvelopeSectorBreakup()
-                        {
-                            SectorId = sector.Id,
-                            Sector = sector.SectorName,
-                            Percentage = 0,
-                            YearlyAllocation = allocationsList
-                        });
                     }
                 }
-                envelope.EnvelopeBreakups = requiredEnvelopeList;
-                envelope.ActualFunds = actualFundingAmount;
-                envelope.ExpectedFunds = projectValue;
-                envelope.Sectors = sectorsList;
-                return envelope;
+                envelopeView.YearlyBreakup = yearlyBreakupList;
+                return envelopeView;
             }
         }
 
