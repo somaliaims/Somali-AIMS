@@ -11,6 +11,7 @@ namespace AIMS.Services.Helpers
         public static readonly string LOCATION_REPORT_URL = "locations-report/";
         public static readonly string BUDGET_REPORT_URL = "budget-report/";
         public static readonly string YEARLY_REPORT_URL = "time-trend-report/";
+        public static readonly string ENVELOPE_REPORT_URL = "envelope-report/";
 
         //Projects related constants
         public static readonly string PROJECTS_LIST_TITLE = "Projects list";
@@ -40,6 +41,11 @@ namespace AIMS.Services.Helpers
         public static readonly string PROJECTS_BUDGET_REPORT_TITLE = "Budget report";
         public static readonly string PROJECTS_BUDGET_REPORT_SUBTITLE = "Projects budget year-wise";
         public static readonly string PROJECTS_BUDGET_REPORT_FOOTER = "Budget report from AIMS Somalia";
+
+        //Constants for envelope report
+        public static readonly string PROJECTS_ENVELOPE_REPORT_TITLE = "Envelope report";
+        public static readonly string PROJECTS_ENVELOPE_REPORT_SUBTITLE = "Envelope report";
+        public static readonly string PROJECTS_ENVELOPE_REPORT_FOOTER = "Envelope report from AIMS Somalia";
 
         public static readonly int YEAR_MONTHS = 12;
     }

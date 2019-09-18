@@ -1323,6 +1323,20 @@ namespace AIMS.Models
         public IEnumerable<ProjectBudgetView> Projects { get; set; }
     }
 
+    public class SearchEnvelopeModel
+    {
+        public int StartingYear { get; set; }
+        public int EndingYear { get; set; }
+        public int FunderId { get; set; }
+        public int EnvelopeTypeId { get; set; }
+    }
+
+    public class EnvelopeReport
+    {
+        public Report ReportSettings { get; set; }
+        public IEnumerable<EnvelopeYearlyView> Envelope { get; set; }
+    }
+
     public class ProjectsBudgetReportSummary
     {
         public Report ReportSettings { get; set; }

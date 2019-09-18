@@ -54,6 +54,15 @@ namespace AIMS.Services
         Task<ProjectsBudgetReportSummary> GetProjectsBudgetReportSummary(string reportUrl, string defaultCurrency, decimal exchangeRate);
 
         /// <summary>
+        /// Gets envelope report
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="reportUrl"></param>
+        /// <param name="defaultCurrency"></param>
+        /// <returns></returns>
+        Task<EnvelopeReport> GetEnvelopeReport(SearchEnvelopeModel model, string reportUrl, string defaultCurrency);
+
+        /// <summary>
         /// Internal function for extracting rate of default currency
         /// </summary>
         /// <param name="currency"></param>
@@ -468,6 +477,117 @@ namespace AIMS.Services
                     string message = ex.Message;
                 }
                 return await Task<ProjectsBudgetReportSummary>.Run(() => budgetReport).ConfigureAwait(false);
+            }
+        }
+
+        public async Task<EnvelopeReport> GetEnvelopeReport(SearchEnvelopeModel model, string reportUrl, string defaultCurrency)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                EnvelopeReport envelopeReport = new EnvelopeReport();
+                try
+                {
+                    envelopeReport.ReportSettings = new Report()
+                    {
+                        Title = ReportConstants.PROJECTS_ENVELOPE_REPORT_TITLE,
+                        SubTitle = ReportConstants.PROJECTS_ENVELOPE_REPORT_SUBTITLE,
+                        Footer = ReportConstants.PROJECTS_ENVELOPE_REPORT_FOOTER,
+                        Dated = DateTime.Now.ToLongDateString(),
+                        ReportUrl = reportUrl + ReportConstants.ENVELOPE_REPORT_URL + "?load=true"
+                    };
+
+                    int currentYear = DateTime.Now.Year;
+                    int previousYear = currentYear - 1;
+                    int upperYearLimit = currentYear + 1;
+                    EnvelopeYearlyView envelopeView = new EnvelopeYearlyView();
+                    IQueryable<EFEnvelope> envelopeList = null;
+                    envelopeView.EnvelopeBreakupsByType = new List<EnvelopeBreakupView>();
+                    List<int> projectIds = new List<int>();
+
+                    var envelopeTypes = unitWork.EnvelopeTypesRepository.GetManyQueryable(e => e.Id != 0);
+                    if (model.FunderId != 0)
+                    {
+                        envelopeList = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == model.FunderId);
+                    }
+                    else
+                    {
+                        envelopeList = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId != 0);
+                    }
+                    
+                    foreach(var envelope in envelopeList)
+                    {
+                        IQueryable<EFEnvelopeYearlyBreakup> yearlyBreakup = null;
+                        if (envelopeList.Any())
+                        {
+                            envelopeView.Currency = envelope.Currency;
+                            envelopeView.FunderId = model.FunderId;
+
+                            yearlyBreakup = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(
+                                f => f.EnvelopeId == envelope.Id && f.Year.FinancialYear >= previousYear, new string[] { "Year", "EnvelopeType" });
+                        }
+
+                        if (yearlyBreakup != null)
+                        {
+                            yearlyBreakup = (from yb in yearlyBreakup
+                                             orderby yb.Year.FinancialYear ascending
+                                             select yb);
+                        }
+
+
+                        IQueryable<EFEnvelopeYearlyBreakup> yearBreakup = null;
+
+                        foreach (var type in envelopeTypes)
+                        {
+                            EnvelopeBreakupView breakupView = new EnvelopeBreakupView();
+                            breakupView.EnvelopeType = type.TypeName;
+                            breakupView.EnvelopeTypeId = type.Id;
+
+                            List<EnvelopeYearlyBreakUp> yearlyBreakupList = new List<EnvelopeYearlyBreakUp>();
+                            for (int year = previousYear; year <= upperYearLimit; year++)
+                            {
+                                if (yearlyBreakup != null)
+                                {
+                                    yearBreakup = (from yb in yearlyBreakup
+                                                   where yb.Year.FinancialYear == year
+                                                   select yb);
+                                }
+
+                                EFEnvelopeYearlyBreakup isBreakupExists = null;
+                                if (yearBreakup != null)
+                                {
+                                    isBreakupExists = (from typeBreakup in yearBreakup
+                                                       where typeBreakup.EnvelopeTypeId == type.Id
+                                                       select typeBreakup).FirstOrDefault();
+                                }
+
+                                if (isBreakupExists != null)
+                                {
+                                    yearlyBreakupList.Add(new EnvelopeYearlyBreakUp()
+                                    {
+                                        Amount = isBreakupExists.Amount,
+                                        Year = year
+                                    });
+                                }
+                                else
+                                {
+                                    yearlyBreakupList.Add(new EnvelopeYearlyBreakUp()
+                                    {
+                                        Amount = 0,
+                                        Year = year,
+                                    });
+                                }
+                            }
+                            breakupView.YearlyBreakup = yearlyBreakupList;
+                            envelopeView.EnvelopeBreakupsByType.Add(breakupView);
+                        }
+                    }
+                    
+                }
+                catch(Exception ex)
+                {
+                    string message = ex.Message;
+                }
+                return await Task<EnvelopeReport>.Run(() => envelopeReport).ConfigureAwait(false);
             }
         }
 
