@@ -60,7 +60,7 @@ namespace AIMS.Services
         /// <param name="reportUrl"></param>
         /// <param name="defaultCurrency"></param>
         /// <returns></returns>
-        Task<EnvelopeReport> GetEnvelopeReport(SearchEnvelopeModel model, string reportUrl, string defaultCurrency);
+        Task<EnvelopeReport> GetEnvelopeReport(SearchEnvelopeModel model, string reportUrl, string defaultCurrency, decimal exchangeRate);
 
         /// <summary>
         /// Internal function for extracting rate of default currency
@@ -404,7 +404,7 @@ namespace AIMS.Services
                         int projectStartYear = project.StartingFinancialYear.FinancialYear;
                         projectBudget.Id = project.Id;
                         projectBudget.Title = project.Title;
-                       
+
                         List<ProjectDisbursements> disbursementsList = new List<ProjectDisbursements>();
                         decimal projectCost = 0;
 
@@ -480,7 +480,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<EnvelopeReport> GetEnvelopeReport(SearchEnvelopeModel model, string reportUrl, string defaultCurrency)
+        public async Task<EnvelopeReport> GetEnvelopeReport(SearchEnvelopeModel model, string reportUrl, string defaultCurrency, decimal exchangeRate)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -499,32 +499,56 @@ namespace AIMS.Services
                     int currentYear = DateTime.Now.Year;
                     int previousYear = currentYear - 1;
                     int upperYearLimit = currentYear + 1;
-                    EnvelopeYearlyView envelopeView = new EnvelopeYearlyView();
-                    IQueryable<EFEnvelope> envelopeList = null;
-                    envelopeView.EnvelopeBreakupsByType = new List<EnvelopeBreakupView>();
-                    List<int> projectIds = new List<int>();
+                    List<EnvelopeYearlyView> envelopeViewList = new List<EnvelopeYearlyView>();
+                    IQueryable<EFEnvelopeYearlyBreakup> envelopeList = null;
+                    IQueryable<EFEnvelope> envelopes = null;
+
+
 
                     var envelopeTypes = unitWork.EnvelopeTypesRepository.GetManyQueryable(e => e.Id != 0);
                     if (model.FunderId != 0)
                     {
-                        envelopeList = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == model.FunderId);
+                        envelopes = unitWork.EnvelopeRepository.GetWithInclude(e => e.FunderId == model.FunderId, new string[] { "Funder" });
+                        envelopeList = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(e => e.Envelope.FunderId == model.FunderId, new string[] { "Envelope", "Year" });
                     }
                     else
                     {
-                        envelopeList = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId != 0);
+                        envelopes = unitWork.EnvelopeRepository.GetWithInclude(e => e.FunderId != 0, new string[] { "Funder" });
+                        envelopeList = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(e => e.Envelope.FunderId != 0, new string[] { "Envelope", "Year" });
                     }
-                    
-                    foreach(var envelope in envelopeList)
-                    {
-                        IQueryable<EFEnvelopeYearlyBreakup> yearlyBreakup = null;
-                        if (envelopeList.Any())
-                        {
-                            envelopeView.Currency = envelope.Currency;
-                            envelopeView.FunderId = model.FunderId;
 
-                            yearlyBreakup = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(
-                                f => f.EnvelopeId == envelope.Id && f.Year.FinancialYear >= previousYear, new string[] { "Year", "EnvelopeType" });
-                        }
+                    if (model.StartingYear > 0)
+                    {
+                        previousYear = model.StartingYear;
+                        envelopeList = (from e in envelopeList
+                                        where e.Year.FinancialYear >= model.StartingYear
+                                        select e);
+                    }
+
+                    if (model.EndingYear > 0)
+                    {
+                        upperYearLimit = model.EndingYear;
+                        envelopeList = (from e in envelopeList
+                                        where e.Year.FinancialYear <= model.EndingYear
+                                        select e);
+                    }
+
+                    if (model.EnvelopeTypeId > 0)
+                    {
+                        envelopeList = (from e in envelopeList
+                                        where e.EnvelopeId == model.EnvelopeTypeId
+                                        select e);
+                    }
+
+                    foreach (var envelope in envelopes)
+                    {
+                        EnvelopeYearlyView envelopeView = new EnvelopeYearlyView();
+                        envelopeView.EnvelopeBreakupsByType = new List<EnvelopeBreakupView>();
+                        IQueryable<EFEnvelopeYearlyBreakup> yearlyBreakup = null;
+                        envelopeView.Currency = envelope.Currency;
+                        envelopeView.FunderId = envelope.FunderId;
+                        envelopeView.Funder = envelope.Funder.OrganizationName;
+                        int envelopeId = envelope.Id;
 
                         if (yearlyBreakup != null)
                         {
@@ -533,9 +557,7 @@ namespace AIMS.Services
                                              select yb);
                         }
 
-
                         IQueryable<EFEnvelopeYearlyBreakup> yearBreakup = null;
-
                         foreach (var type in envelopeTypes)
                         {
                             EnvelopeBreakupView breakupView = new EnvelopeBreakupView();
@@ -579,11 +601,12 @@ namespace AIMS.Services
                             }
                             breakupView.YearlyBreakup = yearlyBreakupList;
                             envelopeView.EnvelopeBreakupsByType.Add(breakupView);
+                            envelopeViewList.Add(envelopeView);
                         }
                     }
-                    
+                    envelopeReport.Envelope = envelopeViewList;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     string message = ex.Message;
                 }
@@ -1015,7 +1038,7 @@ namespace AIMS.Services
                             if (project.Disbursements.Count() > 0)
                             {
                                 var disbursements = (from d in project.Disbursements
-                                                         select d).ToList();
+                                                     select d).ToList();
 
                                 decimal projectDisbursements = Math.Round((from d in disbursements
                                                                            where d.DisbursementType == DisbursementTypes.Actual && d.Year == currentYearId

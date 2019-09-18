@@ -77,6 +77,45 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
+        [Route("GetEnvelopeReport")]
+        public async Task<IActionResult> GetEnvelopeReport([FromBody] SearchEnvelopeModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var defaultCurrencyObj = currencyService.GetDefaultCurrency();
+            if (defaultCurrencyObj == null)
+            {
+                return BadRequest("Default currency is not set. Please contact administrator");
+            }
+            string defaultCurrency = defaultCurrencyObj.Currency;
+            decimal exchangeRate = 1;
+            if (!string.IsNullOrEmpty(defaultCurrency))
+            {
+                var dated = DateTime.Now;
+                var rates = await ratesService.GetCurrencyRatesForDate(dated);
+                if (rates.Rates == null)
+                {
+                    string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                    rates = await ratesHttpService.GetRatesAsync(apiKey);
+                    if (rates.Rates != null)
+                    {
+                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                    }
+                }
+                else
+                {
+                    exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                }
+            }
+            var report = await reportService.GetEnvelopeReport(model, clientUrl, defaultCurrency, exchangeRate);
+            return Ok(report);
+        }
+
+        [HttpPost]
         [Route("GetSectorWiseProjects")]
         public async Task<IActionResult> GetSectorWiseProjects([FromBody] SearchProjectsBySectorModel model)
         {
