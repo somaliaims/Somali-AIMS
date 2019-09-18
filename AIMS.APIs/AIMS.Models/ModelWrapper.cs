@@ -1334,6 +1334,7 @@ namespace AIMS.Models
     public class EnvelopeReport
     {
         public Report ReportSettings { get; set; }
+        public ICollection<int> EnvelopeYears { get; set; }
         public IEnumerable<EnvelopeYearlyView> Envelope { get; set; }
     }
 

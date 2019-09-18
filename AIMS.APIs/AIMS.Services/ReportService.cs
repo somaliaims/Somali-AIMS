@@ -503,8 +503,6 @@ namespace AIMS.Services
                     IQueryable<EFEnvelopeYearlyBreakup> envelopeList = null;
                     IQueryable<EFEnvelope> envelopes = null;
 
-
-
                     var envelopeTypes = unitWork.EnvelopeTypesRepository.GetManyQueryable(e => e.Id != 0);
                     if (model.FunderId != 0)
                     {
@@ -539,6 +537,13 @@ namespace AIMS.Services
                                         where e.EnvelopeId == model.EnvelopeTypeId
                                         select e);
                     }
+
+                    List<int> envelopeYearsList = new List<int>();
+                    for (int yr = previousYear; yr <= upperYearLimit; yr++)
+                    {
+                        envelopeYearsList.Add(yr);
+                    }
+                    envelopeReport.EnvelopeYears = envelopeYearsList;
 
                     foreach (var envelope in envelopes)
                     {
