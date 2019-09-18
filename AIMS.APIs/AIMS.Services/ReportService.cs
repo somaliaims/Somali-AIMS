@@ -550,12 +550,10 @@ namespace AIMS.Services
                         envelopeView.Funder = envelope.Funder.OrganizationName;
                         int envelopeId = envelope.Id;
 
-                        if (yearlyBreakup != null)
-                        {
-                            yearlyBreakup = (from yb in yearlyBreakup
-                                             orderby yb.Year.FinancialYear ascending
-                                             select yb);
-                        }
+                        yearlyBreakup = (from yb in envelopeList
+                                         where yb.EnvelopeId == envelope.Id
+                                         orderby yb.Year.FinancialYear ascending
+                                         select yb);
 
                         IQueryable<EFEnvelopeYearlyBreakup> yearBreakup = null;
                         foreach (var type in envelopeTypes)
@@ -601,8 +599,8 @@ namespace AIMS.Services
                             }
                             breakupView.YearlyBreakup = yearlyBreakupList;
                             envelopeView.EnvelopeBreakupsByType.Add(breakupView);
-                            envelopeViewList.Add(envelopeView);
                         }
+                        envelopeViewList.Add(envelopeView);
                     }
                     envelopeReport.Envelope = envelopeViewList;
                 }
