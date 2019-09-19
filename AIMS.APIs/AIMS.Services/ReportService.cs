@@ -534,8 +534,12 @@ namespace AIMS.Services
                     if (model.EnvelopeTypeId > 0)
                     {
                         envelopeList = (from e in envelopeList
-                                        where e.EnvelopeId == model.EnvelopeTypeId
+                                        where e.EnvelopeTypeId == model.EnvelopeTypeId
                                         select e);
+
+                        envelopeTypes = (from e in envelopeTypes
+                                         where e.Id == model.EnvelopeTypeId
+                                         select e);
                     }
 
                     List<int> envelopeYearsList = new List<int>();
