@@ -76,7 +76,7 @@ namespace AIMS.DAL.EF
                 .IsUnique();
 
             modelBuilder.Entity<EFEnvelopeYearlyBreakup>()
-                .HasKey(e => new { e.EnvelopeTypeId, e.YearId });
+                .HasKey(e => new { e.EnvelopeTypeId, e.EnvelopeId, e.YearId });
         }
 
         //Creating DB Tables for the Objects

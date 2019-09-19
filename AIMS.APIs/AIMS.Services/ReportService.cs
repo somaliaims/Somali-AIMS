@@ -504,10 +504,10 @@ namespace AIMS.Services
                     IQueryable<EFEnvelope> envelopes = null;
 
                     var envelopeTypes = unitWork.EnvelopeTypesRepository.GetManyQueryable(e => e.Id != 0);
-                    if (model.FunderId != 0)
+                    if (model.FunderIds.Count > 0)
                     {
-                        envelopes = unitWork.EnvelopeRepository.GetWithInclude(e => e.FunderId == model.FunderId, new string[] { "Funder" });
-                        envelopeList = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(e => e.Envelope.FunderId == model.FunderId, new string[] { "Envelope", "Year" });
+                        envelopes = unitWork.EnvelopeRepository.GetWithInclude(e => model.FunderIds.Contains(e.FunderId), new string[] { "Funder" });
+                        envelopeList = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(e => model.FunderIds.Contains(e.Envelope.FunderId), new string[] { "Envelope", "Year" });
                     }
                     else
                     {
@@ -531,14 +531,14 @@ namespace AIMS.Services
                                         select e);
                     }
 
-                    if (model.EnvelopeTypeId > 0)
+                    if (model.EnvelopeTypeIds.Count > 0)
                     {
                         envelopeList = (from e in envelopeList
-                                        where e.EnvelopeTypeId == model.EnvelopeTypeId
+                                        where model.EnvelopeTypeIds.Contains(e.EnvelopeTypeId)
                                         select e);
 
                         envelopeTypes = (from e in envelopeTypes
-                                         where e.Id == model.EnvelopeTypeId
+                                         where model.EnvelopeTypeIds.Contains(e.Id)
                                          select e);
                     }
 
