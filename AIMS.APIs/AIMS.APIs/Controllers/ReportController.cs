@@ -112,6 +112,11 @@ namespace AIMS.APIs.Controllers
                 }
             }
             var report = await reportService.GetEnvelopeReport(model, clientUrl, defaultCurrency, exchangeRate);
+            var response = excelService.GenerateEnvelopeReport(report);
+            if (response.Success)
+            {
+                report.ReportSettings.ExcelReportName = response.Message;
+            }
             return Ok(report);
         }
 
