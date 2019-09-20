@@ -984,14 +984,16 @@ namespace AIMS.Services
                     row = excelSheet.CreateRow(++rowCounter);
                     row.CreateCell(0, CellType.Blank);
                     row.CreateCell(1, CellType.Blank);
-                    int index = 1;
+                    int index = 0;
                     foreach (var year in yearsList)
                     {
                         var funderCol = row.CreateCell(++index);
                         funderCol.SetCellValue(year.ToString());
                         funderCol.CellStyle = headerStyle;
                     }
-
+                    var totalCell = row.CreateCell(++index);
+                    totalCell.SetCellValue("Total");
+                    totalCell.CellStyle = headerStyle;
 
                     foreach (var envelope in report.Envelope)
                     {
@@ -1013,16 +1015,17 @@ namespace AIMS.Services
                             envelopeTypeCell.SetCellValue(breakupByType.EnvelopeType);
 
                             double envelopeTypeTotalAmount = 0;
+                            int yearlyIndex = 0;
                             foreach(var yearly in breakupByType.YearlyBreakup)
                             {
-                                var yearlyCell = row.CreateCell(++index, CellType.Numeric);
+                                var yearlyCell = row.CreateCell(++yearlyIndex, CellType.Numeric);
                                 yearlyCell.CellStyle = dataCellStyle;
                                 double yearlyAmount = Convert.ToDouble(yearly.Amount);
                                 yearlyCell.SetCellValue(yearlyAmount);
                                 envelopeTypeTotalAmount += yearlyAmount;
                             }
-                            var yearlyTotalCell = row.CreateCell(++index, CellType.Numeric);
-                            yearlyTotalCell.CellStyle = dataCellStyle;
+                            var yearlyTotalCell = row.CreateCell(++yearlyIndex, CellType.Numeric);
+                            yearlyTotalCell.CellStyle = headerStyle;
                             yearlyTotalCell.SetCellValue(envelopeTypeTotalAmount);
                         }
 
@@ -1037,12 +1040,12 @@ namespace AIMS.Services
                             double yearlyTotalAmount = 0;
                             foreach(var yearly in yearlyBreakUps)
                             {
-                                yearlyTotalAmount = (double) (from y in yearly
-                                                     where y.Year == year
-                                                     select y.Amount).FirstOrDefault();
+                                yearlyTotalAmount += (double)(from y in yearly
+                                                             where y.Year == year
+                                                             select y.Amount).FirstOrDefault();
                             }
                             var yearlyTotalCell = row.CreateCell(++index, CellType.Numeric);
-                            yearlyTotalCell.CellStyle = groupHeaderStyle;
+                            yearlyTotalCell.CellStyle = headerStyle;
                             yearlyTotalCell.SetCellValue(yearlyTotalAmount);
                         }
                         
