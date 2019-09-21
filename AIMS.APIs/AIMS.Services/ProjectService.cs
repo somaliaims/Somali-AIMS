@@ -2262,21 +2262,35 @@ namespace AIMS.Services
                                         select d.DocumentUrl).ToList<string>();
 
                     List<EFProjectDocuments> newDocuments = new List<EFProjectDocuments>();
+                    int documentsUpdated = 0;
                     foreach (var document in model.Documents)
                     {
-                        if (!documentNames.Contains(document.DocumentTitle, StringComparer.OrdinalIgnoreCase)
-                            && !documentUrls.Contains(document.DocumentUrl, StringComparer.OrdinalIgnoreCase))
+                        var isDocumentNameExists = (from d in documents
+                                                    where d.DocumentTitle.Equals(document.DocumentTitle, StringComparison.OrdinalIgnoreCase)
+                                                    select d).FirstOrDefault();
+
+                        if (isDocumentNameExists != null)
                         {
-                            unitWork.ProjectDocumentRepository.Insert(new EFProjectDocuments()
-                            {
-                                Project = project,
-                                DocumentTitle = document.DocumentTitle,
-                                DocumentUrl = document.DocumentUrl
-                            });
+                            isDocumentNameExists.DocumentUrl = document.DocumentUrl;
+                            unitWork.ProjectDocumentRepository.Update(isDocumentNameExists);
+                            ++documentsUpdated;
                         }
+                        else
+                        {
+                            if (!documentNames.Contains(document.DocumentTitle, StringComparer.OrdinalIgnoreCase))
+                            {
+                                unitWork.ProjectDocumentRepository.Insert(new EFProjectDocuments()
+                                {
+                                    Project = project,
+                                    DocumentTitle = document.DocumentTitle,
+                                    DocumentUrl = document.DocumentUrl
+                                });
+                            }
+                        }
+                        
                     }
 
-                    if (newDocuments.Count > 0)
+                    if (newDocuments.Count > 0 || documentsUpdated > 0)
                     {
                         unitWork.Save();
                     }
