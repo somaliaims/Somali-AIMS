@@ -391,7 +391,7 @@ namespace AIMS.Services
             {
                 List<LatestProjectView> projects = new List<LatestProjectView>();
                 var latestProjects = unitWork.ProjectRepository.GetWithIncludeOrderByDescending(p => p.Id != 0, p => p.DateUpdated, 10, new string[] { "Funders", "Funders.Funder", "StartingFinancialYear", "EndingFinancialYear" });
-                foreach(var project in latestProjects)
+                foreach (var project in latestProjects)
                 {
                     projects.Add(new LatestProjectView()
                     {
@@ -427,16 +427,16 @@ namespace AIMS.Services
             {
                 List<ProjectAbstractView> projectsList = new List<ProjectAbstractView>();
                 var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
-                foreach(var project in projects)
+                foreach (var project in projects)
                 {
                     IEnumerable<string> funderNames = (from f in project.Funders
-                                                                    select f.Funder.OrganizationName);
+                                                       select f.Funder.OrganizationName);
                     IEnumerable<string> implementerNames = (from i in project.Implementers
-                                                     select i.Implementer.OrganizationName);
+                                                            select i.Implementer.OrganizationName);
                     IEnumerable<string> organizations = funderNames.Union(implementerNames);
 
                     List<OrganizationAbstractView> organizationsList = new List<OrganizationAbstractView>();
-                    foreach(string org in organizations)
+                    foreach (string org in organizations)
                     {
                         organizationsList.Add(new OrganizationAbstractView()
                         {
@@ -483,7 +483,7 @@ namespace AIMS.Services
                 var locationProjects = unitWork.ProjectLocationsRepository.GetManyQueryable(p => p.LocationId == locationId);
 
                 var projectIds = (from l in locationProjects
-                                         select l.ProjectId).Distinct().ToList<int>();
+                                  select l.ProjectId).Distinct().ToList<int>();
 
                 var projects = unitWork.ProjectRepository.GetManyQueryable(p => projectIds.Contains(p.Id));
                 return mapper.Map<List<ProjectView>>(projects);
@@ -582,13 +582,13 @@ namespace AIMS.Services
                         if (project.Disbursements.Any())
                         {
                             projectDisbursements = (from d in project.Disbursements
-                                                        orderby d.Year.FinancialYear ascending
-                                                        select d);
+                                                    orderby d.Year.FinancialYear ascending
+                                                    select d);
                             projectDisbursements = (from d in project.Disbursements
                                                     orderby d.DisbursementType ascending
                                                     select d);
                         }
-                        
+
 
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
@@ -1022,7 +1022,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
-                disbursements = (disbursements.Count() > 0) ? 
+                disbursements = (disbursements.Count() > 0) ?
                                     (from d in disbursements orderby d.Year.FinancialYear ascending select d) : disbursements;
                 return mapper.Map<List<ProjectDisbursementView>>(disbursements);
             }
@@ -1047,7 +1047,7 @@ namespace AIMS.Services
                 var combinedProjectIds = funderProjectsIds.Union(implementerProjectIds);
                 combinedProjectIds = combinedProjectIds.Union(membershipProjectIds);
                 List<UserProjectsView> projectIds = new List<UserProjectsView>();
-                foreach(var id in combinedProjectIds)
+                foreach (var id in combinedProjectIds)
                 {
                     projectIds.Add(new UserProjectsView() { Id = id });
                 }
@@ -1103,8 +1103,8 @@ namespace AIMS.Services
                                                  where fy.FinancialYear == model.StartingFinancialYear
                                                  select fy).FirstOrDefault();
                     var endingFinancialYear = (from fy in financialYears
-                                                where fy.FinancialYear == model.EndingFinancialYear
-                                                select fy).FirstOrDefault();
+                                               where fy.FinancialYear == model.EndingFinancialYear
+                                               select fy).FirstOrDefault();
 
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
@@ -1190,8 +1190,8 @@ namespace AIMS.Services
                 }
 
                 previousFinancialYear = (from fy in financialYears
-                                              where fy.FinancialYear == (currentYear - 1)
-                                              select fy).FirstOrDefault();
+                                         where fy.FinancialYear == (currentYear - 1)
+                                         select fy).FirstOrDefault();
                 if (previousFinancialYear == null)
                 {
                     previousFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 1) });
@@ -1199,8 +1199,8 @@ namespace AIMS.Services
                 }
 
                 currentFinancialYear = (from fy in financialYears
-                                              where fy.FinancialYear == (currentYear)
-                                              select fy).FirstOrDefault();
+                                        where fy.FinancialYear == (currentYear)
+                                        select fy).FirstOrDefault();
                 if (currentFinancialYear == null)
                 {
                     currentFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear) });
@@ -1208,8 +1208,8 @@ namespace AIMS.Services
                 }
 
                 futureFinancialYear = (from fy in financialYears
-                                              where fy.FinancialYear == (currentYear + 1)
-                                              select fy).FirstOrDefault();
+                                       where fy.FinancialYear == (currentYear + 1)
+                                       select fy).FirstOrDefault();
                 if (futureFinancialYear == null)
                 {
                     futureFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 1) });
@@ -1236,7 +1236,7 @@ namespace AIMS.Services
                                                          select y).FirstOrDefault();
                                 if (startingFinancialYear == null)
                                 {
-                                    startingFinancialYear = unitWork.FinancialYearRepository.Insert( new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.StartYear) });
+                                    startingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.StartYear) });
                                     unitWork.Save();
                                 }
 
@@ -1262,12 +1262,12 @@ namespace AIMS.Services
                                     DateUpdated = DateTime.Now
                                 });
                                 await unitWork.SaveAsync();
-                                
+
                                 List<EFProjectFunders> projectFunders = new List<EFProjectFunders>();
                                 if (!string.IsNullOrEmpty(project.Funders))
                                 {
                                     string[] funderNames = project.Funders.Split(",");
-                                    foreach(string funderName in funderNames)
+                                    foreach (string funderName in funderNames)
                                     {
                                         var organization = (from org in organizations
                                                             where org.OrganizationName.Equals(funderName, StringComparison.OrdinalIgnoreCase)
@@ -1326,7 +1326,7 @@ namespace AIMS.Services
                                 List<EFProjectDocuments> projectDocuments = new List<EFProjectDocuments>();
                                 if (project.DocumentLinks.Count > 0)
                                 {
-                                    foreach(var document in project.DocumentLinks)
+                                    foreach (var document in project.DocumentLinks)
                                     {
                                         projectDocuments.Add(new EFProjectDocuments()
                                         {
@@ -1453,7 +1453,7 @@ namespace AIMS.Services
                         }
                     });
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
@@ -1499,8 +1499,8 @@ namespace AIMS.Services
                             foreach (var location in model.ProjectLocations)
                             {
                                 var isProjectLocationExists = (from l in projectLocations
-                                                             where l.LocationId == location.LocationId && l.ProjectId == model.ProjectId
-                                                             select l).FirstOrDefault();
+                                                               where l.LocationId == location.LocationId && l.ProjectId == model.ProjectId
+                                                               select l).FirstOrDefault();
                                 if (isProjectLocationExists != null)
                                 {
                                     isProjectLocationExists.FundsPercentage += location.FundsPercentage;
@@ -1559,7 +1559,7 @@ namespace AIMS.Services
                     }
 
                     bool isError = false;
-                    foreach(var sector in model.ProjectSectors)
+                    foreach (var sector in model.ProjectSectors)
                     {
                         if (sector.SectorId == 0 && sector.MappingId == 0)
                         {
@@ -1635,7 +1635,7 @@ namespace AIMS.Services
                             {
                                 await unitWork.SaveAsync();
                             }
-                            
+
                             if (model.NewMappings.Count() > 0)
                             {
                                 var defaultSectorId = unitWork.SectorTypesRepository.GetProjection(s => s.IsPrimary == true, s => s.Id).FirstOrDefault();
@@ -1683,7 +1683,7 @@ namespace AIMS.Services
                             transaction.Commit();
                         }
                     });
-                    
+
                 }
                 catch (Exception ex)
                 {
@@ -1757,7 +1757,7 @@ namespace AIMS.Services
                             unitWork.Save();
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         response.Success = false;
                         response.Message = ex.Message;
@@ -1812,11 +1812,11 @@ namespace AIMS.Services
                             }
 
                             var isImplementerInDB = (from i in projectImplementers
-                                                where i.ProjectId == project.Id && i.ImplementerId == isOrganizationInDB.Id
-                                                select i).FirstOrDefault();
+                                                     where i.ProjectId == project.Id && i.ImplementerId == isOrganizationInDB.Id
+                                                     select i).FirstOrDefault();
                             var isImplementerInList = (from i in newImplementersList
-                                                  where i.ProjectId == project.Id && i.ImplementerId == isOrganizationInDB.Id
-                                                  select i).FirstOrDefault();
+                                                       where i.ProjectId == project.Id && i.ImplementerId == isOrganizationInDB.Id
+                                                       select i).FirstOrDefault();
 
                             if (isImplementerInDB == null && isImplementerInList == null)
                             {
@@ -1954,7 +1954,7 @@ namespace AIMS.Services
                             message = emailMessage.Message;
                             footerMessage = emailMessage.FooterMessage;
                         }
-                        
+
                         message += mHelper.ProjectToOrganizationMessage(project.Title, string.Join(",", updatedOrganizationNames));
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
                         emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
@@ -1999,10 +1999,10 @@ namespace AIMS.Services
                     var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(f => model.ProjectId == model.ProjectId);
                     List<EFProjectImplementers> newImplementers = new List<EFProjectImplementers>();
                     var implementersToDelete = (from i in projectImplementers
-                                           where !model.ImplementerIds.Contains(i.ImplementerId)
-                                           select i);
+                                                where !model.ImplementerIds.Contains(i.ImplementerId)
+                                                select i);
                     var alreadyImplementerIds = (from i in implementersToDelete
-                                            select i.ImplementerId).ToList<int>();
+                                                 select i.ImplementerId).ToList<int>();
                     updatedImplementerIds = (model.ImplementerIds.Except(alreadyImplementerIds).ToList<int>());
                     if (implementersToDelete.Any())
                     {
@@ -2016,11 +2016,11 @@ namespace AIMS.Services
                     foreach (var implementer in implementers)
                     {
                         var isImplementerInDB = (from i in projectImplementers
-                                            where i.ProjectId == model.ProjectId && i.ImplementerId == implementer.Id
-                                            select i).FirstOrDefault();
+                                                 where i.ProjectId == model.ProjectId && i.ImplementerId == implementer.Id
+                                                 select i).FirstOrDefault();
                         var isImplementerAdded = (from i in newImplementers
-                                             where i.ProjectId == model.ProjectId && i.ImplementerId == implementer.Id
-                                             select i).FirstOrDefault();
+                                                  where i.ProjectId == model.ProjectId && i.ImplementerId == implementer.Id
+                                                  select i).FirstOrDefault();
 
                         if (isImplementerInDB == null && isImplementerAdded == null)
                         {
@@ -2047,8 +2047,8 @@ namespace AIMS.Services
                     unitWork.Save();
 
                     var projectImplementerIds = (from i in implementers
-                                            where updatedImplementerIds.Contains(i.Id)
-                                            select i.Id).ToList<int>();
+                                                 where updatedImplementerIds.Contains(i.Id)
+                                                 select i.Id).ToList<int>();
                     var users = unitWork.UserRepository.GetManyQueryable(u => projectImplementerIds.Contains(u.OrganizationId));
                     List<EmailAddress> emailAddresses = new List<EmailAddress>();
                     var updatedOrganizationNames = (from i in implementers
@@ -2121,7 +2121,7 @@ namespace AIMS.Services
 
                     decimal projectValue = (project.ProjectValue * project.ExchangeRate);
                     decimal totalDisbursements = (from d in model.YearlyDisbursements
-                                                select (d.Amount * model.ExchangeRate)).Sum();
+                                                  select (d.Amount * model.ExchangeRate)).Sum();
 
                     if (totalDisbursements > projectValue)
                     {
@@ -2140,9 +2140,36 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => f.FinancialYear >= (currentYear - 2));
-                    var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == model.ProjectId, new string[] {  "Year" });
+                    int startingYear = (from y in model.YearlyDisbursements
+                                        select y.Year).Min();
+                    int endingYear = (from y in model.YearlyDisbursements
+                                      select y.Year).Max();
+                    var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => f.FinancialYear >= startingYear).ToList();
+                    var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == model.ProjectId, new string[] { "Year" });
                     List<EFProjectDisbursements> newDisbursementsList = new List<EFProjectDisbursements>();
+                    List<EFFinancialYears> newFinancialYears = new List<EFFinancialYears>();
+
+                    for(var year = startingYear; year <= endingYear; year++)
+                    {
+                        var isYearExists = (from yr in financialYears
+                                            where yr.FinancialYear == year
+                                            select yr).FirstOrDefault();
+
+                        if (isYearExists == null)
+                        {
+                            newFinancialYears.Add(new EFFinancialYears() { FinancialYear = year });
+                            unitWork.Save();
+                        }
+                    }
+
+                    if (newFinancialYears.Count > 0)
+                    {
+                        unitWork.Save();
+                        foreach(var newYear in newFinancialYears)
+                        {
+                            financialYears.Add(newYear);
+                        }
+                    }
 
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
@@ -2150,7 +2177,7 @@ namespace AIMS.Services
                         using (var transaction = context.Database.BeginTransaction())
                         {
                             EFProjectDisbursements isDisbursementInDB = null;
-                            foreach(var disbursement in model.YearlyDisbursements)
+                            foreach (var disbursement in model.YearlyDisbursements)
                             {
                                 isDisbursementInDB = null;
                                 if (disbursements.Any())
@@ -2159,7 +2186,7 @@ namespace AIMS.Services
                                                           where d.Year.FinancialYear == disbursement.Year && d.DisbursementType == disbursement.DisbursementType
                                                           select d).FirstOrDefault();
                                 }
-                                
+
                                 var isDisbursementInList = (from d in newDisbursementsList
                                                             where d.Year.FinancialYear == disbursement.Year && d.DisbursementType == disbursement.DisbursementType
                                                             select d).FirstOrDefault();
@@ -2235,9 +2262,9 @@ namespace AIMS.Services
                                         select d.DocumentUrl).ToList<string>();
 
                     List<EFProjectDocuments> newDocuments = new List<EFProjectDocuments>();
-                    foreach(var document in model.Documents)
+                    foreach (var document in model.Documents)
                     {
-                        if (!documentNames.Contains(document.DocumentTitle, StringComparer.OrdinalIgnoreCase) 
+                        if (!documentNames.Contains(document.DocumentTitle, StringComparer.OrdinalIgnoreCase)
                             && !documentUrls.Contains(document.DocumentUrl, StringComparer.OrdinalIgnoreCase))
                         {
                             unitWork.ProjectDocumentRepository.Insert(new EFProjectDocuments()
@@ -2290,7 +2317,7 @@ namespace AIMS.Services
                         });
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
@@ -2539,8 +2566,8 @@ namespace AIMS.Services
                                              where fy.FinancialYear == model.StartingFinancialYear
                                              select fy).FirstOrDefault();
                 var endingFinancialYear = (from fy in financialYears
-                                            where fy.FinancialYear == model.EndingFinancialYear
-                                            select fy).FirstOrDefault();
+                                           where fy.FinancialYear == model.EndingFinancialYear
+                                           select fy).FirstOrDefault();
 
                 var strategy = context.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
@@ -2591,7 +2618,7 @@ namespace AIMS.Services
 
                                 if (project.Implementers.Count > 0)
                                 {
-                                    foreach(var implementer in project.Implementers)
+                                    foreach (var implementer in project.Implementers)
                                     {
                                         var implementerExists = (from i in implementersList
                                                                  where i.ImplementerId == implementer.ImplementerId && i.ProjectId == newProject.Id
@@ -2610,7 +2637,7 @@ namespace AIMS.Services
 
                                 if (project.Sectors.Count > 0)
                                 {
-                                    foreach(var sector in project.Sectors)
+                                    foreach (var sector in project.Sectors)
                                     {
                                         var sectorExists = (from s in sectorsList
                                                             where s.ProjectId == newProject.Id && s.SectorId == sector.SectorId
@@ -2630,12 +2657,12 @@ namespace AIMS.Services
 
                                 if (project.Locations.Count > 0)
                                 {
-                                    foreach(var location in project.Locations)
+                                    foreach (var location in project.Locations)
                                     {
                                         var locationExists = (from l in locationsList
                                                               where l.LocationId == location.LocationId && l.ProjectId == newProject.Id
                                                               select l).FirstOrDefault();
-      
+
                                         if (locationExists == null)
                                         {
                                             locationsList.Add(new EFProjectLocations()
@@ -2650,7 +2677,7 @@ namespace AIMS.Services
 
                                 if (project.Disbursements.Count > 0)
                                 {
-                                    foreach(var disbursement in project.Disbursements)
+                                    foreach (var disbursement in project.Disbursements)
                                     {
                                         var disbursementExists = (from d in disbursementsList
                                                                   where d.ProjectId == newProject.Id &&
@@ -2669,13 +2696,13 @@ namespace AIMS.Services
                                                 Year = disbursement.Year
                                             });
                                         }
-                                        
+
                                     }
                                 }
 
                                 if (project.Documents.Count > 0)
                                 {
-                                    foreach(var document in project.Documents)
+                                    foreach (var document in project.Documents)
                                     {
                                         var documentExists = (from d in documentsList
                                                               where d.DocumentTitle == document.DocumentTitle &&
@@ -2700,7 +2727,7 @@ namespace AIMS.Services
                             {
                                 unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
                             }
-                            
+
                             if (implementersList.Count > 0)
                             {
                                 unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
@@ -2728,7 +2755,6 @@ namespace AIMS.Services
                             await unitWork.SaveAsync();
                         }
 
-                        
                         //Now delete the old projects
                         if (model.ProjectsIds.Count > 0)
                         {
