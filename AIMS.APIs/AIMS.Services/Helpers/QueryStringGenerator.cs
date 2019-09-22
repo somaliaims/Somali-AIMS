@@ -8,25 +8,32 @@ namespace AIMS.Services.Helpers
     public interface IQueryStringGenerator
     {
         /// <summary>
-        /// Prepares a querystring for sectors reports ui
+        /// Prepares a querystring for sectors reports using UI
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
         string GetQueryStringForSectorsReport(SearchProjectsBySectorModel model);
 
         /// <summary>
-        /// Prepares a querystring for locations reports ui
+        /// Prepares a querystring for locations reports using UI
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
         string GetQueryStringForLocationsReport(SearchProjectsByLocationModel model);
 
         /// <summary>
-        /// Prepares a querystring for time series reports ui
+        /// Prepares a querystring for time series reports using UI
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
         string GetQueryStringForTimeSeriesReport(SearchProjectsByYearModel model);
+
+        /// <summary>
+        /// Prepares a querystring for envelope report reload using UI
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        string GetQueryStringForEnvelopeReport(SearchEnvelopeModel model);
     }
 
     public class QueryStringGenerator : IQueryStringGenerator
@@ -121,6 +128,32 @@ namespace AIMS.Services.Helpers
             if (!string.IsNullOrEmpty(model.Title))
             {
                 queryString += ("&title=" + model.Title);
+            }
+
+            if (model.StartingYear > 0)
+            {
+                queryString += ("&syear=" + model.StartingYear);
+            }
+
+            if (model.EndingYear > 0)
+            {
+                queryString += ("&eyear=" + model.EndingYear);
+            }
+            return queryString;
+        }
+
+        public string GetQueryStringForEnvelopeReport(SearchEnvelopeModel model)
+        {
+            string queryString = "?load=true";
+            if (model.FunderIds.Count > 0)
+            {
+                queryString += "&funders=" + string.Join(",", model.FunderIds);
+            }
+
+            if (model.EnvelopeTypeIds.Count > 0)
+            {
+                string envelopeTypeIdsStr = string.Join(",", model.EnvelopeTypeIds);
+                queryString += ("&envelopeTypes=" + envelopeTypeIdsStr);
             }
 
             if (model.StartingYear > 0)

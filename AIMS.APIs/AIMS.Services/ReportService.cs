@@ -487,13 +487,21 @@ namespace AIMS.Services
                 EnvelopeReport envelopeReport = new EnvelopeReport();
                 try
                 {
+                    IQueryStringGenerator queryStringGenerator = new QueryStringGenerator();
+                    string queryString = queryStringGenerator.GetQueryStringForEnvelopeReport(model);
+                    reportUrl += ReportConstants.ENVELOPE_REPORT_URL;
+
+                    if (!string.IsNullOrEmpty(queryString))
+                    {
+                        reportUrl += queryString;
+                    }
                     envelopeReport.ReportSettings = new Report()
                     {
                         Title = ReportConstants.PROJECTS_ENVELOPE_REPORT_TITLE,
                         SubTitle = ReportConstants.PROJECTS_ENVELOPE_REPORT_SUBTITLE,
                         Footer = ReportConstants.PROJECTS_ENVELOPE_REPORT_FOOTER,
                         Dated = DateTime.Now.ToLongDateString(),
-                        ReportUrl = reportUrl + ReportConstants.ENVELOPE_REPORT_URL + "?load=true"
+                        ReportUrl = reportUrl
                     };
 
                     int currentYear = DateTime.Now.Year;
