@@ -601,7 +601,7 @@ namespace AIMS.Services
                                 {
                                     yearlyBreakupList.Add(new EnvelopeYearlyBreakUp()
                                     {
-                                        Amount = isBreakupExists.Amount,
+                                        Amount = isBreakupExists.Amount * (exchangeRate / envelope.ExchangeRate),
                                         Year = year
                                     });
                                 }
