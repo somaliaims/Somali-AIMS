@@ -155,10 +155,34 @@ namespace AIMS.Services
                     {
                         using (var transaction = context.Database.BeginTransaction())
                         {
-                            var envelopeBreakups = await unitWork.EnvelopeYearlyBreakupRepository.GetManyQueryableAsync(e => e.EnvelopeTypeId == id);
-                            foreach (var breakup in envelopeBreakups)
+                            var envelopeBreakups = await unitWork.EnvelopeYearlyBreakupRepository.GetWithIncludeAsync(e => (e.EnvelopeTypeId == id || e.EnvelopeTypeId == mappingId), new string[] { "Year" });
+                            var deletingBreakups = (from b in envelopeBreakups
+                                                    where b.EnvelopeTypeId == id
+                                                    select b);
+                            var mappingBreakups = (from b in envelopeBreakups
+                                                   where b.EnvelopeTypeId == mappingId
+                                                   select b);
+
+                            int amountsUpdated = 0;
+                            foreach (var breakup in deletingBreakups)
                             {
-                                breakup.EnvelopeTypeId = mappingId;
+                                int year = breakup.Year.FinancialYear;
+                                var mappingBreakupExists = (from b in mappingBreakups
+                                                            where b.Year.FinancialYear == year
+                                                            select b).FirstOrDefault();
+
+                                if (mappingBreakupExists != null)
+                                {
+                                    mappingBreakupExists.Amount += breakup.Amount;
+                                    mappingBreakupExists.Amount = Math.Round(mappingBreakupExists.Amount, MidpointRounding.AwayFromZero);
+                                    unitWork.EnvelopeYearlyBreakupRepository.Update(mappingBreakupExists);
+                                    amountsUpdated++;
+                                }
+                            }
+
+                            if (amountsUpdated > 0)
+                            {
+                                unitWork.Save();
                             }
                             unitWork.EnvelopeTypesRepository.Delete(isDeletedOkay);
                             await unitWork.SaveAsync();
