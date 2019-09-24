@@ -167,8 +167,9 @@ namespace AIMS.Services
                             foreach (var breakup in deletingBreakups)
                             {
                                 int year = breakup.Year.FinancialYear;
+                                int envelopeId = breakup.EnvelopeId;
                                 var mappingBreakupExists = (from b in mappingBreakups
-                                                            where b.Year.FinancialYear == year
+                                                            where b.Year.FinancialYear == year && b.EnvelopeId == envelopeId
                                                             select b).FirstOrDefault();
 
                                 if (mappingBreakupExists != null)
