@@ -1136,19 +1136,6 @@ namespace AIMS.Services
                             await unitWork.SaveAsync();
                             response.ReturnedId = newProject.Id;
 
-                            //Finally deleting any extra disbursements
-                            var disbursementsToDelete = unitWork.ProjectDisbursementsRepository.GetWithInclude(
-                                d => d.Year.FinancialYear < model.StartingFinancialYear && d.Year.FinancialYear > model.EndingFinancialYear,
-                                new string[] { "Year" });
-
-                            if (disbursementsToDelete.Any())
-                            {
-                                foreach(var disbursement in disbursementsToDelete)
-                                {
-                                    unitWork.ProjectDisbursementsRepository.Delete(disbursement);
-                                }
-                            }
-                            await unitWork.SaveAsync();
                             transaction.Commit();
                         }
                     });
@@ -2424,6 +2411,27 @@ namespace AIMS.Services
                 projectObj.DateUpdated = DateTime.Now;
 
                 unitWork.ProjectRepository.Update(projectObj);
+                unitWork.Save();
+
+                //Finally deleting any extra disbursements
+                var projectDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(p => p.ProjectId == id, new string[] { "Year" });
+
+                List<EFProjectDisbursements> disbursementsToDelete = new List<EFProjectDisbursements>();
+                foreach(var disbursement in projectDisbursements)
+                {
+                    if (disbursement.Year.FinancialYear < model.StartingFinancialYear || 
+                        disbursement.Year.FinancialYear > model.EndingFinancialYear)
+                    {
+                        disbursementsToDelete.Add(disbursement);
+                    }
+                }
+                if (disbursementsToDelete.Any())
+                {
+                    foreach (var disbursement in disbursementsToDelete)
+                    {
+                        unitWork.ProjectDisbursementsRepository.Delete(disbursement);
+                    }
+                }
                 unitWork.Save();
                 response.Message = true.ToString();
                 return response;
