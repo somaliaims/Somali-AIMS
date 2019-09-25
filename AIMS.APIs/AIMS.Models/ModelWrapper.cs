@@ -863,6 +863,11 @@ namespace AIMS.Models
         public int Id { get; set; }
         [Required]
         public string Title { get; set; }
+        [Required]
+        [Column(TypeName = "decimal(11,2)")]
+        public decimal ProjectValue { get; set; }
+        [Required]
+        public string ProjectCurrency { get; set; }
         public string Description { get; set; }
         [Required]
         public int StartingFinancialYear { get; set; }

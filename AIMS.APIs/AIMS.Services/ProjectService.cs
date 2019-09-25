@@ -1135,6 +1135,20 @@ namespace AIMS.Services
                             });
                             await unitWork.SaveAsync();
                             response.ReturnedId = newProject.Id;
+
+                            //Finally deleting any extra disbursements
+                            var disbursementsToDelete = unitWork.ProjectDisbursementsRepository.GetWithInclude(
+                                d => d.Year.FinancialYear < model.StartingFinancialYear && d.Year.FinancialYear > model.EndingFinancialYear,
+                                new string[] { "Year" });
+
+                            if (disbursementsToDelete.Any())
+                            {
+                                foreach(var disbursement in disbursementsToDelete)
+                                {
+                                    unitWork.ProjectDisbursementsRepository.Delete(disbursement);
+                                }
+                            }
+                            await unitWork.SaveAsync();
                             transaction.Commit();
                         }
                     });
@@ -2110,11 +2124,32 @@ namespace AIMS.Services
                 try
                 {
                     int currentYear = DateTime.Now.Year;
-                    var project = unitWork.ProjectRepository.GetByID(model.ProjectId);
+                    var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == model.ProjectId, new string[] { "StartingFinancialYear", "EndingFinancialYear" }).FirstOrDefault();
                     if (project == null)
                     {
                         mHelper = new MessageHelper();
                         response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                        return response;
+                    }
+
+                    int startingYear = (from y in model.YearlyDisbursements
+                                        select y.Year).Min();
+                    int endingYear = (from y in model.YearlyDisbursements
+                                      select y.Year).Max();
+
+                    if (startingYear < project.StartingFinancialYear.FinancialYear)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetInvalidStartingFinancialYearMessage();
+                        response.Success = false;
+                        return response;
+                    }
+
+                    if (endingYear < project.EndingFinancialYear.FinancialYear)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetInvalidEndingFinancialYearMessage();
                         response.Success = false;
                         return response;
                     }
@@ -2140,10 +2175,8 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    int startingYear = (from y in model.YearlyDisbursements
-                                        select y.Year).Min();
-                    int endingYear = (from y in model.YearlyDisbursements
-                                      select y.Year).Max();
+                    
+
                     var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => f.FinancialYear >= startingYear).ToList();
                     var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == model.ProjectId, new string[] { "Year" });
                     List<EFProjectDisbursements> newDisbursementsList = new List<EFProjectDisbursements>();
@@ -2572,7 +2605,16 @@ namespace AIMS.Services
                 {
                     mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("Provided financial year");
+                    response.Message = mHelper.GetNotFound("Provided Financial Years");
+                    return response;
+                }
+
+                var currency = unitWork.CurrencyRepository.GetOne(c => c.Currency == model.ProjectCurrency);
+                if (currency == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Provided Currency");
                     return response;
                 }
 
@@ -2593,7 +2635,9 @@ namespace AIMS.Services
                             Title = model.Title,
                             Description = model.Description,
                             StartingFinancialYear = startingFinancialYear,
-                            EndingFinancialYear = endingFinancialYear
+                            EndingFinancialYear = endingFinancialYear,
+                            ProjectCurrency = model.ProjectCurrency,
+                            ProjectValue = model.ProjectValue
                         });
                         await unitWork.SaveAsync();
 
