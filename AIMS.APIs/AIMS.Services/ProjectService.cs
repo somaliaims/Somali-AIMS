@@ -1024,6 +1024,29 @@ namespace AIMS.Services
                 var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
                 disbursements = (disbursements.Count() > 0) ?
                                     (from d in disbursements orderby d.Year.FinancialYear ascending select d) : disbursements;
+
+                //Delete any planned disbursements for previous year
+                var disbursementsToDelete = (from d in disbursements
+                                            where d.Year.FinancialYear < DateTime.Now.Year && d.DisbursementType == DisbursementTypes.Planned
+                                            select d);
+
+                int deleted = 0;
+                if (disbursementsToDelete.Any())
+                {
+                    foreach(var disbursement in disbursementsToDelete)
+                    {
+                        unitWork.ProjectDisbursementsRepository.Delete(disbursement);
+                        deleted++;
+                    }
+                }
+
+                if (deleted > 0)
+                {
+                    unitWork.Save();
+                    disbursements = (from d in disbursements
+                                     where (d.Year.FinancialYear != DateTime.Now.Year && d.DisbursementType != DisbursementTypes.Planned)
+                                     select d);
+                }
                 return mapper.Map<List<ProjectDisbursementView>>(disbursements);
             }
         }
