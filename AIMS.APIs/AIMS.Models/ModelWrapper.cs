@@ -875,7 +875,41 @@ namespace AIMS.Models
         public int EndingFinancialYear { get; set; }
         [Required]
         public List<int> ProjectsIds { get; set; }
+        public List<int> FunderIds { get; set; }
+        public List<int> ImplementerIds { get; set; }
+        public List<DocumentModel> Documents { get; set; }
+        public List<MergeProjectSectorModel> Sectors { get; set; }
+        public List<MergeProjectLocationModel> Locations { get; set; }
+        public List<MergeProjectDisbursementsModel> Disbursements { get; set; }
+        public List<MergeProjectMarkerModel> Markers { get; set; }
     }
+
+    public class MergeProjectSectorModel
+    {
+        public int SectorId { get; set; }
+        public decimal FundsPercentage { get; set; }
+    }
+
+    public class MergeProjectLocationModel
+    {
+        public int LocationId { get; set; }
+        public decimal FundsPercentage { get; set; }
+    }
+
+    public class MergeProjectDisbursementsModel
+    {
+        public int Year { get; set; }
+        public decimal Amount { get; set; }
+        public DisbursementTypes Type { get; set; }
+    }
+
+    public class MergeProjectMarkerModel
+    {
+        public int MarkerId { get; set; }
+        public FieldTypes FieldType { get; set; }
+        public string Values { get; set; }
+    }
+
 
     /// <summary>
     /// Project funders models
