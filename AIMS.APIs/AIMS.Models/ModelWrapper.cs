@@ -868,13 +868,14 @@ namespace AIMS.Models
         public decimal ProjectValue { get; set; }
         [Required]
         public string ProjectCurrency { get; set; }
+        public int FundingTypeId { get; set; }
         public string Description { get; set; }
         [Required]
         public int StartingFinancialYear { get; set; }
         [Required]
         public int EndingFinancialYear { get; set; }
         [Required]
-        public List<int> ProjectsIds { get; set; }
+        public List<int> ProjectIds { get; set; }
         public List<int> FunderIds { get; set; }
         public List<int> ImplementerIds { get; set; }
         public List<DocumentModel> Documents { get; set; }

@@ -1064,10 +1064,10 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var funderProjectsIds = unitWork.ProjectFundersRepository.GetProjection(f => f.FunderId == funderId, f => f.ProjectId).ToList();
+                var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(f => f.FunderId == funderId, f => f.ProjectId).ToList();
                 var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ImplementerId == funderId, i => i.ProjectId).ToList();
                 var membershipProjectIds = unitWork.ProjectMembershipRepository.GetProjection(m => (m.UserId == userId && m.IsApproved == true), m => m.ProjectId);
-                var combinedProjectIds = funderProjectsIds.Union(implementerProjectIds);
+                var combinedProjectIds = funderProjectIds.Union(implementerProjectIds);
                 combinedProjectIds = combinedProjectIds.Union(membershipProjectIds);
                 List<UserProjectsView> projectIds = new List<UserProjectsView>();
                 foreach (var id in combinedProjectIds)
@@ -2623,7 +2623,7 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
 
-                if (model.ProjectsIds.Count < 2)
+                if (model.ProjectIds.Count < 2)
                 {
                     mHelper = new MessageHelper();
                     response.Message = mHelper.InvalidProjectMerge();
@@ -2646,6 +2646,15 @@ namespace AIMS.Services
                     mHelper = new MessageHelper();
                     response.Success = false;
                     response.Message = mHelper.GetNotFound("Provided Currency");
+                    return response;
+                }
+
+                var fundingType = unitWork.FundingTypeRepository.GetOne(f => f.Id == model.FundingTypeId);
+                if (fundingType == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Funding Type");
                     return response;
                 }
 
@@ -2700,7 +2709,8 @@ namespace AIMS.Services
                             StartingFinancialYear = startingFinancialYear,
                             EndingFinancialYear = endingFinancialYear,
                             ProjectCurrency = model.ProjectCurrency,
-                            ProjectValue = model.ProjectValue
+                            ProjectValue = model.ProjectValue,
+                            FundingType = fundingType
                         });
                         await unitWork.SaveAsync();
 
@@ -2793,15 +2803,60 @@ namespace AIMS.Services
                                     newSectors.Add(new EFProjectSectors()
                                     {
                                         Project = newProject,
+                                        SectorId = sector.Id,
                                         Sector = sector,
                                         FundsPercentage = sectorModel.FundsPercentage,
                                     });
+                                }
+                                else if (isSectorAdded != null)
+                                {
+                                    isSectorAdded.FundsPercentage += sectorModel.FundsPercentage;
                                 }
                             }
 
                             if (newSectors.Count > 0)
                             {
                                 unitWork.ProjectSectorsRepository.InsertMultiple(newSectors);
+                                await unitWork.SaveAsync();
+                            }
+                        }
+
+                        if (model.Locations.Count > 0)
+                        {
+                            List<EFProjectLocations> newLocations = new List<EFProjectLocations>();
+                            EFLocation location = null;
+                            foreach (var locationModel in model.Locations)
+                            {
+                                if (locations != null)
+                                {
+                                    location = (from l in locations
+                                              where l.Id == locationModel.LocationId
+                                              select l).FirstOrDefault();
+                                }
+
+                                var isLocationAdded = (from l in newLocations
+                                                     where l.LocationId == locationModel.LocationId
+                                                     select l).FirstOrDefault();
+
+                                if (location != null && isLocationAdded == null)
+                                {
+                                    newLocations.Add(new EFProjectLocations()
+                                    {
+                                        Project = newProject,
+                                        LocationId = location.Id,
+                                        Location = location,
+                                        FundsPercentage = locationModel.FundsPercentage,
+                                    });
+                                }
+                                else if (isLocationAdded != null)
+                                {
+                                    isLocationAdded.FundsPercentage += locationModel.FundsPercentage;
+                                }
+                            }
+
+                            if (newLocations.Count > 0)
+                            {
+                                unitWork.ProjectLocationsRepository.InsertMultiple(newLocations);
                                 await unitWork.SaveAsync();
                             }
                         }
@@ -2824,6 +2879,7 @@ namespace AIMS.Services
                                 {
                                     newDisbursements.Add(new EFProjectDisbursements()
                                     {
+                                        Project = newProject,
                                         DisbursementType = disbursement.Type,
                                         Year = financialYear,
                                         Amount = disbursement.Amount,
@@ -2853,6 +2909,7 @@ namespace AIMS.Services
                                 {
                                     newDocuments.Add(new EFProjectDocuments()
                                     {
+                                        Project = newProject,
                                         DocumentTitle = document.DocumentTitle,
                                         DocumentUrl = document.DocumentUrl
                                     });
@@ -2897,9 +2954,9 @@ namespace AIMS.Services
                         }
 
                         //Now delete the old projects
-                        if (model.ProjectsIds.Count > 0)
+                        if (model.ProjectIds.Count > 0)
                         {
-                            var projectsToDelete = unitWork.ProjectRepository.GetManyQueryable(p => model.ProjectsIds.Contains(p.Id));
+                            var projectsToDelete = unitWork.ProjectRepository.GetManyQueryable(p => model.ProjectIds.Contains(p.Id));
                             foreach (var project in projectsToDelete)
                             {
                                 unitWork.ProjectRepository.Delete(project);
