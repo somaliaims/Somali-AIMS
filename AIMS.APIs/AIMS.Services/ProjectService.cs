@@ -2806,6 +2806,66 @@ namespace AIMS.Services
                             }
                         }
 
+                        if (model.Disbursements.Count > 0)
+                        {
+                            List<EFProjectDisbursements> newDisbursements = new List<EFProjectDisbursements>();
+                            EFFinancialYears financialYear = null;
+                            foreach(var disbursement in model.Disbursements)
+                            {
+                                financialYear = (from y in financialYears
+                                                 where y.FinancialYear == disbursement.Year
+                                                 select y).FirstOrDefault();
+
+                                var isDisbursementAdded = (from d in newDisbursements
+                                                           where d.Year.FinancialYear == disbursement.Year && disbursement.Type == d.DisbursementType
+                                                           select d).FirstOrDefault();
+
+                                if (financialYear != null && isDisbursementAdded == null)
+                                {
+                                    newDisbursements.Add(new EFProjectDisbursements()
+                                    {
+                                        DisbursementType = disbursement.Type,
+                                        Year = financialYear,
+                                        Amount = disbursement.Amount,
+                                        Currency = newProject.ProjectCurrency,
+                                        ExchangeRate = newProject.ExchangeRate
+                                    });
+                                }
+                            }
+
+                            if (newDisbursements.Count > 0)
+                            {
+                                unitWork.ProjectDisbursementsRepository.InsertMultiple(newDisbursements);
+                                await unitWork.SaveAsync();
+                            }
+                        }
+
+                        if (model.Documents.Count > 0)
+                        {
+                            List<EFProjectDocuments> newDocuments = new List<EFProjectDocuments>();
+                            foreach(var document in model.Documents)
+                            {
+                                var isDocumentAdded = (from d in newDocuments
+                                                       where d.DocumentTitle.Equals(document.DocumentTitle, StringComparison.OrdinalIgnoreCase)
+                                                       select d).FirstOrDefault();
+
+                                if (isDocumentAdded == null)
+                                {
+                                    newDocuments.Add(new EFProjectDocuments()
+                                    {
+                                        DocumentTitle = document.DocumentTitle,
+                                        DocumentUrl = document.DocumentUrl
+                                    });
+                                }
+                            }
+
+                            if (newDocuments.Count > 0)
+                            {
+                                unitWork.ProjectDocumentRepository.InsertMultiple(newDocuments);
+                                await unitWork.SaveAsync();
+                            }
+                        }
+
                         //Now delete the old projects
                         if (model.ProjectsIds.Count > 0)
                         {
