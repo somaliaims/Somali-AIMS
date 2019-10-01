@@ -2866,6 +2866,36 @@ namespace AIMS.Services
                             }
                         }
 
+                        if (model.Markers.Count > 0)
+                        {
+                            List<EFProjectMarkers> newMarkersList = new List<EFProjectMarkers>();
+                            EFMarkers marker = null;
+                            foreach(var mark in model.Markers)
+                            {
+                                marker = (from m in markers
+                                          where m.Id == mark.MarkerId
+                                          select m).FirstOrDefault();
+
+                                var isMarkerAdded = (from m in newMarkersList
+                                                     where m.MarkerId == mark.MarkerId
+                                                     select m).FirstOrDefault();
+                                if (isMarkerAdded == null)
+                                {
+                                    newMarkersList.Add(new EFProjectMarkers()
+                                    {
+                                        Project = newProject,
+                                        Marker = marker,
+                                        Values = mark.Values
+                                    });
+                                }
+                            }
+                            if (newMarkersList.Count > 0)
+                            {
+                                unitWork.ProjectMarkersRepository.InsertMultiple(newMarkersList);
+                                await unitWork.SaveAsync();
+                            }
+                        }
+
                         //Now delete the old projects
                         if (model.ProjectsIds.Count > 0)
                         {
