@@ -1890,7 +1890,7 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => model.ProjectId == model.ProjectId);
+                    var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.ProjectId == model.ProjectId);
                     List<EFProjectFunders> newFunders = new List<EFProjectFunders>();
                     var fundersToDelete = (from f in projectFunders
                                            where !model.FunderIds.Contains(f.FunderId)
@@ -2020,7 +2020,7 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(f => model.ProjectId == model.ProjectId);
+                    var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(i => i.ProjectId == model.ProjectId);
                     List<EFProjectImplementers> newImplementers = new List<EFProjectImplementers>();
                     var implementersToDelete = (from i in projectImplementers
                                                 where !model.ImplementerIds.Contains(i.ImplementerId)
