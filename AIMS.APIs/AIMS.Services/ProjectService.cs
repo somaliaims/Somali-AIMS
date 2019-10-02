@@ -2631,7 +2631,7 @@ namespace AIMS.Services
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                 }
 
-                var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => (f.FinancialYear == model.StartingFinancialYear || f.FinancialYear == model.EndingFinancialYear));
+                var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => (f.FinancialYear >= model.StartingFinancialYear && f.FinancialYear <= model.EndingFinancialYear));
                 if (financialYears.Count() < 2)
                 {
                     mHelper = new MessageHelper();
@@ -2710,7 +2710,9 @@ namespace AIMS.Services
                             EndingFinancialYear = endingFinancialYear,
                             ProjectCurrency = model.ProjectCurrency,
                             ProjectValue = model.ProjectValue,
-                            FundingType = fundingType
+                            ExchangeRate = model.ExchangeRate,
+                            FundingType = fundingType,
+                            DateUpdated = DateTime.Now,
                         });
                         await unitWork.SaveAsync();
 
@@ -2872,7 +2874,7 @@ namespace AIMS.Services
                                                  select y).FirstOrDefault();
 
                                 var isDisbursementAdded = (from d in newDisbursements
-                                                           where d.Year.FinancialYear == disbursement.Year && disbursement.Type == d.DisbursementType
+                                                           where d.Year.FinancialYear == disbursement.Year && disbursement.DisbursementType == d.DisbursementType
                                                            select d).FirstOrDefault();
 
                                 if (financialYear != null && isDisbursementAdded == null)
@@ -2880,7 +2882,7 @@ namespace AIMS.Services
                                     newDisbursements.Add(new EFProjectDisbursements()
                                     {
                                         Project = newProject,
-                                        DisbursementType = disbursement.Type,
+                                        DisbursementType = disbursement.DisbursementType,
                                         Year = financialYear,
                                         Amount = disbursement.Amount,
                                         Currency = newProject.ProjectCurrency,

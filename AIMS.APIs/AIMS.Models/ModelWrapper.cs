@@ -868,6 +868,7 @@ namespace AIMS.Models
         public decimal ProjectValue { get; set; }
         [Required]
         public string ProjectCurrency { get; set; }
+        public decimal ExchangeRate { get; set; }
         public int FundingTypeId { get; set; }
         public string Description { get; set; }
         [Required]
@@ -901,7 +902,7 @@ namespace AIMS.Models
     {
         public int Year { get; set; }
         public decimal Amount { get; set; }
-        public DisbursementTypes Type { get; set; }
+        public DisbursementTypes DisbursementType { get; set; }
     }
 
     public class MergeProjectMarkerModel
