@@ -714,9 +714,21 @@ namespace AIMS.Services
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
+                    List<int> sectorIds = new List<int>();
+                    if (model.ParentSectorId != 0)
+                    {
+                        //sectorIds = unitWork.SectorRepository.GetProjection(s => s.ParentSectorId == model.ParentSectorId).ToList<int>();
+                        sectorIds.Add(model.ParentSectorId);
+                    }
+
                     if (model.SectorIds.Count > 0)
                     {
-                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains(p.SectorId), new string[] { "Sector" });
+                        sectorIds = model.SectorIds.Union(sectorIds).ToList<int>();
+                    }
+
+                    if (sectorIds.Count > 0)
+                    {
+                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => sectorIds.Contains(p.SectorId), new string[] { "Sector" });
                     }
                     else
                     {

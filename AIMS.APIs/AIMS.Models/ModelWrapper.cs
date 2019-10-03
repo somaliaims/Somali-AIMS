@@ -395,6 +395,14 @@ namespace AIMS.Models
         public string SectorName { get; set; }
     }
 
+    public class SectorViewWithParent
+    {
+        public int Id { get; set; }
+        public int ParentSectorId { get; set; }
+        public string ParentSector { get; set; }
+        public string SectorName { get; set; }
+    }
+
     public class SectorViewModel
     {
         public int Id { get; set; }
@@ -1566,6 +1574,7 @@ namespace AIMS.Models
         public List<int> OrganizationIds { get; set; } = new List<int>();
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
+        public int ParentSectorId { get; set; }
         public List<int> SectorIds { get; set; } = new List<int>();
     }
 

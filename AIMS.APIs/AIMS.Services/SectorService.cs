@@ -37,13 +37,13 @@ namespace AIMS.Services
         /// Gets list of default sector types
         /// </summary>
         /// <returns></returns>
-        IEnumerable<SectorView> GetDefaultSectors();
+        IEnumerable<SectorViewWithParent> GetDefaultSectors();
 
         /// <summary>
         /// Gets list of default parent sectors
         /// </summary>
         /// <returns></returns>
-        IEnumerable<SectorView> GetDefaultParentSectors();
+        IEnumerable<SectorViewWithParent> GetDefaultParentSectors();
 
         /// <summary>
         /// Gets sector category view for the provided id
@@ -137,33 +137,33 @@ namespace AIMS.Services
             }
         }
 
-        public IEnumerable<SectorView> GetDefaultSectors()
+        public IEnumerable<SectorViewWithParent> GetDefaultSectors()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsPrimary == true, new string[] { "SectorType" });
+                var sectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsPrimary == true, new string[] { "ParentSector", "SectorType" });
                 if (sectors.Count() > 1)
                 {
                     sectors = (from sector in sectors
                                orderby sector.SectorName ascending
                                select sector);
                 }
-                return mapper.Map<List<SectorView>>(sectors);
+                return mapper.Map<List<SectorViewWithParent>>(sectors);
             }
         }
 
-        public IEnumerable<SectorView> GetDefaultParentSectors()
+        public IEnumerable<SectorViewWithParent> GetDefaultParentSectors()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var sectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsPrimary == true && s.ParentSectorId == null, new string[] { "SectorType" });
+                var sectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsPrimary == true && s.ParentSectorId == null, new string[] { "ParentSector", "SectorType" });
                 if (sectors.Count() > 1)
                 {
                     sectors = (from sector in sectors
                                orderby sector.SectorName ascending
                                select sector);
                 }
-                return mapper.Map<List<SectorView>>(sectors);
+                return mapper.Map<List<SectorViewWithParent>>(sectors);
             }
         }
 
