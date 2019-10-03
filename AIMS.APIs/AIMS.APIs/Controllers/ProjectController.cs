@@ -243,7 +243,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = await projectService.MergeProjectsAsync(model);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = await projectService.MergeProjectsAsync(model, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

@@ -335,7 +335,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ActionResponse> MergeProjectsAsync(MergeProjectsModel model);
+        Task<ActionResponse> MergeProjectsAsync(MergeProjectsModel model, int userId);
 
         /// <summary>
         /// Gets count for active projects
@@ -2616,12 +2616,21 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> MergeProjectsAsync(MergeProjectsModel model)
+        public async Task<ActionResponse> MergeProjectsAsync(MergeProjectsModel model, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
+
+                var createdBy = unitWork.UserRepository.GetByID(userId);
+                if (createdBy == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetUnAuthorizedAccessMessage();
+                    return response;
+                }
 
                 if (model.ProjectIds.Count < 2)
                 {
@@ -2713,6 +2722,16 @@ namespace AIMS.Services
                             ExchangeRate = model.ExchangeRate,
                             FundingType = fundingType,
                             DateUpdated = DateTime.Now,
+                            CreatedBy = createdBy
+                        });
+                        await unitWork.SaveAsync();
+
+                        unitWork.ProjectMembershipRepository.Insert(new EFProjectMembershipRequests()
+                        {
+                            ProjectId = newProject.Id,
+                            UserId = userId,
+                            Dated = DateTime.Now,
+                            IsApproved = true
                         });
                         await unitWork.SaveAsync();
 
