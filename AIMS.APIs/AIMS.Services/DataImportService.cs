@@ -153,8 +153,8 @@ namespace AIMS.Services
                 int projectTitleIndex = 0, projectDescriptionIndex = 1, sectorIndex = 2, startYearIndex = 3,
                     endYearIndex = 4, funderIndex = 6, implementerIndex = 7, currencyIndex = 9, projectCostIndex = 10,
                     twentySixteenYearIndex = 11, twentySeventeenYearIndex = 12, twentyEighteenYearIndex = 13, twentyNineteenYearIndex = 14, 
-                    twentyTwentyYearIndex = 15, locationLowerIndex = 18, locationUpperIndex = 26, markerLowerIndex = 28,
-                    markerUpperIndex = 34, documentLinkIndex = 40, documentDescriptionIndex = 41;
+                    twentyTwentyYearIndex = 15, locationLowerIndex = 18, locationUpperIndex = 27, markerLowerIndex = 29,
+                    markerUpperIndex = 36, documentLinkIndex = 38, documentDescriptionIndex = 39, exchangeRateIndex = 51;
 
                 file.CopyTo(stream);
                 stream.Position = 0;
@@ -163,8 +163,8 @@ namespace AIMS.Services
                 this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
                 this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(hssfwb);
 
-                ISheet sheet = hssfwb.GetSheetAt(2);
-                IRow headerRow = sheet.GetRow(0);
+                ISheet sheet = hssfwb.GetSheetAt(3);
+                IRow headerRow = sheet.GetRow(1);
                 int cellCount = headerRow.LastCellNum;
 
                 for (int i = (sheet.FirstRowNum + 1); i < sheet.LastRowNum; i++)
@@ -194,7 +194,7 @@ namespace AIMS.Services
                         decimal.TryParse(row.GetCell(l).NumericCellValue.ToString(), out percentage);
                         locationsList.Add(new ImportedLocation()
                         {
-                            Location = newDataLocations[l.ToString()],
+                            Location = latestDataLocations[l.ToString()],
                             Percentage = (percentage * 100)
                         });
 

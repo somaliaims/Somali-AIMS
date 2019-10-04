@@ -1203,9 +1203,10 @@ namespace AIMS.Services
                 EFFinancialYears twentySeventeenFinancialYear = null;
                 EFFinancialYears twentyEighteenFinancialYear = null;
                 EFFinancialYears twentyNineteenFinancialYear = null;
+                EFFinancialYears twentyTwentyFinancialYear = null;
 
                 twentySixteenFinancialYear = (from fy in financialYears
-                                              where fy.FinancialYear == (currentYear - 2)
+                                              where fy.FinancialYear == (currentYear - 3)
                                               select fy).FirstOrDefault();
                 if (twentySixteenFinancialYear == null)
                 {
@@ -1214,7 +1215,7 @@ namespace AIMS.Services
                 }
 
                 twentySeventeenFinancialYear = (from fy in financialYears
-                                         where fy.FinancialYear == (currentYear - 1)
+                                         where fy.FinancialYear == (currentYear - 2)
                                          select fy).FirstOrDefault();
                 if (twentySeventeenFinancialYear == null)
                 {
@@ -1223,7 +1224,7 @@ namespace AIMS.Services
                 }
 
                 twentyEighteenFinancialYear = (from fy in financialYears
-                                        where fy.FinancialYear == (currentYear)
+                                        where fy.FinancialYear == (currentYear - 1)
                                         select fy).FirstOrDefault();
                 if (twentyEighteenFinancialYear == null)
                 {
@@ -1232,11 +1233,21 @@ namespace AIMS.Services
                 }
 
                 twentyNineteenFinancialYear = (from fy in financialYears
-                                       where fy.FinancialYear == (currentYear + 1)
+                                       where fy.FinancialYear == (currentYear)
                                        select fy).FirstOrDefault();
                 if (twentyNineteenFinancialYear == null)
                 {
                     twentyNineteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 1) });
+                    unitWork.Save();
+                }
+
+                twentyTwentyFinancialYear = (from fy in financialYears
+                                               where fy.FinancialYear == (currentYear + 1)
+                                               select fy).FirstOrDefault();
+
+                if (twentyTwentyFinancialYear == null)
+                {
+                    twentyTwentyFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 1) });
                     unitWork.Save();
                 }
 
@@ -1468,6 +1479,14 @@ namespace AIMS.Services
                                     Project = newProject,
                                     Year = twentyNineteenFinancialYear,
                                     Amount = project.TwentyNineteenDisbursements,
+                                    Currency = project.Currency,
+                                    ExchangeRate = 1
+                                });
+                                unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                {
+                                    Project = newProject,
+                                    Year = twentyTwentyFinancialYear,
+                                    Amount = project.TwentyTwentyDisbursements,
                                     Currency = project.Currency,
                                     ExchangeRate = 1
                                 });
