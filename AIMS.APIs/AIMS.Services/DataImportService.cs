@@ -152,8 +152,8 @@ namespace AIMS.Services
             {
                 int projectTitleIndex = 0, projectDescriptionIndex = 1, sectorIndex = 2, startYearIndex = 3,
                     endYearIndex = 4, funderIndex = 6, implementerIndex = 7, currencyIndex = 9, projectCostIndex = 10,
-                    previousMinusYearIndex = 12, previousYearIndex = 13, currentYearIndex = 14, currentYearPlannedIndex = 15,
-                    futureYearPlannedIndex = 15, locationLowerIndex = 18, locationUpperIndex = 26, markerLowerIndex = 28,
+                    twentySixteenYearIndex = 11, twentySeventeenYearIndex = 12, twentyEighteenYearIndex = 13, twentyNineteenYearIndex = 14, 
+                    twentyTwentyYearIndex = 15, locationLowerIndex = 18, locationUpperIndex = 26, markerLowerIndex = 28,
                     markerUpperIndex = 34, documentLinkIndex = 40, documentDescriptionIndex = 41;
 
                 file.CopyTo(stream);
@@ -179,13 +179,13 @@ namespace AIMS.Services
                         continue;
                     }
 
-                    decimal disbursementsPreviousMinusYear = 0, disbursementsPreviousYear = 0, disbursementsCurrentYear = 0, 
-                        exchangeRate = 0, disbursementsPlannedCurrentYear = 0, disbursementsPlannedFutureYear = 0;
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(previousMinusYearIndex)), out disbursementsPreviousMinusYear);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(previousYearIndex)), out disbursementsPreviousYear);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(currentYearIndex)), out disbursementsCurrentYear);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(currentYearPlannedIndex)), out disbursementsPlannedCurrentYear);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(futureYearPlannedIndex)), out disbursementsPlannedFutureYear);
+                    decimal disbursementsTwentySixteen = 0, disbursementsTwentySeventeen = 0, disbursementsTwentyEighteen = 0, 
+                        exchangeRate = 0, disbursementsTwentyNineteen = 0, disbursementsTwentyTwenty = 0;
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out disbursementsTwentySixteen);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out disbursementsTwentySeventeen);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out disbursementsTwentyEighteen);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyNineteenYearIndex)), out disbursementsTwentyNineteen);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyTwentyYearIndex)), out disbursementsTwentyTwenty);
 
                     List<ImportedLocation> locationsList = new List<ImportedLocation>();
                     for (int l = locationLowerIndex; l <= locationUpperIndex; l++)
@@ -232,19 +232,19 @@ namespace AIMS.Services
                     }
 
                     int startingYear = 0, endingYear = 0;
-                    decimal projectCost = 0, previousMinusYearDisbursements = 0, previousYearDisbursements = 0,
-                        currentYearDisbursements = 0, currentYearPlannedDisbursements = 0, futureYearPlannedDisbursements = 0;
+                    decimal projectCost = 0, twentySixteenDisbursements = 0, twentySeventeenDisbursements = 0,
+                        twentyEighteenDisbursements = 0, twentyNineteenDisbursements = 0, twentyTwentyDisbursements = 0;
 
                     int.TryParse(this.GetFormattedValue(row.GetCell(startYearIndex)), out startingYear);
                     int.TryParse(this.GetFormattedValue(row.GetCell(endYearIndex)), out endingYear);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(previousMinusYearIndex)), out previousMinusYearDisbursements);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(previousYearIndex)), out previousYearDisbursements);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(currentYearIndex)), out currentYearDisbursements);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(currentYearPlannedIndex)), out currentYearPlannedDisbursements);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(futureYearPlannedIndex)), out futureYearPlannedDisbursements);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out twentySixteenDisbursements);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out twentySeventeenDisbursements);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out twentyEighteenDisbursements);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyNineteenYearIndex)), out twentyNineteenDisbursements);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyTwentyYearIndex)), out twentyTwentyDisbursements);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(projectCostIndex)), out projectCost);
-                    projectCost = (previousMinusYearDisbursements + previousYearDisbursements + currentYearDisbursements +
-                        currentYearPlannedDisbursements + futureYearPlannedDisbursements);
+                    projectCost = (twentySixteenDisbursements + twentySeventeenDisbursements + twentyEighteenDisbursements +
+                        twentyNineteenDisbursements + twentyTwentyDisbursements);
 
                     projectsList.Add(new NewImportedAidData()
                     {
@@ -257,11 +257,11 @@ namespace AIMS.Services
                         Currency = this.GetFormattedValue(row.GetCell(currencyIndex)),
                         ExchangeRate = exchangeRate,
                         Implementers = this.GetFormattedValue(row.GetCell(implementerIndex)),
-                        PreviousMinusYearDisbursements = previousMinusYearDisbursements,
-                        PreviousYearDisbursements = previousYearDisbursements,
-                        CurrentYearDisbursements = currentYearDisbursements,
-                        CurrentYearPlannedDisbursements = currentYearPlannedDisbursements,
-                        FutureYearPlannedDisbursements = futureYearPlannedDisbursements,
+                        TwentySixteenDisbursements = twentySixteenDisbursements,
+                        TwentySeventeenDisbursements = twentySeventeenDisbursements,
+                        TwentyEighteenDisbursements = twentyEighteenDisbursements,
+                        TwentyNineteenDisbursements = twentyNineteenDisbursements,
+                        TwentyTwentyDisbursements = twentyTwentyDisbursements,
                         Sector = this.GetFormattedValue(row.GetCell(sectorIndex)),
                         Locations = locationsList,
                         CustomFields = customFieldsList,

@@ -1199,44 +1199,44 @@ namespace AIMS.Services
 
                 List<EFSector> ndpSectorsList = new List<EFSector>();
                 List<EFLocation> locationsList = new List<EFLocation>();
-                EFFinancialYears previousMinusFinancialYear = null;
-                EFFinancialYears previousFinancialYear = null;
-                EFFinancialYears currentFinancialYear = null;
-                EFFinancialYears futureFinancialYear = null;
+                EFFinancialYears twentySixteenFinancialYear = null;
+                EFFinancialYears twentySeventeenFinancialYear = null;
+                EFFinancialYears twentyEighteenFinancialYear = null;
+                EFFinancialYears twentyNineteenFinancialYear = null;
 
-                previousMinusFinancialYear = (from fy in financialYears
+                twentySixteenFinancialYear = (from fy in financialYears
                                               where fy.FinancialYear == (currentYear - 2)
                                               select fy).FirstOrDefault();
-                if (previousMinusFinancialYear == null)
+                if (twentySixteenFinancialYear == null)
                 {
-                    previousMinusFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 2) });
+                    twentySixteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 2) });
                     unitWork.Save();
                 }
 
-                previousFinancialYear = (from fy in financialYears
+                twentySeventeenFinancialYear = (from fy in financialYears
                                          where fy.FinancialYear == (currentYear - 1)
                                          select fy).FirstOrDefault();
-                if (previousFinancialYear == null)
+                if (twentySeventeenFinancialYear == null)
                 {
-                    previousFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 1) });
+                    twentySeventeenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 1) });
                     unitWork.Save();
                 }
 
-                currentFinancialYear = (from fy in financialYears
+                twentyEighteenFinancialYear = (from fy in financialYears
                                         where fy.FinancialYear == (currentYear)
                                         select fy).FirstOrDefault();
-                if (currentFinancialYear == null)
+                if (twentyEighteenFinancialYear == null)
                 {
-                    currentFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear) });
+                    twentyEighteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear) });
                     unitWork.Save();
                 }
 
-                futureFinancialYear = (from fy in financialYears
+                twentyNineteenFinancialYear = (from fy in financialYears
                                        where fy.FinancialYear == (currentYear + 1)
                                        select fy).FirstOrDefault();
-                if (futureFinancialYear == null)
+                if (twentyNineteenFinancialYear == null)
                 {
-                    futureFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 1) });
+                    twentyNineteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 1) });
                     unitWork.Save();
                 }
 
@@ -1442,32 +1442,32 @@ namespace AIMS.Services
                                 unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                 {
                                     Project = newProject,
-                                    Year = previousMinusFinancialYear,
-                                    Amount = project.PreviousMinusYearDisbursements,
+                                    Year = twentySixteenFinancialYear,
+                                    Amount = project.TwentySixteenDisbursements,
                                     Currency = project.Currency,
                                     ExchangeRate = 1
                                 });
                                 unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                 {
                                     Project = newProject,
-                                    Year = previousFinancialYear,
-                                    Amount = project.PreviousYearDisbursements,
+                                    Year = twentySeventeenFinancialYear,
+                                    Amount = project.TwentySeventeenDisbursements,
                                     Currency = project.Currency,
                                     ExchangeRate = 1
                                 });
                                 unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                 {
                                     Project = newProject,
-                                    Year = currentFinancialYear,
-                                    Amount = project.CurrentYearDisbursements,
+                                    Year = twentyEighteenFinancialYear,
+                                    Amount = project.TwentyEighteenDisbursements,
                                     Currency = project.Currency,
                                     ExchangeRate = 1
                                 });
                                 unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                 {
                                     Project = newProject,
-                                    Year = futureFinancialYear,
-                                    Amount = project.FutureYearPlannedDisbursements,
+                                    Year = twentyNineteenFinancialYear,
+                                    Amount = project.TwentyNineteenDisbursements,
                                     Currency = project.Currency,
                                     ExchangeRate = 1
                                 });

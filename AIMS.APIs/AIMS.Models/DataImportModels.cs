@@ -36,11 +36,11 @@ namespace AIMS.Models
         public string EndYear { get; set; }
         public string Funders { get; set; }
         public string Implementers { get; set; }
-        public decimal PreviousMinusYearDisbursements { get; set; }
-        public decimal PreviousYearDisbursements { get; set; }
-        public decimal CurrentYearDisbursements { get; set; }
-        public decimal CurrentYearPlannedDisbursements { get; set; }
-        public decimal FutureYearPlannedDisbursements { get; set; }
+        public decimal TwentySixteenDisbursements { get; set; }
+        public decimal TwentySeventeenDisbursements { get; set; }
+        public decimal TwentyEighteenDisbursements { get; set; }
+        public decimal TwentyNineteenDisbursements { get; set; }
+        public decimal TwentyTwentyDisbursements { get; set; }
         public string Sector { get; set; }
         public List<ImportedDocumentLinks> DocumentLinks { get; set; }
         public List<ImportedLocation> Locations { get; set; }
