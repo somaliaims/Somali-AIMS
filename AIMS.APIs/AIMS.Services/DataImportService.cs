@@ -181,6 +181,8 @@ namespace AIMS.Services
 
                     decimal disbursementsTwentySixteen = 0, disbursementsTwentySeventeen = 0, disbursementsTwentyEighteen = 0, 
                         exchangeRate = 0, disbursementsTwentyNineteen = 0, disbursementsTwentyTwenty = 0;
+
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(exchangeRateIndex)), out exchangeRate);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out disbursementsTwentySixteen);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out disbursementsTwentySeventeen);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out disbursementsTwentyEighteen);

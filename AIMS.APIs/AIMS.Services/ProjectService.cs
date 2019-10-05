@@ -1190,10 +1190,10 @@ namespace AIMS.Services
                 }
 
                 int currentYear = DateTime.Now.Year;
-                var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(p => p.Id != 0);
-                var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
-                var ndpSectors = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == 1);
-                var locations = unitWork.LocationRepository.GetManyQueryable(l => l.Id != 0);
+                var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(p => p.Id != 0).ToList();
+                var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0).ToList();
+                var ndpSectors = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == 1).ToList();
+                var locations = unitWork.LocationRepository.GetManyQueryable(l => l.Id != 0).ToList();
                 var fundingType = unitWork.FundingTypeRepository.GetOne(f => f.Id == 1);
                 var organizationType = unitWork.OrganizationTypesRepository.GetOne(o => o.Id == 1);
 
@@ -1212,6 +1212,7 @@ namespace AIMS.Services
                 {
                     twentySixteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 2) });
                     unitWork.Save();
+                    financialYears.Add(twentySixteenFinancialYear);
                 }
 
                 twentySeventeenFinancialYear = (from fy in financialYears
@@ -1221,6 +1222,7 @@ namespace AIMS.Services
                 {
                     twentySeventeenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 1) });
                     unitWork.Save();
+                    financialYears.Add(twentySeventeenFinancialYear);
                 }
 
                 twentyEighteenFinancialYear = (from fy in financialYears
@@ -1230,6 +1232,7 @@ namespace AIMS.Services
                 {
                     twentyEighteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear) });
                     unitWork.Save();
+                    financialYears.Add(twentyEighteenFinancialYear);
                 }
 
                 twentyNineteenFinancialYear = (from fy in financialYears
@@ -1239,6 +1242,7 @@ namespace AIMS.Services
                 {
                     twentyNineteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 1) });
                     unitWork.Save();
+                    financialYears.Add(twentyNineteenFinancialYear);
                 }
 
                 twentyTwentyFinancialYear = (from fy in financialYears
@@ -1249,6 +1253,7 @@ namespace AIMS.Services
                 {
                     twentyTwentyFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 1) });
                     unitWork.Save();
+                    financialYears.Add(twentyTwentyFinancialYear);
                 }
 
                 foreach (var sector in ndpSectors)
@@ -1273,6 +1278,7 @@ namespace AIMS.Services
                                 {
                                     startingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.StartYear) });
                                     unitWork.Save();
+                                    financialYears.Add(startingFinancialYear);
                                 }
 
                                 endingFinancialYear = (from y in financialYears
@@ -1282,6 +1288,7 @@ namespace AIMS.Services
                                 {
                                     endingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = Convert.ToInt32(project.EndYear) });
                                     unitWork.Save();
+                                    financialYears.Add(endingFinancialYear);
                                 }
 
                                 var newProject = unitWork.ProjectRepository.Insert(new EFProject()
@@ -1317,8 +1324,17 @@ namespace AIMS.Services
                                                 IsApproved = true
                                             });
                                             unitWork.Save();
+                                            organizations.Add(organization);
                                         }
-                                        projectFunders.Add(new EFProjectFunders() { Project = newProject, Funder = organization });
+
+                                        var isFunderExists = (from f in projectFunders
+                                                              where f.ProjectId == newProject.Id && f.FunderId == organization.Id
+                                                              select f).FirstOrDefault();
+
+                                        if (isFunderExists == null)
+                                        {
+                                            projectFunders.Add(new EFProjectFunders() { Project = newProject, Funder = organization });
+                                        }
                                     }
                                 }
 
@@ -1347,8 +1363,17 @@ namespace AIMS.Services
                                                 IsApproved = true
                                             });
                                             unitWork.Save();
+                                            organizations.Add(organization);
                                         }
-                                        projectImplementers.Add(new EFProjectImplementers() { Project = newProject, Implementer = organization });
+
+                                        var isImplementerExists = (from i in projectImplementers
+                                                                   where i.ProjectId == newProject.Id && i.ImplementerId == organization.Id
+                                                                   select i).FirstOrDefault();
+
+                                        if (isImplementerExists == null)
+                                        {
+                                            projectImplementers.Add(new EFProjectImplementers() { Project = newProject, Implementer = organization });
+                                        }
                                     }
                                 }
 
@@ -1423,17 +1448,25 @@ namespace AIMS.Services
                                                     Location = location.Location
                                                 });
                                                 await unitWork.SaveAsync();
+                                                locationsList.Add(dbLocation);
                                             }
 
                                             if (location.Percentage > 0)
                                             {
-                                                fundsPercentage += location.Percentage;
-                                                newProjectLocations.Add(new EFProjectLocations()
+                                                var isLocationExists = (from loc in newProjectLocations
+                                                                        where loc.ProjectId == newProject.Id && loc.LocationId == dbLocation.Id
+                                                                        select loc).FirstOrDefault();
+
+                                                if (isLocationExists == null)
                                                 {
-                                                    Project = newProject,
-                                                    Location = dbLocation,
-                                                    FundsPercentage = location.Percentage
-                                                });
+                                                    fundsPercentage += location.Percentage;
+                                                    newProjectLocations.Add(new EFProjectLocations()
+                                                    {
+                                                        Project = newProject,
+                                                        Location = dbLocation,
+                                                        FundsPercentage = location.Percentage
+                                                    });
+                                                }
                                             }
                                         }
 
