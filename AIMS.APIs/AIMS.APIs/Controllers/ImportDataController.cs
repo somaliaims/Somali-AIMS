@@ -110,7 +110,7 @@ namespace AIMS.APIs.Controllers
                             return BadRequest(response.Message);
                         }
                     }
-                    return Ok(extractedProjects);
+                    return Ok(true);
                 }
                 else
                 {

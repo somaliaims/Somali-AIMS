@@ -233,12 +233,12 @@ namespace AIMS.Services
                         });
                     }
 
-                    int startingYear = 0, endingYear = 0;
+                    DateTime startingDate = new DateTime(), endingDate = new DateTime();
                     decimal projectCost = 0, twentySixteenDisbursements = 0, twentySeventeenDisbursements = 0,
                         twentyEighteenDisbursements = 0, twentyNineteenDisbursements = 0, twentyTwentyDisbursements = 0;
 
-                    int.TryParse(this.GetFormattedValue(row.GetCell(startYearIndex)), out startingYear);
-                    int.TryParse(this.GetFormattedValue(row.GetCell(endYearIndex)), out endingYear);
+                    DateTime.TryParse(this.GetFormattedValue(row.GetCell(startYearIndex)), out startingDate);
+                    DateTime.TryParse(this.GetFormattedValue(row.GetCell(endYearIndex)), out endingDate);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out twentySixteenDisbursements);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out twentySeventeenDisbursements);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out twentyEighteenDisbursements);
@@ -247,6 +247,9 @@ namespace AIMS.Services
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(projectCostIndex)), out projectCost);
                     projectCost = (twentySixteenDisbursements + twentySeventeenDisbursements + twentyEighteenDisbursements +
                         twentyNineteenDisbursements + twentyTwentyDisbursements);
+
+                    int startingYear = startingDate.Year;
+                    int endingYear = endingDate.Year;
 
                     projectsList.Add(new NewImportedAidData()
                     {

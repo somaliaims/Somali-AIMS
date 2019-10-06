@@ -1210,7 +1210,7 @@ namespace AIMS.Services
                                               select fy).FirstOrDefault();
                 if (twentySixteenFinancialYear == null)
                 {
-                    twentySixteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 2) });
+                    twentySixteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 3) });
                     unitWork.Save();
                     financialYears.Add(twentySixteenFinancialYear);
                 }
@@ -1220,7 +1220,7 @@ namespace AIMS.Services
                                          select fy).FirstOrDefault();
                 if (twentySeventeenFinancialYear == null)
                 {
-                    twentySeventeenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 1) });
+                    twentySeventeenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 2) });
                     unitWork.Save();
                     financialYears.Add(twentySeventeenFinancialYear);
                 }
@@ -1230,7 +1230,7 @@ namespace AIMS.Services
                                         select fy).FirstOrDefault();
                 if (twentyEighteenFinancialYear == null)
                 {
-                    twentyEighteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear) });
+                    twentyEighteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 1) });
                     unitWork.Save();
                     financialYears.Add(twentyEighteenFinancialYear);
                 }
@@ -1240,7 +1240,7 @@ namespace AIMS.Services
                                        select fy).FirstOrDefault();
                 if (twentyNineteenFinancialYear == null)
                 {
-                    twentyNineteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 1) });
+                    twentyNineteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear) });
                     unitWork.Save();
                     financialYears.Add(twentyNineteenFinancialYear);
                 }
@@ -1296,6 +1296,7 @@ namespace AIMS.Services
                                     Title = project.ProjectTitle,
                                     ProjectCurrency = project.Currency,
                                     ProjectValue = project.ProjectValue,
+                                    ExchangeRate = project.ExchangeRate,
                                     Description = project.ProjectDescription,
                                     StartingFinancialYear = startingFinancialYear,
                                     EndingFinancialYear = endingFinancialYear,
@@ -1303,9 +1304,10 @@ namespace AIMS.Services
                                     FundingType = fundingType,
                                     DateUpdated = DateTime.Now
                                 });
-                                await unitWork.SaveAsync();
+                                unitWork.Save();
 
                                 List<EFProjectFunders> projectFunders = new List<EFProjectFunders>();
+                                List<EFOrganization> newOrganizations = new List<EFOrganization>();
                                 if (!string.IsNullOrEmpty(project.Funders))
                                 {
                                     string[] funderNames = project.Funders.Split(",");
@@ -1324,7 +1326,7 @@ namespace AIMS.Services
                                                 IsApproved = true
                                             });
                                             unitWork.Save();
-                                            organizations.Add(organization);
+                                            newOrganizations.Add(organization);
                                         }
 
                                         var isFunderExists = (from f in projectFunders
@@ -1341,21 +1343,29 @@ namespace AIMS.Services
                                 if (projectFunders.Count > 0)
                                 {
                                     unitWork.ProjectFundersRepository.InsertMultiple(projectFunders);
-                                    await unitWork.SaveAsync();
+                                    unitWork.Save();
                                 }
 
                                 List<EFProjectImplementers> projectImplementers = new List<EFProjectImplementers>();
                                 if (!string.IsNullOrEmpty(project.Implementers))
                                 {
                                     string[] implementerNames = project.Implementers.Split(",");
+                                    EFOrganization implementer = null;
                                     foreach (string implementerName in implementerNames)
                                     {
-                                        var organization = (from org in organizations
+                                        implementer = (from org in organizations
                                                             where org.OrganizationName.Equals(implementerName, StringComparison.OrdinalIgnoreCase)
                                                             select org).FirstOrDefault();
-                                        if (organization == null)
+                                        if (implementer == null)
                                         {
-                                            organization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                            implementer = (from org in newOrganizations
+                                                            where org.OrganizationName.Equals(implementerName, StringComparison.OrdinalIgnoreCase)
+                                                            select org).FirstOrDefault();
+                                        }
+
+                                        if (implementer == null)
+                                        {
+                                            implementer = unitWork.OrganizationRepository.Insert(new EFOrganization()
                                             {
                                                 OrganizationName = implementerName,
                                                 OrganizationTypeId = 1,
@@ -1363,16 +1373,16 @@ namespace AIMS.Services
                                                 IsApproved = true
                                             });
                                             unitWork.Save();
-                                            organizations.Add(organization);
+                                            newOrganizations.Add(implementer);
                                         }
 
                                         var isImplementerExists = (from i in projectImplementers
-                                                                   where i.ProjectId == newProject.Id && i.ImplementerId == organization.Id
+                                                                   where i.ProjectId == newProject.Id && i.ImplementerId == implementer.Id
                                                                    select i).FirstOrDefault();
 
                                         if (isImplementerExists == null)
                                         {
-                                            projectImplementers.Add(new EFProjectImplementers() { Project = newProject, Implementer = organization });
+                                            projectImplementers.Add(new EFProjectImplementers() { ProjectId = newProject.Id, ImplementerId = implementer.Id });
                                         }
                                     }
                                 }
@@ -1380,7 +1390,7 @@ namespace AIMS.Services
                                 if (projectImplementers.Count > 0)
                                 {
                                     unitWork.ProjectImplementersRepository.InsertMultiple(projectImplementers);
-                                    await unitWork.SaveAsync();
+                                    unitWork.Save();
                                 }
 
                                 List<EFProjectDocuments> projectDocuments = new List<EFProjectDocuments>();
@@ -1400,7 +1410,7 @@ namespace AIMS.Services
                                 if (projectDocuments.Count > 0)
                                 {
                                     unitWork.ProjectDocumentRepository.InsertMultiple(projectDocuments);
-                                    await unitWork.SaveAsync();
+                                    unitWork.Save();
                                 }
 
                                 if (!string.IsNullOrEmpty(project.Sector))
@@ -1418,7 +1428,6 @@ namespace AIMS.Services
                                             TimeStamp = DateTime.Now
                                         });
                                     }
-                                    await unitWork.SaveAsync();
                                     ndpSectorsList.Add(dbSector);
 
                                     unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
@@ -1427,7 +1436,7 @@ namespace AIMS.Services
                                         Sector = dbSector,
                                         FundsPercentage = 100
                                     });
-                                    await unitWork.SaveAsync();
+                                    unitWork.Save();
                                 }
 
                                 if (project.Locations.Count > 0)
@@ -1447,7 +1456,7 @@ namespace AIMS.Services
                                                 {
                                                     Location = location.Location
                                                 });
-                                                await unitWork.SaveAsync();
+                                                unitWork.Save();
                                                 locationsList.Add(dbLocation);
                                             }
 
@@ -1478,7 +1487,7 @@ namespace AIMS.Services
                                     if (newProjectLocations.Count > 0)
                                     {
                                         unitWork.ProjectLocationsRepository.InsertMultiple(newProjectLocations);
-                                        await unitWork.SaveAsync();
+                                        unitWork.Save();
                                     }
                                 }
 
@@ -1489,39 +1498,52 @@ namespace AIMS.Services
                                     Year = twentySixteenFinancialYear,
                                     Amount = project.TwentySixteenDisbursements,
                                     Currency = project.Currency,
-                                    ExchangeRate = 1
+                                    DisbursementType = DisbursementTypes.Actual,
+                                    ExchangeRate = project.ExchangeRate,
                                 });
+                                unitWork.Save();
+
                                 unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                 {
                                     Project = newProject,
                                     Year = twentySeventeenFinancialYear,
                                     Amount = project.TwentySeventeenDisbursements,
                                     Currency = project.Currency,
-                                    ExchangeRate = 1
+                                    DisbursementType = DisbursementTypes.Actual,
+                                    ExchangeRate = project.ExchangeRate
                                 });
+                                unitWork.Save();
+
                                 unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                 {
                                     Project = newProject,
                                     Year = twentyEighteenFinancialYear,
                                     Amount = project.TwentyEighteenDisbursements,
                                     Currency = project.Currency,
-                                    ExchangeRate = 1
+                                    DisbursementType = DisbursementTypes.Actual,
+                                    ExchangeRate = project.ExchangeRate
                                 });
+                                unitWork.Save();
+
                                 unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                 {
                                     Project = newProject,
                                     Year = twentyNineteenFinancialYear,
                                     Amount = project.TwentyNineteenDisbursements,
                                     Currency = project.Currency,
-                                    ExchangeRate = 1
+                                    DisbursementType = DisbursementTypes.Actual,
+                                    ExchangeRate = project.ExchangeRate
                                 });
+                                unitWork.Save();
+
                                 unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                 {
                                     Project = newProject,
                                     Year = twentyTwentyFinancialYear,
                                     Amount = project.TwentyTwentyDisbursements,
                                     Currency = project.Currency,
-                                    ExchangeRate = 1
+                                    DisbursementType = DisbursementTypes.Planned,
+                                    ExchangeRate = project.ExchangeRate
                                 });
                                 await unitWork.SaveAsync();
                             }
