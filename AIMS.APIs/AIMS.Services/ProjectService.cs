@@ -1447,8 +1447,8 @@ namespace AIMS.Services
                                     {
                                         if (!string.IsNullOrEmpty(location.Location))
                                         {
-                                            var dbLocation = (from loc in locationsList
-                                                              where location.Location.Equals(project)
+                                            var dbLocation = (from loc in locations
+                                                              where location.Location.Equals(location.Location, StringComparison.OrdinalIgnoreCase)
                                                               select loc).FirstOrDefault();
                                             if (dbLocation == null)
                                             {
@@ -1457,7 +1457,7 @@ namespace AIMS.Services
                                                     Location = location.Location
                                                 });
                                                 unitWork.Save();
-                                                locationsList.Add(dbLocation);
+                                                locations.Add(dbLocation);
                                             }
 
                                             if (location.Percentage > 0)
@@ -2930,7 +2930,7 @@ namespace AIMS.Services
                                 }
 
                                 var isLocationAdded = (from l in newLocations
-                                                     where l.LocationId == locationModel.LocationId
+                                                     where l.LocationId == locationModel.LocationId && l.ProjectId == newProject.Id
                                                      select l).FirstOrDefault();
 
                                 if (location != null && isLocationAdded == null)
