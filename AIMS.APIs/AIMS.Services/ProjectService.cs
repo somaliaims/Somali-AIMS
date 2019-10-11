@@ -1448,7 +1448,7 @@ namespace AIMS.Services
                                         if (!string.IsNullOrEmpty(location.Location))
                                         {
                                             var dbLocation = (from loc in locations
-                                                              where location.Location.Equals(location.Location, StringComparison.OrdinalIgnoreCase)
+                                                              where loc.Location.Equals(location.Location, StringComparison.OrdinalIgnoreCase)
                                                               select loc).FirstOrDefault();
                                             if (dbLocation == null)
                                             {

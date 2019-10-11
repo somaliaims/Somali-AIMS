@@ -56,6 +56,7 @@ namespace AIMS.IATILib.Parsers
 
     public class IATISector
     {
+        public int SectorTypeCode { get; set; }
         public string Code { get; set; }
         public string SectorName { get; set; }
         public string FundsPercentage { get; set; }
