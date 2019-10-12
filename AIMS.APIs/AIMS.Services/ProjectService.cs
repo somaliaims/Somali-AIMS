@@ -1708,6 +1708,38 @@ namespace AIMS.Services
                             int newSectors = 0;
                             foreach (var sector in model.ProjectSectors)
                             {
+                                EFSectorTypes sectorType = null;
+                                EFSector newSector = null;
+
+                                if (sector.SectorId == 0)
+                                {
+                                    if (sector.SectorTypeId == 0)
+                                    {
+                                        sectorType = unitWork.SectorTypesRepository.GetOne(s => s.TypeName == "Default");
+                                        if (sectorType == null)
+                                        {
+                                            sectorType = unitWork.SectorTypesRepository.Insert(new EFSectorTypes()
+                                            {
+                                                TypeName = "Default",
+                                                IsPrimary = false,
+                                                IsSourceType = true,
+                                            });
+                                            unitWork.Save();
+                                        }
+                                    }
+
+                                    newSector = unitWork.SectorRepository.GetOne(s => s.SectorName.Equals(sector.Sector, StringComparison.OrdinalIgnoreCase));
+                                    if (newSector == null)
+                                    {
+                                        newSector = unitWork.SectorRepository.Insert(new EFSector()
+                                        {
+                                            SectorName = sector.Sector,
+                                            SectorType = sectorType,
+                                            ParentSector = null,
+                                            TimeStamp = DateTime.Now
+                                        });
+                                    }
+                                }
                                 var isProjectSectorExists = (from s in projectSectors
                                                              where s.SectorId == sector.MappingId && s.ProjectId == model.ProjectId
                                                              select s).FirstOrDefault();

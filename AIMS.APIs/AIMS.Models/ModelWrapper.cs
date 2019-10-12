@@ -1016,6 +1016,7 @@ namespace AIMS.Models
 
     public class ProjectSector
     {
+        public int? SectorTypeId { get; set; }
         [Required]
         public int SectorId { get; set; }
         [Required]
