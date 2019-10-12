@@ -1727,6 +1727,10 @@ namespace AIMS.Services
                                             unitWork.Save();
                                         }
                                     }
+                                    else
+                                    {
+                                        sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IATICode == sector.SectorTypeId);
+                                    }
 
                                     newSector = unitWork.SectorRepository.GetOne(s => s.SectorName.Equals(sector.Sector, StringComparison.OrdinalIgnoreCase));
                                     if (newSector == null)
@@ -1739,6 +1743,12 @@ namespace AIMS.Services
                                             TimeStamp = DateTime.Now
                                         });
                                     }
+                                    model.NewMappings.Add(new SectorMappings()
+                                    {
+                                        SectorTypeId = sectorType.Id,
+                                        SectorId = newSector.Id,
+                                        MappingId = sector.MappingId
+                                    });
                                 }
                                 var isProjectSectorExists = (from s in projectSectors
                                                              where s.SectorId == sector.MappingId && s.ProjectId == model.ProjectId
@@ -1784,17 +1794,13 @@ namespace AIMS.Services
                                                                select m).FirstOrDefault();
                                         if (isMappingExists == null)
                                         {
-                                            var sectorType = (from s in sectors
-                                                              where s.Id == mapping.SectorId
-                                                              select s.SectorType).FirstOrDefault();
-
-                                            if (sectorType != null)
+                                            if (mapping.SectorTypeId != 0)
                                             {
                                                 unitWork.SectorMappingsRepository.Insert(new EFSectorMappings()
                                                 {
                                                     SectorId = mapping.SectorId,
                                                     MappedSectorId = mapping.MappingId,
-                                                    SectorTypeId = sectorType.Id
+                                                    SectorTypeId = mapping.SectorTypeId
                                                 });
                                                 ++newMappings;
                                             }
