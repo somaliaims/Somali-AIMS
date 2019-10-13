@@ -1318,15 +1318,18 @@ namespace AIMS.Services
                                                             select org).FirstOrDefault();
                                         if (organization == null)
                                         {
-                                            organization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                            if (!string.IsNullOrEmpty(funderName) && !string.IsNullOrWhiteSpace(funderName))
                                             {
-                                                OrganizationName = funderName,
-                                                OrganizationTypeId = 1,
-                                                SourceType = OrganizationSourceType.User,
-                                                IsApproved = true
-                                            });
-                                            unitWork.Save();
-                                            newOrganizations.Add(organization);
+                                                organization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                                {
+                                                    OrganizationName = funderName,
+                                                    OrganizationTypeId = 1,
+                                                    SourceType = OrganizationSourceType.User,
+                                                    IsApproved = true
+                                                });
+                                                unitWork.Save();
+                                                newOrganizations.Add(organization);
+                                            }
                                         }
 
                                         var isFunderExists = (from f in projectFunders
@@ -1365,15 +1368,18 @@ namespace AIMS.Services
 
                                         if (implementer == null)
                                         {
-                                            implementer = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                            if (!string.IsNullOrEmpty(implementerName) && !string.IsNullOrWhiteSpace(implementerName))
                                             {
-                                                OrganizationName = implementerName,
-                                                OrganizationTypeId = 1,
-                                                SourceType = OrganizationSourceType.User,
-                                                IsApproved = true
-                                            });
-                                            unitWork.Save();
-                                            newOrganizations.Add(implementer);
+                                                implementer = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                                {
+                                                    OrganizationName = implementerName,
+                                                    OrganizationTypeId = 1,
+                                                    SourceType = OrganizationSourceType.User,
+                                                    IsApproved = true
+                                                });
+                                                unitWork.Save();
+                                                newOrganizations.Add(implementer);
+                                            }
                                         }
 
                                         var isImplementerExists = (from i in projectImplementers

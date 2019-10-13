@@ -76,6 +76,12 @@ namespace AIMS.APIs
                 if (context.OrganizationTypes.Count() == 0)
                 {
                     context.OrganizationTypes.Add(new EFOrganizationTypes() { TypeName = "Default" });
+                    context.SaveChanges();
+                }
+
+                if (context.SectorTypes.Count() == 0)
+                {
+                    context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Default" });
                 }
 
                 if (context.FinancialYears.Count() == 0)
