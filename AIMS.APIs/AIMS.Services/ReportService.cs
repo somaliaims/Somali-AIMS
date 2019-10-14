@@ -803,7 +803,8 @@ namespace AIMS.Services
                                               where projectIds.Contains(project.Id)
                                               select project).ToList<ProjectProfileView>();
 
-                        decimal totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0, sectorPercentage = 0;
+                        decimal totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0, sectorPercentage = 0,
+                            sectorActualDisbursements = 0, sectorPlannedDisbursements = 0;
                         foreach (var project in sectorProjects)
                         {
                             if (project.Sectors != null)
@@ -859,6 +860,8 @@ namespace AIMS.Services
                                         project.PlannedDisbursements = 0;
                                     }
                                     totalDisbursementsPercentage += project.ActualDisbursements;
+                                    sectorActualDisbursements += project.ActualDisbursements;
+                                    sectorPlannedDisbursements += project.PlannedDisbursements;
                                 }
                             }
                         }
@@ -882,6 +885,8 @@ namespace AIMS.Services
 
                         projectsBySector.TotalFunding = totalFundingPercentage;
                         projectsBySector.TotalDisbursements = totalDisbursementsPercentage;
+                        projectsBySector.ActualDisbursements = sectorActualDisbursements;
+                        projectsBySector.PlannedDisbursements = sectorPlannedDisbursements;
                         projectsBySector.Projects = projectsListForSector;
                         sectorProjectsList.Add(projectsBySector);
                     }

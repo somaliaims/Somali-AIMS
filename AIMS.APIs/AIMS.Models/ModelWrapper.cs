@@ -1516,6 +1516,8 @@ namespace AIMS.Models
     {
         public string SectorName { get; set; }
         public decimal TotalFunding { get; set; }
+        public decimal ActualDisbursements { get; set; }
+        public decimal PlannedDisbursements { get; set; }
         public decimal TotalDisbursements { get; set; }
         public IEnumerable<ProjectViewForSector> Projects { get; set; }
     }
