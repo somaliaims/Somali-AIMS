@@ -1313,9 +1313,11 @@ namespace AIMS.Services
                                     string[] funderNames = project.Funders.Split(",");
                                     foreach (string funderName in funderNames)
                                     {
+                                        EFProjectFunders isFunderExists = null;
                                         var organization = (from org in organizations
                                                             where org.OrganizationName.Equals(funderName, StringComparison.OrdinalIgnoreCase)
                                                             select org).FirstOrDefault();
+
                                         if (organization == null)
                                         {
                                             if (!string.IsNullOrEmpty(funderName) && !string.IsNullOrWhiteSpace(funderName))
@@ -1329,14 +1331,18 @@ namespace AIMS.Services
                                                 });
                                                 unitWork.Save();
                                                 newOrganizations.Add(organization);
+                                                organizations.Add(organization);
                                             }
                                         }
 
-                                        var isFunderExists = (from f in projectFunders
+                                        if (organization != null)
+                                        {
+                                            isFunderExists = (from f in projectFunders
                                                               where f.ProjectId == newProject.Id && f.FunderId == organization.Id
                                                               select f).FirstOrDefault();
+                                        }
 
-                                        if (isFunderExists == null)
+                                        if (isFunderExists == null && organization != null)
                                         {
                                             projectFunders.Add(new EFProjectFunders() { Project = newProject, Funder = organization });
                                         }
@@ -1356,15 +1362,10 @@ namespace AIMS.Services
                                     EFOrganization implementer = null;
                                     foreach (string implementerName in implementerNames)
                                     {
+                                        EFProjectImplementers isImplementerExists = null;
                                         implementer = (from org in organizations
                                                             where org.OrganizationName.Equals(implementerName, StringComparison.OrdinalIgnoreCase)
                                                             select org).FirstOrDefault();
-                                        if (implementer == null)
-                                        {
-                                            implementer = (from org in newOrganizations
-                                                            where org.OrganizationName.Equals(implementerName, StringComparison.OrdinalIgnoreCase)
-                                                            select org).FirstOrDefault();
-                                        }
 
                                         if (implementer == null)
                                         {
@@ -1379,14 +1380,18 @@ namespace AIMS.Services
                                                 });
                                                 unitWork.Save();
                                                 newOrganizations.Add(implementer);
+                                                organizations.Add(implementer);
                                             }
                                         }
 
-                                        var isImplementerExists = (from i in projectImplementers
+                                        if (implementer != null)
+                                        {
+                                            isImplementerExists = (from i in projectImplementers
                                                                    where i.ProjectId == newProject.Id && i.ImplementerId == implementer.Id
                                                                    select i).FirstOrDefault();
+                                        }
 
-                                        if (isImplementerExists == null)
+                                        if (isImplementerExists == null && implementer != null)
                                         {
                                             projectImplementers.Add(new EFProjectImplementers() { ProjectId = newProject.Id, ImplementerId = implementer.Id });
                                         }
@@ -1795,6 +1800,11 @@ namespace AIMS.Services
                                     int newMappings = 0;
                                     foreach (var mapping in newFoundMappings)
                                     {
+                                        if (mapping.SectorId == mapping.MappingId)
+                                        {
+                                            continue;
+                                        }
+
                                         var isMappingExists = (from m in sectorMappings
                                                                where m.SectorId == mapping.SectorId && m.MappedSectorId == mapping.MappingId
                                                                select m).FirstOrDefault();
