@@ -1540,6 +1540,7 @@ namespace AIMS.Models
         public decimal TotalProjectValue { get; set; }
         public decimal TotalFunding { get; set; }
         public decimal TotalDisbursements { get; set; }
+        public decimal TotalActualDisbursements { get; set; }
         public decimal TotalPlannedDisbursements { get; set; }
         public IEnumerable<ProjectViewForYear> Projects { get; set; }
     }
@@ -1560,6 +1561,8 @@ namespace AIMS.Models
     {
         public string LocationName { get; set; }
         public decimal TotalFunding { get; set; }
+        public decimal ActualDisbursements { get; set; }
+        public decimal PlannedDisbursements { get; set; }
         public decimal TotalDisbursements { get; set; }
         public IEnumerable<ProjectViewForLocation> Projects { get; set; }
     }

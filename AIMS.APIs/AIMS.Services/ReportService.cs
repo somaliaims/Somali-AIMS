@@ -275,7 +275,8 @@ namespace AIMS.Services
                                                 select project).ToList<ProjectProfileView>();
 
                         int projectTotalPercentage = 0;
-                        decimal totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0, locationPercentage = 0;
+                        decimal totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0, locationPercentage = 0,
+                            locationActualDisbursements = 0, locationPlannedDisbursements = 0;
                         foreach (var project in locationProjects)
                         {
                             if (project.Locations != null)
@@ -327,6 +328,8 @@ namespace AIMS.Services
                                     project.ActualDisbursements = Math.Round(actualDisbursements, MidpointRounding.AwayFromZero);
                                     project.PlannedDisbursements = Math.Round(plannedDisbursements, MidpointRounding.AwayFromZero);
                                     totalDisbursementsPercentage += project.ActualDisbursements;
+                                    locationActualDisbursements += project.ActualDisbursements;
+                                    locationPlannedDisbursements += project.PlannedDisbursements;
                                 }
                             }
                         }
@@ -348,6 +351,8 @@ namespace AIMS.Services
                         }
                         projectsByLocation.TotalFunding = Math.Round(totalFundingPercentage, MidpointRounding.AwayFromZero);
                         projectsByLocation.TotalDisbursements = Math.Round(totalDisbursementsPercentage, MidpointRounding.AwayFromZero);
+                        projectsByLocation.ActualDisbursements = Math.Round(locationActualDisbursements, MidpointRounding.AwayFromZero);
+                        projectsByLocation.PlannedDisbursements = Math.Round(locationPlannedDisbursements, MidpointRounding.AwayFromZero);
                         projectsByLocation.Projects = projectsListForLocation;
                         locationProjectsList.Add(projectsByLocation);
                     }
@@ -1062,7 +1067,8 @@ namespace AIMS.Services
                                                      where projectIds.Contains(project.Id)
                                                      select project).ToList<ProjectProfileView>();
 
-                        decimal totalFunding = 0, totalDisbursements = 0, totalProjectValue = 0, totalPlannedDisbursements = 0;
+                        decimal totalFunding = 0, totalDisbursements = 0, totalProjectValue = 0, totalPlannedDisbursements = 0,
+                            totalActualDisbursements = 0;
                         foreach (var project in yearlyProjectsProfile)
                         {
                             totalProjectValue += (project.ProjectValue * (exchangeRate / project.ExchangeRate));
@@ -1088,6 +1094,7 @@ namespace AIMS.Services
                                 }
                                 totalFunding += (project.ActualDisbursements + project.PlannedDisbursements);
                                 totalPlannedDisbursements += project.PlannedDisbursements;
+                                totalActualDisbursements += project.ActualDisbursements;
                             }
 
                             projectsViewForYear.Add(new ProjectViewForYear()
@@ -1109,6 +1116,7 @@ namespace AIMS.Services
                             projectsByYear.TotalFunding = totalFunding;
                             projectsByYear.TotalDisbursements = totalDisbursements;
                             projectsByYear.TotalProjectValue = totalProjectValue;
+                            projectsByYear.TotalActualDisbursements = totalActualDisbursements;
                             projectsByYear.TotalPlannedDisbursements = totalPlannedDisbursements;
                             projectsByYear.Projects = projectsViewForYear;
                             projectsListForYear.Add(projectsByYear);
