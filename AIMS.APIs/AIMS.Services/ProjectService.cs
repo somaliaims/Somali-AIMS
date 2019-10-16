@@ -744,8 +744,9 @@ namespace AIMS.Services
                         projectsList.Add(profileView);
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    string message = ex.Message;
                 }
                 return await Task<ProjectProfileView>.Run(() => projectsList).ConfigureAwait(false);
             }
@@ -762,14 +763,17 @@ namespace AIMS.Services
                 {
                     if (!string.IsNullOrEmpty(model.Title))
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetManyQueryableAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase));
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase),
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                     }
 
                     if (model.StartingYear != 0 && model.EndingYear != 0)
                     {
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetManyQueryableAsync(p => (p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.EndingFinancialYear.FinancialYear <= model.EndingYear));
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.StartingFinancialYear.FinancialYear >= model.StartingYear 
+                            && p.EndingFinancialYear.FinancialYear <= model.EndingYear), 
+                                new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                         }
                         else
                         {
@@ -782,13 +786,13 @@ namespace AIMS.Services
 
                     if (model.SectorIds.Count > 0)
                     {
-                        var projectSectors = unitWork.ProjectSectorsRepository.GetMany(s => model.SectorIds.Contains(s.SectorId));
+                        var projectSectors = unitWork.ProjectSectorsRepository.GetManyQueryable(s => model.SectorIds.Contains(s.SectorId));
                         var projectIds = (from pSector in projectSectors
                                           select pSector.ProjectId).ToList<int>().Distinct();
 
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetManyQueryableAsync(p => projectIds.Contains(p.Id));
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id), new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                         }
                         else
                         {
@@ -800,11 +804,11 @@ namespace AIMS.Services
 
                     if (model.OrganizationIds.Count > 0)
                     {
-                        var projectFunders = unitWork.ProjectFundersRepository.GetMany(f => model.OrganizationIds.Contains(f.FunderId));
+                        var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => model.OrganizationIds.Contains(f.FunderId));
                         var projectIdsFunders = (from pFunder in projectFunders
                                                  select pFunder.ProjectId).ToList<int>().Distinct();
 
-                        var projectImplementers = unitWork.ProjectImplementersRepository.GetMany(f => model.OrganizationIds.Contains(f.ImplementerId));
+                        var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(f => model.OrganizationIds.Contains(f.ImplementerId));
                         var projectIdsImplementers = (from pImplementer in projectImplementers
                                                       select pImplementer.ProjectId).ToList<int>().Distinct();
 
@@ -813,7 +817,7 @@ namespace AIMS.Services
 
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetManyQueryableAsync(p => projectIds.Contains(p.Id));
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id), new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                         }
                         else
                         {
@@ -825,13 +829,13 @@ namespace AIMS.Services
 
                     if (model.LocationIds.Count > 0)
                     {
-                        var projectLocations = unitWork.ProjectLocationsRepository.GetMany(l => model.LocationIds.Contains(l.LocationId));
+                        var projectLocations = unitWork.ProjectLocationsRepository.GetManyQueryable(l => model.LocationIds.Contains(l.LocationId));
                         var projectIds = (from pLocation in projectLocations
                                           select pLocation.ProjectId).ToList<int>().Distinct();
 
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetManyQueryableAsync(p => projectIds.Contains(p.Id));
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id), new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                         }
                         else
                         {
@@ -843,7 +847,7 @@ namespace AIMS.Services
 
                     if (projectProfileList == null)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetManyQueryableAsync(p => p.Title.Contains(model.Title));
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title), new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                     }
 
                     foreach (var project in projectProfileList)
@@ -853,13 +857,14 @@ namespace AIMS.Services
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
-                        profileView.EndingFinancialYear = project.EndingFinancialYear.ToString();
+                        profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.DateUpdated = project.DateUpdated.ToShortDateString();
                         projectsList.Add(profileView);
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    string message = ex.Message;
                 }
                 return await Task<ProjectProfileView>.Run(() => projectsList).ConfigureAwait(false);
             }
