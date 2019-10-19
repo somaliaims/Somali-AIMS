@@ -261,10 +261,19 @@ namespace AIMS.Services
                     return response;
                 }
 
+                var organizationType = unitWork.OrganizationTypesRepository.GetOne(o => o.Id == organization.OrganizationTypeId);
+                if (organizationType == null)
+                {
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Organization Type");
+                    return response;
+                }
+
                 organizationObj.OrganizationName = organization.Name.Trim();
+                organizationObj.OrganizationType = organizationType;
                 unitWork.OrganizationRepository.Update(organizationObj);
                 unitWork.Save();
-                response.Message = "1";
+                response.ReturnedId = id;
                 return response;
             }
         }
