@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using AIMS.Services.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 namespace AIMS.Services
 {
@@ -145,7 +146,7 @@ namespace AIMS.Services
 
                     if (!string.IsNullOrEmpty(model.Title))
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase),
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => EF.Functions.Like(p.Title, "%" + model.Title + "%"),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
@@ -667,7 +668,7 @@ namespace AIMS.Services
 
                     if (!string.IsNullOrEmpty(model.Title))
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase),
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => EF.Functions.Like(p.Title, "%" + model.Title + "%"),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
@@ -937,7 +938,7 @@ namespace AIMS.Services
 
                     if (!string.IsNullOrEmpty(model.Title))
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase),
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => EF.Functions.Like(p.Title, "%" + model.Title + "%"),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
