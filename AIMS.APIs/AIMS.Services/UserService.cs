@@ -200,7 +200,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 UserAuthenticationView foundUser = new UserAuthenticationView();
-                var findUser = unitWork.UserRepository.GetOne(u => u.Email.Equals(email) && u.Password.Equals(password));
+                var findUser = unitWork.UserRepository.GetWithInclude(u => u.Email.Equals(email) && u.Password.Equals(password), new string[] { "Organization" }).FirstOrDefault();
 
                 if (findUser != null)
                 {
@@ -214,6 +214,7 @@ namespace AIMS.Services
                         foundUser.Id = findUser.Id;
                         foundUser.Email = findUser.Email;
                         foundUser.UserType = findUser.UserType;
+                        foundUser.OrganizationName = findUser.Organization.OrganizationName;
                         foundUser.OrganizationId = findUser.OrganizationId;
                         foundUser.IsApproved = true;
 

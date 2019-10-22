@@ -139,6 +139,7 @@ namespace AIMS.APIs.Controllers
                     Token = null,
                     UserType = 0,
                     OrganizationId = foundUser.OrganizationId,
+                    OrganizationName = foundUser.OrganizationName,
                     IsApproved = false
                 };
                 return Ok(uView);
@@ -153,6 +154,7 @@ namespace AIMS.APIs.Controllers
                     JwtIssuer = configuration["JwtIssuer"],
                     TokenExpirationDays = configuration["JwtExpireDays"],
                     OrganizationId = foundUser.OrganizationId.ToString(),
+                    OrganizationName = foundUser.OrganizationName,
                     UserType = Convert.ToInt32(foundUser.UserType),
                     Email = foundUser.Email
                 };
@@ -163,6 +165,7 @@ namespace AIMS.APIs.Controllers
                     Token = jwtToken,
                     UserType = foundUser.UserType,
                     OrganizationId = foundUser.OrganizationId,
+                    OrganizationName = foundUser.OrganizationName,
                     IsApproved = foundUser.IsApproved
                 };
                 return Ok(uView);

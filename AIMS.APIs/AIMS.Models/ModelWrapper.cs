@@ -81,6 +81,7 @@ namespace AIMS.Models
         public string Id { get; set; }
         public string Email { get; set; }
         public string OrganizationId { get; set; }
+        public string OrganizationName { get; set; }
         public int UserType { get; set; }
         public string JwtKey { get; set; }
         public string JwtAudience { get; set; }
@@ -538,6 +539,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Email { get; set; }
         public int OrganizationId { get; set; }
+        public string OrganizationName { get; set; }
         public UserTypes UserType { get; set; }
         public bool IsApproved { get; set; }
     }
@@ -546,6 +548,7 @@ namespace AIMS.Models
     {
         public string Token { get; set; }
         public int OrganizationId { get; set; }
+        public string OrganizationName { get; set; }
         public UserTypes UserType { get; set; }
         public bool IsApproved { get; set; }
     }
