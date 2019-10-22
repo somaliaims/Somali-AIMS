@@ -21,6 +21,12 @@ namespace AIMS.Services
         IEnumerable<ProjectView> GetAll();
 
         /// <summary>
+        /// Gets list of project titles
+        /// </summary>
+        /// <returns></returns>
+        ICollection<ProjectTitle> GetProjectTitles();
+
+        /// <summary>
         /// Gets all with abstract level details
         /// </summary>
         /// <returns></returns>
@@ -382,6 +388,26 @@ namespace AIMS.Services
                             orderby p.DateUpdated descending
                             select p);
                 return await Task<IEnumerable<ProjectView>>.Run(() => mapper.Map<List<ProjectView>>(projects)).ConfigureAwait(false);
+            }
+        }
+
+        public ICollection<ProjectTitle> GetProjectTitles()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<ProjectTitle> projectTitles = new List<ProjectTitle>();
+                var titles = unitWork.ProjectRepository.GetProjection(p => p.Id != 0, p => p.Title);
+                if (titles.Any())
+                {
+                    foreach(var projectTitle in titles)
+                    {
+                        projectTitles.Add(new ProjectTitle()
+                        {
+                            Title = projectTitle
+                        });
+                    }
+                }
+                return projectTitles;
             }
         }
 

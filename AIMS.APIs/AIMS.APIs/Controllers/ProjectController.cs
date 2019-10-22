@@ -37,6 +37,12 @@ namespace AIMS.APIs.Controllers
             return Ok(await projectService.GetAllDetailAsync());
         }
 
+        [HttpGet("GetProjectTitles")]
+        public IActionResult GetProjectTitles()
+        {
+            return Ok(projectService.GetProjectTitles());
+        }
+
         [HttpGet("GetLatest")]
         public IActionResult GetLatest()
         {

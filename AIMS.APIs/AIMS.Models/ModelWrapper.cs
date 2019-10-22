@@ -687,6 +687,11 @@ namespace AIMS.Models
         public string DateUpdated { get; set; }
     }
 
+    public class ProjectTitle
+    {
+        public string Title { get; set; }
+    }
+
     public class LatestProjectView
     {
         public int Id { get; set; }
