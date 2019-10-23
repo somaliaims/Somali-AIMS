@@ -497,7 +497,13 @@ namespace AIMS.Services.Helpers
 
         public string FormUserApprovedMessage(string message, string url)
         {
-            return (message + "<p>Click on url below to login now: </p><p>" + url + "</p>");
+            List<string> messageList = new List<string>();
+            messageList.Add("<p>Your account has been approved.</p>");
+            messageList.Add(message);
+            messageList.Add("<p>Please follow the link to login: </p><p>" + url + "</p>");
+            messageList.Add("<p>If you need further assistance, please submit a help request via the contact form in the " +
+                "AIMS: <a href='http://aims.mop.gov.so/contact'>http://aims.mop.gov.so/contact</a>");
+            return (message);
         }
 
         public string NewUserRegisteredMessage(string email)
@@ -523,22 +529,22 @@ namespace AIMS.Services.Helpers
         public string OrganizationsMergedMessage(List<string> organizations, string newOrganization)
         {
             List<string> formattedMessageList = new List<string>();
-            formattedMessageList.Add("<h4>Organizations merged</h4><ul>");
+            formattedMessageList.Add("<h4>Your organization has been merged and/or renamed by a management user.</h4><p>Organizations combined with: </p><ul>");
             foreach(var org in organizations)
             {
                 formattedMessageList.Add("<li>" + org + "</li>");
             }
             formattedMessageList.Add("</ul>");
-            formattedMessageList.Add("<h4>New organization</h4><p>" + newOrganization + "</p>");
+            formattedMessageList.Add("<ul><li>New name for combined organization: " + newOrganization + "</li></ul>");
             return (String.Join("", formattedMessageList));
         }
 
         public string OrganizationRenamedMessage(string oldName, string newName)
         {
             List<string> formattedMessageList = new List<string>();
-            formattedMessageList.Add("<h4>Organizations renamed</h4><ul>");
-            formattedMessageList.Add("<li><b>Old name: " + oldName + "</b></li>");
-            formattedMessageList.Add("<li><b>New name: " + newName + "</b></li>");
+            formattedMessageList.Add("<h4>Your organization has been renamed by a management user.</h4><ul>");
+            formattedMessageList.Add("<li>Your organization: " + oldName + "</li>");
+            formattedMessageList.Add("<li>New name for organization: " + newName + "</li>");
             formattedMessageList.Add("</ul>");
             return (String.Join("", formattedMessageList));
         }
