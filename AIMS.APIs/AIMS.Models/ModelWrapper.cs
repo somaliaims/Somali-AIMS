@@ -689,6 +689,7 @@ namespace AIMS.Models
 
     public class ProjectTitle
     {
+        public int Id { get; set; }
         public string Title { get; set; }
     }
 

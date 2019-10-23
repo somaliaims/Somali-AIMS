@@ -396,14 +396,15 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<ProjectTitle> projectTitles = new List<ProjectTitle>();
-                var titles = unitWork.ProjectRepository.GetProjection(p => p.Id != 0, p => p.Title);
-                if (titles.Any())
+                var projects = unitWork.ProjectRepository.GetProjection(p => p.Id != 0, p => new { p.Id, p.Title });
+                if (projects.Any())
                 {
-                    foreach(var projectTitle in titles)
+                    foreach(var project in projects)
                     {
                         projectTitles.Add(new ProjectTitle()
                         {
-                            Title = projectTitle
+                            Id = project.Id,
+                            Title = project.Title
                         });
                     }
                 }
