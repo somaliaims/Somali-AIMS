@@ -57,9 +57,10 @@ namespace AIMS.Services.Helpers
                 queryString += ("&sectors=" + sectorIdsStr);
             }
 
-            if (!string.IsNullOrEmpty(model.Title))
+            if (model.ProjectIds.Count > 0)
             {
-                queryString += ("&title=" + model.Title);
+                string projectIdsStr = string.Join(",", model.ProjectIds);
+                queryString += ("&projects=" + projectIdsStr);
             }
 
             if (model.StartingYear > 0)
@@ -88,9 +89,10 @@ namespace AIMS.Services.Helpers
                 queryString += ("&locations=" + locationIdsStr);
             }
 
-            if (!string.IsNullOrEmpty(model.Title))
+            if (model.ProjectIds.Count > 0)
             {
-                queryString += ("&title=" + model.Title);
+                string projectIdsStr = string.Join(",", model.ProjectIds);
+                queryString += ("&projects=" + projectIdsStr);
             }
 
             if (model.StartingYear > 0)
@@ -125,9 +127,10 @@ namespace AIMS.Services.Helpers
                 queryString += ("&sectors=" + sectorIdsStr);
             }
 
-            if (!string.IsNullOrEmpty(model.Title))
+            if (model.ProjectIds.Count > 0)
             {
-                queryString += ("&title=" + model.Title);
+                string projectIdsStr = string.Join(",", model.ProjectIds);
+                queryString += ("&projects=" + projectIdsStr);
             }
 
             if (model.StartingYear > 0)

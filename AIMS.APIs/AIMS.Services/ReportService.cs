@@ -144,9 +144,9 @@ namespace AIMS.Services
                     IQueryable<EFProjectLocations> projectLocationsQueryable = null;
                     List<EFProjectLocations> projectLocations = null;
 
-                    if (!string.IsNullOrEmpty(model.Title))
+                    if (model.ProjectIds.Count > 0)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => EF.Functions.Like(p.Title, "%" + model.Title + "%"),
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
@@ -666,9 +666,9 @@ namespace AIMS.Services
                     IQueryable<EFProject> projectProfileList = null;
                     IQueryable<EFProjectSectors> projectSectors = null;
 
-                    if (!string.IsNullOrEmpty(model.Title))
+                    if (model.ProjectIds.Count > 0)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => EF.Functions.Like(p.Title, "%" + model.Title + "%"),
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
@@ -936,9 +936,9 @@ namespace AIMS.Services
                     IQueryable<EFProject> projectProfileList = null;
                     IEnumerable<int> financialYears = null;
 
-                    if (!string.IsNullOrEmpty(model.Title))
+                    if (model.ProjectIds.Count > 0)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => EF.Functions.Like(p.Title, "%" + model.Title + "%"),
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 

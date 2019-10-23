@@ -1587,7 +1587,7 @@ namespace AIMS.Models
 
     public class SearchProjectsBySectorModel
     {
-        public string Title { get; set; } = null;
+        public List<int> ProjectIds { get; set; } = new List<int>();
         public List<int> OrganizationIds { get; set; } = new List<int>();
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
@@ -1597,7 +1597,7 @@ namespace AIMS.Models
 
     public class SearchProjectsByLocationModel
     {
-        public string Title { get; set; } = null;
+        public List<int> ProjectIds { get; set; } = new List<int>();
         public List<int> OrganizationIds { get; set; } = new List<int>();
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
@@ -1606,7 +1606,7 @@ namespace AIMS.Models
 
     public class SearchProjectsByYearModel
     {
-        public string Title { get; set; } = null;
+        public List<int> ProjectIds { get; set; } = new List<int>();
         public List<int> OrganizationIds { get; set; } = new List<int>();
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
