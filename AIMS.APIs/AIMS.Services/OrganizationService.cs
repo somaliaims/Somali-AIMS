@@ -326,7 +326,7 @@ namespace AIMS.Services
                         }
 
                         mHelper = new MessageHelper();
-                        message += mHelper.OrganizationRenamedMessage(oldName, newName);
+                        message += mHelper.OrganizationRenamedMessage(oldName, newName, emailMessage.Message, emailMessage.FooterMessage);
                         ISMTPSettingsService smtpService = new SMTPSettingsService(context);
                         var smtpSettings = smtpService.GetPrivate();
                         SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
@@ -462,7 +462,7 @@ namespace AIMS.Services
                         }
 
                         mHelper = new MessageHelper();
-                        message += mHelper.OrganizationsMergedMessage(organizationNames, newOrganization.OrganizationName);
+                        message += mHelper.OrganizationsMergedMessage(organizationNames, newOrganization.OrganizationName, emailMessage.Message, emailMessage.FooterMessage);
                         
                         //Send email
                         ISMTPSettingsService smtpService = new SMTPSettingsService(context);

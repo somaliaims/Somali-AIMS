@@ -30,23 +30,23 @@ namespace AIMS.APIs
                 context.Database.Migrate();
                 if (context.EmailMessages.Count() == 0)
                 {
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewUser, TypeDefinition = "New user registration", Message = "New user registered" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewProjectToOrg, TypeDefinition = "New project to organization", Message = "New project added to organanization" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.UserInactive, TypeDefinition = "User inactive", Message = "User is inactive" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ChangedMappingEffectedProject, TypeDefinition = "Sector mapping updated", Message = "Sector mapping updated" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewIATISector, TypeDefinition = "Sector added from IATI", Message = "New sector/s added from IATI" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.OrganizationMerged, TypeDefinition = "Organization merged", Message = "Organization merged" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewOrgToProject, TypeDefinition = "New organization request for project", Message = "" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectPermissionGranted, TypeDefinition = "Project permission approved/granted", Message = "" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectPermissionDenied, TypeDefinition = "Project permission unapproved/denied", Message = "" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.UserApproved, TypeDefinition = "User account approved", Message = "" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.OrganizationRenamed, TypeDefinition = "Organization renamed", Message = "" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionRequest, TypeDefinition = "Project deletion request", Message = "" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionCancelled, TypeDefinition = "Project deletion cancelled", Message = "" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionApproved, TypeDefinition = "Project deletion approved", Message = "" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeleted, TypeDefinition = "Project deleted", Message = "" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ResetPassword, TypeDefinition = "Reset password", Message = "Your password is reset successfully" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewIATIOrganization, TypeDefinition = "New IATI organizations", Message = "Some new organizations are added through IATI to AIMS DB." });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewUser, TypeDefinition = "New user registration", Subject= "New user registration", Message = "New user registered" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewProjectToOrg, TypeDefinition = "New project to organization", Subject="Project added to organization", Message = "New project added to organanization" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.UserInactive, TypeDefinition = "User inactive", Subject="User account deactivated", Message = "User is inactive" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ChangedMappingEffectedProject, TypeDefinition = "Sector mapping updated", Subject="Sector mapping updated", Message = "Sector mapping updated" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewIATISector, TypeDefinition = "Sector added from IATI", Subject="Sector/s added from IATI", Message = "New sector/s added from IATI" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.OrganizationMerged, TypeDefinition = "Organization merged", Subject="Organizations merged", Message = "Organization merged" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewOrgToProject, TypeDefinition = "New organization request for project", Subject="Organization requesting to join project", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectPermissionGranted, TypeDefinition = "Project permission approved/granted", Subject="Project membership granted", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectPermissionDenied, TypeDefinition = "Project permission unapproved/denied", Subject="Project membership denied", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.UserApproved, TypeDefinition = "User account approved", Subject="User account approval confirmation", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.OrganizationRenamed, TypeDefinition = "Organization renamed", Subject="Organization renamed", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionRequest, TypeDefinition = "Project deletion request", Subject="Project deletion request", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionCancelled, TypeDefinition = "Project deletion cancelled", Subject="Project deletion request cancelled", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionApproved, TypeDefinition = "Project deletion approved", Subject="Project deletion approved", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeleted, TypeDefinition = "Project deleted", Subject="Project deleted", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ResetPassword, TypeDefinition = "Reset password", Subject="User password reset", Message = "Your password is reset successfully" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewIATIOrganization, TypeDefinition = "New IATI organizations", Subject="New organization/s", Message = "Some new organizations are added through IATI to AIMS DB." });
                     context.SaveChanges();
                 }
 

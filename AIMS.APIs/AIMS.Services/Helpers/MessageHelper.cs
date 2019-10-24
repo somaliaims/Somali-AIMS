@@ -197,7 +197,7 @@ namespace AIMS.Services.Helpers
         /// <param name="organizations"></param>
         /// <param name="newOrganization"></param>
         /// <returns></returns>
-        string OrganizationsMergedMessage(List<string> organizations, string newOrganization);
+        string OrganizationsMergedMessage(List<string> organizations, string newOrganization, string message, string footerMessage);
 
         /// <summary>
         /// Formats rename organization message
@@ -205,7 +205,7 @@ namespace AIMS.Services.Helpers
         /// <param name="oldName"></param>
         /// <param name="newName"></param>
         /// <returns></returns>
-        string OrganizationRenamedMessage(string oldName, string newName);
+        string OrganizationRenamedMessage(string oldName, string newName, string message, string footerMessage);
 
         /// <summary>
         /// Formats sector mapping changed message
@@ -222,7 +222,7 @@ namespace AIMS.Services.Helpers
         /// <param name="message"></param>
         /// <param name="url"></param>
         /// <returns></returns>
-        string FormUserApprovedMessage(string message, string url);
+        string FormUserApprovedMessage(string message, string url, string footerMessage);
 
         /// <summary>
         /// Gets message for an invalid attempt to approve a funder
@@ -495,14 +495,12 @@ namespace AIMS.Services.Helpers
             return ("<h4>Following organizations are added to the project (" + project + ")</h4><p>" + organizations  + "</p>");
         }
 
-        public string FormUserApprovedMessage(string message, string url)
+        public string FormUserApprovedMessage(string message, string url, string footerMessage)
         {
             List<string> messageList = new List<string>();
-            messageList.Add("<p>Your account has been approved.</p>");
             messageList.Add(message);
             messageList.Add("<p>Please follow the link to login: </p><p>" + url + "</p>");
-            messageList.Add("<p>If you need further assistance, please submit a help request via the contact form in the " +
-                "AIMS: <a href='http://aims.mop.gov.so/contact'>http://aims.mop.gov.so/contact</a>");
+            messageList.Add("<p>" + footerMessage + "</p>:" + "<a href='http://aims.mop.gov.so/contact'>http://aims.mop.gov.so/contact</a>");
             return (message);
         }
 
@@ -526,26 +524,29 @@ namespace AIMS.Services.Helpers
             return (EXRATE_ORDER_EXISTS);
         }
 
-        public string OrganizationsMergedMessage(List<string> organizations, string newOrganization)
+        public string OrganizationsMergedMessage(List<string> organizations, string newOrganization, string message, string footerMessage)
         {
             List<string> formattedMessageList = new List<string>();
-            formattedMessageList.Add("<h4>Your organization has been merged and/or renamed by a management user.</h4><p>Organizations combined with: </p><ul>");
+            formattedMessageList.Add("<h4>" + message + "</h4><p>Organizations combined with: </p><ul>");
             foreach(var org in organizations)
             {
                 formattedMessageList.Add("<li>" + org + "</li>");
             }
+            formattedMessageList.Add("</ul><ul>");
+            formattedMessageList.Add("<li>New name for combined organization: " + newOrganization + "</li>");
             formattedMessageList.Add("</ul>");
-            formattedMessageList.Add("<ul><li>New name for combined organization: " + newOrganization + "</li></ul>");
+            formattedMessageList.Add("<p>" + footerMessage + "</p>");
             return (String.Join("", formattedMessageList));
         }
 
-        public string OrganizationRenamedMessage(string oldName, string newName)
+        public string OrganizationRenamedMessage(string oldName, string newName, string message, string footerMessage)
         {
             List<string> formattedMessageList = new List<string>();
-            formattedMessageList.Add("<h4>Your organization has been renamed by a management user.</h4><ul>");
+            formattedMessageList.Add("<h4>" + message + "</h4><ul>");
             formattedMessageList.Add("<li>Your organization: " + oldName + "</li>");
             formattedMessageList.Add("<li>New name for organization: " + newName + "</li>");
             formattedMessageList.Add("</ul>");
+            formattedMessageList.Add("<p>" + footerMessage + "</p>");
             return (String.Join("", formattedMessageList));
         }
 

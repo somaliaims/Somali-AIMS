@@ -534,7 +534,7 @@ namespace AIMS.Services
                         footerMessage = emailMessage.FooterMessage;
                     }
                     mHelper = new MessageHelper();
-                    message = mHelper.FormUserApprovedMessage(message, loginUrl);
+                    message = mHelper.FormUserApprovedMessage(emailMessage.Message, loginUrl, emailMessage.FooterMessage);
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
                     emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                 }
