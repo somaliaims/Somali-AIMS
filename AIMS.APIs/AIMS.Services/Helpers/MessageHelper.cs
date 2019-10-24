@@ -153,6 +153,13 @@ namespace AIMS.Services.Helpers
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="project"></param>
+        /// <returns></returns>
+        string ProjectDeletionMessage(string project);
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="email"></param>
         /// <param name="organization"></param>
         /// <returns></returns>
@@ -367,11 +374,12 @@ namespace AIMS.Services.Helpers
 
         public string NewIATIOrganizationsMessage(int newOrgs, int withoutType)
         {
-            if (withoutType > 0)
-            {
-                return ("<p>" + newOrgs + " new organizations added from IATI out of which " + withoutType + " are without organization types.</p>");
-            }
-            return ("<p>" + newOrgs + " new organizations added from IATI</p>");
+            List<string> messageList = new List<string>();
+            messageList.Add("<ul>");
+            messageList.Add("<li>Organization/s added from IATI: " + newOrgs + "</li>");
+            messageList.Add("<li>Organization/s added without type: " + withoutType + "</li>");
+            messageList.Add("</ul>");
+            return (string.Join("", messageList));
         }
 
         public string EmailNotFound(string email)
@@ -431,13 +439,23 @@ namespace AIMS.Services.Helpers
 
         public string OrganizationAsFunderMessage(string organization, string projectTitle)
         {
-            return ("<p>You organization (" + organization + ") has been added as a funder into a project (" + projectTitle + ") </p>" );
+            List<string> messageList = new List<string>();
+            messageList.Add("<ul>");
+            messageList.Add("<li>Project title: " + projectTitle + "</li>");
+            messageList.Add("<li>Organization: " + organization + "</li>");
+            messageList.Add("</ul>");
+            return (string.Join("", messageList));
         }
 
         public string InactiveUserMessage(string email, string organization)
         {
             return ("<p>The user having (" + email + ") which is registered with your organization (" 
                 + organization + ") is inactive since an year and will be deleted soon.</p>");
+        }
+
+        public string ProjectDeletionMessage(string project)
+        {
+            return ("<p>Project title: " + project + "</p>");
         }
 
         public string GetInvalidOptionsMessage()
@@ -492,7 +510,13 @@ namespace AIMS.Services.Helpers
 
         public string ProjectToOrganizationMessage(string project, string organizations)
         {
-            return ("<h4>Following organizations are added to the project (" + project + ")</h4><p>" + organizations  + "</p>");
+            List<string> messageList = new List<string>();
+            messageList.Add("<h4>New organization/s added to the project: <i>" + project + "</i><h4>");
+            messageList.Add("<h5>Added organization/s<h5>");
+            messageList.Add("<ul>");
+            messageList.Add("<li>" + organizations + "</li>");
+            messageList.Add("</ul>");
+            return (string.Join("", messageList));
         }
 
         public string FormUserApprovedMessage(string message, string url, string footerMessage)

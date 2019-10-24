@@ -836,16 +836,6 @@ namespace AIMS.Services
                         unitWork.SectorRepository.InsertMultiple(newIATISectors);
                         unitWork.Save();
                         response.ReturnedId = newIATISectors.Count;
-                        /*IMessageHelper mHelper = new MessageHelper();
-                        unitWork.NotificationsRepository.Insert(new EFUserNotifications()
-                        {
-                            NotificationType = NotificationTypes.NewIATISector,
-                            Message = mHelper.NewIATISectorsAdded(newIATISectors.Count),
-                            OrganizationId = 0,
-                            TreatmentId = 0,
-                            UserType = UserTypes.Manager
-                        });
-                        unitWork.Save();*/
                     }
                 }
             }

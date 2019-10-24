@@ -678,7 +678,7 @@ namespace AIMS.Services
                                     footerMessage = emailMessage.FooterMessage;
                                 }
                                 IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
-                                emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
+                                emailHelper.SendEmailToUsers(usersEmailList, emailMessage.Subject, "", message, footerMessage);
                             }
                             else
                             {

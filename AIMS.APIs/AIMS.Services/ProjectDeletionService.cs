@@ -488,14 +488,15 @@ namespace AIMS.Services
                     }
 
                     string message = "", subject = "", footerMessage = "";
-                    string projectTitle = "<h5>Project title: " + project.Title + "</h5>";
                     var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectDeleted);
                     if (emailMessage != null)
                     {
                         subject = emailMessage.Subject;
-                        message = projectTitle + emailMessage.Message;
+                        message = emailMessage.Message;
                         footerMessage = emailMessage.FooterMessage;
                     }
+                    mHelper = new MessageHelper();
+                    message += mHelper.ProjectDeletionMessage(project.Title);
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
                     emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                 }

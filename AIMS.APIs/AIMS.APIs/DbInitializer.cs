@@ -44,7 +44,6 @@ namespace AIMS.APIs
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionRequest, TypeDefinition = "Project deletion request", Subject="Project deletion request", Message = "" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionCancelled, TypeDefinition = "Project deletion cancelled", Subject="Project deletion request cancelled", Message = "" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeletionApproved, TypeDefinition = "Project deletion approved", Subject="Project deletion approved", Message = "" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ProjectDeleted, TypeDefinition = "Project deleted", Subject="Project deleted", Message = "" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ResetPassword, TypeDefinition = "Reset password", Subject="User password reset", Message = "Your password is reset successfully" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewIATIOrganization, TypeDefinition = "New IATI organizations", Subject="New organization/s", Message = "Some new organizations are added through IATI to AIMS DB." });
                     context.SaveChanges();
