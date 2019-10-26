@@ -721,24 +721,20 @@ namespace AIMS.Services
                     }
 
                     List<int> sectorIds = new List<int>();
-                    if (model.ParentSectorId != 0)
-                    {
-                        //sectorIds = unitWork.SectorRepository.GetProjection(s => s.ParentSectorId == model.ParentSectorId).ToList<int>();
-                        sectorIds.Add(model.ParentSectorId);
-                    }
-
                     if (model.SectorIds.Count > 0)
                     {
-                        sectorIds = model.SectorIds.Union(sectorIds).ToList<int>();
-                    }
-
-                    if (sectorIds.Count > 0)
-                    {
-                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => sectorIds.Contains(p.SectorId), new string[] { "Sector" });
+                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains(p.SectorId), new string[] { "Sector" });
                     }
                     else
                     {
-                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => p.ProjectId != 0, new string[] { "Sector" });
+                        int defaultSectorTypeId = 0;
+                        var defaultSectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsPrimary == true);
+                        if (defaultSectorType != null)
+                        {
+                            defaultSectorTypeId = defaultSectorType.Id;
+                        }
+                        var parentSectorIds = unitWork.SectorRepository.GetProjection(s => s.ParentSectorId == null && s.SectorTypeId == defaultSectorTypeId, s => s.Id);
+                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => parentSectorIds.Contains(p.SectorId), new string[] { "Sector" });
                     }
 
                     projectSectors = from pSector in projectSectors

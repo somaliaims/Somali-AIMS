@@ -40,6 +40,8 @@ namespace AIMS.Services.Helpers
     {
         SmtpClient client;
         string emailFrom;
+        const string EMAIL_SIGNATURE = "AIMS Support Team";
+        const string FOOTER_LINE = "If you need further assistance, please submit a help request via the contact form in the AIMS";
 
         public EmailHelper(string adminEmail, SMTPSettingsModel smtpSettings)
         {
@@ -126,7 +128,7 @@ namespace AIMS.Services.Helpers
                 }
                 mailMessage.IsBodyHtml = true;
                 mailMessage.From = new MailAddress(this.emailFrom);
-                mailMessage.Body = this.FormatMessage(emailTitle, emailMessage);
+                mailMessage.Body = this.FormatMessage(emailTitle, emailMessage, footerMessage);
                 mailMessage.Subject = subject;
                 client.Send(mailMessage);
             }
@@ -143,9 +145,10 @@ namespace AIMS.Services.Helpers
             List<string> messageList = new List<string>();
             messageList.Add("<h3>" + title + "</h3>");
             messageList.Add("<h3>Dear user,</h3>");
-            footerMessage = (footerMessage != null) ? footerMessage : "AIMS Support Team"; 
+            footerMessage = (footerMessage != null) ? footerMessage : FOOTER_LINE; 
             messageList.Add(message);
             messageList.Add("<h5>" + footerMessage + "</h5>");
+            messageList.Add("<h5><b>" + EMAIL_SIGNATURE + "</b></h5>");
             return (String.Join(string.Empty, messageList));
         }
 
@@ -162,8 +165,9 @@ namespace AIMS.Services.Helpers
                 messageList.Add("<p>A new user has just submitted the request for registration.</p>");
                 messageList.Add("<p>Please open your notification area using AIMS, and approve/disapprove the request.</p>");
             }
-            footerMessage = (footerMessage != null) ? footerMessage : "AIMS Support Team";
+            footerMessage = (footerMessage != null) ? footerMessage : FOOTER_LINE;
             messageList.Add("<h5>" + footerMessage + "</h5>");
+            messageList.Add("<h5><b>" + EMAIL_SIGNATURE + "</b></h5>");
             return (String.Join(string.Empty, messageList));
         }
 
@@ -181,8 +185,9 @@ namespace AIMS.Services.Helpers
                 messageList.Add("<p>A new user has just submitted a request for registration into your organization.</p>");
                 messageList.Add("<p>Please open your notification area using AIMS, and approve/disapprove the request.</p>");
             }
-            footerMessage = (footerMessage != null) ? footerMessage : "AIMS Support Team";
+            footerMessage = (footerMessage != null) ? footerMessage : FOOTER_LINE;
             messageList.Add("<h5>" + footerMessage + "</h5>");
+            messageList.Add("<h5><b>" + EMAIL_SIGNATURE + "</b></h5>");
             return (String.Join(string.Empty, messageList));
         }
 
@@ -193,7 +198,8 @@ namespace AIMS.Services.Helpers
             messageList.Add("<p>We have received a password reset request for your email. If it was not you, please ignore this email.</p>");
             messageList.Add("<p>Click on the link below and follow the instructions to reset password. This link will expire in two hours</p>");
             messageList.Add("<p><a target='_blank' href='" + url + token + "'>Password Reset Link</a></p>");
-            messageList.Add("<h5>AIMS Support Team</h5>");
+            messageList.Add("<h5>" + FOOTER_LINE + "</h5>");
+            messageList.Add("<h5><b>" + EMAIL_SIGNATURE + "</b></h5>");
             return (String.Join(string.Empty, messageList));
         }
 

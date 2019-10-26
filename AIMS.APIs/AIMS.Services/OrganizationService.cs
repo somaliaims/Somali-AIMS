@@ -317,7 +317,7 @@ namespace AIMS.Services
 
                     if (emailsList.Count > 0)
                     {
-                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.OrganizationMerged);
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.OrganizationRenamed);
                         if (emailMessage != null)
                         {
                             subject = emailMessage.Subject;
@@ -326,7 +326,7 @@ namespace AIMS.Services
                         }
 
                         mHelper = new MessageHelper();
-                        message += mHelper.OrganizationRenamedMessage(oldName, newName, emailMessage.Message, emailMessage.FooterMessage);
+                        message = mHelper.OrganizationRenamedMessage(oldName, newName, emailMessage.Message, emailMessage.FooterMessage);
                         ISMTPSettingsService smtpService = new SMTPSettingsService(context);
                         var smtpSettings = smtpService.GetPrivate();
                         SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();

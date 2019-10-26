@@ -524,7 +524,6 @@ namespace AIMS.Services.Helpers
             List<string> messageList = new List<string>();
             messageList.Add(message);
             messageList.Add("<p>Please follow the link to login: </p><p>" + url + "</p>");
-            messageList.Add("<p>" + footerMessage + "</p>:" + "<a href='http://aims.mop.gov.so/contact'>http://aims.mop.gov.so/contact</a>");
             return (message);
         }
 
@@ -559,7 +558,6 @@ namespace AIMS.Services.Helpers
             formattedMessageList.Add("</ul><ul>");
             formattedMessageList.Add("<li>New name for combined organization: " + newOrganization + "</li>");
             formattedMessageList.Add("</ul>");
-            formattedMessageList.Add("<p>" + footerMessage + "</p>");
             return (String.Join("", formattedMessageList));
         }
 
@@ -570,7 +568,6 @@ namespace AIMS.Services.Helpers
             formattedMessageList.Add("<li>Your organization: " + oldName + "</li>");
             formattedMessageList.Add("<li>New name for organization: " + newName + "</li>");
             formattedMessageList.Add("</ul>");
-            formattedMessageList.Add("<p>" + footerMessage + "</p>");
             return (String.Join("", formattedMessageList));
         }
 
