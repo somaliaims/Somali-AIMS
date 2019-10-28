@@ -80,7 +80,7 @@ namespace AIMS.APIs
 
                 if (context.SectorTypes.Count() == 0)
                 {
-                    context.SectorTypes.Add(new EFSectorTypes() 
+                    var primary = context.SectorTypes.Add(new EFSectorTypes() 
                     { 
                         TypeName = "Somali Sectors", 
                         IsPrimary = true, 
@@ -88,6 +88,261 @@ namespace AIMS.APIs
                         IATICode = 0 
                     });
                     context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Default" });
+
+                    var inclusivePolitics = context.Sectors.Add(new EFSector() 
+                    { 
+                        ParentSector = null, 
+                        SectorType = primary.Entity, 
+                        SectorName = "Pillar 1: Inclusive Politics", 
+                        TimeStamp = DateTime.Now 
+                    });
+                    context.Sectors.Add(new EFSector() 
+                    { 
+                        ParentSector = inclusivePolitics.Entity, 
+                        SectorType = primary.Entity, 
+                        SectorName = "Inclusive Politics", 
+                        TimeStamp = DateTime.Now 
+                    });
+
+                    var security = context.Sectors.Add(new EFSector() 
+                    { 
+                        ParentSector = null, 
+                        SectorType = primary.Entity, 
+                        SectorName = "Pillar 2: Security", 
+                        TimeStamp = DateTime.Now 
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = security.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Security",
+                        TimeStamp = DateTime.Now
+                    });
+
+                    var ruleOfLaw = context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = null,
+                        SectorType = primary.Entity,
+                        SectorName = "Pillar 3: Rule of Law",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = ruleOfLaw.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Rule of Law",
+                        TimeStamp = DateTime.Now
+                    });
+
+                    var effectiveInstitutions = context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = null,
+                        SectorType = primary.Entity,
+                        SectorName = "Pillar 4: Effective, Efficient Institutions",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = effectiveInstitutions.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Civil Service Reform / Public Administration",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = effectiveInstitutions.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Planning, M&E and Statistics",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = effectiveInstitutions.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Public Financial Management",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = effectiveInstitutions.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "State and Local Governance",
+                        TimeStamp = DateTime.Now
+                    });
+
+                    var economicalGrowth = context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = null,
+                        SectorType = primary.Entity,
+                        SectorName = "Pillar 5: Economic Growth",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = economicalGrowth.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Agriculture - Irrigated and rain-fed crops",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = economicalGrowth.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Employment and skills development",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = economicalGrowth.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Livestock",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = economicalGrowth.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Private Sector Development",
+                        TimeStamp = DateTime.Now
+                    });
+
+                    var infrastructure = context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = null,
+                        SectorType = primary.Entity,
+                        SectorName = "Pillar 6: Infrastructure",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = infrastructure.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Energy and ICT",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = infrastructure.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Other infrastructure",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = infrastructure.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Transport",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = infrastructure.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Water and Sanitation (Urban)",
+                        TimeStamp = DateTime.Now
+                    });
+
+                    var social = context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = null,
+                        SectorType = primary.Entity,
+                        SectorName = "Pillar 7: Social & Human Development",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = social.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Education",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = social.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Health",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = social.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Nutrition",
+                        TimeStamp = DateTime.Now
+                    });
+
+                    var resilience = context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = null,
+                        SectorType = primary.Entity,
+                        SectorName = "Pillar 8: Resilience",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = resilience.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Disaster Risk Reduction",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = resilience.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Environment & Natural Resources Management",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = resilience.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Food Security",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = resilience.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Migration, Displacement, Refugees and Durable Solutions",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = resilience.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Social Protection & Safety Nets",
+                        TimeStamp = DateTime.Now
+                    });
+
+                    var gender = context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = null,
+                        SectorType = primary.Entity,
+                        SectorName = "Pillar 9: Gender & Human Rights",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = gender.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Gender & Human Rights",
+                        TimeStamp = DateTime.Now
+                    });
+
+                    var other = context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = null,
+                        SectorType = primary.Entity,
+                        SectorName = "Other",
+                        TimeStamp = DateTime.Now
+                    });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = other.Entity,
+                        SectorType = primary.Entity,
+                        SectorName = "Other",
+                        TimeStamp = DateTime.Now
+                    });
                 }
 
                 if (context.FinancialYears.Count() == 0)
