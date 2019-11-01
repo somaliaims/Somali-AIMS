@@ -29,6 +29,13 @@ namespace AIMS.Services
         EnvelopeYearlyView GetFunderEnvelope(int funderId);
 
         /// <summary>
+        /// Imports envelope data
+        /// </summary>
+        /// <param name="dataList"></param>
+        /// <returns></returns>
+        ActionResponse ImportEnvelopeData(List<ImportedEnvelopeData> dataList);
+
+        /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
@@ -143,6 +150,108 @@ namespace AIMS.Services
             }
         }
 
+        public ActionResponse ImportEnvelopeData(List<ImportedEnvelopeData> envelopeList)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
+                var defaultOrganizationType = unitWork.OrganizationTypesRepository.GetOne(o => o.TypeName == "Other");
+                var envelopeTypes = unitWork.EnvelopeTypesRepository.GetManyQueryable(e => e.Id != 0);
+                var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => f.Id != 0);
+
+                var envelopeDevelopment = (from et in envelopeTypes
+                                           where et.TypeName.Equals("Development", StringComparison.OrdinalIgnoreCase)
+                                           select et).FirstOrDefault();
+                var envelopeHumanitarian = (from et in envelopeTypes
+                                               where et.TypeName.Equals("Humanitarian", StringComparison.OrdinalIgnoreCase)
+                                               select et).FirstOrDefault();
+
+                if (envelopeDevelopment == null)
+                {
+                    envelopeDevelopment = unitWork.EnvelopeTypesRepository.Insert(new EFEnvelopeTypes() { TypeName = "Development" });
+                    unitWork.Save();
+                }
+
+                if (envelopeHumanitarian == null)
+                {
+                    envelopeHumanitarian = unitWork.EnvelopeTypesRepository.Insert(new EFEnvelopeTypes() { TypeName = "Humanatarian" });
+                }
+
+                var yearEighteen = (from fy in financialYears
+                                where fy.FinancialYear == 2018
+                                select fy).FirstOrDefault();
+
+                var yearNineteen = (from fy in financialYears
+                                    where fy.FinancialYear == 2019
+                                    select fy).FirstOrDefault();
+
+                var yearTwenty = (from fy in financialYears
+                                    where fy.FinancialYear == 2020
+                                    select fy).FirstOrDefault();
+
+                if (yearEighteen == null)
+                {
+                    yearEighteen = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = 2018 });
+                    unitWork.Save();
+                }
+
+                if (yearNineteen == null)
+                {
+                    yearNineteen = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = 2019 });
+                    unitWork.Save();
+                }
+
+                if (yearTwenty == null)
+                {
+                    yearTwenty = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = 2020 });
+                    unitWork.Save();
+                }
+
+
+                envelopeList = (from e in envelopeList
+                                where e.Currency == "USD"
+                                select e).ToList();
+
+                foreach(var envelope in envelopeList)
+                {
+                    EFOrganization organization = null;
+                    if (!string.IsNullOrEmpty(envelope.Organization))
+                    {
+                        organization = (from o in organizations
+                                        where o.OrganizationName.Equals(envelope.Organization, StringComparison.OrdinalIgnoreCase)
+                                        select o).FirstOrDefault();
+
+                        if (organization == null)
+                        {
+                            if (defaultOrganizationType != null)
+                            {
+                                organization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                {
+                                    OrganizationType = defaultOrganizationType,
+                                    OrganizationName = envelope.Organization
+                                });
+                                unitWork.Save();
+                            }
+                        }
+
+                        if (organization != null)
+                        {
+                            unitWork.EnvelopeRepository.Insert(new EFEnvelope()
+                            {
+                                Funder = organization,
+                                Currency = envelope.Currency,
+                                ExchangeRate = envelope.ExchangeRate
+                            });
+
+                            
+                        }
+                        
+                    }
+                }
+                return response;
+            }
+        }
 
         public async Task<ActionResponse> AddAsync(EnvelopeModel model, int funderId)
         {
