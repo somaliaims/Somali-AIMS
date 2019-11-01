@@ -123,6 +123,45 @@ namespace AIMS.APIs.Controllers
             }
         }
 
+        [HttpPost("ImportEnvelopeData"), DisableRequestSizeLimit]
+        public IActionResult ImportEnvelopeData()
+        {
+            try
+            {
+                var file = Request.Form.Files[0];
+                var folderName = Path.Combine("wwwroot", "DataImportFiles");
+                var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+                Directory.CreateDirectory(pathToSave);
+                if (file.Length > 0)
+                {
+                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+                    var filePath = Path.Combine(pathToSave, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
+                    var envelopeList = service.ImportEnvelopeData(filePath, file);
+                    if (envelopeList.Count > 0)
+                    {
+                        /*var response = await projectService.ImportProjects(extractedProjects);
+                        if (!response.Success)
+                        {
+                            return BadRequest(response.Message);
+                        }*/
+                    }
+                    return Ok(envelopeList);
+                }
+                else
+                {
+                    return BadRequest("Invalid data file provided");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpGet("GetMatchesForImportedData")]
         public IActionResult GetMatchesForImportedData()
         {

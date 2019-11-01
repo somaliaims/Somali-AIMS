@@ -25,6 +25,19 @@ namespace AIMS.Models
         public List<ImportedCustomFields> CustomFields { get; set; }
     }
 
+    public class ImportedEnvelopeData
+    {
+        public string Organization { get; set; }
+        public string Currency { get; set; }
+        public decimal DevelopmentEighteen { get; set; }
+        public decimal DevelopmentNineteen { get; set; }
+        public decimal DevelopmentTwenty { get; set; }
+        public decimal HumanitarianEighteen { get; set; }
+        public decimal HumanitarianNineteen { get; set; }
+        public decimal HumanitarianTwenty { get; set; }
+        public decimal ExchangeRate { get; set; }
+    }
+
     public class NewImportedAidData
     {
         public string ProjectTitle { get; set; }

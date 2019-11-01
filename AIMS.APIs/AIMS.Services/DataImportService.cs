@@ -40,6 +40,14 @@ namespace AIMS.Services
         List<NewImportedAidData> ImportLatestAidData(string filePath, IFormFile file);
 
         /// <summary>
+        /// Imports envelope data
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        List<ImportedEnvelopeData> ImportEnvelopeData(string filePath, IFormFile file);
+
+        /// <summary>
         /// Gets data matches for both old and new data
         /// </summary>
         /// <returns></returns>
@@ -275,6 +283,62 @@ namespace AIMS.Services
                 }
             }
             return projectsList;
+        }
+
+        public List<ImportedEnvelopeData> ImportEnvelopeData(string filePath, IFormFile file)
+        {
+            List<ImportedEnvelopeData> envelopeList = new List<ImportedEnvelopeData>();
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                int currencyIndex = 1, organizationIndex = 2, developmentEighteenIndex = 3, developmentNineteenIndex = 4,
+                    developmentTwentyIndex = 5, humanitarianEighteenIndex = 6, humanitarianNineteenIndex = 7,
+                    humanitarianTwentyIndex = 8, exchangeRateIndex = 10;
+
+                file.CopyTo(stream);
+                stream.Position = 0;
+
+                XSSFWorkbook hssfwb = new XSSFWorkbook(stream);
+                this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
+                this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(hssfwb);
+
+                ISheet sheet = hssfwb.GetSheetAt(0);
+                IRow headerRow = sheet.GetRow(1);
+                int cellCount = headerRow.LastCellNum;
+
+                for (int i = (sheet.FirstRowNum + 1); i < sheet.LastRowNum; i++)
+                {
+                    IRow row = sheet.GetRow(i);
+                    if (row == null)
+                    {
+                        continue;
+                    }
+
+                    decimal developmentEighteen = 0, developmentNineteen = 0, developmentTwenty = 0,
+                        exchangeRate = 0, humanitarianEighteen = 0, humanitarianNineteen = 0, humanitarianTwenty = 0;
+
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(exchangeRateIndex)), out exchangeRate);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(developmentEighteenIndex)), out developmentEighteen);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(developmentNineteenIndex)), out developmentNineteen);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(developmentTwentyIndex)), out developmentTwenty);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(humanitarianEighteenIndex)), out humanitarianEighteen);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(humanitarianNineteenIndex)), out humanitarianNineteen);
+                    decimal.TryParse(this.GetFormattedValue(row.GetCell(humanitarianTwentyIndex)), out humanitarianTwenty);
+
+                    envelopeList.Add(new ImportedEnvelopeData()
+                    {
+                       Organization = this.GetFormattedValue(row.GetCell(organizationIndex)),
+                       Currency = this.GetFormattedValue(row.GetCell(currencyIndex)),
+                       ExchangeRate = exchangeRate,
+                       DevelopmentEighteen = developmentEighteen,
+                       DevelopmentNineteen = developmentNineteen,
+                       DevelopmentTwenty = developmentTwenty,
+                       HumanitarianEighteen = humanitarianEighteen,
+                       HumanitarianNineteen = humanitarianNineteen,
+                       HumanitarianTwenty = humanitarianTwenty
+                    });
+                }
+            }
+            return envelopeList;
         }
 
         public List<ImportedAidData> ImportAidDataEighteen(string filePath, IFormFile file)
