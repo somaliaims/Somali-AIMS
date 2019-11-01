@@ -16,10 +16,13 @@ namespace AIMS.APIs.Controllers
     {
         IDataImportService service;
         IProjectService projectService;
-        public ImportDataController(IDataImportService dataImportService, IProjectService projService)
+        IEnvelopeService envelopeService;
+
+        public ImportDataController(IDataImportService dataImportService, IProjectService projService, IEnvelopeService envpService)
         {
             service = dataImportService;
             projectService = projService;
+            envelopeService = envpService;
         }
 
         [HttpPost("UploadDataImportFileEighteen"), DisableRequestSizeLimit]
@@ -124,7 +127,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost("ImportEnvelopeData"), DisableRequestSizeLimit]
-        public IActionResult ImportEnvelopeData()
+        public async Task<IActionResult> ImportEnvelopeData()
         {
             try
             {
@@ -143,11 +146,11 @@ namespace AIMS.APIs.Controllers
                     var envelopeList = service.ImportEnvelopeData(filePath, file);
                     if (envelopeList.Count > 0)
                     {
-                        /*var response = await projectService.ImportProjects(extractedProjects);
+                        var response = await envelopeService.ImportEnvelopeData(envelopeList);
                         if (!response.Success)
                         {
                             return BadRequest(response.Message);
-                        }*/
+                        }
                     }
                     return Ok(envelopeList);
                 }

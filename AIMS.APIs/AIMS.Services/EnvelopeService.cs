@@ -33,7 +33,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="dataList"></param>
         /// <returns></returns>
-        ActionResponse ImportEnvelopeData(List<ImportedEnvelopeData> dataList);
+        Task<ActionResponse> ImportEnvelopeData(List<ImportedEnvelopeData> dataList);
 
         /// <summary>
         /// Adds a new section
@@ -150,7 +150,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ImportEnvelopeData(List<ImportedEnvelopeData> envelopeList)
+        public async Task<ActionResponse> ImportEnvelopeData(List<ImportedEnvelopeData> envelopeList)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -213,43 +213,108 @@ namespace AIMS.Services
                                 where e.Currency == "USD"
                                 select e).ToList();
 
-                foreach(var envelope in envelopeList)
+                try
                 {
-                    EFOrganization organization = null;
-                    if (!string.IsNullOrEmpty(envelope.Organization))
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        organization = (from o in organizations
-                                        where o.OrganizationName.Equals(envelope.Organization, StringComparison.OrdinalIgnoreCase)
-                                        select o).FirstOrDefault();
-
-                        if (organization == null)
+                        using (var transaction = context.Database.BeginTransaction())
                         {
-                            if (defaultOrganizationType != null)
+                            foreach (var envelope in envelopeList)
                             {
-                                organization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                EFOrganization organization = null;
+                                if (!string.IsNullOrEmpty(envelope.Organization))
                                 {
-                                    OrganizationType = defaultOrganizationType,
-                                    OrganizationName = envelope.Organization
-                                });
-                                unitWork.Save();
+                                    organization = (from o in organizations
+                                                    where o.OrganizationName.Equals(envelope.Organization, StringComparison.OrdinalIgnoreCase)
+                                                    select o).FirstOrDefault();
+
+                                    if (organization == null)
+                                    {
+                                        if (defaultOrganizationType != null)
+                                        {
+                                            organization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                            {
+                                                OrganizationType = defaultOrganizationType,
+                                                OrganizationName = envelope.Organization
+                                            });
+                                            unitWork.Save();
+                                        }
+                                    }
+
+                                    EFEnvelope newEnvelope = null;
+                                    if (organization != null)
+                                    {
+                                        newEnvelope = unitWork.EnvelopeRepository.Insert(new EFEnvelope()
+                                        {
+                                            Funder = organization,
+                                            Currency = envelope.Currency,
+                                            ExchangeRate = envelope.ExchangeRate
+                                        });
+                                        unitWork.Save();
+                                    }
+
+                                    unitWork.EnvelopeYearlyBreakupRepository.Insert(new EFEnvelopeYearlyBreakup()
+                                    {
+                                        Envelope = newEnvelope,
+                                        Year = yearEighteen,
+                                        EnvelopeType = envelopeDevelopment,
+                                        Amount = envelope.DevelopmentEighteen
+                                    });
+
+                                    unitWork.EnvelopeYearlyBreakupRepository.Insert(new EFEnvelopeYearlyBreakup()
+                                    {
+                                        Envelope = newEnvelope,
+                                        Year = yearNineteen,
+                                        EnvelopeType = envelopeDevelopment,
+                                        Amount = envelope.DevelopmentNineteen
+                                    });
+
+                                    unitWork.EnvelopeYearlyBreakupRepository.Insert(new EFEnvelopeYearlyBreakup()
+                                    {
+                                        Envelope = newEnvelope,
+                                        Year = yearTwenty,
+                                        EnvelopeType = envelopeDevelopment,
+                                        Amount = envelope.DevelopmentTwenty
+                                    });
+
+                                    unitWork.EnvelopeYearlyBreakupRepository.Insert(new EFEnvelopeYearlyBreakup()
+                                    {
+                                        Envelope = newEnvelope,
+                                        Year = yearEighteen,
+                                        EnvelopeType = envelopeHumanitarian,
+                                        Amount = envelope.HumanitarianEighteen
+                                    });
+
+                                    unitWork.EnvelopeYearlyBreakupRepository.Insert(new EFEnvelopeYearlyBreakup()
+                                    {
+                                        Envelope = newEnvelope,
+                                        Year = yearNineteen,
+                                        EnvelopeType = envelopeHumanitarian,
+                                        Amount = envelope.HumanitarianNineteen
+                                    });
+
+                                    unitWork.EnvelopeYearlyBreakupRepository.Insert(new EFEnvelopeYearlyBreakup()
+                                    {
+                                        Envelope = newEnvelope,
+                                        Year = yearTwenty,
+                                        EnvelopeType = envelopeHumanitarian,
+                                        Amount = envelope.HumanitarianTwenty
+                                    });
+
+                                    await unitWork.SaveAsync();
+                                }
                             }
+                            transaction.Commit();
                         }
-
-                        if (organization != null)
-                        {
-                            unitWork.EnvelopeRepository.Insert(new EFEnvelope()
-                            {
-                                Funder = organization,
-                                Currency = envelope.Currency,
-                                ExchangeRate = envelope.ExchangeRate
-                            });
-
-                            
-                        }
-                        
-                    }
+                    });
                 }
-                return response;
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
 
