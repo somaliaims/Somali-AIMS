@@ -1,7 +1,9 @@
 ﻿using AIMS.Models;
+using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.IO;
 using System.IO.Compression;
 using System.Text;
 
@@ -9,12 +11,22 @@ namespace AIMS.Services
 {
     public interface IDataBackupService
     {
-        ActionResponse BackupData(string connString, string backupDir);
+        ActionResponse BackupData(string connString);
     }
 
-    public class DataBackupService
+    public class DataBackupService : IDataBackupService
     {
-        public ActionResponse BackupData(string connString, string backupDir)
+        IHostingEnvironment hostingEnvironment;
+        string backupDir = "";
+
+        public DataBackupService(IHostingEnvironment _hostingEnvironment)
+        {
+            hostingEnvironment = _hostingEnvironment;
+            backupDir = hostingEnvironment.WebRootPath + "/DataBackups/";
+            Directory.CreateDirectory(backupDir);
+        }
+
+        public ActionResponse BackupData(string connString)
         {
             ActionResponse response = new ActionResponse();
             try
