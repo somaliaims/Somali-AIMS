@@ -12,6 +12,12 @@ namespace AIMS.Services
     public interface IDataBackupService
     {
         ActionResponse BackupData(string connString);
+
+        /// <summary>
+        /// Gets full path of the data backup directory
+        /// </summary>
+        /// <returns></returns>
+        string GetDataBackupDirectory();
     }
 
     public class DataBackupService : IDataBackupService
@@ -24,6 +30,11 @@ namespace AIMS.Services
             hostingEnvironment = _hostingEnvironment;
             backupDir = hostingEnvironment.WebRootPath + "/DataBackups/";
             Directory.CreateDirectory(backupDir);
+        }
+
+        public string GetDataBackupDirectory()
+        {
+            return backupDir;
         }
 
         public ActionResponse BackupData(string connString)
