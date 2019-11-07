@@ -6,12 +6,25 @@ using System.Data.SqlClient;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AIMS.Services
 {
     public interface IDataBackupService
     {
+        /// <summary>
+        /// Back ups the database in its current form
+        /// </summary>
+        /// <param name="connString"></param>
+        /// <returns></returns>
         ActionResponse BackupData(string connString);
+
+        /// <summary>
+        /// Backup the database from the provided backed up data
+        /// </summary>
+        /// <param name="backupFile"></param>
+        /// <returns></returns>
+        Task<ActionResponse> RestoreDatabase(string backupFile, string connString);
 
         /// <summary>
         /// Gets full path of the data backup directory
@@ -72,6 +85,53 @@ namespace AIMS.Services
                 response.Message = ex.Message;
             }
             return response;
+        }
+
+        public async Task<ActionResponse> RestoreDatabase(string backupFile, string connString)
+        {
+            ActionResponse response = new ActionResponse();
+            try
+            {
+                using (var sqlConnection = new SqlConnection(connString))
+                {
+                    using (SqlCommand sqlCommand = new SqlCommand())
+                    {
+                        sqlConnection.Open();
+                        var transaction = sqlConnection.BeginTransaction();
+                        sqlCommand.Connection = sqlConnection;
+                        string cmdText = "select physical_name from sys.database_files where type = 0";
+                        sqlCommand.CommandText = cmdText;
+
+                        sqlConnection.ChangeDatabase("master");
+                        cmdText = "ALTER DATABASE[AIMSDb] SET Single_User WITH Rollback Immediate";
+                        sqlCommand.CommandText = cmdText;
+                        sqlCommand.ExecuteNonQuery();
+
+                        cmdText = "RESTORE DATABASE AIMSDb FROM DISK = '" + backupFile + "'" +
+                                    "WITH REPLACE";
+                        sqlCommand.CommandText = cmdText;
+                        sqlCommand.ExecuteNonQuery();
+
+                        cmdText = "RESTORE DATABASE AIMSDb FROM DISK = '" + backupFile + "'" +
+                                    "WITH REPLACE";
+                        sqlCommand.CommandText = cmdText;
+                        sqlCommand.ExecuteNonQuery();
+
+                        cmdText = "ALTER DATABASE[AIMSDb] SET Multi_User";
+                        sqlCommand.CommandText = cmdText;
+                        sqlCommand.ExecuteNonQuery();
+
+                        transaction.Commit();
+                        sqlConnection.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return await Task<ActionResponse>.Run(() => response);
         }
     }
 }
