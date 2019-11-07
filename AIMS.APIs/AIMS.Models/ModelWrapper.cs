@@ -1921,4 +1921,11 @@ namespace AIMS.Models
         public decimal Funding { get; set; }
         public decimal Disbursement { get; set; }
     }
+
+    public class RestoreDatabaseModel
+    {
+        [Required]
+        [MaxLength(255)]
+        public string FileName { get; set; }
+    }
 }

@@ -1,10 +1,12 @@
 ﻿using AIMS.Models;
 using Dropbox.Api;
 using Dropbox.Api.Files;
+using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,17 +40,21 @@ namespace AIMS.Services
         /// <param name="backupDirectory"></param>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        Task<ActionResponse> DownloadFile(string backupDirectory, string fileName);
+        Task<ActionResponse> DownloadFile(string fileName);
     }
 
     public class DropboxService
     {
+        IHostingEnvironment hostingEnvironment;
         string token = "40mPFdltTIAAAAAAAAAADx0r3r5TlXdfNF6icOQciANhFYFJiDMRPwsneZXDK_sG";
-        string backupFolder = "DBBackups";
+        string dropboxFolder = "DataBackups";
+        string backupDirectory = "";
 
-        public DropboxService(string tkn)
+        public DropboxService(string tkn, IHostingEnvironment _hostingEnvironment)
         {
             token = tkn;
+            hostingEnvironment = _hostingEnvironment;
+            backupDirectory = hostingEnvironment.WebRootPath + "/" + dropboxFolder + "/";
         }
 
         public async Task<ActionResponse> GetAccountName()
@@ -77,7 +83,7 @@ namespace AIMS.Services
             {
                 using (var dbx = new DropboxClient(token))
                 {
-                    var folderArg = new CreateFolderArg("/" + backupFolder);
+                    var folderArg = new CreateFolderArg("/" + dropboxFolder);
                     var result = await dbx.Files.CreateFolderV2Async(folderArg);
                     response.Message = result.Metadata.Name;
                 }
@@ -101,7 +107,7 @@ namespace AIMS.Services
                     var content = reader.ReadToEnd();
                     using (var stream = new MemoryStream(System.Text.UTF8Encoding.UTF8.GetBytes(content)))
                     {
-                        var result = await dbx.Files.UploadAsync("/" + backupFolder + "/" + fileToUpload, WriteMode.Overwrite.Instance, body: stream);
+                        var result = await dbx.Files.UploadAsync("/" + dropboxFolder + "/" + fileToUpload, WriteMode.Overwrite.Instance, body: stream);
                     }
                 }
             }
@@ -113,18 +119,22 @@ namespace AIMS.Services
             return response;
         }
 
-        public async Task<ActionResponse> DownloadFile(string backupDirectory, string fileName)
+        public async Task<ActionResponse> DownloadFile(string fileName)
         {
             ActionResponse response = new ActionResponse();
             try
             {
                 using (var dbx = new DropboxClient(token))
                 {
-                    using (var result = await dbx.Files.DownloadAsync("/" + backupFolder + "/" + fileName))
+                    using (var result = await dbx.Files.DownloadAsync("/" + dropboxFolder + "/" + fileName))
                     {
                         using (var fileStream = File.Create(backupDirectory + fileName))
                         {
                             (await result.GetContentAsStreamAsync()).CopyTo(fileStream);
+                            string backupFileName = Path.GetFileName(fileName);
+                            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+                            ZipFile.ExtractToDirectory(backupDirectory + "\\" + fileName, backupDirectory);
+                            response.Message = backupDirectory + "\\" + fileNameWithoutExt + ".bak"; 
                         }
                     }
                 }
@@ -145,7 +155,7 @@ namespace AIMS.Services
             {
                 using (var dbx = new DropboxClient(token))
                 {
-                    var list = await dbx.Files.ListFolderAsync("/" + backupFolder);
+                    var list = await dbx.Files.ListFolderAsync("/" + dropboxFolder);
                     foreach (var item in list.Entries.Where(i => i.IsFile))
                     {
                         var file = item.AsFile;
