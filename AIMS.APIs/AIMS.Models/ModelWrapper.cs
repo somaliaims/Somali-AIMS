@@ -1928,4 +1928,11 @@ namespace AIMS.Models
         [MaxLength(255)]
         public string FileName { get; set; }
     }
+
+    public class DropboxSettingsModel
+    {
+        [Required]
+        [MaxLength(255)]
+        public string Token { get; set; }
+    }
 }

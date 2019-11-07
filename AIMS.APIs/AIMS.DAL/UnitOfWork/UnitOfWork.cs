@@ -51,6 +51,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFProjectDeletionRequests> projectDeletionRepository;
         private GenericRepository<EFHelp> helpRepository;
         private GenericRepository<EFHomePageSettings> homePageRepository;
+        private GenericRepository<EFDropboxSettings> dropboxSettingsRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -65,6 +66,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.homePageRepository == null)
                     this.homePageRepository = new GenericRepository<EFHomePageSettings>(context);
                 return this.homePageRepository;
+            }
+        }
+
+        public GenericRepository<EFDropboxSettings> DropboxSettingsRepository
+        {
+            get
+            {
+                if (this.dropboxSettingsRepository == null)
+                    this.dropboxSettingsRepository = new GenericRepository<EFDropboxSettings>(context);
+                return this.dropboxSettingsRepository;
             }
         }
 

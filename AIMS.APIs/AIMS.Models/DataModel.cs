@@ -487,6 +487,13 @@ namespace AIMS.Models
         public string TransactionTypesJson { get; set; }
     }
 
+    public class EFDropboxSettings
+    {
+        [Key]
+        public string Token { get; set; }
+
+    }
+
     public class EFManualExchangeRates
     {
         [Key]

@@ -120,6 +120,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFExchangeRatesUsageSettings> ExchangeRatesUsageSettings { get; set; }
         public DbSet<EFHelp> Help { get; set; }
         public DbSet<EFHomePageSettings> HomePageSettings { get; set; }
+        public DbSet<EFDropboxSettings> DropboxSettings { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime
