@@ -547,13 +547,17 @@ namespace AIMS.IATILib.Parsers
 
                                 if (isSectorExists == null && !string.IsNullOrEmpty(sectorName))
                                 {
-                                    sectors.Add(new IATISector()
+                                    //sectorTypeVocabulary = (sectorTypeVocabulary == null) ? 0 : sectorTypeVocabulary;
+                                    if (sectorTypeVocabulary != null)
                                     {
-                                        SectorTypeCode = (int)sectorTypeVocabulary,
-                                        Code = sector.Attribute("code")?.Value,
-                                        SectorName = sectorName,
-                                        FundsPercentage = sector.Attribute("percentage")?.Value
-                                    });
+                                        sectors.Add(new IATISector()
+                                        {
+                                            SectorTypeCode = (int)sectorTypeVocabulary,
+                                            Code = sector.Attribute("code")?.Value,
+                                            SectorName = sectorName,
+                                            FundsPercentage = sector.Attribute("percentage")?.Value
+                                        });
+                                    }
                                 }
                             }
                         }
