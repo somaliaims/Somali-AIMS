@@ -55,7 +55,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="report"></param>
         /// <returns></returns>
-        ActionResponse GenerateAllProjectsReport(ProjectReportView report);
+        ActionResponse GenerateAllProjectsReport(List<ProjectReportView> projects, List<string> locationNames);
     }
 
     public class ExcelGeneratorService : IExcelGeneratorService
@@ -69,9 +69,88 @@ namespace AIMS.Services
             Directory.CreateDirectory(sWebRootFolder);
         }
 
-        public ActionResponse GenerateAllProjectsReport(ProjectReportView report)
+        public ActionResponse GenerateAllProjectsReport(List<ProjectReportView> projects, List<string> locationNames)
         {
             ActionResponse response = new ActionResponse();
+            try
+            {
+                string sFileName = @"AIMSProjects-" + DateTime.UtcNow.Ticks.ToString() + ".xlsx";
+                FileInfo file = new FileInfo(Path.Combine(sWebRootFolder, sFileName));
+                var memory = new MemoryStream();
+                using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
+                {
+                    int rowCounter = 0;
+                    IWorkbook workbook;
+                    workbook = new XSSFWorkbook();
+                    ISheet excelSheet = workbook.CreateSheet("Report");
+
+                    ICellStyle titleStyle = workbook.CreateCellStyle();
+                    IFont fontTitle = workbook.CreateFont();
+                    fontTitle.Color = IndexedColors.DarkBlue.Index;
+                    fontTitle.IsBold = true;
+                    fontTitle.FontHeightInPoints = 16;
+                    titleStyle.SetFont(fontTitle);
+                    titleStyle.Alignment = HorizontalAlignment.CenterSelection;
+                    titleStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle headerStyle = workbook.CreateCellStyle();
+                    IFont fontHeader = workbook.CreateFont();
+                    fontHeader.Color = IndexedColors.Black.Index;
+                    fontHeader.IsBold = true;
+                    fontHeader.FontHeightInPoints = 12;
+                    headerStyle.SetFont(fontHeader);
+                    headerStyle.Alignment = HorizontalAlignment.Center;
+                    headerStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    var row = excelSheet.CreateRow(rowCounter);
+                    
+                    var projectTitle = row.CreateCell(0);
+                    projectTitle.SetCellValue("Project title");
+                    projectTitle.CellStyle = headerStyle;
+
+                    var projectDesc = row.CreateCell(1);
+                    projectDesc.SetCellValue("Description");
+                    projectDesc.CellStyle = headerStyle;
+
+                    var sector = row.CreateCell(2);
+                    sector.SetCellValue("Sector");
+                    sector.CellStyle = headerStyle;
+
+                    var startYear = row.CreateCell(3);
+                    startYear.SetCellValue("Start year");
+                    startYear.CellStyle = headerStyle;
+
+                    var endYear = row.CreateCell(4);
+                    endYear.SetCellValue("End year");
+                    endYear.CellStyle = headerStyle;
+
+                    var funders = row.CreateCell(5);
+                    funders.SetCellValue("Funder(s)");
+                    funders.CellStyle = headerStyle;
+
+                    var implementers = row.CreateCell(6);
+                    implementers.SetCellValue("Implementer(s)");
+                    implementers.CellStyle = headerStyle;
+
+                    var currency = row.CreateCell(7);
+                    currency.SetCellValue("Currency");
+                    currency.CellStyle = headerStyle;
+
+                    var totalValue = row.CreateCell(8);
+                    totalValue.SetCellValue("Total value");
+                    totalValue.CellStyle = headerStyle;
+
+                    foreach (var project in projects)
+                    {
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
             return response;
         }
 

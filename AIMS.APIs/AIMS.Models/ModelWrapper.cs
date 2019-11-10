@@ -297,6 +297,7 @@ namespace AIMS.Models
     public class LocationAbstractView
     {
         public string Name { get; set; }
+        public decimal FundsPercentage { get; set; }
     }
 
     public class SectorAbstractView

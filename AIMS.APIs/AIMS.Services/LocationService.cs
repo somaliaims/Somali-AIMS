@@ -27,6 +27,12 @@ namespace AIMS.Services
         IEnumerable<LocationView> GetMatching(string criteria);
 
         /// <summary>
+        /// Gets list of location names
+        /// </summary>
+        /// <returns></returns>
+        ICollection<string> GetLocationNames();
+
+        /// <summary>
         /// Gets the location for the provided id
         /// </summary>
         /// <param name="id"></param>
@@ -77,6 +83,21 @@ namespace AIMS.Services
             {
                 var locations = unitWork.LocationRepository.GetAll();
                 return mapper.Map<List<LocationView>>(locations);
+            }
+        }
+
+        public ICollection<string> GetLocationNames()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var locations = unitWork.LocationRepository.GetProjection(l => l.Id != 0, l => l.Location);
+                if (locations.Any())
+                {
+                    locations = (from l in locations
+                                 orderby l ascending
+                                 select l);
+                }
+                return locations.ToList();
             }
         }
 

@@ -47,6 +47,11 @@ namespace AIMS.Services.Helpers
         public static readonly string PROJECTS_ENVELOPE_REPORT_SUBTITLE = "Envelope report";
         public static readonly string PROJECTS_ENVELOPE_REPORT_FOOTER = "Envelope report from AIMS Somalia";
 
+        //Constants for projects report
+        public static readonly string PROJECTS_REPORT_TITLE = "Projects report";
+        public static readonly string PROJECTS_REPORT_SUBTITLE = "Projects report";
+        public static readonly string PROJECTS_REPORT_FOOTER = "Projects report from AIMS Somalia";
+
         public static readonly int YEAR_MONTHS = 12;
     }
 }

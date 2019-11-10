@@ -95,7 +95,8 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(m => m.UserOrganization, opts => opts.MapFrom(source => source.User.Organization.OrganizationName));
 
             CreateMap<EFProjectLocations, LocationAbstractView>()
-                .ForMember(l => l.Name, opts => opts.MapFrom(source => source.Location.Location));
+                .ForMember(l => l.Name, opts => opts.MapFrom(source => source.Location.Location))
+                .ForMember(l => l.FundsPercentage, opts => opts.MapFrom(source => source.FundsPercentage));
 
             CreateMap<EFProjectSectors, SectorAbstractView>()
                 .ForMember(s => s.Name, opts => opts.MapFrom(source => source.Sector.SectorName));

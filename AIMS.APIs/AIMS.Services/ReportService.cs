@@ -82,6 +82,12 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         IEnumerable<ProjectSummary> GetLatestProjectsSummary();
+
+        /// <summary>
+        /// Gets location names only for projects report
+        /// </summary>
+        /// <returns></returns>
+        ICollection<string> GetLocationNames();
     }
 
     public class ReportService : IReportService
@@ -115,6 +121,21 @@ namespace AIMS.Services
                     });
                 }
                 return summaryList;
+            }
+        }
+
+        public ICollection<string> GetLocationNames()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var locations = unitWork.LocationRepository.GetProjection(l => l.Id != 0, l => l.Location);
+                if (locations.Any())
+                {
+                    locations = (from l in locations
+                                 orderby l ascending
+                                 select l);
+                }
+                return locations.ToList();
             }
         }
 
