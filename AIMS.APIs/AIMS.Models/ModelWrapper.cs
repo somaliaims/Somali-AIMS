@@ -276,6 +276,7 @@ namespace AIMS.Models
     public class OrganizationView
     {
         public int Id { get; set; }
+        public string SourceType { get; set; }
         public int OrganizationTypeId { get; set; }
         public string OrganizationType { get; set; }
         public string OrganizationName { get; set; }
@@ -285,6 +286,13 @@ namespace AIMS.Models
     {
         public string Name { get; set; }
     }
+
+    public class DocumentAbstractView
+    {
+        public string Document { get; set; }
+        public string DocumentUrl { get; set; }
+    }
+
 
     public class LocationAbstractView
     {
@@ -713,6 +721,20 @@ namespace AIMS.Models
         public IEnumerable<LocationAbstractView> Locations { get; set; }
         public IEnumerable<OrganizationAbstractView> Organizations { get; set; }
 
+    }
+
+    public class ProjectReportView
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string StartingFinancialYear { get; set; }
+        public string EndingFinancialYear { get; set; }
+        public ICollection<SectorAbstractView> Sectors { get; set; }
+        public ICollection<LocationAbstractView> Locations { get; set; }
+        public ICollection<OrganizationAbstractView> Funders { get; set; }
+        public ICollection<OrganizationAbstractView> Implementers { get; set; }
+        public ICollection<DocumentAbstractView> Documents { get; set; }
     }
 
     public class EnvelopeTypeModel

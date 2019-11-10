@@ -34,6 +34,12 @@ namespace AIMS.Services
         IEnumerable<OrganizationView> GetUserOrganizations();
 
         /// <summary>
+        /// Gets organizations imported from source (e.g. IATI)
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<OrganizationView> GetSourceOrganizations();
+
+        /// <summary>
         /// Gets organization by id
         /// </summary>
         /// <param name="id"></param>
@@ -160,6 +166,22 @@ namespace AIMS.Services
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
                 var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.SourceType == OrganizationSourceType.User, new string[] { "OrganizationType" });
+                if (organizations.Count() > 0)
+                {
+                    organizations = (from org in organizations
+                                     orderby org.OrganizationName ascending
+                                     select org);
+                }
+                return mapper.Map<List<OrganizationView>>(organizations);
+            }
+        }
+
+        public IEnumerable<OrganizationView> GetSourceOrganizations()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<OrganizationView> organizationsList = new List<OrganizationView>();
+                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.SourceType == OrganizationSourceType.IATI, new string[] { "OrganizationType" });
                 if (organizations.Count() > 0)
                 {
                     organizations = (from org in organizations

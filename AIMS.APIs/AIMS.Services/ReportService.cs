@@ -64,6 +64,12 @@ namespace AIMS.Services
         Task<EnvelopeReport> GetEnvelopeReport(SearchEnvelopeModel model, string reportUrl, string defaultCurrency, decimal exchangeRate);
 
         /// <summary>
+        /// Gets all projects report
+        /// </summary>
+        /// <returns></returns>
+        Task<ICollection<ProjectReportView>> GetAllProjectsReport();
+
+        /// <summary>
         /// Internal function for extracting rate of default currency
         /// </summary>
         /// <param name="currency"></param>
@@ -109,6 +115,54 @@ namespace AIMS.Services
                     });
                 }
                 return summaryList;
+            }
+        }
+
+        public async Task<ICollection<ProjectReportView>> GetAllProjectsReport()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<ProjectReportView> projectsList = new List<ProjectReportView>();
+                var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+                foreach (var project in projects)
+                {
+                    IEnumerable<string> funderNames = (from f in project.Funders
+                                                       select f.Funder.OrganizationName);
+                    IEnumerable<string> implementerNames = (from i in project.Implementers
+                                                            select i.Implementer.OrganizationName);
+                    IEnumerable<string> organizations = funderNames.Union(implementerNames);
+
+                    List<OrganizationAbstractView> fundersList = new List<OrganizationAbstractView>();
+                    foreach (string org in funderNames)
+                    {
+                        fundersList.Add(new OrganizationAbstractView()
+                        {
+                            Name = org
+                        });
+                    }
+
+                    List<OrganizationAbstractView> implementersList = new List<OrganizationAbstractView>();
+                    foreach (string org in funderNames)
+                    {
+                        implementersList.Add(new OrganizationAbstractView()
+                        {
+                            Name = org
+                        });
+                    }
+                    projectsList.Add(new ProjectReportView()
+                    {
+                        Id = project.Id,
+                        Title = project.Title,
+                        StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
+                        EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
+                        Funders = fundersList,
+                        Implementers = implementersList,
+                        Locations = mapper.Map<List<LocationAbstractView>>(project.Locations),
+                        Sectors = mapper.Map<List<SectorAbstractView>>(project.Sectors),
+                        Documents = mapper.Map<List<DocumentAbstractView>>(project.Documents)
+                    });
+                }
+                return await Task<IEnumerable<ProjectAbstractView>>.Run(() => projectsList).ConfigureAwait(false);
             }
         }
 

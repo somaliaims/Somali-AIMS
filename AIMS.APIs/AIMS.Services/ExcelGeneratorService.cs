@@ -49,6 +49,13 @@ namespace AIMS.Services
         /// <param name="report"></param>
         /// <returns></returns>
         ActionResponse GenerateEnvelopeReport (EnvelopeReport report);
+
+        /// <summary>
+        /// Generates excel report for all the projects
+        /// </summary>
+        /// <param name="report"></param>
+        /// <returns></returns>
+        ActionResponse GenerateAllProjectsReport(ProjectReportView report);
     }
 
     public class ExcelGeneratorService : IExcelGeneratorService
@@ -60,6 +67,12 @@ namespace AIMS.Services
             hostingEnvironment = _hostingEnvironment;
             sWebRootFolder = hostingEnvironment.WebRootPath + "/ExcelFiles/";
             Directory.CreateDirectory(sWebRootFolder);
+        }
+
+        public ActionResponse GenerateAllProjectsReport(ProjectReportView report)
+        {
+            ActionResponse response = new ActionResponse();
+            return response;
         }
 
         public ActionResponse GenerateSectorProjectsReport(ProjectProfileReportBySector report)
