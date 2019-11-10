@@ -102,48 +102,113 @@ namespace AIMS.Services
                     headerStyle.Alignment = HorizontalAlignment.Center;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
 
+                    ICellStyle dataCellStyle = workbook.CreateCellStyle();
+                    dataCellStyle.WrapText = true;
+                    dataCellStyle.Alignment = HorizontalAlignment.Center;
+                    dataCellStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    int colIndex = 0;
                     var row = excelSheet.CreateRow(rowCounter);
-                    
-                    var projectTitle = row.CreateCell(0);
+                    var projectTitle = row.CreateCell(colIndex);
                     projectTitle.SetCellValue("Project title");
                     projectTitle.CellStyle = headerStyle;
 
-                    var projectDesc = row.CreateCell(1);
+                    var projectDesc = row.CreateCell(++colIndex);
                     projectDesc.SetCellValue("Description");
                     projectDesc.CellStyle = headerStyle;
 
-                    var sector = row.CreateCell(2);
+                    var sector = row.CreateCell(++colIndex);
                     sector.SetCellValue("Sector");
                     sector.CellStyle = headerStyle;
 
-                    var startYear = row.CreateCell(3);
+                    var startYear = row.CreateCell(++colIndex);
                     startYear.SetCellValue("Start year");
                     startYear.CellStyle = headerStyle;
 
-                    var endYear = row.CreateCell(4);
+                    var endYear = row.CreateCell(++colIndex);
                     endYear.SetCellValue("End year");
                     endYear.CellStyle = headerStyle;
 
-                    var funders = row.CreateCell(5);
+                    var funders = row.CreateCell(++colIndex);
                     funders.SetCellValue("Funder(s)");
                     funders.CellStyle = headerStyle;
 
-                    var implementers = row.CreateCell(6);
+                    var implementers = row.CreateCell(++colIndex);
                     implementers.SetCellValue("Implementer(s)");
                     implementers.CellStyle = headerStyle;
 
-                    var currency = row.CreateCell(7);
+                    var currency = row.CreateCell(++colIndex);
                     currency.SetCellValue("Currency");
                     currency.CellStyle = headerStyle;
 
-                    var totalValue = row.CreateCell(8);
+                    var totalValue = row.CreateCell(++colIndex);
                     totalValue.SetCellValue("Total value");
                     totalValue.CellStyle = headerStyle;
 
+                    var exchangeRate = row.CreateCell(++colIndex);
+                    exchangeRate.SetCellValue("Exchange rate");
+                    exchangeRate.CellStyle = headerStyle;
+
+
+                    ICell locationCell = null;
+                    foreach(var location in locationNames)
+                    {
+                        locationCell = row.CreateCell(++colIndex);
+                        locationCell.SetCellValue(location);
+                        locationCell.CellStyle = headerStyle;
+                    }
+
                     foreach (var project in projects)
                     {
+                        row = excelSheet.CreateRow(++rowCounter);
 
+                        int col = 0;
+                        var titleCell = row.CreateCell(col);
+                        titleCell.SetCellValue(project.Title);
+                        titleCell.CellStyle = dataCellStyle;
+
+                        var descriptionCell = row.CreateCell(++col);
+                        descriptionCell.SetCellValue(project.Description);
+                        descriptionCell.CellStyle = dataCellStyle;
+
+                        var sectorCell = row.CreateCell(++col);
+                        sectorCell.SetCellValue(project.Title);
+                        sectorCell.CellStyle = dataCellStyle;
+
+                        var startYearCell = row.CreateCell(++col);
+                        startYearCell.SetCellValue(project.StartingFinancialYear);
+                        startYearCell.CellStyle = dataCellStyle;
+
+                        var endYearCell = row.CreateCell(++col);
+                        endYearCell.SetCellValue(project.EndingFinancialYear);
+                        endYearCell.CellStyle = dataCellStyle;
+
+                        var funderNames = string.Join(", ", (from f in project.Funders
+                                                       select f.Name));
+                        var implementerNames = string.Join(", ", (from i in project.Implementers
+                                                                  select i.Name));
+                        var fundersCell = row.CreateCell(++col);
+                        fundersCell.SetCellValue(funderNames);
+                        fundersCell.CellStyle = dataCellStyle;
+
+                        var implementersCell = row.CreateCell(++col);
+                        implementersCell.SetCellValue(implementerNames);
+                        implementersCell.CellStyle = dataCellStyle;
+
+                        var currencyCell = row.CreateCell(++col);
+                        currencyCell.SetCellValue(project.ProjectCurrency);
+                        currencyCell.CellStyle = dataCellStyle;
+
+                        var projectValueCell = row.CreateCell(++col, CellType.Numeric);
+                        projectValueCell.SetCellValue(project.ProjectValue.ToString());
+                        projectValueCell.CellStyle = dataCellStyle;
+
+                        var exchangeRateCell = row.CreateCell(++col, CellType.Numeric);
+                        exchangeRateCell.SetCellValue(project.ExchangeRate.ToString());
+                        exchangeRateCell.CellStyle = dataCellStyle;
                     }
+                    workbook.Write(fs);
+                    response.Message = sFileName;
                 }
             }
             catch (Exception ex)

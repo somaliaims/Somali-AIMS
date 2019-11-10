@@ -77,6 +77,10 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(d => d.Year, opts => opts.MapFrom(source => source.Year.FinancialYear))
                 .ForMember(d => d.DisbursementType, opts => opts.MapFrom(source => (DisbursementTypes)source.DisbursementType));
 
+            CreateMap<EFProjectDisbursements, DisbursementAbstractView>()
+                .ForMember(d => d.Disbursement, opts => opts.MapFrom(source => source.Amount))
+                .ForMember(d => d.DisbursementType, opts => opts.MapFrom(source => (DisbursementTypes)source.DisbursementType));
+            
             CreateMap<EFProjectImplementers, ProjectImplementerView>()
                 .ForMember(i => i.ImplementerId, opts => opts.MapFrom(source => source.Implementer.Id))
                 .ForMember(i => i.Implementer, opts => opts.MapFrom(source => source.Implementer.OrganizationName));

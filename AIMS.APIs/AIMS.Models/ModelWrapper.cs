@@ -287,9 +287,16 @@ namespace AIMS.Models
         public string Name { get; set; }
     }
 
+    public class DisbursementAbstractView
+    {
+        public int Year { get; set; }
+        public string DisbursementType { get; set; }
+        public decimal Disbursement { get; set; }
+    }
+
     public class DocumentAbstractView
     {
-        public string Document { get; set; }
+        public string DocumentTitle { get; set; }
         public string DocumentUrl { get; set; }
     }
 
@@ -731,11 +738,15 @@ namespace AIMS.Models
         public string Description { get; set; }
         public string StartingFinancialYear { get; set; }
         public string EndingFinancialYear { get; set; }
+        public string ProjectCurrency { get; set; }
+        public decimal ExchangeRate { get; set; }
+        public decimal ProjectValue { get; set; }
         public ICollection<SectorAbstractView> Sectors { get; set; }
         public ICollection<LocationAbstractView> Locations { get; set; }
         public ICollection<OrganizationAbstractView> Funders { get; set; }
         public ICollection<OrganizationAbstractView> Implementers { get; set; }
         public ICollection<DocumentAbstractView> Documents { get; set; }
+        public ICollection<DisbursementAbstractView> Disbursements { get; set; }
     }
 
     public class EnvelopeTypeModel

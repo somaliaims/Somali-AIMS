@@ -76,6 +76,19 @@ namespace AIMS.APIs.Controllers
             return Ok(report);
         }
 
+        [HttpGet("GetAllProjectsReport")]
+        public async Task<IActionResult> GetAllProjectsReport()
+        {
+            var projectsList = await reportService.GetAllProjectsReport();
+            var locationNames = reportService.GetLocationNames();
+            var response = excelService.GenerateAllProjectsReport(projectsList.ToList(), locationNames.ToList());
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response);
+        }
+
         [HttpPost]
         [Route("GetEnvelopeReport")]
         public async Task<IActionResult> GetEnvelopeReport([FromBody] SearchEnvelopeModel model)

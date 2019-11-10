@@ -141,50 +141,53 @@ namespace AIMS.Services
 
         public async Task<ICollection<ProjectReportView>> GetAllProjectsReport()
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            List<ProjectReportView> projectsList = new List<ProjectReportView>();
+            var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+            foreach (var project in projects)
             {
-                List<ProjectReportView> projectsList = new List<ProjectReportView>();
-                var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
-                foreach (var project in projects)
+                IEnumerable<string> funderNames = (from f in project.Funders
+                                                   select f.Funder.OrganizationName);
+                IEnumerable<string> implementerNames = (from i in project.Implementers
+                                                        select i.Implementer.OrganizationName);
+                IEnumerable<string> organizations = funderNames.Union(implementerNames);
+
+                List<OrganizationAbstractView> fundersList = new List<OrganizationAbstractView>();
+                foreach (string org in funderNames)
                 {
-                    IEnumerable<string> funderNames = (from f in project.Funders
-                                                       select f.Funder.OrganizationName);
-                    IEnumerable<string> implementerNames = (from i in project.Implementers
-                                                            select i.Implementer.OrganizationName);
-                    IEnumerable<string> organizations = funderNames.Union(implementerNames);
-
-                    List<OrganizationAbstractView> fundersList = new List<OrganizationAbstractView>();
-                    foreach (string org in funderNames)
+                    fundersList.Add(new OrganizationAbstractView()
                     {
-                        fundersList.Add(new OrganizationAbstractView()
-                        {
-                            Name = org
-                        });
-                    }
-
-                    List<OrganizationAbstractView> implementersList = new List<OrganizationAbstractView>();
-                    foreach (string org in funderNames)
-                    {
-                        implementersList.Add(new OrganizationAbstractView()
-                        {
-                            Name = org
-                        });
-                    }
-                    projectsList.Add(new ProjectReportView()
-                    {
-                        Id = project.Id,
-                        Title = project.Title,
-                        StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
-                        EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
-                        Funders = fundersList,
-                        Implementers = implementersList,
-                        Locations = mapper.Map<List<LocationAbstractView>>(project.Locations),
-                        Sectors = mapper.Map<List<SectorAbstractView>>(project.Sectors),
-                        Documents = mapper.Map<List<DocumentAbstractView>>(project.Documents)
+                        Name = org
                     });
                 }
-                return await Task<IEnumerable<ProjectAbstractView>>.Run(() => projectsList).ConfigureAwait(false);
+
+                List<OrganizationAbstractView> implementersList = new List<OrganizationAbstractView>();
+                foreach (string org in implementerNames)
+                {
+                    implementersList.Add(new OrganizationAbstractView()
+                    {
+                        Name = org
+                    });
+                }
+                projectsList.Add(new ProjectReportView()
+                {
+                    Id = project.Id,
+                    Title = project.Title,
+                    Description = project.Description,
+                    ProjectCurrency = project.ProjectCurrency,
+                    ProjectValue = project.ProjectValue,
+                    ExchangeRate = project.ExchangeRate,
+                    StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
+                    EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
+                    Funders = fundersList,
+                    Implementers = implementersList,
+                    Locations = mapper.Map<List<LocationAbstractView>>(project.Locations),
+                    Sectors = mapper.Map<List<SectorAbstractView>>(project.Sectors),
+                    Documents = mapper.Map<List<DocumentAbstractView>>(project.Documents),
+                    Disbursements = mapper.Map<List<DisbursementAbstractView>>(project.Disbursements)
+                });
             }
+            return await Task<IEnumerable<ProjectAbstractView>>.Run(() => projectsList).ConfigureAwait(false);
         }
 
         public async Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model, string reportUrl, string defaultCurrency, decimal exchangeRate)
