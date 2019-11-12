@@ -369,7 +369,7 @@ namespace AIMS.Services
                 this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
                 this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(hssfwb);
 
-                ISheet sheet = hssfwb.GetSheetAt(0);
+                ISheet sheet = hssfwb.GetSheetAt(2);
                 IRow headerRow = sheet.GetRow(1);
                 int cellCount = headerRow.LastCellNum;
 

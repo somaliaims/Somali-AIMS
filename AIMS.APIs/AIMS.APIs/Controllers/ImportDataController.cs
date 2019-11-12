@@ -17,12 +17,15 @@ namespace AIMS.APIs.Controllers
         IDataImportService service;
         IProjectService projectService;
         IEnvelopeService envelopeService;
+        IOrganizationTypeService organizationTypeService;
 
-        public ImportDataController(IDataImportService dataImportService, IProjectService projService, IEnvelopeService envpService)
+        public ImportDataController(IDataImportService dataImportService, IProjectService projService, 
+            IEnvelopeService envpService, IOrganizationTypeService orgTypeService)
         {
             service = dataImportService;
             projectService = projService;
             envelopeService = envpService;
+            organizationTypeService = orgTypeService;
         }
 
         [HttpPost("UploadDataImportFileEighteen"), DisableRequestSizeLimit]
@@ -153,6 +156,45 @@ namespace AIMS.APIs.Controllers
                         }
                     }
                     return Ok(envelopeList);
+                }
+                else
+                {
+                    return BadRequest("Invalid data file provided");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost("ImportOrganizationTypes"), DisableRequestSizeLimit]
+        public async Task<IActionResult> ImportOrganizationTypes()
+        {
+            try
+            {
+                var file = Request.Form.Files[0];
+                var folderName = Path.Combine("wwwroot", "DataImportFiles");
+                var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+                Directory.CreateDirectory(pathToSave);
+                if (file.Length > 0)
+                {
+                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+                    var filePath = Path.Combine(pathToSave, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
+                    var organizationsList = service.ImportOrganizations(filePath, file);
+                    if (organizationsList.Count > 0)
+                    {
+                        var response = await organizationTypeService.ImportOrganizationAndTypes(organizationsList);
+                        if (!response.Success)
+                        {
+                            return BadRequest(response.Message);
+                        }
+                    }
+                    return Ok(organizationsList);
                 }
                 else
                 {

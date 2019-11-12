@@ -3,10 +3,12 @@ using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace AIMS.Services
 {
@@ -29,6 +31,13 @@ namespace AIMS.Services
         /// </summary>
         /// <returns>Response with success/failure details</returns>
         ActionResponse Add(OrganizationTypeModel organizationType);
+
+        /// <summary>
+        /// Import organizations with types
+        /// </summary>
+        /// <param name="organizationsList"></param>
+        /// <returns></returns>
+        Task<ActionResponse> ImportOrganizationAndTypes(List<ImportedOrganizations> organizationsList);
 
         /// <summary>
         /// Updates a organizationType
@@ -86,6 +95,67 @@ namespace AIMS.Services
                     unitWork.Save();
                 }
                 catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public async Task<ActionResponse> ImportOrganizationAndTypes(List<ImportedOrganizations> organizationsList)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var organizationTypes = unitWork.OrganizationTypesRepository.GetManyQueryable(t => t.Id != 0);
+                    var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
+
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
+                    {
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            foreach(var org in organizationsList)
+                            {
+                                var typeName = org.OrganizationType;
+                                var orgType = (from t in organizationTypes
+                                                    where t.TypeName.Equals(typeName, StringComparison.OrdinalIgnoreCase)
+                                                    select t).FirstOrDefault();
+                                
+                                if (orgType == null)
+                                {
+                                    orgType = unitWork.OrganizationTypesRepository.Insert(new EFOrganizationTypes()
+                                    {
+                                        TypeName = typeName,
+                                    });
+                                    unitWork.Save();
+                                }
+
+                                var organizationName = org.Organization;
+                                var organization = (from o in organizations
+                                                    where o.OrganizationName.Equals(organizationName, StringComparison.OrdinalIgnoreCase)
+                                                    select o).FirstOrDefault();
+
+                                if (organization == null)
+                                {
+                                    unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                    {
+                                        OrganizationType = orgType,
+                                        OrganizationName = organizationName,
+                                        SourceType = OrganizationSourceType.User,
+                                        IsApproved = true
+                                    });
+                                }
+                            }
+                            await unitWork.SaveAsync();
+                            transaction.Commit();
+                        }
+                    });
+                }
+                catch(Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
