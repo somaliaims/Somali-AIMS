@@ -48,6 +48,14 @@ namespace AIMS.Services
         List<ImportedEnvelopeData> ImportEnvelopeData(string filePath, IFormFile file);
 
         /// <summary>
+        /// Imports organizations
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        List<ImportedOrganizations> ImportOrganizations(string filePath, IFormFile file);
+
+        /// <summary>
         /// Gets data matches for both old and new data
         /// </summary>
         /// <returns></returns>
@@ -158,11 +166,11 @@ namespace AIMS.Services
             List<NewImportedAidData> projectsList = new List<NewImportedAidData>();
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                int projectTitleIndex = 0, projectDescriptionIndex = 2, sectorIndex = 3, startYearIndex = 4,
-                    endYearIndex = 5, funderIndex = 7, implementerIndex = 8, currencyIndex = 10, projectCostIndex = 11,
-                    twentySixteenYearIndex = 12, twentySeventeenYearIndex = 13, twentyEighteenYearIndex = 14, twentyNineteenYearIndex = 15, 
-                    twentyTwentyYearIndex = 16, locationLowerIndex = 19, locationUpperIndex = 28, markerLowerIndex = 30,
-                    markerUpperIndex = 37, documentLinkIndex = 39, documentDescriptionIndex = 40, exchangeRateIndex = 51;
+                int projectTitleIndex = 0, projectDescriptionIndex = 1, sectorIndex = 2, startYearIndex = 3,
+                    endYearIndex = 4, funderIndex = 6, implementerIndex = 7, currencyIndex = 9, projectCostIndex = 10,
+                    twentySixteenYearIndex = 11, twentySeventeenYearIndex = 12, twentyEighteenYearIndex = 13, twentyNineteenYearIndex = 14, 
+                    twentyTwentyYearIndex = 15, locationLowerIndex = 18, locationUpperIndex = 26, markerLowerIndex = 29,
+                    markerUpperIndex = 36, documentLinkIndex = 38, documentDescriptionIndex = 39, exchangeRateIndex = 51;
 
                 file.CopyTo(stream);
                 stream.Position = 0;
@@ -345,6 +353,49 @@ namespace AIMS.Services
                 }
             }
             return envelopeList;
+        }
+
+        public List<ImportedOrganizations> ImportOrganizations(string filePath, IFormFile file)
+        {
+            List<ImportedOrganizations> organizationsList = new List<ImportedOrganizations>();
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                int organizationIndex = 0, organizationTypeIndex = 1;
+
+                file.CopyTo(stream);
+                stream.Position = 0;
+
+                XSSFWorkbook hssfwb = new XSSFWorkbook(stream);
+                this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
+                this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(hssfwb);
+
+                ISheet sheet = hssfwb.GetSheetAt(0);
+                IRow headerRow = sheet.GetRow(1);
+                int cellCount = headerRow.LastCellNum;
+
+                for (int i = (sheet.FirstRowNum + 2); i < sheet.LastRowNum; i++)
+                {
+                    IRow row = sheet.GetRow(i);
+                    if (row == null)
+                    {
+                        continue;
+                    }
+
+                    string organization = this.GetFormattedValue(row.GetCell(organizationIndex));
+                    string organizationType = this.GetFormattedValue(row.GetCell(organizationTypeIndex));
+                    if (string.IsNullOrEmpty(organization))
+                    {
+                        continue;
+                    }
+
+                    organizationsList.Add(new ImportedOrganizations()
+                    {
+                        Organization = organization,
+                        OrganizationType = organizationType
+                    });
+                }
+            }
+            return organizationsList;
         }
 
         public List<ImportedAidData> ImportAidDataEighteen(string filePath, IFormFile file)

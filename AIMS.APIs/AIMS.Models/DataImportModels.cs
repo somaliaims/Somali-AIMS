@@ -66,6 +66,18 @@ namespace AIMS.Models
         public string Value { get; set; }
     }
 
+    public class ImportedOrganizationTypes
+    {
+        public int OrganizationTypeId { get; set; }
+        public string OrganizationType { get; set; }
+    }
+
+    public class ImportedOrganizations
+    {
+        public string OrganizationType { get; set; }
+        public string Organization { get; set; }
+    }
+
     public class ImportedDocumentLinks
     {
         public string DocumentTitle { get; set; }

@@ -408,9 +408,10 @@ namespace AIMS.APIs
                 if (context.Organizations.Count() == 0)
                 {
                     //Funders & Implementers
-                    var undp = context.Organizations.Add(new EFOrganization() { OrganizationName = "UNDP" });
-                    var mgec = context.Organizations.Add(new EFOrganization() { OrganizationName = "MGEC" });
-                    var mop = context.Organizations.Add(new EFOrganization() { OrganizationName = "Ministry of Planning, Somalia" });
+                    var unAgency = context.OrganizationTypes.Add(new EFOrganizationTypes() { TypeName = "UN Agency" });
+                    var federalGovt = context.OrganizationTypes.Add(new EFOrganizationTypes() { TypeName = "Federal Government" });
+                    var undp = context.Organizations.Add(new EFOrganization() { OrganizationName = "UNDP", OrganizationType = unAgency.Entity });
+                    var mop = context.Organizations.Add(new EFOrganization() { OrganizationName = "Ministry of Planning, Somalia", OrganizationType = federalGovt.Entity });
                     /*context.Organizations.Add(new EFOrganization() { OrganizationName = "DFID" });
                     context.Organizations.Add(new EFOrganization() { OrganizationName = "USA" });
                     context.Organizations.Add(new EFOrganization() { OrganizationName = "UK" });
@@ -556,7 +557,7 @@ namespace AIMS.APIs
                         {
                             Email = "work@mattgeddes.co.uk",
                             Password = "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-                            Organization = mgec.Entity,
+                            Organization = undp.Entity,
                             RegistrationDate = DateTime.Now,
                             IsApproved = true,
                             UserType = UserTypes.Standard
