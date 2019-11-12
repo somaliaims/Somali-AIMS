@@ -158,11 +158,11 @@ namespace AIMS.Services
             List<NewImportedAidData> projectsList = new List<NewImportedAidData>();
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                int projectTitleIndex = 0, projectDescriptionIndex = 1, sectorIndex = 2, startYearIndex = 3,
-                    endYearIndex = 4, funderIndex = 6, implementerIndex = 7, currencyIndex = 9, projectCostIndex = 10,
-                    twentySixteenYearIndex = 11, twentySeventeenYearIndex = 12, twentyEighteenYearIndex = 13, twentyNineteenYearIndex = 14, 
-                    twentyTwentyYearIndex = 15, locationLowerIndex = 18, locationUpperIndex = 27, markerLowerIndex = 29,
-                    markerUpperIndex = 36, documentLinkIndex = 38, documentDescriptionIndex = 39, exchangeRateIndex = 51;
+                int projectTitleIndex = 0, projectDescriptionIndex = 2, sectorIndex = 3, startYearIndex = 4,
+                    endYearIndex = 5, funderIndex = 7, implementerIndex = 8, currencyIndex = 10, projectCostIndex = 11,
+                    twentySixteenYearIndex = 12, twentySeventeenYearIndex = 13, twentyEighteenYearIndex = 14, twentyNineteenYearIndex = 15, 
+                    twentyTwentyYearIndex = 16, locationLowerIndex = 19, locationUpperIndex = 28, markerLowerIndex = 30,
+                    markerUpperIndex = 37, documentLinkIndex = 39, documentDescriptionIndex = 40, exchangeRateIndex = 51;
 
                 file.CopyTo(stream);
                 stream.Position = 0;
