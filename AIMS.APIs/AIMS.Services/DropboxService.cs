@@ -41,20 +41,31 @@ namespace AIMS.Services
         /// <param name="fileName"></param>
         /// <returns></returns>
         Task<ActionResponse> DownloadFile(string fileName);
+
+        /// <summary>
+        /// Sets token for DB
+        /// </summary>
+        /// <param name="tkn"></param>
+        /// <returns></returns>
+        void SetToken(string tkn);
     }
 
-    public class DropboxService
+    public class DropboxService : IDropboxService
     {
         IHostingEnvironment hostingEnvironment;
         string token = "40mPFdltTIAAAAAAAAAADx0r3r5TlXdfNF6icOQciANhFYFJiDMRPwsneZXDK_sG";
         string dropboxFolder = "DataBackups";
         string backupDirectory = "";
 
-        public DropboxService(string tkn, IHostingEnvironment _hostingEnvironment)
+        public DropboxService(IHostingEnvironment _hostingEnvironment)
         {
-            token = tkn;
             hostingEnvironment = _hostingEnvironment;
             backupDirectory = hostingEnvironment.WebRootPath + "/" + dropboxFolder + "/";
+        }
+
+        public void SetToken(string tkn)
+        {
+            token = tkn;
         }
 
         public async Task<ActionResponse> GetAccountName()

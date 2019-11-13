@@ -138,6 +138,8 @@ namespace AIMS.APIs
             services.AddScoped<IExchangeRatesUsageService, ExchangeRatesUsageService>();
             services.AddScoped<IHelpService, HelpService>();
             services.AddScoped<IHomePageService, HomePageService>();
+            services.AddScoped<IDataBackupService, DataBackupService>();
+            services.AddScoped<IDropboxService, DropboxService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();

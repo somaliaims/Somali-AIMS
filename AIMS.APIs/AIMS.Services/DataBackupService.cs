@@ -41,7 +41,7 @@ namespace AIMS.Services
         public DataBackupService(IHostingEnvironment _hostingEnvironment)
         {
             hostingEnvironment = _hostingEnvironment;
-            backupDir = hostingEnvironment.WebRootPath + "/DataBackups/";
+            backupDir = hostingEnvironment.WebRootPath + "\\DataBackups\\";
             Directory.CreateDirectory(backupDir);
         }
 
@@ -59,10 +59,9 @@ namespace AIMS.Services
                 using (SqlConnection sqlConnection = new SqlConnection(connString))
                 {
                     sqlConnection.Open();
-
                     foreach (string dbName in saDatabases)
                     {
-                        string backupFileNameWithoutExt = String.Format("{0}\\{1}_{2:yyyy-MM-dd_hh-mm-ss-tt}", backupDir, dbName, DateTime.Now.ToString());
+                        string backupFileNameWithoutExt = String.Format("{0}\\{1}_{2:yyyy-MM-dd-hh-mm-ss-tt}", backupDir, dbName, DateTime.Now);
                         string backupFileNameWithExt = String.Format("{0}.bak", backupFileNameWithoutExt);
                         string zipFileName = String.Format("{0}.zip", backupFileNameWithoutExt);
 
@@ -73,8 +72,7 @@ namespace AIMS.Services
                             sqlCommand.CommandTimeout = 0;
                             sqlCommand.ExecuteNonQuery();
                         }
-
-                        ZipFile.CreateFromDirectory(backupFileNameWithExt, zipFileName);
+                        //ZipFile.CreateFromDirectory(backupFileNameWithExt, zipFileName);
                     }
                     sqlConnection.Close();
                 }

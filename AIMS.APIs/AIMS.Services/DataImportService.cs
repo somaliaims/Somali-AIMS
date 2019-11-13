@@ -298,9 +298,10 @@ namespace AIMS.Services
             List<ImportedEnvelopeData> envelopeList = new List<ImportedEnvelopeData>();
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                int currencyIndex = 1, organizationIndex = 2, developmentEighteenIndex = 3, developmentNineteenIndex = 4,
-                    developmentTwentyIndex = 5, humanitarianEighteenIndex = 6, humanitarianNineteenIndex = 7,
-                    humanitarianTwentyIndex = 8, exchangeRateIndex = 10;
+                int organizationIndex = 0, currencyIndex = 1,  developmentEighteenIndex = 2, developmentNineteenIndex = 3,
+                    developmentTwentyIndex = 4, humanitarianEighteenIndex = 5, humanitarianNineteenIndex = 6,
+                    humanitarianTwentyIndex = 7;
+                //exchangeRateIndex = 8
 
                 file.CopyTo(stream);
                 stream.Position = 0;
@@ -330,7 +331,9 @@ namespace AIMS.Services
                     decimal developmentEighteen = 0, developmentNineteen = 0, developmentTwenty = 0,
                         exchangeRate = 0, humanitarianEighteen = 0, humanitarianNineteen = 0, humanitarianTwenty = 0;
 
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(exchangeRateIndex)), out exchangeRate);
+                    //To discuss where to get the exchange rate
+                    exchangeRate = 1;
+                    //decimal.TryParse(this.GetFormattedValue(row.GetCell(exchangeRateIndex)), out exchangeRate);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(developmentEighteenIndex)), out developmentEighteen);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(developmentNineteenIndex)), out developmentNineteen);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(developmentTwentyIndex)), out developmentTwenty);

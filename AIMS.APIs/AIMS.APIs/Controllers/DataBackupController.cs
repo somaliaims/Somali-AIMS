@@ -24,13 +24,12 @@ namespace AIMS.APIs.Controllers
             configuration = config;
             service = srvc;
             dropboxService = drpBoxService;
-            connectionString = configuration["DefaultConnection"];
+            connectionString = configuration["ConnectionStrings:DefaultConnection"];
         }
 
         [HttpGet("PerformBackup")]
         public IActionResult PerformBackup()
         {
-            
             if (string.IsNullOrEmpty(connectionString))
             {
                 return BadRequest("Connection string to database is not set in the configuration file.");
