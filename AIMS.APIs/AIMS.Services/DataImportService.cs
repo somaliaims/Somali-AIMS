@@ -37,7 +37,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        List<NewImportedAidData> ImportLatestAidData(string filePath, IFormFile file);
+        List<NewImportedAidData> ImportLatestAidData(string filePath, IFormFile file, List<CurrencyWithRates> exRatesList);
 
         /// <summary>
         /// Imports envelope data
@@ -45,7 +45,7 @@ namespace AIMS.Services
         /// <param name="filePath"></param>
         /// <param name="file"></param>
         /// <returns></returns>
-        List<ImportedEnvelopeData> ImportEnvelopeData(string filePath, IFormFile file);
+        List<ImportedEnvelopeData> ImportEnvelopeData(string filePath, IFormFile file, List<CurrencyWithRates> exRatesList);
 
         /// <summary>
         /// Imports organizations
@@ -161,7 +161,7 @@ namespace AIMS.Services
             };
         }
 
-        public List<NewImportedAidData> ImportLatestAidData(string filePath, IFormFile file)
+        public List<NewImportedAidData> ImportLatestAidData(string filePath, IFormFile file, List<CurrencyWithRates> exRatesList)
         {
             List<NewImportedAidData> projectsList = new List<NewImportedAidData>();
             using (var stream = new FileStream(filePath, FileMode.Create))
@@ -170,7 +170,7 @@ namespace AIMS.Services
                     endYearIndex = 4, funderIndex = 6, implementerIndex = 7, currencyIndex = 9, projectCostIndex = 10,
                     twentySixteenYearIndex = 11, twentySeventeenYearIndex = 12, twentyEighteenYearIndex = 13, twentyNineteenYearIndex = 14, 
                     twentyTwentyYearIndex = 15, locationLowerIndex = 18, locationUpperIndex = 26, markerLowerIndex = 29,
-                    markerUpperIndex = 36, documentLinkIndex = 38, documentDescriptionIndex = 39, exchangeRateIndex = 51;
+                    markerUpperIndex = 36, documentLinkIndex = 38, documentDescriptionIndex = 39;
 
                 file.CopyTo(stream);
                 stream.Position = 0;
@@ -198,7 +198,6 @@ namespace AIMS.Services
                     decimal disbursementsTwentySixteen = 0, disbursementsTwentySeventeen = 0, disbursementsTwentyEighteen = 0, 
                         exchangeRate = 0, disbursementsTwentyNineteen = 0, disbursementsTwentyTwenty = 0;
 
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(exchangeRateIndex)), out exchangeRate);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out disbursementsTwentySixteen);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out disbursementsTwentySeventeen);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out disbursementsTwentyEighteen);
@@ -266,6 +265,13 @@ namespace AIMS.Services
 
                     int startingYear = startingDate.Year;
                     int endingYear = endingDate.Year;
+                    string currency = this.GetFormattedValue(row.GetCell(currencyIndex));
+                    if (!string.IsNullOrEmpty(currency))
+                    {
+                        exchangeRate = (from rate in exRatesList
+                                        where rate.Currency.Equals(currency, StringComparison.OrdinalIgnoreCase)
+                                        select rate.Rate).FirstOrDefault();
+                    }
 
                     projectsList.Add(new NewImportedAidData()
                     {
@@ -275,7 +281,7 @@ namespace AIMS.Services
                         StartYear = startingYear.ToString(),
                         EndYear = endingYear.ToString(),
                         Funders = this.GetFormattedValue(row.GetCell(funderIndex)),
-                        Currency = this.GetFormattedValue(row.GetCell(currencyIndex)),
+                        Currency = currency,
                         ExchangeRate = exchangeRate,
                         Implementers = this.GetFormattedValue(row.GetCell(implementerIndex)),
                         TwentySixteenDisbursements = twentySixteenDisbursements,
@@ -293,7 +299,7 @@ namespace AIMS.Services
             return projectsList;
         }
 
-        public List<ImportedEnvelopeData> ImportEnvelopeData(string filePath, IFormFile file)
+        public List<ImportedEnvelopeData> ImportEnvelopeData(string filePath, IFormFile file, List<CurrencyWithRates> exRatesList)
         {
             List<ImportedEnvelopeData> envelopeList = new List<ImportedEnvelopeData>();
             using (var stream = new FileStream(filePath, FileMode.Create))
@@ -301,7 +307,6 @@ namespace AIMS.Services
                 int organizationIndex = 0, currencyIndex = 1,  developmentEighteenIndex = 2, developmentNineteenIndex = 3,
                     developmentTwentyIndex = 4, humanitarianEighteenIndex = 5, humanitarianNineteenIndex = 6,
                     humanitarianTwentyIndex = 7;
-                //exchangeRateIndex = 8
 
                 file.CopyTo(stream);
                 stream.Position = 0;
@@ -341,10 +346,17 @@ namespace AIMS.Services
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(humanitarianNineteenIndex)), out humanitarianNineteen);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(humanitarianTwentyIndex)), out humanitarianTwenty);
 
+                    string currency = this.GetFormattedValue(row.GetCell(currencyIndex));
+                    if (!string.IsNullOrEmpty(currency))
+                    {
+                        exchangeRate = (from rate in exRatesList
+                                        where rate.Currency.Equals(currency, StringComparison.OrdinalIgnoreCase)
+                                        select rate.Rate).FirstOrDefault();
+                    }
                     envelopeList.Add(new ImportedEnvelopeData()
                     {
                        Organization = organization,
-                       Currency = this.GetFormattedValue(row.GetCell(currencyIndex)),
+                       Currency = currency,
                        ExchangeRate = exchangeRate,
                        DevelopmentEighteen = developmentEighteen,
                        DevelopmentNineteen = developmentNineteen,

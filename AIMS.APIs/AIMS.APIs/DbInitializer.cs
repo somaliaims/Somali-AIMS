@@ -28,6 +28,17 @@ namespace AIMS.APIs
             {
                 // Run Migrations
                 context.Database.Migrate();
+
+                if (context.HomePageSettings.Count() == 0)
+                {
+                    context.HomePageSettings.Add(new EFHomePageSettings()
+                    {
+                        AIMSTitle = "Somali AIMS",
+                        IntroductionHeading = "Introduction",
+                        IntroductionText = "Welcome to Somali AIMS"
+                    });
+                }
+
                 if (context.EmailMessages.Count() == 0)
                 {
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewUser, TypeDefinition = "New user registration", Subject= "New user registration", Message = "New user registered" });
@@ -412,125 +423,7 @@ namespace AIMS.APIs
                     var federalGovt = context.OrganizationTypes.Add(new EFOrganizationTypes() { TypeName = "Federal Government" });
                     var undp = context.Organizations.Add(new EFOrganization() { OrganizationName = "UNDP", OrganizationType = unAgency.Entity });
                     var mop = context.Organizations.Add(new EFOrganization() { OrganizationName = "Ministry of Planning, Somalia", OrganizationType = federalGovt.Entity });
-                    /*context.Organizations.Add(new EFOrganization() { OrganizationName = "DFID" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "USA" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "UK" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "GEF" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "EU" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Netherlands" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "African Water Facility" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Netherlands" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "AFDB" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Japan" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "QATAR" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "USAID" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "UNEP" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "DANIDA" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Switzerland" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "FAO" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "CHF" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Finland" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Italy" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "The Global Fund" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "FCO" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "UNICEF - GC" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Norway" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Sweden" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "UNODC" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Denmark" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "WB SPF" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "WORLD VISION" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Government Counterparts" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "HIRDA" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "NCA" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Bancroft Global Development" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "SRDA" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "INTERSOS" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "SEDHURO" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "SHRA" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "CEDA" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "RAAS" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "GEWDO" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "HARD" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "EDRO" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "UNOPS" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "UNODC" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "UNICEF" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "MOE" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "IMWSC" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "MOWR" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "MOH" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Ministries of Health" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "OSPAD" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "AIDS Commissions" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Progressio" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "SCRCS" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Swisso Kalmo" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "CISP" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Mercy USA" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Galkayo Medical Foundation" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "SOS Village Children" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Human Development Concern" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "SAHAN" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "WAWA" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "PLHIV networks" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Physician Across Continents" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "CCS" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "PUNCHAD" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Armament Policy Support" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "ASI" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "MUSLIM AID" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "SWISSO KALMO" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "ICRC" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Arma dei Carabinieri" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "ADAM SMITH INTERNATIONAL LTD" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "FAO" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "TERRE SOLIDALI ONLUS ASSOCIAZIONE" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "MdM France" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "OXFAM" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Population Services International" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "NORWEGIAN REFUGEE COUNCIL" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "CONCERN WORLDWIDE" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Save the Children International" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Action Against Hunger (ACF)" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Concern World Wide" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Care International" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "ASSOCIATION OF EUROPEAN PARLIAMENTARIANS WITH AFRICA VERENIGING" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "IRG" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Stichting Care Nederland" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "AUIBAR" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "CARE" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "HALO Trust" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "RED BARNET FORENING" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "MERCY CORPS" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "STIFTELSEN FLYKTNINGHJELPEN (NRC)" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "THE INTERNATIONAL CENTRE OF INSECTPHYSIOLOGY AND ECOLOGY LBG" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "INTERPEACE EUROPE AISBL" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Oxfam Novib" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "NRC" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "SPARK" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Fairfishing" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "ADRA DEUTSCHLAND EV" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "ACTED" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "International Organization for Migration" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "IDLO" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Ministry of Finance" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Conflict Dynamics" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "WORLD VISION DEUTSCHLAND EV" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "African Water Facility" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Saferworld" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "AFRICAN DEVELOPMENT SOLUTIONS (ADESO) ASSOCIATION" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "WORLD VISION DEUTSCHLAND EV" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "STIFTELSEN FLYKTNINGHJELPEN (NRC)" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Danish Demming Group" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Mott Macdonald" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Creative Associates International Inc." });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "DAI" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "CESVI" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "International Rescue Committee" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Concern World Wide" });
-                    context.Organizations.Add(new EFOrganization() { OrganizationName = "Norwegian Refugee Council" });*/
-
+                    
                     if (context.Users.Count() == 0)
                     {
                         context.Users.Add(new EFUser()

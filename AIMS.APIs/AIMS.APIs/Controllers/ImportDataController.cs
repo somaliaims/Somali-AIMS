@@ -18,14 +18,19 @@ namespace AIMS.APIs.Controllers
         IProjectService projectService;
         IEnvelopeService envelopeService;
         IOrganizationTypeService organizationTypeService;
+        IExchangeRateService ratesService;
+        IExchangeRateHttpService ratesHttpService;
 
         public ImportDataController(IDataImportService dataImportService, IProjectService projService, 
-            IEnvelopeService envpService, IOrganizationTypeService orgTypeService)
+            IEnvelopeService envpService, IOrganizationTypeService orgTypeService, IExchangeRateService exRateService,
+            IExchangeRateHttpService exRateHttpService)
         {
             service = dataImportService;
             projectService = projService;
             envelopeService = envpService;
             organizationTypeService = orgTypeService;
+            ratesService = exRateService;
+            ratesHttpService = exRateHttpService;
         }
 
         [HttpPost("UploadDataImportFileEighteen"), DisableRequestSizeLimit]
@@ -107,7 +112,9 @@ namespace AIMS.APIs.Controllers
                     {
                         file.CopyTo(stream);
                     }
-                    var extractedProjects = service.ImportLatestAidData(filePath, file);
+                    string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                    var ratesView = await ratesHttpService.GetRatesAsync(apiKey);
+                    var extractedProjects = service.ImportLatestAidData(filePath, file, ratesView.Rates);
                     if (extractedProjects.Count > 0)
                     {
                         var response = await projectService.ImportProjects(extractedProjects);
@@ -146,7 +153,10 @@ namespace AIMS.APIs.Controllers
                     {
                         file.CopyTo(stream);
                     }
-                    var envelopeList = service.ImportEnvelopeData(filePath, file);
+
+                    string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                    var ratesView = await ratesHttpService.GetRatesAsync(apiKey);
+                    var envelopeList = service.ImportEnvelopeData(filePath, file, ratesView.Rates);
                     if (envelopeList.Count > 0)
                     {
                         var response = await envelopeService.ImportEnvelopeData(envelopeList);
