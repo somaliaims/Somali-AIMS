@@ -130,13 +130,13 @@ namespace AIMS.Services
 
             latestCustomFields = new NameValueCollection()
             {
-                { "28", "GENDER MARKER" },
-                { "20", "CAPACITY DEVELOPMENT MARKER" },
-                { "30", "STABALIZATION/CRESTA" },
-                { "31", "DURABLE SOLUTIONS" },
-                { "32", "YOUTH MARKER" },
-                { "33", "PCVE MARKER" },
-                { "34", "RRF MARKER" },
+                { "29", "GENDER MARKER" },
+                { "30", "CAPACITY DEVELOPMENT MARKER" },
+                { "31", "STABALIZATION/CRESTA" },
+                { "32", "DURABLE SOLUTIONS" },
+                { "33", "YOUTH MARKER" },
+                { "34", "PCVE MARKER" },
+                { "35", "RRF MARKER" },
             };
 
             oldCustomFields = new NameValueCollection()
@@ -179,121 +179,128 @@ namespace AIMS.Services
                 this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
                 this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(hssfwb);
 
-                ISheet sheet = hssfwb.GetSheetAt(3);
+                ISheet sheet = hssfwb.GetSheetAt(0);
                 IRow headerRow = sheet.GetRow(1);
                 int cellCount = headerRow.LastCellNum;
 
-                for (int i = (sheet.FirstRowNum + 1); i < sheet.LastRowNum; i++)
+                try
                 {
-                    IRow row = sheet.GetRow(i);
-                    if (row == null)
+                    for (int i = (sheet.FirstRowNum + 1); i < sheet.LastRowNum; i++)
                     {
-                        continue;
-                    }
-                    if (row.Cells.All(d => d.CellType == CellType.Blank))
-                    {
-                        continue;
-                    }
-
-                    decimal disbursementsTwentySixteen = 0, disbursementsTwentySeventeen = 0, disbursementsTwentyEighteen = 0, 
-                        exchangeRate = 0, disbursementsTwentyNineteen = 0, disbursementsTwentyTwenty = 0;
-
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out disbursementsTwentySixteen);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out disbursementsTwentySeventeen);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out disbursementsTwentyEighteen);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyNineteenYearIndex)), out disbursementsTwentyNineteen);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyTwentyYearIndex)), out disbursementsTwentyTwenty);
-
-                    List<ImportedLocation> locationsList = new List<ImportedLocation>();
-                    for (int l = locationLowerIndex; l <= locationUpperIndex; l++)
-                    {
-                        decimal percentage = 0;
-                        decimal.TryParse(row.GetCell(l).NumericCellValue.ToString(), out percentage);
-                        locationsList.Add(new ImportedLocation()
+                        IRow row = sheet.GetRow(i);
+                        if (row == null)
                         {
-                            Location = latestDataLocations[l.ToString()],
-                            Percentage = (percentage * 100)
-                        });
-
-                        decimal totalPercentage = (from loc in locationsList
-                                                   select loc.Percentage).Sum();
-                        if (totalPercentage == 100)
-                        {
-                            break;
-                        }
-                    }
-
-                    List<ImportedCustomFields> customFieldsList = new List<ImportedCustomFields>();
-                    for (int c = markerLowerIndex; c <= markerUpperIndex; c++)
-                    {
-                        if (c == 39)
                             continue;
-
-                        customFieldsList.Add(new ImportedCustomFields()
+                        }
+                        if (row.Cells.All(d => d.CellType == CellType.Blank))
                         {
-                            CustomField = latestCustomFields[c.ToString()],
-                            Value = this.GetFormattedValue(row.GetCell(c))
+                            continue;
+                        }
+
+                        decimal disbursementsTwentySixteen = 0, disbursementsTwentySeventeen = 0, disbursementsTwentyEighteen = 0,
+                            exchangeRate = 0, disbursementsTwentyNineteen = 0, disbursementsTwentyTwenty = 0;
+
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out disbursementsTwentySixteen);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out disbursementsTwentySeventeen);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out disbursementsTwentyEighteen);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyNineteenYearIndex)), out disbursementsTwentyNineteen);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyTwentyYearIndex)), out disbursementsTwentyTwenty);
+
+                        List<ImportedLocation> locationsList = new List<ImportedLocation>();
+                        for (int l = locationLowerIndex; l <= locationUpperIndex; l++)
+                        {
+                            decimal percentage = 0;
+                            decimal.TryParse(row.GetCell(l).NumericCellValue.ToString(), out percentage);
+                            locationsList.Add(new ImportedLocation()
+                            {
+                                Location = latestDataLocations[l.ToString()],
+                                Percentage = (percentage * 100)
+                            });
+
+                            decimal totalPercentage = (from loc in locationsList
+                                                       select loc.Percentage).Sum();
+                            if (totalPercentage == 100)
+                            {
+                                break;
+                            }
+                        }
+
+                        List<ImportedCustomFields> customFieldsList = new List<ImportedCustomFields>();
+                        for (int c = markerLowerIndex; c <= markerUpperIndex; c++)
+                        {
+                            if (c == 39)
+                                continue;
+
+                            customFieldsList.Add(new ImportedCustomFields()
+                            {
+                                CustomField = latestCustomFields[c.ToString()],
+                                Value = this.GetFormattedValue(row.GetCell(c))
+                            });
+                        }
+
+                        List<ImportedDocumentLinks> documentsList = new List<ImportedDocumentLinks>();
+                        var documentLink = this.GetFormattedValue(row.GetCell(documentLinkIndex));
+                        var documentDescription = this.GetFormattedValue(row.GetCell(documentDescriptionIndex));
+                        if (!string.IsNullOrEmpty(documentLink) || !string.IsNullOrEmpty(documentDescription))
+                        {
+                            documentsList.Add(new ImportedDocumentLinks()
+                            {
+                                DocumentUrl = documentLink,
+                                DocumentTitle = documentDescription
+                            });
+                        }
+
+                        DateTime startingDate = new DateTime(), endingDate = new DateTime();
+                        decimal projectCost = 0, twentySixteenDisbursements = 0, twentySeventeenDisbursements = 0,
+                            twentyEighteenDisbursements = 0, twentyNineteenDisbursements = 0, twentyTwentyDisbursements = 0;
+
+                        DateTime.TryParse(this.GetFormattedValue(row.GetCell(startYearIndex)), out startingDate);
+                        DateTime.TryParse(this.GetFormattedValue(row.GetCell(endYearIndex)), out endingDate);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out twentySixteenDisbursements);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out twentySeventeenDisbursements);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out twentyEighteenDisbursements);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyNineteenYearIndex)), out twentyNineteenDisbursements);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyTwentyYearIndex)), out twentyTwentyDisbursements);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(projectCostIndex)), out projectCost);
+                        projectCost = (twentySixteenDisbursements + twentySeventeenDisbursements + twentyEighteenDisbursements +
+                            twentyNineteenDisbursements + twentyTwentyDisbursements);
+
+                        int startingYear = startingDate.Year;
+                        int endingYear = endingDate.Year;
+                        string currency = this.GetFormattedValue(row.GetCell(currencyIndex));
+                        if (!string.IsNullOrEmpty(currency))
+                        {
+                            exchangeRate = (from rate in exRatesList
+                                            where rate.Currency.Equals(currency, StringComparison.OrdinalIgnoreCase)
+                                            select rate.Rate).FirstOrDefault();
+                        }
+
+                        projectsList.Add(new NewImportedAidData()
+                        {
+                            ProjectTitle = this.GetFormattedValue(row.GetCell(projectTitleIndex)),
+                            ProjectDescription = this.GetFormattedValue(row.GetCell(projectDescriptionIndex)),
+                            ProjectValue = projectCost,
+                            StartYear = startingYear.ToString(),
+                            EndYear = endingYear.ToString(),
+                            Funders = this.GetFormattedValue(row.GetCell(funderIndex)),
+                            Currency = currency,
+                            ExchangeRate = exchangeRate,
+                            Implementers = this.GetFormattedValue(row.GetCell(implementerIndex)),
+                            TwentySixteenDisbursements = twentySixteenDisbursements,
+                            TwentySeventeenDisbursements = twentySeventeenDisbursements,
+                            TwentyEighteenDisbursements = twentyEighteenDisbursements,
+                            TwentyNineteenDisbursements = twentyNineteenDisbursements,
+                            TwentyTwentyDisbursements = twentyTwentyDisbursements,
+                            Sector = this.GetFormattedValue(row.GetCell(sectorIndex)),
+                            Locations = locationsList,
+                            CustomFields = customFieldsList,
+                            DocumentLinks = documentsList
                         });
                     }
-
-                    List<ImportedDocumentLinks> documentsList = new List<ImportedDocumentLinks>();
-                    var documentLink = this.GetFormattedValue(row.GetCell(documentLinkIndex));
-                    var documentDescription = this.GetFormattedValue(row.GetCell(documentDescriptionIndex));
-                    if (!string.IsNullOrEmpty(documentLink) || !string.IsNullOrEmpty(documentDescription))
-                    {
-                        documentsList.Add(new ImportedDocumentLinks()
-                        {
-                            DocumentUrl = documentLink,
-                            DocumentTitle = documentDescription
-                        });
-                    }
-
-                    DateTime startingDate = new DateTime(), endingDate = new DateTime();
-                    decimal projectCost = 0, twentySixteenDisbursements = 0, twentySeventeenDisbursements = 0,
-                        twentyEighteenDisbursements = 0, twentyNineteenDisbursements = 0, twentyTwentyDisbursements = 0;
-
-                    DateTime.TryParse(this.GetFormattedValue(row.GetCell(startYearIndex)), out startingDate);
-                    DateTime.TryParse(this.GetFormattedValue(row.GetCell(endYearIndex)), out endingDate);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out twentySixteenDisbursements);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out twentySeventeenDisbursements);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out twentyEighteenDisbursements);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyNineteenYearIndex)), out twentyNineteenDisbursements);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyTwentyYearIndex)), out twentyTwentyDisbursements);
-                    decimal.TryParse(this.GetFormattedValue(row.GetCell(projectCostIndex)), out projectCost);
-                    projectCost = (twentySixteenDisbursements + twentySeventeenDisbursements + twentyEighteenDisbursements +
-                        twentyNineteenDisbursements + twentyTwentyDisbursements);
-
-                    int startingYear = startingDate.Year;
-                    int endingYear = endingDate.Year;
-                    string currency = this.GetFormattedValue(row.GetCell(currencyIndex));
-                    if (!string.IsNullOrEmpty(currency))
-                    {
-                        exchangeRate = (from rate in exRatesList
-                                        where rate.Currency.Equals(currency, StringComparison.OrdinalIgnoreCase)
-                                        select rate.Rate).FirstOrDefault();
-                    }
-
-                    projectsList.Add(new NewImportedAidData()
-                    {
-                        ProjectTitle = this.GetFormattedValue(row.GetCell(projectTitleIndex)),
-                        ProjectDescription = this.GetFormattedValue(row.GetCell(projectDescriptionIndex)),
-                        ProjectValue = projectCost,
-                        StartYear = startingYear.ToString(),
-                        EndYear = endingYear.ToString(),
-                        Funders = this.GetFormattedValue(row.GetCell(funderIndex)),
-                        Currency = currency,
-                        ExchangeRate = exchangeRate,
-                        Implementers = this.GetFormattedValue(row.GetCell(implementerIndex)),
-                        TwentySixteenDisbursements = twentySixteenDisbursements,
-                        TwentySeventeenDisbursements = twentySeventeenDisbursements,
-                        TwentyEighteenDisbursements = twentyEighteenDisbursements,
-                        TwentyNineteenDisbursements = twentyNineteenDisbursements,
-                        TwentyTwentyDisbursements = twentyTwentyDisbursements,
-                        Sector = this.GetFormattedValue(row.GetCell(sectorIndex)),
-                        Locations = locationsList,
-                        CustomFields = customFieldsList,
-                        DocumentLinks = documentsList
-                    });
+                }
+                catch(Exception ex)
+                {
+                    string message = ex.Message;
                 }
             }
             return projectsList;
@@ -336,7 +343,7 @@ namespace AIMS.Services
                     decimal developmentEighteen = 0, developmentNineteen = 0, developmentTwenty = 0,
                         exchangeRate = 0, humanitarianEighteen = 0, humanitarianNineteen = 0, humanitarianTwenty = 0;
 
-                    //To discuss where to get the exchange rate
+                    //To discuss from where to get the exchange rate
                     exchangeRate = 1;
                     //decimal.TryParse(this.GetFormattedValue(row.GetCell(exchangeRateIndex)), out exchangeRate);
                     decimal.TryParse(this.GetFormattedValue(row.GetCell(developmentEighteenIndex)), out developmentEighteen);

@@ -209,9 +209,9 @@ namespace AIMS.Services
                 }
 
 
-                envelopeList = (from e in envelopeList
+                /*envelopeList = (from e in envelopeList
                                 where e.Currency == "USD"
-                                select e).ToList();
+                                select e).ToList();*/
 
                 try
                 {

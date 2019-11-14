@@ -1376,7 +1376,7 @@ namespace AIMS.Services
 
                                         if (isFunderExists == null && organization != null)
                                         {
-                                            projectFunders.Add(new EFProjectFunders() { Project = newProject, Funder = organization });
+                                            projectFunders.Add(new EFProjectFunders() { ProjectId = newProject.Id, FunderId = organization.Id });
                                         }
                                     }
                                 }

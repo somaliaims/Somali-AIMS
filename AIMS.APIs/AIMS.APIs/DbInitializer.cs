@@ -39,6 +39,12 @@ namespace AIMS.APIs
                     });
                 }
 
+                if (context.EnvelopeTypes.Count() == 0)
+                {
+                    context.EnvelopeTypes.Add(new EFEnvelopeTypes() { TypeName = "Development" });
+                    context.EnvelopeTypes.Add(new EFEnvelopeTypes() { TypeName = "Humanitarian" });
+                }
+
                 if (context.EmailMessages.Count() == 0)
                 {
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewUser, TypeDefinition = "New user registration", Subject= "New user registration", Message = "New user registered" });
