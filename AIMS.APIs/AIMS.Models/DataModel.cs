@@ -221,7 +221,7 @@ namespace AIMS.Models
         [ForeignKey("FundingTypeId")]
         public int FundingTypeId { get; set; }
         public EFFundingTypes FundingType { get; set; }
-        [Column(TypeName = "decimal(11, 2)")]
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal ProjectValue { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; }
@@ -269,7 +269,7 @@ namespace AIMS.Models
         [ForeignKey("Year")]
         public int YearId { get; set; }
         public EFFinancialYears Year { get; set; }
-        [Column(TypeName = "decimal(11, 2)")]
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal Amount { get; set; }
     }
 
@@ -281,9 +281,9 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
         public EFFinancialYears Year { get; set; }
-        [Column(TypeName = "decimal(11, 2)")]
+        [Column(TypeName = "decimal(18, 2)")]
         public DisbursementTypes DisbursementType { get; set; }
-        [Column(TypeName = "decimal(11, 2)")]
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         [Column(TypeName = "decimal(9, 2)")]

@@ -185,7 +185,7 @@ namespace AIMS.Services
 
                 try
                 {
-                    for (int i = (sheet.FirstRowNum + 1); i < sheet.LastRowNum; i++)
+                    for (int i = (sheet.FirstRowNum + 1); i <= sheet.LastRowNum; i++)
                     {
                         IRow row = sheet.GetRow(i);
                         if (row == null)
@@ -326,7 +326,7 @@ namespace AIMS.Services
                 IRow headerRow = sheet.GetRow(1);
                 int cellCount = headerRow.LastCellNum;
 
-                for (int i = (sheet.FirstRowNum + 2); i < sheet.LastRowNum; i++)
+                for (int i = (sheet.FirstRowNum + 1); i <= sheet.LastRowNum; i++)
                 {
                     IRow row = sheet.GetRow(i);
                     if (row == null)
@@ -395,7 +395,7 @@ namespace AIMS.Services
                 IRow headerRow = sheet.GetRow(1);
                 int cellCount = headerRow.LastCellNum;
 
-                for (int i = (sheet.FirstRowNum + 2); i < sheet.LastRowNum; i++)
+                for (int i = (sheet.FirstRowNum + 1); i <= sheet.LastRowNum; i++)
                 {
                     IRow row = sheet.GetRow(i);
                     if (row == null)
