@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using System.IO.Compression;
 using System.Text;
 using System.Threading.Tasks;
@@ -105,6 +106,13 @@ namespace AIMS.Services
                         BackupFileName = fi.Name,
                         TakenOn = fi.CreationTime
                     });
+                }
+
+                if (filesList.Count > 1)
+                {
+                    filesList = (from f in filesList
+                                 orderby f.TakenOn descending
+                                 select f).ToList();
                 }
             }
             catch(Exception ex)
