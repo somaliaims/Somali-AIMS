@@ -55,7 +55,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="report"></param>
         /// <returns></returns>
-        ActionResponse GenerateAllProjectsReport(List<ProjectReportView> projects, List<string> locationNames);
+        ActionResponse GenerateAllProjectsReport(ProjectReportView projectsReport);
     }
 
     public class ExcelGeneratorService : IExcelGeneratorService
@@ -69,7 +69,7 @@ namespace AIMS.Services
             Directory.CreateDirectory(sWebRootFolder);
         }
 
-        public ActionResponse GenerateAllProjectsReport(List<ProjectReportView> projects, List<string> locationNames)
+        public ActionResponse GenerateAllProjectsReport(ProjectReportView projectsReport)
         {
             ActionResponse response = new ActionResponse();
             try
@@ -151,13 +151,15 @@ namespace AIMS.Services
 
 
                     ICell locationCell = null;
-                    foreach(var location in locationNames)
+                    var locations = projectsReport.Locations;
+                    foreach(var location in locations)
                     {
                         locationCell = row.CreateCell(++colIndex);
-                        locationCell.SetCellValue(location);
+                        locationCell.SetCellValue(location.Location);
                         locationCell.CellStyle = headerStyle;
                     }
 
+                    var projects = projectsReport.Projects;
                     foreach (var project in projects)
                     {
                         row = excelSheet.CreateRow(++rowCounter);

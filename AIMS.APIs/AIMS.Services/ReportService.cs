@@ -67,7 +67,7 @@ namespace AIMS.Services
         /// Gets all projects report
         /// </summary>
         /// <returns></returns>
-        Task<ICollection<ProjectReportView>> GetAllProjectsReport();
+        Task<ProjectReportView> GetAllProjectsReport(SearchAllProjectsModel model);
 
         /// <summary>
         /// Internal function for extracting rate of default currency
@@ -139,11 +139,58 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ICollection<ProjectReportView>> GetAllProjectsReport()
+        public async Task<ProjectReportView> GetAllProjectsReport(SearchAllProjectsModel model)
         {
             var unitWork = new UnitOfWork(context);
-            List<ProjectReportView> projectsList = new List<ProjectReportView>();
-            var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents" });
+            ProjectReportView projectsReport = new ProjectReportView();
+            List<ProjectDetailView> projectsList = new List<ProjectDetailView>();
+            IQueryable<EFProject> projects;
+            int startingFinancialYear = 0;
+            int endingFinancialYear = 0;
+
+            var financialYears = unitWork.FinancialYearRepository.GetProjection(y => y.FinancialYear > 0, y => y.FinancialYear);
+            var locations = unitWork.LocationRepository.GetProjection(l => l.Id != 0, l => new { l.Id, l.Location });
+            var markers = unitWork.MarkerRepository.GetProjection(m => m.Id != 0, m => new { m.Id, m.FieldTitle });
+            projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers", "Markers.Marker" });
+            startingFinancialYear = financialYears.Min();
+            endingFinancialYear = financialYears.Max();
+
+            List<ProjectDetailLocationView> locationsList = new List<ProjectDetailLocationView>();
+            if (locations.Any())
+            {
+                locations = (from l in locations
+                             orderby l.Location
+                             select l);
+                locationsList = mapper.Map<List<ProjectDetailLocationView>>(locations);
+            }
+
+            List<ProjectDetailMarkerView> markersList = new List<ProjectDetailMarkerView>();
+            if (markers.Any())
+            {
+                markers = (from m in markers
+                           orderby m.FieldTitle
+                           select m);
+                markersList = mapper.Map<List<ProjectDetailMarkerView>>(markers);
+            }
+
+            if (model.StartingYear > 0)
+            {
+                startingFinancialYear = model.StartingYear;
+                projects = (from p in projects
+                            where p.StartingFinancialYear.FinancialYear >= model.StartingYear ||
+                            p.EndingFinancialYear.FinancialYear >= model.StartingYear
+                            select p);
+            }
+
+            if (model.EndingYear > 0)
+            {
+                endingFinancialYear = model.EndingYear;
+                projects = (from p in projects
+                            where p.EndingFinancialYear.FinancialYear <= model.EndingYear ||
+                            p.StartingFinancialYear.FinancialYear <= model.EndingYear
+                            select p);
+            }
+
             foreach (var project in projects)
             {
                 IEnumerable<string> funderNames = (from f in project.Funders
@@ -169,7 +216,7 @@ namespace AIMS.Services
                         Name = org
                     });
                 }
-                projectsList.Add(new ProjectReportView()
+                projectsList.Add(new ProjectDetailView()
                 {
                     Id = project.Id,
                     Title = project.Title,
@@ -187,7 +234,8 @@ namespace AIMS.Services
                     Disbursements = mapper.Map<List<DisbursementAbstractView>>(project.Disbursements)
                 });
             }
-            return await Task<IEnumerable<ProjectAbstractView>>.Run(() => projectsList).ConfigureAwait(false);
+            projectsReport.Projects = projectsList;
+            return await Task<ProjectReportView>.Run(() => projectsReport).ConfigureAwait(false);
         }
 
         public async Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model, string reportUrl, string defaultCurrency, decimal exchangeRate)

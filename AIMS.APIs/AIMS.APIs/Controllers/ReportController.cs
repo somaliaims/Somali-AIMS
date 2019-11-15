@@ -76,12 +76,11 @@ namespace AIMS.APIs.Controllers
             return Ok(report);
         }
 
-        [HttpGet("GetAllProjectsReport")]
-        public async Task<IActionResult> GetAllProjectsReport()
+        [HttpPost("GetAllProjectsReport")]
+        public async Task<IActionResult> GetAllProjectsReport([FromBody] SearchAllProjectsModel model)
         {
-            var projectsList = await reportService.GetAllProjectsReport();
-            var locationNames = reportService.GetLocationNames();
-            var response = excelService.GenerateAllProjectsReport(projectsList.ToList(), locationNames.ToList());
+            var projectsReport = await reportService.GetAllProjectsReport(model);
+            var response = excelService.GenerateAllProjectsReport(projectsReport);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

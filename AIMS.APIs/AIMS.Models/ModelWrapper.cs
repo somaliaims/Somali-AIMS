@@ -728,10 +728,30 @@ namespace AIMS.Models
         public IEnumerable<SectorAbstractView> Sectors { get; set; }
         public IEnumerable<LocationAbstractView> Locations { get; set; }
         public IEnumerable<OrganizationAbstractView> Organizations { get; set; }
-
     }
 
     public class ProjectReportView
+    {
+        public int StartingFinancialYear { get; set; }
+        public int EndingFinancialYear { get; set; }
+        public List<ProjectDetailLocationView> Locations { get; set; }
+        public List<ProjectDetailMarkerView> Markers { get; set; }
+        public List<ProjectDetailView> Projects { get; set; }
+    }
+
+    public class ProjectDetailLocationView
+    {
+        public int Id { get; set; }
+        public string Location { get; set; }
+    }
+
+    public class ProjectDetailMarkerView
+    {
+        public int Id { get; set; }
+        public string Marker { get; set; }
+    }
+
+    public class ProjectDetailView
     {
         public int Id { get; set; }
         public string Title { get; set; }
@@ -1417,6 +1437,12 @@ namespace AIMS.Models
     {
         public Report ReportSettings { get; set; }
         public IEnumerable<ProjectBudgetView> Projects { get; set; }
+    }
+
+    public class SearchAllProjectsModel
+    {
+        public int StartingYear { get; set; }
+        public int EndingYear { get; set; }
     }
 
     public class SearchEnvelopeModel
