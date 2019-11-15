@@ -62,5 +62,11 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [HttpGet("GetBackupFiles")]
+        public IActionResult GetBackupFiles()
+        {
+            return Ok(service.GetBackupFiles());
+        }
+
     }
 }

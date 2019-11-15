@@ -27,6 +27,12 @@ namespace AIMS.Services
         Task<ActionResponse> RestoreDatabase(string backupFile, string connString);
 
         /// <summary>
+        /// Gets list of backup files
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<BackupFiles> GetBackupFiles();
+
+        /// <summary>
         /// Gets full path of the data backup directory
         /// </summary>
         /// <returns></returns>
@@ -83,6 +89,29 @@ namespace AIMS.Services
                 response.Message = ex.Message;
             }
             return response;
+        }
+
+        public IEnumerable<BackupFiles> GetBackupFiles()
+        {
+            List<BackupFiles> filesList = new List<BackupFiles>();
+            try
+            {
+                string[] files = Directory.GetFiles(backupDir);
+                foreach (string file in files)
+                {
+                    FileInfo fi = new FileInfo(file);
+                    filesList.Add(new BackupFiles()
+                    {
+                        BackupFileName = fi.Name,
+                        TakenOn = fi.CreationTime
+                    });
+                }
+            }
+            catch(Exception ex)
+            {
+                string message = ex.Message;
+            }
+            return filesList;
         }
 
         public async Task<ActionResponse> RestoreDatabase(string backupFile, string connString)

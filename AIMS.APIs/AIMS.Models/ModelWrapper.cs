@@ -1969,4 +1969,10 @@ namespace AIMS.Models
         [MaxLength(255)]
         public string Token { get; set; }
     }
+
+    public class BackupFiles
+    {
+        public string BackupFileName { get; set; }
+        public DateTime TakenOn { get; set; }
+    }
 }
