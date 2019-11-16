@@ -251,15 +251,14 @@ namespace AIMS.Services
                             });
                         }
 
-                        DateTime startingDate = new DateTime(), endingDate = new DateTime();
                         decimal projectCost = 0, twentySixteenDisbursements = 0, twentySeventeenDisbursements = 0,
                             twentyEighteenDisbursements = 0, twentyNineteenDisbursements = 0, twentyTwentyDisbursements = 0;
 
                         var sDate = this.GetFormattedValue(row.GetCell(startYearIndex));
                         var eDate = this.GetFormattedValue(row.GetCell(endYearIndex));
 
-                        startingDate = this.GetDateTime(sDate);
-                        endingDate = this.GetDateTime(eDate);
+                        int startingYear = this.GetYear(sDate);
+                        int endingYear = this.GetYear(eDate);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out twentySixteenDisbursements);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out twentySeventeenDisbursements);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out twentyEighteenDisbursements);
@@ -269,8 +268,6 @@ namespace AIMS.Services
                         projectCost = (twentySixteenDisbursements + twentySeventeenDisbursements + twentyEighteenDisbursements +
                             twentyNineteenDisbursements + twentyTwentyDisbursements);
 
-                        int startingYear = startingDate.Year;
-                        int endingYear = endingDate.Year;
                         string currency = this.GetFormattedValue(row.GetCell(currencyIndex));
                         if (!string.IsNullOrEmpty(currency))
                         {
@@ -947,7 +944,8 @@ namespace AIMS.Services
             return (returnValue ?? string.Empty).Trim();
         }
 
-        private DateTime GetDateTime(string dateValue)
+
+        private int GetYear(string dateValue)
         {
             string[] datesArr = dateValue.Split("/");
             int year = Convert.ToInt32(datesArr[2]);
@@ -956,7 +954,7 @@ namespace AIMS.Services
                 year = 2000 + year;
             }
             string formattedDate = (year + "-" + datesArr[1] + "-" + datesArr[0]);
-            return Convert.ToDateTime(formattedDate);
+            return year;
         }
 
 
