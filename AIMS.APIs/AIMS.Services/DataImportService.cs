@@ -255,8 +255,11 @@ namespace AIMS.Services
                         decimal projectCost = 0, twentySixteenDisbursements = 0, twentySeventeenDisbursements = 0,
                             twentyEighteenDisbursements = 0, twentyNineteenDisbursements = 0, twentyTwentyDisbursements = 0;
 
-                        DateTime.TryParse(this.GetFormattedValue(row.GetCell(startYearIndex)), out startingDate);
-                        DateTime.TryParse(this.GetFormattedValue(row.GetCell(endYearIndex)), out endingDate);
+                        var sDate = this.GetFormattedValue(row.GetCell(startYearIndex));
+                        var eDate = this.GetFormattedValue(row.GetCell(endYearIndex));
+
+                        startingDate = this.GetDateTime(sDate);
+                        endingDate = this.GetDateTime(eDate);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out twentySixteenDisbursements);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out twentySeventeenDisbursements);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out twentyEighteenDisbursements);
@@ -392,7 +395,7 @@ namespace AIMS.Services
                 this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
                 this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(hssfwb);
 
-                ISheet sheet = hssfwb.GetSheetAt(2);
+                ISheet sheet = hssfwb.GetSheetAt(0);
                 IRow headerRow = sheet.GetRow(1);
                 int cellCount = headerRow.LastCellNum;
 
@@ -944,6 +947,18 @@ namespace AIMS.Services
             return (returnValue ?? string.Empty).Trim();
         }
 
-        
+        private DateTime GetDateTime(string dateValue)
+        {
+            string[] datesArr = dateValue.Split("/");
+            int year = Convert.ToInt32(datesArr[2]);
+            if (year < 2000)
+            {
+                year = 2000 + year;
+            }
+            string formattedDate = (year + "-" + datesArr[1] + "-" + datesArr[0]);
+            return Convert.ToDateTime(formattedDate);
+        }
+
+
     }
 }

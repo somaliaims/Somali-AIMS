@@ -1467,7 +1467,8 @@ namespace AIMS.Services
                                             unitWork.ProjectMarkersRepository.Insert(new EFProjectMarkers()
                                             {
                                                 Project = newProject,
-                                                Marker = marker
+                                                Marker = marker,
+                                                Values = field.Value
                                             });
                                         }
                                     }
