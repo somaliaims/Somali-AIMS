@@ -208,6 +208,21 @@ namespace AIMS.Services
                         var exchangeRateCell = row.CreateCell(++col, CellType.Numeric);
                         exchangeRateCell.SetCellValue(project.ExchangeRate.ToString());
                         exchangeRateCell.CellStyle = dataCellStyle;
+
+                        var projectLocations = project.Locations;
+                        foreach(var location in locations)
+                        {
+                            var projectLocationCell = row.CreateCell(++col, CellType.Numeric);
+                            var retrieveLocation = (from l in projectLocations
+                                                    where l.Name.Equals(location.Location, StringComparison.OrdinalIgnoreCase)
+                                                    select l).FirstOrDefault();
+
+                            if (retrieveLocation != null)
+                            {
+                                projectLocationCell.SetCellValue(retrieveLocation.FundsPercentage.ToString());
+                                projectLocationCell.CellStyle = dataCellStyle;
+                            }
+                        }
                     }
                     workbook.Write(fs);
                     response.Message = sFileName;

@@ -135,8 +135,9 @@ namespace AIMS.Services
                 { "31", "STABALIZATION/CRESTA" },
                 { "32", "DURABLE SOLUTIONS" },
                 { "33", "YOUTH MARKER" },
-                { "34", "PCVE MARKER" },
-                { "35", "RRF MARKER" },
+                { "34", "RRF MARKER" },
+                { "35", "HUMANITARIAN" },
+                { "36", "PWG CONSULTATION" }
             };
 
             oldCustomFields = new NameValueCollection()

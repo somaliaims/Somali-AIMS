@@ -1228,6 +1228,7 @@ namespace AIMS.Services
                 var locations = unitWork.LocationRepository.GetManyQueryable(l => l.Id != 0).ToList();
                 var fundingType = unitWork.FundingTypeRepository.GetOne(f => f.Id == 1);
                 var organizationType = unitWork.OrganizationTypesRepository.GetOne(o => o.Id == 1);
+                var markers = unitWork.MarkerRepository.GetManyQueryable(m => m.Id != 0);
 
                 List<EFSector> ndpSectorsList = new List<EFSector>();
                 List<EFLocation> locationsList = new List<EFLocation>();
@@ -1434,6 +1435,47 @@ namespace AIMS.Services
                                 {
                                     unitWork.ProjectImplementersRepository.InsertMultiple(projectImplementers);
                                     unitWork.Save();
+                                }
+
+                                List<EFProjectMarkers> projectMarkers = new List<EFProjectMarkers>();
+                                if (project.CustomFields.Count > 0)
+                                {
+                                    foreach(var field in project.CustomFields)
+                                    {
+                                        var marker = (from m in markers
+                                                      where m.FieldTitle.Equals(field.CustomField, StringComparison.OrdinalIgnoreCase)
+                                                      select m).FirstOrDefault();
+
+                                        if (marker == null)
+                                        {
+                                            marker = unitWork.MarkerRepository.Insert(new EFMarkers()
+                                            {
+                                                FieldTitle = field.CustomField,
+                                                FieldType = FieldTypes.Text,
+                                                Values = "",
+                                                Help = ""
+                                            });
+                                            unitWork.Save();
+                                        }
+
+                                        var projectMarker = (from m in projectMarkers
+                                                             where m.ProjectId == newProject.Id && m.MarkerId == marker.Id
+                                                             select m).FirstOrDefault();
+
+                                        if (marker != null && projectMarker == null)
+                                        {
+                                            unitWork.ProjectMarkersRepository.Insert(new EFProjectMarkers()
+                                            {
+                                                Project = newProject,
+                                                Marker = marker
+                                            });
+                                        }
+                                    }
+                                    if (projectMarkers.Count > 0)
+                                    {
+                                        unitWork.ProjectMarkersRepository.InsertMultiple(projectMarkers);
+                                        unitWork.Save();
+                                    }
                                 }
 
                                 List<EFProjectDocuments> projectDocuments = new List<EFProjectDocuments>();

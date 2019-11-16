@@ -416,10 +416,137 @@ namespace AIMS.APIs
                 {
                     context.Locations.Add(new EFLocation()
                     {
-                        Location = "Other",
+                        Location = "UNATTRIBUTED",
                         Longitude = 0,
                         Latitude = 0
                     });
+
+                    context.Locations.Add(new EFLocation()
+                    {
+                        Location = "FGS",
+                        Longitude = 0,
+                        Latitude = 0
+                    });
+
+                    context.Locations.Add(new EFLocation()
+                    {
+                        Location = "BRA",
+                        Longitude = 0,
+                        Latitude = 0
+                    });
+
+                    context.Locations.Add(new EFLocation()
+                    {
+                        Location = "GALMUDUG",
+                        Longitude = 0,
+                        Latitude = 0
+                    });
+
+                    context.Locations.Add(new EFLocation()
+                    {
+                        Location = "HIIRSHABELLE",
+                        Longitude = 0,
+                        Latitude = 0
+                    });
+
+                    context.Locations.Add(new EFLocation()
+                    {
+                        Location = "JUBALAND",
+                        Longitude = 0,
+                        Latitude = 0
+                    });
+
+                    context.Locations.Add(new EFLocation()
+                    {
+                        Location = "PUNTLAND",
+                        Longitude = 0,
+                        Latitude = 0
+                    });
+
+                    context.Locations.Add(new EFLocation()
+                    {
+                        Location = "SOUTH WEST",
+                        Longitude = 0,
+                        Latitude = 0
+                    });
+
+                    context.Locations.Add(new EFLocation()
+                    {
+                        Location = "SOMALILAND",
+                        Longitude = 0,
+                        Latitude = 0
+                    });
+
+                    context.SaveChanges();
+                }
+
+                if (context.Markers.Count() == 0)
+                {
+                    context.Markers.Add(new EFMarkers()
+                    {
+                       FieldTitle = "GENDER MARKER",
+                       FieldType = FieldTypes.Text,
+                       Help = "",
+                       Values = ""
+                    });
+
+                    context.Markers.Add(new EFMarkers()
+                    {
+                        FieldTitle = "CAPACITY DEVELOPMENT MARKER",
+                        FieldType = FieldTypes.Text,
+                        Help = "",
+                        Values = ""
+                    });
+
+                    context.Markers.Add(new EFMarkers()
+                    {
+                        FieldTitle = "STABALIZATION/CRESTA",
+                        FieldType = FieldTypes.Text,
+                        Help = "",
+                        Values = ""
+                    });
+
+                    context.Markers.Add(new EFMarkers()
+                    {
+                        FieldTitle = "DURABLE SOLUTIONS",
+                        FieldType = FieldTypes.Text,
+                        Help = "",
+                        Values = ""
+                    });
+
+                    context.Markers.Add(new EFMarkers()
+                    {
+                        FieldTitle = "YOUTH MARKER",
+                        FieldType = FieldTypes.Text,
+                        Help = "",
+                        Values = ""
+                    });
+
+                    context.Markers.Add(new EFMarkers()
+                    {
+                        FieldTitle = "RRF MARKER",
+                        FieldType = FieldTypes.Text,
+                        Help = "",
+                        Values = ""
+                    });
+
+                    context.Markers.Add(new EFMarkers()
+                    {
+                        FieldTitle = "HUMANATARIAN",
+                        FieldType = FieldTypes.Text,
+                        Help = "",
+                        Values = ""
+                    });
+
+                    context.Markers.Add(new EFMarkers()
+                    {
+                        FieldTitle = "PWG CONSULTATION",
+                        FieldType = FieldTypes.Text,
+                        Help = "",
+                        Values = ""
+                    });
+
+                    context.SaveChanges();
                 }
 
                 if (context.Organizations.Count() == 0)
