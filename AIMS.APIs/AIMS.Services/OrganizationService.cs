@@ -140,7 +140,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                return unitWork.OrganizationRepository.GetProjection(o => o.Id != 0, o => o.Id).Count();
+                return unitWork.OrganizationRepository.GetProjection(o => o.SourceType == OrganizationSourceType.User, o => o.Id).Count();
             }
         }
 
@@ -251,8 +251,11 @@ namespace AIMS.Services
                     }
                     else
                     {
+                        var organizationType = unitWork.OrganizationTypesRepository.GetOne(o => o.Id == model.OrganizationTypeId);
                         var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
                         {
+                            SourceType = OrganizationSourceType.User,
+                            OrganizationType = organizationType,
                             OrganizationName = model.Name.Trim(),
                         });
                         unitWork.Save();

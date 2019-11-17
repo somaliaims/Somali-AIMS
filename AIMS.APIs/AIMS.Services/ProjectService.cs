@@ -417,7 +417,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<LatestProjectView> projects = new List<LatestProjectView>();
-                var latestProjects = unitWork.ProjectRepository.GetWithIncludeOrderByDescending(p => p.Id != 0, p => p.DateUpdated, 10, new string[] { "Funders", "Funders.Funder", "StartingFinancialYear", "EndingFinancialYear" });
+                var latestProjects = unitWork.ProjectRepository.GetWithIncludeOrderByDescending(p => p.Id != 0, p => p.DateUpdated, 5, new string[] { "Funders", "Funders.Funder", "StartingFinancialYear", "EndingFinancialYear" });
                 foreach (var project in latestProjects)
                 {
                     projects.Add(new LatestProjectView()
