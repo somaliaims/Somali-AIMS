@@ -756,8 +756,8 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string StartingFinancialYear { get; set; }
-        public string EndingFinancialYear { get; set; }
+        public int StartingFinancialYear { get; set; }
+        public int EndingFinancialYear { get; set; }
         public string ProjectCurrency { get; set; }
         public decimal ExchangeRate { get; set; }
         public decimal ProjectValue { get; set; }

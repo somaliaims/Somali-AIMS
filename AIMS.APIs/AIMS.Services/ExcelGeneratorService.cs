@@ -80,6 +80,10 @@ namespace AIMS.Services
                 using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
                 {
                     int rowCounter = 0;
+                    int startingYear = projectsReport.StartingFinancialYear, endingYear = projectsReport.EndingFinancialYear;
+                    var locations = projectsReport.Locations;
+                    var markers = projectsReport.Markers;
+
                     IWorkbook workbook;
                     workbook = new XSSFWorkbook();
                     ISheet excelSheet = workbook.CreateSheet("Report");
@@ -149,9 +153,13 @@ namespace AIMS.Services
                     exchangeRate.SetCellValue("Exchange rate");
                     exchangeRate.CellStyle = headerStyle;
 
+                    for (int yr = startingYear; yr <= endingYear; yr++)
+                    {
+                        var yearCell = row.CreateCell(++colIndex);
+                        yearCell.SetCellValue("Disbursements " + yr.ToString());
+                    }
 
                     ICell locationCell = null;
-                    var locations = projectsReport.Locations;
                     foreach(var location in locations)
                     {
                         locationCell = row.CreateCell(++colIndex);
@@ -173,16 +181,18 @@ namespace AIMS.Services
                         descriptionCell.SetCellValue(project.Description);
                         descriptionCell.CellStyle = dataCellStyle;
 
+                        var sectors = string.Join(", ", (from s in project.Sectors
+                                                         select s.Name));
                         var sectorCell = row.CreateCell(++col);
-                        sectorCell.SetCellValue(project.Title);
+                        sectorCell.SetCellValue(sectors);
                         sectorCell.CellStyle = dataCellStyle;
 
                         var startYearCell = row.CreateCell(++col);
-                        startYearCell.SetCellValue(project.StartingFinancialYear);
+                        startYearCell.SetCellValue(project.StartingFinancialYear.ToString());
                         startYearCell.CellStyle = dataCellStyle;
 
                         var endYearCell = row.CreateCell(++col);
-                        endYearCell.SetCellValue(project.EndingFinancialYear);
+                        endYearCell.SetCellValue(project.EndingFinancialYear.ToString());
                         endYearCell.CellStyle = dataCellStyle;
 
                         var funderNames = string.Join(", ", (from f in project.Funders
@@ -208,6 +218,25 @@ namespace AIMS.Services
                         var exchangeRateCell = row.CreateCell(++col, CellType.Numeric);
                         exchangeRateCell.SetCellValue(project.ExchangeRate.ToString());
                         exchangeRateCell.CellStyle = dataCellStyle;
+
+                        var disbursements = project.Disbursements;
+                        for(int yr = startingYear; yr <= endingYear; yr++)
+                        {
+                            var disbursement = (from disb in disbursements
+                                        where disb.Year == yr
+                                        select disb).FirstOrDefault();
+
+                            var disbursementCell = row.CreateCell(++col, CellType.Numeric);
+                            if (disbursement == null)
+                            {
+                                disbursementCell.SetCellValue("0");
+                            }
+                            else
+                            {
+                                disbursementCell.SetCellValue(disbursement.Disbursement.ToString());
+                            }
+                            disbursementCell.CellStyle = dataCellStyle;
+                        }
 
                         var projectLocations = project.Locations;
                         foreach(var location in locations)

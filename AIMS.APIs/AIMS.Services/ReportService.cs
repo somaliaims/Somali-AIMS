@@ -161,7 +161,14 @@ namespace AIMS.Services
                 locations = (from l in locations
                              orderby l.Location
                              select l);
-                locationsList = mapper.Map<List<ProjectDetailLocationView>>(locations);
+                foreach(var location in locations)
+                {
+                    locationsList.Add(new ProjectDetailLocationView()
+                    {
+                        Id = location.Id,
+                        Location = location.Location
+                    });
+                }
             }
 
             List<ProjectDetailMarkerView> markersList = new List<ProjectDetailMarkerView>();
@@ -170,7 +177,14 @@ namespace AIMS.Services
                 markers = (from m in markers
                            orderby m.FieldTitle
                            select m);
-                markersList = mapper.Map<List<ProjectDetailMarkerView>>(markers);
+                foreach(var marker in markers)
+                {
+                    markersList.Add(new ProjectDetailMarkerView()
+                    {
+                        Id = marker.Id,
+                        Marker = marker.FieldTitle
+                    });
+                }
             }
 
             if (model.StartingYear > 0)
@@ -224,8 +238,8 @@ namespace AIMS.Services
                     ProjectCurrency = project.ProjectCurrency,
                     ProjectValue = project.ProjectValue,
                     ExchangeRate = project.ExchangeRate,
-                    StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
-                    EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
+                    StartingFinancialYear = project.StartingFinancialYear.FinancialYear,
+                    EndingFinancialYear = project.EndingFinancialYear.FinancialYear,
                     Funders = fundersList,
                     Implementers = implementersList,
                     Locations = mapper.Map<List<LocationAbstractView>>(project.Locations),
