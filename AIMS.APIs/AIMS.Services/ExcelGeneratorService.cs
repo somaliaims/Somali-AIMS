@@ -232,7 +232,7 @@ namespace AIMS.Services
                         currencyCell.CellStyle = dataCellStyle;
 
                         var projectValueCell = row.CreateCell(++col, CellType.Numeric);
-                        projectValueCell.SetCellValue(project.ProjectValue.ToString());
+                        projectValueCell.SetCellValue(ApplyThousandFormat(project.ProjectValue));
                         projectValueCell.CellStyle = dataCellStyle;
 
                         var exchangeRateCell = row.CreateCell(++col, CellType.Numeric);
@@ -253,7 +253,7 @@ namespace AIMS.Services
                             }
                             else
                             {
-                                disbursementCell.SetCellValue(disbursement.Disbursement.ToString());
+                                disbursementCell.SetCellValue(ApplyThousandFormat(disbursement.Disbursement));
                             }
                             disbursementCell.CellStyle = dataCellStyle;
                         }
