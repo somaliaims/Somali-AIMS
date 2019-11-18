@@ -80,7 +80,11 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFProjectDisbursements, DisbursementAbstractView>()
                 .ForMember(d => d.Disbursement, opts => opts.MapFrom(source => source.Amount))
                 .ForMember(d => d.DisbursementType, opts => opts.MapFrom(source => (DisbursementTypes)source.DisbursementType));
-            
+
+            CreateMap<EFProjectMarkers, MarkerAbstractView>()
+                .ForMember(m => m.Marker, opts => opts.MapFrom(source => source.Marker.FieldTitle))
+                .ForMember(m => m.Values, opts => opts.MapFrom(source => source.Values));
+
             CreateMap<EFProjectImplementers, ProjectImplementerView>()
                 .ForMember(i => i.ImplementerId, opts => opts.MapFrom(source => source.Implementer.Id))
                 .ForMember(i => i.Implementer, opts => opts.MapFrom(source => source.Implementer.OrganizationName));

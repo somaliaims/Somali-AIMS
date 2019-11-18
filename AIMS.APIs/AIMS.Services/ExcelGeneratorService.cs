@@ -10,6 +10,7 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace AIMS.Services
 {
@@ -80,7 +81,9 @@ namespace AIMS.Services
                 using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
                 {
                     int rowCounter = 0;
-                    int startingYear = projectsReport.StartingFinancialYear, endingYear = projectsReport.EndingFinancialYear;
+                    int currentYear = DateTime.Now.Year;
+                    int startingYear = (projectsReport.StartingFinancialYear < 2000) ? (currentYear - 3) : projectsReport.StartingFinancialYear,
+                        endingYear = projectsReport.EndingFinancialYear;
                     var locations = projectsReport.Locations;
                     var markers = projectsReport.Markers;
 
@@ -157,6 +160,7 @@ namespace AIMS.Services
                     {
                         var yearCell = row.CreateCell(++colIndex);
                         yearCell.SetCellValue("Disbursements " + yr.ToString());
+                        yearCell.CellStyle = headerStyle;
                     }
 
                     ICell locationCell = null;
@@ -166,6 +170,22 @@ namespace AIMS.Services
                         locationCell.SetCellValue(location.Location);
                         locationCell.CellStyle = headerStyle;
                     }
+
+                    ICell markerHeadingCell = null;
+                    foreach (var marker in markers)
+                    {
+                        markerHeadingCell = row.CreateCell(++colIndex);
+                        markerHeadingCell.SetCellValue(marker.Marker);
+                        markerHeadingCell.CellStyle = headerStyle;
+                    }
+
+                    var documentTitleHeadingCell = row.CreateCell(++colIndex);
+                    documentTitleHeadingCell.SetCellValue("Document title");
+                    documentTitleHeadingCell.CellStyle = headerStyle;
+
+                    var documentUrlHeadingCell = row.CreateCell(++colIndex);
+                    documentUrlHeadingCell.SetCellValue("Document url");
+                    documentUrlHeadingCell.CellStyle = headerStyle;
 
                     var projects = projectsReport.Projects;
                     foreach (var project in projects)
@@ -249,9 +269,69 @@ namespace AIMS.Services
                             if (retrieveLocation != null)
                             {
                                 projectLocationCell.SetCellValue(retrieveLocation.FundsPercentage.ToString());
-                                projectLocationCell.CellStyle = dataCellStyle;
+                            }
+                            else
+                            {
+                                projectLocationCell.SetCellValue("0");
+                            }
+                            projectLocationCell.CellStyle = dataCellStyle;
+                        }
+
+                        var projectMarkers = project.Markers;
+                        foreach(var marker in markers)
+                        {
+                            var markerCell = row.CreateCell(++col, CellType.String);
+                            var projectMarker = (from m in projectMarkers
+                                                 where m.Marker.Equals(marker.Marker, StringComparison.OrdinalIgnoreCase)
+                                                 select m).FirstOrDefault();
+                            
+                            if (projectMarker == null)
+                            {
+                                markerCell.SetCellValue("");
+                            }
+                            else
+                            {
+                                if (!string.IsNullOrEmpty(projectMarker.Values))
+                                {
+                                    List<MarkerValues> parsedValues = JsonConvert.DeserializeObject<List<MarkerValues>>(projectMarker.Values);
+                                    string values = string.Join(",", (from pv in parsedValues
+                                                                      select pv.Value).ToList());
+                                    markerCell.SetCellValue(values);
+                                }
+                                else
+                                {
+                                    markerCell.SetCellValue("");
+                                }
+                                
+                            }
+                            markerCell.CellStyle = dataCellStyle;
+                        }
+
+                        string documents = "";
+                        string documentsUrl = "";
+                        if (project.Documents.Any())
+                        {
+                            var docList = (from doc in project.Documents
+                                                     select doc.DocumentTitle);
+                            if (docList.Count() > 0)
+                            {
+                                documents = string.Join(",", docList);
+                            }
+
+                            var urlsList = (from doc in project.Documents
+                                            select doc.DocumentUrl);
+                            if (urlsList.Count() > 0)
+                            {
+                                documentsUrl = string.Join(",", urlsList);
                             }
                         }
+                        var documentCell = row.CreateCell(++col);
+                        documentCell.SetCellValue(documents);
+                        documentCell.CellStyle = dataCellStyle;
+
+                        var documentUrlCell = row.CreateCell(++col);
+                        documentUrlCell.SetCellValue(documentsUrl);
+                        documentUrlCell.CellStyle = dataCellStyle;
                     }
                     workbook.Write(fs);
                     response.Message = sFileName;

@@ -245,9 +245,14 @@ namespace AIMS.Services
                     Locations = mapper.Map<List<LocationAbstractView>>(project.Locations),
                     Sectors = mapper.Map<List<SectorAbstractView>>(project.Sectors),
                     Documents = mapper.Map<List<DocumentAbstractView>>(project.Documents),
-                    Disbursements = mapper.Map<List<DisbursementAbstractView>>(project.Disbursements)
+                    Disbursements = mapper.Map<List<DisbursementAbstractView>>(project.Disbursements),
+                    Markers = mapper.Map<List<MarkerAbstractView>>(project.Markers)
                 });
             }
+            projectsReport.StartingFinancialYear = startingFinancialYear;
+            projectsReport.EndingFinancialYear = endingFinancialYear;
+            projectsReport.Markers = markersList;
+            projectsReport.Locations = locationsList;
             projectsReport.Projects = projectsList;
             return await Task<ProjectReportView>.Run(() => projectsReport).ConfigureAwait(false);
         }

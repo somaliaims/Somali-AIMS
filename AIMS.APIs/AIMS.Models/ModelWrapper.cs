@@ -294,6 +294,13 @@ namespace AIMS.Models
         public decimal Disbursement { get; set; }
     }
 
+    public class MarkerAbstractView
+    {
+        public int MarkerId { get; set; }
+        public string Marker { get; set; }
+        public string Values { get; set; }
+    }
+
     public class DocumentAbstractView
     {
         public string DocumentTitle { get; set; }
@@ -767,6 +774,7 @@ namespace AIMS.Models
         public ICollection<OrganizationAbstractView> Implementers { get; set; }
         public ICollection<DocumentAbstractView> Documents { get; set; }
         public ICollection<DisbursementAbstractView> Disbursements { get; set; }
+        public ICollection<MarkerAbstractView> Markers { get; set; }
     }
 
     public class EnvelopeTypeModel
