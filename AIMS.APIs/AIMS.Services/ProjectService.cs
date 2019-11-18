@@ -616,7 +616,8 @@ namespace AIMS.Services
                                                     select d);
                         }
 
-
+                        string startDate = (project.StartDate != null) ? project.StartDate.ToString() : null;
+                        string endDate = (project.EndDate != null) ? project.EndDate.ToString() : null;
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.FundingTypeId = project.FundingTypeId;
@@ -625,6 +626,8 @@ namespace AIMS.Services
                         profileView.ProjectCurrency = project.ProjectCurrency;
                         profileView.ExchangeRate = project.ExchangeRate;
                         profileView.Description = project.Description;
+                        profileView.StartDate = startDate;
+                        profileView.EndDate = endDate;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
@@ -908,6 +911,8 @@ namespace AIMS.Services
                 {
                     foreach (var project in projectProfileList)
                     {
+                        string startDate = (project.StartDate != null) ? project.StartDate.ToString() : null;
+                        string endDate = (project.EndDate != null) ? project.EndDate.ToString() : null;
                         profileViewList.Add(new ProjectProfileView()
                         {
                             Id = project.Id,
@@ -916,6 +921,8 @@ namespace AIMS.Services
                             ExchangeRate = project.ExchangeRate,
                             ProjectValue = project.ProjectValue,
                             Description = project.Description,
+                            StartDate = startDate,
+                            EndDate = endDate,
                             StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
                             EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
                             Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors),
@@ -1137,13 +1144,13 @@ namespace AIMS.Services
                     }
 
                     var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => (f.FinancialYear == model.StartingFinancialYear || f.FinancialYear == model.EndingFinancialYear));
-                    if (financialYears.Count() < 2)
+                    /*if (financialYears.Count() < 2)
                     {
                         mHelper = new MessageHelper();
                         response.Success = false;
                         response.Message = mHelper.GetNotFound("Financial Year");
                         return response;
-                    }
+                    }*/
 
                     var currency = unitWork.CurrencyRepository.GetOne(c => c.Currency == model.ProjectCurrency);
                     if (currency == null)
@@ -1157,9 +1164,28 @@ namespace AIMS.Services
                     var startingFinancialYear = (from fy in financialYears
                                                  where fy.FinancialYear == model.StartingFinancialYear
                                                  select fy).FirstOrDefault();
+
+                    if (startingFinancialYear == null)
+                    {
+                        startingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                        {
+                            FinancialYear = model.StartingFinancialYear
+                        });
+                        unitWork.Save();
+                    }
+
                     var endingFinancialYear = (from fy in financialYears
                                                where fy.FinancialYear == model.EndingFinancialYear
                                                select fy).FirstOrDefault();
+
+                    if (startingFinancialYear == null)
+                    {
+                        endingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                        {
+                            FinancialYear = model.EndingFinancialYear
+                        });
+                        unitWork.Save();
+                    }
 
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
@@ -1171,6 +1197,8 @@ namespace AIMS.Services
                                 Title = model.Title,
                                 Description = model.Description,
                                 FundingType = fundingType,
+                                StartDate = model.StartingDate,
+                                EndDate = model.EndingDate,
                                 StartingFinancialYear = startingFinancialYear,
                                 EndingFinancialYear = endingFinancialYear,
                                 ProjectValue = model.ProjectValue,

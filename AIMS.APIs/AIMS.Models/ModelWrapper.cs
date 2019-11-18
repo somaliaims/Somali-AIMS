@@ -903,6 +903,8 @@ namespace AIMS.Models
         public string FundingType { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
         public string StartingFinancialYear { get; set; }
         public string EndingFinancialYear { get; set; }
         public decimal ProjectValue { get; set; }
@@ -926,6 +928,8 @@ namespace AIMS.Models
         public string Title { get; set; }
         [Required]
         public string Description { get; set; }
+        public DateTime? StartingDate { get; set; }
+        public DateTime? EndingDate { get; set; }
         [Required]
         public int StartingFinancialYear { get; set; }
         [Required]
