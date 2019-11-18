@@ -186,7 +186,7 @@ namespace AIMS.Services
 
                 try
                 {
-                    for (int i = 678; i <= 687; i++)
+                    for (int i = 1; i <= 687; i++)
                     {
                         IRow row = sheet.GetRow(i);
                         if (row == null)
@@ -265,8 +265,6 @@ namespace AIMS.Services
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyNineteenYearIndex)), out twentyNineteenDisbursements);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyTwentyYearIndex)), out twentyTwentyDisbursements);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(projectCostIndex)), out projectCost);
-                        projectCost = (twentySixteenDisbursements + twentySeventeenDisbursements + twentyEighteenDisbursements +
-                            twentyNineteenDisbursements + twentyTwentyDisbursements);
 
                         string currency = this.GetFormattedValue(row.GetCell(currencyIndex));
                         if (!string.IsNullOrEmpty(currency))
@@ -274,6 +272,12 @@ namespace AIMS.Services
                             exchangeRate = (from rate in exRatesList
                                             where rate.Currency.Equals(currency, StringComparison.OrdinalIgnoreCase)
                                             select rate.Rate).FirstOrDefault();
+                        }
+
+                        if (projectCost == 0)
+                        {
+                            projectCost = (twentySixteenDisbursements + twentySeventeenDisbursements +
+                                twentyEighteenDisbursements + twentyNineteenDisbursements + twentyTwentyDisbursements);
                         }
 
                         projectsList.Add(new NewImportedAidData()
