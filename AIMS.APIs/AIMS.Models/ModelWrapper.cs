@@ -928,8 +928,8 @@ namespace AIMS.Models
         public string Title { get; set; }
         [Required]
         public string Description { get; set; }
-        public DateTime? StartingDate { get; set; }
-        public DateTime? EndingDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         [Required]
         public int StartingFinancialYear { get; set; }
         [Required]

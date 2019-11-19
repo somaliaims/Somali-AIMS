@@ -616,8 +616,8 @@ namespace AIMS.Services
                                                     select d);
                         }
 
-                        string startDate = (project.StartDate != null) ? project.StartDate.ToString() : null;
-                        string endDate = (project.EndDate != null) ? project.EndDate.ToString() : null;
+                        string startDate = (project.StartDate != null) ? Convert.ToDateTime(project.StartDate).ToShortDateString() : null;
+                        string endDate = (project.EndDate != null) ? Convert.ToDateTime(project.EndDate).ToShortDateString() : null;
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.FundingTypeId = project.FundingTypeId;
@@ -911,8 +911,8 @@ namespace AIMS.Services
                 {
                     foreach (var project in projectProfileList)
                     {
-                        string startDate = (project.StartDate != null) ? project.StartDate.ToString() : null;
-                        string endDate = (project.EndDate != null) ? project.EndDate.ToString() : null;
+                        string startDate = (project.StartDate != null) ? Convert.ToDateTime(project.StartDate).ToShortDateString() : null;
+                        string endDate = (project.EndDate != null) ? Convert.ToDateTime(project.EndDate).ToShortDateString() : null;
                         profileViewList.Add(new ProjectProfileView()
                         {
                             Id = project.Id,
@@ -1144,14 +1144,6 @@ namespace AIMS.Services
                     }
 
                     var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => (f.FinancialYear == model.StartingFinancialYear || f.FinancialYear == model.EndingFinancialYear));
-                    /*if (financialYears.Count() < 2)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Success = false;
-                        response.Message = mHelper.GetNotFound("Financial Year");
-                        return response;
-                    }*/
-
                     var currency = unitWork.CurrencyRepository.GetOne(c => c.Currency == model.ProjectCurrency);
                     if (currency == null)
                     {
@@ -1197,8 +1189,8 @@ namespace AIMS.Services
                                 Title = model.Title,
                                 Description = model.Description,
                                 FundingType = fundingType,
-                                StartDate = model.StartingDate,
-                                EndDate = model.EndingDate,
+                                StartDate = model.StartDate,
+                                EndDate = model.EndDate,
                                 StartingFinancialYear = startingFinancialYear,
                                 EndingFinancialYear = endingFinancialYear,
                                 ProjectValue = model.ProjectValue,
@@ -2631,14 +2623,6 @@ namespace AIMS.Services
                 }
 
                 var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => (f.FinancialYear == model.StartingFinancialYear || f.FinancialYear == model.EndingFinancialYear));
-                if (financialYears.Count() < 2)
-                {
-                    mHelper = new MessageHelper();
-                    response.Success = false;
-                    response.Message = mHelper.GetNotFound("Financial Year");
-                    return response;
-                }
-
                 var currency = unitWork.CurrencyRepository.GetOne(c => c.Currency == model.ProjectCurrency);
                 if (currency == null)
                 {
@@ -2651,14 +2635,33 @@ namespace AIMS.Services
                 var startingFinancialYear = (from fy in financialYears
                                              where fy.FinancialYear == model.StartingFinancialYear
                                              select fy).FirstOrDefault();
-                var endingFinancialYears = (from fy in financialYears
+                if (startingFinancialYear == null)
+                {
+                    startingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                    {
+                        FinancialYear = model.StartingFinancialYear
+                    });
+                    unitWork.Save();
+                }
+
+                var endingFinancialYear = (from fy in financialYears
                                             where fy.FinancialYear == model.EndingFinancialYear
                                             select fy).FirstOrDefault();
+                if (endingFinancialYear == null)
+                {
+                    endingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                    {
+                        FinancialYear = model.EndingFinancialYear
+                    });
+                    unitWork.Save();
+                }
 
                 projectObj.Title = model.Title;
                 projectObj.Description = model.Description;
                 projectObj.StartingFinancialYear = startingFinancialYear;
-                projectObj.EndingFinancialYear = endingFinancialYears;
+                projectObj.StartDate = model.StartDate;
+                projectObj.EndDate = model.EndDate;
+                projectObj.EndingFinancialYear = endingFinancialYear;
                 projectObj.ProjectValue = model.ProjectValue;
                 projectObj.ExchangeRate = model.ExchangeRate;
                 projectObj.ProjectCurrency = model.ProjectCurrency;
