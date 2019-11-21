@@ -199,13 +199,15 @@ namespace AIMS.Services
                         }
 
                         decimal disbursementsTwentySixteen = 0, disbursementsTwentySeventeen = 0, disbursementsTwentyEighteen = 0,
-                            exchangeRate = 0, disbursementsTwentyNineteen = 0, disbursementsTwentyTwenty = 0;
+                            exchangeRate = 0, disbursementsTwentyNineteen = 0, disbursementsTwentyTwenty = 0, disbursementsTotal = 0;
 
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out disbursementsTwentySixteen);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out disbursementsTwentySeventeen);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out disbursementsTwentyEighteen);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyNineteenYearIndex)), out disbursementsTwentyNineteen);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyTwentyYearIndex)), out disbursementsTwentyTwenty);
+                        disbursementsTotal = (disbursementsTwentySixteen + disbursementsTwentySeventeen + disbursementsTwentyEighteen +
+                            disbursementsTwentyNineteen + disbursementsTwentyTwenty);
 
                         List<ImportedLocation> locationsList = new List<ImportedLocation>();
                         for (int l = locationLowerIndex; l <= locationUpperIndex; l++)

@@ -1602,7 +1602,8 @@ namespace AIMS.Services
 
                                 int startYear = Convert.ToDateTime(newProject.StartDate).Year;
                                 int endYear = Convert.ToDateTime(newProject.EndDate).Year;
-                                if (startYear >= twentySixteenFinancialYear.FinancialYear && endYear >= twentySixteenFinancialYear.FinancialYear)
+                                if (startYear >= twentySixteenFinancialYear.FinancialYear && endYear <= twentySixteenFinancialYear.FinancialYear &&
+                                project.TwentySixteenDisbursements > 0)
                                 {
                                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                     {
@@ -1616,7 +1617,8 @@ namespace AIMS.Services
                                     unitWork.Save();
                                 }
 
-                                if (startYear >= twentySeventeenFinancialYear.FinancialYear && endYear >= twentySeventeenFinancialYear.FinancialYear)
+                                if (startYear >= twentySeventeenFinancialYear.FinancialYear && endYear <= twentySeventeenFinancialYear.FinancialYear &&
+                                project.TwentySeventeenDisbursements > 0)
                                 {
                                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                     {
@@ -1630,7 +1632,8 @@ namespace AIMS.Services
                                     unitWork.Save();
                                 }
 
-                                if (startYear >= twentyEighteenFinancialYear.FinancialYear && endYear >= twentyEighteenFinancialYear.FinancialYear)
+                                if (startYear >= twentyEighteenFinancialYear.FinancialYear && endYear <= twentyEighteenFinancialYear.FinancialYear && 
+                                project.TwentyEighteenDisbursements > 0)
                                 {
                                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                     {
@@ -1644,7 +1647,8 @@ namespace AIMS.Services
                                     unitWork.Save();
                                 }
 
-                                if (startYear >= twentyNineteenFinancialYear.FinancialYear && endYear >= twentyNineteenFinancialYear.FinancialYear)
+                                if (startYear >= twentyNineteenFinancialYear.FinancialYear && endYear <= twentyNineteenFinancialYear.FinancialYear &&
+                                project.TwentyNineteenDisbursements > 0)
                                 {
                                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                     {
@@ -1658,7 +1662,8 @@ namespace AIMS.Services
                                     unitWork.Save();
                                 }
 
-                                if (startYear >= twentyTwentyFinancialYear.FinancialYear && endYear >= twentyTwentyFinancialYear.FinancialYear)
+                                if (startYear >= twentyTwentyFinancialYear.FinancialYear && endYear <= twentyTwentyFinancialYear.FinancialYear &&
+                                project.TwentyTwentyDisbursements > 0)
                                 {
                                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                     {
