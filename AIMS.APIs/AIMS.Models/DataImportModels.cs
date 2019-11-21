@@ -42,6 +42,8 @@ namespace AIMS.Models
     {
         public string ProjectTitle { get; set; }
         public string ProjectDescription { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public decimal ProjectValue { get; set; }
         public string Currency { get; set; }
         public decimal ExchangeRate { get; set; }

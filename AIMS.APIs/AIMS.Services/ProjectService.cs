@@ -1271,6 +1271,7 @@ namespace AIMS.Services
                 twentySeventeenFinancialYear = (from fy in financialYears
                                          where fy.FinancialYear == (currentYear - 2)
                                          select fy).FirstOrDefault();
+
                 if (twentySeventeenFinancialYear == null)
                 {
                     twentySeventeenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 2) });
@@ -1351,6 +1352,8 @@ namespace AIMS.Services
                                     ProjectValue = project.ProjectValue,
                                     ExchangeRate = project.ExchangeRate,
                                     Description = project.ProjectDescription,
+                                    StartDate = project.StartDate,
+                                    EndDate = project.EndDate,
                                     StartingFinancialYear = startingFinancialYear,
                                     EndingFinancialYear = endingFinancialYear,
                                     CreatedBy = user,
@@ -1597,61 +1600,84 @@ namespace AIMS.Services
                                     }
                                 }
 
-                                //Insert disbursements
-                                unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                int startYear = Convert.ToDateTime(newProject.StartDate).Year;
+                                int endYear = Convert.ToDateTime(newProject.EndDate).Year;
+                                if (startYear >= twentySixteenFinancialYear.FinancialYear && endYear >= twentySixteenFinancialYear.FinancialYear)
                                 {
-                                    Project = newProject,
-                                    Year = twentySixteenFinancialYear,
-                                    Amount = project.TwentySixteenDisbursements,
-                                    Currency = project.Currency,
-                                    DisbursementType = DisbursementTypes.Actual,
-                                    ExchangeRate = project.ExchangeRate,
-                                });
-                                unitWork.Save();
+                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    {
+                                        Project = newProject,
+                                        Year = twentySixteenFinancialYear,
+                                        Amount = project.TwentySixteenDisbursements,
+                                        Currency = project.Currency,
+                                        DisbursementType = DisbursementTypes.Actual,
+                                        ExchangeRate = project.ExchangeRate,
+                                    });
+                                    unitWork.Save();
+                                }
 
-                                unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                if (startYear >= twentySeventeenFinancialYear.FinancialYear && endYear >= twentySeventeenFinancialYear.FinancialYear)
                                 {
-                                    Project = newProject,
-                                    Year = twentySeventeenFinancialYear,
-                                    Amount = project.TwentySeventeenDisbursements,
-                                    Currency = project.Currency,
-                                    DisbursementType = DisbursementTypes.Actual,
-                                    ExchangeRate = project.ExchangeRate
-                                });
-                                unitWork.Save();
+                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    {
+                                        Project = newProject,
+                                        Year = twentySeventeenFinancialYear,
+                                        Amount = project.TwentySeventeenDisbursements,
+                                        Currency = project.Currency,
+                                        DisbursementType = DisbursementTypes.Actual,
+                                        ExchangeRate = project.ExchangeRate
+                                    });
+                                    unitWork.Save();
+                                }
 
-                                unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                if (startYear >= twentyEighteenFinancialYear.FinancialYear && endYear >= twentyEighteenFinancialYear.FinancialYear)
                                 {
-                                    Project = newProject,
-                                    Year = twentyEighteenFinancialYear,
-                                    Amount = project.TwentyEighteenDisbursements,
-                                    Currency = project.Currency,
-                                    DisbursementType = DisbursementTypes.Actual,
-                                    ExchangeRate = project.ExchangeRate
-                                });
-                                unitWork.Save();
+                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    {
+                                        Project = newProject,
+                                        Year = twentyEighteenFinancialYear,
+                                        Amount = project.TwentyEighteenDisbursements,
+                                        Currency = project.Currency,
+                                        DisbursementType = DisbursementTypes.Actual,
+                                        ExchangeRate = project.ExchangeRate
+                                    });
+                                    unitWork.Save();
+                                }
 
-                                unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                if (startYear >= twentyNineteenFinancialYear.FinancialYear && endYear >= twentyNineteenFinancialYear.FinancialYear)
                                 {
-                                    Project = newProject,
-                                    Year = twentyNineteenFinancialYear,
-                                    Amount = project.TwentyNineteenDisbursements,
-                                    Currency = project.Currency,
-                                    DisbursementType = DisbursementTypes.Actual,
-                                    ExchangeRate = project.ExchangeRate
-                                });
-                                unitWork.Save();
+                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    {
+                                        Project = newProject,
+                                        Year = twentyNineteenFinancialYear,
+                                        Amount = project.TwentyNineteenDisbursements,
+                                        Currency = project.Currency,
+                                        DisbursementType = DisbursementTypes.Actual,
+                                        ExchangeRate = project.ExchangeRate
+                                    });
+                                    unitWork.Save();
+                                }
 
-                                unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                if (startYear >= twentyTwentyFinancialYear.FinancialYear && endYear >= twentyTwentyFinancialYear.FinancialYear)
                                 {
-                                    Project = newProject,
-                                    Year = twentyTwentyFinancialYear,
-                                    Amount = project.TwentyTwentyDisbursements,
-                                    Currency = project.Currency,
-                                    DisbursementType = DisbursementTypes.Planned,
-                                    ExchangeRate = project.ExchangeRate
-                                });
-                                await unitWork.SaveAsync();
+                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    {
+                                        Project = newProject,
+                                        Year = twentyTwentyFinancialYear,
+                                        Amount = project.TwentyTwentyDisbursements,
+                                        Currency = project.Currency,
+                                        DisbursementType = DisbursementTypes.Planned,
+                                        ExchangeRate = project.ExchangeRate
+                                    });
+                                    await unitWork.SaveAsync();
+                                }
+                            }
+
+                            var invalidFyear = unitWork.FinancialYearRepository.GetOne(f => f.FinancialYear == 1);
+                            if (invalidFyear != null)
+                            {
+                                unitWork.FinancialYearRepository.Delete(invalidFyear);
+                                unitWork.Save();
                             }
                             transaction.Commit();
                         }
