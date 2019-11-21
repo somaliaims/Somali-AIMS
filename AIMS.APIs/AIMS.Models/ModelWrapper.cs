@@ -669,6 +669,7 @@ namespace AIMS.Models
     public class LocationView
     {
         public int Id { get; set; }
+        public int LocationId { get; set; }
         public string Location { get; set; }
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }

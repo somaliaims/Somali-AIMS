@@ -1773,9 +1773,32 @@ namespace AIMS.Services
                             if (fundsPercentage < 100)
                             {
                                 int leftPercentage = (100 - fundsPercentage);
-                                unattributedLocation.FundsPercentage = leftPercentage;
-                                unitWork.ProjectLocationsRepository.Update(unattributedLocation);
-                                unitWork.Save();
+                                if (unattributedLocation != null)
+                                {
+                                    unattributedLocation.FundsPercentage = leftPercentage;
+                                    unitWork.ProjectLocationsRepository.Update(unattributedLocation);
+                                    unitWork.Save();
+                                }
+                                else
+                                {
+                                    var location = unitWork.LocationRepository.GetOne(l => l.Location.Equals("Unattributed", StringComparison.OrdinalIgnoreCase));
+                                    if (location == null)
+                                    {
+                                        location = unitWork.LocationRepository.Insert(new EFLocation()
+                                        {
+                                            Location = "Unattributed"
+                                        });
+                                        unitWork.Save();
+                                    }
+
+                                    unitWork.ProjectLocationsRepository.Insert(new EFProjectLocations()
+                                    {
+                                        Project = project,
+                                        Location = location,
+                                        FundsPercentage = leftPercentage
+                                    });
+                                    unitWork.Save();
+                                }
                             }
                             
                             if (fundsPercentage > 100)
