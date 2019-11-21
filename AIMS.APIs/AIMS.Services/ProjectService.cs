@@ -1602,7 +1602,7 @@ namespace AIMS.Services
 
                                 int startYear = Convert.ToDateTime(newProject.StartDate).Year;
                                 int endYear = Convert.ToDateTime(newProject.EndDate).Year;
-                                if (startYear >= twentySixteenFinancialYear.FinancialYear && endYear <= twentySixteenFinancialYear.FinancialYear &&
+                                if (twentySixteenFinancialYear.FinancialYear >= startYear && twentySixteenFinancialYear.FinancialYear <= endYear &&
                                 project.TwentySixteenDisbursements > 0)
                                 {
                                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
@@ -1617,7 +1617,7 @@ namespace AIMS.Services
                                     unitWork.Save();
                                 }
 
-                                if (startYear >= twentySeventeenFinancialYear.FinancialYear && endYear <= twentySeventeenFinancialYear.FinancialYear &&
+                                if (twentySeventeenFinancialYear.FinancialYear >= startYear && twentySeventeenFinancialYear.FinancialYear <= endYear &&
                                 project.TwentySeventeenDisbursements > 0)
                                 {
                                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
@@ -1632,7 +1632,7 @@ namespace AIMS.Services
                                     unitWork.Save();
                                 }
 
-                                if (startYear >= twentyEighteenFinancialYear.FinancialYear && endYear <= twentyEighteenFinancialYear.FinancialYear && 
+                                if (twentyEighteenFinancialYear.FinancialYear >= startYear && twentyEighteenFinancialYear.FinancialYear <= endYear && 
                                 project.TwentyEighteenDisbursements > 0)
                                 {
                                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
@@ -1647,7 +1647,7 @@ namespace AIMS.Services
                                     unitWork.Save();
                                 }
 
-                                if (startYear >= twentyNineteenFinancialYear.FinancialYear && endYear <= twentyNineteenFinancialYear.FinancialYear &&
+                                if (twentyNineteenFinancialYear.FinancialYear >= startYear && twentyNineteenFinancialYear.FinancialYear <= endYear &&
                                 project.TwentyNineteenDisbursements > 0)
                                 {
                                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
@@ -1662,7 +1662,7 @@ namespace AIMS.Services
                                     unitWork.Save();
                                 }
 
-                                if (startYear >= twentyTwentyFinancialYear.FinancialYear && endYear <= twentyTwentyFinancialYear.FinancialYear &&
+                                if (twentyTwentyFinancialYear.FinancialYear >= startYear && twentyTwentyFinancialYear.FinancialYear <= endYear &&
                                 project.TwentyTwentyDisbursements > 0)
                                 {
                                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
@@ -1763,11 +1763,31 @@ namespace AIMS.Services
                             await unitWork.SaveAsync();
 
                             var updatedLocations = unitWork.ProjectLocationsRepository.GetWithInclude(p => p.ProjectId == model.ProjectId, new string[] { "Location" });
-                            /*if (fundsPercentage < 100)
-                            {
+                            var unattributedLocation = (from loc in updatedLocations
+                                                        where loc.Location.Location.Equals("Unattributed", StringComparison.OrdinalIgnoreCase)
+                                                        select loc).FirstOrDefault();
 
-                            }*/
-                            transaction.Commit();
+                            int fundsPercentage = (int)(from loc in updatedLocations
+                                                   select loc.FundsPercentage).Sum();
+
+                            if (fundsPercentage < 100)
+                            {
+                                int leftPercentage = (100 - fundsPercentage);
+                                unattributedLocation.FundsPercentage = leftPercentage;
+                                unitWork.ProjectLocationsRepository.Update(unattributedLocation);
+                                unitWork.Save();
+                            }
+                            
+                            if (fundsPercentage > 100)
+                            {
+                                mHelper = new MessageHelper();
+                                response.Success = false;
+                                response.Message = "Total percentage cannot be greater than 100";
+                            }
+                            else
+                            {
+                                transaction.Commit();
+                            }
                         }
                     });
                 }
