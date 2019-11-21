@@ -1336,7 +1336,7 @@ namespace AIMS.Services
                                 }
 
                                 endingFinancialYear = (from y in financialYears
-                                                       where y.FinancialYear == Convert.ToInt32(project.StartYear)
+                                                       where y.FinancialYear == Convert.ToInt32(project.EndYear)
                                                        select y).FirstOrDefault();
                                 if (endingFinancialYear == null)
                                 {
@@ -1761,6 +1761,12 @@ namespace AIMS.Services
                             project.DateUpdated = DateTime.Now;
                             unitWork.ProjectRepository.Update(project);
                             await unitWork.SaveAsync();
+
+                            var updatedLocations = unitWork.ProjectLocationsRepository.GetWithInclude(p => p.ProjectId == model.ProjectId, new string[] { "Location" });
+                            /*if (fundsPercentage < 100)
+                            {
+
+                            }*/
                             transaction.Commit();
                         }
                     });
