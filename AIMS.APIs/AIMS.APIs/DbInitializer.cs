@@ -95,7 +95,7 @@ namespace AIMS.APIs
                     context.SaveChanges();
                 }
 
-                /*if (context.SectorTypes.Count() == 0)
+                if (context.SectorTypes.Count() == 0)
                 {
                     var primary = context.SectorTypes.Add(new EFSectorTypes() 
                     { 
@@ -360,7 +360,7 @@ namespace AIMS.APIs
                         SectorName = "Other",
                         TimeStamp = DateTime.Now
                     });
-                }*/
+                }
 
                 if (context.FinancialYears.Count() == 0)
                 {
