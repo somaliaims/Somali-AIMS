@@ -707,7 +707,6 @@ namespace AIMS.Services
                         envelopeYearsList.Add(yr);
                     }
                     envelopeReport.EnvelopeYears = envelopeYearsList;
-
                     foreach (var envelope in envelopes)
                     {
                         EnvelopeYearlyView envelopeView = new EnvelopeYearlyView();
@@ -724,12 +723,13 @@ namespace AIMS.Services
                                          select yb);
 
                         IQueryable<EFEnvelopeYearlyBreakup> yearBreakup = null;
+                        decimal envelopeTypeTotal = 0;
                         foreach (var type in envelopeTypes)
                         {
                             EnvelopeBreakupView breakupView = new EnvelopeBreakupView();
                             breakupView.EnvelopeType = type.TypeName;
                             breakupView.EnvelopeTypeId = type.Id;
-
+                            envelopeTypeTotal = 0;
                             List<EnvelopeYearlyBreakUp> yearlyBreakupList = new List<EnvelopeYearlyBreakUp>();
                             for (int year = previousYear; year <= upperYearLimit; year++)
                             {
@@ -750,11 +750,13 @@ namespace AIMS.Services
 
                                 if (isBreakupExists != null)
                                 {
+                                    var amount = Math.Round(isBreakupExists.Amount * (exchangeRate / envelope.ExchangeRate), MidpointRounding.AwayFromZero);
                                     yearlyBreakupList.Add(new EnvelopeYearlyBreakUp()
                                     {
-                                        Amount = Math.Round(isBreakupExists.Amount * (exchangeRate / envelope.ExchangeRate), MidpointRounding.AwayFromZero),
+                                        Amount = amount,
                                         Year = year
                                     });
+                                    envelopeTypeTotal += amount;
                                 }
                                 else
                                 {
@@ -765,11 +767,22 @@ namespace AIMS.Services
                                     });
                                 }
                             }
-                            breakupView.YearlyBreakup = yearlyBreakupList;
-                            envelopeView.EnvelopeBreakupsByType.Add(breakupView);
+
+                            if (envelopeTypeTotal != 0)
+                            {
+                                breakupView.YearlyBreakup = yearlyBreakupList;
+                                envelopeView.EnvelopeBreakupsByType.Add(breakupView);
+                            }
                         }
-                        envelopeViewList.Add(envelopeView);
+
+                        if (envelopeTypeTotal != 0)
+                        {
+                            envelopeViewList.Add(envelopeView);
+                        }
                     }
+                    envelopeViewList = (from e in envelopeViewList
+                                        orderby e.Funder ascending
+                                        select e).ToList();
                     envelopeReport.Envelope = envelopeViewList;
                 }
                 catch (Exception ex)
