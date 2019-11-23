@@ -297,6 +297,7 @@ namespace AIMS.Models
     public class MarkerAbstractView
     {
         public int MarkerId { get; set; }
+        public FieldTypes MarkerType { get; set; }
         public string Marker { get; set; }
         public string Values { get; set; }
     }

@@ -83,6 +83,7 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFProjectMarkers, MarkerAbstractView>()
                 .ForMember(m => m.Marker, opts => opts.MapFrom(source => source.Marker.FieldTitle))
+                .ForMember(m => m.MarkerType, opts => opts.MapFrom(source => source.Marker.FieldType))
                 .ForMember(m => m.Values, opts => opts.MapFrom(source => source.Values));
 
             CreateMap<EFProjectImplementers, ProjectImplementerView>()

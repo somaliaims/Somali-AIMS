@@ -293,10 +293,17 @@ namespace AIMS.Services
                             {
                                 if (!string.IsNullOrEmpty(projectMarker.Values))
                                 {
-                                    List<MarkerValues> parsedValues = JsonConvert.DeserializeObject<List<MarkerValues>>(projectMarker.Values);
-                                    string values = string.Join(",", (from pv in parsedValues
-                                                                      select pv.Value).ToList());
-                                    markerCell.SetCellValue(values);
+                                    if (projectMarker.MarkerType == FieldTypes.Text)
+                                    {
+                                        markerCell.SetCellValue(projectMarker.Values);
+                                    }
+                                    else
+                                    {
+                                        List<MarkerValues> parsedValues = JsonConvert.DeserializeObject<List<MarkerValues>>(projectMarker.Values);
+                                        string values = string.Join(",", (from pv in parsedValues
+                                                                          select pv.Value).ToList());
+                                        markerCell.SetCellValue(values);
+                                    }
                                 }
                                 else
                                 {
