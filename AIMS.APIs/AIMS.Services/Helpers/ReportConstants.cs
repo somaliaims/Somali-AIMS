@@ -12,6 +12,7 @@ namespace AIMS.Services.Helpers
         public static readonly string BUDGET_REPORT_URL = "budget-report/";
         public static readonly string YEARLY_REPORT_URL = "time-trend-report/";
         public static readonly string ENVELOPE_REPORT_URL = "envelope-report/";
+        public static readonly string PROJECTS_REPORT_URL = "projects-report";
 
         //Projects related constants
         public static readonly string PROJECTS_LIST_TITLE = "Projects list";
