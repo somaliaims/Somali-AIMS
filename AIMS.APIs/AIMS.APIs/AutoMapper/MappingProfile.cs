@@ -79,6 +79,7 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFProjectDisbursements, DisbursementAbstractView>()
                 .ForMember(d => d.Disbursement, opts => opts.MapFrom(source => source.Amount))
+                .ForMember(d => d.Year, opts => opts.MapFrom(source => source.Year.FinancialYear))
                 .ForMember(d => d.DisbursementType, opts => opts.MapFrom(source => (DisbursementTypes)source.DisbursementType));
 
             CreateMap<EFProjectMarkers, MarkerAbstractView>()
@@ -108,7 +109,8 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(l => l.FundsPercentage, opts => opts.MapFrom(source => source.FundsPercentage));
 
             CreateMap<EFProjectSectors, SectorAbstractView>()
-                .ForMember(s => s.Name, opts => opts.MapFrom(source => source.Sector.SectorName));
+                .ForMember(s => s.Name, opts => opts.MapFrom(source => source.Sector.SectorName))
+                .ForMember(s => s.FundsPercentage, opts => opts.MapFrom(source => source.FundsPercentage));
 
             CreateMap<EFProjectDeletionRequests, ProjectDeletionRequestView>()
                 .ForMember(d => d.UserOrganization, opts => opts.MapFrom(source => source.RequestedBy.Organization.OrganizationName))

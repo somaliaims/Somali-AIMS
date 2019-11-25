@@ -144,11 +144,24 @@ namespace AIMS.Services
             var unitWork = new UnitOfWork(context);
             ProjectReportView projectsReport = new ProjectReportView();
             List<ProjectDetailView> projectsList = new List<ProjectDetailView>();
+            List<ProjectDetailSectorView> sectorsList = new List<ProjectDetailSectorView>();
             IQueryable<EFProject> projects;
             int startingFinancialYear = 0;
             int endingFinancialYear = 0;
 
             var financialYears = unitWork.FinancialYearRepository.GetProjection(y => y.FinancialYear > 0, y => y.FinancialYear);
+            var sectors = unitWork.SectorRepository.GetWithInclude(s => s.ParentSectorId != 0 && s.SectorType.IsPrimary == true, new string[] { "ParentSector" });
+            if (sectors.Any())
+            {
+                var sectorDetailList = (from sec in sectors
+                                        orderby sec.SectorName
+                          select new { sec.Id, sec.SectorName });
+                foreach(var sec in sectorDetailList)
+                {
+                    sectorsList.Add(new ProjectDetailSectorView() { Id = sec.Id, Sector = sec.SectorName });
+                }
+            }
+            
             var locations = unitWork.LocationRepository.GetProjection(l => l.Id != 0, l => new { l.Id, l.Location });
             var markers = unitWork.MarkerRepository.GetProjection(m => m.Id != 0, m => new { m.Id, m.FieldTitle });
             projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers", "Markers.Marker" });
@@ -253,6 +266,7 @@ namespace AIMS.Services
             projectsReport.EndingFinancialYear = endingFinancialYear;
             projectsReport.Markers = markersList;
             projectsReport.Locations = locationsList;
+            projectsReport.Sectors = sectorsList;
             projectsReport.Projects = projectsList;
             return await Task<ProjectReportView>.Run(() => projectsReport).ConfigureAwait(false);
         }
@@ -1205,7 +1219,8 @@ namespace AIMS.Services
                             {
                                 Year = yr,
                                 Projects = (from p in projectProfileList
-                                            where p.StartingFinancialYear.FinancialYear >= yr || p.EndingFinancialYear.FinancialYear >= yr
+                                            where yr >= p.StartingFinancialYear.FinancialYear && 
+                                            (p.EndingFinancialYear.FinancialYear <= yr || p.EndingFinancialYear.FinancialYear > yr)
                                             select p.Id).ToList<int>()
                             });
                         }

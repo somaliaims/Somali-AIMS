@@ -86,6 +86,7 @@ namespace AIMS.Services
                         endingYear = projectsReport.EndingFinancialYear;
                     var locations = projectsReport.Locations;
                     var markers = projectsReport.Markers;
+                    var sectors = projectsReport.Sectors;
 
                     IWorkbook workbook;
                     workbook = new XSSFWorkbook();
@@ -124,9 +125,12 @@ namespace AIMS.Services
                     projectDesc.SetCellValue("Description");
                     projectDesc.CellStyle = headerStyle;
 
-                    var sector = row.CreateCell(++colIndex);
-                    sector.SetCellValue("Sector");
-                    sector.CellStyle = headerStyle;
+                    foreach(var sector in sectors)
+                    {
+                        var sectorCell = row.CreateCell(++colIndex);
+                        sectorCell.SetCellValue(sector.Sector);
+                        sectorCell.CellStyle = headerStyle;
+                    }
 
                     var startYear = row.CreateCell(++colIndex);
                     startYear.SetCellValue("Start year");
@@ -201,11 +205,24 @@ namespace AIMS.Services
                         descriptionCell.SetCellValue(project.Description);
                         descriptionCell.CellStyle = dataCellStyle;
 
-                        var sectors = string.Join(", ", (from s in project.Sectors
-                                                         select s.Name));
-                        var sectorCell = row.CreateCell(++col);
-                        sectorCell.SetCellValue(sectors);
-                        sectorCell.CellStyle = dataCellStyle;
+                        var projectSectors = project.Sectors;
+                        foreach (var sector in sectors)
+                        {
+                            var projectSectorCell = row.CreateCell(++col, CellType.Numeric);
+                            var retrieveSector = (from s in projectSectors
+                                                    where s.Name.Equals(sector.Sector, StringComparison.OrdinalIgnoreCase)
+                                                    select s).FirstOrDefault();
+
+                            if (retrieveSector != null)
+                            {
+                                projectSectorCell.SetCellValue(retrieveSector.FundsPercentage.ToString());
+                            }
+                            else
+                            {
+                                projectSectorCell.SetCellValue("0");
+                            }
+                            projectSectorCell.CellStyle = dataCellStyle;
+                        }
 
                         var startYearCell = row.CreateCell(++col);
                         startYearCell.SetCellValue(project.StartingFinancialYear.ToString());
@@ -516,7 +533,6 @@ namespace AIMS.Services
                     footerCell.CellStyle = headerStyle;
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, groupHeaderColumns));
-                    
 
                     var grandFundTotalCell = row.CreateCell(3, CellType.Numeric);
                     grandFundTotalCell.SetCellValue(ApplyThousandFormat(grandTotalFunding));

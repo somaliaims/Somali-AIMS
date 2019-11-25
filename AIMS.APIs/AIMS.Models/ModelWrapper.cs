@@ -290,6 +290,7 @@ namespace AIMS.Models
     public class DisbursementAbstractView
     {
         public int Year { get; set; }
+        public decimal Amount { get; set; }
         public string DisbursementType { get; set; }
         public decimal Disbursement { get; set; }
     }
@@ -318,6 +319,7 @@ namespace AIMS.Models
     public class SectorAbstractView
     {
         public string Name { get; set; }
+        public decimal FundsPercentage { get; set; }
     }
 
     public class OrganizationModel
@@ -743,9 +745,16 @@ namespace AIMS.Models
     {
         public int StartingFinancialYear { get; set; }
         public int EndingFinancialYear { get; set; }
+        public List<ProjectDetailSectorView> Sectors { get; set; }
         public List<ProjectDetailLocationView> Locations { get; set; }
         public List<ProjectDetailMarkerView> Markers { get; set; }
         public List<ProjectDetailView> Projects { get; set; }
+    }
+
+    public class ProjectDetailSectorView
+    {
+        public int Id { get; set; }
+        public string Sector { get; set; }
     }
 
     public class ProjectDetailLocationView
