@@ -663,10 +663,25 @@ namespace AIMS.Services
 
                 try
                 {
-                    if (!string.IsNullOrEmpty(model.Title))
+                    if (model.ProjectIds.Count > 0)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase)
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id)
                             , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                    }
+
+                    if (!string.IsNullOrEmpty(model.Description))
+                    {
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => EF.Functions.Like(p.Description, "%" + model.Description + "%") 
+                            , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = (from p in projectProfileList
+                                                  where p.Description.Contains(model.Description, StringComparison.OrdinalIgnoreCase)
+                                                  select p);
+                        }
                     }
 
                     if (model.StartingYear != 0 && model.EndingYear != 0)
@@ -751,7 +766,7 @@ namespace AIMS.Services
 
                     if (projectProfileList == null)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase)
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0
                             , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Markers.Marker" });
                     }
 
@@ -791,10 +806,25 @@ namespace AIMS.Services
 
                 try
                 {
-                    if (!string.IsNullOrEmpty(model.Title))
+                    if (model.ProjectIds.Count > 0)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title, StringComparison.OrdinalIgnoreCase),
-                            new string[] { "StartingFinancialYear", "EndingFinancialYear" });
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id)
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear" });
+                    }
+
+                    if (!string.IsNullOrEmpty(model.Description))
+                    {
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => EF.Functions.Like(p.Description, "%" + model.Description + "%")
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear" });
+                        }
+                        else
+                        {
+                            projectProfileList = (from p in projectProfileList
+                                                  where p.Description.Contains(model.Description, StringComparison.OrdinalIgnoreCase)
+                                                  select p);
+                        }
                     }
 
                     if (model.StartingYear != 0 && model.EndingYear != 0)
@@ -816,7 +846,8 @@ namespace AIMS.Services
 
                     if (model.SectorIds.Count > 0)
                     {
-                        var projectSectors = unitWork.ProjectSectorsRepository.GetManyQueryable(s => model.SectorIds.Contains(s.SectorId));
+                        var projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(s => model.SectorIds.Contains(s.SectorId) || 
+                        model.SectorIds.Contains((int)s.Sector.ParentSectorId), new string[] { "Sector" });
                         var projectIds = (from pSector in projectSectors
                                           select pSector.ProjectId).ToList<int>().Distinct();
 
@@ -877,7 +908,7 @@ namespace AIMS.Services
 
                     if (projectProfileList == null)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Title.Contains(model.Title), new string[] { "StartingFinancialYear", "EndingFinancialYear" });
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                     }
 
                     foreach (var project in projectProfileList)

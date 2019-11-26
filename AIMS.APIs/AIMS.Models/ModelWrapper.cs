@@ -1735,12 +1735,14 @@ namespace AIMS.Models
 
     public class SearchProjectModel
     {
-        public string Title { get; set; } = null;
+        public string Title { get; set; }
+        public List<int> ProjectIds { get; set; } = new List<int>();
         public List<int> OrganizationIds { get; set; } = new List<int>();
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
         public List<int> SectorIds { get; set; } = new List<int>();
         public List<int> LocationIds { get; set; } = new List<int>();
+        public string Description { get; set; }
     }
 
     public class MarkerModel

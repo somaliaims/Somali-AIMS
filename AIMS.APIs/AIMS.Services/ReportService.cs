@@ -863,7 +863,6 @@ namespace AIMS.Services
                                                   where model.ProjectIds.Contains(p.Id)
                                                   select p);
                         }
-                        
                     }
 
                     if (model.StartingYear >= 2000 && model.EndingYear >= 2000)
