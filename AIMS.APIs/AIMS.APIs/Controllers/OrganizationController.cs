@@ -28,8 +28,7 @@ namespace AIMS.APIs.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            var organizations = organizationService.GetAll();
-            return Ok(organizations);
+            return Ok(organizationService.GetAll());
         }
 
         [HttpGet("GetOrganizationsCount")]
@@ -41,22 +40,25 @@ namespace AIMS.APIs.Controllers
         [HttpGet("GetWithTypes")]
         public IActionResult GetOrganizationsWithTypes()
         {
-            var organizations = organizationService.GetWithType();
-            return Ok(organizations);
+            return Ok(organizationService.GetWithType());
         }
 
         [HttpGet("GetUserOrganizations")]
         public IActionResult GetUserOrganizations()
         {
-            var organizations = organizationService.GetUserOrganizations();
-            return Ok(organizations);
+            return Ok(organizationService.GetUserOrganizations());
+        }
+
+        [HttpGet("GetOrganizationsHavingEnvelope")]
+        public IActionResult GetOrganizationsHavingEnvelope()
+        {
+            return Ok(organizationService.GetOrganizationsHavingEnvelope());
         }
 
         [HttpGet("GetSourceOrganizations")]
         public IActionResult GetSourceOrganizations()
         {
-            var organizations = organizationService.GetSourceOrganizations();
-            return Ok(organizations);
+            return Ok(organizationService.GetSourceOrganizations());
         }
 
         [HttpGet]

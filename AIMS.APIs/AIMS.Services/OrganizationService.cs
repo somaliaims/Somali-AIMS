@@ -60,6 +60,12 @@ namespace AIMS.Services
         Task<IEnumerable<OrganizationView>> GetAllAsync();
 
         /// <summary>
+        /// Gets list of organizations that have envelope data available
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<OrganizationView> GetOrganizationsHavingEnvelope();
+
+        /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
@@ -166,6 +172,25 @@ namespace AIMS.Services
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
                 var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.SourceType == OrganizationSourceType.User, new string[] { "OrganizationType" });
+                if (organizations.Count() > 0)
+                {
+                    organizations = (from org in organizations
+                                     orderby org.OrganizationName ascending
+                                     select org);
+                }
+                return mapper.Map<List<OrganizationView>>(organizations);
+            }
+        }
+
+        public IEnumerable<OrganizationView> GetOrganizationsHavingEnvelope()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<OrganizationView> organizationsList = new List<OrganizationView>();
+                var organizationIds = unitWork.EnvelopeRepository.GetProjection(e => e.Id != 0, e => e.FunderId);
+                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.SourceType == OrganizationSourceType.User && 
+                organizationIds.Contains(o.Id), new string[] { "OrganizationType" });
+
                 if (organizations.Count() > 0)
                 {
                     organizations = (from org in organizations
