@@ -281,8 +281,14 @@ namespace AIMS.Services
 
                         if (projectCost == 0)
                         {
-                            projectCost = (twentySixteenDisbursements + twentySeventeenDisbursements +
+                            disbursementsTotal = (twentySixteenDisbursements + twentySeventeenDisbursements +
                                 twentyEighteenDisbursements + twentyNineteenDisbursements + twentyTwentyDisbursements);
+                            projectCost = disbursementsTotal;
+                        }
+
+                        if (projectCost < disbursementsTotal)
+                        {
+                            projectCost = disbursementsTotal;
                         }
 
                         projectsList.Add(new NewImportedAidData()

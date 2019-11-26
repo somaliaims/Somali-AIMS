@@ -837,11 +837,33 @@ namespace AIMS.Services
                     int month = dated.Month;
                     IQueryable<EFProject> projectProfileList = null;
                     IQueryable<EFProjectSectors> projectSectors = null;
+                    List<int> locationProjectIds = new List<int>();
+
+                    if (model.LocationId != 0)
+                    {
+                        locationProjectIds = unitWork.ProjectLocationsRepository.GetProjection(p => p.LocationId == model.LocationId, p => p.ProjectId).ToList();
+                    }
+
+                    if (locationProjectIds.Count > 0)
+                    {
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => locationProjectIds.Contains(p.Id),
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                    }
 
                     if (model.ProjectIds.Count > 0)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = (from p in projectProfileList
+                                                  where model.ProjectIds.Contains(p.Id)
+                                                  select p);
+                        }
+                        
                     }
 
                     if (model.StartingYear >= 2000 && model.EndingYear >= 2000)
@@ -895,7 +917,7 @@ namespace AIMS.Services
                     List<int> sectorIds = new List<int>();
                     if (model.SectorIds.Count > 0)
                     {
-                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains(p.SectorId), new string[] { "Sector" });
+                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains(p.SectorId) || model.SectorIds.Contains((int)p.Sector.ParentSectorId), new string[] { "Sector" });
                     }
                     else
                     {

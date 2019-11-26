@@ -106,6 +106,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var locations = await unitWork.LocationRepository.GetAllAsync();
+                locations = (from loc in locations
+                             orderby loc.Location
+                             select loc);
                 return await Task<IEnumerable<LocationView>>.Run(() => mapper.Map<List<LocationView>>(locations)).ConfigureAwait(false);
             }
         }

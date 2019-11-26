@@ -1675,7 +1675,7 @@ namespace AIMS.Models
         public List<int> OrganizationIds { get; set; } = new List<int>();
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
-        //public int ParentSectorId { get; set; }
+        public int LocationId { get; set; }
         public List<int> SectorIds { get; set; } = new List<int>();
     }
 
