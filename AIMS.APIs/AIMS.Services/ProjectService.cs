@@ -442,7 +442,7 @@ namespace AIMS.Services
                 if (disbursements.Any())
                 {
                     disbursementValue = (from d in disbursements
-                                         select (d.Amount * d.ExchangeRate)).Sum();
+                                         select (d.Amount * (1 / d.ExchangeRate))).Sum();
                 }
                 return disbursementValue;
             }
