@@ -907,16 +907,25 @@ namespace AIMS.Services
                         }
                     }
 
-                    if (projectProfileList == null)
-                    {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndingFinancialYear.FinancialYear >= year),
-                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
-                    }
-
+                    
                     List<int> sectorIds = new List<int>();
                     if (model.SectorIds.Count > 0)
                     {
-                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains(p.SectorId) || model.SectorIds.Contains((int)p.Sector.ParentSectorId), new string[] { "Sector" });
+                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains((int)p.Sector.ParentSectorId), new string[] { "Sector" });
+                        List<int> projectIdsList = (from s in projectSectors
+                                         select s.ProjectId).ToList<int>();
+
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = from project in projectProfileList
+                                                 where projectIdsList.Contains(project.Id)
+                                                 select project;
+                        }
                     }
                     else
                     {
@@ -928,6 +937,26 @@ namespace AIMS.Services
                         }
                         var parentSectorIds = unitWork.SectorRepository.GetProjection(s => s.ParentSectorId == null && s.SectorTypeId == defaultSectorTypeId, s => s.Id);
                         projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => parentSectorIds.Contains(p.SectorId), new string[] { "Sector" });
+                        var projectIdsList = (from s in projectSectors
+                                              select s.ProjectId);
+
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = from project in projectProfileList
+                                                 where projectIdsList.Contains(project.Id)
+                                                 select project;
+                        }
+                    }
+
+                    if (projectProfileList == null)
+                    {
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndingFinancialYear.FinancialYear >= year),
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     projectSectors = from pSector in projectSectors

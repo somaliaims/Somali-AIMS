@@ -186,7 +186,8 @@ namespace AIMS.Services
 
                 try
                 {
-                    for (int i = (sheet.FirstRowNum); i <= sheet.LastRowNum; i++)
+                    //for (int i = (sheet.FirstRowNum); i <= sheet.LastRowNum; i++)
+                    for (int i = (sheet.FirstRowNum + 1); i <= 10; i++)
                     {
                         IRow row = sheet.GetRow(i);
                         if (row == null)
@@ -291,6 +292,13 @@ namespace AIMS.Services
                             projectCost = disbursementsTotal;
                         }
 
+                        string sector = this.GetFormattedValue(row.GetCell(sectorIndex));
+                        if (!string.IsNullOrEmpty(sector))
+                        {
+                            var sectorArr = sector.Split("-");
+                            sector = sectorArr.Length > 1 ? sectorArr[1] : sector;
+                        }
+
                         projectsList.Add(new NewImportedAidData()
                         {
                             ProjectTitle = this.GetFormattedValue(row.GetCell(projectTitleIndex)),
@@ -309,7 +317,7 @@ namespace AIMS.Services
                             TwentyEighteenDisbursements = twentyEighteenDisbursements,
                             TwentyNineteenDisbursements = twentyNineteenDisbursements,
                             TwentyTwentyDisbursements = twentyTwentyDisbursements,
-                            Sector = this.GetFormattedValue(row.GetCell(sectorIndex)),
+                            Sector = sector,
                             Locations = locationsList,
                             CustomFields = customFieldsList,
                             DocumentLinks = documentsList

@@ -1402,7 +1402,7 @@ namespace AIMS.Services
                                     {
                                         EFProjectFunders isFunderExists = null;
                                         var organization = (from org in organizations
-                                                            where org.OrganizationName.Equals(funderName, StringComparison.OrdinalIgnoreCase)
+                                                            where org.OrganizationName.Equals(funderName.Trim(), StringComparison.OrdinalIgnoreCase)
                                                             select org).FirstOrDefault();
 
                                         if (organization == null)
@@ -1451,7 +1451,7 @@ namespace AIMS.Services
                                     {
                                         EFProjectImplementers isImplementerExists = null;
                                         implementer = (from org in organizations
-                                                            where org.OrganizationName.Equals(implementerName, StringComparison.OrdinalIgnoreCase)
+                                                            where org.OrganizationName.Equals(implementerName.Trim(), StringComparison.OrdinalIgnoreCase)
                                                             select org).FirstOrDefault();
 
                                         if (implementer == null)
@@ -1556,7 +1556,7 @@ namespace AIMS.Services
                                 if (!string.IsNullOrEmpty(project.Sector))
                                 {
                                     var dbSector = (from sector in ndpSectorsList
-                                                    where sector.SectorName.Equals(project.Sector, StringComparison.OrdinalIgnoreCase)
+                                                    where sector.SectorName.Equals(project.Sector.Trim(), StringComparison.OrdinalIgnoreCase)
                                                     select sector).FirstOrDefault();
                                     if (dbSector == null)
                                     {
