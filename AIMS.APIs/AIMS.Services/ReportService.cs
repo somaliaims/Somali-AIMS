@@ -935,7 +935,7 @@ namespace AIMS.Services
                         {
                             defaultSectorTypeId = defaultSectorType.Id;
                         }
-                        var parentSectorIds = unitWork.SectorRepository.GetProjection(s => s.ParentSectorId == null && s.SectorTypeId == defaultSectorTypeId, s => s.Id);
+                        var parentSectorIds = unitWork.SectorRepository.GetProjection(s => s.ParentSectorId != null && s.SectorTypeId == defaultSectorTypeId, s => s.Id);
                         projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => parentSectorIds.Contains(p.SectorId), new string[] { "Sector" });
                         var projectIdsList = (from s in projectSectors
                                               select s.ProjectId);
