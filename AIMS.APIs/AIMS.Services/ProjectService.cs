@@ -1398,6 +1398,10 @@ namespace AIMS.Services
                                 if (!string.IsNullOrEmpty(project.Funders))
                                 {
                                     string[] funderNames = project.Funders.Split(",");
+                                    for(int i = 0; i < funderNames.Length; i++)
+                                    {
+                                        funderNames[i] = funderNames[i].Trim();
+                                    }
                                     foreach (string funderName in funderNames)
                                     {
                                         EFProjectFunders isFunderExists = null;
@@ -1446,6 +1450,10 @@ namespace AIMS.Services
                                 if (!string.IsNullOrEmpty(project.Implementers))
                                 {
                                     string[] implementerNames = project.Implementers.Split(",");
+                                    for (int i = 0; i < implementerNames.Length; i++)
+                                    {
+                                        implementerNames[i] = implementerNames[i].Trim();
+                                    }
                                     EFOrganization implementer = null;
                                     foreach (string implementerName in implementerNames)
                                     {
