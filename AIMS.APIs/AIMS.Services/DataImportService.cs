@@ -186,7 +186,7 @@ namespace AIMS.Services
 
                 try
                 {
-                    for (int i = (sheet.FirstRowNum); i <= sheet.LastRowNum; i++)
+                    for (int i = (sheet.FirstRowNum + 1); i <= 50; i++)
                     {
                         IRow row = sheet.GetRow(i);
                         if (row == null)
@@ -295,7 +295,7 @@ namespace AIMS.Services
                         if (!string.IsNullOrEmpty(sector))
                         {
                             var sectorArr = sector.Split("-");
-                            sector = sectorArr.Length > 1 ? sectorArr[1] : sector;
+                            sector = sectorArr.Length > 1 ? sectorArr[1].Trim() : sector;
                         }
 
                         projectsList.Add(new NewImportedAidData()
