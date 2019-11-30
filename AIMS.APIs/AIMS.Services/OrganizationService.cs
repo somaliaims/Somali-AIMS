@@ -188,7 +188,7 @@ namespace AIMS.Services
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
                 var organizationIds = unitWork.EnvelopeRepository.GetProjection(e => e.Id != 0, e => e.FunderId);
-                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.SourceType == OrganizationSourceType.User && 
+                var organizations = unitWork.OrganizationRepository.GetWithInclude(o =>  
                 organizationIds.Contains(o.Id), new string[] { "OrganizationType" });
 
                 if (organizations.Count() > 0)

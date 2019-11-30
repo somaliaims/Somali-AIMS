@@ -149,6 +149,12 @@ namespace AIMS.Services
                                         IsApproved = true
                                     });
                                 }
+                                else
+                                {
+                                    organization.SourceType = OrganizationSourceType.User;
+                                    unitWork.OrganizationRepository.Update(organization);
+                                    unitWork.Save();
+                                }
                             }
                             await unitWork.SaveAsync();
                             transaction.Commit();

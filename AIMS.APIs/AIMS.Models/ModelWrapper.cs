@@ -823,6 +823,7 @@ namespace AIMS.Models
         public int FunderId { get; set; }
         public string Funder { get; set; }
         public string Currency { get; set; }
+        public decimal ExchangeRate { get; set; }
         public List<EnvelopeBreakupView> EnvelopeBreakupsByType { get; set; }
     }
 
@@ -1480,6 +1481,7 @@ namespace AIMS.Models
     {
         public Report ReportSettings { get; set; }
         public ICollection<int> EnvelopeYears { get; set; }
+        public ICollection<EnvelopeTypeView> EnvelopeTypes { get; set; }
         public IEnumerable<EnvelopeYearlyView> Envelope { get; set; }
     }
 

@@ -122,6 +122,8 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFExchangeRatesUsageSettings, ExchangeRatesUsageView>()
                 .ForMember(e => e.Source, opts => opts.MapFrom(source => source.Source.ToString()))
                 .ForMember(e => e.UsageSection, opts => opts.MapFrom(source => source.UsageSection.ToString()));
+
+            CreateMap<EFEnvelopeTypes, EnvelopeTypeView>();
         }
     }
 }

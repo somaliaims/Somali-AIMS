@@ -677,6 +677,7 @@ namespace AIMS.Services
                     IQueryable<EFEnvelope> envelopes = null;
 
                     var envelopeTypes = unitWork.EnvelopeTypesRepository.GetManyQueryable(e => e.Id != 0);
+                    envelopeReport.EnvelopeTypes = mapper.Map<List<EnvelopeTypeView>>(envelopeTypes);
                     if (model.FunderIds.Count > 0)
                     {
                         envelopes = unitWork.EnvelopeRepository.GetWithInclude(e => model.FunderIds.Contains(e.FunderId), new string[] { "Funder" });
@@ -727,6 +728,7 @@ namespace AIMS.Services
                         envelopeView.EnvelopeBreakupsByType = new List<EnvelopeBreakupView>();
                         IQueryable<EFEnvelopeYearlyBreakup> yearlyBreakup = null;
                         envelopeView.Currency = envelope.Currency;
+                        envelopeView.ExchangeRate = envelope.ExchangeRate;
                         envelopeView.FunderId = envelope.FunderId;
                         envelopeView.Funder = envelope.Funder.OrganizationName;
                         int envelopeId = envelope.Id;
