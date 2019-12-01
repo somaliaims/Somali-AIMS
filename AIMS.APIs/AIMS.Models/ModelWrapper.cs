@@ -1085,6 +1085,7 @@ namespace AIMS.Models
     public class ProjectSectorView
     {
         public int SectorId { get; set; }
+        public int ParentSectorId { get; set; }
         public string Sector { get; set; }
         public decimal FundsPercentage { get; set; }
     }
@@ -1612,6 +1613,8 @@ namespace AIMS.Models
     public class ProjectsBySector
     {
         public string SectorName { get; set; }
+        public int ParentSectorId { get; set; }
+        public string ParentSector { get; set; }
         public decimal TotalFunding { get; set; }
         public decimal ActualDisbursements { get; set; }
         public decimal PlannedDisbursements { get; set; }
@@ -1900,6 +1903,7 @@ namespace AIMS.Models
     public class SectorWithProjects
     {
         public int SectorId { get; set; }
+        public int ParentSectorId { get; set; }
         public string Sector { get; set; }
         public ICollection<SectorProject> Projects { get; set; }
     }

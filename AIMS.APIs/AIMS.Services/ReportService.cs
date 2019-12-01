@@ -992,6 +992,7 @@ namespace AIMS.Services
                     List<ProjectViewForSector> projectsListForSector = null;
                     ICollection<SectorWithProjects> sectorsByProjects = new List<SectorWithProjects>();
 
+                    var sectors = unitWork.SectorRepository.GetProjection(s => s.Id != 0, s => new { s.Id, s.SectorName });
                     foreach (var sec in projectSectors)
                     {
                         var isSectorIdsExist = (from secIds in sectorsByProjects
@@ -1003,6 +1004,7 @@ namespace AIMS.Services
                             sectorsByProjects.Add(new SectorWithProjects()
                             {
                                 SectorId = sec.SectorId,
+                                ParentSectorId = (int)sec.Sector.ParentSectorId,
                                 Sector = sec.Sector.SectorName,
                                 Projects = (from secProject in projectSectors
                                             where secProject.SectorId.Equals(sec.SectorId)
@@ -1019,6 +1021,13 @@ namespace AIMS.Services
                     {
                         projectsBySector = new ProjectsBySector();
                         projectsBySector.SectorName = sectorByProject.Sector;
+                        projectsBySector.ParentSectorId = sectorByProject.ParentSectorId;
+                        if (projectsBySector.ParentSectorId > 0)
+                        {
+                            projectsBySector.ParentSector = (from s in sectors
+                                                             where s.Id.Equals(projectsBySector.ParentSectorId)
+                                                             select s.SectorName).FirstOrDefault();
+                        }
                         int currentSectorId = sectorByProject.SectorId;
 
                         projectsListForSector = new List<ProjectViewForSector>();
