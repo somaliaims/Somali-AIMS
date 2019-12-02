@@ -1474,6 +1474,7 @@ namespace AIMS.Models
     {
         public int StartingYear { get; set; }
         public int EndingYear { get; set; }
+        public List<int> FunderTypeIds { get; set; }
         public List<int> FunderIds { get; set; }
         public List<int> EnvelopeTypeIds { get; set; }
     }

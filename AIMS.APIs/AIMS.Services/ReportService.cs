@@ -683,6 +683,13 @@ namespace AIMS.Services
                         envelopes = unitWork.EnvelopeRepository.GetWithInclude(e => model.FunderIds.Contains(e.FunderId), new string[] { "Funder" });
                         envelopeList = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(e => model.FunderIds.Contains(e.Envelope.FunderId), new string[] { "Envelope", "Year" });
                     }
+                    else if (model.FunderTypeIds.Count > 0)
+                    {
+                        envelopes = unitWork.EnvelopeRepository.GetWithInclude(e => model.FunderTypeIds.Contains((int)e.Funder.OrganizationTypeId), new string[] { "Funder", "Funder.OrganizationType" });
+                        var funderIds = (from e in envelopes
+                                         select e.FunderId);
+                        envelopeList = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(e => funderIds.Contains((int)e.Envelope.FunderId), new string[] { "Envelope", "Year" });
+                    }
                     else
                     {
                         envelopes = unitWork.EnvelopeRepository.GetWithInclude(e => e.FunderId != 0, new string[] { "Funder" });
