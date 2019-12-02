@@ -477,10 +477,10 @@ namespace AIMS.Services
 
                                     decimal actualDisbursements = ((((from d in project.Disbursements
                                                                       where d.DisbursementType == DisbursementTypes.Actual
-                                                                      select d.Amount).Sum()) / 100) * locationPercentage);
+                                                                      select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum()) / 100) * locationPercentage);
                                     decimal plannedDisbursements = ((((from d in project.Disbursements
                                                                        where d.DisbursementType == DisbursementTypes.Planned
-                                                                       select d.Amount).Sum()) / 100) * locationPercentage);
+                                                                       select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum()) / 100) * locationPercentage);
 
                                     totalDisbursements += actualDisbursements;
 
@@ -503,7 +503,7 @@ namespace AIMS.Services
                                 EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
-                                ProjectValue = project.ProjectValue,
+                                ProjectValue = (project.ProjectValue * (exchangeRate / project.ExchangeRate)),
                                 ProjectPercentValue = project.ProjectPercentValue,
                                 ActualDisbursements = project.ActualDisbursements,
                                 PlannedDisbursements = project.PlannedDisbursements,
@@ -920,7 +920,7 @@ namespace AIMS.Services
                     List<int> sectorIds = new List<int>();
                     if (model.SectorIds.Count > 0)
                     {
-                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains((int)p.Sector.ParentSectorId), new string[] { "Sector" });
+                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains(p.SectorId) || model.SectorIds.Contains((int)p.Sector.ParentSectorId), new string[] { "Sector" });
                         List<int> projectIdsList = (from s in projectSectors
                                          select s.ProjectId).ToList<int>();
 
@@ -1088,10 +1088,10 @@ namespace AIMS.Services
 
                                     decimal actualDisbursements = (from d in project.Disbursements
                                                                    where d.DisbursementType == DisbursementTypes.Actual
-                                                                   select (d.Amount * d.ExchangeRate)).FirstOrDefault();
+                                                                   select (d.Amount * ( exchangeRate / d.ExchangeRate))).FirstOrDefault();
                                     decimal plannedDisbursements = (from d in project.Disbursements
                                                                     where d.DisbursementType == DisbursementTypes.Planned
-                                                                    select (d.Amount * d.ExchangeRate)).FirstOrDefault();
+                                                                    select (d.Amount * (exchangeRate / d.ExchangeRate))).FirstOrDefault();
                                     totalDisbursements = (actualDisbursements + plannedDisbursements);
 
                                     UtilityHelper helper = new UtilityHelper();
@@ -1113,6 +1113,7 @@ namespace AIMS.Services
                             decimal projectExchangeRate = (project.ExchangeRate == 0) ? 1 : project.ExchangeRate;
                             projectsListForSector.Add(new ProjectViewForSector()
                             {
+                                ProjectId = project.Id,
                                 Title = project.Title,
                                 StartingFinancialYear = project.StartingFinancialYear,
                                 EndingFinancialYear = project.EndingFinancialYear,

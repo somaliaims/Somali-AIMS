@@ -1715,6 +1715,7 @@ namespace AIMS.Models
 
     public class ProjectViewForSector
     {
+        public int ProjectId { get; set; }
         public string Title { get; set; }
         public string Funders { get; set; }
         public string Implementers { get; set; }

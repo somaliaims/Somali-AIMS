@@ -438,7 +438,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 Decimal disbursementValue = 0;
-                var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == DateTime.Now.Year, new string[] { "Year" });
+                var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == DateTime.Now.Year && d.DisbursementType == DisbursementTypes.Actual, new string[] { "Year" });
                 if (disbursements.Any())
                 {
                     disbursementValue = (from d in disbursements

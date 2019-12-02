@@ -437,8 +437,8 @@ namespace AIMS.Services
 
                     organizationsList.Add(new ImportedOrganizations()
                     {
-                        Organization = organization,
-                        OrganizationType = organizationType
+                        Organization = organization.Trim(),
+                        OrganizationType = organizationType.Trim()
                     });
                 }
             }
