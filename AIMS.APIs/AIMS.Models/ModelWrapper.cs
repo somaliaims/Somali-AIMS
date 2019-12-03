@@ -276,7 +276,6 @@ namespace AIMS.Models
     public class OrganizationView
     {
         public int Id { get; set; }
-        public string SourceType { get; set; }
         public int OrganizationTypeId { get; set; }
         public string OrganizationType { get; set; }
         public string OrganizationName { get; set; }
@@ -327,6 +326,12 @@ namespace AIMS.Models
     {
         [Required]
         public int OrganizationTypeId { get; set; }
+        [Required]
+        public string Name { get; set; }
+    }
+
+    public class SourceOrganizationModel
+    {
         [Required]
         public string Name { get; set; }
     }

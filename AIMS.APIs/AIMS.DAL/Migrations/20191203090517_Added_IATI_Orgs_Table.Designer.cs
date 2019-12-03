@@ -4,14 +4,16 @@ using AIMS.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    partial class AIMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191203090517_Added_IATI_Orgs_Table")]
+    partial class Added_IATI_Orgs_Table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -290,11 +292,7 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<string>("OrganizationName");
 
-                    b.Property<int?>("OrganizationTypeId");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("OrganizationTypeId");
 
                     b.ToTable("IATIOrganizations");
                 });
@@ -410,6 +408,8 @@ namespace AIMS.DAL.Migrations
                     b.Property<string>("OrganizationName");
 
                     b.Property<int?>("OrganizationTypeId");
+
+                    b.Property<int>("SourceType");
 
                     b.HasKey("Id");
 
@@ -844,13 +844,6 @@ namespace AIMS.DAL.Migrations
                         .WithMany()
                         .HasForeignKey("YearId")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("AIMS.Models.EFIATIOrganization", b =>
-                {
-                    b.HasOne("AIMS.Models.EFOrganizationTypes", "OrganizationType")
-                        .WithMany()
-                        .HasForeignKey("OrganizationTypeId");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFLogs", b =>

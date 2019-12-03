@@ -34,10 +34,10 @@ namespace AIMS.Services
         IEnumerable<OrganizationView> GetUserOrganizations();
 
         /// <summary>
-        /// Gets organizations imported from source (e.g. IATI)
+        /// Gets all iati organizations
         /// </summary>
         /// <returns></returns>
-        IEnumerable<OrganizationView> GetSourceOrganizations();
+        IEnumerable<OrganizationView> GetIATIOrganizations();
 
         /// <summary>
         /// Gets organization by id
@@ -146,7 +146,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                return unitWork.OrganizationRepository.GetProjection(o => o.SourceType == OrganizationSourceType.User, o => o.Id).Count();
+                return unitWork.OrganizationRepository.GetProjection(o => o.IsApproved == true, o => o.Id).Count();
             }
         }
 
@@ -171,7 +171,23 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
-                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.SourceType == OrganizationSourceType.User, new string[] { "OrganizationType" });
+                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.Id != 0, new string[] { "OrganizationType" });
+                if (organizations.Count() > 0)
+                {
+                    organizations = (from org in organizations
+                                     orderby org.OrganizationName ascending
+                                     select org);
+                }
+                return mapper.Map<List<OrganizationView>>(organizations);
+            }
+        }
+
+        public IEnumerable<OrganizationView> GetIATIOrganizations()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<OrganizationView> organizationsList = new List<OrganizationView>();
+                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.Id != 0, new string[] { "OrganizationType" });
                 if (organizations.Count() > 0)
                 {
                     organizations = (from org in organizations
@@ -206,7 +222,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<OrganizationView> organizationsList = new List<OrganizationView>();
-                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.SourceType == OrganizationSourceType.IATI, new string[] { "OrganizationType" });
+                var organizations = unitWork.IATIOrganizationRepository.GetWithInclude(o => o.Id != 0, new string[] { "OrganizationType" });
                 if (organizations.Count() > 0)
                 {
                     organizations = (from org in organizations
@@ -279,7 +295,6 @@ namespace AIMS.Services
                         var organizationType = unitWork.OrganizationTypesRepository.GetOne(o => o.Id == model.OrganizationTypeId);
                         var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
                         {
-                            SourceType = OrganizationSourceType.User,
                             OrganizationType = organizationType,
                             OrganizationName = model.Name.Trim(),
                         });

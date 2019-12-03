@@ -145,15 +145,8 @@ namespace AIMS.Services
                                     {
                                         OrganizationType = orgType,
                                         OrganizationName = organizationName,
-                                        SourceType = OrganizationSourceType.User,
                                         IsApproved = true
                                     });
-                                }
-                                else
-                                {
-                                    organization.SourceType = OrganizationSourceType.User;
-                                    unitWork.OrganizationRepository.Update(organization);
-                                    unitWork.Save();
                                 }
                             }
                             await unitWork.SaveAsync();

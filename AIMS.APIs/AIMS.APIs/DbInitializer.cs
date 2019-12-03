@@ -554,7 +554,7 @@ namespace AIMS.APIs
                     //Funders & Implementers
                     var unAgency = context.OrganizationTypes.Add(new EFOrganizationTypes() { TypeName = "UN Agency" });
                     var federalGovt = context.OrganizationTypes.Add(new EFOrganizationTypes() { TypeName = "Federal Government" });
-                    var undp = context.Organizations.Add(new EFOrganization() { OrganizationName = "UNDP", SourceType = OrganizationSourceType.User, OrganizationType = unAgency.Entity });
+                    var undp = context.Organizations.Add(new EFOrganization() { OrganizationName = "UNDP", OrganizationType = unAgency.Entity });
                     var mop = context.Organizations.Add(new EFOrganization() { OrganizationName = "Ministry of Planning, Somalia", OrganizationType = federalGovt.Entity });
                     
                     if (context.Users.Count() == 0)

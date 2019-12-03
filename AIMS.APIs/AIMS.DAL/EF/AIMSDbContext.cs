@@ -83,6 +83,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFFundingTypes> FundingTypes { get; set; }
         public DbSet<EFOrganizationTypes> OrganizationTypes { get; set; }
         public DbSet<EFOrganization> Organizations { get; set; }
+        public DbSet<EFIATIOrganization> IATIOrganizations { get; set; }
         public DbSet<EFUser> Users { get; set; }
         public DbSet<EFSectorTypes> SectorTypes { get; set; }
         public DbSet<EFSectorMappings> SectorMappings { get; set; }

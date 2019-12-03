@@ -1417,7 +1417,6 @@ namespace AIMS.Services
                                                 {
                                                     OrganizationName = funderName,
                                                     OrganizationTypeId = 1,
-                                                    SourceType = OrganizationSourceType.User,
                                                     IsApproved = true
                                                 });
                                                 unitWork.Save();
@@ -1470,7 +1469,6 @@ namespace AIMS.Services
                                                 {
                                                     OrganizationName = implementerName,
                                                     OrganizationTypeId = 1,
-                                                    SourceType = OrganizationSourceType.User,
                                                     IsApproved = true
                                                 });
                                                 unitWork.Save();
