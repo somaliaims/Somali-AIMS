@@ -155,10 +155,10 @@ namespace AIMS.Services
             {
                 var sectorDetailList = (from sec in sectors
                                         orderby sec.SectorName
-                          select new { sec.Id, sec.SectorName });
+                          select new { Id = sec.Id, SectorName = sec.SectorName, ParentSector = sec.ParentSector.SectorName });
                 foreach(var sec in sectorDetailList)
                 {
-                    sectorsList.Add(new ProjectDetailSectorView() { Id = sec.Id, Sector = sec.SectorName });
+                    sectorsList.Add(new ProjectDetailSectorView() { Id = sec.Id, Sector = sec.SectorName, ParentSector = sec.ParentSector });
                 }
             }
             
@@ -915,7 +915,6 @@ namespace AIMS.Services
                                                  select project;
                         }
                     }
-
                     
                     List<int> sectorIds = new List<int>();
                     if (model.SectorIds.Count > 0)

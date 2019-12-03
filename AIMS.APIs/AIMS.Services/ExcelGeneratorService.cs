@@ -125,13 +125,6 @@ namespace AIMS.Services
                     projectDesc.SetCellValue("Description");
                     projectDesc.CellStyle = headerStyle;
 
-                    foreach(var sector in sectors)
-                    {
-                        var sectorCell = row.CreateCell(++colIndex);
-                        sectorCell.SetCellValue(sector.Sector);
-                        sectorCell.CellStyle = headerStyle;
-                    }
-
                     var startYear = row.CreateCell(++colIndex);
                     startYear.SetCellValue("Start year");
                     startYear.CellStyle = headerStyle;
@@ -165,6 +158,14 @@ namespace AIMS.Services
                         var yearCell = row.CreateCell(++colIndex);
                         yearCell.SetCellValue("Disbursements " + yr.ToString());
                         yearCell.CellStyle = headerStyle;
+                    }
+
+                    ICell sectorCell = null;
+                    foreach (var sector in sectors)
+                    {
+                        sectorCell = row.CreateCell(++colIndex);
+                        sectorCell.SetCellValue(sector.ParentSector + " - " + sector.Sector);
+                        sectorCell.CellStyle = headerStyle;
                     }
 
                     ICell locationCell = null;
@@ -204,25 +205,6 @@ namespace AIMS.Services
                         var descriptionCell = row.CreateCell(++col);
                         descriptionCell.SetCellValue(project.Description);
                         descriptionCell.CellStyle = dataCellStyle;
-
-                        var projectSectors = project.Sectors;
-                        foreach (var sector in sectors)
-                        {
-                            var projectSectorCell = row.CreateCell(++col, CellType.Numeric);
-                            var retrieveSector = (from s in projectSectors
-                                                    where s.Name.Equals(sector.Sector, StringComparison.OrdinalIgnoreCase)
-                                                    select s).FirstOrDefault();
-
-                            if (retrieveSector != null)
-                            {
-                                projectSectorCell.SetCellValue(retrieveSector.FundsPercentage.ToString());
-                            }
-                            else
-                            {
-                                projectSectorCell.SetCellValue("0");
-                            }
-                            projectSectorCell.CellStyle = dataCellStyle;
-                        }
 
                         var startYearCell = row.CreateCell(++col);
                         startYearCell.SetCellValue(project.StartingFinancialYear.ToString());
@@ -273,6 +255,25 @@ namespace AIMS.Services
                                 disbursementCell.SetCellValue(ApplyThousandFormat(disbursement.Disbursement));
                             }
                             disbursementCell.CellStyle = dataCellStyle;
+                        }
+
+                        var projectSectors = project.Sectors;
+                        foreach (var sector in sectors)
+                        {
+                            var projectSectorCell = row.CreateCell(++col, CellType.Numeric);
+                            var retrieveSector = (from s in projectSectors
+                                                  where s.Name.Equals(sector.Sector, StringComparison.OrdinalIgnoreCase)
+                                                  select s).FirstOrDefault();
+
+                            if (retrieveSector != null)
+                            {
+                                projectSectorCell.SetCellValue(retrieveSector.FundsPercentage.ToString());
+                            }
+                            else
+                            {
+                                projectSectorCell.SetCellValue("0");
+                            }
+                            projectSectorCell.CellStyle = dataCellStyle;
                         }
 
                         var projectLocations = project.Locations;

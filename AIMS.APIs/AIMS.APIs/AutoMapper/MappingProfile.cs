@@ -111,6 +111,7 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFProjectSectors, SectorAbstractView>()
                 .ForMember(s => s.Name, opts => opts.MapFrom(source => source.Sector.SectorName))
+                .ForMember(s => s.ParentSector, opts => opts.MapFrom(source => source.Sector.ParentSector))
                 .ForMember(s => s.FundsPercentage, opts => opts.MapFrom(source => source.FundsPercentage));
 
             CreateMap<EFProjectDeletionRequests, ProjectDeletionRequestView>()

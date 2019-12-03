@@ -319,6 +319,7 @@ namespace AIMS.Models
     public class SectorAbstractView
     {
         public string Name { get; set; }
+        public string ParentSector { get; set; }
         public decimal FundsPercentage { get; set; }
     }
 
@@ -754,6 +755,7 @@ namespace AIMS.Models
     public class ProjectDetailSectorView
     {
         public int Id { get; set; }
+        public string ParentSector { get; set; }
         public string Sector { get; set; }
     }
 
