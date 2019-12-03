@@ -28,6 +28,17 @@ namespace AIMS.APIs.Controllers
             return Ok(response);
         }
 
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid id provided");
+            }
+            var response = organizationTypeService.Get(id);
+            return Ok(response);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] OrganizationTypeModel model)
         {

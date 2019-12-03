@@ -27,6 +27,13 @@ namespace AIMS.Services
         Task<IEnumerable<OrganizationTypeView>> GetAllAsync();
 
         /// <summary>
+        /// Gets organization type for the provided id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        OrganizationTypeView Get(int id);
+
+        /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
@@ -80,6 +87,20 @@ namespace AIMS.Services
             {
                 var organizationTypes = await unitWork.OrganizationTypesRepository.GetAllAsync();
                 return await Task<IEnumerable<OrganizationTypeView>>.Run(() => mapper.Map<List<OrganizationTypeView>>(organizationTypes)).ConfigureAwait(false);
+            }
+        }
+
+        public OrganizationTypeView Get(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var orgType = unitWork.OrganizationTypesRepository.GetByID(id);
+                OrganizationTypeView orgTypeView = new OrganizationTypeView();
+                if (orgType != null)
+                {
+                    orgTypeView.TypeName = orgType.TypeName;
+                }
+                return orgTypeView;
             }
         }
 
