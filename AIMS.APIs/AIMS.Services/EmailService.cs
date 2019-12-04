@@ -21,7 +21,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        string GetTextForSuggestionType(ProjectSuggestionType type, string projectTitle);
+        string GetTextForSuggestionType(string projectTitle);
 
         /// <summary>
         /// Sends contact email to users
@@ -81,27 +81,9 @@ namespace AIMS.Services
             return emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Subject, model.Message, model.FooterMessage);
         }
 
-        public string GetTextForSuggestionType(ProjectSuggestionType type, string projectTitle)
+        public string GetTextForSuggestionType(string projectTitle)
         {
-            string suggestedText = "";
-            switch(type)
-            {
-                case ProjectSuggestionType.AddData:
-                    suggestedText = "Suggestion through AIMS to add some data to the project (<b>" + projectTitle  + "</b>)";
-                    break;
-
-                case ProjectSuggestionType.EditData:
-                    suggestedText = "Suggestion through AIMS to edit some data for the project (<b>" + projectTitle + "</b>)";
-                    break;
-
-                case ProjectSuggestionType.AmendData:
-                    suggestedText = "Suggestion through AIMS for correction of some data for the project (<b>" + projectTitle + "</b>)";
-                    break;
-
-                default:
-                    suggestedText = "Suggestion through AIMS to update data for the project (<b>" + projectTitle + "</b>)";
-                    break;
-            }
+            string suggestedText = "Suggestion through AIMS to update data for the project (<b>" + projectTitle + "</b>)";
             return suggestedText;
         }
 

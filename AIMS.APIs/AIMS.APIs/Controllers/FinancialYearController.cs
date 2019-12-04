@@ -56,6 +56,22 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [HttpPost("AddRange")]
+        public IActionResult AddRange([FromBody] FinancialYearRangeModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = financialYearService.AddRange(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.ReturnedId);
+        }
+
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] FinancialYearModel model)
         {

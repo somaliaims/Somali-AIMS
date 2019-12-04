@@ -466,8 +466,6 @@ namespace AIMS.Models
     public class ProjectHelpEmail
     {
         [Required]
-        public ProjectSuggestionType suggesstionType { get; set; }
-        [Required]
         public string SenderName { get; set; }
         [Required]
         public int ProjectId { get; set; }
@@ -1322,6 +1320,14 @@ namespace AIMS.Models
     {
         [Required]
         public int FinancialYear { get; set; }
+    }
+
+    public class FinancialYearRangeModel
+    {
+        [Required]
+        public int StartingYear { get; set; }
+        [Required]
+        public int EndingYear { get; set; }
     }
 
     public class NotificationModel

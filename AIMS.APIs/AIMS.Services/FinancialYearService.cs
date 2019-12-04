@@ -40,6 +40,13 @@ namespace AIMS.Services
         ActionResponse Add(FinancialYearModel model);
 
         /// <summary>
+        /// Adds range of years
+        /// </summary>
+        /// <param name="years"></param>
+        /// <returns></returns>
+        ActionResponse AddRange(FinancialYearRangeModel years);
+
+        /// <summary>
         /// Adds multiple years, for internal use only
         /// </summary>
         /// <param name="years"></param>
@@ -116,6 +123,44 @@ namespace AIMS.Services
 
                 }
                 catch (Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse AddRange(FinancialYearRangeModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                try
+                {
+                    if (model.StartingYear > model.EndingYear)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetInvalidEndingFinancialYearMessage();
+                        response.Success = false;
+                        return response;
+                    }
+                    var financialYears = unitWork.FinancialYearRepository.GetProjection(y => y.Id != 0, y => y.FinancialYear);
+                    for(int year = model.StartingYear; year <= model.EndingYear; year++)
+                    {
+                        var financialYearExists = (from fy in financialYears
+                                                   where fy == year
+                                                   select fy).FirstOrDefault();
+
+                        if (financialYearExists < 1)
+                        {
+                            unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = year });
+                        }
+                    }
+                    unitWork.Save();
+                }
+                catch(Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
