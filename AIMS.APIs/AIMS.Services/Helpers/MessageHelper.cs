@@ -301,6 +301,12 @@ namespace AIMS.Services.Helpers
         /// 
         /// </summary>
         /// <returns></returns>
+        string GetInvalidFinancialYearMessage();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         string GetInvalidEndingFinancialYearMessage();
 
     }
@@ -334,6 +340,7 @@ namespace AIMS.Services.Helpers
         private readonly string DEPENDENT_PROJECTS_FOR_ORGANIZATION = "Dependent projects found for the selected organization. Either map another organization or remove organization (funder/implementer) from the dependent projects";
         private readonly string USER_ACCOUNTS_ASSOCIATED_WITH_ORGANIZATION = "There are user accounts associated with this organization. Either map this organizaiton to another or delete user accounts first in order to delete the organizaiton";
         private readonly string EXRATE_ORDER_EXISTS = "Exchange rate usage order you provided already exits, provide a different one";
+        private readonly string INVALID_FINANCIAL_YEAR = "Financial year you requested is not allowed.";
         private readonly string INVALID_STARTING_FINANCIAL_YEAR = "The project you provided has a different starting financial year than provided for disbursements. Please change the financial year for project and try again";
         private readonly string INVALID_ENDING_FINANCIAL_YEAR = "The project you provided has a different ending financial year than provided for disbursements. Please change the financial year for project and try again";
 
@@ -501,6 +508,11 @@ namespace AIMS.Services.Helpers
         public string GetInvalidStartingFinancialYearMessage()
         {
             return (INVALID_STARTING_FINANCIAL_YEAR);
+        }
+
+        public string GetInvalidFinancialYearMessage()
+        {
+            return (INVALID_FINANCIAL_YEAR);
         }
 
         public string GetInvalidEndingFinancialYearMessage()

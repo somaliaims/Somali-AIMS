@@ -103,7 +103,16 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                IMessageHelper mHelper;
                 ActionResponse response = new ActionResponse();
+                if (model.FinancialYear < 1900)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetInvalidFinancialYearMessage();
+                    response.Success = false;
+                    return response;
+                }
+                
                 try
                 {
                     var isFinancialYearCreated = unitWork.FinancialYearRepository.GetOne(l => l.FinancialYear == model.FinancialYear);
