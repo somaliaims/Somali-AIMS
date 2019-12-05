@@ -150,7 +150,7 @@ namespace AIMS.Services
             int endingFinancialYear = 0;
 
             var financialYears = unitWork.FinancialYearRepository.GetProjection(y => y.FinancialYear > 0, y => y.FinancialYear);
-            var sectors = unitWork.SectorRepository.GetWithInclude(s => s.ParentSectorId != 0 && s.SectorType.IsPrimary == true, new string[] { "ParentSector" });
+            var sectors = unitWork.SectorRepository.GetWithInclude(s => s.ParentSectorId != null && s.SectorType.IsPrimary == true, new string[] { "ParentSector" });
             if (sectors.Any())
             {
                 var sectorDetailList = (from sec in sectors
