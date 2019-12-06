@@ -58,7 +58,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ActionResponse Delete(int id);
+        Task<ActionResponse> DeleteAsync(int id, int newId = 0);
     }
 
     public class OrganizationTypeService : IOrganizationTypeService
@@ -205,24 +205,56 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Delete(int id)
+        public async Task<ActionResponse> DeleteAsync(int id, int newId = 0)
         {
+            ActionResponse response = new ActionResponse();
+            IMessageHelper mHelper;
+            if (id < 1 || newId < 1)
+            {
+                mHelper = new MessageHelper();
+                response.Success = false;
+                response.Message = mHelper.GetNotFound("Organization Type");
+                return response;
+            }
             using (var unitWork = new UnitOfWork(context))
             {
-                ActionResponse response = new ActionResponse();
-                var organizationTypeObj = unitWork.OrganizationTypesRepository.GetByID(id);
-                if (organizationTypeObj == null)
+                mHelper = new MessageHelper();
+                var organizationTypes = unitWork.OrganizationTypesRepository.GetManyQueryable(t => (t.Id == id || t.Id == newId));
+                if (organizationTypes.Count() < 2)
                 {
-                    IMessageHelper mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("Organization Type");
+                    response.Message = mHelper.GetNotFound("Either of Organization Type/s");
                     return response;
                 }
 
-                unitWork.OrganizationTypesRepository.Delete(organizationTypeObj);
-                unitWork.Save();
-                return response;
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        var orgToDelete = (from type in organizationTypes
+                                           where type.Id == id
+                                           select type).FirstOrDefault();
+                        var orgToMap = (from type in organizationTypes
+                                        where type.Id == newId
+                                        select type).FirstOrDefault();
+
+                        var organizationsToChange = await unitWork.OrganizationRepository.GetManyQueryableAsync(o => o.OrganizationTypeId == orgToDelete.Id);
+                        if (organizationsToChange.Any())
+                        {
+                            foreach(var org in organizationsToChange)
+                            {
+                                org.OrganizationTypeId = orgToMap.Id;
+                                unitWork.OrganizationRepository.Update(org);
+                            }
+                            await unitWork.SaveAsync();
+                        }
+                        unitWork.OrganizationTypesRepository.Delete(orgToDelete);
+                        await unitWork.SaveAsync();
+                    }
+                });
             }
+            return await Task.Run(() => response).ConfigureAwait(false);
         }
     }
 }

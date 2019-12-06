@@ -69,15 +69,21 @@ namespace AIMS.APIs.Controllers
             return Ok(response.Message);
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        [HttpDelete]
+        [Route("Delete/{id}/{newId}")]
+        public async Task<IActionResult> Delete(int id, int newId = 0)
         {
-            var response = organizationTypeService.Delete(id);
+            if (id <= 0)
+            {
+                return BadRequest("Invalid id provided");
+            }
+
+            var response = await organizationTypeService.DeleteAsync(id, newId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
             }
-            return Ok(response.Message);
+            return Ok(true);
         }
     }
 }
