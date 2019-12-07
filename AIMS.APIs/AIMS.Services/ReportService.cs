@@ -420,6 +420,9 @@ namespace AIMS.Services
                         }
                     }
 
+                    locationsByProjects = (from loc in locationsByProjects
+                                           orderby loc.Location
+                                           select loc).ToList();
                     foreach (var locationByProject in locationsByProjects)
                     {
                         projectsByLocation = new ProjectsByLocation();
@@ -1023,6 +1026,9 @@ namespace AIMS.Services
                         }
                     }
 
+                    sectorsByProjects = (from sec in sectorsByProjects
+                                         orderby sec.Sector
+                                         select sec).ToList();
                     foreach (var sectorByProject in sectorsByProjects)
                     {
                         projectsBySector = new ProjectsBySector();

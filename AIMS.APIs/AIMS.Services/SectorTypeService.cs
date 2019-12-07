@@ -118,6 +118,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var sectorTypes = unitWork.SectorTypesRepository.GetManyQueryable(s => s.IsPrimary != true);
+                sectorTypes = (from st in sectorTypes
+                               orderby st.TypeName
+                               select st);
                 return mapper.Map<List<SectorTypesView>>(sectorTypes);
             }
         }
@@ -160,6 +163,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var sectorTypes = await unitWork.SectorTypesRepository.GetAllAsync();
+                sectorTypes = (from st in sectorTypes
+                               orderby st.TypeName
+                               select st);
                 return await Task<IEnumerable<SectorTypesView>>.Run(() => mapper.Map<List<SectorTypesView>>(sectorTypes)).ConfigureAwait(false);
             }
         }
@@ -170,6 +176,9 @@ namespace AIMS.Services
             {
                 List<SectorTypesView> sectorTypesList = new List<SectorTypesView>();
                 var sectorTypes = unitWork.SectorTypesRepository.GetMany(o => o.TypeName.Contains(criteria));
+                sectorTypes = (from st in sectorTypes
+                               orderby st.TypeName
+                               select st);
                 return mapper.Map<List<SectorTypesView>>(sectorTypes);
             }
         }
