@@ -209,7 +209,7 @@ namespace AIMS.Services
         {
             ActionResponse response = new ActionResponse();
             IMessageHelper mHelper;
-            if (id < 1 || newId < 1)
+            if (id < 1)
             {
                 mHelper = new MessageHelper();
                 response.Success = false;
@@ -220,10 +220,26 @@ namespace AIMS.Services
             {
                 mHelper = new MessageHelper();
                 var organizationTypes = unitWork.OrganizationTypesRepository.GetManyQueryable(t => (t.Id == id || t.Id == newId));
-                if (organizationTypes.Count() < 2)
+                if ((id > 1 && organizationTypes.Count() < 1) || (id > 1 && newId > 1 && organizationTypes.Count() < 2))
                 {
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("Either of Organization Type/s");
+                    response.Message = mHelper.GetNotFound("Organization Type/s");
+                    return response;
+                }
+
+                var orgToDelete = (from type in organizationTypes
+                                   where type.Id == id
+                                   select type).FirstOrDefault();
+
+                var orgToMap = (from type in organizationTypes
+                                where type.Id == newId
+                                select type).FirstOrDefault();
+
+                if (orgToMap == null && newId > 0)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Organization to map");
                     return response;
                 }
 
@@ -232,25 +248,22 @@ namespace AIMS.Services
                 {
                     using (var transaction = context.Database.BeginTransaction())
                     {
-                        var orgToDelete = (from type in organizationTypes
-                                           where type.Id == id
-                                           select type).FirstOrDefault();
-                        var orgToMap = (from type in organizationTypes
-                                        where type.Id == newId
-                                        select type).FirstOrDefault();
-
-                        var organizationsToChange = await unitWork.OrganizationRepository.GetManyQueryableAsync(o => o.OrganizationTypeId == orgToDelete.Id);
-                        if (organizationsToChange.Any())
+                        if (newId > 0)
                         {
-                            foreach(var org in organizationsToChange)
+                            var organizationsToChange = await unitWork.OrganizationRepository.GetManyQueryableAsync(o => o.OrganizationTypeId == orgToDelete.Id);
+                            if (organizationsToChange.Any())
                             {
-                                org.OrganizationTypeId = orgToMap.Id;
-                                unitWork.OrganizationRepository.Update(org);
+                                foreach (var org in organizationsToChange)
+                                {
+                                    org.OrganizationTypeId = orgToMap.Id;
+                                    unitWork.OrganizationRepository.Update(org);
+                                }
+                                await unitWork.SaveAsync();
                             }
-                            await unitWork.SaveAsync();
                         }
                         unitWork.OrganizationTypesRepository.Delete(orgToDelete);
                         await unitWork.SaveAsync();
+                        transaction.Commit();
                     }
                 });
             }

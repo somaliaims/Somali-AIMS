@@ -69,8 +69,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.Message);
         }
 
-        [HttpDelete]
-        [Route("Delete/{id}/{newId}")]
+        [HttpDelete("{id}/{newId}")]
         public async Task<IActionResult> Delete(int id, int newId = 0)
         {
             if (id <= 0)

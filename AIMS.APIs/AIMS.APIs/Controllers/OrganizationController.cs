@@ -76,6 +76,12 @@ namespace AIMS.APIs.Controllers
             return Ok(organizations);
         }
 
+        [HttpGet("GetOrganizationsForType/{id}")]
+        public IActionResult GetOrganizationsForType(int id)
+        {
+            return Ok(organizationService.GetOrganizationsForType(id));
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] OrganizationModel model)
         {

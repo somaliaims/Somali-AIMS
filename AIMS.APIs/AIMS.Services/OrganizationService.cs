@@ -54,6 +54,13 @@ namespace AIMS.Services
         IEnumerable<OrganizationView> GetMatching(string criteria);
 
         /// <summary>
+        /// Gets organizations for the provided type id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IEnumerable<OrganizationView> GetOrganizationsForType(int id);
+
+        /// <summary>
         /// Gets all organizations async
         /// </summary>
         /// <returns></returns>
@@ -244,6 +251,15 @@ namespace AIMS.Services
                     organization = org;
                 }
                 return mapper.Map<OrganizationViewModel>(organization);
+            }
+        }
+
+        public IEnumerable<OrganizationView> GetOrganizationsForType(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var organizationList = unitWork.OrganizationRepository.GetManyQueryable(o => o.OrganizationTypeId.Equals(id));
+                return mapper.Map<List<OrganizationView>>(organizationList);
             }
         }
 
