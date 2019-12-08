@@ -540,8 +540,8 @@ namespace AIMS.Services
                         break;
                 }
 
-                var organizationTypesVocabs = this.GetDeserializedOrgTypes(orgTypesJson);
-                var organizationTypes = unitWork.OrganizationTypesRepository.GetManyQueryable(o => o.Id != 0);
+                //var organizationTypesVocabs = this.GetDeserializedOrgTypes(orgTypesJson);
+                //var organizationTypes = unitWork.OrganizationTypesRepository.GetManyQueryable(o => o.Id != 0);
                 var organizationsList = unitWork.IATIOrganizationRepository.GetManyQueryable(o => o.Id != 0);
                 var orgNames = (from o in organizationsList
                                 select o.OrganizationName.Trim()).ToList<string>();
@@ -571,31 +571,29 @@ namespace AIMS.Services
                             if (isOrganizationInList == null && isOrganizationInDb == null)
                             {
                                 int orgCode = org.Code;
-                                EFOrganizationTypes orgType = null;
+                                /*EFOrganizationTypes orgType = null;
                                 string orgTypeName = (from v in organizationTypesVocabs
                                                         where v.Code == org.Code
                                                         select v.Name).FirstOrDefault();
                                 orgType = (from t in organizationTypes
                                                       where t.TypeName.Equals(orgTypeName, StringComparison.OrdinalIgnoreCase)
-                                                      select t).FirstOrDefault();
+                                                      select t).FirstOrDefault();*/
 
-                                withOutTypeCount = (orgType == null) ? withOutTypeCount : (withOutTypeCount + 1);
+                                /*withOutTypeCount = (orgType == null) ? withOutTypeCount : (withOutTypeCount + 1);
                                 if (orgType != null)
                                 {
                                     newIATIOrganizations.Add(new EFIATIOrganization()
                                     {
                                         OrganizationName = org.Name,
-                                        OrganizationType = orgType
+                                        //OrganizationType = orgType
                                     });
                                 }
                                 else
+                                {*/
+                                newIATIOrganizations.Add(new EFIATIOrganization()
                                 {
-                                    newIATIOrganizations.Add(new EFIATIOrganization()
-                                    {
-                                        OrganizationName = org.Name,
-                                    });
-                                }
-                                
+                                    OrganizationName = org.Name,
+                                });
                             }
                         }
                     }

@@ -113,7 +113,7 @@ namespace AIMS.APIs.Scheduler
                     userService.SetNotificationsForUsers();
                     var sectorResponse = service.ExtractAndSaveIATISectors(filePath, sectorsVocabPath);
                     service.ExtractAndSaveLocations(filePath);
-                    service.ExtractAndSaveOrganizationTypes(cleanedOrgTypesVocabJson);
+                    //service.ExtractAndSaveOrganizationTypes(cleanedOrgTypesVocabJson);
                     var orgResponse = service.ExtractAndSaveOrganizations(filePath, cleanedOrgTypesVocabJson);
                     notificationService.SendNotificationsForNewOrganizations(orgResponse.ReturnedId, Convert.ToInt32(orgResponse.Message));
                     notificationService.SendNotificationsForNewSectors(sectorResponse.ReturnedId);

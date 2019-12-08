@@ -70,6 +70,13 @@ namespace AIMS.Services
         Task<ProjectReportView> GetAllProjectsReport(SearchAllProjectsModel model);
 
         /// <summary>
+        /// Gets project report for a single project
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<ProjectReportView> GetProjectReport(int id);
+
+        /// <summary>
         /// Internal function for extracting rate of default currency
         /// </summary>
         /// <param name="currency"></param>
@@ -216,6 +223,120 @@ namespace AIMS.Services
                             where p.EndingFinancialYear.FinancialYear <= model.EndingYear ||
                             p.StartingFinancialYear.FinancialYear <= model.EndingYear
                             select p);
+            }
+
+            foreach (var project in projects)
+            {
+                IEnumerable<string> funderNames = (from f in project.Funders
+                                                   select f.Funder.OrganizationName);
+                IEnumerable<string> implementerNames = (from i in project.Implementers
+                                                        select i.Implementer.OrganizationName);
+                IEnumerable<string> organizations = funderNames.Union(implementerNames);
+
+                List<OrganizationAbstractView> fundersList = new List<OrganizationAbstractView>();
+                foreach (string org in funderNames)
+                {
+                    fundersList.Add(new OrganizationAbstractView()
+                    {
+                        Name = org
+                    });
+                }
+
+                List<OrganizationAbstractView> implementersList = new List<OrganizationAbstractView>();
+                foreach (string org in implementerNames)
+                {
+                    implementersList.Add(new OrganizationAbstractView()
+                    {
+                        Name = org
+                    });
+                }
+                projectsList.Add(new ProjectDetailView()
+                {
+                    Id = project.Id,
+                    Title = project.Title,
+                    Description = project.Description,
+                    ProjectCurrency = project.ProjectCurrency,
+                    ProjectValue = project.ProjectValue,
+                    ExchangeRate = project.ExchangeRate,
+                    StartingFinancialYear = project.StartingFinancialYear.FinancialYear,
+                    EndingFinancialYear = project.EndingFinancialYear.FinancialYear,
+                    Funders = fundersList,
+                    Implementers = implementersList,
+                    Locations = mapper.Map<List<LocationAbstractView>>(project.Locations),
+                    Sectors = mapper.Map<List<SectorAbstractView>>(project.Sectors),
+                    Documents = mapper.Map<List<DocumentAbstractView>>(project.Documents),
+                    Disbursements = mapper.Map<List<DisbursementAbstractView>>(project.Disbursements),
+                    Markers = mapper.Map<List<MarkerAbstractView>>(project.Markers)
+                });
+            }
+            projectsReport.StartingFinancialYear = startingFinancialYear;
+            projectsReport.EndingFinancialYear = endingFinancialYear;
+            projectsReport.Markers = markersList;
+            projectsReport.Locations = locationsList;
+            projectsReport.Sectors = sectorsList;
+            projectsReport.Projects = projectsList;
+            return await Task<ProjectReportView>.Run(() => projectsReport).ConfigureAwait(false);
+        }
+
+        public async Task<ProjectReportView> GetProjectReport(int id)
+        {
+            var unitWork = new UnitOfWork(context);
+            ProjectReportView projectsReport = new ProjectReportView();
+            List<ProjectDetailView> projectsList = new List<ProjectDetailView>();
+            List<ProjectDetailSectorView> sectorsList = new List<ProjectDetailSectorView>();
+            IQueryable<EFProject> projects;
+            int startingFinancialYear = 0;
+            int endingFinancialYear = 0;
+
+            var financialYears = unitWork.FinancialYearRepository.GetProjection(y => y.FinancialYear > 0, y => y.FinancialYear);
+            var sectors = unitWork.SectorRepository.GetWithInclude(s => s.ParentSectorId != null && s.SectorType.IsPrimary == true, new string[] { "ParentSector" });
+            if (sectors.Any())
+            {
+                var sectorDetailList = (from sec in sectors
+                                        orderby sec.SectorName
+                                        select new { Id = sec.Id, SectorName = sec.SectorName, ParentSector = sec.ParentSector.SectorName });
+                foreach (var sec in sectorDetailList)
+                {
+                    sectorsList.Add(new ProjectDetailSectorView() { Id = sec.Id, Sector = sec.SectorName, ParentSector = sec.ParentSector });
+                }
+            }
+
+            var locations = unitWork.LocationRepository.GetProjection(l => l.Id != 0, l => new { l.Id, l.Location });
+            var markers = unitWork.MarkerRepository.GetProjection(m => m.Id != 0, m => new { m.Id, m.FieldTitle });
+            projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id == id, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers", "Markers.Marker" });
+            startingFinancialYear = financialYears.Min();
+            endingFinancialYear = financialYears.Max();
+
+            List<ProjectDetailLocationView> locationsList = new List<ProjectDetailLocationView>();
+            if (locations.Any())
+            {
+                locations = (from l in locations
+                             orderby l.Location
+                             select l);
+                foreach (var location in locations)
+                {
+                    locationsList.Add(new ProjectDetailLocationView()
+                    {
+                        Id = location.Id,
+                        Location = location.Location
+                    });
+                }
+            }
+
+            List<ProjectDetailMarkerView> markersList = new List<ProjectDetailMarkerView>();
+            if (markers.Any())
+            {
+                markers = (from m in markers
+                           orderby m.FieldTitle
+                           select m);
+                foreach (var marker in markers)
+                {
+                    markersList.Add(new ProjectDetailMarkerView()
+                    {
+                        Id = marker.Id,
+                        Marker = marker.FieldTitle
+                    });
+                }
             }
 
             foreach (var project in projects)

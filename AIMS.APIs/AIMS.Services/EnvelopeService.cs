@@ -160,6 +160,12 @@ namespace AIMS.Services
                 var envelopeTypes = unitWork.EnvelopeTypesRepository.GetManyQueryable(e => e.Id != 0);
                 var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => f.Id != 0);
 
+                if (defaultOrganizationType == null)
+                {
+                    defaultOrganizationType = unitWork.OrganizationTypesRepository.Insert(new EFOrganizationTypes() { TypeName = "Other" });
+                    unitWork.Save();
+                }
+
                 var envelopeDevelopment = (from et in envelopeTypes
                                            where et.TypeName.Equals("Development", StringComparison.OrdinalIgnoreCase)
                                            select et).FirstOrDefault();
@@ -207,8 +213,6 @@ namespace AIMS.Services
                     yearTwenty = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = 2020 });
                     unitWork.Save();
                 }
-
-
 
                 try
                 {
