@@ -79,13 +79,20 @@ namespace AIMS.APIs.Controllers
         [HttpGet("GetProjectReport/{id}")]
         public async Task<IActionResult> GetProjectReport(int id)
         {
-            var projectReport = await reportService.GetProjectReport(id);
-            var response = excelService.GenerateAllProjectsReport(projectReport);
-            if (!response.Success)
+            var report = await reportService.GetProjectReport(id, clientUrl);
+            if (report.ProjectProfile != null)
             {
-                return BadRequest(response.Message);
+                var response = excelService.GenerateAllProjectsReport(report.ProjectProfile);
+                if (!response.Success)
+                {
+                    return BadRequest(response.Message);
+                }
+                else
+                {
+                    report.ReportSettings.ExcelReportName = response.Message;
+                }
             }
-            return Ok(response);
+            return Ok(report);
         }
 
 

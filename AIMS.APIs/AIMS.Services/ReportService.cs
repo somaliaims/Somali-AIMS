@@ -74,7 +74,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<ProjectReportView> GetProjectReport(int id);
+        Task<ProjectDetailReport> GetProjectReport(int id, string reportUrl);
 
         /// <summary>
         /// Internal function for extracting rate of default currency
@@ -278,9 +278,18 @@ namespace AIMS.Services
             return await Task<ProjectReportView>.Run(() => projectsReport).ConfigureAwait(false);
         }
 
-        public async Task<ProjectReportView> GetProjectReport(int id)
+        public async Task<ProjectDetailReport> GetProjectReport(int id, string reportUrl)
         {
             var unitWork = new UnitOfWork(context);
+            ProjectDetailReport report = new ProjectDetailReport();
+            report.ReportSettings = new Report()
+            {
+                Title = ReportConstants.PROJECT_PROFILE_TITLE,
+                SubTitle = ReportConstants.PROJECT_PROFILE_SUBTITLE,
+                Footer = ReportConstants.PROJECTS_PROFILE_FOOTER,
+                Dated = DateTime.Now.ToLongDateString(),
+                ReportUrl = reportUrl + ReportConstants.PROJECT_PROFILE_URL + id
+            };
             ProjectReportView projectsReport = new ProjectReportView();
             List<ProjectDetailView> projectsList = new List<ProjectDetailView>();
             List<ProjectDetailSectorView> sectorsList = new List<ProjectDetailSectorView>();
@@ -339,6 +348,14 @@ namespace AIMS.Services
                 }
             }
 
+            var firstProject = (from p in projects
+                           select p).FirstOrDefault();
+            if (firstProject != null)
+            {
+                startingFinancialYear = firstProject.StartingFinancialYear.FinancialYear;
+                endingFinancialYear = firstProject.EndingFinancialYear.FinancialYear;
+            }
+
             foreach (var project in projects)
             {
                 IEnumerable<string> funderNames = (from f in project.Funders
@@ -389,7 +406,8 @@ namespace AIMS.Services
             projectsReport.Locations = locationsList;
             projectsReport.Sectors = sectorsList;
             projectsReport.Projects = projectsList;
-            return await Task<ProjectReportView>.Run(() => projectsReport).ConfigureAwait(false);
+            report.ProjectProfile = projectsReport;
+            return await Task<ProjectDetailReport>.Run(() => report).ConfigureAwait(false);
         }
 
         public async Task<ProjectProfileReportByLocation> GetProjectsByLocations(SearchProjectsByLocationModel model, string reportUrl, string defaultCurrency, decimal exchangeRate)

@@ -13,6 +13,7 @@ namespace AIMS.Services.Helpers
         public static readonly string YEARLY_REPORT_URL = "time-trend-report/";
         public static readonly string ENVELOPE_REPORT_URL = "envelope-report/";
         public static readonly string PROJECTS_REPORT_URL = "projects-report";
+        public static readonly string PROJECT_PROFILE_URL = "view-project/";
 
         //Projects related constants
         public static readonly string PROJECTS_LIST_TITLE = "Projects list";
@@ -52,6 +53,11 @@ namespace AIMS.Services.Helpers
         public static readonly string PROJECTS_REPORT_TITLE = "Projects report";
         public static readonly string PROJECTS_REPORT_SUBTITLE = "Projects report";
         public static readonly string PROJECTS_REPORT_FOOTER = "Projects report from AIMS Somalia";
+
+        //Constants for project profile report
+        public static readonly string PROJECT_PROFILE_TITLE = "Project profile report";
+        public static readonly string PROJECT_PROFILE_SUBTITLE = "Project profile report";
+        public static readonly string PROJECT_PROFILE_FOOTER = "Project profile report from AIMS Somalia";
 
         public static readonly int YEAR_MONTHS = 12;
     }

@@ -1471,6 +1471,12 @@ namespace AIMS.Models
         public ProjectProfileView ProjectProfile { get; set; }
     }
 
+    public class ProjectDetailReport
+    {
+        public Report ReportSettings { get; set; }
+        public ProjectReportView ProjectProfile { get; set; }
+    }
+
     public class ProjectsBudgetReport
     {
         public Report ReportSettings { get; set; }
