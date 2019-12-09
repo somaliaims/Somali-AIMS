@@ -253,7 +253,7 @@ namespace AIMS.Services
                 projectsList.Add(new ProjectDetailView()
                 {
                     Id = project.Id,
-                    Title = project.Title,
+                    Title = project.Title.Replace("\"", ""),
                     Description = project.Description,
                     ProjectCurrency = project.ProjectCurrency,
                     ProjectValue = project.ProjectValue,
@@ -384,7 +384,7 @@ namespace AIMS.Services
                 projectsList.Add(new ProjectDetailView()
                 {
                     Id = project.Id,
-                    Title = project.Title,
+                    Title = project.Title.Replace("\"", ""),
                     Description = project.Description,
                     ProjectCurrency = project.ProjectCurrency,
                     ProjectValue = project.ProjectValue,
@@ -625,7 +625,6 @@ namespace AIMS.Services
                                                                        select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum()) / 100) * locationPercentage);
 
                                     totalDisbursements += actualDisbursements;
-
                                     UtilityHelper helper = new UtilityHelper();
                                     project.ActualDisbursements = Math.Round(actualDisbursements, MidpointRounding.AwayFromZero);
                                     project.PlannedDisbursements = Math.Round(plannedDisbursements, MidpointRounding.AwayFromZero);
@@ -640,7 +639,7 @@ namespace AIMS.Services
                         {
                             projectsListForLocation.Add(new ProjectViewForLocation()
                             {
-                                Title = project.Title,
+                                Title = project.Title.Replace("\"", ""),
                                 StartingFinancialYear = project.StartingFinancialYear,
                                 EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
@@ -651,6 +650,9 @@ namespace AIMS.Services
                                 PlannedDisbursements = project.PlannedDisbursements,
                             });
                         }
+                        projectsListForLocation = (from pl in projectsListForLocation
+                                                   orderby pl.Title ascending
+                                                   select pl).ToList();
                         projectsByLocation.TotalFunding = Math.Round(totalFundingPercentage, MidpointRounding.AwayFromZero);
                         projectsByLocation.TotalDisbursements = Math.Round(totalDisbursementsPercentage, MidpointRounding.AwayFromZero);
                         projectsByLocation.ActualDisbursements = Math.Round(locationActualDisbursements, MidpointRounding.AwayFromZero);
@@ -710,7 +712,7 @@ namespace AIMS.Services
                         int yearsLeft = upperYearLimit - currentYear;
                         int projectStartYear = project.StartingFinancialYear.FinancialYear;
                         projectBudget.Id = project.Id;
-                        projectBudget.Title = project.Title;
+                        projectBudget.Title = project.Title.Replace("\"", "");
 
                         List<ProjectDisbursements> disbursementsList = new List<ProjectDisbursements>();
                         decimal projectCost = 0;
@@ -777,6 +779,9 @@ namespace AIMS.Services
                         total.TotalExpectedDisbursements = Math.Round(total.TotalExpectedDisbursements, MidpointRounding.AwayFromZero);
                     }
                     budgetReport.TotalYearlyDisbursements = totalDisbursementsSummaryList;
+                    projectBudgetsList = (from pl in projectBudgetsList
+                                          orderby pl.Title ascending
+                                          select pl).ToList();
                     budgetReport.Projects = projectBudgetsList;
                 }
                 catch (Exception ex)
@@ -1262,7 +1267,7 @@ namespace AIMS.Services
                             projectsListForSector.Add(new ProjectViewForSector()
                             {
                                 ProjectId = project.Id,
-                                Title = project.Title,
+                                Title = project.Title.Replace("\"", ""),
                                 StartingFinancialYear = project.StartingFinancialYear,
                                 EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
@@ -1490,7 +1495,7 @@ namespace AIMS.Services
 
                             projectsViewForYear.Add(new ProjectViewForYear()
                             {
-                                Title = project.Title,
+                                Title = project.Title.Replace("\"", ""),
                                 StartingFinancialYear = project.StartingFinancialYear,
                                 EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
@@ -1503,6 +1508,9 @@ namespace AIMS.Services
 
                         if (projectsByYear != null)
                         {
+                            projectsViewForYear = (from pv in projectsViewForYear
+                                                   orderby pv.Title ascending
+                                                   select pv).ToList();
                             projectsByYear.Year = currentYearId;
                             projectsByYear.TotalFunding = totalFunding;
                             projectsByYear.TotalDisbursements = totalDisbursements;
