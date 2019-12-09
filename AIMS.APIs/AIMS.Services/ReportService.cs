@@ -1141,6 +1141,10 @@ namespace AIMS.Services
                     ICollection<SectorWithProjects> sectorsByProjects = new List<SectorWithProjects>();
 
                     var sectors = unitWork.SectorRepository.GetProjection(s => s.Id != 0, s => new { s.Id, s.SectorName });
+                    projectSectors = (from ps in projectSectors
+                                      orderby ps.Sector.SectorName
+                                      select ps);
+
                     foreach (var sec in projectSectors)
                     {
                         var isSectorIdsExist = (from secIds in sectorsByProjects
@@ -1269,6 +1273,10 @@ namespace AIMS.Services
                                 PlannedDisbursements = project.PlannedDisbursements,
                             });
                         }
+
+                        projectsListForSector = (from pl in projectsListForSector
+                                                 orderby pl.Title ascending
+                                                 select pl).ToList();
 
                         projectsBySector.TotalFunding = totalFundingPercentage;
                         projectsBySector.TotalDisbursements = totalDisbursementsPercentage;
