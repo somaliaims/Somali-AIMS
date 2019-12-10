@@ -1961,6 +1961,8 @@ namespace AIMS.Models
     {
         [Required]
         public string Title { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
         [Required]
         public string StartingFinancialYear { get; set; }
         [Required]

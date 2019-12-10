@@ -151,9 +151,6 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string OrganizationName { get; set; }
-        /*[ForeignKey("OrganizationType")]
-        public int? OrganizationTypeId { get; set; }
-        public virtual EFOrganizationTypes OrganizationType { get; set; }*/
     }
 
     public class EFHelp
