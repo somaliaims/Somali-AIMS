@@ -115,21 +115,50 @@ namespace AIMS.Services
                 
                 try
                 {
-                    var isFinancialYearCreated = unitWork.FinancialYearRepository.GetOne(l => l.FinancialYear == model.FinancialYear);
-                    if (isFinancialYearCreated != null)
+                    List<int> years = new List<int>();
+                    int previousYear = 0, yearToCreate = 0, nextYear = 0;
+                    previousYear = (model.FinancialYear - 1);
+                    nextYear = (model.FinancialYear + 1);
+
+                    if (model.Month > 0 && model.Month <= 6)
                     {
-                        response.ReturnedId = isFinancialYearCreated.Id;
+                        years.Add(previousYear);
                     }
-                    else
+                    else if (model.Month > 6 && model.Month <= 12)
                     {
-                        var newFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
-                        {
-                            FinancialYear = model.FinancialYear,
-                        });
-                        unitWork.Save();
-                        response.ReturnedId = newFinancialYear.Id;
+                        years.Add(nextYear);
+                    } 
+                    else if (model.Month == 0)
+                    {
+                        years.Add(previousYear);
+                        years.Add(nextYear);
                     }
 
+                    yearToCreate = model.FinancialYear;
+                    years.Add(yearToCreate);
+
+                    bool newYearsAdded = false;
+                    var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(l => years.Contains(l.FinancialYear));
+                    foreach(var year in years)
+                    {
+                        var isYearExist = (from fy in financialYears
+                                           where fy.FinancialYear == year
+                                           select fy).FirstOrDefault();
+
+                        if (isYearExist == null)
+                        {
+                            unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                            {
+                                FinancialYear = year,
+                                Label = "FY " + (year - 1) + "/" + (year)
+                            });
+                            newYearsAdded = true;
+                        }
+                    }
+                    if (newYearsAdded)
+                    {
+                        unitWork.Save();
+                    }
                 }
                 catch (Exception ex)
                 {

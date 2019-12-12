@@ -550,6 +550,7 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public int FinancialYear { get; set; }
+        public string Label { get; set; }
     }
 
     public class EFProjectDeletionRequests

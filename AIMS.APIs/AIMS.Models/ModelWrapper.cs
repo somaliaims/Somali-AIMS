@@ -1314,10 +1314,12 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public int FinancialYear { get; set; }
+        public string Label { get; set; }
     }
 
     public class FinancialYearModel
     {
+        public int Month { get; set; } = 0;
         [Required]
         public int FinancialYear { get; set; }
     }
