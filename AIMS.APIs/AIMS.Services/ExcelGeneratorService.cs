@@ -11,6 +11,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Security.Permissions;
 
 namespace AIMS.Services
 {
@@ -68,6 +69,14 @@ namespace AIMS.Services
             hostingEnvironment = _hostingEnvironment;
             sWebRootFolder = hostingEnvironment.WebRootPath + "/ExcelFiles/";
             Directory.CreateDirectory(sWebRootFolder);
+            FileIOPermission fp = new FileIOPermission(FileIOPermissionAccess.Write, sWebRootFolder);
+            try
+            {
+                fp.Demand();
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public ActionResponse GenerateAllProjectsReport(ProjectReportView projectsReport)

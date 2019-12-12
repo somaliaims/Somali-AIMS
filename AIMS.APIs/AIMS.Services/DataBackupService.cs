@@ -9,6 +9,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.AccessControl;
+using System.Security.Permissions;
 
 namespace AIMS.Services
 {
@@ -51,6 +52,14 @@ namespace AIMS.Services
             hostingEnvironment = _hostingEnvironment;
             backupDir = hostingEnvironment.WebRootPath + "\\DataBackups\\";
             Directory.CreateDirectory(backupDir);
+            FileIOPermission fp = new FileIOPermission(FileIOPermissionAccess.Write, backupDir);
+            try
+            {
+                fp.Demand();
+            }
+            catch(Exception)
+            {
+            }
             /*DirectoryInfo directory = new DirectoryInfo(@"C:\my\directory");
             DirectorySecurity security = directory.GetAccessControl();
 
