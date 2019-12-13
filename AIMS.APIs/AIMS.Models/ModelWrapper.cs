@@ -1327,7 +1327,11 @@ namespace AIMS.Models
     public class FinancialYearRangeModel
     {
         [Required]
+        public int StartingMonth { get; set; }
+        [Required]
         public int StartingYear { get; set; }
+        [Required]
+        public int EndingMonth { get; set; }
         [Required]
         public int EndingYear { get; set; }
     }
