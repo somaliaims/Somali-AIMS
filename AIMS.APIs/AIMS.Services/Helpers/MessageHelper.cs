@@ -309,6 +309,12 @@ namespace AIMS.Services.Helpers
         /// <returns></returns>
         string GetInvalidEndingFinancialYearMessage();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string StartingYearGreaterThanEnding();
+
     }
 
     public class MessageHelper : IMessageHelper
@@ -319,6 +325,7 @@ namespace AIMS.Services.Helpers
         private readonly string NEW = "New ";
         private readonly string DELETED = " deleted successfully";
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
+        private readonly string STARTING_YEAR_GREATER = "Starting financial year cannot be greater than ending financial year";
         private readonly string INVALID_ACCOUNT_DELETION_ATTEMPT = "A super admin account cannot be deleted";
         private readonly string INVALID_SECTORTYPE_MAPPING = " cannot be used for sector mapping as it is a default sector type.";
         private readonly string INVALID_PROJECT_MERGE = "At least two projects must be provided for completing the project merge process";
@@ -513,6 +520,11 @@ namespace AIMS.Services.Helpers
         public string GetInvalidFinancialYearMessage()
         {
             return (INVALID_FINANCIAL_YEAR);
+        }
+
+        public string StartingYearGreaterThanEnding()
+        {
+            return (STARTING_YEAR_GREATER);
         }
 
         public string GetInvalidEndingFinancialYearMessage()

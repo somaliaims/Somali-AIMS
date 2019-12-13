@@ -77,6 +77,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var years = unitWork.FinancialYearRepository.GetAll();
+                years = (from y in years
+                         orderby y.FinancialYear
+                         select y);
                 return mapper.Map<List<FinancialYearView>>(years);
             }
         }
@@ -86,6 +89,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var years = await unitWork.FinancialYearRepository.GetAllAsync();
+                years = (from y in years
+                         orderby y.FinancialYear
+                         select y);
                 return await Task<IEnumerable<FinancialYearView>>.Run(() => mapper.Map<List<FinancialYearView>>(years)).ConfigureAwait(false);
             }
         }
@@ -177,15 +183,56 @@ namespace AIMS.Services
                 IMessageHelper mHelper;
                 try
                 {
-                    if (model.StartingYear > model.EndingYear)
+                    if (model.StartingYear > model.EndingYear && model.EndingYear != 0)
                     {
                         mHelper = new MessageHelper();
-                        response.Message = mHelper.GetInvalidEndingFinancialYearMessage();
+                        response.Message = mHelper.StartingYearGreaterThanEnding();
                         response.Success = false;
                         return response;
                     }
+                    int startingYear = model.StartingYear, endingYear = model.EndingYear;
+                    int startingMonth = model.StartingMonth, endingMonth = model.EndingMonth;
+                    if (startingYear != 0)
+                    {
+                        if (startingMonth <= 6)
+                        {
+                            if (endingYear == 0)
+                            {
+                                endingYear = startingYear;
+                            }
+                            startingYear = (startingYear - 1);
+                        }
+                        else if (startingMonth > 6)
+                        {
+                            if (endingYear == 0)
+                            {
+                                endingYear = (startingYear + 1);
+                            }
+                        }
+                    }
+
+                    if (endingYear != 0)
+                    {
+                        if (startingYear == 0)
+                        {
+                            startingYear = endingYear;
+                        }
+
+                        if (endingMonth > 6)
+                        {
+                            endingYear = ++endingYear;
+                        }
+                        else if(endingMonth <= 6)
+                        {
+                            if (startingYear == endingYear)
+                            {
+                                startingYear = (endingYear - 1);
+                            }
+                        }
+                    }
+
                     var financialYears = unitWork.FinancialYearRepository.GetProjection(y => y.Id != 0, y => y.FinancialYear);
-                    for(int year = model.StartingYear; year <= model.EndingYear; year++)
+                    for(int year = startingYear; year <= endingYear; year++)
                     {
                         var financialYearExists = (from fy in financialYears
                                                    where fy == year
@@ -193,7 +240,8 @@ namespace AIMS.Services
 
                         if (financialYearExists < 1)
                         {
-                            unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = year });
+                            string yearLabel = "FY " + (year - 1) + "/" + (year); 
+                            unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = year, Label = yearLabel });
                         }
                     }
                     unitWork.Save();
