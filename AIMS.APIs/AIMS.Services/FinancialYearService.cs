@@ -276,9 +276,11 @@ namespace AIMS.Services
                             {
                                 if (!yearsList.Contains(year))
                                 {
+                                    string label = "FY " + (year - 1) + "/" + year;
                                     unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                                     {
-                                        FinancialYear = year
+                                        FinancialYear = year,
+                                        Label = label
                                     });
                                 }
                             }
