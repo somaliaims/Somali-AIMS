@@ -1288,8 +1288,11 @@ namespace AIMS.Services
                 EFFinancialYears twentyEighteenFinancialYear = null;
                 EFFinancialYears twentyNineteenFinancialYear = null;
                 EFFinancialYears twentyTwentyFinancialYear = null;
+                EFFinancialYears twentyOneFinancialYear = null;
+                EFFinancialYears twentyTwoFinancialYear = null;
+                EFFinancialYears twentyThreeFinancialYear = null;
+                EFFinancialYears twentyFourFinancialYear = null;
 
-                
 
                 foreach (var sector in ndpSectors)
                 {
@@ -1353,6 +1356,50 @@ namespace AIMS.Services
                                 twentyTwentyFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 1), Label = "FY " + (currentYear) + "/" + (currentYear + 1) });
                                 unitWork.Save();
                                 financialYears.Add(twentyTwentyFinancialYear);
+                            }
+
+                            twentyOneFinancialYear = (from fy in financialYears
+                                                         where fy.FinancialYear == (currentYear + 2)
+                                                         select fy).FirstOrDefault();
+
+                            if (twentyOneFinancialYear == null)
+                            {
+                                twentyOneFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 2), Label = "FY " + (currentYear + 1) + "/" + (currentYear + 2) });
+                                unitWork.Save();
+                                financialYears.Add(twentyOneFinancialYear);
+                            }
+
+                            twentyTwoFinancialYear = (from fy in financialYears
+                                                      where fy.FinancialYear == (currentYear + 3)
+                                                      select fy).FirstOrDefault();
+
+                            if (twentyTwoFinancialYear == null)
+                            {
+                                twentyTwoFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 3), Label = "FY " + (currentYear + 2) + "/" + (currentYear + 3) });
+                                unitWork.Save();
+                                financialYears.Add(twentyTwoFinancialYear);
+                            }
+
+                            twentyThreeFinancialYear = (from fy in financialYears
+                                                      where fy.FinancialYear == (currentYear + 4)
+                                                      select fy).FirstOrDefault();
+
+                            if (twentyThreeFinancialYear == null)
+                            {
+                                twentyThreeFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 4), Label = "FY " + (currentYear + 3) + "/" + (currentYear + 4) });
+                                unitWork.Save();
+                                financialYears.Add(twentyThreeFinancialYear);
+                            }
+
+                            twentyFourFinancialYear = (from fy in financialYears
+                                                      where fy.FinancialYear == (currentYear + 5)
+                                                      select fy).FirstOrDefault();
+
+                            if (twentyFourFinancialYear == null)
+                            {
+                                twentyFourFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 5), Label = "FY " + (currentYear + 4) + "/" + (currentYear + 5) });
+                                unitWork.Save();
+                                financialYears.Add(twentyFourFinancialYear);
                             }
 
                             foreach (var project in projects)
@@ -1710,6 +1757,66 @@ namespace AIMS.Services
                                         Project = newProject,
                                         Year = twentyTwentyFinancialYear,
                                         Amount = project.TwentyTwentyDisbursements,
+                                        Currency = project.Currency,
+                                        DisbursementType = DisbursementTypes.Planned,
+                                        ExchangeRate = project.ExchangeRate
+                                    });
+                                    await unitWork.SaveAsync();
+                                }
+
+                                if (twentyOneFinancialYear.FinancialYear >= startYear && twentyOneFinancialYear.FinancialYear <= endYear &&
+                                project.TwentyOneDisbursements > 0)
+                                {
+                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    {
+                                        Project = newProject,
+                                        Year = twentyOneFinancialYear,
+                                        Amount = project.TwentyOneDisbursements,
+                                        Currency = project.Currency,
+                                        DisbursementType = DisbursementTypes.Planned,
+                                        ExchangeRate = project.ExchangeRate
+                                    });
+                                    await unitWork.SaveAsync();
+                                }
+
+                                if (twentyTwoFinancialYear.FinancialYear >= startYear && twentyTwoFinancialYear.FinancialYear <= endYear &&
+                                project.TwentyTwoDisbursements > 0)
+                                {
+                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    {
+                                        Project = newProject,
+                                        Year = twentyTwoFinancialYear,
+                                        Amount = project.TwentyTwoDisbursements,
+                                        Currency = project.Currency,
+                                        DisbursementType = DisbursementTypes.Planned,
+                                        ExchangeRate = project.ExchangeRate
+                                    });
+                                    await unitWork.SaveAsync();
+                                }
+
+                                if (twentyThreeFinancialYear.FinancialYear >= startYear && twentyThreeFinancialYear.FinancialYear <= endYear &&
+                                project.TwentyThreeDisbursements > 0)
+                                {
+                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    {
+                                        Project = newProject,
+                                        Year = twentyThreeFinancialYear,
+                                        Amount = project.TwentyThreeDisbursements,
+                                        Currency = project.Currency,
+                                        DisbursementType = DisbursementTypes.Planned,
+                                        ExchangeRate = project.ExchangeRate
+                                    });
+                                    await unitWork.SaveAsync();
+                                }
+
+                                if (twentyFourFinancialYear.FinancialYear >= startYear && twentyFourFinancialYear.FinancialYear <= endYear &&
+                                project.TwentyFourDisbursements > 0)
+                                {
+                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    {
+                                        Project = newProject,
+                                        Year = twentyFourFinancialYear,
+                                        Amount = project.TwentyFourDisbursements,
                                         Currency = project.Currency,
                                         DisbursementType = DisbursementTypes.Planned,
                                         ExchangeRate = project.ExchangeRate
