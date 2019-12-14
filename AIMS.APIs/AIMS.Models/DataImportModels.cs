@@ -56,6 +56,10 @@ namespace AIMS.Models
         public decimal TwentyEighteenDisbursements { get; set; }
         public decimal TwentyNineteenDisbursements { get; set; }
         public decimal TwentyTwentyDisbursements { get; set; }
+        public decimal TwentyOneDisbursements { get; set; }
+        public decimal TwentyTwoDisbursements { get; set; }
+        public decimal TwentyThreeDisbursements { get; set; }
+        public decimal TwentyFourDisbursements { get; set; }
         public string Sector { get; set; }
         public List<ImportedDocumentLinks> DocumentLinks { get; set; }
         public List<ImportedLocation> Locations { get; set; }

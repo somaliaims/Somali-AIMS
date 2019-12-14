@@ -170,8 +170,10 @@ namespace AIMS.Services
                 int projectTitleIndex = 0, projectDescriptionIndex = 1, sectorIndex = 2, startYearIndex = 3,
                     endYearIndex = 4, funderIndex = 6, implementerIndex = 7, currencyIndex = 9, projectCostIndex = 10,
                     twentySixteenYearIndex = 11, twentySeventeenYearIndex = 12, twentyEighteenYearIndex = 13, twentyNineteenYearIndex = 14, 
-                    twentyTwentyYearIndex = 15, locationLowerIndex = 18, locationUpperIndex = 26, markerLowerIndex = 29,
-                    markerUpperIndex = 36, documentLinkIndex = 38, documentDescriptionIndex = 39;
+                    twentyTwentyYearIndex = 15, twentyOneYearIndex = 16, twentyTwoYearIndex = 17,
+                    twentyThreeYearIndex = 18, twentyFourYearIndex = 19,
+                    locationLowerIndex = 22, locationUpperIndex = 30, markerLowerIndex = 33,
+                    markerUpperIndex = 40, documentLinkIndex = 42, documentDescriptionIndex = 43;
 
                 file.CopyTo(stream);
                 stream.Position = 0;
@@ -199,15 +201,24 @@ namespace AIMS.Services
                         }
 
                         decimal disbursementsTwentySixteen = 0, disbursementsTwentySeventeen = 0, disbursementsTwentyEighteen = 0,
-                            exchangeRate = 0, disbursementsTwentyNineteen = 0, disbursementsTwentyTwenty = 0, disbursementsTotal = 0;
+                            exchangeRate = 0, disbursementsTwentyNineteen = 0, disbursementsTwentyTwenty = 0, 
+                            disbursementsTwentyOne = 0, disbursementsTwentyTwo = 0, disbursementsTwentyThree = 0,
+                            disbursementsTwentyFour = 0, disbursementsTotal = 0, projectCost = 0;
 
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out disbursementsTwentySixteen);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out disbursementsTwentySeventeen);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out disbursementsTwentyEighteen);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyNineteenYearIndex)), out disbursementsTwentyNineteen);
                         decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyTwentyYearIndex)), out disbursementsTwentyTwenty);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyOneYearIndex)), out disbursementsTwentyOne);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyTwoYearIndex)), out disbursementsTwentyTwo);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyThreeYearIndex)), out disbursementsTwentyThree);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyFourYearIndex)), out disbursementsTwentyFour);
+                        decimal.TryParse(this.GetFormattedValue(row.GetCell(projectCostIndex)), out projectCost);
+
                         disbursementsTotal = (disbursementsTwentySixteen + disbursementsTwentySeventeen + disbursementsTwentyEighteen +
-                            disbursementsTwentyNineteen + disbursementsTwentyTwenty);
+                            disbursementsTwentyNineteen + disbursementsTwentyTwenty + disbursementsTwentyOne + 
+                            disbursementsTwentyTwo + disbursementsTwentyThree + disbursementsTwentyFour);
 
                         List<ImportedLocation> locationsList = new List<ImportedLocation>();
                         for (int l = locationLowerIndex; l <= locationUpperIndex; l++)
@@ -253,23 +264,12 @@ namespace AIMS.Services
                             });
                         }
 
-                        decimal projectCost = 0, twentySixteenDisbursements = 0, twentySeventeenDisbursements = 0,
-                            twentyEighteenDisbursements = 0, twentyNineteenDisbursements = 0, twentyTwentyDisbursements = 0;
-
                         var sDate = this.GetFormattedValue(row.GetCell(startYearIndex));
                         var eDate = this.GetFormattedValue(row.GetCell(endYearIndex));
-
                         DateTime startDate = this.GetFormattedDate(sDate);
                         DateTime endDate = this.GetFormattedDate(eDate);
-
                         int startingYear = startDate.Year;
                         int endingYear = endDate.Year;
-                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySixteenYearIndex)), out twentySixteenDisbursements);
-                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentySeventeenYearIndex)), out twentySeventeenDisbursements);
-                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyEighteenYearIndex)), out twentyEighteenDisbursements);
-                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyNineteenYearIndex)), out twentyNineteenDisbursements);
-                        decimal.TryParse(this.GetFormattedValue(row.GetCell(twentyTwentyYearIndex)), out twentyTwentyDisbursements);
-                        decimal.TryParse(this.GetFormattedValue(row.GetCell(projectCostIndex)), out projectCost);
 
                         string currency = this.GetFormattedValue(row.GetCell(currencyIndex));
                         if (!string.IsNullOrEmpty(currency))
@@ -281,8 +281,10 @@ namespace AIMS.Services
 
                         if (projectCost == 0)
                         {
-                            disbursementsTotal = (twentySixteenDisbursements + twentySeventeenDisbursements +
-                                twentyEighteenDisbursements + twentyNineteenDisbursements + twentyTwentyDisbursements);
+                            disbursementsTotal = (disbursementsTwentySixteen + disbursementsTwentySeventeen +
+                                disbursementsTwentyEighteen + disbursementsTwentyNineteen + disbursementsTwentyTwenty +
+                                disbursementsTwentyOne + disbursementsTwentyTwo + disbursementsTwentyThree +
+                                disbursementsTwentyFour);
                             projectCost = disbursementsTotal;
                         }
 
@@ -311,11 +313,15 @@ namespace AIMS.Services
                             Currency = currency,
                             ExchangeRate = exchangeRate,
                             Implementers = this.GetFormattedValue(row.GetCell(implementerIndex)),
-                            TwentySixteenDisbursements = twentySixteenDisbursements,
-                            TwentySeventeenDisbursements = twentySeventeenDisbursements,
-                            TwentyEighteenDisbursements = twentyEighteenDisbursements,
-                            TwentyNineteenDisbursements = twentyNineteenDisbursements,
-                            TwentyTwentyDisbursements = twentyTwentyDisbursements,
+                            TwentySixteenDisbursements = disbursementsTwentySixteen,
+                            TwentySeventeenDisbursements = disbursementsTwentySeventeen,
+                            TwentyEighteenDisbursements = disbursementsTwentyEighteen,
+                            TwentyNineteenDisbursements = disbursementsTwentyNineteen,
+                            TwentyTwentyDisbursements = disbursementsTwentyTwenty,
+                            TwentyOneDisbursements = disbursementsTwentyOne,
+                            TwentyTwoDisbursements = disbursementsTwentyTwo,
+                            TwentyThreeDisbursements = disbursementsTwentyThree,
+                            TwentyFourDisbursements = disbursementsTwentyFour,
                             Sector = sector,
                             Locations = locationsList,
                             CustomFields = customFieldsList,
