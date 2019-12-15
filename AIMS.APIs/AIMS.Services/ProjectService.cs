@@ -438,11 +438,25 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 Decimal disbursementValue = 0;
-                var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == DateTime.Now.Year && d.DisbursementType == DisbursementTypes.Actual, new string[] { "Year" });
-                if (disbursements.Any())
+                int currentYear = DateTime.Now.Year;
+                var financialYearExists = unitWork.FinancialYearRepository.GetOne(y => y.FinancialYear == currentYear);
+                if (financialYearExists == null)
                 {
-                    disbursementValue = (from d in disbursements
-                                         select (d.Amount * (1 / d.ExchangeRate))).Sum();
+                    unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                    {
+                        FinancialYear = currentYear,
+                        Label = "FY " + (currentYear - 1) + "/" + currentYear
+                    });
+                    unitWork.Save();
+                }
+                else
+                {
+                    var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == DateTime.Now.Year && d.DisbursementType == DisbursementTypes.Actual, new string[] { "Year" });
+                    if (disbursements.Any())
+                    {
+                        disbursementValue = (from d in disbursements
+                                             select (d.Amount * (1 / d.ExchangeRate))).Sum();
+                    }
                 }
                 return disbursementValue;
             }

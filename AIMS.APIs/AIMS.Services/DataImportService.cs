@@ -117,27 +117,27 @@ namespace AIMS.Services
 
             latestDataLocations = new NameValueCollection()
             {
-                { "18", "FGS" },
-                { "19", "BRA" },
-                { "20", "Galmudug" },
-                { "21", "Hiirshabelle" },
-                { "22", "Jubaland" },
-                { "23", "Puntland" },
-                { "24", "South West" },
-                { "25", "Somaliland" },
-                { "26", "Unattributed" }
+                { "21", "FGS" },
+                { "22", "BRA" },
+                { "23", "Galmudug" },
+                { "24", "Hiirshabelle" },
+                { "25", "Jubaland" },
+                { "26", "Puntland" },
+                { "27", "South West" },
+                { "28", "Somaliland" },
+                { "29", "Unattributed" }
             };
 
             latestCustomFields = new NameValueCollection()
             {
-                { "29", "GENDER MARKER" },
-                { "30", "CAPACITY DEVELOPMENT MARKER" },
-                { "31", "STABALIZATION/CRESTA" },
-                { "32", "DURABLE SOLUTIONS" },
-                { "33", "YOUTH MARKER" },
-                { "34", "RRF MARKER" },
-                { "35", "HUMANITARIAN" },
-                { "36", "PWG CONSULTATION" }
+                { "32", "GENDER MARKER" },
+                { "33", "CAPACITY DEVELOPMENT MARKER" },
+                { "34", "STABALIZATION/CRESTA" },
+                { "35", "DURABLE SOLUTIONS" },
+                { "36", "YOUTH MARKER" },
+                { "37", "RRF MARKER" },
+                { "38", "HUMANITARIAN" },
+                { "39", "PWG CONSULTATION" }
             };
 
             oldCustomFields = new NameValueCollection()
@@ -172,8 +172,8 @@ namespace AIMS.Services
                     twentySixteenYearIndex = 11, twentySeventeenYearIndex = 12, twentyEighteenYearIndex = 13, twentyNineteenYearIndex = 14, 
                     twentyTwentyYearIndex = 15, twentyOneYearIndex = 16, twentyTwoYearIndex = 17,
                     twentyThreeYearIndex = 18, twentyFourYearIndex = 19,
-                    locationLowerIndex = 22, locationUpperIndex = 30, markerLowerIndex = 33,
-                    markerUpperIndex = 40, documentLinkIndex = 42, documentDescriptionIndex = 43;
+                    locationLowerIndex = 22, locationUpperIndex = 30, markerLowerIndex = 32,
+                    markerUpperIndex = 39, documentLinkIndex = 41, documentDescriptionIndex = 42;
 
                 file.CopyTo(stream);
                 stream.Position = 0;
