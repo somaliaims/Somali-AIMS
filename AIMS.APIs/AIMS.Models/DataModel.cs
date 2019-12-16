@@ -222,8 +222,8 @@ namespace AIMS.Models
         [MaxLength(1000)]
         public string Title { get; set; }
         public string Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public EFFinancialYears StartingFinancialYear { get; set; }
         public EFFinancialYears EndingFinancialYear { get; set; }
         [ForeignKey("FundingTypeId")]

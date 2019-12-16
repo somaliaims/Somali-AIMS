@@ -713,6 +713,8 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
         public string StartingFinancialYear { get; set; }
         public string EndingFinancialYear { get; set; }
         public string DateUpdated { get; set; }
@@ -945,8 +947,8 @@ namespace AIMS.Models
         public string Title { get; set; }
         [Required]
         public string Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         [Required]
         public int StartingFinancialYear { get; set; }
         [Required]
@@ -1708,6 +1710,15 @@ namespace AIMS.Models
         public int EndingYear { get; set; } = 0;
         public int LocationId { get; set; }
         public List<int> SectorIds { get; set; } = new List<int>();
+    }
+
+    public class SearchProjectsWithoutSectorModel
+    {
+        public List<int> ProjectIds { get; set; } = new List<int>();
+        public List<int> OrganizationIds { get; set; } = new List<int>();
+        public int StartingYear { get; set; } = 0;
+        public int EndingYear { get; set; } = 0;
+        public int LocationId { get; set; }
     }
 
     public class SearchProjectsByLocationModel

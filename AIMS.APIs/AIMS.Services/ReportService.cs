@@ -29,6 +29,16 @@ namespace AIMS.Services
         Task<ProjectProfileReportBySector> GetProjectsBySectors(SearchProjectsBySectorModel model, string reportUrl, string defaultCurrency, decimal exchangeRate);
 
         /// <summary>
+        /// Search matching projects without sector for the provided criteria
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="reportUrl"></param>
+        /// <param name="defaultCurrency"></param>
+        /// <param name="exchangeRate"></param>
+        /// <returns></returns>
+        Task<ProjectProfileReportBySector> GetProjectsWithoutSectors(SearchProjectsBySectorModel model, string reportUrl, string defaultCurrency, decimal exchangeRate);
+
+        /// <summary>
         /// Search matching projects by sector wise grouped for the provided criteria
         /// </summary>
         /// <param name="model"></param>
@@ -960,6 +970,180 @@ namespace AIMS.Services
                     string message = ex.Message;
                 }
                 return await Task<EnvelopeReport>.Run(() => envelopeReport).ConfigureAwait(false);
+            }
+        }
+
+        public async Task<ProjectProfileReportBySector> GetProjectsWithoutSectors(SearchProjectsBySectorModel model, string reportUrl, string defaultCurrency, decimal exchangeRate)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                exchangeRate = (exchangeRate == 0) ? 1 : exchangeRate;
+                ProjectProfileReportBySector sectorProjectsReport = new ProjectProfileReportBySector();
+                try
+                {
+                    IQueryStringGenerator queryStringGenerator = new QueryStringGenerator();
+                    string queryString = queryStringGenerator.GetQueryStringForSectorsReport(model);
+                    reportUrl += ReportConstants.SECTOR_REPORT_URL;
+
+                    if (!string.IsNullOrEmpty(queryString))
+                    {
+                        reportUrl += queryString;
+                    }
+                    sectorProjectsReport.ReportSettings = new Report()
+                    {
+                        Title = ReportConstants.PROJECTS_BY_SECTOR_TITLE,
+                        SubTitle = ReportConstants.PROJECTS_BY_SECTOR_SUBTITLE,
+                        Footer = ReportConstants.PROJECTS_BY_SECTOR_FOOTER,
+                        Dated = DateTime.Now.ToLongDateString(),
+                        ReportUrl = reportUrl
+                    };
+
+                    DateTime dated = new DateTime();
+                    int year = dated.Year;
+                    int month = dated.Month;
+                    IQueryable<EFProject> projectProfileList = null;
+                    IQueryable<EFProjectSectors> projectSectors = null;
+                    List<int> locationProjectIds = new List<int>();
+
+                    var projectIds = unitWork.ProjectSectorsRepository.GetProjection(p => p.ProjectId != 0, p => p.ProjectId).Distinct();
+                    if (model.LocationId != 0)
+                    {
+                        locationProjectIds = unitWork.ProjectLocationsRepository.GetProjection(p => projectIds.Contains(p.ProjectId) && p.LocationId == model.LocationId, p => p.ProjectId).ToList();
+                    }
+
+                    if (locationProjectIds.Count > 0)
+                    {
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => locationProjectIds.Contains(p.Id),
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                    }
+
+                    if (model.ProjectIds.Count > 0)
+                    {
+                        model.ProjectIds = projectIds.Intersect(model.ProjectIds).ToList();
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = (from p in projectProfileList
+                                                  where model.ProjectIds.Contains(p.Id)
+                                                  select p);
+                        }
+                    }
+
+                    if (model.StartingYear >= 2000 && model.EndingYear >= 2000)
+                    {
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id) && ((p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.EndingFinancialYear.FinancialYear <= model.EndingYear)),
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = from project in projectProfileList
+                                                 where projectIds.Contains(project.Id) && project.StartingFinancialYear.FinancialYear >= model.StartingYear
+                                                 && project.EndingFinancialYear.FinancialYear <= model.EndingYear
+                                                 select project;
+                        }
+                    }
+
+                    if (model.OrganizationIds.Count > 0)
+                    {
+                        var projectFunders = unitWork.ProjectFundersRepository.GetMany(f => model.OrganizationIds.Contains(f.FunderId));
+                        var projectIdsFunders = (from pFunder in projectFunders
+                                                 select pFunder.ProjectId).ToList<int>().Distinct();
+
+                        var projectImplementers = unitWork.ProjectImplementersRepository.GetMany(f => model.OrganizationIds.Contains(f.ImplementerId));
+                        var projectIdsImplementers = (from pImplementer in projectImplementers
+                                                      select pImplementer.ProjectId).ToList<int>().Distinct();
+
+
+                        var projectIdsList = projectIds.Intersect(projectIdsFunders.Union(projectIdsImplementers));
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = from project in projectProfileList
+                                                 where projectIdsList.Contains(project.Id)
+                                                 select project;
+                        }
+                    }
+
+                    if (projectProfileList == null)
+                    {
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id) && (p.EndingFinancialYear.FinancialYear >= year),
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                    }
+                    
+                    List<ProjectProfileView> projectsList = new List<ProjectProfileView>();
+                    foreach (var project in projectProfileList)
+                    {
+                        decimal projectExchangeRate = (project.ExchangeRate == 0) ? 1 : project.ExchangeRate;
+                        ProjectProfileView profileView = new ProjectProfileView();
+                        profileView.Id = project.Id;
+                        profileView.Title = project.Title;
+                        profileView.Description = project.Description;
+                        profileView.ProjectCurrency = project.ProjectCurrency;
+                        profileView.ProjectValue = (project.ProjectValue * (exchangeRate / projectExchangeRate));
+                        profileView.ExchangeRate = projectExchangeRate;
+                        profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
+                        profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
+                        profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
+                        profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
+                        profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);
+                        projectsList.Add(profileView);
+                    }
+
+                        decimal totalFunding = 0, totalDisbursements = 0, actualDisbursements = 0, plannedDisbursements = 0;
+
+                    List<ProjectsBySector> sectorProjectsList = new List<ProjectsBySector>();
+                    List<ProjectViewForSector> projectsListForSector = new List<ProjectViewForSector>();
+                    ProjectsBySector noSector = new ProjectsBySector();
+                    noSector.ParentSector = null;
+                    noSector.ParentSectorId = 0;
+                    noSector.SectorName = "Not having a sector";
+                    noSector.TotalFunding = (from p in projectsList
+                                             let funding = (p.ProjectValue * (exchangeRate/p.ExchangeRate))
+                                             select funding).Sum();
+
+                    foreach(var project in projectsList)
+                    {
+                        var projectExchangeRate = project.ExchangeRate;
+                        totalFunding += (project.ProjectValue * (exchangeRate / projectExchangeRate));
+
+                        projectsListForSector.Add(new ProjectViewForSector()
+                        {
+                            ProjectId = project.Id,
+                            Title = project.Title.Replace("\"", ""),
+                            StartingFinancialYear = project.StartingFinancialYear,
+                            EndingFinancialYear = project.EndingFinancialYear,
+                            Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
+                            Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
+                            ProjectValue = (project.ProjectValue * (exchangeRate / projectExchangeRate)),
+                            ProjectPercentValue = project.ProjectPercentValue,
+                            ActualDisbursements = project.ActualDisbursements,
+                            PlannedDisbursements = project.PlannedDisbursements,
+                        });
+                    }
+                    noSector.TotalFunding = totalFunding;
+                    noSector.TotalDisbursements = totalDisbursements;
+                    noSector.ActualDisbursements = actualDisbursements;
+                    noSector.PlannedDisbursements = plannedDisbursements;
+                    noSector.Projects = projectsListForSector;
+                    
+                    sectorProjectsList.Add(noSector);
+                    sectorProjectsReport.SectorProjectsList = sectorProjectsList;
+                }
+                catch (Exception ex)
+                {
+                    string error = ex.Message;
+                }
+                return await Task<ProjectProfileReportBySector>.Run(() => sectorProjectsReport).ConfigureAwait(false);
             }
         }
 

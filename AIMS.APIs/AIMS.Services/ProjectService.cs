@@ -931,6 +931,8 @@ namespace AIMS.Services
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
+                        profileView.StartDate = project.StartDate.ToShortDateString();
+                        profileView.EndDate = project.EndDate.ToShortDateString();
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.DateUpdated = project.DateUpdated.ToShortDateString();

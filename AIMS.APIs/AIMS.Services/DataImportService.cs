@@ -982,6 +982,7 @@ namespace AIMS.Services
             {
                 year = 2000 + year;
             }
+
             string formattedDate = (year + "-" + datesArr[1] + "-" + datesArr[0]);
             return Convert.ToDateTime(formattedDate);
         }
