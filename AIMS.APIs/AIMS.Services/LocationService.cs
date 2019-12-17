@@ -82,6 +82,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var locations = unitWork.LocationRepository.GetAll();
+                locations = (from l in locations
+                             orderby l.Location
+                             select l);
                 return mapper.Map<List<LocationView>>(locations);
             }
         }

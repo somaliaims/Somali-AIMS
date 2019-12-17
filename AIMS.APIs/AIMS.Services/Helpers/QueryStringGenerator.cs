@@ -72,6 +72,11 @@ namespace AIMS.Services.Helpers
             {
                 queryString += ("&eyear=" + model.EndingYear);
             }
+
+            if (model.SectorOption == NoSectorOptions.ProjectsWithoutSectors)
+            {
+                queryString += ("&noSectors=true");
+            }
             return queryString;
         }
 
@@ -103,6 +108,11 @@ namespace AIMS.Services.Helpers
             if (model.EndingYear > 0)
             {
                 queryString += ("&eyear=" + model.EndingYear);
+            }
+
+            if (model.LocationOption == NoLocationOptions.ProjectsWithoutLocations)
+            {
+                queryString += ("&noLocations=true");
             }
             return queryString;
         }

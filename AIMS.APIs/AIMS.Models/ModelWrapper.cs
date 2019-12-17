@@ -19,6 +19,18 @@ namespace AIMS.Models
         AmendData = 3
     };
 
+    public enum NoLocationOptions
+    {
+        ProjectsWithLocations = 1,
+        ProjectsWithoutLocations = 2
+    }
+
+    public enum NoSectorOptions
+    {
+        ProjectsWithSectors = 1,
+        ProjectsWithoutSectors = 2
+    }
+
     public class ActionResponse
     {
         public int ReturnedId { get; set; } = 0;
@@ -1710,6 +1722,7 @@ namespace AIMS.Models
         public int EndingYear { get; set; } = 0;
         public int LocationId { get; set; }
         public List<int> SectorIds { get; set; } = new List<int>();
+        public NoSectorOptions SectorOption { get; set; } = NoSectorOptions.ProjectsWithSectors;
     }
 
     public class SearchProjectsWithoutSectorModel
@@ -1728,6 +1741,7 @@ namespace AIMS.Models
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
         public List<int> LocationIds { get; set; } = new List<int>();
+        public NoLocationOptions LocationOption { get; set; } = NoLocationOptions.ProjectsWithLocations;
     }
 
     public class SearchProjectsByYearModel
