@@ -1002,24 +1002,23 @@ namespace AIMS.Services
                     int year = dated.Year;
                     int month = dated.Month;
                     IQueryable<EFProject> projectProfileList = null;
-                    IQueryable<EFProjectSectors> projectSectors = null;
                     List<int> locationProjectIds = new List<int>();
 
                     var projectIds = unitWork.ProjectSectorsRepository.GetProjection(p => p.ProjectId != 0, p => p.ProjectId).Distinct();
                     if (model.LocationId != 0)
                     {
-                        locationProjectIds = unitWork.ProjectLocationsRepository.GetProjection(p => projectIds.Contains(p.ProjectId) && p.LocationId == model.LocationId, p => p.ProjectId).ToList();
+                        locationProjectIds = unitWork.ProjectLocationsRepository.GetProjection(p => !projectIds.Contains(p.ProjectId) && p.LocationId == model.LocationId, p => p.ProjectId).ToList();
                     }
 
                     if (locationProjectIds.Count > 0)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => locationProjectIds.Contains(p.Id),
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => !projectIds.Contains(p.Id) && locationProjectIds.Contains(p.Id),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     if (model.ProjectIds.Count > 0)
                     {
-                        model.ProjectIds = projectIds.Intersect(model.ProjectIds).ToList();
+                        model.ProjectIds = model.ProjectIds.Except(projectIds).ToList();
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
@@ -1037,13 +1036,13 @@ namespace AIMS.Services
                     {
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id) && ((p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.EndingFinancialYear.FinancialYear <= model.EndingYear)),
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => !projectIds.Contains(p.Id) && ((p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.EndingFinancialYear.FinancialYear <= model.EndingYear)),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
                             projectProfileList = from project in projectProfileList
-                                                 where projectIds.Contains(project.Id) && project.StartingFinancialYear.FinancialYear >= model.StartingYear
+                                                 where !projectIds.Contains(project.Id) && project.StartingFinancialYear.FinancialYear >= model.StartingYear
                                                  && project.EndingFinancialYear.FinancialYear <= model.EndingYear
                                                  select project;
                         }
@@ -1060,7 +1059,7 @@ namespace AIMS.Services
                                                       select pImplementer.ProjectId).ToList<int>().Distinct();
 
 
-                        var projectIdsList = projectIds.Intersect(projectIdsFunders.Union(projectIdsImplementers));
+                        var projectIdsList = (projectIdsFunders.Union(projectIdsImplementers)).Except(projectIds);
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
@@ -1076,7 +1075,7 @@ namespace AIMS.Services
 
                     if (projectProfileList == null)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id) && (p.EndingFinancialYear.FinancialYear >= year),
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => !projectIds.Contains(p.Id) && (p.EndingFinancialYear.FinancialYear >= year),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
                     
@@ -1089,7 +1088,7 @@ namespace AIMS.Services
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
                         profileView.ProjectCurrency = project.ProjectCurrency;
-                        profileView.ProjectValue = (project.ProjectValue * (exchangeRate / projectExchangeRate));
+                        profileView.ProjectValue = project.ProjectValue;
                         profileView.ExchangeRate = projectExchangeRate;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
@@ -1099,7 +1098,9 @@ namespace AIMS.Services
                         projectsList.Add(profileView);
                     }
 
-                        decimal totalFunding = 0, totalDisbursements = 0, actualDisbursements = 0, plannedDisbursements = 0;
+                        decimal totalFunding = 0, totalDisbursements = 0, actualDisbursements = 0, 
+                        plannedDisbursements = 0, totalSectorDisbursements = 0, totalSectorActualDisbursements = 0,
+                        totalSectorPlannedDisbursements = 0;
 
                     List<ProjectsBySector> sectorProjectsList = new List<ProjectsBySector>();
                     List<ProjectViewForSector> projectsListForSector = new List<ProjectViewForSector>();
@@ -1107,14 +1108,24 @@ namespace AIMS.Services
                     noSector.ParentSector = null;
                     noSector.ParentSectorId = 0;
                     noSector.SectorName = "Not having a sector";
-                    noSector.TotalFunding = (from p in projectsList
-                                             let funding = (p.ProjectValue * (exchangeRate/p.ExchangeRate))
-                                             select funding).Sum();
 
                     foreach(var project in projectsList)
                     {
                         var projectExchangeRate = project.ExchangeRate;
-                        totalFunding += (project.ProjectValue * (exchangeRate / projectExchangeRate));
+                        totalFunding += Math.Round((project.ProjectValue * (exchangeRate / projectExchangeRate)), MidpointRounding.AwayFromZero);
+                        actualDisbursements = (from d in project.Disbursements
+                                               where d.DisbursementType == DisbursementTypes.Actual
+                                               let disbursements = (d.Amount * (exchangeRate / d.ExchangeRate))
+                                               select disbursements).Sum();
+                        plannedDisbursements = (from d in project.Disbursements
+                                               where d.DisbursementType == DisbursementTypes.Planned
+                                               let disbursements = (d.Amount * (exchangeRate / d.ExchangeRate))
+                                               select disbursements).Sum();
+                        
+                        totalDisbursements = (actualDisbursements + plannedDisbursements);
+                        totalSectorActualDisbursements = Math.Round((totalSectorActualDisbursements + actualDisbursements), MidpointRounding.AwayFromZero);
+                        totalSectorPlannedDisbursements = Math.Round((totalSectorPlannedDisbursements + plannedDisbursements), MidpointRounding.AwayFromZero);
+                        totalSectorDisbursements = Math.Round((totalSectorDisbursements + totalDisbursements), MidpointRounding.AwayFromZero);
 
                         projectsListForSector.Add(new ProjectViewForSector()
                         {
@@ -1124,16 +1135,16 @@ namespace AIMS.Services
                             EndingFinancialYear = project.EndingFinancialYear,
                             Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                             Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
-                            ProjectValue = (project.ProjectValue * (exchangeRate / projectExchangeRate)),
+                            ProjectValue = Math.Round((project.ProjectValue * (exchangeRate / projectExchangeRate)), MidpointRounding.AwayFromZero),
                             ProjectPercentValue = project.ProjectPercentValue,
-                            ActualDisbursements = project.ActualDisbursements,
-                            PlannedDisbursements = project.PlannedDisbursements,
+                            ActualDisbursements = Math.Round(actualDisbursements, MidpointRounding.AwayFromZero),
+                            PlannedDisbursements = Math.Round(plannedDisbursements, MidpointRounding.AwayFromZero),
                         });
                     }
                     noSector.TotalFunding = totalFunding;
-                    noSector.TotalDisbursements = totalDisbursements;
-                    noSector.ActualDisbursements = actualDisbursements;
-                    noSector.PlannedDisbursements = plannedDisbursements;
+                    noSector.TotalDisbursements = totalSectorDisbursements;
+                    noSector.ActualDisbursements = totalSectorActualDisbursements;
+                    noSector.PlannedDisbursements = totalSectorPlannedDisbursements;
                     noSector.Projects = projectsListForSector;
                     
                     sectorProjectsList.Add(noSector);
