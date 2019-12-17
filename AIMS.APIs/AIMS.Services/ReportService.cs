@@ -1136,7 +1136,7 @@ namespace AIMS.Services
                             Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                             Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
                             ProjectValue = Math.Round((project.ProjectValue * (exchangeRate / projectExchangeRate)), MidpointRounding.AwayFromZero),
-                            ProjectPercentValue = project.ProjectPercentValue,
+                            ProjectPercentValue = Math.Round((project.ProjectValue * (exchangeRate / projectExchangeRate)), MidpointRounding.AwayFromZero),
                             ActualDisbursements = Math.Round(actualDisbursements, MidpointRounding.AwayFromZero),
                             PlannedDisbursements = Math.Round(plannedDisbursements, MidpointRounding.AwayFromZero),
                         });
