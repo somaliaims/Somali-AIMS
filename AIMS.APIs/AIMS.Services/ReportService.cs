@@ -465,7 +465,7 @@ namespace AIMS.Services
                     var projectIds = unitWork.ProjectLocationsRepository.GetProjection(p => p.ProjectId != 0, p => p.ProjectId).Distinct();
                     if (model.ProjectIds.Count > 0)
                     {
-                        model.ProjectIds = projectIds.Except(model.ProjectIds).ToList();
+                        model.ProjectIds = model.ProjectIds.Except(projectIds).ToList();
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
@@ -497,7 +497,7 @@ namespace AIMS.Services
                                                       select pImplementer.ProjectId).ToList<int>().Distinct();
 
 
-                        var projectIdsList = projectIds.Except(projectIdsFunders.Union(projectIdsImplementers));
+                        var projectIdsList = (projectIdsFunders.Union(projectIdsImplementers)).Except(projectIds);
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
@@ -522,7 +522,7 @@ namespace AIMS.Services
 
                     if (projectProfileList == null)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (projectIds.Contains(p.Id)) && (p.StartingFinancialYear.FinancialYear >= year),
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (!projectIds.Contains(p.Id)) && (p.StartingFinancialYear.FinancialYear >= year),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 

@@ -286,6 +286,51 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
+        [Route("GetNoLocationProjects")]
+        public async Task<IActionResult> GetNoLocationProjects([FromBody] SearchProjectsByLocationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var defaultCurrencyObj = currencyService.GetDefaultCurrency();
+            if (defaultCurrencyObj == null)
+            {
+                return BadRequest("Default currency is not set. Please contact administrator");
+            }
+
+            string defaultCurrency = defaultCurrencyObj.Currency;
+            decimal exchangeRate = 1;
+            if (!string.IsNullOrEmpty(defaultCurrency))
+            {
+                var dated = DateTime.Now;
+                var rates = await ratesService.GetCurrencyRatesForDate(dated);
+                if (rates.Rates == null)
+                {
+                    string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                    rates = await ratesHttpService.GetRatesAsync(apiKey);
+                    if (rates.Rates != null)
+                    {
+                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                    }
+                }
+                else
+                {
+                    exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                }
+            }
+            var report = await reportService.GetProjectsWithoutLocations(model, clientUrl, defaultCurrency, exchangeRate);
+            var response = excelService.GenerateLocationProjectsReport(report);
+            if (response.Success)
+            {
+                report.ReportSettings.ExcelReportName = response.Message;
+            }
+            return Ok(report);
+        }
+
+        [HttpPost]
         [Route("GetYearWiseProjects")]
         public async Task<IActionResult> GetYearWiseProjects([FromBody] SearchProjectsByYearModel model)
         {
