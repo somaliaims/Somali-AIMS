@@ -552,7 +552,7 @@ namespace AIMS.Services
                     List<ProjectsByLocation> locationProjectsList = new List<ProjectsByLocation>();
                     List<ProjectViewForLocation> projectsListForLocation = new List<ProjectViewForLocation>();
                     ProjectsByLocation noLocation = new ProjectsByLocation();
-                    noLocation.LocationName = "No Location";
+                    noLocation.LocationName = "No Locations Projects";
 
                     foreach (var project in projectsList)
                     {
@@ -1290,7 +1290,7 @@ namespace AIMS.Services
                     ProjectsBySector noSector = new ProjectsBySector();
                     noSector.ParentSector = null;
                     noSector.ParentSectorId = 0;
-                    noSector.SectorName = "Not having a sector";
+                    noSector.SectorName = "No Sector Projects";
 
                     foreach(var project in projectsList)
                     {
