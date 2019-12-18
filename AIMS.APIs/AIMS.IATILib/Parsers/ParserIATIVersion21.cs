@@ -135,6 +135,7 @@ namespace AIMS.IATILib.Parsers
                             }
                         }*/
 
+                        
                         //Extracting dates
                         var dates = activity.Elements("activity-date");
                         if (dates.Any())
@@ -823,6 +824,34 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
+                        //Extracting budgets
+                        decimal projectValueTypeOne = 0;
+                        decimal projectValueTypeTwo = 0;
+                        decimal projectValue = 0;
+                        var budgets = activity.Elements("budget");
+                        if (budgets.Any())
+                        {
+                            foreach (var budget in budgets)
+                            {
+                                if (budget.HasAttributes && budget.Attribute("type") != null)
+                                {
+                                    if (budget.Attribute("type").Value.Equals("1"))
+                                    {
+                                        projectValueTypeOne += Convert.ToDecimal(budget.Value);
+                                    }
+                                    else if (budget.Attribute("type").Value.Equals("2"))
+                                    {
+                                        projectValueTypeTwo += Convert.ToDecimal(budget.Value);
+                                    }
+                                }
+                                else
+                                {
+                                    projectValueTypeOne = Convert.ToDecimal(budget.Value);
+                                }
+                            }
+                        }
+                        projectValue = (projectValueTypeOne > projectValueTypeTwo) ? projectValueTypeOne : projectValueTypeTwo;
+
                         //Extracting participating organizations
                         var organizations = activity.Elements("participating-org");
                         List<IATIOrganizationView> organizationList = new List<IATIOrganizationView>();
@@ -960,6 +989,7 @@ namespace AIMS.IATILib.Parsers
                         {
                             Id = activityCounter,
                             DefaultCurrency = currency,
+                            ProjectValue = projectValue,
                             DefaultFinanceType = defaultFinanceType,
                             IATIIdentifier = activity.Element("iati-identifier")?.Value,
                             Title = projectTitle,

@@ -751,7 +751,11 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string Title { get; set; }
+        public decimal ProjectValue { get; set; }
+        public string ProjectCurrency { get; set; }
         public string Description { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
         public string StartingFinancialYear { get; set; }
         public string EndingFinancialYear { get; set; }
         public IEnumerable<SectorAbstractView> Sectors { get; set; }

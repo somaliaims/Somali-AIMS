@@ -488,6 +488,10 @@ namespace AIMS.Services
                     {
                         Id = project.Id,
                         Title = project.Title,
+                        ProjectValue = project.ProjectValue,
+                        ProjectCurrency = project.ProjectCurrency,
+                        StartDate = project.StartDate.ToShortDateString(),
+                        EndDate = project.EndDate.ToShortDateString(),
                         StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
                         EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
                         Organizations = organizationsList,

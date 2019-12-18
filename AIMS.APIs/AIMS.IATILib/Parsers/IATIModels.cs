@@ -208,6 +208,7 @@ namespace AIMS.IATILib.Parsers
         public string IATIIdentifier { get; set; }
         public string Title { get; set; }
         public string TrimmedTitle { get; set; }
+        public decimal ProjectValue { get; set; }
         public string DefaultFinanceType { get; set; }
         public string DefaultCurrency { get; set; }
         public string Description { get; set; }
