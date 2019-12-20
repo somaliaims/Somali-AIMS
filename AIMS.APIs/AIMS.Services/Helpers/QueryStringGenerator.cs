@@ -73,6 +73,11 @@ namespace AIMS.Services.Helpers
                 queryString += ("&eyear=" + model.EndingYear);
             }
 
+            if (model.LocationId > 0)
+            {
+                queryString += ("&locationId=" + model.LocationId);
+            }
+
             if (model.SectorOption == NoSectorOptions.ProjectsWithoutSectors)
             {
                 queryString += ("&noSectors=true");
