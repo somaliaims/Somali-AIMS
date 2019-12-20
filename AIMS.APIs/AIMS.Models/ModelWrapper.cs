@@ -1745,6 +1745,7 @@ namespace AIMS.Models
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
         public List<int> LocationIds { get; set; } = new List<int>();
+        public int SectorId { get; set; } = 0;
         public NoLocationOptions LocationOption { get; set; } = NoLocationOptions.ProjectsWithLocations;
     }
 

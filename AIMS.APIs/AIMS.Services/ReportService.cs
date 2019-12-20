@@ -628,16 +628,42 @@ namespace AIMS.Services
                     };
 
                     DateTime dated = new DateTime();
+                    List<int> sectorProjectIds = new List<int>();
                     int year = dated.Year;
                     int month = dated.Month;
                     IQueryable<EFProject> projectProfileList = null;
                     IQueryable<EFProjectLocations> projectLocationsQueryable = null;
                     List<EFProjectLocations> projectLocations = null;
 
+                    if (model.SectorId > 0)
+                    {
+                        var sectorIds = unitWork.SectorRepository.GetProjection(s => s.ParentSectorId == model.SectorId, p => p.Id);
+                        if (sectorIds.Count() > 0)
+                        {
+                            sectorProjectIds = unitWork.ProjectSectorsRepository.GetProjection(p => sectorIds.Contains(p.SectorId), p => p.ProjectId).ToList();
+                        }
+                        else
+                        {
+                            sectorProjectIds = unitWork.ProjectSectorsRepository.GetProjection(p => p.SectorId == model.SectorId, p => p.ProjectId).ToList();
+                        }
+                        
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => sectorProjectIds.Contains(p.Id),
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                    }
+
                     if (model.ProjectIds.Count > 0)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            projectProfileList = (from p in projectProfileList
+                                                  where model.ProjectIds.Contains(p.Id)
+                                                  select p);
+                        }
                     }
 
                     if (model.StartingYear >= 1970 && model.EndingYear >= 1970)
@@ -1373,13 +1399,9 @@ namespace AIMS.Services
                     IQueryable<EFProjectSectors> projectSectors = null;
                     List<int> locationProjectIds = new List<int>();
 
-                    if (model.LocationId != 0)
+                    if (model.LocationId > 0)
                     {
                         locationProjectIds = unitWork.ProjectLocationsRepository.GetProjection(p => p.LocationId == model.LocationId, p => p.ProjectId).ToList();
-                    }
-
-                    if (locationProjectIds.Count > 0)
-                    {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => locationProjectIds.Contains(p.Id),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
