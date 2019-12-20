@@ -427,13 +427,28 @@ namespace AIMS.Services
             {
                 EFSector sector = null;
                 EFSector newSector = null;
-                var sectors = await unitWork.SectorRepository.GetManyQueryableAsync(s => (s.Id == id || s.Id == newId));
+                var sectors = await unitWork.SectorRepository.GetWithIncludeAsync(s => (s.Id == id || s.Id == newId), new string[] { "SectorType" });
                 if (sectors.Count() < 2 && newId != 0)
                 {
                     mHelper = new MessageHelper();
                     response.Success = false;
                     response.Message = mHelper.GetNotFound("Sector");
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                }
+
+                var sectorToDelete = (from s in sectors
+                              where s.Id == id
+                              select s).FirstOrDefault();
+
+                if (sectorToDelete != null)
+                {
+                    if (sectorToDelete.SectorType.IsSourceType)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetCannotBeDeleted("Sector imported from source");
+                        response.Success = false;
+                        return response;
+                    }
                 }
 
                 var projectSectors = await unitWork.ProjectSectorsRepository.GetManyQueryableAsync(s => (s.SectorId == id || s.SectorId == newId));

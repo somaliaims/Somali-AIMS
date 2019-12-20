@@ -130,7 +130,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string TypeName { get; set; }
         public bool? IsPrimary { get; set; }
-        public bool? IsSourceType { get; set; }
+        public bool IsSourceType { get; set; } = true;
         public int? IATICode { get; set; }
         public IEnumerable<EFSector> Sectors { get; set; }
     }

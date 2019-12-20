@@ -315,6 +315,13 @@ namespace AIMS.Services.Helpers
         /// <returns></returns>
         string StartingYearGreaterThanEnding();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        string GetCannotBeDeleted(string entity);
+
     }
 
     public class MessageHelper : IMessageHelper
@@ -569,6 +576,11 @@ namespace AIMS.Services.Helpers
         public string GetExRateOrderExistsMessage()
         {
             return (EXRATE_ORDER_EXISTS);
+        }
+
+        public string GetCannotBeDeleted(string entity)
+        {
+            return ("Delete operation is not allowed for " + entity);
         }
 
         public string OrganizationsMergedMessage(List<string> organizations, string newOrganization, string message, string footerMessage)

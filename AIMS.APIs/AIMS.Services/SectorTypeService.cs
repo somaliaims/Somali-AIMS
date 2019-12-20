@@ -194,7 +194,7 @@ namespace AIMS.Services
                     {
                         TypeName = model.TypeName,
                         IsPrimary = model.IsPrimary,
-                        IsSourceType = model.IsSourceType
+                        IsSourceType = false
                     });
                     response.ReturnedId = newSectorTypes.Id;
                     unitWork.Save();
@@ -325,6 +325,14 @@ namespace AIMS.Services
                 {
                     mHelper = new MessageHelper();
                     response.Message = mHelper.GetNotFound("Sector type");
+                    response.Success = false;
+                    return response;
+                }
+
+                if (sectorType.IsSourceType)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetCannotBeDeleted("Sector type imported from source");
                     response.Success = false;
                     return response;
                 }

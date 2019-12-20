@@ -111,7 +111,10 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var newOrganizationType = unitWork.OrganizationTypesRepository.Insert(new EFOrganizationTypes() { TypeName = organizationType.TypeName });
+                    var newOrganizationType = unitWork.OrganizationTypesRepository.Insert(new EFOrganizationTypes() 
+                    { 
+                        TypeName = organizationType.TypeName
+                    });
                     response.ReturnedId = newOrganizationType.Id;
                     unitWork.Save();
                 }
