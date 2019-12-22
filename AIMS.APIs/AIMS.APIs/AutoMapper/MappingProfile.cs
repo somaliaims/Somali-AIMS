@@ -29,6 +29,8 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFOrganization, OrganizationView>()
                 .ForMember(o => o.OrganizationType, opts => opts.MapFrom(source => source.OrganizationType.TypeName));
 
+            CreateMap<EFIATIOrganization, OrganizationView>();
+
             CreateMap<EFOrganizationTypes, OrganizationTypeView>();
 
             CreateMap<EFUser, UserView>()

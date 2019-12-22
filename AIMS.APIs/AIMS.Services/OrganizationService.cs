@@ -37,7 +37,7 @@ namespace AIMS.Services
         /// Gets all iati organizations
         /// </summary>
         /// <returns></returns>
-        IEnumerable<OrganizationView> GetIATIOrganizations();
+        IEnumerable<IATIOrganizationView> GetIATIOrganizations();
 
         /// <summary>
         /// Gets organization by id
@@ -189,19 +189,19 @@ namespace AIMS.Services
             }
         }
 
-        public IEnumerable<OrganizationView> GetIATIOrganizations()
+        public IEnumerable<IATIOrganizationView> GetIATIOrganizations()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                List<OrganizationView> organizationsList = new List<OrganizationView>();
-                var organizations = unitWork.OrganizationRepository.GetWithInclude(o => o.Id != 0, new string[] { "OrganizationType" });
+                List<IATIOrganizationView> organizationsList = new List<IATIOrganizationView>();
+                var organizations = unitWork.IATIOrganizationRepository.GetManyQueryable(o => o.Id != 0);
                 if (organizations.Count() > 0)
                 {
                     organizations = (from org in organizations
                                      orderby org.OrganizationName ascending
                                      select org);
                 }
-                return mapper.Map<List<OrganizationView>>(organizations);
+                return mapper.Map<List<IATIOrganizationView>>(organizations);
             }
         }
 

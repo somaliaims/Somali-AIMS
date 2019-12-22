@@ -293,6 +293,12 @@ namespace AIMS.Models
         public string OrganizationName { get; set; }
     }
 
+    public class IATIOrganizationView
+    {
+        public int Id { get; set; }
+        public string OrganizationName { get; set; }
+    }
+
     public class OrganizationAbstractView
     {
         public string Name { get; set; }
