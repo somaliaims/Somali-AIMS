@@ -40,6 +40,7 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         string GetDataBackupDirectory();
+
     }
 
     public class DataBackupService : IDataBackupService
@@ -60,14 +61,6 @@ namespace AIMS.Services
             catch(Exception)
             {
             }
-            /*DirectoryInfo directory = new DirectoryInfo(@"C:\my\directory");
-            DirectorySecurity security = directory.GetAccessControl();
-
-            security.AddAccessRule(new FileSystemAccessRule(@"MYDOMAIN\JohnDoe",
-                                    FileSystemRights.Modify,
-                                    AccessControlType.Deny));
-
-            directory.SetAccessControl(security);*/
         }
 
         public string GetDataBackupDirectory()
@@ -116,14 +109,17 @@ namespace AIMS.Services
             try
             {
                 string[] files = Directory.GetFiles(backupDir);
+                int index = 1;
                 foreach (string file in files)
                 {
                     FileInfo fi = new FileInfo(file);
                     filesList.Add(new BackupFiles()
                     {
+                        Id = index,
                         BackupFileName = fi.Name,
                         TakenOn = fi.CreationTime
                     });
+                    ++index;
                 }
 
                 if (filesList.Count > 1)
@@ -145,6 +141,7 @@ namespace AIMS.Services
             ActionResponse response = new ActionResponse();
             try
             {
+                backupFile = backupDir + backupFile;
                 using (var sqlConnection = new SqlConnection(connString))
                 {
                     using (SqlCommand sqlCommand = new SqlCommand())

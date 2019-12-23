@@ -18,6 +18,7 @@ namespace AIMS.APIs.Controllers
         IDropboxService dropboxService;
         IDataBackupService service;
         string connectionString = "";
+        string clientUrl = "";
 
         public DataBackupController(IConfiguration config, IDataBackupService srvc, IDropboxService drpBoxService)
         {
@@ -25,6 +26,7 @@ namespace AIMS.APIs.Controllers
             service = srvc;
             dropboxService = drpBoxService;
             connectionString = configuration["ConnectionStrings:DefaultConnection"];
+            clientUrl = configuration["clientUrl"];
         }
 
         [HttpGet("PerformBackup")]
@@ -49,12 +51,12 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var response = await dropboxService.DownloadFile(model.FileName);
+            /*var response = await dropboxService.DownloadFile(model.FileName);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
-            }
-            response = await service.RestoreDatabase(response.Message, connectionString);
+            }*/
+            var response = await service.RestoreDatabase(model.FileName, connectionString);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
