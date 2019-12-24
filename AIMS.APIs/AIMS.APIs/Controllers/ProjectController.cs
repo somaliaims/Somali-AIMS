@@ -499,7 +499,6 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(ModelState);
             }
-
             var projects = await projectService.SearchProjectsByCriteria(model);
             return Ok(projects);
         }

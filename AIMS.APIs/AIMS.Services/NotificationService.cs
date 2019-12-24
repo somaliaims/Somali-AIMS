@@ -191,10 +191,11 @@ namespace AIMS.Services
                         smtpSettingsModel.Port = smtpSettings.Port;
                         smtpSettingsModel.Username = smtpSettings.Username;
                         smtpSettingsModel.Password = smtpSettings.Password;
-                        smtpSettings.AdminEmail = smtpSettings.AdminEmail;
+                        smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                    smtpSettingsModel.SenderName = smtpSettings.SenderName;
                     }
 
-                    IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                     var users = unitWork.UserRepository.GetManyQueryable(u => u.UserType == UserTypes.Manager);
                     var emails = (from u in users
                                   select u.Email);
@@ -245,10 +246,11 @@ namespace AIMS.Services
                     smtpSettingsModel.Port = smtpSettings.Port;
                     smtpSettingsModel.Username = smtpSettings.Username;
                     smtpSettingsModel.Password = smtpSettings.Password;
-                    smtpSettings.AdminEmail = smtpSettings.AdminEmail;
+                    smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                    smtpSettingsModel.SenderName = smtpSettings.SenderName;
                 }
 
-                IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
+                IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                 var users = unitWork.UserRepository.GetManyQueryable(u => u.UserType == UserTypes.Manager);
                 var emails = (from u in users
                               select u.Email);

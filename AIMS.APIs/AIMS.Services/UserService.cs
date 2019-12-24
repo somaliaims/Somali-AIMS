@@ -281,9 +281,10 @@ namespace AIMS.Services
                         smtpSettingsModel.Username = smtpSettings.Username;
                         smtpSettingsModel.Password = smtpSettings.Password;
                         smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                        smtpSettingsModel.SenderName = smtpSettings.SenderName;
                     }
 
-                    IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                     response = emailHelper.SendPasswordRecoveryEmail(model);
                     if (!response.Success)
                     {
@@ -398,6 +399,7 @@ namespace AIMS.Services
                             smtpSettingsModel.Username = smtpSettings.Username;
                             smtpSettingsModel.Password = smtpSettings.Password;
                             smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                            smtpSettingsModel.SenderName = smtpSettings.SenderName;
                         }
 
                         string message = "", subject = "", footerMessage = "";
@@ -424,7 +426,7 @@ namespace AIMS.Services
                         unitWork.Save();
 
                         message += mHelper.NewUserForOrganization(organization.OrganizationName);
-                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                         emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, subject, message, footerMessage);
                     }
                     response.ReturnedId = newUser.Id;
@@ -516,6 +518,7 @@ namespace AIMS.Services
                         smtpSettingsModel.Username = smtpSettings.Username;
                         smtpSettingsModel.Password = smtpSettings.Password;
                         smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                        smtpSettingsModel.SenderName = smtpSettings.SenderName;
                     }
 
                     string message = "", subject = "", footerMessage = "";
@@ -528,7 +531,7 @@ namespace AIMS.Services
                     }
                     mHelper = new MessageHelper();
                     message = mHelper.FormUserApprovedMessage(emailMessage.Message, loginUrl, emailMessage.FooterMessage);
-                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                     emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                 }
                 response.ReturnedId = userAccount.Id;
@@ -604,6 +607,7 @@ namespace AIMS.Services
                     smtpSettingsModel.Username = smtpSettings.Username;
                     smtpSettingsModel.Password = smtpSettings.Password;
                     smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                    smtpSettingsModel.SenderName = smtpSettings.SenderName;
                 }
                 string message = "", subject = "", footerMessage = "";
                 var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ResetPassword);
@@ -613,7 +617,7 @@ namespace AIMS.Services
                     message = emailMessage.Message;
                     footerMessage = emailMessage.FooterMessage;
                 }
-                IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                 emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                 response.Message = true.ToString();
                 return response;
@@ -660,6 +664,7 @@ namespace AIMS.Services
                                     smtpSettingsModel.Username = smtpSettings.Username;
                                     smtpSettingsModel.Password = smtpSettings.Password;
                                     smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                                    smtpSettingsModel.SenderName = smtpSettings.SenderName;
                                 }
 
                                 string message = "", subject = "", footerMessage = "";
@@ -670,7 +675,7 @@ namespace AIMS.Services
                                     message = emailMessage.Message;
                                     footerMessage = emailMessage.FooterMessage;
                                 }
-                                IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                                IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName,  smtpSettingsModel);
                                 emailHelper.SendEmailToUsers(usersEmailList, emailMessage.Subject, "", message, footerMessage);
                             }
                             else

@@ -51,12 +51,13 @@ namespace AIMS.Services
                 smtpSettingsModel.Port = smtpSettings.Port;
                 smtpSettingsModel.Username = smtpSettings.Username;
                 smtpSettingsModel.Password = smtpSettings.Password;
-                smtpSettings.AdminEmail = smtpSettings.AdminEmail;
-                emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings);
+                smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                smtpSettings.SenderName = smtpSettings.SenderName;
+                emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettings);
             }
             else
             {
-                emailHelper = new EmailHelper(null, null);
+                emailHelper = new EmailHelper(null, null, null);
             }
         }
 

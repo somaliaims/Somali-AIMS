@@ -39,13 +39,14 @@ namespace AIMS.Services.Helpers
     public class EmailHelper : IEmailHelper
     {
         SmtpClient client;
-        string emailFrom;
+        string emailFrom, senderName;
         const string EMAIL_SIGNATURE = "AIMS Support Team";
         const string FOOTER_LINE = "If you need further assistance, please submit a help request via the contact form in the AIMS";
 
-        public EmailHelper(string adminEmail, SMTPSettingsModel smtpSettings)
+        public EmailHelper(string adminEmail, string adminName, SMTPSettingsModel smtpSettings)
         {
             client = this.GetSMTPClient(smtpSettings);
+            senderName = adminName;
             emailFrom = adminEmail;
         }
 
@@ -54,7 +55,7 @@ namespace AIMS.Services.Helpers
             ActionResponse response = new ActionResponse();
             MailMessage mailMessage = new MailMessage();
             mailMessage.IsBodyHtml = true;
-            mailMessage.From = new MailAddress(this.emailFrom);
+            mailMessage.From = new MailAddress(this.emailFrom, senderName);
 
             var managersEmailList = (from user in emailList
                                      where user.UserType == UserTypes.Manager
@@ -98,7 +99,7 @@ namespace AIMS.Services.Helpers
             {
                 MailMessage mailMessage = new MailMessage();
                 mailMessage.IsBodyHtml = true;
-                mailMessage.From = new MailAddress(this.emailFrom);
+                mailMessage.From = new MailAddress(this.emailFrom, senderName);
                 string emailMessage = this.GetPasswordResetMessage(model.Email, model.FullName, model.Token, model.Url);
                 mailMessage.To.Add(model.Email);
                 mailMessage.Body = emailMessage;
@@ -127,7 +128,7 @@ namespace AIMS.Services.Helpers
                     mailMessage.To.Add(new MailAddress(emailAddress));
                 }
                 mailMessage.IsBodyHtml = true;
-                mailMessage.From = new MailAddress(this.emailFrom);
+                mailMessage.From = new MailAddress(this.emailFrom, senderName);
                 mailMessage.Body = this.FormatMessage(emailTitle, emailMessage, footerMessage);
                 mailMessage.Subject = subject;
                 client.Send(mailMessage);

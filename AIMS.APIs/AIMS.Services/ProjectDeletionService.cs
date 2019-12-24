@@ -185,6 +185,7 @@ namespace AIMS.Services
                         smtpSettingsModel.Username = smtpSettings.Username;
                         smtpSettingsModel.Password = smtpSettings.Password;
                         smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                        smtpSettingsModel.SenderName = smtpSettings.SenderName;
                     }
 
                     string message = "", subject = "", footerMessage = "";
@@ -196,7 +197,7 @@ namespace AIMS.Services
                         message = projectTitle + emailMessage.Message;
                         footerMessage = emailMessage.FooterMessage;
                     }
-                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                     emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                 }
                 return response;
@@ -298,6 +299,7 @@ namespace AIMS.Services
                             smtpSettingsModel.Username = smtpSettings.Username;
                             smtpSettingsModel.Password = smtpSettings.Password;
                             smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                            smtpSettingsModel.SenderName = smtpSettings.SenderName;
                         }
 
                         string message = "", subject = "", footerMessage = "";
@@ -309,7 +311,7 @@ namespace AIMS.Services
                             message = projectTitle + emailMessage.Message;
                             footerMessage = emailMessage.FooterMessage;
                         }
-                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                         emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                     }
                 }
@@ -403,6 +405,7 @@ namespace AIMS.Services
                             smtpSettingsModel.Username = smtpSettings.Username;
                             smtpSettingsModel.Password = smtpSettings.Password;
                             smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                            smtpSettingsModel.SenderName = smtpSettings.SenderName;
                         }
 
                         string message = "", subject = "", footerMessage = "";
@@ -414,7 +417,7 @@ namespace AIMS.Services
                             message = projectTitle + emailMessage.Message;
                             footerMessage = emailMessage.FooterMessage;
                         }
-                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                         emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                     }
                 }
@@ -485,6 +488,7 @@ namespace AIMS.Services
                         smtpSettingsModel.Username = smtpSettings.Username;
                         smtpSettingsModel.Password = smtpSettings.Password;
                         smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                        smtpSettingsModel.SenderName = smtpSettings.SenderName;
                     }
 
                     string message = "", subject = "", footerMessage = "";
@@ -497,7 +501,7 @@ namespace AIMS.Services
                     }
                     mHelper = new MessageHelper();
                     message += mHelper.ProjectDeletionMessage(project.Title);
-                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                     emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                 }
                 return response;

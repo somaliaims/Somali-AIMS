@@ -418,8 +418,9 @@ namespace AIMS.Services
                             smtpSettingsModel.Username = smtpSettings.Username;
                             smtpSettingsModel.Password = smtpSettings.Password;
                             smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                            smtpSettingsModel.SenderName = smtpSettings.SenderName;
                         }
-                        IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
+                        IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                         emailHelper.SendEmailToUsers(emailsList, subject, "", message, footerMessage);
                     }
                 }
@@ -556,6 +557,7 @@ namespace AIMS.Services
                             smtpSettingsModel.Username = smtpSettings.Username;
                             smtpSettingsModel.Password = smtpSettings.Password;
                             smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                            smtpSettingsModel.SenderName = smtpSettings.SenderName;
                         }
 
                         transaction.Commit();
@@ -571,7 +573,7 @@ namespace AIMS.Services
                                     Email = email
                                 });
                             }
-                            IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettingsModel);
+                            IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                             emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
                         }
                     }
@@ -793,6 +795,7 @@ namespace AIMS.Services
                                     smtpSettingsModel.Username = smtpSettings.Username;
                                     smtpSettingsModel.Password = smtpSettings.Password;
                                     smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                                    smtpSettingsModel.SenderName = smtpSettings.SenderName;
                                 }
 
                                 string subject = "", message = "", footerMessage = "";
@@ -808,7 +811,7 @@ namespace AIMS.Services
                                 string oldSectorName = oldOrganization != null ? oldOrganization.OrganizationName : null;
                                 string newSectorName = newOrganization != null ? newOrganization.OrganizationName : null;
                                 message += mHelper.ChangedMappingAffectedProjectsMessage(projectNames, oldSectorName, newSectorName);
-                                IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettingsModel);
+                                IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                                 emailHelper.SendEmailToUsers(emailAddresses, subject, "", message);
                             }
                         }

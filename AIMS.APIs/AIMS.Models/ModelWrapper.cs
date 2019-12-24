@@ -1441,6 +1441,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Host { get; set; }
         public string Port { get; set; }
+        public string SenderName { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public string AdminEmail { get; set; }
@@ -1451,6 +1452,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Host { get; set; }
         public int Port { get; set; }
+        public string SenderName { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public string AdminEmail { get; set; }
@@ -1458,10 +1460,16 @@ namespace AIMS.Models
 
     public class SMTPSettingsModel
     {
+        [Required]
         public string Host { get; set; }
+        [Required]
         public int Port { get; set; } = 0;
+        [Required]
+        public string SenderName { get; set; }
+        [Required]
         public string Username { get; set; }
         public string Password { get; set; }
+        [Required]
         public string AdminEmail { get; set; }
     }
 

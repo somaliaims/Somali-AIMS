@@ -485,6 +485,7 @@ namespace AIMS.Models
         public string Username { get; set; }
         public string Password { get; set; }
         public string AdminEmail { get; set; }
+        public string SenderName { get; set; } = "AIMS";
     }
 
     public class EFIATISettings

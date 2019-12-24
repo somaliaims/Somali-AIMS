@@ -63,6 +63,7 @@ namespace AIMS.Services
                     view.Host = settings.Host;
                     view.Port = settings.Port;
                     view.Username = settings.Username;
+                    view.SenderName = settings.SenderName;
                 }
                 return view;
             }
@@ -80,6 +81,7 @@ namespace AIMS.Services
                 view.Port = settings.Port;
                 view.Username = settings.Username;
                 view.Password = settings.Password;
+                view.SenderName = settings.SenderName;
             }
             return view;
         }
@@ -98,6 +100,7 @@ namespace AIMS.Services
                         smtpSettings.Port = model.Port;
                         smtpSettings.Username = model.Username;
                         smtpSettings.AdminEmail = model.AdminEmail;
+                        smtpSettings.SenderName = model.SenderName;
 
                         if (!string.IsNullOrEmpty(model.Password))
                         {
@@ -116,7 +119,8 @@ namespace AIMS.Services
                             Port = model.Port,
                             Username = model.Username,
                             Password = model.Password,
-                            AdminEmail = model.AdminEmail
+                            AdminEmail = model.AdminEmail,
+                            SenderName = model.SenderName
                         });
                         response.ReturnedId = newSMTPSettings.Id;
                         unitWork.Save();
@@ -149,14 +153,13 @@ namespace AIMS.Services
                 settingsObj.Host = model.Host;
                 settingsObj.Port = model.Port;
                 settingsObj.Username = model.Username;
+                settingsObj.SenderName = model.SenderName;
+                settingsObj.AdminEmail = model.AdminEmail;
 
                 if (!string.IsNullOrEmpty(model.Password))
                 {
                     settingsObj.Password = model.Password;
                 }
-                
-                settingsObj.AdminEmail = model.AdminEmail;
-
                 unitWork.SMTPSettingsRepository.Update(settingsObj);
                 unitWork.Save();
                 response.Message = true.ToString();
