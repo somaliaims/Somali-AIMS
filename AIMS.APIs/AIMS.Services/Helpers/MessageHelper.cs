@@ -14,6 +14,12 @@ namespace AIMS.Services.Helpers
         string GetNotFound(string entity);
 
         /// <summary>
+        /// Gets incorrect password message
+        /// </summary>
+        /// <returns></returns>
+        string IncorrectAccountInformation();
+
+        /// <summary>
         /// Gets invalid sector type message
         /// </summary>
         /// <param name="sectorType"></param>
@@ -327,13 +333,14 @@ namespace AIMS.Services.Helpers
     public class MessageHelper : IMessageHelper
     {
         private readonly string NOT_FOUND = " not found with the provided ID";
+        private readonly string INCORRECT_USER_INFO = "Account information you provided is incorrect. Please check your username/password";
         private readonly string USERNAME_TAKEN = " is already taken.";
         private readonly string NEW_RECORD = " added successfully.";
         private readonly string NEW = "New ";
         private readonly string DELETED = " deleted successfully";
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
         private readonly string STARTING_YEAR_GREATER = "Starting financial year cannot be greater than ending financial year";
-        private readonly string INVALID_ACCOUNT_DELETION_ATTEMPT = "A super admin account cannot be deleted";
+        private readonly string INVALID_ACCOUNT_DELETION_ATTEMPT = "Admin/Manager accounts cannot be deleted";
         private readonly string INVALID_SECTORTYPE_MAPPING = " cannot be used for sector mapping as it is a default sector type.";
         private readonly string INVALID_PROJECT_MERGE = "At least two projects must be provided for completing the project merge process";
         private readonly string INVALID_ORGANIZATION_MERGE = "At least two organizations must be provided for completing the project merge process";
@@ -361,6 +368,11 @@ namespace AIMS.Services.Helpers
         public string GetNotFound(string entity)
         {
             return (entity + NOT_FOUND);
+        }
+
+        public string IncorrectAccountInformation()
+        {
+            return (INCORRECT_USER_INFO);
         }
 
         public string UserNameAlreadyTaken(string userName)

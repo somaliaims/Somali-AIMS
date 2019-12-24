@@ -719,11 +719,11 @@ namespace AIMS.Services
                 {
                     mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.GetNotFound("User");
+                    response.Message = mHelper.IncorrectAccountInformation();
                     return response;
                 }
 
-                if (user.UserType == UserTypes.SuperAdmin)
+                if (user.UserType == UserTypes.SuperAdmin || user.UserType == UserTypes.Manager)
                 {
                     mHelper = new MessageHelper();
                     response.Success = false;
