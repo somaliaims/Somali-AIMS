@@ -51,11 +51,6 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(ModelState);
             }
-            /*var response = await dropboxService.DownloadFile(model.FileName);
-            if (!response.Success)
-            {
-                return BadRequest(response.Message);
-            }*/
             var response = await service.RestoreDatabase(model.FileName, connectionString);
             if (!response.Success)
             {

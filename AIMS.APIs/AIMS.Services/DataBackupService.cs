@@ -147,31 +147,34 @@ namespace AIMS.Services
                     using (SqlCommand sqlCommand = new SqlCommand())
                     {
                         sqlConnection.Open();
-                        var transaction = sqlConnection.BeginTransaction();
-                        sqlCommand.Connection = sqlConnection;
-                        string cmdText = "select physical_name from sys.database_files where type = 0";
-                        sqlCommand.CommandText = cmdText;
-
+                        //string cmdText = "select physical_name from sys.database_files where type = 0";
+                        //sqlCommand.CommandText = cmdText;
                         sqlConnection.ChangeDatabase("master");
-                        cmdText = "ALTER DATABASE[AIMSDb] SET Single_User WITH Rollback Immediate";
+                        sqlCommand.Connection = sqlConnection;
+                        string cmdText = "ALTER DATABASE[AIMSDb] SET Single_User WITH Rollback Immediate";
                         sqlCommand.CommandText = cmdText;
+                        sqlCommand.ExecuteNonQuery();
+
+                        //var transaction = sqlConnection.BeginTransaction();
+                        cmdText = "RESTORE DATABASE AIMSDb FROM DISK = '" + backupFile + "'" +
+                                    "WITH REPLACE";
+                        sqlCommand.CommandText = cmdText;
+                        //sqlCommand.Transaction = transaction;
                         sqlCommand.ExecuteNonQuery();
 
                         cmdText = "RESTORE DATABASE AIMSDb FROM DISK = '" + backupFile + "'" +
                                     "WITH REPLACE";
                         sqlCommand.CommandText = cmdText;
+                        //sqlCommand.Transaction = transaction;
                         sqlCommand.ExecuteNonQuery();
-
-                        cmdText = "RESTORE DATABASE AIMSDb FROM DISK = '" + backupFile + "'" +
-                                    "WITH REPLACE";
-                        sqlCommand.CommandText = cmdText;
-                        sqlCommand.ExecuteNonQuery();
+                        //transaction.Commit();
 
                         cmdText = "ALTER DATABASE[AIMSDb] SET Multi_User";
                         sqlCommand.CommandText = cmdText;
+                        //sqlCommand.Transaction = transaction;
                         sqlCommand.ExecuteNonQuery();
 
-                        transaction.Commit();
+                        //transaction.Commit();
                         sqlConnection.Close();
                     }
                 }
