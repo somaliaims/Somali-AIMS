@@ -327,7 +327,6 @@ namespace AIMS.Services.Helpers
         /// <param name="entity"></param>
         /// <returns></returns>
         string GetCannotBeDeleted(string entity);
-
     }
 
     public class MessageHelper : IMessageHelper

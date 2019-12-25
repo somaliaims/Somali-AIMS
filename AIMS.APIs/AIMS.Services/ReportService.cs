@@ -72,7 +72,7 @@ namespace AIMS.Services
         /// <param name="defaultCurrency"></param>
         /// <param name="exchangeRate"></param>
         /// <returns></returns>
-        Task<ProjectsBudgetReportSummary> GetProjectsBudgetReportSummary(string reportUrl, string defaultCurrency, decimal exchangeRate);
+        Task<ProjectsBudgetReportSummary> GetProjectsBudgetReportSummary(string reportUrl, string defaultCurrency, decimal exchangeRate, int chartType = 0);
 
         /// <summary>
         /// Gets envelope report
@@ -888,7 +888,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ProjectsBudgetReportSummary> GetProjectsBudgetReportSummary(string reportUrl, string defaultCurrency, decimal exchangeRate)
+        public async Task<ProjectsBudgetReportSummary> GetProjectsBudgetReportSummary(string reportUrl, string defaultCurrency, decimal exchangeRate, int chartType = 0)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -900,13 +900,18 @@ namespace AIMS.Services
                 IQueryable<EFProject> projectProfileList = null;
                 try
                 {
+                    string queryString = "?load=true";
+                    if (chartType != 0)
+                    {
+                        queryString += "&ctype=" + chartType;
+                    }
                     budgetReport.ReportSettings = new Report()
                     {
                         Title = ReportConstants.PROJECTS_BUDGET_REPORT_TITLE,
                         SubTitle = ReportConstants.PROJECTS_BUDGET_REPORT_SUBTITLE,
                         Footer = ReportConstants.PROJECTS_BUDGET_REPORT_FOOTER,
                         Dated = DateTime.Now.ToLongDateString(),
-                        ReportUrl = reportUrl + ReportConstants.BUDGET_REPORT_URL + "?load=true"
+                        ReportUrl = reportUrl + ReportConstants.BUDGET_REPORT_URL + queryString
                     };
 
                     int currentYear = DateTime.Now.Year;

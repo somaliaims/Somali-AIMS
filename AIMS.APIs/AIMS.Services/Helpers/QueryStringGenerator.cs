@@ -82,6 +82,11 @@ namespace AIMS.Services.Helpers
             {
                 queryString += ("&noSectors=true");
             }
+
+            if (model.ChartType > 0)
+            {
+                queryString += ("&ctype=" + model.ChartType);
+            }
             return queryString;
         }
 
@@ -124,6 +129,11 @@ namespace AIMS.Services.Helpers
             {
                 queryString += ("&noLocations=true");
             }
+
+            if (model.ChartType > 0)
+            {
+                queryString += ("&ctype=" + model.ChartType);
+            }
             return queryString;
         }
 
@@ -162,6 +172,11 @@ namespace AIMS.Services.Helpers
             {
                 queryString += ("&eyear=" + model.EndingYear);
             }
+
+            if (model.ChartType > 0)
+            {
+                queryString += ("&ctype=" + model.ChartType);
+            }
             return queryString;
         }
 
@@ -187,6 +202,11 @@ namespace AIMS.Services.Helpers
             if (model.EndingYear > 0)
             {
                 queryString += ("&eyear=" + model.EndingYear);
+            }
+
+            if (model.ChartType > 0)
+            {
+                queryString += ("&ctype=" + model.ChartType);
             }
             return queryString;
         }
