@@ -21,13 +21,14 @@ namespace AIMS.APIs.Controllers
     public class UserController : ControllerBase
     {
         IUserService userService;
-
         IConfiguration configuration;
+        string clientUrl = "";
 
         public UserController(IUserService service, IConfiguration config)
         {
-            this.userService = service;
-            this.configuration = config;
+            userService = service;
+            configuration = config;
+            clientUrl = configuration["clientUrl"];
         }
 
         [HttpGet]
