@@ -66,7 +66,7 @@ namespace AIMS.Services.Helpers
         /// <param name="organization"></param>
         /// <param name="user"></param>
         /// <returns></returns>
-        string NewUserForOrganization(string organization);
+        string NewUserForOrganization(string organization, string userEmail);
 
         /// <summary>
         /// 
@@ -406,9 +406,9 @@ namespace AIMS.Services.Helpers
             return (DEFAULT_SECTOR_TYPE_MISSING);
         }
 
-        public string NewUserForOrganization(string organization)
+        public string NewUserForOrganization(string organization, string userEmail)
         {
-            return ("<p>Organization name: " +  organization + "</p>");
+            return ("<p>Organization name: " +  organization + "<br>User email address: " + userEmail + "</p>");
         }
 
         public string NewIATISectorsAdded(int sectorCount)

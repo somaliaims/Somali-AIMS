@@ -425,7 +425,7 @@ namespace AIMS.Services
                         });
                         unitWork.Save();
 
-                        message += mHelper.NewUserForOrganization(organization.OrganizationName);
+                        message += mHelper.NewUserForOrganization(organization.OrganizationName, model.Email);
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                         emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, subject, message, footerMessage);
                     }

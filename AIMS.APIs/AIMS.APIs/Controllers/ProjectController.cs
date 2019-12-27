@@ -536,28 +536,32 @@ namespace AIMS.APIs.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete]
         [Route("DeleteProjectLocation/{projectId}/{locationId}")]
-        public IActionResult DeleteProjectLocation(int projectId, int locationId)
+        public async Task<IActionResult> DeleteProjectLocation(int projectId, int locationId)
         {
             if (projectId <= 0 || locationId <= 0)
             {
                 return BadRequest("Invalid Ids provided");
             }
 
-            projectService.DeleteProjectLocation(projectId, locationId);
+            var response = await projectService.DeleteProjectLocationAsync(projectId, locationId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
             return Ok(true);
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete]
         [Route("DeleteProjectSector/{projectId}/{sectorId}")]
-        public IActionResult DeleteProjectSector(int projectId, int sectorId)
+        public async Task<IActionResult> DeleteProjectSector(int projectId, int sectorId)
         {
             if (projectId <= 0 || sectorId <= 0)
             {
                 return BadRequest("Invalid Ids provided");
             }
 
-            var response = projectService.DeleteProjectSector(projectId, sectorId);
+            var response = await projectService.DeleteProjectSectorAsync(projectId, sectorId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
