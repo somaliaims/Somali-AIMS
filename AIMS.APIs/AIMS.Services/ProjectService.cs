@@ -3001,8 +3001,17 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectLocation = unitWork.ProjectLocationsRepository.Get(p => p.ProjectId == projectId && p.LocationId == locationId);
                 IMessageHelper mHelper;
+                var location = unitWork.LocationRepository.GetByID(locationId);
+                if (location == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Location");
+                    response.Success = false;
+                    return response;
+                }
+                
+                var projectLocation = unitWork.ProjectLocationsRepository.Get(p => p.ProjectId == projectId && p.LocationId == locationId);
                 if (projectLocation == null)
                 {
                     mHelper = new MessageHelper();
@@ -3010,9 +3019,35 @@ namespace AIMS.Services
                     response.Success = false;
                     return response;
                 }
-
                 unitWork.ProjectLocationsRepository.Delete(projectLocation);
                 unitWork.Save();
+
+                if (!location.Location.Equals("Unattributed", StringComparison.OrdinalIgnoreCase))
+                {
+                    decimal fundsPercentage = unitWork.ProjectLocationsRepository.GetProjection(p => p.ProjectId == projectId, p => p.FundsPercentage).Sum();
+                    if (fundsPercentage < 100)
+                    {
+                        decimal leftPercentage = (100 - fundsPercentage);
+                        var unAttributedLocation = unitWork.LocationRepository.GetOne(l => l.Location.Equals("Unattributed", StringComparison.OrdinalIgnoreCase));
+                        if (unAttributedLocation == null)
+                        {
+                            unitWork.LocationRepository.Insert(new EFLocation()
+                            {
+                                Location = "Unattributed",
+                                Latitude = 0,
+                                Longitude = 0
+                            });
+                            unitWork.Save();
+                        }
+
+                        unitWork.ProjectLocationsRepository.Insert(new EFProjectLocations()
+                        {
+                            Location = unAttributedLocation,
+                            FundsPercentage = leftPercentage
+                        });
+                        unitWork.Save();
+                    }
+                }
                 return response;
             }
         }
