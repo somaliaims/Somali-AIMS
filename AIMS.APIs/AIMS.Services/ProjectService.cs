@@ -360,6 +360,7 @@ namespace AIMS.Services
     {
         AIMSDbContext context;
         IMapper mapper;
+        readonly string NOT_AVAILABLE = "Not Available";
 
         public ProjectService(AIMSDbContext cntxt, IMapper autoMapper)
         {
@@ -1972,7 +1973,7 @@ namespace AIMS.Services
                                 int leftPercentage = (100 - fundsPercentage);
                                 if (unattributedLocation != null)
                                 {
-                                    unattributedLocation.FundsPercentage = leftPercentage;
+                                    unattributedLocation.FundsPercentage += leftPercentage;
                                     unitWork.ProjectLocationsRepository.Update(unattributedLocation);
                                     unitWork.Save();
                                 }
@@ -2213,13 +2214,13 @@ namespace AIMS.Services
                             decimal leftPercentage = (100 - sectorsPercentage);
                             if (leftPercentage > 0)
                             {
-                                var notAvailableSector = unitWork.SectorRepository.GetOne(s => s.SectorTypeId == defaultSectorType.Id && s.SectorName.Equals("Not Avaialble", StringComparison.OrdinalIgnoreCase));
+                                var notAvailableSector = unitWork.SectorRepository.GetOne(s => s.SectorTypeId == defaultSectorType.Id && s.SectorName.Equals(NOT_AVAILABLE, StringComparison.OrdinalIgnoreCase));
                                 if (notAvailableSector == null)
                                 {
                                     notAvailableSector  = unitWork.SectorRepository.Insert(new EFSector()
                                     {
                                         SectorType = defaultSectorType,
-                                        SectorName = "Not Available",
+                                        SectorName = NOT_AVAILABLE,
                                         ParentSector = null
                                     });
                                     unitWork.Save();
@@ -3125,7 +3126,7 @@ namespace AIMS.Services
                         unitWork.ProjectSectorsRepository.Delete(projectSector);
                         await unitWork.SaveAsync();
 
-                        if (!sector.SectorName.Equals("Not Available", StringComparison.OrdinalIgnoreCase))
+                        if (!sector.SectorName.Equals(NOT_AVAILABLE, StringComparison.OrdinalIgnoreCase))
                         {
                             var fundsPercentage = unitWork.ProjectSectorsRepository.GetProjection(s => s.ProjectId == projectId, s => s.FundsPercentage).Sum();
                             decimal leftPercentage = (100 - fundsPercentage);
@@ -3134,13 +3135,13 @@ namespace AIMS.Services
                                 var defaultSectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsPrimary == true);
                                 if (defaultSectorType != null)
                                 {
-                                    var notAvailableSector = unitWork.SectorRepository.GetOne(s => s.SectorTypeId == defaultSectorType.Id && s.SectorName.Equals("Not Avaialble", StringComparison.OrdinalIgnoreCase));
+                                    var notAvailableSector = unitWork.SectorRepository.GetOne(s => s.SectorTypeId == defaultSectorType.Id && s.SectorName.Equals(NOT_AVAILABLE, StringComparison.OrdinalIgnoreCase));
                                     if (notAvailableSector == null)
                                     {
                                         notAvailableSector = unitWork.SectorRepository.Insert(new EFSector()
                                         {
                                             SectorType = defaultSectorType,
-                                            SectorName = "Not Available",
+                                            SectorName = NOT_AVAILABLE,
                                             ParentSector = null
                                         });
                                         unitWork.Save();
