@@ -327,6 +327,12 @@ namespace AIMS.Services.Helpers
         /// <param name="entity"></param>
         /// <returns></returns>
         string GetCannotBeDeleted(string entity);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string GetDefaultSectorTypeMissingMessage();
     }
 
     public class MessageHelper : IMessageHelper
@@ -338,6 +344,7 @@ namespace AIMS.Services.Helpers
         private readonly string NEW = "New ";
         private readonly string DELETED = " deleted successfully";
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
+        private readonly string DEFAULT_SECTOR_TYPE_MISSING = "Default sector type not found. You cannot store sector to projects without a default sector type";
         private readonly string STARTING_YEAR_GREATER = "Starting financial year cannot be greater than ending financial year";
         private readonly string INVALID_ACCOUNT_DELETION_ATTEMPT = "Admin/Manager accounts cannot be deleted";
         private readonly string INVALID_SECTORTYPE_MAPPING = " cannot be used for sector mapping as it is a default sector type.";
@@ -392,6 +399,11 @@ namespace AIMS.Services.Helpers
         public string InvalidAccountDeletionAttempt()
         {
             return INVALID_ACCOUNT_DELETION_ATTEMPT;
+        }
+
+        public string GetDefaultSectorTypeMissingMessage()
+        {
+            return (DEFAULT_SECTOR_TYPE_MISSING);
         }
 
         public string NewUserForOrganization(string organization)
