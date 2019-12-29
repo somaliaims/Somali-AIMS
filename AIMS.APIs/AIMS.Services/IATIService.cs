@@ -124,12 +124,19 @@ namespace AIMS.Services
         string ExtractSectorsVocabJson(string json);
 
         /// <summary>
+        /// Extract country and respective code from json
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        string ExtractCountriesJson(string json);
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="json"></param>
         /// <returns></returns>
-
         string ExtractOrganizationTypesVocabJson(string json);
+
         /// <summary>
         /// Extracts organization vocabulary json
         /// </summary>
@@ -344,10 +351,30 @@ namespace AIMS.Services
                         Name = (string)tCode["name"]
                     });
                 }
-                var unitWork = new UnitOfWork(context);
                 tTypeJson = JsonConvert.SerializeObject(transactionTypes);
             }
             return tTypeJson;
+        }
+
+        public string ExtractCountriesJson(string json)
+        {
+            string countriesJson = null;
+            List<IATICountryCode> countries = new List<IATICountryCode>();
+            JObject jObject = JObject.Parse(json);
+            var cCodesArray = jObject["data"].ToArray();
+            if (cCodesArray.Length > 0)
+            {
+                foreach (var cCode in cCodesArray)
+                {
+                    countries.Add(new IATICountryCode()
+                    {
+                        Code = (string)cCode["code"],
+                        Country = (string)cCode["name"]
+                    });
+                }
+                countriesJson = JsonConvert.SerializeObject(countries);
+            }
+            return countriesJson;
         }
 
         public string ExtractFinanceTypesJson(string json)

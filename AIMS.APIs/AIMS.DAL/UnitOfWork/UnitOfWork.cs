@@ -29,6 +29,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFProjectDisbursements> projectDisbursementsRepository;
         private GenericRepository<EFUserNotifications> notificationsRepository;
         private GenericRepository<EFIATIData> iatiDataRepository;
+        private GenericRepository<EFIATICountryCodes> iatiCountryRepository;
         private GenericRepository<EFSMTPSettings> smtpSettingsRepository;
         private GenericRepository<EFIATISettings> iatiSettingsRepository;
         private GenericRepository<EFPasswordRecoveryRequests> passwordRecoveryRepository;
@@ -247,6 +248,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.iatiSettingsRepository == null)
                     this.iatiSettingsRepository = new GenericRepository<EFIATISettings>(context);
                 return this.iatiSettingsRepository;
+            }
+        }
+
+        public GenericRepository<EFIATICountryCodes> IATICountryRepository
+        {
+            get
+            {
+                if (this.iatiCountryRepository == null)
+                    this.iatiCountryRepository = new GenericRepository<EFIATICountryCodes>(context);
+                return this.iatiCountryRepository;
             }
         }
 

@@ -1478,6 +1478,13 @@ namespace AIMS.Models
         public string BaseUrl { get; set; }
     }
 
+    public class IATICountryModel
+    {
+        public string Code { get; set; }
+        public string Country { get; set; }
+        public bool IsActive { get; set; } = false;
+    }
+
     public class DeleteAccountModel
     {
         [Required]

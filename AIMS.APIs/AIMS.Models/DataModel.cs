@@ -567,6 +567,14 @@ namespace AIMS.Models
         public ProjectDeletionStatus Status { get; set; }
     }
 
+    public class EFIATICountryCodes
+    {
+        public int Id { get; set; }
+        public string Code { get; set; }
+        public string Country { get; set; }
+        public bool IsActive { get; set; }
+    }
+
     public class EFHomePageSettings
     {
         public int Id { get; set; }

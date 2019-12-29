@@ -42,6 +42,12 @@ namespace AIMS.IATILib.Parsers
         public string Name { get; set; }
     }
 
+    public class IATICountryCode
+    {
+        public string Code { get; set; }
+        public string Country { get; set; }
+    }
+
     public class IATICountry
     {
         public string Code { get; set; }
