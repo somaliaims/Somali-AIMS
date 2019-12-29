@@ -842,11 +842,11 @@ namespace AIMS.Services
                                                                        where d.DisbursementType == DisbursementTypes.Planned
                                                                        select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum()) / 100) * locationPercentage);
 
-                                    totalDisbursements += actualDisbursements;
+                                    totalDisbursements = (actualDisbursements + plannedDisbursements);
                                     UtilityHelper helper = new UtilityHelper();
                                     project.ActualDisbursements = Math.Round(actualDisbursements, MidpointRounding.AwayFromZero);
                                     project.PlannedDisbursements = Math.Round(plannedDisbursements, MidpointRounding.AwayFromZero);
-                                    totalDisbursementsPercentage += project.ActualDisbursements;
+                                    totalDisbursementsPercentage += totalDisbursements;
                                     locationActualDisbursements += project.ActualDisbursements;
                                     locationPlannedDisbursements += project.PlannedDisbursements;
                                 }
@@ -1659,7 +1659,7 @@ namespace AIMS.Services
                                     {
                                         project.PlannedDisbursements = 0;
                                     }
-                                    totalDisbursementsPercentage += project.ActualDisbursements;
+                                    totalDisbursementsPercentage += totalDisbursements;
                                     sectorActualDisbursements += project.ActualDisbursements;
                                     sectorPlannedDisbursements += project.PlannedDisbursements;
                                 }
