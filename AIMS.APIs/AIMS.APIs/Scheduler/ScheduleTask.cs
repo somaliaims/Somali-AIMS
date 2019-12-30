@@ -107,6 +107,7 @@ namespace AIMS.APIs.Scheduler
                     IUserService userService = new UserService(dbContext, imapper);
                     INotificationService notificationService = new NotificationService(dbContext, imapper);
                     IATIService service = new IATIService(dbContext);
+                    ICountryService countryService = new CountryService(dbContext, imapper);
 
                     var cleanedCountryJson = service.ExtractCountriesJson(countriesJson);
                     var cleanedTTypeJson = service.ExtractTransactionTypesJson(transactionTypesJson);
