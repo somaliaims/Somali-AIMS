@@ -107,9 +107,8 @@ namespace AIMS.APIs.Scheduler
                     IUserService userService = new UserService(dbContext, imapper);
                     INotificationService notificationService = new NotificationService(dbContext, imapper);
                     IATIService service = new IATIService(dbContext);
-                    ICountryService countryService = new CountryService(dbContext, imapper);
 
-                    var cleanedCountryJson = service.ExtractCountriesJson(countriesJson);
+                    
                     var cleanedTTypeJson = service.ExtractTransactionTypesJson(transactionTypesJson);
                     var cleanedFTypeJson = service.ExtractFinanceTypesJson(financeTypesJson);
                     var cleanedSectorVocabJson = service.ExtractSectorsVocabJson(sectorsVocabJson);
@@ -118,12 +117,11 @@ namespace AIMS.APIs.Scheduler
                     File.WriteAllText(financeTypesPath, cleanedFTypeJson);
                     File.WriteAllText(sectorsVocabPath, cleanedSectorVocabJson);
                     File.WriteAllText(organizationTypesPath, cleanedOrgTypesVocabJson);
-                    File.WriteAllText(countriesFilePath, cleanedCountryJson);
 
                     userService.SetNotificationsForUsers();
                     var sectorResponse = service.ExtractAndSaveIATISectors(filePath, sectorsVocabPath);
                     service.ExtractAndSaveLocations(filePath);
-                    //service.ExtractAndSaveOrganizationTypes(cleanedOrgTypesVocabJson);
+                    //Oldservice.ExtractAndSaveOrganizationTypes(cleanedOrgTypesVocabJson);
                     var orgResponse = service.ExtractAndSaveOrganizations(filePath, cleanedOrgTypesVocabJson);
                     notificationService.SendNotificationsForNewOrganizations(orgResponse.ReturnedId, Convert.ToInt32(orgResponse.Message));
                     notificationService.SendNotificationsForNewSectors(sectorResponse.ReturnedId);
@@ -133,6 +131,13 @@ namespace AIMS.APIs.Scheduler
                     {
                         ICurrencyService currencyService = new CurrencyService(dbContext, imapper);
                         currencyService.AddMultiple(currencyList);
+                    }
+
+                    var countriesList = service.ExtractCountriesList(countriesJson);
+                    if (countriesList.Count > 0)
+                    {
+                        ICountryService countryService = new CountryService(dbContext, imapper);
+                        countryService.AddList(countriesList);
                     }
 
                 }

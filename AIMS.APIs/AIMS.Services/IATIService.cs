@@ -128,7 +128,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="json"></param>
         /// <returns></returns>
-        string ExtractCountriesJson(string json);
+        List<IATICountryModel> ExtractCountriesList(string json);
 
         /// <summary>
         /// 
@@ -356,25 +356,23 @@ namespace AIMS.Services
             return tTypeJson;
         }
 
-        public string ExtractCountriesJson(string json)
+        public List<IATICountryModel> ExtractCountriesList(string json)
         {
-            string countriesJson = null;
-            List<IATICountryCode> countries = new List<IATICountryCode>();
+            List<IATICountryModel> countries = new List<IATICountryModel>();
             JObject jObject = JObject.Parse(json);
             var cCodesArray = jObject["data"].ToArray();
             if (cCodesArray.Length > 0)
             {
                 foreach (var cCode in cCodesArray)
                 {
-                    countries.Add(new IATICountryCode()
+                    countries.Add(new IATICountryModel()
                     {
                         Code = (string)cCode["code"],
-                        Country = (string)cCode["name"]
+                        Country = (string)cCode["name"],
                     });
                 }
-                countriesJson = JsonConvert.SerializeObject(countries);
             }
-            return countriesJson;
+            return countries;
         }
 
         public string ExtractFinanceTypesJson(string json)
@@ -632,6 +630,10 @@ namespace AIMS.Services
                     unitWork.Save();
                     response.Message = withOutTypeCount.ToString();
                     response.ReturnedId = newIATIOrganizations.Count;
+                }
+                else
+                {
+                    response.Message = "0"; 
                 }
             }
             catch(Exception ex)
