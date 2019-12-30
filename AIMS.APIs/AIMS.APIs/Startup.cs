@@ -140,6 +140,7 @@ namespace AIMS.APIs
             services.AddScoped<IHomePageService, HomePageService>();
             services.AddScoped<IDataBackupService, DataBackupService>();
             services.AddScoped<IDropboxService, DropboxService>();
+            services.AddScoped<ICountryService, CountryService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();

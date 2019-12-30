@@ -44,6 +44,7 @@ namespace AIMS.APIs.Scheduler
             {
                 string sWebRootFolder = hostingEnvironment.WebRootPath;
                 string url = configuration.GetValue<string>("IATI:Url");
+                string countryCode = configuration.GetValue<string>("IATI:Country");
                 string currencyUrl = configuration.GetValue<string>("IATI:CurrencyUrl");
                 string transactionTypesUrl = configuration.GetValue<string>("IATI:TransactionTypesUrl");
                 string financeTypesUrl = configuration.GetValue<string>("IATI:FinanceTypesUrl");
@@ -60,11 +61,7 @@ namespace AIMS.APIs.Scheduler
                 string xml = "", json = "", transactionTypesJson = "", financeTypesJson = "", sectorsVocabJson = "",
                     organizationTypesJson = "", countriesJson = "";
 
-                using (var client = new WebClient())
-                {
-                    xml = client.DownloadString(url);
-                }
-                File.WriteAllText(filePath, xml);
+          
 
                 using (var client = new WebClient())
                 {
@@ -107,8 +104,24 @@ namespace AIMS.APIs.Scheduler
                     IUserService userService = new UserService(dbContext, imapper);
                     INotificationService notificationService = new NotificationService(dbContext, imapper);
                     IATIService service = new IATIService(dbContext);
+                    ICountryService countryService = new CountryService(dbContext, imapper);
 
-                    
+                    var activeCountryCode = countryService.GetActiveCountry();
+                    if (!string.IsNullOrEmpty(activeCountryCode))
+                    {
+                        string[] urlParts = url.Split("?");
+                        if (urlParts.Length > 1)
+                        {
+                            url = urlParts[0] + "?recipient-country=" + activeCountryCode + "&stream=true";
+                        }
+                    }
+                    //Download latest iati
+                    using (var client = new WebClient())
+                    {
+                        xml = client.DownloadString(url);
+                    }
+                    File.WriteAllText(filePath, xml);
+
                     var cleanedTTypeJson = service.ExtractTransactionTypesJson(transactionTypesJson);
                     var cleanedFTypeJson = service.ExtractFinanceTypesJson(financeTypesJson);
                     var cleanedSectorVocabJson = service.ExtractSectorsVocabJson(sectorsVocabJson);
@@ -136,7 +149,6 @@ namespace AIMS.APIs.Scheduler
                     var countriesList = service.ExtractCountriesList(countriesJson);
                     if (countriesList.Count > 0)
                     {
-                        ICountryService countryService = new CountryService(dbContext, imapper);
                         countryService.AddList(countriesList);
                     }
 

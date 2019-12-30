@@ -25,6 +25,27 @@ namespace AIMS.APIs.Controllers
             return Ok(service.GetAll());
         }
 
+        [HttpGet("GetActiveCountry")]
+        public IActionResult GetActiveCountry()
+        {
+            return Ok(service.GetActiveCountry());
+        }
+
+        [HttpPost("SetActiveCountry/{code}")]
+        public IActionResult SetActiveCountry(string code)
+        {
+            if (string.IsNullOrEmpty(code))
+            {
+                return BadRequest("Invalid code provided");
+            }
+            var response = service.SetActiveCountry(code);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] List<IATICountryModel> model)
         {

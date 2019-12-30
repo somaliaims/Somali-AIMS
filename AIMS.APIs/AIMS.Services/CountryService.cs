@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using AIMS.Services.Helpers;
 
 namespace AIMS.Services
 {
@@ -17,6 +18,18 @@ namespace AIMS.Services
         /// <param name="list"></param>
         /// <returns></returns>
         ActionResponse AddList(List<IATICountryModel> countriesList);
+
+        /// <summary>
+        /// Gets primary country
+        /// </summary>
+        /// <returns></returns>
+        string GetActiveCountry();
+
+        /// <summary>
+        /// Sets primary country
+        /// </summary>
+        /// <returns></returns>
+        ActionResponse SetActiveCountry(string code);
 
         /// <summary>
         /// Get countries list
@@ -72,6 +85,48 @@ namespace AIMS.Services
                 }
                 return response;
             }
+        }
+
+        public ActionResponse SetActiveCountry(string code)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                var country = unitWork.IATICountryRepository.GetOne(c => c.Code == code);
+                if (country == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Country");
+                    return response;
+                }
+
+                try
+                {
+                    country.IsActive = true;
+                    unitWork.IATICountryRepository.Update(country);
+                    unitWork.Save();
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
+            }
+        }
+
+        public string GetActiveCountry()
+        {
+            var unitWork = new UnitOfWork(context);
+            string code = "";
+            var country = unitWork.IATICountryRepository.GetOne(c => c.IsActive == true);
+            if (country != null)
+            {
+                code = country.Code;
+            }
+            return code;
         }
 
         public ICollection<IATICountryModel> GetAll()
