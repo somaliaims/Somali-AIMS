@@ -93,7 +93,14 @@ namespace AIMS.Services
             {
                 IMessageHelper mHelper;
                 ActionResponse response = new ActionResponse();
-                var country = unitWork.IATICountryRepository.GetOne(c => c.Code == code);
+                var countries = unitWork.IATICountryRepository.GetManyQueryable(c => (c.Code == code || c.IsActive == true));
+                var country = (from c in countries
+                               where c.Code == code
+                               select c).FirstOrDefault();
+                var previousCountry = (from c in countries
+                                       where c.IsActive == true
+                                       select c).FirstOrDefault();
+
                 if (country == null)
                 {
                     mHelper = new MessageHelper();
@@ -106,6 +113,12 @@ namespace AIMS.Services
                 {
                     country.IsActive = true;
                     unitWork.IATICountryRepository.Update(country);
+                    unitWork.Save();
+                    if (previousCountry != null)
+                    {
+                        previousCountry.IsActive = false;
+                        unitWork.IATICountryRepository.Update(previousCountry);
+                    }
                     unitWork.Save();
                 }
                 catch(Exception ex)

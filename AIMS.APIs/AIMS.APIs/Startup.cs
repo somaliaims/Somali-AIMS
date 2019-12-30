@@ -145,7 +145,7 @@ namespace AIMS.APIs
 
             services.AddHttpClient();
             services.AddHttpClient<IExchangeRateHttpService, ExchangeRateHttpService>();
-            services.AddSingleton<IHostedService, ScheduleTask>();
+            //services.AddSingleton<IHostedService, ScheduleTask>();
             services.AddScoped<IViewRenderService, ViewRenderService>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
