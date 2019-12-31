@@ -359,7 +359,7 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_OPTIONS_COUNT = "Invalid number of options provided for the type of field";
         private readonly string INVALID_SECTOR_TYPE_DELETION = "A sector type cannot be deleted untill all the sector under the type is deleted";
         private readonly string INVALID_DISBURSEMENTS = "You cannot add more disbursements than the project total value. Please increase the project funding amount before adding more disbursements.";
-        private readonly string UNAUTHORIZED_ACCESS = "Your account not found. Please logout and login again";
+        private readonly string UNAUTHORIZED_ACCESS = "Your login token is invalid. Please login again and try.";
         private readonly string PROJECT_DELETION_EXISTS = "There is already a request in pending to delete this project";
         private readonly string INVALID_PROJECT_EDIT = "You do not have enough permissions to set project status";
         private readonly string INVALID_ACCOUNT_FOR_PROJECT = "You have provided an invalid user account";
