@@ -2052,8 +2052,10 @@ namespace AIMS.Models
 
     public class ProjectSectorHelp
     {
+        public string SectorType { get; set; }
         [Required]
         public string Sector { get; set; }
+        public string MappingSector { get; set; }
         [Required]
         public string Percentage { get; set; }
     }
