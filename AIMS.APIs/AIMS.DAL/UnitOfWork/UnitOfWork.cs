@@ -34,6 +34,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFIATISettings> iatiSettingsRepository;
         private GenericRepository<EFPasswordRecoveryRequests> passwordRecoveryRepository;
         private GenericRepository<EFProjectLocations> projectLocationsRepository;
+        private GenericRepository<EFFinancialYearSettings> financialYearSettingsRepository;
         private GenericRepository<EFFinancialYears> financialYearRepository;
         private GenericRepository<EFStaticReports> reportsRepository;
         private GenericRepository<EFReportSubscriptions> reportSubscriptionsRepository;
@@ -208,6 +209,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.financialYearRepository == null)
                     this.financialYearRepository = new GenericRepository<EFFinancialYears>(context);
                 return this.financialYearRepository;
+            }
+        }
+
+        public GenericRepository<EFFinancialYearSettings> FinancialYearSettingsRepository
+        {
+            get
+            {
+                if (this.financialYearSettingsRepository == null)
+                    this.financialYearSettingsRepository = new GenericRepository<EFFinancialYearSettings>(context);
+                return this.financialYearSettingsRepository;
             }
         }
 

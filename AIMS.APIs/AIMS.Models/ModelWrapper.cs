@@ -1341,6 +1341,14 @@ namespace AIMS.Models
         public string Label { get; set; }
     }
 
+    public class FinancialYearSettingModel
+    {
+        [Required]
+        public int Month { get; set; }
+        [Required]
+        public int Day { get; set; }
+    }
+
     public class FinancialYearModel
     {
         public int Month { get; set; } = 0;

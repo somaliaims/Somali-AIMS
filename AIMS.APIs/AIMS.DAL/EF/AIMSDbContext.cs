@@ -107,6 +107,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFSMTPSettings> SMTPSettings { get; set; }
         public DbSet<EFIATISettings> IATISettings { get; set; }
         public DbSet<EFPasswordRecoveryRequests> PasswordRecoveryRequests { get; set; }
+        public DbSet<EFFinancialYearSettings> FinancialYearSettings { get; set; }
         public DbSet<EFFinancialYears> FinancialYears { get; set; }
         public DbSet<EFCurrency> Currencies { get; set; }
         public DbSet<EFExchangeRates> ExchangeRates { get; set; }

@@ -546,6 +546,16 @@ namespace AIMS.Models
         public DateTime Dated { get; set; }
     }
 
+    public class EFFinancialYearSettings
+    {
+        [Key]
+        public int Id { get; set; }
+        [Required]
+        public int Month { get; set; }
+        [Required]
+        public int Day { get; set; }
+    }
+
     public class EFFinancialYears
     {
         [Key]
