@@ -332,6 +332,12 @@ namespace AIMS.Services.Helpers
         /// 
         /// </summary>
         /// <returns></returns>
+        string InvalidMonthDayFound();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         string GetDefaultSectorTypeMissingMessage();
     }
 
@@ -341,6 +347,7 @@ namespace AIMS.Services.Helpers
         private readonly string INCORRECT_USER_INFO = "Account information you provided is incorrect. Please check your username/password";
         private readonly string USERNAME_TAKEN = " is already taken.";
         private readonly string NEW_RECORD = " added successfully.";
+        private readonly string INVALID_MONTH_DAY = "You provided invalid month and/or day";
         private readonly string NEW = "New ";
         private readonly string DELETED = " deleted successfully";
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
@@ -434,6 +441,11 @@ namespace AIMS.Services.Helpers
         public string InvalidPercentage()
         {
             return (INVALID_PERCENTAGE);
+        }
+
+        public string InvalidMonthDayFound()
+        {
+            return (INVALID_MONTH_DAY);
         }
 
         public string AlreadyExists(string entity)
