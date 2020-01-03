@@ -40,6 +40,13 @@ namespace AIMS.APIs.Controllers
             return Ok(financialYear);
         }
 
+        [HttpGet("AmendLabels")]
+        public IActionResult AmendLabels()
+        {
+            financialYearService.AmendLabels();
+            return Ok(true);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] FinancialYearModel model)
         {

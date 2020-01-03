@@ -59,6 +59,12 @@ namespace AIMS.Services
         /// <param name="location"></param>
         /// <returns></returns>
         ActionResponse Update(int id, FinancialYearModel model);
+
+        /// <summary>
+        /// Amend the financial year labels, temporary api
+        /// </summary>
+        /// <returns></returns>
+        ActionResponse AmendLabels();
     }
 
     public class FinancialYearService : IFinancialYearService
@@ -81,6 +87,23 @@ namespace AIMS.Services
                          orderby y.FinancialYear
                          select y);
                 return mapper.Map<List<FinancialYearView>>(years);
+            }
+        }
+
+        public ActionResponse AmendLabels()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var years = unitWork.FinancialYearRepository.GetManyQueryable(y => y.Id != 0);
+                foreach(var year in years)
+                {
+                    int yr = year.FinancialYear;
+                    year.Label = "FY " + yr + "/" + (yr + 1);
+                    unitWork.FinancialYearRepository.Update(year);
+                }
+                unitWork.Save();
+                return response;
             }
         }
 

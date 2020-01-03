@@ -354,6 +354,12 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         decimal GetCurrentYearDisbursements();
+
+        /// <summary>
+        /// Rectify financial years for projects, temporary Api
+        /// </summary>
+        /// <returns></returns>
+        ActionResponse UpdateFinancialYearsForProjects();
     }
 
     public class ProjectService : IProjectService
@@ -1303,6 +1309,86 @@ namespace AIMS.Services
                     response.Message = ex.Message;
                 }
                 return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+            }
+        }
+
+        public ActionResponse UpdateFinancialYearsForProjects()
+        {
+            using(var unitWork = new UnitOfWork(context))
+            {
+                int month = 0, day = 1;
+                ActionResponse response = new ActionResponse();
+                var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(s => s.Id != 0);
+                if (fySettings != null)
+                {
+                    month = fySettings.Month;
+                    day = fySettings.Day;
+                }
+
+                EFFinancialYears startingFinancialYear, endingFinancialYear = null;
+                var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(y => y.Id != 0);
+                var projects = unitWork.ProjectRepository.GetWithInclude(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear" });
+                foreach(var project in projects)
+                {
+                    int startingYear = project.StartDate.Year;
+                    int endingYear = project.EndDate.Year;
+                    if (month == 1 && day == 1)
+                    {
+                        startingFinancialYear = (from fy in financialYears
+                                                 where fy.FinancialYear == startingYear
+                                                 select fy).FirstOrDefault();
+
+                        if (startingFinancialYear == null)
+                        {
+                            startingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                            {
+                                FinancialYear = startingYear,
+                                Label = "FY " + startingYear
+                            });
+                        }
+                        else
+                        {
+                            startingFinancialYear.Label = "FY " + startingYear;
+                        }
+                        unitWork.Save();
+
+                        endingFinancialYear = (from fy in financialYears
+                                               where fy.FinancialYear == endingYear
+                                               select fy).FirstOrDefault();
+                        if (endingFinancialYear == null)
+                        {
+                            endingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                            {
+                                FinancialYear = endingYear,
+                                Label = "FY " + endingYear
+                            });
+                        }
+                        else
+                        {
+                            endingFinancialYear.Label = "FY " + endingYear;
+                        }
+                        unitWork.Save();
+                    }
+                    else if (month >= 1 && day > 1)
+                    {
+                        int startingMonth = project.StartDate.Month;
+                        int startingDay = project.StartDate.Day;
+                        int endingMonth = project.EndDate.Month;
+                        int endingDay = project.EndDate.Day;
+
+                        if (startingMonth < month)
+                        {
+                            --startingYear;
+                        }
+                        else if(startingMonth == month && startingDay < day)
+                        {
+                            --startingYear;
+                        }
+
+
+                    }
+                }
+                return response;
             }
         }
 
