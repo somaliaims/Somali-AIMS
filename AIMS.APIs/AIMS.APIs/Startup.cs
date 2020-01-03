@@ -141,6 +141,7 @@ namespace AIMS.APIs
             services.AddScoped<IDataBackupService, DataBackupService>();
             services.AddScoped<IDropboxService, DropboxService>();
             services.AddScoped<ICountryService, CountryService>();
+            services.AddScoped<IFinancialYearSettingsService, FinancialYearSettingsService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();

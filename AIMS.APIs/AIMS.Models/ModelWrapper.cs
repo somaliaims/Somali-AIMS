@@ -1352,8 +1352,7 @@ namespace AIMS.Models
     public class FinancialYearModel
     {
         public int Month { get; set; } = 0;
-        [Required]
-        public int FinancialYear { get; set; }
+        public int Day { get; set; } = 0;
     }
 
     public class FinancialYearRangeModel

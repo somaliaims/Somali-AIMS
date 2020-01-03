@@ -111,38 +111,31 @@ namespace AIMS.Services
             {
                 IMessageHelper mHelper;
                 ActionResponse response = new ActionResponse();
-                if (model.FinancialYear < 1900)
-                {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.GetInvalidFinancialYearMessage();
-                    response.Success = false;
-                    return response;
-                }
                 
                 try
                 {
                     List<int> years = new List<int>();
-                    int previousYear = 0, yearToCreate = 0, nextYear = 0;
-                    previousYear = (model.FinancialYear - 1);
-                    nextYear = (model.FinancialYear + 1);
-
-                    if (model.Month > 0 && model.Month <= 6)
+                    var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(y => y.Id != 0);
+                    int settingsMonth = 0, settingsDay = 0;
+                    if (fySettings == null)
                     {
-                        years.Add(previousYear);
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = "";
+                        return response;
                     }
-                    else if (model.Month > 6 && model.Month <= 12)
+                    settingsMonth = fySettings.Month;
+                    settingsDay = fySettings.Day;
+                    int currentYear = DateTime.Now.Year, yearToCreate = currentYear;
+                    if (model.Month < settingsMonth)
                     {
-                        years.Add(nextYear);
-                    } 
-                    else if (model.Month == 0)
-                    {
-                        years.Add(previousYear);
-                        years.Add(nextYear);
+                        years.Add((currentYear - 1));
+                        years.Add(currentYear);
                     }
-
-                    yearToCreate = model.FinancialYear;
-                    years.Add(yearToCreate);
-
+                    else
+                    {
+                        years.Add(currentYear);
+                    }
                     bool newYearsAdded = false;
                     var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(l => years.Contains(l.FinancialYear));
                     foreach(var year in years)
@@ -156,7 +149,7 @@ namespace AIMS.Services
                             unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                             {
                                 FinancialYear = year,
-                                Label = "FY " + (year - 1) + "/" + (year)
+                                Label = "FY " + year + "/" + (year + 1)
                             });
                             newYearsAdded = true;
                         }
@@ -262,7 +255,6 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
                     {
@@ -303,7 +295,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var yearObj = unitWork.FinancialYearRepository.GetByID(id);
+                /*var yearObj = unitWork.FinancialYearRepository.GetByID(id);
                 if (yearObj == null)
                 {
                     IMessageHelper mHelper = new MessageHelper();
@@ -316,7 +308,7 @@ namespace AIMS.Services
 
                 unitWork.FinancialYearRepository.Update(yearObj);
                 unitWork.Save();
-                response.Message = "1";
+                response.Message = "1";*/
                 return response;
             }
         }

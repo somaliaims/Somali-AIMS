@@ -24,7 +24,7 @@ namespace AIMS.Services
         ActionResponse Add(FinancialYearSettingModel model);
     }
 
-    public class FinancialYearSettingsService
+    public class FinancialYearSettingsService : IFinancialYearSettingsService
     {
         AIMSDbContext context;
 
