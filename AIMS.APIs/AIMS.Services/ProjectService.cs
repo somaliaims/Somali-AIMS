@@ -1385,7 +1385,40 @@ namespace AIMS.Services
                             --startingYear;
                         }
 
+                        startingFinancialYear = unitWork.FinancialYearRepository.GetOne(f => f.FinancialYear == startingYear);
+                        if (startingFinancialYear == null)
+                        {
+                            startingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                            {
+                                FinancialYear = startingYear,
+                                Label = "FY " + startingYear + "/" + (startingYear + 1)
+                            });
+                            unitWork.Save();
+                        }
 
+                        if (endingMonth < month)
+                        {
+                            --endingYear;
+                        }
+                        else if(endingMonth == month && endingDay < day)
+                        {
+                            --endingYear;
+                        }
+
+                        endingFinancialYear = unitWork.FinancialYearRepository.GetOne(f => f.FinancialYear == endingYear);
+                        if (endingFinancialYear == null)
+                        {
+                            endingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                            {
+                                FinancialYear = endingYear,
+                                Label = "FY " + endingYear + "/" + (startingYear + 1)
+                            });
+                            unitWork.Save();
+                        }
+
+                        project.StartingFinancialYear = startingFinancialYear;
+                        project.EndingFinancialYear = endingFinancialYear;
+                        unitWork.Save();
                     }
                 }
                 return response;

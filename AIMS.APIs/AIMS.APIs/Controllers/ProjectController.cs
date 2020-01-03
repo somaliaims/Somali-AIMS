@@ -49,6 +49,17 @@ namespace AIMS.APIs.Controllers
             return Ok(projectService.GetLatest());
         }
 
+        [HttpGet("UpdateFinancialYearsForProjects")]
+        public IActionResult UpdateFinancialYearsForProjects()
+        {
+            var response = projectService.UpdateFinancialYearsForProjects();
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpGet]
         [Route("GetById/{id}")]
         public IActionResult Get(int id)
