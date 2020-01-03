@@ -121,7 +121,7 @@ namespace AIMS.Services
                     {
                         mHelper = new MessageHelper();
                         response.Success = false;
-                        response.Message = "";
+                        response.Message = mHelper.FinancialYearSettingsMissing();
                         return response;
                     }
                     settingsMonth = fySettings.Month;

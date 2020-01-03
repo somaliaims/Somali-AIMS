@@ -339,6 +339,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string GetDefaultSectorTypeMissingMessage();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string FinancialYearSettingsMissing();
     }
 
     public class MessageHelper : IMessageHelper
@@ -349,6 +355,7 @@ namespace AIMS.Services.Helpers
         private readonly string NEW_RECORD = " added successfully.";
         private readonly string INVALID_MONTH_DAY = "You provided invalid month and/or day";
         private readonly string NEW = "New ";
+        private readonly string FINANCIAL_YEAR_SETTINGS_MISSING = "Settings for financial year missing. Please set day and month to mark the start of financial year.";
         private readonly string DELETED = " deleted successfully";
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
         private readonly string DEFAULT_SECTOR_TYPE_MISSING = "Default sector type not found. You cannot store sector to projects without a default sector type";
@@ -411,6 +418,11 @@ namespace AIMS.Services.Helpers
         public string GetDefaultSectorTypeMissingMessage()
         {
             return (DEFAULT_SECTOR_TYPE_MISSING);
+        }
+
+        public string FinancialYearSettingsMissing()
+        {
+            return (FINANCIAL_YEAR_SETTINGS_MISSING);
         }
 
         public string NewUserForOrganization(string organization, string userEmail)
