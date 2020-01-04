@@ -51,8 +51,10 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(p => p.DateUpdated, opts => opts.MapFrom(source => source.DateUpdated.ToShortDateString()));
 
             CreateMap<EFProject, ProjectModelView>()
-                .ForMember(p => p.StartingFinancialYear, opts => opts.MapFrom(source => source.StartingFinancialYear.FinancialYear.ToString() ))
-                .ForMember(p => p.EndingFinancialYear, opts => opts.MapFrom(source => source.EndingFinancialYear.FinancialYear.ToString()));
+                .ForMember(p => p.StartDate, opts => opts.MapFrom(source => source.StartDate.ToShortDateString()))
+                .ForMember(p => p.EndDate, opts => opts.MapFrom(source => source.EndDate.ToShortDateString()))
+                .ForMember(p => p.StartingFinancialYear, opts => opts.MapFrom(source => source.StartingFinancialYear.Label.ToString()))
+                .ForMember(p => p.EndingFinancialYear, opts => opts.MapFrom(source => source.EndingFinancialYear.Label.ToString()));
 
             CreateMap<EFProjectLocations, LocationView>()
                 .ForMember(l => l.Id, opts => opts.MapFrom(source => source.Location.Id))
@@ -79,11 +81,13 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFProjectDisbursements, ProjectDisbursementView>()
                 .ForMember(d => d.Year, opts => opts.MapFrom(source => source.Year.FinancialYear))
+                .ForMember(d => d.FinancialYear, opts => opts.MapFrom(source => source.Year.Label))
                 .ForMember(d => d.DisbursementType, opts => opts.MapFrom(source => (DisbursementTypes)source.DisbursementType));
 
             CreateMap<EFProjectDisbursements, DisbursementAbstractView>()
                 .ForMember(d => d.Disbursement, opts => opts.MapFrom(source => source.Amount))
                 .ForMember(d => d.Year, opts => opts.MapFrom(source => source.Year.FinancialYear))
+                .ForMember(d => d.FinancialYear, opts => opts.MapFrom(source => source.Year.Label))
                 .ForMember(d => d.DisbursementType, opts => opts.MapFrom(source => (DisbursementTypes)source.DisbursementType));
 
             CreateMap<EFProjectMarkers, MarkerAbstractView>()

@@ -307,6 +307,7 @@ namespace AIMS.Models
     public class DisbursementAbstractView
     {
         public int Year { get; set; }
+        public string FinancialYear { get; set; }
         public decimal Amount { get; set; }
         public string DisbursementType { get; set; }
         public decimal Disbursement { get; set; }
@@ -924,6 +925,8 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
         public string StartingFinancialYear { get; set; }
         public string EndingFinancialYear { get; set; }
         public decimal ProjectValue { get; set; }
@@ -1227,6 +1230,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public int ProjectId { get; set; }
         public int Year { get; set; }
+        public string FinancialYear { get; set; }
         public DisbursementTypes DisbursementType { get; set; }
         public decimal Amount { get; set; }
         public string Currency { get; set; }
