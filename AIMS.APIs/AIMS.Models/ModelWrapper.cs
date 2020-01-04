@@ -1359,6 +1359,13 @@ namespace AIMS.Models
         public int Day { get; set; } = 0;
     }
 
+    public class CurrentYearDisbursementView
+    {
+        public int Year { get; set; }
+        public string FinancialYear { get; set; }
+        public decimal Disbursements { get; set; }
+    }
+
     public class FinancialYearRangeModel
     {
         [Required]

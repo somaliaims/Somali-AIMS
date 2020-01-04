@@ -353,7 +353,7 @@ namespace AIMS.Services
         /// Gets current year disbursements
         /// </summary>
         /// <returns></returns>
-        decimal GetCurrentYearDisbursements();
+        CurrentYearDisbursementView GetCurrentYearDisbursements();
 
         /// <summary>
         /// Rectify financial years for projects, temporary Api
@@ -440,32 +440,53 @@ namespace AIMS.Services
             }
         }
 
-        public decimal GetCurrentYearDisbursements()
+        public CurrentYearDisbursementView GetCurrentYearDisbursements()
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                CurrentYearDisbursementView disbursementView = new CurrentYearDisbursementView();
                 Decimal disbursementValue = 0;
                 int currentYear = DateTime.Now.Year;
+                int currentMonth = DateTime.Now.Month;
+                int currentDay = DateTime.Now.Day;
+                var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(s => s.Id != 0);
+                if (fySettings != null)
+                {
+                    int settingsMonth = fySettings.Month;
+                    int settingsDay = fySettings.Day;
+
+                    if (currentMonth < settingsMonth)
+                    {
+                        --currentYear;
+                    }
+                    else if(currentMonth == settingsMonth && currentDay < settingsDay)
+                    {
+                        --currentYear;
+                    }
+                }
                 var financialYearExists = unitWork.FinancialYearRepository.GetOne(y => y.FinancialYear == currentYear);
                 if (financialYearExists == null)
                 {
                     unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                     {
                         FinancialYear = currentYear,
-                        Label = "FY " + (currentYear - 1) + "/" + currentYear
+                        Label = "FY " + (currentYear) + "/" + (currentYear + 1)
                     });
                     unitWork.Save();
                 }
                 else
                 {
-                    var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == DateTime.Now.Year && d.DisbursementType == DisbursementTypes.Actual, new string[] { "Year" });
+                    var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == currentYear && d.DisbursementType == DisbursementTypes.Actual, new string[] { "Year" });
                     if (disbursements.Any())
                     {
                         disbursementValue = (from d in disbursements
                                              select (d.Amount * (1 / d.ExchangeRate))).Sum();
                     }
                 }
-                return disbursementValue;
+                disbursementView.Year = currentYear;
+                disbursementView.FinancialYear = financialYearExists.Label;
+                disbursementView.Disbursements = disbursementValue;
+                return disbursementView;
             }
         }
 
