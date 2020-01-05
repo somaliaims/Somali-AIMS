@@ -357,6 +357,7 @@ namespace AIMS.Models
 
     public class MergeOrganizationModel
     {
+        public int OrganizationTypeId { get; set; }
         [Required]
         public string NewName { get; set; }
         [Required]

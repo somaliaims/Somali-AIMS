@@ -444,6 +444,15 @@ namespace AIMS.Services
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                 }
 
+                var organizationType = unitWork.OrganizationTypesRepository.GetOne(t => t.Id == model.OrganizationTypeId);
+                if (organizationType == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Organization type");
+                    response.Success = false;
+                    return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                }
+
                 var strategy = context.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
                 {
@@ -467,6 +476,7 @@ namespace AIMS.Services
                         var users = unitWork.UserRepository.GetManyQueryable(u => (orgIds.Contains(u.OrganizationId)));
                         var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
                         {
+                            OrganizationType = organizationType,
                             OrganizationName = model.NewName,
                             IsApproved = true
                         });
