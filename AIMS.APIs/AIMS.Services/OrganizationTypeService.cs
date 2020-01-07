@@ -77,6 +77,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var organizationTypes = unitWork.OrganizationTypesRepository.GetAll();
+                organizationTypes = (from type in organizationTypes
+                                     orderby type.TypeName
+                                     select type);
                 return mapper.Map<List<OrganizationTypeView>>(organizationTypes);
             }
         }
@@ -86,6 +89,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var organizationTypes = await unitWork.OrganizationTypesRepository.GetAllAsync();
+                organizationTypes = (from type in organizationTypes
+                                     orderby type.TypeName
+                                     select type);
                 return await Task<IEnumerable<OrganizationTypeView>>.Run(() => mapper.Map<List<OrganizationTypeView>>(organizationTypes)).ConfigureAwait(false);
             }
         }

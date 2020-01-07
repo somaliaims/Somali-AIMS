@@ -261,12 +261,26 @@ namespace AIMS.Services
             List<CurrencyWithRates> exchangeRates = new List<CurrencyWithRates>();
             try
             {
-                int dateYear = dated.Year;
-                int month = dated.Month;
-                int startingDayOfMonth = 1, endingDayOfMonth = 30;
-                int fyStartingMonth = 7, fyEndingMonth = 6;
+                //int dateYear = dated.Year;
+                //int month = dated.Month;
+                //int startingDayOfMonth = 1, endingDayOfMonth = 30;
+                //int fyStartingMonth = 1, fyEndingMonth = 6;
                 int proposedYear = dated.Year;
-                DateTime startDate, endDate;
+                //DateTime startDate, endDate;
+
+                /*var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
+                if (fySettings != null)
+                {
+                    fyStartingMonth = fySettings.Month;
+                    if (fySettings.Month <= 1)
+                    {
+                        fyEndingMonth = 12;
+                    }
+                    else
+                    {
+                        fyEndingMonth = (fyStartingMonth - 1);
+                    }
+                }
 
                 if (month <= fyEndingMonth)
                 {
@@ -279,7 +293,7 @@ namespace AIMS.Services
                     ++proposedYear;
                     startDate = new DateTime(dateYear, fyStartingMonth, startingDayOfMonth);
                     endDate = new DateTime(proposedYear, fyEndingMonth, endingDayOfMonth);
-                }
+                }*/
                 IQueryable<EFManualExchangeRates> exRates = unitWork.ManualRatesRepository.GetManyQueryable(r => r.Year == dated.Year || r.Year == DateTime.Now.Year);
                 var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => c.Id != 0);
                 if (exRates.Any())
@@ -300,7 +314,7 @@ namespace AIMS.Services
                 }
                 else
                 {
-                    exRates = unitWork.ManualRatesRepository.GetManyQueryable(e => e.Year >= startDate.Year);
+                    exRates = unitWork.ManualRatesRepository.GetManyQueryable(e => e.Year >= proposedYear);
                     if (exRates.Any())
                     {
                         foreach (var exRate in exRates)
