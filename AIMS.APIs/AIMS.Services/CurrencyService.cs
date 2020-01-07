@@ -129,12 +129,33 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                int currentYear = DateTime.Now.Year;
                 var currencies = unitWork.CurrencyRepository.GetAll();
-                var availableCurrencies = unitWork.ManualRatesRepository.GetProjection(m => m.Year == DateTime.Now.Year, m => m.Currency);
-                currencies = (from c in currencies
-                              where availableCurrencies.Contains(c.Currency)
-                              orderby c.Currency
-                              select c);
+                var availableCurrencies = unitWork.ManualRatesRepository.GetManyQueryable(m => m.Year == currentYear);
+                if (availableCurrencies.Count() == 0)
+                {
+                    availableCurrencies = unitWork.ManualRatesRepository.GetManyQueryable(m => m.Year == (currentYear - 1));
+                    if (availableCurrencies.Any())
+                    {
+                        foreach(var currency in availableCurrencies)
+                        {
+                            unitWork.ManualRatesRepository.Insert(new EFManualExchangeRates()
+                            {
+                                Currency = currency.Currency,
+                                ExchangeRate = currency.ExchangeRate,
+                                Year = currentYear
+                            });
+                        }
+                        unitWork.Save();
+                    }
+                }
+                
+                var manualCurrencies = (from c in availableCurrencies
+                                       select c.Currency);
+                currencies = (from currency in currencies
+                              where manualCurrencies.Contains(currency.Currency, StringComparer.OrdinalIgnoreCase)
+                              orderby currency.CurrencyName ascending
+                              select currency);
                 return mapper.Map<List<CurrencyView>>(currencies);
             }
         }

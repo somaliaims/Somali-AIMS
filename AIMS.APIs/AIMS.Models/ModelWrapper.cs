@@ -2136,6 +2136,7 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string BackupFileName { get; set; }
+        public string DownloadPath { get; set; }
         public DateTime TakenOn { get; set; }
     }
 }

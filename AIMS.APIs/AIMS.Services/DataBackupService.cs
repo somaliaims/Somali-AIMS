@@ -20,7 +20,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="connString"></param>
         /// <returns></returns>
-        ActionResponse BackupData(string connString);
+        Task<ActionResponse> BackupData(string connString);
 
         /// <summary>
         /// Backup the database from the provided backed up data
@@ -68,7 +68,7 @@ namespace AIMS.Services
             return backupDir;
         }
 
-        public ActionResponse BackupData(string connString)
+        public async Task<ActionResponse> BackupData(string connString)
         {
             ActionResponse response = new ActionResponse();
             try
@@ -90,6 +90,17 @@ namespace AIMS.Services
                             sqlCommand.CommandTimeout = 0;
                             sqlCommand.ExecuteNonQuery();
                         }
+                        await Task.Delay(2000);
+                        Directory.CreateDirectory(backupFileNameWithoutExt);
+                        if (Directory.Exists(backupFileNameWithoutExt))
+                        {
+                            string fileName = Path.GetFileName(backupFileNameWithExt);
+                            string newFilePath = backupFileNameWithoutExt + "\\" + fileName;
+                            File.Copy(backupFileNameWithExt, newFilePath);
+                            ZipFile.CreateFromDirectory(backupFileNameWithoutExt, zipFileName);
+                            await Task.Delay(1000);
+                            Directory.Delete(backupFileNameWithoutExt, true);
+                        }
                     }
                     sqlConnection.Close();
                 }
@@ -109,13 +120,19 @@ namespace AIMS.Services
             {
                 string[] files = Directory.GetFiles(backupDir);
                 int index = 1;
+                files = (from file in files
+                         where Path.GetExtension(Path.GetFileName(file)).Equals(".bak", StringComparison.OrdinalIgnoreCase)
+                         select file).ToArray();
+
                 foreach (string file in files)
                 {
                     FileInfo fi = new FileInfo(file);
+                    string downloadZip = Path.GetFileName(file) + ".zip";
                     filesList.Add(new BackupFiles()
                     {
                         Id = index,
                         BackupFileName = fi.Name,
+                        DownloadPath = downloadZip,
                         TakenOn = fi.CreationTime
                     });
                     ++index;

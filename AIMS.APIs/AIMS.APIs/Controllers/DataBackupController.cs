@@ -30,13 +30,13 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet("PerformBackup")]
-        public IActionResult PerformBackup()
+        public async Task<IActionResult> PerformBackup()
         {
             if (string.IsNullOrEmpty(connectionString))
             {
                 return BadRequest("Connection string to database is not set in the configuration file.");
             }
-            var response = service.BackupData(connectionString);
+            var response = await service.BackupData(connectionString);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
