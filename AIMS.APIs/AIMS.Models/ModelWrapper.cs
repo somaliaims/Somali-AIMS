@@ -441,6 +441,7 @@ namespace AIMS.Models
         public string ParentSector { get; set; }
         public string SectorName { get; set; }
         public bool IsDefault { get; set; } = false;
+        public bool IsUnAttributed { get; set; }
         public bool IsSourceType { get; set; } = false;
     }
 
@@ -449,6 +450,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string ParentSector { get; set; }
         public string SectorName { get; set; }
+        public bool IsUnAttributed { get; set; }
     }
 
     public class SectorViewWithParent
@@ -457,6 +459,7 @@ namespace AIMS.Models
         public int ParentSectorId { get; set; }
         public string ParentSector { get; set; }
         public string SectorName { get; set; }
+        public bool IsUnAttributed { get; set; }
     }
 
     public class SectorViewModel
@@ -701,6 +704,7 @@ namespace AIMS.Models
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
         public decimal FundsPercentage { get; set; }
+        public bool IsUnAttributed { get; set; }
     }
 
     public class LocationModel

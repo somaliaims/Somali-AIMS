@@ -212,6 +212,17 @@ namespace AIMS.Services
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                 }
 
+                var location = (from l in locations
+                                where l.Id == id
+                                select l).FirstOrDefault();
+                if (location.IsUnAttributed)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.UnattributedCannotBeDeleted("Location");
+                    response.Success = false;
+                    return response;
+                }
+
                 var projectLocations = await unitWork.ProjectLocationsRepository.GetManyQueryableAsync(l => (l.LocationId == id || l.LocationId == newId));
                 var locationsInDb = (from l in projectLocations
                                      select new LocationKeyPreview
@@ -220,9 +231,7 @@ namespace AIMS.Services
                                          LocationId = l.LocationId
                                      }).ToList<LocationKeyPreview>();
 
-                var location = (from l in locations
-                                where l.Id == id
-                                select l).FirstOrDefault();
+                
 
                 List<EFProjectLocations> locationsList = new List<EFProjectLocations>();
                     foreach(var pLocation in projectLocations)

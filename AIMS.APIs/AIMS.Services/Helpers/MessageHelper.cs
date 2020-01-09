@@ -351,6 +351,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string PrimarySectorTypeMissing();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string UnattributedCannotBeDeleted(string entity);
     }
 
     public class MessageHelper : IMessageHelper
@@ -435,6 +441,11 @@ namespace AIMS.Services.Helpers
         public string PrimarySectorTypeMissing()
         {
             return (PRIMARY_SECTOR_TYPE_MISSING);
+        }
+
+        public string UnattributedCannotBeDeleted(string entity)
+        {
+            return ("This " + entity + " cannot be deleted");
         }
 
         public string NewUserForOrganization(string organization, string userEmail)

@@ -1169,32 +1169,94 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
-                disbursements = (disbursements.Count() > 0) ?
-                                    (from d in disbursements orderby d.Year.FinancialYear ascending select d) : disbursements;
-
-                //Delete any planned disbursements for previous year
-                var disbursementsToDelete = (from d in disbursements
-                                            where d.Year.FinancialYear < DateTime.Now.Year && d.DisbursementType == DisbursementTypes.Planned
-                                            select d);
-
-                int deleted = 0;
-                if (disbursementsToDelete.Any())
+                int currentActiveYear = DateTime.Now.Year, currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
+                int fyMonth = 0, fyDay = 0;
+                var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(s => s.Id != 0);
+                if (fySettings != null)
                 {
-                    foreach(var disbursement in disbursementsToDelete)
+                    fyMonth = fySettings.Month;
+                    fyDay = fySettings.Day;
+                    if (currentMonth < fyMonth)
                     {
-                        unitWork.ProjectDisbursementsRepository.Delete(disbursement);
-                        deleted++;
+                        --currentActiveYear;
+                    }
+                    else if (currentMonth == fyMonth && currentDay <= fyDay)
+                    {
+                        --currentActiveYear;
                     }
                 }
 
-                if (deleted > 0)
+                int endingYear = 0;
+                var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == id, new string[] { "EndingFinancialYear" }).FirstOrDefault();
+                if (project != null)
                 {
-                    unitWork.Save();
-                    disbursements = (from d in disbursements
-                                     where (d.Year.FinancialYear != DateTime.Now.Year && d.DisbursementType != DisbursementTypes.Planned)
-                                     select d);
+                    endingYear = project.EndingFinancialYear.FinancialYear;
                 }
+
+                if (currentMonth > fyMonth)
+                {
+                    //Delete any planned disbursements for previous year
+                    var disbursementsToDelete = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear < currentActiveYear && d.DisbursementType == DisbursementTypes.Planned, new string[] { "Year" });
+                    int deleted = 0;
+                    decimal deletedAmount = 0;
+                    if (disbursementsToDelete.Any() && endingYear > currentActiveYear)
+                    {
+                        foreach (var disbursement in disbursementsToDelete)
+                        {
+                            deletedAmount += disbursement.Amount;
+                            unitWork.ProjectDisbursementsRepository.Delete(disbursement);
+                            deleted++;
+                        }
+                        var nextPlannedDisbursement = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == project.Id && d.Year.FinancialYear == currentActiveYear
+                        && d.DisbursementType == DisbursementTypes.Planned, new string[] { "Year" });
+                        if (nextPlannedDisbursement == null)
+                        {
+                            var financialYear = unitWork.FinancialYearRepository.GetOne(y => y.FinancialYear == currentActiveYear);
+                            if (financialYear == null)
+                            {
+                                unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                {
+                                    FinancialYear = currentActiveYear,
+                                    Label = "FY " + currentActiveYear + "/" + (currentActiveYear + 1)
+                                });
+                                unitWork.Save();
+                            }
+
+                            unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                            {
+                                Project = project,
+                                Amount = deletedAmount,
+                                DisbursementType = DisbursementTypes.Planned,
+                                Year = financialYear
+                            });
+                        }
+                    }
+                    else if(disbursementsToDelete.Any() && endingYear < currentActiveYear)
+                    {
+                        var actualLastDisbursement = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == endingYear && d.DisbursementType == DisbursementTypes.Actual, new string[] { "Year" }).FirstOrDefault();
+                        if (actualLastDisbursement != null)
+                        {
+                            foreach(var disbursement in disbursementsToDelete)
+                            {
+                                deletedAmount += disbursement.Amount;
+                                deleted++;
+                            }
+                            if (deleted > 0)
+                            {
+                                actualLastDisbursement.Amount += deletedAmount;
+                                unitWork.ProjectDisbursementsRepository.Delete(disbursementsToDelete);
+                            }
+                        }
+                    }
+                    if (deleted > 0)
+                    {
+                        
+                        unitWork.Save();
+                    }
+                }
+                var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
+                disbursements = (disbursements.Count() > 0) ?
+                                    (from d in disbursements orderby d.Year.FinancialYear ascending select d) : disbursements;
                 return mapper.Map<List<ProjectDisbursementView>>(disbursements);
             }
         }
@@ -1336,7 +1398,8 @@ namespace AIMS.Services
                                 {
                                     Location = UNATTRIBUTED,
                                     Longitude = 0,
-                                    Latitude = 0
+                                    Latitude = 0,
+                                    IsUnAttributed = true
                                 });
                                 unitWork.Save();
                             }
@@ -1355,7 +1418,8 @@ namespace AIMS.Services
                                 {
                                     SectorName = UNATTRIBUTED,
                                     SectorType = primarySectorType,
-                                    ParentSector = null
+                                    ParentSector = null,
+                                    IsUnAttributed = true
                                 });
                                 unitWork.Save();
                             }
@@ -2407,7 +2471,8 @@ namespace AIMS.Services
                                     {
                                         SectorType = defaultSectorType,
                                         SectorName = UNATTRIBUTED,
-                                        ParentSector = null
+                                        ParentSector = null,
+                                        IsUnAttributed = true
                                     });
                                     unitWork.Save();
 
@@ -3328,7 +3393,8 @@ namespace AIMS.Services
                                         {
                                             SectorType = defaultSectorType,
                                             SectorName = UNATTRIBUTED,
-                                            ParentSector = null
+                                            ParentSector = null,
+                                            IsUnAttributed = true
                                         });
                                         unitWork.Save();
 

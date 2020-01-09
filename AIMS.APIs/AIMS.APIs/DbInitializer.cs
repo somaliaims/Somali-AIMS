@@ -360,6 +360,26 @@ namespace AIMS.APIs
                         SectorName = "Other",
                         TimeStamp = DateTime.Now
                     });
+                    context.Sectors.Add(new EFSector()
+                    {
+                        ParentSector = null,
+                        SectorType = primary.Entity,
+                        SectorName = "UNATTRIBUTED",
+                        TimeStamp = DateTime.Now,
+                        IsUnAttributed = true
+                    });
+                }
+
+                if (context.Locations.Count() == 0)
+                {
+                    context.Locations.Add(new EFLocation()
+                    {
+                        Location = "UNATTRIBUTED",
+                        Latitude = 0,
+                        Longitude = 0,
+                        IsUnAttributed = true
+                    });
+                    context.SaveChanges();
                 }
 
                 if (context.FinancialYears.Count() == 0)

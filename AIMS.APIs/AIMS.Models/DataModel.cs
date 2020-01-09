@@ -188,6 +188,7 @@ namespace AIMS.Models
         [ForeignKey("ParentSector")]
         public int? ParentSectorId { get; set; }
         public EFSector ParentSector { get; set; }
+        public bool IsUnAttributed { get; set; } = false;
         public DateTime TimeStamp { get; set; }
     }
 
@@ -210,6 +211,7 @@ namespace AIMS.Models
         public decimal? Latitude { get; set; }
         [Column(TypeName = "decimal(9, 5)")]
         public decimal? Longitude { get; set; }
+        public bool IsUnAttributed { get; set; } = false;
     }
 
     /*

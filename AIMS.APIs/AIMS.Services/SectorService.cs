@@ -439,6 +439,14 @@ namespace AIMS.Services
                 var sectorToDelete = (from s in sectors
                               where s.Id == id
                               select s).FirstOrDefault();
+                
+                if (sectorToDelete.IsUnAttributed)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.UnattributedCannotBeDeleted("Sector");
+                    response.Success = false;
+                    return response;
+                }
 
                 if (sectorToDelete != null)
                 {
