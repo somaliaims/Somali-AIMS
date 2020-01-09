@@ -360,6 +360,12 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         ActionResponse UpdateFinancialYearsForProjects();
+
+        /// <summary>
+        /// Adjust planned disbursements for active projects
+        /// </summary>
+        /// <returns></returns>
+        Task<ActionResponse> AdjustDisbursementsForProjectsAsync();
     }
 
     public class ProjectService : IProjectService
@@ -1441,6 +1447,109 @@ namespace AIMS.Services
                 }
                 return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
+        }
+
+        public async Task<ActionResponse> AdjustDisbursementsForProjectsAsync()
+        {
+            ActionResponse response = new ActionResponse();
+            var unitWork = new UnitOfWork(context);
+            int currentActiveYear = DateTime.Now.Year, currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
+            int fyMonth = 0, fyDay = 0;
+            var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(s => s.Id != 0);
+            if (fySettings != null)
+            {
+                fyMonth = fySettings.Month;
+                fyDay = fySettings.Day;
+                if (currentMonth < fyMonth)
+                {
+                    --currentActiveYear;
+                }
+                else if (currentMonth == fyMonth && fyDay <= currentDay)
+                {
+                    --currentActiveYear;
+                }
+            }
+
+            try
+            {
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        int endingYear = 0;
+                        var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndDate.Year >= currentActiveYear, new string[] { "EndingFinancialYear", "Disbursements", "Disbursements.Year" });
+
+                        foreach (var project in projects)
+                        {
+                            endingYear = project.EndingFinancialYear.FinancialYear;
+                            if (currentMonth >= fyMonth)
+                            {
+                                //Delete any planned disbursements for previous year
+                                var disbursementsToDelete = (from disbursement in project.Disbursements
+                                                             where disbursement.Year.FinancialYear == currentActiveYear &&
+                                                             disbursement.DisbursementType == DisbursementTypes.Planned
+                                                             select disbursement);
+                                int deleted = 0;
+                                decimal deletedAmount = 0;
+                                if (disbursementsToDelete.Any() && endingYear > currentActiveYear)
+                                {
+                                    foreach (var disbursement in disbursementsToDelete)
+                                    {
+                                        deletedAmount += disbursement.Amount;
+                                        unitWork.ProjectDisbursementsRepository.Delete(disbursement);
+                                        deleted++;
+                                    }
+
+                                    if (deleted > 0)
+                                    {
+                                        var nextPlannedDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == project.Id && d.Year.FinancialYear > currentActiveYear
+                                    && d.DisbursementType == DisbursementTypes.Planned, new string[] { "Year" });
+                                        if (nextPlannedDisbursements.Any())
+                                        {
+                                            var adjustedAmount = (deletedAmount / nextPlannedDisbursements.Count());
+                                            foreach (var planned in nextPlannedDisbursements)
+                                            {
+                                                planned.Amount += adjustedAmount;
+                                                unitWork.ProjectDisbursementsRepository.Update(planned);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            var financialYear = unitWork.FinancialYearRepository.GetOne(y => y.FinancialYear == (currentActiveYear + 1));
+                                            if (financialYear == null)
+                                            {
+                                                unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                                {
+                                                    FinancialYear = currentActiveYear,
+                                                    Label = "FY " + currentActiveYear + "/" + (currentActiveYear + 1)
+                                                });
+                                                unitWork.Save();
+                                            }
+
+                                            unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                            {
+                                                Project = project,
+                                                Amount = deletedAmount,
+                                                DisbursementType = DisbursementTypes.Planned,
+                                                Year = financialYear
+                                            });
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                });
+            }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+                return response;
+            }
+            return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
         }
 
         public ActionResponse UpdateFinancialYearsForProjects()

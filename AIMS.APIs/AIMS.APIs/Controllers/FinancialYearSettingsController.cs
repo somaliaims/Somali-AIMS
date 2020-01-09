@@ -26,13 +26,13 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] FinancialYearSettingModel model)
+        public async Task<IActionResult> Post([FromBody] FinancialYearSettingModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var response = service.Add(model);
+            var response = await service.AddAsync(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
