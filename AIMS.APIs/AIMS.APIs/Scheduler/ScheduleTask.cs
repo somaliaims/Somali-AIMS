@@ -161,14 +161,13 @@ namespace AIMS.APIs.Scheduler
                         fyDay = fySettings.Day;
                     }
 
-                    //if (fyMonth == currentMonth && fyDay == currentDay)
-                    //{
-                    var response =  projectService.AdjustDisbursementsForProjectsAsync().GetAwaiter().GetResult();
-                    if (response.Success)
+                    if (fyMonth == currentMonth && fyDay == currentDay)
                     {
-
+                        var response = projectService.AdjustDisbursementsForProjectsAsync().GetAwaiter().GetResult();
+                        if (response.Success)
+                        {
+                        }
                     }
-                    //}
                 }
 
                 //File cleanup
