@@ -51,40 +51,38 @@ namespace AIMS.Services
 
         public ActionResponse AddList(List<IATICountryModel> countriesList)
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            ActionResponse response = new ActionResponse();
+            var countriesInDb = unitWork.IATICountryRepository.GetProjection(c => c.Id != 0, c => c.Code);
+            int newCountriesCount = 0;
+            foreach (var country in countriesList)
             {
-                ActionResponse response = new ActionResponse();
-                var countriesInDb = unitWork.IATICountryRepository.GetProjection(c => c.Id != 0, c => c.Code);
-                int newCountriesCount = 0;
-                foreach(var country in countriesList)
+                var countryExists = (from code in countriesInDb
+                                     where code.Equals(country.Code, StringComparison.OrdinalIgnoreCase)
+                                     select code).FirstOrDefault();
+                if (countryExists == null)
                 {
-                    var countryExists = (from code in countriesInDb
-                                         where code.Equals(country.Code, StringComparison.OrdinalIgnoreCase)
-                                         select code).FirstOrDefault();
-                    if (countryExists == null)
+                    unitWork.IATICountryRepository.Insert(new EFIATICountryCodes()
                     {
-                        unitWork.IATICountryRepository.Insert(new EFIATICountryCodes()
-                        {
-                            Code = country.Code,
-                            Country = country.Country
-                        });
-                        ++newCountriesCount;
-                    }
+                        Code = country.Code,
+                        Country = country.Country
+                    });
+                    ++newCountriesCount;
                 }
-                try
-                {
-                    if (newCountriesCount > 0)
-                    {
-                        unitWork.Save();
-                    }
-                }
-                catch(Exception ex)
-                {
-                    response.Success = false;
-                    response.Message = ex.Message;
-                }
-                return response;
             }
+            try
+            {
+                if (newCountriesCount > 0)
+                {
+                    unitWork.Save();
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
         }
 
         public ActionResponse SetActiveCountry(string code)

@@ -61,8 +61,6 @@ namespace AIMS.APIs.Scheduler
                 string xml = "", json = "", transactionTypesJson = "", financeTypesJson = "", sectorsVocabJson = "",
                     organizationTypesJson = "", countriesJson = "";
 
-          
-
                 using (var client = new WebClient())
                 {
                     json = client.DownloadString(currencyUrl);
@@ -104,6 +102,8 @@ namespace AIMS.APIs.Scheduler
                     IUserService userService = new UserService(dbContext, imapper);
                     INotificationService notificationService = new NotificationService(dbContext, imapper);
                     IATIService service = new IATIService(dbContext);
+                    IFinancialYearSettingsService fySettingsService = new FinancialYearSettingsService(dbContext);
+                    IProjectService projectService = new ProjectService(dbContext, imapper);
                     ICountryService countryService = new CountryService(dbContext, imapper);
 
                     var activeCountryCode = countryService.GetActiveCountry();
@@ -116,11 +116,11 @@ namespace AIMS.APIs.Scheduler
                         }
                     }
                     //Download latest iati
-                    using (var client = new WebClient())
+                    /*using (var client = new WebClient())
                     {
                         xml = client.DownloadString(url);
                     }
-                    File.WriteAllText(filePath, xml);
+                    File.WriteAllText(filePath, xml);*/
 
                     var cleanedTTypeJson = service.ExtractTransactionTypesJson(transactionTypesJson);
                     var cleanedFTypeJson = service.ExtractFinanceTypesJson(financeTypesJson);
@@ -152,6 +152,23 @@ namespace AIMS.APIs.Scheduler
                         countryService.AddList(countriesList);
                     }
 
+                    var fySettings = fySettingsService.Get();
+                    int fyMonth = 0, fyDay = 0;
+                    int currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
+                    if (fySettings != null)
+                    {
+                        fyMonth = fySettings.Month;
+                        fyDay = fySettings.Day;
+                    }
+
+                    //if (fyMonth == currentMonth && fyDay == currentDay)
+                    //{
+                    var response =  projectService.AdjustDisbursementsForProjectsAsync().GetAwaiter().GetResult();
+                    if (response.Success)
+                    {
+
+                    }
+                    //}
                 }
 
                 //File cleanup

@@ -38,17 +38,15 @@ namespace AIMS.Services
 
         public FinancialYearSettingModel Get()
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            FinancialYearSettingModel view = new FinancialYearSettingModel();
+            var settings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
+            if (settings != null)
             {
-                FinancialYearSettingModel view = new FinancialYearSettingModel();
-                var settings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
-                if (settings != null)
-                {
-                    view.Month = settings.Month;
-                    view.Day = settings.Day;
-                }
-                return view;
+                view.Month = settings.Month;
+                view.Day = settings.Day;
             }
+            return view;
         }
 
         public async Task<ActionResponse> AddAsync(FinancialYearSettingModel model)
