@@ -1445,7 +1445,7 @@ namespace AIMS.Services
                     disbursementsList = (from d in disbursementsList 
                                          orderby d.Year ascending select d).ToList();
                 }
-                return mapper.Map<List<ProjectDisbursementView>>(disbursements);
+                return disbursementsList;
             }
         }
 

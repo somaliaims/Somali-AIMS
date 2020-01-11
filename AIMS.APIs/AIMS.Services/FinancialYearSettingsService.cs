@@ -217,7 +217,7 @@ namespace AIMS.Services
                                 {
                                     --currentActiveYear;
                                 }
-                                else if (currentMonth == fyMonth && fyDay <= currentDay)
+                                else if (currentMonth == fyMonth && currentDay <= fyDay)
                                 {
                                     --currentActiveYear;
                                 }
@@ -229,7 +229,7 @@ namespace AIMS.Services
                             foreach (var project in adjustProjects)
                             {
                                 endingYear = project.EndingFinancialYear.FinancialYear;
-                                if (currentMonth >= fyMonth)
+                                if (currentMonth > fyMonth || (currentMonth == fyMonth && currentDay > fyDay))
                                 {
                                     //Delete any planned disbursements for previous year
                                     var disbursementsToDelete = (from disbursement in project.Disbursements
@@ -238,7 +238,7 @@ namespace AIMS.Services
                                                                  select disbursement);
                                     int deleted = 0;
                                     decimal deletedAmount = 0;
-                                    if (disbursementsToDelete.Any() && currentDay > fyDay)
+                                    if (disbursementsToDelete.Any())
                                     {
                                         foreach (var disbursement in disbursementsToDelete)
                                         {
@@ -277,16 +277,26 @@ namespace AIMS.Services
                                                         unitWork.Save();
                                                     }
 
-                                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                                    var plannedDisbursement = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == (currentActiveYear + 1),
+                                                        new string[] { "Year" }).FirstOrDefault();
+
+                                                    if (plannedDisbursement == null)
                                                     {
-                                                        Project = project,
-                                                        Amount = deletedAmount,
-                                                        DisbursementType = DisbursementTypes.Planned,
-                                                        Year = financialYear
-                                                    });
+                                                        plannedDisbursement = unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                                        {
+                                                            Project = project,
+                                                            Amount = deletedAmount,
+                                                            DisbursementType = DisbursementTypes.Planned,
+                                                            Year = financialYear
+                                                        });
+                                                    }
+                                                    else
+                                                    {
+                                                        plannedDisbursement.Amount += deletedAmount;
+                                                        unitWork.ProjectDisbursementsRepository.Update(plannedDisbursement);
+                                                    }
                                                     unitWork.Save();
                                                 }
-                                                
                                             }
                                         }
                                     }
