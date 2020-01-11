@@ -132,6 +132,12 @@ namespace AIMS.Services.Helpers
         /// <summary>
         /// 
         /// </summary>
+        /// <returns></returns>
+        string InvalidProjectStartDate();
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
         string DeleteMessage(string entity);
@@ -370,6 +376,7 @@ namespace AIMS.Services.Helpers
         private readonly string PRIMARY_SECTOR_TYPE_MISSING = "Primary sector type is not setup. Please contact Administrator to set it up to enter projects";
         private readonly string FINANCIAL_YEAR_SETTINGS_MISSING = "Settings for financial year missing. Please set day and month to mark the start of financial year.";
         private readonly string DELETED = " deleted successfully";
+        private readonly string INVALID_PROJECT_START_DATE = "Invalid start date provided for the project. Please delete the disbursements first or contact Administrator";
         private readonly string INVALID_ATTEMPT = " made an invalid attempt to update data.";
         private readonly string DEFAULT_SECTOR_TYPE_MISSING = "Default sector type not found. You cannot store sector to projects without a default sector type";
         private readonly string STARTING_YEAR_GREATER = "Starting financial year cannot be greater than ending financial year";
@@ -436,6 +443,11 @@ namespace AIMS.Services.Helpers
         public string FinancialYearSettingsMissing()
         {
             return (FINANCIAL_YEAR_SETTINGS_MISSING);
+        }
+
+        public string InvalidProjectStartDate()
+        {
+            return (INVALID_PROJECT_START_DATE);
         }
 
         public string PrimarySectorTypeMissing()

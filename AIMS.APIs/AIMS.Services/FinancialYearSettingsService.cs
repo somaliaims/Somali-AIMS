@@ -217,7 +217,7 @@ namespace AIMS.Services
                                 {
                                     --currentActiveYear;
                                 }
-                                else if (currentMonth == fyMonth && currentDay <= fyDay)
+                                else if (currentMonth == fyMonth && currentDay >= fyDay)
                                 {
                                     --currentActiveYear;
                                 }
@@ -301,7 +301,7 @@ namespace AIMS.Services
                                         }
                                     }
                                 }
-                                else if ((currentMonth <= fyMonth && currentDay <= fyDay) && endingYear >= currentActiveYear)
+                                else if (((currentMonth < fyMonth) || (currentMonth == fyMonth && currentDay < fyDay)) && endingYear >= currentActiveYear)
                                 {
                                     var plannedDisbursement = unitWork.ProjectDisbursementsRepository.GetWithInclude(p => p.ProjectId == project.Id &&
                                         p.Year.FinancialYear == currentActiveYear && p.DisbursementType == DisbursementTypes.Planned,

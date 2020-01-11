@@ -1349,65 +1349,77 @@ namespace AIMS.Services
                 }*/
                 List<ProjectDisbursementView> disbursementsList = new List<ProjectDisbursementView>();
                 var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
-                if (disbursements.Count() == 0)
+                var project = unitWork.ProjectRepository.GetOne(p => p.Id == id);
+                if (project != null)
                 {
-                    var project = unitWork.ProjectRepository.GetOne(p => p.Id == id);
-                    if (project != null)
+                    var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
+                    int startYear = project.StartDate.Year, startMonth = project.StartDate.Month,
+                        startDay = project.StartDate.Day, endYear = project.EndDate.Year,
+                        endMonth = project.EndDate.Month, endDay = project.EndDate.Day;
+                    int fyMonth = 0, fyDay = 0, projectCurrentYear = 0, currentYear = DateTime.Now.Year,
+                        currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
+
+                    if (fySettings != null)
                     {
-                        var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
-                        int startYear = project.StartDate.Year, startMonth = project.StartDate.Month,
-                            startDay = project.StartDate.Day, endYear = project.EndDate.Year,
-                            endMonth = project.EndDate.Month, endDay = project.EndDate.Day;
-                        int fyMonth = 0, fyDay = 0, projectCurrentYear = 0, currentYear = DateTime.Now.Year,
-                            currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
+                        fyMonth = fySettings.Month;
+                        fyDay = fySettings.Day;
+                    }
 
-                        if (fySettings != null)
-                        {
-                            fyMonth = fySettings.Month;
-                            fyDay = fySettings.Day;
-                        }
+                    if ((startMonth < fyMonth) && fyMonth > 1)
+                    {
+                        --startYear;
+                    }
+                    else if (startMonth == fyMonth && startDay < fyDay)
+                    {
+                        --startYear;
+                    }
 
-                        if ((startMonth < fyMonth) && fyMonth > 1)
-                        {
-                            --startYear;
-                        }
-                        else if (startMonth == fyMonth && startDay < fyDay)
-                        {
-                            --startYear;
-                        }
+                    if ((endMonth > fyMonth) && fyMonth > 1)
+                    {
+                        ++endYear;
+                    }
+                    else if ((endMonth == fyMonth) && endDay > fyDay)
+                    {
+                        ++endYear;
+                    }
 
-                        if ((endMonth > fyMonth) && fyMonth > 1)
+                    if (fyMonth == 1 && fyDay == 1)
+                    {
+                        projectCurrentYear = currentYear;
+                    }
+                    else if (currentMonth > fyMonth)
+                    {
+                        projectCurrentYear = currentYear;
+                    }
+                    else if (currentMonth < fyMonth)
+                    {
+                        projectCurrentYear = (currentYear - 1);
+                    }
+                    else if (currentMonth == fyMonth && currentDay >= fyDay)
+                    {
+                        projectCurrentYear = currentYear;
+                    }
+                    else if (currentMonth == fyMonth && currentDay < fyDay)
+                    {
+                        projectCurrentYear = (currentYear - 1);
+                    }
+                    var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(fy => fy.FinancialYear >= startYear && fy.FinancialYear <= endYear);
+                    for (int yr = startYear; yr <= endYear; yr++)
+                    {
+                        var disbursement = (from d in disbursements
+                                            where d.Year.FinancialYear == yr
+                                            select d).FirstOrDefault();
+                        if (disbursement != null)
                         {
-                            ++endYear;
+                            disbursementsList.Add(new ProjectDisbursementView()
+                            {
+                                Year = disbursement.Year.FinancialYear,
+                                FinancialYear = disbursement.Year.Label,
+                                Amount = disbursement.Amount,
+                                DisbursementType = disbursement.DisbursementType
+                            });
                         }
-                        else if ((endMonth == fyMonth) && endDay > fyDay)
-                        {
-                            ++endYear;
-                        }
-
-                        if (fyMonth == 1 && fyDay == 1)
-                        {
-                            projectCurrentYear = currentYear;
-                        }
-                        else if (currentMonth > fyMonth)
-                        {
-                            projectCurrentYear = currentYear;
-                        }
-                        else if (currentMonth < fyMonth)
-                        {
-                            projectCurrentYear = (currentYear - 1);
-                        }
-                        else if (currentMonth == fyMonth && currentDay >= fyDay)
-                        {
-                            projectCurrentYear = currentYear;
-                        }
-                        else if (currentMonth == fyMonth && currentDay < fyDay)
-                        {
-                            projectCurrentYear = (currentYear - 1);
-                        }
-                        var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(fy => fy.FinancialYear >= startYear && fy.FinancialYear <= endYear);
-
-                        for (int yr = startYear; yr <= endYear; yr++)
+                        else
                         {
                             string yearLabel = (from f in financialYears
                                                 where f.FinancialYear == yr
@@ -1437,13 +1449,14 @@ namespace AIMS.Services
                                 });
                             }
                         }
+
                     }
                 }
-                disbursementsList = (disbursements.Count() > 0) ? mapper.Map<List<ProjectDisbursementView>>(disbursements) : disbursementsList;
                 if (disbursementsList.Count() > 0)
                 {
-                    disbursementsList = (from d in disbursementsList 
-                                         orderby d.Year ascending select d).ToList();
+                    disbursementsList = (from d in disbursementsList
+                                         orderby d.Year ascending
+                                         select d).ToList();
                 }
                 return disbursementsList;
             }
@@ -3522,8 +3535,8 @@ namespace AIMS.Services
             {
                 IMessageHelper mHelper;
                 ActionResponse response = new ActionResponse();
-                var projectObj = unitWork.ProjectRepository.GetByID(id);
-                if (projectObj == null)
+                var project = unitWork.ProjectRepository.GetByID(id);
+                if (project == null)
                 {
                     mHelper = new MessageHelper();
                     response.Success = false;
@@ -3538,6 +3551,14 @@ namespace AIMS.Services
                     mHelper = new MessageHelper();
                     response.Success = false;
                     response.Message = mHelper.GetNotFound("Currency");
+                    return response;
+                }
+
+                if (model.StartDate.Year > project.StartDate.Year)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.InvalidProjectStartDate();
                     return response;
                 }
 
@@ -3565,39 +3586,18 @@ namespace AIMS.Services
                     unitWork.Save();
                 }
 
-                projectObj.Title = model.Title;
-                projectObj.Description = model.Description;
-                projectObj.StartingFinancialYear = startingFinancialYear;
-                projectObj.StartDate = model.StartDate;
-                projectObj.EndDate = model.EndDate;
-                projectObj.EndingFinancialYear = endingFinancialYear;
-                projectObj.ProjectValue = model.ProjectValue;
-                projectObj.ExchangeRate = model.ExchangeRate;
-                projectObj.ProjectCurrency = model.ProjectCurrency;
-                projectObj.DateUpdated = DateTime.Now;
+                project.Title = model.Title;
+                project.Description = model.Description;
+                project.StartingFinancialYear = startingFinancialYear;
+                project.StartDate = model.StartDate;
+                project.EndDate = model.EndDate;
+                project.EndingFinancialYear = endingFinancialYear;
+                project.ProjectValue = model.ProjectValue;
+                project.ExchangeRate = model.ExchangeRate;
+                project.ProjectCurrency = model.ProjectCurrency;
+                project.DateUpdated = DateTime.Now;
 
-                unitWork.ProjectRepository.Update(projectObj);
-                unitWork.Save();
-
-                //Finally deleting any extra disbursements
-                var projectDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(p => p.ProjectId == id, new string[] { "Year" });
-
-                List<EFProjectDisbursements> disbursementsToDelete = new List<EFProjectDisbursements>();
-                foreach(var disbursement in projectDisbursements)
-                {
-                    if (disbursement.Year.FinancialYear < model.StartingFinancialYear || 
-                        disbursement.Year.FinancialYear > model.EndingFinancialYear)
-                    {
-                        disbursementsToDelete.Add(disbursement);
-                    }
-                }
-                if (disbursementsToDelete.Any())
-                {
-                    foreach (var disbursement in disbursementsToDelete)
-                    {
-                        unitWork.ProjectDisbursementsRepository.Delete(disbursement);
-                    }
-                }
+                unitWork.ProjectRepository.Update(project);
                 unitWork.Save();
                 response.Message = true.ToString();
                 return response;
