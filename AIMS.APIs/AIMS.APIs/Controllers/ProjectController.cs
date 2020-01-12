@@ -118,10 +118,9 @@ namespace AIMS.APIs.Controllers
 
         [HttpGet]
         [Route("GetDisbursements/{id}")]
-        public IActionResult GetDisbursements(int id)
+        public async Task<IActionResult> GetDisbursements(int id)
         {
-            var disbursements = projectService.GetProjectDisbursements(id);
-            return Ok(disbursements);
+            return Ok(await projectService.GetProjectDisbursementsAsync(id));
         }
 
         [HttpGet]
