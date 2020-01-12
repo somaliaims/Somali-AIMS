@@ -1284,6 +1284,15 @@ namespace AIMS.Services
                                     isSaved = true;
                                 }
                             }
+                            var disbursementsToDelete = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == project.Id && d.Year.FinancialYear != projectCurrentYear, new string[] { "Year" });
+                            if (disbursementsToDelete.Any())
+                            {
+                                foreach(var disbursement in disbursementsToDelete)
+                                {
+                                    unitWork.ProjectDisbursementsRepository.Delete(disbursement);
+                                }
+                                unitWork.Save();
+                            }
                             transaction.Commit();
                         }
                     });
@@ -1291,7 +1300,10 @@ namespace AIMS.Services
 
                 if (isSaved)
                 {
-                    disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.ProjectId == id);
+                    disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
+                    disbursements = (from d in disbursements
+                                     orderby d.Year.FinancialYear, d.DisbursementType
+                                     select d);
                 }
                 return mapper.Map<List<ProjectDisbursementView>>(disbursements);
             }
@@ -3475,15 +3487,6 @@ namespace AIMS.Services
                     else if (startingMonth == fyMonth && fyDay < startDay)
                     {
                         model.StartingFinancialYear = (model.StartingFinancialYear - 1);
-                    }
-
-                    if (endingMonth > fyMonth)
-                    {
-                        model.EndingFinancialYear = (model.EndingFinancialYear + 1);
-                    }
-                    else if (endingMonth == fyMonth && endingDay >= fyDay)
-                    {
-                        model.EndingFinancialYear = (model.EndingFinancialYear + 1);
                     }
                 }
 
