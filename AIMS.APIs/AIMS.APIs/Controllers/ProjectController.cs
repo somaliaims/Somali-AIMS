@@ -528,14 +528,14 @@ namespace AIMS.APIs.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] ProjectModel project)
+        public async Task<IActionResult> Put(int id, [FromBody] ProjectModel project)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var response = projectService.Update(id, project);
+            var response = await projectService.UpdateAsync(id, project);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

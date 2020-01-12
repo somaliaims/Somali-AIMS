@@ -1179,15 +1179,12 @@ namespace AIMS.Services
                 bool isSaved = false;
                 List<ProjectDisbursementView> disbursementsList = new List<ProjectDisbursementView>();
                 var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
-                var project = unitWork.ProjectRepository.GetOne(p => p.Id == id);
+                var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == id, new string[] { "StartingFinancialYear", "EndingFinancialYear" }).FirstOrDefault();
                 if (project != null)
                 {
                     var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
-                    int startYear = project.StartDate.Year, startMonth = project.StartDate.Month,
-                        startDay = project.StartDate.Day, endYear = project.EndDate.Year,
-                        endMonth = project.EndDate.Month, endDay = project.EndDate.Day;
                     int fyMonth = 0, fyDay = 0, projectCurrentYear = 0, currentYear = DateTime.Now.Year,
-                        currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
+                        startMonth = project.StartDate.Month, startDay = project.StartDate.Day;
 
                     if (fySettings != null)
                     {
@@ -1195,45 +1192,28 @@ namespace AIMS.Services
                         fyDay = fySettings.Day;
                     }
 
-                    if ((startMonth < fyMonth) && fyMonth > 1)
-                    {
-                        --startYear;
-                    }
-                    else if (startMonth == fyMonth && startDay < fyDay)
-                    {
-                        --startYear;
-                    }
-
-                    if ((endMonth > fyMonth) && fyMonth > 1)
-                    {
-                        ++endYear;
-                    }
-                    else if ((endMonth == fyMonth) && endDay > fyDay)
-                    {
-                        ++endYear;
-                    }
-
                     if (fyMonth == 1 && fyDay == 1)
                     {
                         projectCurrentYear = currentYear;
                     }
-                    else if (currentMonth > fyMonth)
+                    else if (startMonth > fyMonth)
                     {
                         projectCurrentYear = currentYear;
                     }
-                    else if (currentMonth < fyMonth)
+                    else if (startMonth < fyMonth)
                     {
                         projectCurrentYear = (currentYear - 1);
                     }
-                    else if (currentMonth == fyMonth && currentDay >= fyDay)
+                    else if (startMonth == fyMonth && startDay >= fyDay)
                     {
                         projectCurrentYear = currentYear;
                     }
-                    else if (currentMonth == fyMonth && currentDay < fyDay)
+                    else if (startMonth == fyMonth && startDay < fyDay)
                     {
                         projectCurrentYear = (currentYear - 1);
                     }
 
+                    int startYear = project.StartingFinancialYear.FinancialYear, endYear = project.EndingFinancialYear.FinancialYear;
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
                     {
@@ -1379,7 +1359,7 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    int fyMonth = 1, fyDay = 1, currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day,
+                    int fyMonth = 1, fyDay = 1, startingMonth = model.StartDate.Month, startDay = model.StartDate.Day,
                         endingMonth = model.EndDate.Month, endingDay = model.EndDate.Day;
                     var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
                     if (fySettings != null)
@@ -1390,22 +1370,13 @@ namespace AIMS.Services
 
                     if (fyMonth > 1)
                     {
-                        if (currentMonth < fyMonth)
+                        if (startingMonth < fyMonth)
                         {
                             model.StartingFinancialYear = (model.StartingFinancialYear - 1);
                         }
-                        else if (currentMonth == fyMonth && fyDay < currentDay)
+                        else if (startingMonth == fyMonth && fyDay < startDay)
                         {
                             model.StartingFinancialYear = (model.StartingFinancialYear - 1);
-                        }
-
-                        if (endingMonth > fyMonth)
-                        {
-                            model.EndingFinancialYear = (model.EndingFinancialYear + 1);
-                        }
-                        else if (endingMonth == fyMonth && endingDay > fyDay)
-                        {
-                            model.EndingFinancialYear = (model.EndingFinancialYear + 1);
                         }
                     }
 
@@ -1534,7 +1505,7 @@ namespace AIMS.Services
             ActionResponse response = new ActionResponse();
             IMessageHelper mHelper;
             var unitWork = new UnitOfWork(context);
-            int currentActiveYear = DateTime.Now.Year, currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
+            int currentActiveYear = DateTime.Now.Year;
             int fyMonth = 0, fyDay = 0;
             var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(s => s.Id != 0);
             if (fySettings == null)
@@ -1544,17 +1515,6 @@ namespace AIMS.Services
                 response.Message = mHelper.GetNotFound("Financial year settings");
                 return response;
             }
-
-            /*fyMonth = fySettings.Month;
-            fyDay = fySettings.Day;
-            if (currentMonth < fyMonth)
-            {
-                --currentActiveYear;
-            }
-            else if (currentMonth == fyMonth && fyDay <= currentDay)
-            {
-                --currentActiveYear;
-            }*/
 
             try
             {
@@ -1567,23 +1527,27 @@ namespace AIMS.Services
                         {
                             fyMonth = fySettings.Month;
                             fyDay = fySettings.Day;
-                            if (currentMonth < fyMonth)
-                            {
-                                --currentActiveYear;
-                            }
-                            else if (currentMonth == fyMonth && currentDay >= fyDay)
-                            {
-                                --currentActiveYear;
-                            }
                         }
 
                         int endingYear = 0;
-                        var adjustProjects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndDate.Year >= currentActiveYear, new string[] { "EndingFinancialYear", "Disbursements", "Disbursements.Year" });
-
+                        var adjustProjects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "EndingFinancialYear", "Disbursements", "Disbursements.Year" });
+                        int startMonth = 0, startDay = 0;
                         foreach (var project in adjustProjects)
                         {
+                            startMonth = project.StartDate.Month;
+                            startDay = project.StartDate.Day;
+                            currentActiveYear = project.StartDate.Year;
+
+                            if (startMonth < fyMonth)
+                            {
+                                --currentActiveYear;
+                            }
+                            else if (startMonth == fyMonth && startDay >= fyDay)
+                            {
+                                --currentActiveYear;
+                            }
                             endingYear = project.EndingFinancialYear.FinancialYear;
-                            if (currentMonth > fyMonth || (currentMonth == fyMonth && currentDay > fyDay))
+                            if (startMonth > fyMonth || (startMonth == fyMonth && startDay >= fyDay))
                             {
                                 //Delete any planned disbursements for previous year
                                 var disbursementsToDelete = (from disbursement in project.Disbursements
@@ -1655,7 +1619,7 @@ namespace AIMS.Services
                                     }
                                 }
                             }
-                            else if (((currentMonth < fyMonth) || (currentMonth == fyMonth && currentDay < fyDay)) && endingYear >= currentActiveYear)
+                            else if (((startMonth < fyMonth) || (startMonth == fyMonth && startDay < fyDay)) && endingYear >= currentActiveYear)
                             {
                                 var plannedDisbursement = unitWork.ProjectDisbursementsRepository.GetWithInclude(p => p.ProjectId == project.Id &&
                                     p.Year.FinancialYear == currentActiveYear && p.DisbursementType == DisbursementTypes.Planned,
@@ -3202,6 +3166,36 @@ namespace AIMS.Services
                     int endingYear = (from y in model.YearlyDisbursements
                                       select y.Year).Max();
 
+                    /*int fyMonth = 1, fyDay = 1, currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day,
+                        endingMonth = project.EndDate.Month, endingDay = project.EndDate.Day;
+                    var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
+                    if (fySettings != null)
+                    {
+                        fyMonth = fySettings.Month;
+                        fyDay = fySettings.Day;
+                    }
+
+                    if (fyMonth > 1)
+                    {
+                        if (currentMonth < fyMonth)
+                        {
+                            startingYear = (startingYear - 1);
+                        }
+                        else if (currentMonth == fyMonth && fyDay < currentDay)
+                        {
+                            startingYear = (startingYear - 1);
+                        }
+
+                        if (endingMonth > fyMonth)
+                        {
+                            endingYear = (endingYear + 1);
+                        }
+                        else if (endingMonth == fyMonth && endingDay > fyDay)
+                        {
+                            endingYear = (endingYear + 1);
+                        }
+                    }*/
+
                     if (startingYear < project.StartingFinancialYear.FinancialYear)
                     {
                         mHelper = new MessageHelper();
@@ -3463,15 +3457,7 @@ namespace AIMS.Services
                     return response;
                 }
 
-                if (model.StartDate.Year > project.StartDate.Year)
-                {
-                    mHelper = new MessageHelper();
-                    response.Success = false;
-                    response.Message = mHelper.InvalidProjectStartDate();
-                    return response;
-                }
-
-                int fyMonth = 1, fyDay = 1, currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day,
+                int fyMonth = 1, fyDay = 1, startingMonth = model.StartDate.Month, startDay = model.StartDate.Day,
                         endingMonth = model.EndDate.Month, endingDay = model.EndDate.Day;
                 var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
                 if (fySettings != null)
@@ -3482,11 +3468,11 @@ namespace AIMS.Services
 
                 if (fyMonth > 1)
                 {
-                    if (currentMonth < fyMonth)
+                    if (startingMonth < fyMonth)
                     {
                         model.StartingFinancialYear = (model.StartingFinancialYear - 1);
                     }
-                    else if (currentMonth == fyMonth && fyDay < currentDay)
+                    else if (startingMonth == fyMonth && fyDay < startDay)
                     {
                         model.StartingFinancialYear = (model.StartingFinancialYear - 1);
                     }
@@ -3495,10 +3481,18 @@ namespace AIMS.Services
                     {
                         model.EndingFinancialYear = (model.EndingFinancialYear + 1);
                     }
-                    else if (endingMonth == fyMonth && endingDay > fyDay)
+                    else if (endingMonth == fyMonth && endingDay >= fyDay)
                     {
                         model.EndingFinancialYear = (model.EndingFinancialYear + 1);
                     }
+                }
+
+                if (model.StartDate > project.EndDate)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.InvalidProjectStartDate();
+                    return response;
                 }
 
                 var strategy = context.Database.CreateExecutionStrategy();
@@ -3546,7 +3540,7 @@ namespace AIMS.Services
                             await unitWork.SaveAsync();
 
                             var deleteDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id &&
-                                d.Year.FinancialYear < model.StartingFinancialYear && d.Year.FinancialYear > model.EndingFinancialYear);
+                                d.Year.FinancialYear < model.StartingFinancialYear || d.Year.FinancialYear > model.EndingFinancialYear);
                             foreach (var disbursement in deleteDisbursements)
                             {
                                 unitWork.ProjectDisbursementsRepository.Delete(disbursement);
@@ -3555,6 +3549,7 @@ namespace AIMS.Services
                             {
                                 await unitWork.SaveAsync();
                             }
+                            transaction.Commit();
                         }
                         catch(Exception ex)
                         {
