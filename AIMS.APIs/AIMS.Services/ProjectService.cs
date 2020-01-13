@@ -662,10 +662,7 @@ namespace AIMS.Services
                         if (project.Disbursements.Any())
                         {
                             projectDisbursements = (from d in project.Disbursements
-                                                    orderby d.Year.FinancialYear ascending
-                                                    select d);
-                            projectDisbursements = (from d in project.Disbursements
-                                                    orderby d.DisbursementType ascending
+                                                    orderby d.Year.FinancialYear, d.DisbursementType ascending
                                                     select d);
                         }
                         if (project.Locations.Count > 0)
@@ -699,8 +696,7 @@ namespace AIMS.Services
                         profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                         profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
-                        profileView.Disbursements = (projectDisbursements != null) ? mapper.Map<List<ProjectDisbursementView>>(projectDisbursements) : disbursementsList;
-                        profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
+                        profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(projectDisbursements);                        profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
                         profileView.Markers = mapper.Map<List<ProjectMarkersView>>(project.Markers);
                     }
                 }
@@ -1284,7 +1280,10 @@ namespace AIMS.Services
                                     isSaved = true;
                                 }
                             }
-                            var disbursementsToDelete = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == project.Id && d.Year.FinancialYear != projectCurrentYear, new string[] { "Year" });
+                            var disbursementsToDelete = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => (d.ProjectId == project.Id && 
+                            d.Year.FinancialYear != projectCurrentYear && d.DisbursementType == DisbursementTypes.Actual) ||
+                            (d.ProjectId == project.Id && d.Year.FinancialYear < projectCurrentYear && d.DisbursementType == DisbursementTypes.Planned), 
+                            new string[] { "Year" });
                             if (disbursementsToDelete.Any())
                             {
                                 foreach(var disbursement in disbursementsToDelete)
@@ -1301,6 +1300,9 @@ namespace AIMS.Services
                 if (isSaved)
                 {
                     disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
+                }
+                if (disbursements.Any())
+                {
                     disbursements = (from d in disbursements
                                      orderby d.Year.FinancialYear, d.DisbursementType
                                      select d);
