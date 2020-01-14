@@ -116,11 +116,11 @@ namespace AIMS.APIs.Scheduler
                         }
                     }
                     //Download latest iati
-                    /*using (var client = new WebClient())
+                    using (var client = new WebClient())
                     {
                         xml = client.DownloadString(url);
                     }
-                    File.WriteAllText(filePath, xml);*/
+                    File.WriteAllText(filePath, xml);
 
                     var cleanedTTypeJson = service.ExtractTransactionTypesJson(transactionTypesJson);
                     var cleanedFTypeJson = service.ExtractFinanceTypesJson(financeTypesJson);

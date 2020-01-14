@@ -262,6 +262,13 @@ namespace AIMS.Services
         Task<IEnumerable<ProjectDisbursementView>> GetProjectDisbursementsAsync(int id);
 
         /// <summary>
+        /// Adjusts project disbursements after changing the settings for FYs
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<IEnumerable<ProjectDisbursementView>> AdjustProjectDisbursementsAsync(int id);
+
+        /// <summary>
         /// Gets project documents
         /// </summary>
         /// <param name="id"></param>
@@ -412,7 +419,7 @@ namespace AIMS.Services
                 var projects = unitWork.ProjectRepository.GetProjection(p => p.Id != 0, p => new { p.Id, p.Title });
                 if (projects.Any())
                 {
-                    foreach(var project in projects)
+                    foreach (var project in projects)
                     {
                         projectTitles.Add(new ProjectTitle()
                         {
@@ -465,7 +472,7 @@ namespace AIMS.Services
                     {
                         --currentYear;
                     }
-                    else if(currentMonth == settingsMonth && currentDay < settingsDay)
+                    else if (currentMonth == settingsMonth && currentDay < settingsDay)
                     {
                         --currentYear;
                     }
@@ -696,7 +703,7 @@ namespace AIMS.Services
                         profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                         profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
-                        profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(projectDisbursements);                        profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
+                        profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(projectDisbursements); profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
                         profileView.Markers = mapper.Map<List<ProjectMarkersView>>(project.Markers);
                     }
                 }
@@ -734,7 +741,7 @@ namespace AIMS.Services
                     {
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => EF.Functions.Like(p.Description, "%" + model.Description + "%") 
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => EF.Functions.Like(p.Description, "%" + model.Description + "%")
                             , new string[] { "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
@@ -892,8 +899,8 @@ namespace AIMS.Services
                     {
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.StartingFinancialYear.FinancialYear >= model.StartingYear 
-                            && p.EndingFinancialYear.FinancialYear <= model.EndingYear), 
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.StartingFinancialYear.FinancialYear >= model.StartingYear
+                            && p.EndingFinancialYear.FinancialYear <= model.EndingYear),
                                 new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                         }
                         else
@@ -907,7 +914,7 @@ namespace AIMS.Services
 
                     if (model.SectorIds.Count > 0)
                     {
-                        var projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(s => model.SectorIds.Contains(s.SectorId) || 
+                        var projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(s => model.SectorIds.Contains(s.SectorId) ||
                         model.SectorIds.Contains((int)s.Sector.ParentSectorId), new string[] { "Sector" });
                         var projectIds = (from pSector in projectSectors
                                           select pSector.ProjectId).ToList<int>().Distinct();
@@ -1168,129 +1175,141 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<IEnumerable<ProjectDisbursementView>> GetProjectDisbursementsAsync(int id)
+        public async Task<IEnumerable<ProjectDisbursementView>> AdjustProjectDisbursementsAsync(int id)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 bool isSaved = false;
                 List<ProjectDisbursementView> disbursementsList = new List<ProjectDisbursementView>();
                 var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
-                var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == id, new string[] { "StartingFinancialYear", "EndingFinancialYear" }).FirstOrDefault();
+                var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == id, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Disbursements", "Disbursements.Year" }).FirstOrDefault();
                 if (project != null)
                 {
-                    var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
-                    int fyMonth = 0, fyDay = 0, projectCurrentYear = 0, currentYear = DateTime.Now.Year,
-                        startMonth = project.StartDate.Month, startDay = project.StartDate.Day;
-
-                    if (fySettings != null)
-                    {
-                        fyMonth = fySettings.Month;
-                        fyDay = fySettings.Day;
-                    }
-
-                    if (fyMonth == 1 && fyDay == 1)
-                    {
-                        projectCurrentYear = currentYear;
-                    }
-                    else if (startMonth > fyMonth)
-                    {
-                        projectCurrentYear = currentYear;
-                    }
-                    else if (startMonth < fyMonth)
-                    {
-                        projectCurrentYear = (currentYear - 1);
-                    }
-                    else if (startMonth == fyMonth && startDay >= fyDay)
-                    {
-                        projectCurrentYear = currentYear;
-                    }
-                    else if (startMonth == fyMonth && startDay < fyDay)
-                    {
-                        projectCurrentYear = (currentYear - 1);
-                    }
-
-                    int startYear = project.StartingFinancialYear.FinancialYear, endYear = project.EndingFinancialYear.FinancialYear;
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
                     {
                         using (var transaction = context.Database.BeginTransaction())
                         {
-                            var financialYears = await unitWork.FinancialYearRepository.GetManyQueryableAsync(fy => fy.FinancialYear >= startYear && fy.FinancialYear <= endYear);
-                            for (int yr = startYear; yr <= endYear; yr++)
+                            var fySettings = await unitWork.FinancialYearSettingsRepository.GetOneAsync(f => f.Id != 0);
+                            int fyMonth = 0, fyDay = 0, currentYear = DateTime.Now.Year,
+                                startMonth = project.StartDate.Month, startDay = project.StartDate.Day;
+                            int startYear = project.StartingFinancialYear.FinancialYear, endYear = project.EndingFinancialYear.FinancialYear;
+                            if (fySettings != null)
                             {
-                                var yearDisbursements = (from d in disbursements
-                                                         where d.Year.FinancialYear == yr
-                                                         select d);
-                                var actualYearDisbursement = (from d in yearDisbursements
-                                                              where d.DisbursementType == DisbursementTypes.Actual
-                                                              select d).FirstOrDefault();
-                                var plannedDisbursement = (from d in yearDisbursements
-                                                           where d.DisbursementType == DisbursementTypes.Planned
-                                                           select d).FirstOrDefault();
-                                var financialYear = (from f in financialYears
-                                                     where f.FinancialYear == yr
-                                                     select f).FirstOrDefault();
+                                fyMonth = fySettings.Month;
+                                fyDay = fySettings.Day;
+                            }
+
+                            bool isSimilarToCalendarYear = (fyMonth == 1 && fyDay == 1) ? true : false;
+                            int startingYear = 0, endingYear = 0, currentActiveYear = DateTime.Now.Year;
+                            startMonth = project.StartDate.Month;
+                            startDay = project.StartDate.Day;
+                            currentActiveYear = DateTime.Now.Year;
+                            startingYear = project.StartingFinancialYear.FinancialYear;
+                            endingYear = project.EndingFinancialYear.FinancialYear;
+
+                            if (!isSimilarToCalendarYear)
+                            {
+                                if (startMonth < fyMonth)
+                                {
+                                    --currentActiveYear;
+                                }
+                                else if (startMonth == fyMonth && startDay >= fyDay)
+                                {
+                                    --currentActiveYear;
+                                }
+                            }
+
+                            var disbursementsToDelete = (from disbursement in project.Disbursements
+                                                         where (disbursement.Year.FinancialYear < startingYear) ||
+                                                         (disbursement.Year.FinancialYear > endingYear) ||
+                                                         (disbursement.Year.FinancialYear != currentActiveYear &&
+                                                         disbursement.DisbursementType == DisbursementTypes.Actual)
+                                                         select disbursement);
+                            bool isDeleted = false;
+                            foreach (var disbursement in disbursementsToDelete)
+                            {
+                                unitWork.ProjectDisbursementsRepository.Delete(disbursement);
+                                isDeleted = true;
+                            }
+                            if (isDeleted)
+                            {
+                                unitWork.Save();
+                            }
+
+                            var disbursementsForCurrentYear = (from disbursement in project.Disbursements
+                                                               where (disbursement.Year.FinancialYear == currentActiveYear) &&
+                                                               (disbursement.DisbursementType == DisbursementTypes.Planned ||
+                                                               disbursement.DisbursementType == DisbursementTypes.Actual)
+                                                               select disbursement);
+                            var actualDisbursementCurrentYear = (from disbursement in disbursementsForCurrentYear
+                                                                 where disbursement.DisbursementType == DisbursementTypes.Actual
+                                                                 select disbursement).FirstOrDefault();
+                            var plannedDisbursementCurrentYear = (from disbursement in disbursementsForCurrentYear
+                                                                  where disbursement.DisbursementType == DisbursementTypes.Planned
+                                                                  select disbursement).FirstOrDefault();
+                            
+                            var financialYears = await unitWork.FinancialYearRepository.GetManyQueryableAsync(f => f.FinancialYear >= startingYear && f.FinancialYear <= endingYear);
+                            if (financialYears.Any())
+                            {
+                                financialYears = (from f in financialYears
+                                                  orderby f.FinancialYear ascending
+                                                  select f);
+                            }
+
+                            for(int year = startingYear; year <= endingYear; year++)
+                            {
+                                var financialYear = (from y in financialYears
+                                                     where y.FinancialYear == year
+                                                     select y).FirstOrDefault();
 
                                 if (financialYear == null)
                                 {
-                                    string yearLabel = (fyMonth == 1 && fyDay == 1) ? ("FY " + yr) : ("FY " + yr + "/" + (yr + 1));
-                                    unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                    string label = (fyMonth == 1 && fyDay == 1) ? "FY " + currentActiveYear : "FY " + currentActiveYear + "/" + (currentActiveYear + 1);
+                                    financialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                                     {
-                                        FinancialYear = yr,
-                                        Label = yearLabel
+                                        FinancialYear = currentActiveYear,
+                                        Label = label
                                     });
                                     unitWork.Save();
                                 }
 
-                                if (yr <= projectCurrentYear && actualYearDisbursement == null)
+                                if (year == currentActiveYear && actualDisbursementCurrentYear == null)
                                 {
-                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    actualDisbursementCurrentYear = unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                     {
-                                        ProjectId = project.Id,
+                                        Project = project,
                                         Year = financialYear,
+                                        Currency = project.ProjectCurrency,
                                         Amount = 0,
                                         DisbursementType = DisbursementTypes.Actual
                                     });
                                     unitWork.Save();
-                                    isSaved = true;
-                                }
-                                else if (yr > projectCurrentYear && plannedDisbursement == null)
-                                {
-                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
-                                    {
-                                        ProjectId = project.Id,
-                                        Year = financialYear,
-                                        Amount = 0,
-                                        DisbursementType = DisbursementTypes.Planned
-                                    });
-                                    unitWork.Save();
-                                    isSaved = true;
                                 }
 
-                                if (yr == projectCurrentYear && plannedDisbursement == null)
+                                DisbursementTypes dType = DisbursementTypes.Planned;
+                                if (year < currentActiveYear)
                                 {
-                                    unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                    dType = DisbursementTypes.Actual;
+                                }
+
+                                var disbursement = (from d in project.Disbursements
+                                                    where d.Year.FinancialYear == year &&
+                                                    d.DisbursementType == dType
+                                                    select d).FirstOrDefault();
+
+                                if (disbursement == null)
+                                {
+                                    plannedDisbursementCurrentYear = unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                     {
-                                        ProjectId = project.Id,
+                                        Project = project,
                                         Year = financialYear,
+                                        Currency = project.ProjectCurrency,
                                         Amount = 0,
-                                        DisbursementType = DisbursementTypes.Planned
+                                        DisbursementType = dType
                                     });
                                     unitWork.Save();
-                                    isSaved = true;
                                 }
-                            }
-                            var disbursementsToDelete = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => (d.ProjectId == project.Id && 
-                            d.Year.FinancialYear != projectCurrentYear && d.DisbursementType == DisbursementTypes.Actual) ||
-                            (d.ProjectId == project.Id && d.Year.FinancialYear < projectCurrentYear && d.DisbursementType == DisbursementTypes.Planned), 
-                            new string[] { "Year" });
-                            if (disbursementsToDelete.Any())
-                            {
-                                foreach(var disbursement in disbursementsToDelete)
-                                {
-                                    unitWork.ProjectDisbursementsRepository.Delete(disbursement);
-                                }
-                                unitWork.Save();
                             }
                             transaction.Commit();
                         }
@@ -1301,6 +1320,22 @@ namespace AIMS.Services
                 {
                     disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
                 }
+                if (disbursements.Any())
+                {
+                    disbursements = (from d in disbursements
+                                     orderby d.Year.FinancialYear, d.DisbursementType
+                                     select d);
+                }
+                return mapper.Map<List<ProjectDisbursementView>>(disbursements);
+            }
+        }
+
+        public async Task<IEnumerable<ProjectDisbursementView>> GetProjectDisbursementsAsync(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<ProjectDisbursementView> disbursementsList = new List<ProjectDisbursementView>();
+                var disbursements = await unitWork.ProjectDisbursementsRepository.GetWithIncludeAsync(d => d.ProjectId == id, new string[] { "Year" });
                 if (disbursements.Any())
                 {
                     disbursements = (from d in disbursements
@@ -1537,10 +1572,16 @@ namespace AIMS.Services
                 {
                     using (var transaction = context.Database.BeginTransaction())
                     {
+                        bool isSimilarToCalendarYear = false;
                         if (fySettings != null)
                         {
                             fyMonth = fySettings.Month;
                             fyDay = fySettings.Day;
+                        }
+
+                        if (fyMonth == 1 && fyDay == 1)
+                        {
+                            isSimilarToCalendarYear = true;
                         }
 
                         int endingYear = 0;
@@ -1550,22 +1591,26 @@ namespace AIMS.Services
                         {
                             startMonth = project.StartDate.Month;
                             startDay = project.StartDate.Day;
-                            currentActiveYear = project.StartDate.Year;
+                            //currentActiveYear = project.StartDate.Year;
 
-                            if (startMonth < fyMonth)
+                            if (!isSimilarToCalendarYear)
                             {
-                                --currentActiveYear;
+                                if (startMonth < fyMonth)
+                                {
+                                    --currentActiveYear;
+                                }
+                                else if (startMonth == fyMonth && startDay >= fyDay)
+                                {
+                                    --currentActiveYear;
+                                }
                             }
-                            else if (startMonth == fyMonth && startDay >= fyDay)
-                            {
-                                --currentActiveYear;
-                            }
+
                             endingYear = project.EndingFinancialYear.FinancialYear;
                             if (startMonth > fyMonth || (startMonth == fyMonth && startDay >= fyDay))
                             {
                                 //Delete any planned disbursements for previous year
                                 var disbursementsToDelete = (from disbursement in project.Disbursements
-                                                             where disbursement.Year.FinancialYear == currentActiveYear &&
+                                                             where disbursement.Year.FinancialYear < currentActiveYear &&
                                                              disbursement.DisbursementType == DisbursementTypes.Planned
                                                              select disbursement);
                                 int deleted = 0;
@@ -1582,7 +1627,7 @@ namespace AIMS.Services
                                     if (deleted > 0)
                                     {
                                         unitWork.Save();
-                                        var nextPlannedDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == project.Id && d.Year.FinancialYear > currentActiveYear
+                                        var nextPlannedDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == project.Id && d.Year.FinancialYear == currentActiveYear
                                     && d.DisbursementType == DisbursementTypes.Planned, new string[] { "Year" });
                                         if (nextPlannedDisbursements.Any())
                                         {
@@ -1660,7 +1705,7 @@ namespace AIMS.Services
                     }
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = ex.Message;
@@ -1671,7 +1716,7 @@ namespace AIMS.Services
 
         public ActionResponse UpdateFinancialYearsForProjects()
         {
-            using(var unitWork = new UnitOfWork(context))
+            using (var unitWork = new UnitOfWork(context))
             {
                 int month = 0, day = 1;
                 ActionResponse response = new ActionResponse();
@@ -1685,7 +1730,7 @@ namespace AIMS.Services
                 EFFinancialYears startingFinancialYear, endingFinancialYear = null;
                 var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(y => y.Id != 0);
                 var projects = unitWork.ProjectRepository.GetWithInclude(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear" });
-                foreach(var project in projects)
+                foreach (var project in projects)
                 {
                     int startingYear = project.StartDate.Year;
                     int endingYear = project.EndDate.Year;
@@ -1737,7 +1782,7 @@ namespace AIMS.Services
                         {
                             --startingYear;
                         }
-                        else if(startingMonth == month && startingDay < day)
+                        else if (startingMonth == month && startingDay < day)
                         {
                             --startingYear;
                         }
@@ -1757,7 +1802,7 @@ namespace AIMS.Services
                         {
                             --endingYear;
                         }
-                        else if(endingMonth == month && endingDay < day)
+                        else if (endingMonth == month && endingDay < day)
                         {
                             --endingYear;
                         }
@@ -1886,8 +1931,8 @@ namespace AIMS.Services
                             }
 
                             twentyOneFinancialYear = (from fy in financialYears
-                                                         where fy.FinancialYear == (currentYear + 2)
-                                                         select fy).FirstOrDefault();
+                                                      where fy.FinancialYear == (currentYear + 2)
+                                                      select fy).FirstOrDefault();
 
                             if (twentyOneFinancialYear == null)
                             {
@@ -1908,8 +1953,8 @@ namespace AIMS.Services
                             }
 
                             twentyThreeFinancialYear = (from fy in financialYears
-                                                      where fy.FinancialYear == (currentYear + 4)
-                                                      select fy).FirstOrDefault();
+                                                        where fy.FinancialYear == (currentYear + 4)
+                                                        select fy).FirstOrDefault();
 
                             if (twentyThreeFinancialYear == null)
                             {
@@ -1919,8 +1964,8 @@ namespace AIMS.Services
                             }
 
                             twentyFourFinancialYear = (from fy in financialYears
-                                                      where fy.FinancialYear == (currentYear + 5)
-                                                      select fy).FirstOrDefault();
+                                                       where fy.FinancialYear == (currentYear + 5)
+                                                       select fy).FirstOrDefault();
 
                             if (twentyFourFinancialYear == null)
                             {
@@ -1975,7 +2020,7 @@ namespace AIMS.Services
                                 if (!string.IsNullOrEmpty(project.Funders))
                                 {
                                     string[] funderNames = project.Funders.Split(",");
-                                    for(int i = 0; i < funderNames.Length; i++)
+                                    for (int i = 0; i < funderNames.Length; i++)
                                     {
                                         funderNames[i] = funderNames[i].Trim();
                                     }
@@ -2035,8 +2080,8 @@ namespace AIMS.Services
                                     {
                                         EFProjectImplementers isImplementerExists = null;
                                         implementer = (from org in organizations
-                                                            where org.OrganizationName.Equals(implementerName.Trim(), StringComparison.OrdinalIgnoreCase)
-                                                            select org).FirstOrDefault();
+                                                       where org.OrganizationName.Equals(implementerName.Trim(), StringComparison.OrdinalIgnoreCase)
+                                                       select org).FirstOrDefault();
 
                                         if (implementer == null)
                                         {
@@ -2077,7 +2122,7 @@ namespace AIMS.Services
                                 List<EFProjectMarkers> projectMarkers = new List<EFProjectMarkers>();
                                 if (project.CustomFields.Count > 0)
                                 {
-                                    foreach(var field in project.CustomFields)
+                                    foreach (var field in project.CustomFields)
                                     {
                                         var marker = (from m in markers
                                                       where m.FieldTitle.Equals(field.CustomField, StringComparison.OrdinalIgnoreCase)
@@ -2246,7 +2291,7 @@ namespace AIMS.Services
                                     unitWork.Save();
                                 }
 
-                                if (twentyEighteenFinancialYear.FinancialYear >= startYear && twentyEighteenFinancialYear.FinancialYear <= endYear && 
+                                if (twentyEighteenFinancialYear.FinancialYear >= startYear && twentyEighteenFinancialYear.FinancialYear <= endYear &&
                                 project.TwentyEighteenDisbursements > 0)
                                 {
                                     unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
@@ -2442,7 +2487,7 @@ namespace AIMS.Services
                                                         select loc).FirstOrDefault();
 
                             int fundsPercentage = (int)(from loc in updatedLocations
-                                                   select loc.FundsPercentage).Sum();
+                                                        select loc.FundsPercentage).Sum();
 
                             if (fundsPercentage < 100)
                             {
@@ -2474,7 +2519,7 @@ namespace AIMS.Services
                                     unitWork.Save();
                                 }
                             }
-                            
+
                             if (fundsPercentage > 100)
                             {
                                 mHelper = new MessageHelper();
@@ -2693,7 +2738,7 @@ namespace AIMS.Services
                                 var notAvailableSector = unitWork.SectorRepository.GetOne(s => s.SectorTypeId == defaultSectorType.Id && s.SectorName.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase));
                                 if (notAvailableSector == null)
                                 {
-                                    notAvailableSector  = unitWork.SectorRepository.Insert(new EFSector()
+                                    notAvailableSector = unitWork.SectorRepository.Insert(new EFSector()
                                     {
                                         SectorType = defaultSectorType,
                                         SectorName = UNATTRIBUTED,
@@ -3247,14 +3292,14 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    
+
 
                     var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => f.FinancialYear >= startingYear).ToList();
                     var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == model.ProjectId, new string[] { "Year" });
                     List<EFProjectDisbursements> newDisbursementsList = new List<EFProjectDisbursements>();
                     List<EFFinancialYears> newFinancialYears = new List<EFFinancialYears>();
 
-                    for(var year = startingYear; year <= endingYear; year++)
+                    for (var year = startingYear; year <= endingYear; year++)
                     {
                         var isYearExists = (from yr in financialYears
                                             where yr.FinancialYear == year
@@ -3270,7 +3315,7 @@ namespace AIMS.Services
                     if (newFinancialYears.Count > 0)
                     {
                         unitWork.Save();
-                        foreach(var newYear in newFinancialYears)
+                        foreach (var newYear in newFinancialYears)
                         {
                             financialYears.Add(newYear);
                         }
@@ -3392,7 +3437,7 @@ namespace AIMS.Services
                                 });
                             }
                         }
-                        
+
                     }
 
                     if (newDocuments.Count > 0 || documentsUpdated > 0)
@@ -3490,7 +3535,17 @@ namespace AIMS.Services
                     {
                         model.StartingFinancialYear = (model.StartingFinancialYear - 1);
                     }
+
+                    if (endingMonth < fyMonth)
+                    {
+                        model.EndingFinancialYear = (model.EndingFinancialYear - 1);
+                    }
+                    else if (endingMonth == fyMonth && endingDay < fyDay)
+                    {
+                        model.EndingFinancialYear = (model.EndingFinancialYear - 1);
+                    }
                 }
+
 
                 if (model.StartDate > project.EndDate)
                 {
@@ -3556,7 +3611,7 @@ namespace AIMS.Services
                             }
                             transaction.Commit();
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             response.Message = ex.Message;
                             response.Success = false;
@@ -3581,7 +3636,7 @@ namespace AIMS.Services
                     response.Success = false;
                     return response;
                 }
-                
+
                 var projectLocation = unitWork.ProjectLocationsRepository.Get(p => p.ProjectId == projectId && p.LocationId == locationId);
                 if (projectLocation == null)
                 {
@@ -3639,7 +3694,7 @@ namespace AIMS.Services
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
-                
+
                 var sector = unitWork.SectorRepository.GetOne(s => s.Id == sectorId);
                 if (sector == null)
                 {
@@ -3961,7 +4016,7 @@ namespace AIMS.Services
                         {
                             List<EFProjectFunders> newFunders = new List<EFProjectFunders>();
                             EFOrganization funder = null;
-                            foreach(var funderId in model.FunderIds)
+                            foreach (var funderId in model.FunderIds)
                             {
                                 if (organizations != null)
                                 {
@@ -3971,8 +4026,8 @@ namespace AIMS.Services
                                 }
 
                                 var isFunderAdded = (from f in newFunders
-                                                          where f.FunderId == funderId
-                                                          select f).FirstOrDefault();
+                                                     where f.FunderId == funderId
+                                                     select f).FirstOrDefault();
 
                                 if (funder != null && isFunderAdded == null)
                                 {
@@ -4004,8 +4059,8 @@ namespace AIMS.Services
                                                    select org).FirstOrDefault();
                                 }
                                 var isImplementerAdded = (from i in newImplementers
-                                                     where i.ImplementerId == implementerId
-                                                     select i).FirstOrDefault();
+                                                          where i.ImplementerId == implementerId
+                                                          select i).FirstOrDefault();
 
                                 if (implementer != null && isImplementerAdded == null)
                                 {
@@ -4028,7 +4083,7 @@ namespace AIMS.Services
                         {
                             List<EFProjectSectors> newSectors = new List<EFProjectSectors>();
                             EFSector sector = null;
-                            foreach(var sectorModel in model.Sectors)
+                            foreach (var sectorModel in model.Sectors)
                             {
                                 if (sectors != null)
                                 {
@@ -4073,13 +4128,13 @@ namespace AIMS.Services
                                 if (locations != null)
                                 {
                                     location = (from l in locations
-                                              where l.Id == locationModel.LocationId
-                                              select l).FirstOrDefault();
+                                                where l.Id == locationModel.LocationId
+                                                select l).FirstOrDefault();
                                 }
 
                                 var isLocationAdded = (from l in newLocations
-                                                     where l.LocationId == locationModel.LocationId && l.ProjectId == newProject.Id
-                                                     select l).FirstOrDefault();
+                                                       where l.LocationId == locationModel.LocationId && l.ProjectId == newProject.Id
+                                                       select l).FirstOrDefault();
 
                                 if (location != null && isLocationAdded == null)
                                 {
@@ -4108,7 +4163,7 @@ namespace AIMS.Services
                         {
                             List<EFProjectDisbursements> newDisbursements = new List<EFProjectDisbursements>();
                             EFFinancialYears financialYear = null;
-                            foreach(var disbursement in model.Disbursements)
+                            foreach (var disbursement in model.Disbursements)
                             {
                                 financialYear = (from y in financialYears
                                                  where y.FinancialYear == disbursement.Year
@@ -4142,7 +4197,7 @@ namespace AIMS.Services
                         if (model.Documents.Count > 0)
                         {
                             List<EFProjectDocuments> newDocuments = new List<EFProjectDocuments>();
-                            foreach(var document in model.Documents)
+                            foreach (var document in model.Documents)
                             {
                                 var isDocumentAdded = (from d in newDocuments
                                                        where d.DocumentTitle.Equals(document.DocumentTitle, StringComparison.OrdinalIgnoreCase)
@@ -4170,7 +4225,7 @@ namespace AIMS.Services
                         {
                             List<EFProjectMarkers> newMarkersList = new List<EFProjectMarkers>();
                             EFMarkers marker = null;
-                            foreach(var mark in model.Markers)
+                            foreach (var mark in model.Markers)
                             {
                                 marker = (from m in markers
                                           where m.Id == mark.MarkerId
