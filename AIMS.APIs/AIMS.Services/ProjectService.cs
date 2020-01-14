@@ -529,6 +529,7 @@ namespace AIMS.Services
                     {
                         Id = project.Id,
                         Title = project.Title,
+                        Description = project.Description,
                         ProjectValue = project.ProjectValue,
                         ProjectCurrency = project.ProjectCurrency,
                         StartDate = project.StartDate.ToShortDateString(),
