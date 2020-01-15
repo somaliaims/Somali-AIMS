@@ -1025,7 +1025,7 @@ namespace AIMS.IATILib.Parsers
                         {
                             foreach (var sector in aSectors)
                             {
-                                int? sectorTypeVocabulary = null;
+                                int? sectorTypeVocabulary = null, sectorCode = null;
                                 string sectorName = "";
                                 if (sector.Attribute("vocabulary")?.Value != null)
                                 {
@@ -1034,6 +1034,16 @@ namespace AIMS.IATILib.Parsers
                                     if (sectorVocabCode != 0)
                                     {
                                         sectorTypeVocabulary = sectorVocabCode;
+                                    }
+                                }
+
+                                if (sector.Attribute("code") != null)
+                                {
+                                    int sCode = 0;
+                                    int.TryParse(sector.Attribute("code")?.Value, out sCode);
+                                    if (sCode != 0)
+                                    {
+                                        sectorCode = sCode;
                                     }
                                 }
 
@@ -1055,6 +1065,7 @@ namespace AIMS.IATILib.Parsers
                                         sectorsList.Add(new IATISectorModel()
                                         {
                                             SectorTypeCode = sectorTypeVocabulary,
+                                            SectorCode = sectorCode,
                                             SectorName = sectorName,
                                         });
                                     }

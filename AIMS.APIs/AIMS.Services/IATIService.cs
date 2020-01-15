@@ -851,6 +851,7 @@ namespace AIMS.Services
                                 newIATISectors.Add(new EFSector()
                                 {
                                     SectorName = sector.SectorName,
+                                    IATICode = sector.SectorCode,
                                     SectorType = sectorType,
                                     ParentSector = null
                                 });
