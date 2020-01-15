@@ -990,6 +990,7 @@ namespace AIMS.Models
         public decimal ExchangeRate { get; set; }
         [Required]
         public string ProjectCurrency { get; set; }
+        public string ProjectUrl { get; set; }
         public int FundingTypeId { get; set; }
     }
 
@@ -1063,6 +1064,7 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         [Required]
         public List<int> FunderIds { get; set; }
+        public string ProjectUrl { get; set; }
     }
 
     public class ProjectFunderSourceModel
@@ -1171,6 +1173,7 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         [Required]
         public List<int> ImplementerIds { get; set; }
+        public string ProjectUrl { get; set; }
     }
 
 

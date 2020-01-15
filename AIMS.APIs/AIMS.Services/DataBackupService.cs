@@ -127,7 +127,7 @@ namespace AIMS.Services
                 foreach (string file in files)
                 {
                     FileInfo fi = new FileInfo(file);
-                    string downloadZip = Path.GetFileName(file) + ".zip";
+                    string downloadZip = Path.GetFileNameWithoutExtension(file) + ".zip";
                     filesList.Add(new BackupFiles()
                     {
                         Id = index,

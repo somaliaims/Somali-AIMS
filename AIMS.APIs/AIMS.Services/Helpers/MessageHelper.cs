@@ -194,7 +194,7 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <param name="organization"></param>
         /// <returns></returns>
-        string ProjectToOrganizationMessage(string project, string organizations);
+        string ProjectToOrganizationMessage(string project, string organizations, string url);
 
         /// <summary>
         /// Formats new user registration message
@@ -621,7 +621,7 @@ namespace AIMS.Services.Helpers
             return (INVALID_ENDING_FINANCIAL_YEAR);
         }
 
-        public string ProjectToOrganizationMessage(string project, string organizations)
+        public string ProjectToOrganizationMessage(string project, string organizations, string url)
         {
             List<string> messageList = new List<string>();
             messageList.Add("<h4>New organization/s added to the project: <i>" + project + "</i><h4>");
@@ -629,6 +629,7 @@ namespace AIMS.Services.Helpers
             messageList.Add("<ul>");
             messageList.Add("<li>" + organizations + "</li>");
             messageList.Add("</ul>");
+            messageList.Add("<p>Please use the link provided to see the project detail: <a href='" + url + "'>" + url + "</a></p>");
             return (string.Join("", messageList));
         }
 

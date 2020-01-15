@@ -7,6 +7,7 @@ using AIMS.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace AIMS.APIs.Controllers
 {
@@ -17,11 +18,15 @@ namespace AIMS.APIs.Controllers
     {
         IProjectService projectService;
         IHostingEnvironment hostingEnvironment;
+        IConfiguration config;
+        string projectUrl = "";
 
-        public ProjectController(IProjectService service, IHostingEnvironment _hostingEnvironment)
+        public ProjectController(IProjectService service, IHostingEnvironment _hostingEnvironment, IConfiguration conf)
         {
-            this.hostingEnvironment = _hostingEnvironment;
-            this.projectService = service;
+            hostingEnvironment = _hostingEnvironment;
+            projectService = service;
+            config = conf;
+            projectUrl = config["ProjectUrl"];
         }
 
         [HttpGet]
@@ -248,6 +253,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Unauthorized user access to api");
             }
+            project.ProjectUrl = projectUrl;
             var response = await projectService.AddAsync(project, userId);
             if (!response.Success)
             {
@@ -350,6 +356,7 @@ namespace AIMS.APIs.Controllers
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
             }
+            model.ProjectUrl = projectUrl;
             var response = projectService.AddProjectFunder(model, organizationId);
             if (!response.Success)
             {
@@ -416,6 +423,7 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
+            model.ProjectUrl = projectUrl;
             var response = projectService.AddProjectImplementer(model);
             if (!response.Success)
             {

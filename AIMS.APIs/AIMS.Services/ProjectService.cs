@@ -2972,6 +2972,8 @@ namespace AIMS.Services
 
                     var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => f.ProjectId == model.ProjectId);
                     List<EFProjectFunders> newFunders = new List<EFProjectFunders>();
+                    var previousFunderIds = (from f in projectFunders
+                                            select f.FunderId).ToList();
                     var fundersToDelete = (from f in projectFunders
                                            where !model.FunderIds.Contains(f.FunderId)
                                            select f);
@@ -3022,7 +3024,7 @@ namespace AIMS.Services
 
                     var projectFunderIds = (from f in funders
                                             where updatedFunderIds.Contains(f.Id)
-                                            select f.Id).ToList<int>();
+                                            select f.Id).ToList<int>().Except(previousFunderIds);
                     var users = unitWork.UserRepository.GetManyQueryable(u => projectFunderIds.Contains(u.OrganizationId));
                     List<EmailAddress> emailAddresses = new List<EmailAddress>();
                     var updatedOrganizationNames = (from o in funders
@@ -3059,8 +3061,8 @@ namespace AIMS.Services
                             message = emailMessage.Message;
                             footerMessage = emailMessage.FooterMessage;
                         }
-
-                        message += mHelper.ProjectToOrganizationMessage(project.Title, string.Join(",", updatedOrganizationNames));
+                        string projectUrl = model.ProjectUrl + project.Id;
+                        message += mHelper.ProjectToOrganizationMessage(project.Title, string.Join(",", updatedOrganizationNames), projectUrl);
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                         emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
                     }
@@ -3103,6 +3105,8 @@ namespace AIMS.Services
 
                     var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(i => i.ProjectId == model.ProjectId);
                     List<EFProjectImplementers> newImplementers = new List<EFProjectImplementers>();
+                    var previousImplementerIds = (from i in projectImplementers
+                                                  select i.ImplementerId).ToList();
                     var implementersToDelete = (from i in projectImplementers
                                                 where !model.ImplementerIds.Contains(i.ImplementerId)
                                                 select i);
@@ -3153,7 +3157,7 @@ namespace AIMS.Services
 
                     var projectImplementerIds = (from i in implementers
                                                  where updatedImplementerIds.Contains(i.Id)
-                                                 select i.Id).ToList<int>();
+                                                 select i.Id).ToList<int>().Except(previousImplementerIds);
                     var users = unitWork.UserRepository.GetManyQueryable(u => projectImplementerIds.Contains(u.OrganizationId));
                     List<EmailAddress> emailAddresses = new List<EmailAddress>();
                     var updatedOrganizationNames = (from i in implementers
@@ -3191,8 +3195,9 @@ namespace AIMS.Services
                             footerMessage = emailMessage.FooterMessage;
                         }
 
+                        string projectUrl = model.ProjectUrl + project.Id;
                         mHelper = new MessageHelper();
-                        message += mHelper.ProjectToOrganizationMessage(project.Title, string.Join(",", updatedOrganizationNames));
+                        message += mHelper.ProjectToOrganizationMessage(project.Title, string.Join(",", updatedOrganizationNames), projectUrl);
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                         emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
                     }
@@ -3548,7 +3553,6 @@ namespace AIMS.Services
                         model.EndingFinancialYear = (model.EndingFinancialYear - 1);
                     }
                 }
-
 
                 if (model.StartDate > project.EndDate)
                 {
