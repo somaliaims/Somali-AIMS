@@ -489,7 +489,7 @@ namespace AIMS.Services
                 }
                 else
                 {
-                    var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == currentYear && d.DisbursementType == DisbursementTypes.Actual, new string[] { "Year" });
+                    var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == currentYear && d.DisbursementType == DisbursementTypes.Actual && d.Amount > 0, new string[] { "Year" });
                     if (disbursements.Any())
                     {
                         disbursementValue = (from d in disbursements
@@ -1181,6 +1181,7 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 bool isSaved = false;
+                decimal exchangeRate = 0;
                 List<ProjectDisbursementView> disbursementsList = new List<ProjectDisbursementView>();
                 var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id, new string[] { "Year" });
                 var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == id, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Disbursements", "Disbursements.Year" }).FirstOrDefault();
@@ -1191,6 +1192,7 @@ namespace AIMS.Services
                     {
                         using (var transaction = context.Database.BeginTransaction())
                         {
+                            exchangeRate = project.ExchangeRate;
                             var fySettings = await unitWork.FinancialYearSettingsRepository.GetOneAsync(f => f.Id != 0);
                             int fyMonth = 0, fyDay = 0, currentYear = DateTime.Now.Year,
                                 startMonth = project.StartDate.Month, startDay = project.StartDate.Day;
@@ -1215,7 +1217,7 @@ namespace AIMS.Services
                                 {
                                     --currentActiveYear;
                                 }
-                                else if (startMonth == fyMonth && startDay >= fyDay)
+                                else if (startMonth == fyMonth && startDay < fyDay)
                                 {
                                     --currentActiveYear;
                                 }
@@ -1282,6 +1284,7 @@ namespace AIMS.Services
                                         Project = project,
                                         Year = financialYear,
                                         Currency = project.ProjectCurrency,
+                                        ExchangeRate = exchangeRate,
                                         Amount = 0,
                                         DisbursementType = DisbursementTypes.Actual
                                     });
@@ -1306,6 +1309,7 @@ namespace AIMS.Services
                                         Project = project,
                                         Year = financialYear,
                                         Currency = project.ProjectCurrency,
+                                        ExchangeRate = exchangeRate,
                                         Amount = 0,
                                         DisbursementType = dType
                                     });
@@ -3292,8 +3296,6 @@ namespace AIMS.Services
                         response.Success = false;
                         return response;
                     }
-
-
 
                     var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(f => f.FinancialYear >= startingYear).ToList();
                     var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == model.ProjectId, new string[] { "Year" });

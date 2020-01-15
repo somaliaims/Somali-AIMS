@@ -237,7 +237,7 @@ namespace AIMS.Services
                                     {
                                         --currentActiveYear;
                                     }
-                                    else if (startMonth == fyMonth && startDay >= fyDay)
+                                    else if (startMonth == fyMonth && startDay < fyDay)
                                     {
                                         --currentActiveYear;
                                     }
@@ -291,6 +291,7 @@ namespace AIMS.Services
                                         Year = currentFinancialYear,
                                         Currency = project.ProjectCurrency,
                                         Amount = 0,
+                                        ExchangeRate = project.ExchangeRate,
                                         DisbursementType = DisbursementTypes.Actual
                                     });
                                     unitWork.Save();
@@ -304,6 +305,7 @@ namespace AIMS.Services
                                         Year = currentFinancialYear,
                                         Currency = project.ProjectCurrency,
                                         Amount = 0,
+                                        ExchangeRate = project.ExchangeRate,
                                         DisbursementType = DisbursementTypes.Planned
                                     });
                                     unitWork.Save();
