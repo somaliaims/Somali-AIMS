@@ -443,6 +443,7 @@ namespace AIMS.Models
         public bool IsDefault { get; set; } = false;
         public bool IsUnAttributed { get; set; }
         public bool IsSourceType { get; set; } = false;
+        public int? IATICode { get; set; } = null;
     }
 
     public class SectorView
