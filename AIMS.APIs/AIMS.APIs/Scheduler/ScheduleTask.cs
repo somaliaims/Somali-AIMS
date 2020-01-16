@@ -51,14 +51,16 @@ namespace AIMS.APIs.Scheduler
                 string sectorVocabularyUrl = configuration.GetValue<string>("IATI:SectorsVocabulary");
                 string organizationTypesUrl = configuration.GetValue<string>("IATI:OrganizationTypesUrl");
                 string countriesUrl = configuration.GetValue<string>("IATI:CountriesUrl");
+                string sectorsUrl = configuration.GetValue<string>("IATI:SectorsUrl");
                 string filePath = sWebRootFolder + "/IATISomali.xml";
+                string sectorsFilePath = sWebRootFolder + "/Sectors.xml";
                 string organizationTypesPath = sWebRootFolder + "/OrganizationTypes.json";
                 string currenciesFilePath = sWebRootFolder + "/Currency.json";
                 string countriesFilePath = sWebRootFolder + "/Country.json";
                 string transactionTypesPath = sWebRootFolder + "/IATITransactionTypes.json";
                 string financeTypesPath = sWebRootFolder + "/IATIFinanceTypes.json";
                 string sectorsVocabPath = sWebRootFolder + "/IATISectorVocabulary.json";
-                string xml = "", json = "", transactionTypesJson = "", financeTypesJson = "", sectorsVocabJson = "",
+                string xml = "", sectorsXml = "", json = "", transactionTypesJson = "", financeTypesJson = "", sectorsVocabJson = "",
                     organizationTypesJson = "", countriesJson = "";
 
                 using (var client = new WebClient())
@@ -122,6 +124,12 @@ namespace AIMS.APIs.Scheduler
                     }
                     File.WriteAllText(filePath, xml);
 
+                    using (var client = new WebClient())
+                    {
+                        sectorsXml = client.DownloadString(sectorsUrl);
+                    }
+                    File.WriteAllText(sectorsFilePath, xml);
+
                     var cleanedTTypeJson = service.ExtractTransactionTypesJson(transactionTypesJson);
                     var cleanedFTypeJson = service.ExtractFinanceTypesJson(financeTypesJson);
                     var cleanedSectorVocabJson = service.ExtractSectorsVocabJson(sectorsVocabJson);
@@ -133,6 +141,7 @@ namespace AIMS.APIs.Scheduler
 
                     userService.SetNotificationsForUsers();
                     var sectorResponse = service.ExtractAndSaveIATISectors(filePath, sectorsVocabPath);
+                    var updateSectorResponse = service.NameSectorsCorrectly(sectorsFilePath);
                     service.ExtractAndSaveLocations(filePath);
                     //Oldservice.ExtractAndSaveOrganizationTypes(cleanedOrgTypesVocabJson);
                     var orgResponse = service.ExtractAndSaveOrganizations(filePath, cleanedOrgTypesVocabJson);

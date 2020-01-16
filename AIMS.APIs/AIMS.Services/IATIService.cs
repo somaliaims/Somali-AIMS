@@ -76,6 +76,13 @@ namespace AIMS.Services
         ActionResponse ExtractAndSaveIATISectors(string dataFilePath, string sectorVocabPath);
 
         /// <summary>
+        /// Amends the sector names
+        /// </summary>
+        /// <param name="dataFilePaht"></param>
+        /// <returns></returns>
+        ActionResponse NameSectorsCorrectly(string filePath);
+
+        /// <summary>
         /// Saves transaction types
         /// </summary>
         /// <param name="json"></param>
@@ -766,6 +773,38 @@ namespace AIMS.Services
             {
                 response.Success = false;
                 response.Message = ex.Message;
+            }
+            return response;
+        }
+
+        public ActionResponse NameSectorsCorrectly(string filePath)
+        {
+            var unitWork = new UnitOfWork(context);
+            ActionResponse response = new ActionResponse();
+            IParser parser = new ParserIATIVersion21();
+            XmlReader xReader = XmlReader.Create(filePath);
+            XDocument xDoc = XDocument.Load(xReader);
+            var sectorsList = parser.ExtractSectorsFromSource(xDoc);
+            if (sectorsList.Count() > 0)
+            {
+                var sectorsInDB = unitWork.SectorRepository.GetManyQueryable(s => s.IATICode != null);
+                bool isSaved = false;
+                foreach(var sector in sectorsList)
+                {
+                    var isInDb = (from s in sectorsInDB
+                                  where s.IATICode == sector.SectorCode
+                                  select s).FirstOrDefault();
+                    if (isInDb != null)
+                    {
+                        isInDb.SectorName = sector.SectorName;
+                        unitWork.SectorRepository.Update(isInDb);
+                        isSaved = true;
+                    }
+                }
+                if (isSaved)
+                {
+                    unitWork.Save();
+                }
             }
             return response;
         }

@@ -39,6 +39,13 @@ namespace AIMS.IATILib.Parsers
         ICollection<IATISectorModel> ExtractSectors(XDocument xmlDoc);
 
         /// <summary>
+        /// Parses sectors with rectified information
+        /// </summary>
+        /// <param name="xmlDoc"></param>
+        /// <returns></returns>
+        ICollection<SourceSectorModel> ExtractSectorsFromSource(XDocument xmlDoc);
+
+        /// <summary>
         /// Parses organizations from the IATI document
         /// </summary>
         /// <param name="xmlDoc"></param>

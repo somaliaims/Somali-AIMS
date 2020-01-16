@@ -68,13 +68,21 @@ namespace AIMS.IATILib.Parsers
         public ICollection<IATISectorModel> ExtractSectors(XDocument xmlDoc)
         {
             List<IATISectorModel> sectorsList = new List<IATISectorModel>();
-            //Pick up all narratives
             var activities = from activity in xmlDoc.Descendants("iati-activity")
                              where activity.Element("title").Element("narrative") != null ||
                              activity.Element("title") != null
                              select activity;
 
             this.ParseAndFillSectors(activities, sectorsList);
+            return sectorsList;
+        }
+
+        public ICollection<SourceSectorModel> ExtractSectorsFromSource(XDocument xmlDoc)
+        {
+            List<SourceSectorModel> sectorsList = new List<SourceSectorModel>();
+            var codelist = from list in xmlDoc.Descendants("codelist")
+                             select list;
+            this.ParseAndFillSectorsFromSource(codelist, sectorsList);
             return sectorsList;
         }
 
@@ -173,18 +181,6 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
-                        /*if (!string.IsNullOrEmpty(endDate))
-                        {
-                            if (DateTime.TryParse(endDate, out parsedDate))
-                            {
-                                TimeSpan timeSpan = todaysDate - parsedDate;
-                                if (timeSpan.Days > 365)
-                                {
-                                    continue;
-                                }
-                            }
-                        }*/
-
                         if (activity.HasAttributes)
                         {
                             if (activity.Attribute("default-currency") != null)
@@ -212,7 +208,6 @@ namespace AIMS.IATILib.Parsers
                                 }
                             }
                         }
-
 
                         //Extracting participating organizations
                         var organizations = activity.Elements("participating-org");
@@ -1065,6 +1060,64 @@ namespace AIMS.IATILib.Parsers
                                         sectorsList.Add(new IATISectorModel()
                                         {
                                             SectorTypeCode = sectorTypeVocabulary,
+                                            SectorCode = sectorCode,
+                                            SectorName = sectorName,
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+        }
+
+        private void ParseAndFillSectorsFromSource(IEnumerable<XElement> elements, List<SourceSectorModel> sectorsList)
+        {
+            string message = "";
+            try
+            {
+                if (elements != null)
+                {
+                    foreach (var element in elements)
+                    {
+                        var items = element.Elements("codelist-item");
+                        if (items.Any())
+                        {
+                            foreach (var item in items)
+                            {
+                                int? sectorCode = null;
+                                string sectorName = "";
+                                if (item.Element("code") != null)
+                                {
+                                    int extractedCode = 0;
+                                    int.TryParse(item.Element("code")?.Value, out extractedCode);
+                                }
+
+                                var sectorNameElement = item.Element("name");
+                                var narratives = sectorNameElement.Elements("narrative");
+                                foreach(var narrative in narratives)
+                                {
+                                    if (!narrative.HasAttributes)
+                                    {
+                                        sectorName = narrative.Value;
+                                    }
+                                }
+
+                                if (!string.IsNullOrEmpty(sectorName) && !string.IsNullOrWhiteSpace(sectorName))
+                                {
+                                    var isSectorExists = (from s in sectorsList
+                                                          where s.SectorName.ToLower() == sectorName.ToLower()
+                                                          select s).FirstOrDefault();
+
+                                    if (isSectorExists == null)
+                                    {
+                                        sectorsList.Add(new SourceSectorModel()
+                                        {
                                             SectorCode = sectorCode,
                                             SectorName = sectorName,
                                         });
