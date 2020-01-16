@@ -1076,14 +1076,15 @@ namespace AIMS.IATILib.Parsers
             }
         }
 
-        private void ParseAndFillSectorsFromSource(IEnumerable<XElement> elements, List<SourceSectorModel> sectorsList)
+        private void ParseAndFillSectorsFromSource(IEnumerable<XElement> sectorWithCodes, List<SourceSectorModel> sectorsList)
         {
             string message = "";
             try
             {
-                if (elements != null)
+                if (sectorWithCodes != null)
                 {
-                    foreach (var element in elements)
+                    var codeListItems = sectorWithCodes.Elements("codelist-items");
+                    foreach (var element in codeListItems)
                     {
                         var items = element.Elements("codelist-item");
                         if (items.Any())
@@ -1092,12 +1093,16 @@ namespace AIMS.IATILib.Parsers
                             {
                                 int? sectorCode = null;
                                 string sectorName = "";
+                                int extractedCode = 0;
+
                                 if (item.Element("code") != null)
                                 {
-                                    int extractedCode = 0;
-                                    int.TryParse(item.Element("code")?.Value, out extractedCode);
+                                    bool isValid = int.TryParse(item.Element("code")?.Value, out extractedCode);
+                                    if (isValid)
+                                    {
+                                        sectorCode = extractedCode;
+                                    }
                                 }
-
                                 var sectorNameElement = item.Element("name");
                                 var narratives = sectorNameElement.Elements("narrative");
                                 foreach(var narrative in narratives)
@@ -1110,18 +1115,11 @@ namespace AIMS.IATILib.Parsers
 
                                 if (!string.IsNullOrEmpty(sectorName) && !string.IsNullOrWhiteSpace(sectorName))
                                 {
-                                    var isSectorExists = (from s in sectorsList
-                                                          where s.SectorName.ToLower() == sectorName.ToLower()
-                                                          select s).FirstOrDefault();
-
-                                    if (isSectorExists == null)
+                                    sectorsList.Add(new SourceSectorModel()
                                     {
-                                        sectorsList.Add(new SourceSectorModel()
-                                        {
-                                            SectorCode = sectorCode,
-                                            SectorName = sectorName,
-                                        });
-                                    }
+                                        SectorCode = sectorCode,
+                                        SectorName = sectorName,
+                                    });
                                 }
                             }
                         }

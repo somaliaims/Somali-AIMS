@@ -781,31 +781,40 @@ namespace AIMS.Services
         {
             var unitWork = new UnitOfWork(context);
             ActionResponse response = new ActionResponse();
-            IParser parser = new ParserIATIVersion21();
-            XmlReader xReader = XmlReader.Create(filePath);
-            XDocument xDoc = XDocument.Load(xReader);
-            var sectorsList = parser.ExtractSectorsFromSource(xDoc);
-            if (sectorsList.Count() > 0)
+            try
             {
-                var sectorsInDB = unitWork.SectorRepository.GetManyQueryable(s => s.IATICode != null);
-                bool isSaved = false;
-                foreach(var sector in sectorsList)
+                IParser parser = new ParserIATIVersion21();
+                XmlReader xReader = XmlReader.Create(filePath);
+                XDocument xDoc = XDocument.Load(xReader);
+                var sectorsList = parser.ExtractSectorsFromSource(xDoc);
+                if (sectorsList.Count() > 0)
                 {
-                    var isInDb = (from s in sectorsInDB
-                                  where s.IATICode == sector.SectorCode
-                                  select s).FirstOrDefault();
-                    if (isInDb != null)
+                    var sectorsInDB = unitWork.SectorRepository.GetManyQueryable(s => s.IATICode != null);
+                    bool isSaved = false;
+                    foreach (var sector in sectorsList)
                     {
-                        isInDb.SectorName = sector.SectorName;
-                        unitWork.SectorRepository.Update(isInDb);
-                        isSaved = true;
+                        var isInDb = (from s in sectorsInDB
+                                      where s.IATICode == sector.SectorCode
+                                      select s).FirstOrDefault();
+                        if (isInDb != null)
+                        {
+                            isInDb.SectorName = sector.SectorName;
+                            unitWork.SectorRepository.Update(isInDb);
+                            isSaved = true;
+                        }
+                    }
+                    if (isSaved)
+                    {
+                        unitWork.Save();
                     }
                 }
-                if (isSaved)
-                {
-                    unitWork.Save();
-                }
             }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            
             return response;
         }
 

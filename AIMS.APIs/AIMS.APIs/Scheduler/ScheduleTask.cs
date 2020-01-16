@@ -118,17 +118,17 @@ namespace AIMS.APIs.Scheduler
                         }
                     }
                     //Download latest iati
-                    using (var client = new WebClient())
+                    /*using (var client = new WebClient())
                     {
                         xml = client.DownloadString(url);
                     }
-                    File.WriteAllText(filePath, xml);
+                    File.WriteAllText(filePath, xml);*/
 
                     using (var client = new WebClient())
                     {
                         sectorsXml = client.DownloadString(sectorsUrl);
                     }
-                    File.WriteAllText(sectorsFilePath, xml);
+                    File.WriteAllText(sectorsFilePath, sectorsXml);
 
                     var cleanedTTypeJson = service.ExtractTransactionTypesJson(transactionTypesJson);
                     var cleanedFTypeJson = service.ExtractFinanceTypesJson(financeTypesJson);
@@ -140,13 +140,13 @@ namespace AIMS.APIs.Scheduler
                     File.WriteAllText(organizationTypesPath, cleanedOrgTypesVocabJson);
 
                     userService.SetNotificationsForUsers();
-                    var sectorResponse = service.ExtractAndSaveIATISectors(filePath, sectorsVocabPath);
+                    //var sectorResponse = service.ExtractAndSaveIATISectors(filePath, sectorsVocabPath);
                     var updateSectorResponse = service.NameSectorsCorrectly(sectorsFilePath);
                     service.ExtractAndSaveLocations(filePath);
                     //Oldservice.ExtractAndSaveOrganizationTypes(cleanedOrgTypesVocabJson);
                     var orgResponse = service.ExtractAndSaveOrganizations(filePath, cleanedOrgTypesVocabJson);
                     notificationService.SendNotificationsForNewOrganizations(orgResponse.ReturnedId, Convert.ToInt32(orgResponse.Message));
-                    notificationService.SendNotificationsForNewSectors(sectorResponse.ReturnedId);
+                    //notificationService.SendNotificationsForNewSectors(sectorResponse.ReturnedId);
 
                     var currencyList = httpService.ParseAndExtractCurrencyList(json);
                     if (currencyList.Count > 0)
