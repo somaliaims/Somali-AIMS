@@ -820,7 +820,6 @@ namespace AIMS.Services
 
         public ActionResponse ExtractAndSaveIATISectors(string dataFilePath, string sectorVocabPath)
         {
-
             var unitWork = new UnitOfWork(context);
             ActionResponse response = new ActionResponse();
             ICollection<IATISectorModel> iatiSectors = new List<IATISectorModel>();
@@ -887,14 +886,18 @@ namespace AIMS.Services
                                 }
                             }
 
+                            EFSector isSectorInDb = null;
                             if (newIATISectors.Count > 0)
                             {
+                                isSectorInDb = (from s in sectorsList
+                                                where s.IATICode == sector.SectorCode
+                                                select s).FirstOrDefault();
                                 isSectorInList = (from s in newIATISectors
-                                                  where s.SectorName.ToLower() == sector.SectorName.ToLower()
+                                                  where s.IATICode == sector.SectorCode
                                                   select s).FirstOrDefault();
                             }
 
-                            if (isSectorInList == null && sectorType != null)
+                            if ((isSectorInList == null && isSectorInDb == null) && sectorType != null)
                             {
                                 newIATISectors.Add(new EFSector()
                                 {

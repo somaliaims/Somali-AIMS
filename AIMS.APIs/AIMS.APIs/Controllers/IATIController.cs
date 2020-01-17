@@ -73,6 +73,18 @@ namespace AIMS.APIs.Controllers
             return Ok(response);
         }
 
+        [HttpGet]
+        [Route("AmendSectorLabels")]
+        public IActionResult AmendSectorLabels()
+        {
+            string sectorsFilePath = hostingEnvironment.WebRootPath + "/Sectors.xml";
+            var response = iatiService.NameSectorsCorrectly(sectorsFilePath);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.Success);
+        }
 
         [HttpGet]
         [Route("GetProjects")]
