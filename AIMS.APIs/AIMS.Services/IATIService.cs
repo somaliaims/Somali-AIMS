@@ -572,8 +572,6 @@ namespace AIMS.Services
                         break;
                 }
 
-                //var organizationTypesVocabs = this.GetDeserializedOrgTypes(orgTypesJson);
-                //var organizationTypes = unitWork.OrganizationTypesRepository.GetManyQueryable(o => o.Id != 0);
                 var organizationsList = unitWork.IATIOrganizationRepository.GetManyQueryable(o => o.Id != 0);
                 var orgNames = (from o in organizationsList
                                 select o.OrganizationName.Trim()).ToList<string>();
@@ -603,25 +601,6 @@ namespace AIMS.Services
                             if (isOrganizationInList == null && isOrganizationInDb == null)
                             {
                                 int orgCode = org.Code;
-                                /*EFOrganizationTypes orgType = null;
-                                string orgTypeName = (from v in organizationTypesVocabs
-                                                        where v.Code == org.Code
-                                                        select v.Name).FirstOrDefault();
-                                orgType = (from t in organizationTypes
-                                                      where t.TypeName.Equals(orgTypeName, StringComparison.OrdinalIgnoreCase)
-                                                      select t).FirstOrDefault();*/
-
-                                /*withOutTypeCount = (orgType == null) ? withOutTypeCount : (withOutTypeCount + 1);
-                                if (orgType != null)
-                                {
-                                    newIATIOrganizations.Add(new EFIATIOrganization()
-                                    {
-                                        OrganizationName = org.Name,
-                                        //OrganizationType = orgType
-                                    });
-                                }
-                                else
-                                {*/
                                 newIATIOrganizations.Add(new EFIATIOrganization()
                                 {
                                     OrganizationName = org.Name,
@@ -859,10 +838,11 @@ namespace AIMS.Services
                                                 select s.SectorName).ToList<string>();
 
                     List<EFSector> newIATISectors = new List<EFSector>();
+                    bool isUpdated = false;
                     foreach (var sector in iatiSectors)
                     {
-                        if (sectorNames.Contains(sector.SectorName, StringComparer.OrdinalIgnoreCase) == false)
-                        {
+                        //if (sectorNames.Contains(sector.SectorName, StringComparer.OrdinalIgnoreCase) == false)
+                        //{
                             EFSector isSectorInList = null;
                             var sectorType = (from s in sectorTypes
                                               where (s.IATICode != null && s.IATICode == sector.SectorTypeCode)
@@ -886,18 +866,32 @@ namespace AIMS.Services
                                 }
                             }
 
-                            EFSector isSectorInDb = null;
-                            if (newIATISectors.Count > 0)
-                            {
-                                isSectorInDb = (from s in sectorsList
-                                                where s.IATICode == sector.SectorCode
-                                                select s).FirstOrDefault();
-                                isSectorInList = (from s in newIATISectors
-                                                  where s.IATICode == sector.SectorCode
-                                                  select s).FirstOrDefault();
-                            }
+                        EFSector isSectorInDb = null;
+                        //if (newIATISectors.Count > 0)
+                        //{
+                        isSectorInDb = (from s in sectorsList
+                                        where s.IATICode == sector.SectorCode
+                                        select s).FirstOrDefault();
 
-                            if ((isSectorInList == null && isSectorInDb == null) && sectorType != null)
+                        if (isSectorInDb == null)
+                        {
+                            isSectorInDb = (from s in sectorsList
+                                            where s.SectorName.Equals(sector.SectorName, StringComparison.OrdinalIgnoreCase)
+                                            select s).FirstOrDefault();
+
+                            if (isSectorInDb != null)
+                            {
+                                isSectorInDb.IATICode = sector.SectorCode;
+                                unitWork.SectorRepository.Update(isSectorInDb);
+                                isUpdated = true;
+                            }
+                        }
+                        isSectorInList = (from s in newIATISectors
+                                          where s.IATICode == sector.SectorCode
+                                          select s).FirstOrDefault();
+                        //}
+
+                        if ((isSectorInList == null && isSectorInDb == null) && sectorType != null)
                             {
                                 newIATISectors.Add(new EFSector()
                                 {
@@ -907,10 +901,10 @@ namespace AIMS.Services
                                     ParentSector = null
                                 });
                             }
-                        }
+                        //}
                     }
 
-                    if (newIATISectors.Count > 0)
+                    if (newIATISectors.Count > 0 || isUpdated)
                     {
                         unitWork.SectorRepository.InsertMultiple(newIATISectors);
                         unitWork.Save();
