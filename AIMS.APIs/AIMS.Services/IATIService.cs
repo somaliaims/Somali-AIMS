@@ -867,8 +867,6 @@ namespace AIMS.Services
                             }
 
                         EFSector isSectorInDb = null;
-                        //if (newIATISectors.Count > 0)
-                        //{
                         isSectorInDb = (from s in sectorsList
                                         where s.IATICode == sector.SectorCode
                                         select s).FirstOrDefault();
@@ -889,7 +887,6 @@ namespace AIMS.Services
                         isSectorInList = (from s in newIATISectors
                                           where s.IATICode == sector.SectorCode
                                           select s).FirstOrDefault();
-                        //}
 
                         if ((isSectorInList == null && isSectorInDb == null) && sectorType != null)
                             {
@@ -901,7 +898,6 @@ namespace AIMS.Services
                                     ParentSector = null
                                 });
                             }
-                        //}
                     }
 
                     if (newIATISectors.Count > 0 || isUpdated)

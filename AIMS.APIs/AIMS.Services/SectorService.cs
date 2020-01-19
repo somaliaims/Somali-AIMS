@@ -270,6 +270,7 @@ namespace AIMS.Services
                                 SectorType = sectorType,
                                 ParentSector = parentSector,
                                 SectorName = model.SectorName,
+                                IATICode = model.IATICode,
                                 TimeStamp = DateTime.Now,
                             });
                         }
@@ -279,6 +280,7 @@ namespace AIMS.Services
                             {
                                 SectorType = sectorType,
                                 SectorName = model.SectorName,
+                                IATICode = model.IATICode,
                                 TimeStamp = DateTime.Now
                             });
                         }
@@ -338,6 +340,7 @@ namespace AIMS.Services
                                 SectorType = sectorType,
                                 ParentSector = parentSector,
                                 SectorName = model.SectorName.Trim(),
+                                IATICode = model.IATICode,
                                 TimeStamp = DateTime.Now,
                             });
                         }
@@ -347,6 +350,7 @@ namespace AIMS.Services
                             {
                                 SectorType = sectorType,
                                 SectorName = model.SectorName,
+                                IATICode = model.IATICode,
                                 TimeStamp = DateTime.Now
                             });
                         }

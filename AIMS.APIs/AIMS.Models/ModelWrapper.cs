@@ -478,6 +478,7 @@ namespace AIMS.Models
         public int? ParentId { get; set; }
         [Required]
         public string SectorName { get; set; }
+        public int? IATICode { get; set; }
     }
 
     public class SearchSectorMappingModel
@@ -529,6 +530,7 @@ namespace AIMS.Models
         public string SectorName { get; set; }
         [Required]
         public int MappingSectorId { get; set; }
+        public int? IATICode { get; set; }
     }
 
     public class SectorMappingsModel
@@ -2127,6 +2129,13 @@ namespace AIMS.Models
     }
 
     public class RestoreDatabaseModel
+    {
+        [Required]
+        [MaxLength(255)]
+        public string FileName { get; set; }
+    }
+
+    public class DataBackupModel
     {
         [Required]
         [MaxLength(255)]

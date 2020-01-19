@@ -65,5 +65,20 @@ namespace AIMS.APIs.Controllers
             return Ok(service.GetBackupFiles());
         }
 
+        [HttpPost("DeleteBackup")]
+        public IActionResult DeleteBackup([FromBody] DataBackupModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = service.DeleteBackupFile(model.FileName);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
     }
 }

@@ -30,6 +30,13 @@ namespace AIMS.Services
         Task<ActionResponse> RestoreDatabase(string backupFile, string connString);
 
         /// <summary>
+        /// Deletes a backup file
+        /// </summary>
+        /// <param name="backupFile"></param>
+        /// <returns></returns>
+        ActionResponse DeleteBackupFile(string backupFile);
+
+        /// <summary>
         /// Gets list of backup files
         /// </summary>
         /// <returns></returns>
@@ -193,6 +200,33 @@ namespace AIMS.Services
                 response.Message = ex.Message;
             }
             return await Task<ActionResponse>.Run(() => response);
+        }
+
+        public ActionResponse DeleteBackupFile(string backupFile)
+        {
+            ActionResponse response = new ActionResponse();
+            try
+            {
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(backupFile);
+                string zipFileName = backupDir + fileNameWithoutExt + ".zip";
+                backupFile = backupDir + backupFile;
+
+                if (File.Exists(backupFile))
+                {
+                    File.Delete(backupFile);
+                }
+
+                if (File.Exists(zipFileName))
+                {
+                    File.Delete(zipFileName);
+                }
+            }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return response;
         }
     }
 }
