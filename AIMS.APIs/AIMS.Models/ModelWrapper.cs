@@ -1809,7 +1809,7 @@ namespace AIMS.Models
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
         public int ChartType { get; set; } = 0;
-        public List<int> LocationIds { get; set; } = new List<int>();
+        public int LocationId { get; set; }
         public List<int> SectorIds { get; set; } = new List<int>();
     }
 

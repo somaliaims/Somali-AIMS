@@ -145,10 +145,9 @@ namespace AIMS.Services.Helpers
                 queryString += "&orgs=" + string.Join(",", model.OrganizationIds);
             }
 
-            if (model.LocationIds.Count > 0)
+            if (model.LocationId > 0)
             {
-                string locationIdsStr = string.Join(",", model.LocationIds);
-                queryString += ("&locations=" + locationIdsStr);
+                queryString += ("&locationId=" + model.LocationId);
             }
 
             if (model.SectorIds.Count > 0)
