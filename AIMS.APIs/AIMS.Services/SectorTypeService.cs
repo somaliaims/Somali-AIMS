@@ -60,6 +60,12 @@ namespace AIMS.Services
         IEnumerable<SectorTypesView> GetOtherSectors();
 
         /// <summary>
+        /// Get sector type with sources
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<SectorSourceView> GetSectorSources();
+
+        /// <summary>
         /// Gets matching sector types for the provided criteria
         /// </summary>
         /// <param name="criteria"></param>
@@ -111,6 +117,24 @@ namespace AIMS.Services
                 var sectorTypes = unitWork.SectorTypesRepository.GetAll();
                 return mapper.Map<List<SectorTypesView>>(sectorTypes);
             }
+        }
+
+        public IEnumerable<SectorSourceView> GetSectorSources()
+        {
+            var unitWork = new UnitOfWork(context);
+            var sectorTypes = unitWork.SectorTypesRepository.GetAll();
+            List<SectorSourceView> typesList = new List<SectorSourceView>();
+            foreach(var type in sectorTypes)
+            {
+                typesList.Add(new SectorSourceView()
+                {
+                    Id = type.Id,
+                    IATICode = type.IATICode,
+                    SourceUrl = type.SourceUrl,
+                    FilePath = null
+                });
+            }
+            return typesList;
         }
 
         public IEnumerable<SectorTypesView> GetOtherSectors()

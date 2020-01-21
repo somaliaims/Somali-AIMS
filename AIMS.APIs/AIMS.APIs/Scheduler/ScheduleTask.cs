@@ -53,7 +53,7 @@ namespace AIMS.APIs.Scheduler
                 string countriesUrl = configuration.GetValue<string>("IATI:CountriesUrl");
                 string sectorsUrl = configuration.GetValue<string>("IATI:SectorsUrl");
                 string filePath = sWebRootFolder + "/IATISomali.xml";
-                string sectorsFilePath = sWebRootFolder + "/Sectors.xml";
+                string sectorsFilePath = sWebRootFolder + "/Sectors";
                 string organizationTypesPath = sWebRootFolder + "/OrganizationTypes.json";
                 string currenciesFilePath = sWebRootFolder + "/Currency.json";
                 string countriesFilePath = sWebRootFolder + "/Country.json";
@@ -105,6 +105,7 @@ namespace AIMS.APIs.Scheduler
                     INotificationService notificationService = new NotificationService(dbContext, imapper);
                     IATIService service = new IATIService(dbContext);
                     IFinancialYearSettingsService fySettingsService = new FinancialYearSettingsService(dbContext);
+                    ISectorTypesService sectorTypeService = new SectorTypesService(dbContext, imapper);
                     IProjectService projectService = new ProjectService(dbContext, imapper);
 
                     var iatiSettings = service.GetIATISettings();
@@ -115,7 +116,7 @@ namespace AIMS.APIs.Scheduler
                             url = iatiSettings.BaseUrl;
                         }
                     }
-                    
+
                     //Download latest iati
                     /*using (var client = new WebClient())
                     {
@@ -123,11 +124,26 @@ namespace AIMS.APIs.Scheduler
                     }
                     File.WriteAllText(filePath, xml);*/
 
-                    using (var client = new WebClient())
+                    var sectorTypesSources = sectorTypeService.GetSectorSources();
+                    if (sectorTypesSources.Count() > 0)
                     {
-                        sectorsXml = client.DownloadString(sectorsUrl);
+                        using (var client = new WebClient())
+                        {
+                            int fileCounter = 1;
+                            foreach(var stype in sectorTypesSources)
+                            {
+                                if (!string.IsNullOrEmpty(stype.SourceUrl))
+                                {
+                                    sectorsXml = client.DownloadString(stype.SourceUrl);
+                                    int counter = (stype.IATICode == null) ? fileCounter : (int)stype.IATICode;
+                                    var newFilePath = sectorsFilePath + counter + ".xml";
+                                    File.WriteAllText(newFilePath, sectorsXml);
+                                    stype.FilePath = newFilePath;
+                                }
+                                ++fileCounter;
+                            }
+                        }
                     }
-                    File.WriteAllText(sectorsFilePath, sectorsXml);
 
                     var cleanedTTypeJson = service.ExtractTransactionTypesJson(transactionTypesJson);
                     var cleanedFTypeJson = service.ExtractFinanceTypesJson(financeTypesJson);
@@ -140,7 +156,17 @@ namespace AIMS.APIs.Scheduler
 
                     userService.SetNotificationsForUsers();
                     var sectorResponse = service.ExtractAndSaveIATISectors(filePath, sectorsVocabPath);
-                    var updateSectorResponse = service.NameSectorsCorrectly(sectorsFilePath);
+                    if (sectorTypesSources.Count() > 0)
+                    {
+                        foreach(var stype in sectorTypesSources)
+                        {
+                            if (!string.IsNullOrEmpty(stype.FilePath))
+                            {
+                                service.NameSectorsCorrectly(stype.FilePath, stype.Id);
+                            }
+                        }
+                    }
+                    
                     service.ExtractAndSaveLocations(filePath);
                     //Oldservice.ExtractAndSaveOrganizationTypes(cleanedOrgTypesVocabJson);
                     var orgResponse = service.ExtractAndSaveOrganizations(filePath, cleanedOrgTypesVocabJson);

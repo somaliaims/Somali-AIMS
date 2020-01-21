@@ -75,6 +75,12 @@ namespace AIMS.IATILib.Parsers
         public string SectorName { get; set; }
     }
 
+    public class SourceSectorsView
+    {
+        public string SectorTypeName { get; set; }
+        public List<SourceSectorModel> SectorsList { get; set; }
+    }
+
     public class SourceSectorModel
     {
         public int? SectorCode { get; set; }

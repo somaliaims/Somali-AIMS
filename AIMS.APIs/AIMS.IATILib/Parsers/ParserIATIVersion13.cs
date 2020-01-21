@@ -31,10 +31,11 @@ namespace AIMS.IATILib.Parsers
             return activityList;
         }
 
-        public ICollection<SourceSectorModel> ExtractSectorsFromSource(XDocument xmlDoc)
+        public SourceSectorsView ExtractSectorsFromSource(XDocument xmlDoc)
         {
-            List<SourceSectorModel> sectorsList = new List<SourceSectorModel>();
-            return sectorsList;
+            SourceSectorsView sectorsView = new SourceSectorsView();
+            sectorsView.SectorsList = new List<SourceSectorModel>();
+            return sectorsView;
         }
 
         public ICollection<IATIProject> ExtractProjects(XDocument xmlDoc)

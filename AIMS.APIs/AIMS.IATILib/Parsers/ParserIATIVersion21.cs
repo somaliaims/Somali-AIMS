@@ -77,13 +77,29 @@ namespace AIMS.IATILib.Parsers
             return sectorsList;
         }
 
-        public ICollection<SourceSectorModel> ExtractSectorsFromSource(XDocument xmlDoc)
+        public SourceSectorsView ExtractSectorsFromSource(XDocument xmlDoc)
         {
+            SourceSectorsView sectorsView = new SourceSectorsView();
             List<SourceSectorModel> sectorsList = new List<SourceSectorModel>();
+            
             var codelist = from list in xmlDoc.Descendants("codelist")
                              select list;
+            var metaData = codelist.Elements("metadata").FirstOrDefault();
+            var nameElement = (metaData != null) ? metaData.Element("name") : null;
+            if (nameElement != null)
+            {
+                var narratives = nameElement.Elements("narrative");
+                foreach (var narrative in narratives)
+                {
+                    if (!narrative.HasAttributes)
+                    {
+                        sectorsView.SectorTypeName = narrative.Value;
+                    }
+                }
+            }
             this.ParseAndFillSectorsFromSource(codelist, sectorsList);
-            return sectorsList;
+            sectorsView.SectorsList = sectorsList;
+            return sectorsView;
         }
 
         public ICollection<IATIOrganizationModel> ExtractOrganizations(XDocument xmlDoc)

@@ -80,7 +80,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="dataFilePaht"></param>
         /// <returns></returns>
-        ActionResponse NameSectorsCorrectly(string filePath);
+        ActionResponse NameSectorsCorrectly(string filePath, int sectorTypeId);
 
         /// <summary>
         /// Saves transaction types
@@ -756,7 +756,7 @@ namespace AIMS.Services
             return response;
         }
 
-        public ActionResponse NameSectorsCorrectly(string filePath)
+        public ActionResponse NameSectorsCorrectly(string filePath, int sectorTypeId)
         {
             var unitWork = new UnitOfWork(context);
             ActionResponse response = new ActionResponse();
@@ -765,10 +765,22 @@ namespace AIMS.Services
                 IParser parser = new ParserIATIVersion21();
                 XmlReader xReader = XmlReader.Create(filePath);
                 XDocument xDoc = XDocument.Load(xReader);
-                var sectorsList = parser.ExtractSectorsFromSource(xDoc);
+                var sectorsView = parser.ExtractSectorsFromSource(xDoc);
+                var sectorType = unitWork.SectorTypesRepository.GetByID(sectorTypeId);
+                if (sectorType != null)
+                {
+                    if (!sectorType.TypeName.Trim().Equals(sectorsView.SectorTypeName.Trim(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        sectorType.TypeName = sectorsView.SectorTypeName;
+                        unitWork.SectorTypesRepository.Update(sectorType);
+                        unitWork.Save();
+                    }
+                }
+
+                var sectorsList = sectorsView.SectorsList;
                 if (sectorsList.Count() > 0)
                 {
-                    var sectorsInDB = unitWork.SectorRepository.GetManyQueryable(s => s.IATICode != null);
+                    var sectorsInDB = unitWork.SectorRepository.GetManyQueryable(s => s.IATICode != null && s.SectorTypeId == sectorTypeId);
                     bool isSaved = false;
                     foreach (var sector in sectorsList)
                     {

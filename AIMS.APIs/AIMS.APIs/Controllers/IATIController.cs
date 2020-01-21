@@ -73,7 +73,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response);
         }
 
-        [HttpGet]
+        /*[HttpGet]
         [Route("AmendSectorLabels")]
         public IActionResult AmendSectorLabels()
         {
@@ -84,7 +84,7 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(response.Message);
             }
             return Ok(response.Success);
-        }
+        }*/
 
         [HttpGet]
         [Route("GetProjects")]

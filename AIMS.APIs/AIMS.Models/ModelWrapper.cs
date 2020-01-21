@@ -2084,6 +2084,14 @@ namespace AIMS.Models
         public string Implementer { get; set; }
     }
 
+    public class SectorSourceView
+    {
+        public int Id { get; set; }
+        public int? IATICode { get; set; }
+        public string SourceUrl { get; set; }
+        public string FilePath { get; set; } = null;
+    }
+
     public class ProjectSectorHelp
     {
         public string SectorType { get; set; }
