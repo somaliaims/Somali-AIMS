@@ -106,23 +106,22 @@ namespace AIMS.APIs.Scheduler
                     IATIService service = new IATIService(dbContext);
                     IFinancialYearSettingsService fySettingsService = new FinancialYearSettingsService(dbContext);
                     IProjectService projectService = new ProjectService(dbContext, imapper);
-                    ICountryService countryService = new CountryService(dbContext, imapper);
 
-                    var activeCountryCode = countryService.GetActiveCountry();
-                    if (!string.IsNullOrEmpty(activeCountryCode))
+                    var iatiSettings = service.GetIATISettings();
+                    if (iatiSettings != null)
                     {
-                        string[] urlParts = url.Split("?");
-                        if (urlParts.Length > 1)
+                        if (!string.IsNullOrEmpty(iatiSettings.BaseUrl))
                         {
-                            url = urlParts[0] + "?recipient-country=" + activeCountryCode + "&stream=true";
+                            url = iatiSettings.BaseUrl;
                         }
                     }
+                    
                     //Download latest iati
-                    using (var client = new WebClient())
+                    /*using (var client = new WebClient())
                     {
                         xml = client.DownloadString(url);
                     }
-                    File.WriteAllText(filePath, xml);
+                    File.WriteAllText(filePath, xml);*/
 
                     using (var client = new WebClient())
                     {
@@ -153,12 +152,6 @@ namespace AIMS.APIs.Scheduler
                     {
                         ICurrencyService currencyService = new CurrencyService(dbContext, imapper);
                         currencyService.AddMultiple(currencyList);
-                    }
-
-                    var countriesList = service.ExtractCountriesList(countriesJson);
-                    if (countriesList.Count > 0)
-                    {
-                        countryService.AddList(countriesList);
                     }
 
                     var fySettings = fySettingsService.Get();

@@ -132,6 +132,7 @@ namespace AIMS.Models
         public bool? IsPrimary { get; set; }
         public bool IsSourceType { get; set; } = true;
         public int? IATICode { get; set; }
+        public string SourceUrl { get; set; }
         public IEnumerable<EFSector> Sectors { get; set; }
     }
 

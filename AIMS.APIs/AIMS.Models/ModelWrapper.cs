@@ -423,14 +423,19 @@ namespace AIMS.Models
         public string TypeName { get; set; }
         public bool? IsPrimary { get; set; }
         public bool? IsSourceType { get; set; }
+        public int? IATICode { get; set; }
+        public string SourceUrl { get; set; }
     }
 
     public class SectorTypesModel
     {
         [Required]
         public string TypeName { get; set; }
+        public int? IATICode { get; set; } = null;
         public bool IsPrimary { get; set; } = false;
         public bool IsSourceType { get; set; } = false;
+        [Url]
+        public string SourceUrl { get; set; } = null;
     }
 
     public class SectorDetailedView

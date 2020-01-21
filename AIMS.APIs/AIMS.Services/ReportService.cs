@@ -1827,16 +1827,18 @@ namespace AIMS.Services
 
                     if (model.SectorIds.Count > 0)
                     {
-                        var projectIds = unitWork.ProjectSectorsRepository.GetProjection(p => model.SectorIds.Contains(p.SectorId), p => p.ProjectId);
+                        var projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains(p.SectorId) || model.SectorIds.Contains((int)p.Sector.ParentSectorId), new string[] { "Sector" });
+                        List<int> projectIdsList = (from s in projectSectors
+                                                    select s.ProjectId).ToList<int>();
                         if (projectProfileList == null)
                         {
-                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id)
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
                             , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
                             projectProfileList = from project in projectProfileList
-                                                 where projectIds.Contains(project.Id)
+                                                 where projectIdsList.Contains(project.Id)
                                                  select project;
                         }
                     }

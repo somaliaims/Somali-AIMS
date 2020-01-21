@@ -194,6 +194,8 @@ namespace AIMS.Services
                     {
                         TypeName = model.TypeName,
                         IsPrimary = model.IsPrimary,
+                        SourceUrl = model.SourceUrl,
+                        IATICode = model.IATICode,
                         IsSourceType = false
                     });
                     response.ReturnedId = newSectorTypes.Id;
@@ -299,6 +301,7 @@ namespace AIMS.Services
                 sectorTypeObj.TypeName = model.TypeName;
                 sectorTypeObj.IsPrimary = model.IsPrimary;
                 sectorTypeObj.IsSourceType = model.IsSourceType;
+                sectorTypeObj.SourceUrl = model.SourceUrl;
                 unitWork.Save();
                 response.Message = true.ToString();
                 return response;

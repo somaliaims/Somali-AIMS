@@ -843,28 +843,28 @@ namespace AIMS.Services
                     {
                         //if (sectorNames.Contains(sector.SectorName, StringComparer.OrdinalIgnoreCase) == false)
                         //{
-                            EFSector isSectorInList = null;
-                            var sectorType = (from s in sectorTypes
-                                              where (s.IATICode != null && s.IATICode == sector.SectorTypeCode)
-                                              select s).FirstOrDefault();
+                        EFSector isSectorInList = null;
+                        var sectorType = (from s in sectorTypes
+                                          where (s.IATICode != null && s.IATICode == sector.SectorTypeCode)
+                                          select s).FirstOrDefault();
 
-                            if (sectorType == null)
+                        if (sectorType == null)
+                        {
+                            var sectorVocab = (from v in sectorVocabs
+                                               where v.Code == sector.SectorTypeCode
+                                               select v).FirstOrDefault();
+
+                            if (sectorVocab != null && (sectorVocab.Code != 99 && sectorVocab.Code != 98))
                             {
-                                var sectorVocab = (from v in sectorVocabs
-                                                   where v.Code == sector.SectorTypeCode
-                                                   select v).FirstOrDefault();
-
-                                if (sectorVocab != null && (sectorVocab.Code != 99 && sectorVocab.Code != 98))
+                                sectorType = unitWork.SectorTypesRepository.Insert(new EFSectorTypes()
                                 {
-                                    sectorType = unitWork.SectorTypesRepository.Insert(new EFSectorTypes()
-                                    {
-                                        IsSourceType = true,
-                                        TypeName = sectorVocab.Name,
-                                        IATICode = sectorVocab.Code
-                                    });
-                                    unitWork.Save();
-                                }
+                                    IsSourceType = true,
+                                    TypeName = sectorVocab.Name,
+                                    IATICode = sectorVocab.Code
+                                });
+                                unitWork.Save();
                             }
+                        }
 
                         EFSector isSectorInDb = null;
                         isSectorInDb = (from s in sectorsList
@@ -874,7 +874,7 @@ namespace AIMS.Services
                         if (isSectorInDb == null)
                         {
                             isSectorInDb = (from s in sectorsList
-                                            where s.SectorName.Equals(sector.SectorName, StringComparison.OrdinalIgnoreCase)
+                                            where s.SectorName.Trim().Equals(sector.SectorName.Trim(), StringComparison.OrdinalIgnoreCase)
                                             select s).FirstOrDefault();
 
                             if (isSectorInDb != null)
