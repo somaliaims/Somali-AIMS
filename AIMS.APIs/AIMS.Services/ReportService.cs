@@ -731,11 +731,11 @@ namespace AIMS.Services
                     List<ProjectProfileView> projectsList = new List<ProjectProfileView>();
                     foreach (var project in projectProfileList)
                     {
-                        //decimal projectExchangeRate = (project.ExchangeRate == 0) ? 1 : project.ExchangeRate;
+                        decimal projectValue = (project.ProjectValue > 0) ? (project.ProjectValue * (exchangeRate / project.ExchangeRate)) : 0;
                         ProjectProfileView profileView = new ProjectProfileView();
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
-                        profileView.ProjectValue = project.ProjectValue;
+                        profileView.ProjectValue = projectValue;
                         profileView.ProjectCurrency = project.ProjectCurrency;
                         profileView.ExchangeRate = project.ExchangeRate;
                         profileView.Description = project.Description;
@@ -862,7 +862,6 @@ namespace AIMS.Services
 
                         foreach (var project in locationProjects)
                         {
-                            decimal projectValue = (project.ProjectValue > 0) ? (project.ProjectValue * (exchangeRate / project.ExchangeRate)) : 0;
                             projectsListForLocation.Add(new ProjectViewForLocation()
                             {
                                 Title = project.Title.Replace("\"", ""),
@@ -870,8 +869,8 @@ namespace AIMS.Services
                                 EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
-                                ProjectValue = projectValue,
-                                ProjectPercentValue = projectValue,
+                                ProjectValue = project.ProjectValue,
+                                ProjectPercentValue = project.ProjectValue,
                                 ActualDisbursements = project.ActualDisbursements,
                                 PlannedDisbursements = project.PlannedDisbursements,
                             });
@@ -1509,7 +1508,7 @@ namespace AIMS.Services
                         {
                             defaultSectorTypeId = defaultSectorType.Id;
                         }
-                        var parentSectorIds = unitWork.SectorRepository.GetProjection(s => s.ParentSectorId != null && s.SectorTypeId == defaultSectorTypeId, s => s.Id);
+                        var parentSectorIds = unitWork.SectorRepository.GetProjection(s => s.ParentSectorId == null && s.SectorTypeId == defaultSectorTypeId, s => s.Id);
                         projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => parentSectorIds.Contains(p.SectorId), new string[] { "Sector" });
                         var projectIdsList = (from s in projectSectors
                                               select s.ProjectId);
@@ -1580,7 +1579,7 @@ namespace AIMS.Services
                             sectorsByProjects.Add(new SectorWithProjects()
                             {
                                 SectorId = sec.SectorId,
-                                ParentSectorId = (int)sec.Sector.ParentSectorId,
+                                ParentSectorId = (sec.Sector.ParentSectorId == null) ? 0 : (int)sec.Sector.ParentSectorId,
                                 Sector = sec.Sector.SectorName,
                                 Projects = (from secProject in projectSectors
                                             where secProject.SectorId.Equals(sec.SectorId)
@@ -1702,8 +1701,6 @@ namespace AIMS.Services
 
                         foreach (var project in sectorProjects)
                         {
-                            decimal projectExchangeRate = (project.ExchangeRate == 0) ? 1 : project.ExchangeRate;
-                            decimal projectValue = (project.ProjectValue > 0) ? (project.ProjectValue * (exchangeRate / projectExchangeRate)) : 0;
                             projectsListForSector.Add(new ProjectViewForSector()
                             {
                                 ProjectId = project.Id,
@@ -1712,8 +1709,8 @@ namespace AIMS.Services
                                 EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
-                                ProjectValue = projectValue,
-                                ProjectPercentValue = projectValue,
+                                ProjectValue = project.ProjectValue,
+                                ProjectPercentValue = project.ProjectValue,
                                 ActualDisbursements = project.ActualDisbursements,
                                 PlannedDisbursements = project.PlannedDisbursements,
                             });

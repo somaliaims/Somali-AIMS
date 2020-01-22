@@ -36,7 +36,7 @@ namespace AIMS.APIs.Scheduler
 
         //"*/10 * * * *"; 10 mins
         //protected override string Schedule => "*/2 * * * *";
-        protected override string Schedule => "1 0 * * *"; //Expression represents 1 minutes past every night
+        protected override string Schedule => "1 0 * * *"; //Expression represents 1 minute past every night
 
         public override Task ProcessInScope(IServiceProvider serviceProvider)
         {
@@ -98,7 +98,6 @@ namespace AIMS.APIs.Scheduler
                 {
                     HttpClient httpClient = new HttpClient();
                     ExchangeRateHttpService httpService = new ExchangeRateHttpService(httpClient);
-
                     AIMSDbContext dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
                     IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
                     IUserService userService = new UserService(dbContext, imapper);
@@ -118,11 +117,11 @@ namespace AIMS.APIs.Scheduler
                     }
 
                     //Download latest iati
-                    /*using (var client = new WebClient())
+                    using (var client = new WebClient())
                     {
                         xml = client.DownloadString(url);
                     }
-                    File.WriteAllText(filePath, xml);*/
+                    File.WriteAllText(filePath, xml);
 
                     var sectorTypesSources = sectorTypeService.GetSectorSources();
                     if (sectorTypesSources.Count() > 0)

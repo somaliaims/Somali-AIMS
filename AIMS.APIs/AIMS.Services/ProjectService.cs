@@ -380,6 +380,7 @@ namespace AIMS.Services
         AIMSDbContext context;
         IMapper mapper;
         readonly string UNATTRIBUTED = "UNATTRIBUTED";
+        readonly string OTHER = "Other";
 
         public ProjectService(AIMSDbContext cntxt, IMapper autoMapper)
         {
@@ -1522,6 +1523,17 @@ namespace AIMS.Services
                             });
                             unitWork.Save();
 
+                            /*var otherParentSector = unitWork.SectorRepository.GetOne(s => s.SectorName.Equals(OTHER, StringComparison.OrdinalIgnoreCase) && s.ParentSectorId == null);
+                            if (otherParentSector == null)
+                            {
+                                otherParentSector = unitWork.SectorRepository.Insert(new EFSector()
+                                {
+                                    SectorName = OTHER,
+                                    SectorType = primarySectorType,
+                                    ParentSector = null,
+                                    IsUnAttributed = false
+                                });
+                            }*/
                             var unattributedSector = unitWork.SectorRepository.GetOne(s => s.SectorName.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase));
                             if (unattributedSector == null)
                             {

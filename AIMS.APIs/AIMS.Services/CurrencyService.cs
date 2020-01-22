@@ -322,6 +322,18 @@ namespace AIMS.Services
                 unitWork.CurrencyRepository.InsertMultiple(newCurrenciesList);
             }
             unitWork.Save();
+
+            var defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
+            if (defaultCurrency == null)
+            {
+                defaultCurrency = unitWork.CurrencyRepository.GetOne(c => c.Currency.Equals("usd", StringComparison.OrdinalIgnoreCase));
+                if (defaultCurrency != null)
+                {
+                    defaultCurrency.IsDefault = true;
+                    unitWork.CurrencyRepository.Update(defaultCurrency);
+                    unitWork.Save();
+                }
+            }
             return response;
         }
 
