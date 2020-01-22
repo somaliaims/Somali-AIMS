@@ -466,7 +466,6 @@ namespace AIMS.Services
                 var projectSectors = await unitWork.ProjectSectorsRepository.GetManyQueryableAsync(s => (s.SectorId == id || s.SectorId == newId));
                 var projectIds = (from s in projectSectors
                                   select s.ProjectId).Distinct().ToList<int>();
-                projectIds = unitWork.ProjectRepository.GetProjection(p => p.EndDate >= DateTime.Now, p => p.Id).ToList();
                 if (projectIds.Count() > 0 && newId == 0)
                 {
                     mHelper = new MessageHelper();

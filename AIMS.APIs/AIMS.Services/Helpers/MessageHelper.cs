@@ -624,7 +624,7 @@ namespace AIMS.Services.Helpers
         public string ProjectToOrganizationMessage(string project, string organizations, string url)
         {
             List<string> messageList = new List<string>();
-            messageList.Add("<h4>New organization/s added to the project: <i>" + project + "</i><h4>");
+            messageList.Add("<h4>Project name: <i>" + project + "</i><h4>");
             messageList.Add("<h5>Added organization/s<h5>");
             messageList.Add("<ul>");
             messageList.Add("<li>" + organizations + "</li>");
@@ -692,17 +692,17 @@ namespace AIMS.Services.Helpers
 
         public string NewOrganizationForProject(string organization)
         {
-            return ("<h4>Requesting organization</h4><p>" + organization + "</p>");
+            return ("<h4>Organization name: </h4><p>" + organization + "</p>");
         }
 
         public string ProjectPermissionGranted(string project)
         {
-            return ("<h4>Permission granted for project</h4><p>" + project + "</p>");
+            return ("<h4>Project name: </h4><p>" + project + "</p>");
         }
 
         public string ProjectPermissionDenied(string project)
         {
-            return ("<h4>Permission denied for project</h4><p>" + project + "</p>");
+            return ("<h4>Project name: </h4><p>" + project + "</p>");
         }
 
         public string ChangedMappingAffectedProjectsMessage(List<string> affectedProjects, string oldSector, string newSector)

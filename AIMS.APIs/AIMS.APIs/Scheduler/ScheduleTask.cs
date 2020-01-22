@@ -169,7 +169,7 @@ namespace AIMS.APIs.Scheduler
                     service.ExtractAndSaveLocations(filePath);
                     //Oldservice.ExtractAndSaveOrganizationTypes(cleanedOrgTypesVocabJson);
                     var orgResponse = service.ExtractAndSaveOrganizations(filePath, cleanedOrgTypesVocabJson);
-                    notificationService.SendNotificationsForNewOrganizations(orgResponse.ReturnedId, Convert.ToInt32(orgResponse.Message));
+                    //notificationService.SendNotificationsForNewOrganizations(orgResponse.ReturnedId, Convert.ToInt32(orgResponse.Message));
                     notificationService.SendNotificationsForNewSectors(sectorResponse.ReturnedId);
 
                     var currencyList = httpService.ParseAndExtractCurrencyList(json);
