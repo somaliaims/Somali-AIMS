@@ -96,10 +96,20 @@ namespace AIMS.Services
             {
                 ActionResponse response = new ActionResponse();
                 var years = unitWork.FinancialYearRepository.GetManyQueryable(y => y.Id != 0);
-                foreach(var year in years)
+                int currentMonth = DateTime.Now.Month;
+                int currentDay = DateTime.Now.Day;
+                var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(s => s.Id != 0);
+                int settingsMonth = 1, settingsDay = 1;
+                if (fySettings != null)
+                {
+                    settingsMonth = fySettings.Month;
+                    settingsDay = fySettings.Day;
+                }
+                foreach (var year in years)
                 {
                     int yr = year.FinancialYear;
-                    year.Label = "FY " + yr + "/" + (yr + 1);
+                    string label = (settingsMonth == 1 && settingsDay == 1) ? "FY " + yr : "FY " + yr + "/" + (yr + 1);
+                    year.Label = label;
                     unitWork.FinancialYearRepository.Update(year);
                 }
                 unitWork.Save();

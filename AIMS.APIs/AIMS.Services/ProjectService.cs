@@ -380,7 +380,6 @@ namespace AIMS.Services
         AIMSDbContext context;
         IMapper mapper;
         readonly string UNATTRIBUTED = "UNATTRIBUTED";
-        readonly string OTHER = "Other";
 
         public ProjectService(AIMSDbContext cntxt, IMapper autoMapper)
         {
@@ -464,10 +463,11 @@ namespace AIMS.Services
                 int currentMonth = DateTime.Now.Month;
                 int currentDay = DateTime.Now.Day;
                 var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(s => s.Id != 0);
+                int settingsMonth = 1, settingsDay = 1;
                 if (fySettings != null)
                 {
-                    int settingsMonth = fySettings.Month;
-                    int settingsDay = fySettings.Day;
+                    settingsMonth = fySettings.Month;
+                    settingsDay = fySettings.Day;
 
                     if (currentMonth < settingsMonth)
                     {
@@ -481,10 +481,11 @@ namespace AIMS.Services
                 var financialYearExists = unitWork.FinancialYearRepository.GetOne(y => y.FinancialYear == currentYear);
                 if (financialYearExists == null)
                 {
+                    string label = (fySettings.Month == 1 && fySettings.Day == 1) ? "FY " + currentYear : "FY " + (currentYear) + "/" + (currentYear + 1);
                     unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                     {
                         FinancialYear = currentYear,
-                        Label = "FY " + (currentYear) + "/" + (currentYear + 1)
+                        Label = label
                     });
                     unitWork.Save();
                 }
@@ -1896,7 +1897,7 @@ namespace AIMS.Services
                         using (var transaction = context.Database.BeginTransaction())
                         {
                             twentySixteenFinancialYear = (from fy in financialYears
-                                                          where fy.FinancialYear == (currentYear - 3)
+                                                          where fy.FinancialYear == (2016)
                                                           select fy).FirstOrDefault();
                             if (twentySixteenFinancialYear == null)
                             {
@@ -1906,7 +1907,7 @@ namespace AIMS.Services
                             }
 
                             twentySeventeenFinancialYear = (from fy in financialYears
-                                                            where fy.FinancialYear == (currentYear - 2)
+                                                            where fy.FinancialYear == (2017)
                                                             select fy).FirstOrDefault();
 
                             if (twentySeventeenFinancialYear == null)
@@ -1917,7 +1918,7 @@ namespace AIMS.Services
                             }
 
                             twentyEighteenFinancialYear = (from fy in financialYears
-                                                           where fy.FinancialYear == (currentYear - 1)
+                                                           where fy.FinancialYear == (2018)
                                                            select fy).FirstOrDefault();
                             if (twentyEighteenFinancialYear == null)
                             {
@@ -1927,7 +1928,7 @@ namespace AIMS.Services
                             }
 
                             twentyNineteenFinancialYear = (from fy in financialYears
-                                                           where fy.FinancialYear == (currentYear)
+                                                           where fy.FinancialYear == (2019)
                                                            select fy).FirstOrDefault();
                             if (twentyNineteenFinancialYear == null)
                             {
@@ -1937,7 +1938,7 @@ namespace AIMS.Services
                             }
 
                             twentyTwentyFinancialYear = (from fy in financialYears
-                                                         where fy.FinancialYear == (currentYear + 1)
+                                                         where fy.FinancialYear == (2020)
                                                          select fy).FirstOrDefault();
 
                             if (twentyTwentyFinancialYear == null)
@@ -1948,7 +1949,7 @@ namespace AIMS.Services
                             }
 
                             twentyOneFinancialYear = (from fy in financialYears
-                                                      where fy.FinancialYear == (currentYear + 2)
+                                                      where fy.FinancialYear == (2021)
                                                       select fy).FirstOrDefault();
 
                             if (twentyOneFinancialYear == null)
@@ -1959,7 +1960,7 @@ namespace AIMS.Services
                             }
 
                             twentyTwoFinancialYear = (from fy in financialYears
-                                                      where fy.FinancialYear == (currentYear + 3)
+                                                      where fy.FinancialYear == (2022)
                                                       select fy).FirstOrDefault();
 
                             if (twentyTwoFinancialYear == null)
@@ -1970,7 +1971,7 @@ namespace AIMS.Services
                             }
 
                             twentyThreeFinancialYear = (from fy in financialYears
-                                                        where fy.FinancialYear == (currentYear + 4)
+                                                        where fy.FinancialYear == (2023)
                                                         select fy).FirstOrDefault();
 
                             if (twentyThreeFinancialYear == null)
@@ -1981,7 +1982,7 @@ namespace AIMS.Services
                             }
 
                             twentyFourFinancialYear = (from fy in financialYears
-                                                       where fy.FinancialYear == (currentYear + 5)
+                                                       where fy.FinancialYear == (2024)
                                                        select fy).FirstOrDefault();
 
                             if (twentyFourFinancialYear == null)
