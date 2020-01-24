@@ -432,6 +432,17 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [HttpGet("AdjustDisbursementsForProjects")]
+        public async Task<IActionResult> AdjustDisbursementsForProjects()
+        {
+            var response = await projectService.AdjustDisbursementsForProjectsAsync();
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpGet("GetActiveProjectsCount")]
         public IActionResult GetActiveProjectsCount()
         {

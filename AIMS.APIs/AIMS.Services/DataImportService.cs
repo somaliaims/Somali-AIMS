@@ -188,7 +188,7 @@ namespace AIMS.Services
 
                 try
                 {
-                    for (int i = (sheet.FirstRowNum + 1); i <= sheet.LastRowNum; i++)
+                    for (int i = (sheet.FirstRowNum + 1); i <= 50; i++)
                     {
                         IRow row = sheet.GetRow(i);
                         if (row == null)

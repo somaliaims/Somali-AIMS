@@ -1705,14 +1705,19 @@ namespace AIMS.Services
                                 if (plannedDisbursement == null)
                                 {
                                     var fYear = unitWork.FinancialYearRepository.GetOne(fy => fy.FinancialYear == currentActiveYear);
-
+                                    decimal totalDisbursements = unitWork.ProjectDisbursementsRepository.GetProjection(d => d.ProjectId == project.Id, d => d.Amount).Sum();
+                                    decimal remainingAmount = Math.Round(project.ProjectValue - totalDisbursements, MidpointRounding.AwayFromZero);
+                                    if (remainingAmount < 0)
+                                    {
+                                        remainingAmount = 0;
+                                    }
                                     if (fYear != null)
                                     {
                                         unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                         {
                                             Year = fYear,
                                             Project = project,
-                                            Amount = 0,
+                                            Amount = remainingAmount,
                                             DisbursementType = DisbursementTypes.Planned
                                         });
                                         unitWork.Save();
