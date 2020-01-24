@@ -154,6 +154,7 @@ namespace AIMS.Services
                                     project.StartingFinancialYear = startingFinancialYear;
                                     project.EndingFinancialYear = endingFinancialYear;
                                     unitWork.ProjectRepository.Update(project);
+                                    unitWork.Save();
                                 }
                                 else
                                 {
@@ -205,6 +206,7 @@ namespace AIMS.Services
                                     project.StartingFinancialYear = startingFinancialYear;
                                     project.EndingFinancialYear = endingFinancialYear;
                                     unitWork.ProjectRepository.Update(project);
+                                    unitWork.Save();
                                 }
                             }
 
@@ -249,9 +251,18 @@ namespace AIMS.Services
                                                              (disbursement.Year.FinancialYear != currentActiveYear &&
                                                                 disbursement.DisbursementType == DisbursementTypes.Actual)
                                                              select disbursement);
-                                bool isDeleted = false;
+                                bool isDeleted = false; 
+                                decimal deletedActualDisbursements = 0, deletedPlannedDisbursements = 0;
                                 foreach (var disbursement in disbursementsToDelete)
                                 {
+                                    if (disbursement.DisbursementType == DisbursementTypes.Actual)
+                                    {
+                                        deletedActualDisbursements += disbursement.Amount;
+                                    }
+                                    else if (disbursement.DisbursementType == DisbursementTypes.Planned)
+                                    {
+                                        deletedPlannedDisbursements += disbursement.Amount;
+                                    }
                                     unitWork.ProjectDisbursementsRepository.Delete(disbursement);
                                     isDeleted = true;
                                 }
@@ -290,24 +301,35 @@ namespace AIMS.Services
                                         Project = project,
                                         Year = currentFinancialYear,
                                         Currency = project.ProjectCurrency,
-                                        Amount = 0,
+                                        Amount = deletedActualDisbursements,
                                         ExchangeRate = project.ExchangeRate,
                                         DisbursementType = DisbursementTypes.Actual
                                     });
                                     unitWork.Save();
                                 }
+                                else
+                                {
+                                    actualDisbursementCurrentYear.Amount += deletedActualDisbursements;
+                                    unitWork.ProjectDisbursementsRepository.Update(actualDisbursementCurrentYear);
+                                    unitWork.Save();
+                                }
                                 if (plannedDisbursementCurrentYear == null)
                                 {
-                                   
                                     plannedDisbursementCurrentYear = unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
                                     {
                                         Project = project,
                                         Year = currentFinancialYear,
                                         Currency = project.ProjectCurrency,
-                                        Amount = 0,
+                                        Amount = deletedPlannedDisbursements,
                                         ExchangeRate = project.ExchangeRate,
                                         DisbursementType = DisbursementTypes.Planned
                                     });
+                                    unitWork.Save();
+                                }
+                                else
+                                {
+                                    plannedDisbursementCurrentYear.Amount += deletedPlannedDisbursements;
+                                    unitWork.ProjectDisbursementsRepository.Update(plannedDisbursementCurrentYear);
                                     unitWork.Save();
                                 }
                             }
