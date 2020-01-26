@@ -2076,7 +2076,7 @@ namespace AIMS.Services
                             if (twentyFourFinancialYear == null)
                             {
                                 string label = (isCalendarYear) ? "FY 2024" : "FY 2024/2025";
-                                twentySixteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                twentyFourFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                                 {
                                     FinancialYear = 2024,
                                     Label = label

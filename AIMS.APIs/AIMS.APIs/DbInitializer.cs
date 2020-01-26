@@ -396,12 +396,15 @@ namespace AIMS.APIs
 
                 if (context.FinancialYears.Count() == 0)
                 {
-                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2015, Label = "FY 2014/2015" });
-                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2016, Label = "FY 2015/2016" });
-                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2017, Label = "FY 2016/2017" });
-                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2018, Label = "FY 2017/2018" });
-                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2019, Label = "FY 2018/2019" });
-                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2020, Label = "FY 2019/2020" });
+                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2016, Label = "FY 2016" });
+                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2017, Label = "FY 2017" });
+                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2018, Label = "FY 2018" });
+                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2019, Label = "FY 2019" });
+                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2020, Label = "FY 2020" });
+                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2021, Label = "FY 2021" });
+                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2022, Label = "FY 2022" });
+                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2023, Label = "FY 2023" });
+                    context.FinancialYears.Add(new EFFinancialYears() { FinancialYear = 2024, Label = "FY 2024" });
 
                     context.SaveChanges();
                 }
