@@ -104,7 +104,8 @@ namespace AIMS.APIs
                         IsSourceType = false, 
                         IATICode = 0 
                     });
-                    context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Default" });
+                    context.SaveChanges();
+                    //context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Default" });
 
                     var inclusivePolitics = context.Sectors.Add(new EFSector() 
                     { 
@@ -113,6 +114,7 @@ namespace AIMS.APIs
                         SectorName = "Pillar 1: Inclusive Politics", 
                         TimeStamp = DateTime.Now 
                     });
+                    
                     context.Sectors.Add(new EFSector() 
                     { 
                         ParentSector = inclusivePolitics.Entity, 
