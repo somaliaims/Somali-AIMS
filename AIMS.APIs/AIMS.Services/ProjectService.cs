@@ -1883,14 +1883,41 @@ namespace AIMS.Services
                     return response;
                 }
 
-                int currentYear = DateTime.Now.Year;
+                var defaultSectorType = unitWork.SectorTypesRepository.GetOne(t => t.IsPrimary == true);
+                if (defaultSectorType == null)
+                {
+                   defaultSectorType = unitWork.SectorTypesRepository.Insert(new EFSectorTypes()
+                    {
+                        TypeName = "Somali Sectors",
+                        IsPrimary = true,
+                        IsSourceType = false,
+                        IATICode = 0
+                    });
+                }
+                int currentYear = DateTime.Now.Year, fyMonth = 1, fyDay = 1;
                 var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(p => p.Id != 0).ToList();
                 var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0).ToList();
-                var ndpSectors = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == 1).ToList();
+                var ndpSectors = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == defaultSectorType.Id).ToList();
                 var locations = unitWork.LocationRepository.GetManyQueryable(l => l.Id != 0).ToList();
                 var fundingType = unitWork.FundingTypeRepository.GetOne(f => f.Id == 1);
                 var organizationType = unitWork.OrganizationTypesRepository.GetOne(o => o.Id == 1);
                 var markers = unitWork.MarkerRepository.GetManyQueryable(m => m.Id != 0);
+                var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
+                if (fySettings == null)
+                {
+                    fySettings = unitWork.FinancialYearSettingsRepository.Insert(new EFFinancialYearSettings()
+                    {
+                        Day = 1,
+                        Month = 1
+                    });
+                    unitWork.Save();
+                }
+                else
+                {
+                    fyMonth = fySettings.Month;
+                    fyDay = fySettings.Day;
+                }
+                bool isCalendarYear = (fyMonth == 1 && fyDay == 1) ? true : false;
 
                 List<EFSector> ndpSectorsList = new List<EFSector>();
                 List<EFLocation> locationsList = new List<EFLocation>();
@@ -1922,7 +1949,12 @@ namespace AIMS.Services
                                                           select fy).FirstOrDefault();
                             if (twentySixteenFinancialYear == null)
                             {
-                                twentySixteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 3), Label = "FY " + (currentYear - 4) + "/" + (currentYear - 3) });
+                                string label = (isCalendarYear) ? "FY 2016" : "FY 2016/2017";
+                                twentySixteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() 
+                                { 
+                                    FinancialYear = 2016, 
+                                    Label = label 
+                                });
                                 unitWork.Save();
                                 financialYears.Add(twentySixteenFinancialYear);
                             }
@@ -1933,7 +1965,12 @@ namespace AIMS.Services
 
                             if (twentySeventeenFinancialYear == null)
                             {
-                                twentySeventeenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 2), Label = "FY " + (currentYear - 3) + "/" + (currentYear - 2) });
+                                string label = (isCalendarYear) ? "FY 2017" : "FY 2017/2018";
+                                twentySeventeenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                {
+                                    FinancialYear = 2017,
+                                    Label = label
+                                });
                                 unitWork.Save();
                                 financialYears.Add(twentySeventeenFinancialYear);
                             }
@@ -1943,7 +1980,12 @@ namespace AIMS.Services
                                                            select fy).FirstOrDefault();
                             if (twentyEighteenFinancialYear == null)
                             {
-                                twentyEighteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear - 1), Label = "FY " + (currentYear - 2) + "/" + (currentYear - 1) });
+                                string label = (isCalendarYear) ? "FY 2018" : "FY 2018/2019";
+                                twentyEighteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                {
+                                    FinancialYear = 2018,
+                                    Label = label
+                                });
                                 unitWork.Save();
                                 financialYears.Add(twentyEighteenFinancialYear);
                             }
@@ -1953,7 +1995,12 @@ namespace AIMS.Services
                                                            select fy).FirstOrDefault();
                             if (twentyNineteenFinancialYear == null)
                             {
-                                twentyNineteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear), Label = "FY " + (currentYear - 1) + "/" + (currentYear) });
+                                string label = (isCalendarYear) ? "FY 2019" : "FY 2019/2020";
+                                twentyNineteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                {
+                                    FinancialYear = 2019,
+                                    Label = label
+                                });
                                 unitWork.Save();
                                 financialYears.Add(twentyNineteenFinancialYear);
                             }
@@ -1964,7 +2011,12 @@ namespace AIMS.Services
 
                             if (twentyTwentyFinancialYear == null)
                             {
-                                twentyTwentyFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 1), Label = "FY " + (currentYear) + "/" + (currentYear + 1) });
+                                string label = (isCalendarYear) ? "FY 2020" : "FY 2020/2021";
+                                twentyTwentyFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                {
+                                    FinancialYear = 2020,
+                                    Label = label
+                                });
                                 unitWork.Save();
                                 financialYears.Add(twentyTwentyFinancialYear);
                             }
@@ -1975,7 +2027,12 @@ namespace AIMS.Services
 
                             if (twentyOneFinancialYear == null)
                             {
-                                twentyOneFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 2), Label = "FY " + (currentYear + 1) + "/" + (currentYear + 2) });
+                                string label = (isCalendarYear) ? "FY 2021" : "FY 2021/2022";
+                                twentyOneFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                {
+                                    FinancialYear = 2021,
+                                    Label = label
+                                });
                                 unitWork.Save();
                                 financialYears.Add(twentyOneFinancialYear);
                             }
@@ -1986,7 +2043,12 @@ namespace AIMS.Services
 
                             if (twentyTwoFinancialYear == null)
                             {
-                                twentyTwoFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 3), Label = "FY " + (currentYear + 2) + "/" + (currentYear + 3) });
+                                string label = (isCalendarYear) ? "FY 2022" : "FY 2022/2023";
+                                twentyTwoFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                {
+                                    FinancialYear = 2022,
+                                    Label = label
+                                });
                                 unitWork.Save();
                                 financialYears.Add(twentyTwoFinancialYear);
                             }
@@ -1997,7 +2059,12 @@ namespace AIMS.Services
 
                             if (twentyThreeFinancialYear == null)
                             {
-                                twentyThreeFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 4), Label = "FY " + (currentYear + 3) + "/" + (currentYear + 4) });
+                                string label = (isCalendarYear) ? "FY 2023" : "FY 2023/2024";
+                                twentyThreeFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                {
+                                    FinancialYear = 2023,
+                                    Label = label
+                                });
                                 unitWork.Save();
                                 financialYears.Add(twentyThreeFinancialYear);
                             }
@@ -2008,7 +2075,12 @@ namespace AIMS.Services
 
                             if (twentyFourFinancialYear == null)
                             {
-                                twentyFourFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears() { FinancialYear = (currentYear + 5), Label = "FY " + (currentYear + 4) + "/" + (currentYear + 5) });
+                                string label = (isCalendarYear) ? "FY 2024" : "FY 2024/2025";
+                                twentySixteenFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                {
+                                    FinancialYear = 2024,
+                                    Label = label
+                                });
                                 unitWork.Save();
                                 financialYears.Add(twentyFourFinancialYear);
                             }

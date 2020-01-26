@@ -71,6 +71,16 @@ namespace AIMS.APIs
                     context.IATISettings.Add(new EFIATISettings() { BaseUrl = "http://datastore.iatistandard.org/api/1/access/activity.xml?recipient-country=SO&stream=true" });
                 }
 
+                if (context.FinancialYearSettings.Count() == 0)
+                {
+                    context.FinancialYearSettings.Add(new EFFinancialYearSettings()
+                    {
+                        Day = 1,
+                        Month = 1
+                    });
+                    context.SaveChanges();
+                }
+
                 if (context.FundingTypes.Count() == 0)
                 {
                     context.FundingTypes.Add(new EFFundingTypes() { FundingType = "Grant" });
