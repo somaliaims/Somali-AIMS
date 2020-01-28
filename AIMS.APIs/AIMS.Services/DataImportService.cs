@@ -172,7 +172,7 @@ namespace AIMS.Services
                     twentySixteenYearIndex = 11, twentySeventeenYearIndex = 12, twentyEighteenYearIndex = 13, twentyNineteenYearIndex = 14, 
                     twentyTwentyYearIndex = 15, twentyOneYearIndex = 16, twentyTwoYearIndex = 17,
                     twentyThreeYearIndex = 18, twentyFourYearIndex = 19,
-                    locationLowerIndex = 22, locationUpperIndex = 30, markerLowerIndex = 32,
+                    locationLowerIndex = 21, locationUpperIndex = 29, markerLowerIndex = 32,
                     markerUpperIndex = 39, documentLinkIndex = 41, documentDescriptionIndex = 42;
 
                 file.CopyTo(stream);

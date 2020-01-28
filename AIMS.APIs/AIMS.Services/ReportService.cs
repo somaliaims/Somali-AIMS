@@ -778,6 +778,25 @@ namespace AIMS.Services
                         }
                     }
 
+                    if (model.LocationIds.Count == 0)
+                    {
+                        var currentLocationIds = (from l in projectLocations
+                                                  select l.LocationId);
+                        var locationsWithNoProjects = unitWork.LocationRepository.GetManyQueryable(l => !currentLocationIds.Contains(l.Id));
+                        if (locationsWithNoProjects.Any())
+                        {
+                            foreach (var location in locationsWithNoProjects)
+                            {
+                                locationsByProjects.Add(new LocationProjects()
+                                {
+                                    LocationId = location.Id,
+                                    Location = location.Location,
+                                    Projects = new List<LocationProject>()
+                                });
+                            }
+                        }
+                    }
+
                     locationsByProjects = (from loc in locationsByProjects
                                            orderby loc.Location
                                            select loc).ToList();
@@ -1324,9 +1343,9 @@ namespace AIMS.Services
                         projectsList.Add(profileView);
                     }
 
-                        decimal totalFunding = 0, totalDisbursements = 0, actualDisbursements = 0, 
-                        plannedDisbursements = 0, totalSectorDisbursements = 0, totalSectorActualDisbursements = 0,
-                        totalSectorPlannedDisbursements = 0;
+                    decimal totalFunding = 0, totalDisbursements = 0, actualDisbursements = 0,
+                    plannedDisbursements = 0, totalSectorDisbursements = 0, totalSectorActualDisbursements = 0,
+                    totalSectorPlannedDisbursements = 0;
 
                     List<ProjectsBySector> sectorProjectsList = new List<ProjectsBySector>();
                     List<ProjectViewForSector> projectsListForSector = new List<ProjectViewForSector>();
@@ -1413,6 +1432,7 @@ namespace AIMS.Services
                     DateTime dated = new DateTime();
                     int year = dated.Year;
                     int month = dated.Month;
+                    int defaultSectorTypeId = 0;
                     IQueryable<EFProject> projectProfileList = null;
                     IQueryable<EFProjectSectors> projectSectors = null;
                     List<int> locationProjectIds = new List<int>();
@@ -1502,7 +1522,6 @@ namespace AIMS.Services
                     }
                     else
                     {
-                        int defaultSectorTypeId = 0;
                         var defaultSectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsPrimary == true);
                         if (defaultSectorType != null)
                         {
@@ -1594,6 +1613,28 @@ namespace AIMS.Services
                                                 FundsPercentage = secProject.FundsPercentage
                                             }).ToList<SectorProject>()
                             });
+                        }
+                    }
+
+                    if (model.SectorIds.Count == 0)
+                    {
+                        var projectSectorIds = (from s in sectorsByProjects
+                                                   select s.SectorId);
+                        var sectorsWithoutProjects = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == defaultSectorTypeId &&
+                            !projectSectorIds.Contains(s.Id) && s.ParentSectorId != null);
+
+                        if (sectorsWithoutProjects.Any())
+                        {
+                            foreach(var sec in sectorsWithoutProjects)
+                            {
+                                sectorsByProjects.Add(new SectorWithProjects()
+                                {
+                                    SectorId = sec.Id,
+                                    ParentSectorId = (sec.ParentSectorId == null) ? 0 : (int)sec.ParentSectorId,
+                                    Sector = sec.SectorName,
+                                    Projects = new List<SectorProject>()
+                                });
+                            }
                         }
                     }
 

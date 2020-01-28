@@ -3341,36 +3341,6 @@ namespace AIMS.Services
                     int endingYear = (from y in model.YearlyDisbursements
                                       select y.Year).Max();
 
-                    /*int fyMonth = 1, fyDay = 1, currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day,
-                        endingMonth = project.EndDate.Month, endingDay = project.EndDate.Day;
-                    var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
-                    if (fySettings != null)
-                    {
-                        fyMonth = fySettings.Month;
-                        fyDay = fySettings.Day;
-                    }
-
-                    if (fyMonth > 1)
-                    {
-                        if (currentMonth < fyMonth)
-                        {
-                            startingYear = (startingYear - 1);
-                        }
-                        else if (currentMonth == fyMonth && fyDay < currentDay)
-                        {
-                            startingYear = (startingYear - 1);
-                        }
-
-                        if (endingMonth > fyMonth)
-                        {
-                            endingYear = (endingYear + 1);
-                        }
-                        else if (endingMonth == fyMonth && endingDay > fyDay)
-                        {
-                            endingYear = (endingYear + 1);
-                        }
-                    }*/
-
                     if (startingYear < project.StartingFinancialYear.FinancialYear)
                     {
                         mHelper = new MessageHelper();
@@ -3387,9 +3357,9 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    decimal projectValue = (project.ProjectValue * project.ExchangeRate);
+                    decimal projectValue = (project.ProjectValue);
                     decimal totalDisbursements = (from d in model.YearlyDisbursements
-                                                  select (d.Amount * model.ExchangeRate)).Sum();
+                                                  select (d.Amount)).Sum();
 
                     if (totalDisbursements > projectValue)
                     {
@@ -3462,8 +3432,8 @@ namespace AIMS.Services
                                 if (isDisbursementInDB != null)
                                 {
                                     isDisbursementInDB.Amount = disbursement.Amount;
-                                    isDisbursementInDB.Currency = model.Currency;
-                                    isDisbursementInDB.ExchangeRate = model.ExchangeRate;
+                                    isDisbursementInDB.Currency = project.ProjectCurrency;
+                                    isDisbursementInDB.ExchangeRate = project.ExchangeRate;
                                     unitWork.ProjectDisbursementsRepository.Update(isDisbursementInDB);
                                     await unitWork.SaveAsync();
                                 }
@@ -3476,8 +3446,8 @@ namespace AIMS.Services
                                             Project = project,
                                             Year = financialYear,
                                             Amount = disbursement.Amount,
-                                            Currency = model.Currency,
-                                            ExchangeRate = model.ExchangeRate,
+                                            Currency = project.ProjectCurrency,
+                                            ExchangeRate = project.ExchangeRate,
                                             DisbursementType = disbursement.DisbursementType
                                         });
                                         newDisbursementsList.Add(newDisbursement);
