@@ -2092,6 +2092,18 @@ namespace AIMS.Models
         public string FilePath { get; set; } = null;
     }
 
+    public class OrganizationMergeRequests
+    {
+        public int Id { get; set; }
+        public List<OrganizationsToMerge> Organizations { get; set; }
+    }
+
+    public class OrganizationsToMerge
+    {
+        public int Id { get; set; }
+        public string OrganizationName { get; set; }
+    }
+
     public class ProjectSectorHelp
     {
         public string SectorType { get; set; }

@@ -359,6 +359,25 @@ namespace AIMS.Models
         public bool IsApproved { get; set; }
     }
 
+    public class EFOrganizationMergeRequests
+    {
+        [Key]
+        public int Id { get; set; }
+        public bool IsApproved { get; set; }
+        public DateTime Dated { get; set; }
+        public ICollection<EFOrganizationsToMerge> Organizations { get; set; }
+    }
+
+    public class EFOrganizationsToMerge
+    {
+        [ForeignKey("Request")]
+        public int RequestId { get; set; }
+        public EFOrganizationMergeRequests Request { get; set; }
+        [ForeignKey("Organization")]
+        public int OrganizationId { get; set; }
+        public EFOrganization Organization { get; set; }
+    }
+
     public class EFProjectImplementers
     {
         [ForeignKey("Implementer")]

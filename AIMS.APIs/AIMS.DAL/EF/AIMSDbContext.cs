@@ -68,6 +68,9 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFProjectMembershipRequests>()
                 .HasKey(m => new { m.ProjectId, m.UserId });
 
+            modelBuilder.Entity<EFOrganizationsToMerge>()
+                .HasKey(o => new { o.RequestId, o.OrganizationId });
+
             modelBuilder.Entity<EFProjectDeletionRequests>()
                 .HasKey(d => new { d.ProjectId, d.UserId });
 
@@ -124,6 +127,8 @@ namespace AIMS.DAL.EF
         public DbSet<EFHelp> Help { get; set; }
         public DbSet<EFHomePageSettings> HomePageSettings { get; set; }
         public DbSet<EFDropboxSettings> DropboxSettings { get; set; }
+        public DbSet<EFOrganizationMergeRequests> OrganizationMergeRequests { get; set; }
+        public DbSet<EFOrganizationsToMerge> OrganizationsToMerge { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime

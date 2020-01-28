@@ -55,6 +55,8 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFHelp> helpRepository;
         private GenericRepository<EFHomePageSettings> homePageRepository;
         private GenericRepository<EFDropboxSettings> dropboxSettingsRepository;
+        private GenericRepository<EFOrganizationMergeRequests> organizationMergeRequestsRepository;
+        private GenericRepository<EFOrganizationsToMerge> organizationsToMergeRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -79,6 +81,26 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.dropboxSettingsRepository == null)
                     this.dropboxSettingsRepository = new GenericRepository<EFDropboxSettings>(context);
                 return this.dropboxSettingsRepository;
+            }
+        }
+
+        public GenericRepository<EFOrganizationMergeRequests> OrganizationMergeRequestsRepository
+        {
+            get
+            {
+                if (this.organizationMergeRequestsRepository == null)
+                    this.organizationMergeRequestsRepository = new GenericRepository<EFOrganizationMergeRequests>(context);
+                return this.organizationMergeRequestsRepository;
+            }
+        }
+
+        public GenericRepository<EFOrganizationsToMerge> OrganizationsToMergeRepository
+        {
+            get
+            {
+                if (this.organizationsToMergeRepository == null)
+                    this.organizationsToMergeRepository = new GenericRepository<EFOrganizationsToMerge>(context);
+                return this.organizationsToMergeRepository;
             }
         }
 

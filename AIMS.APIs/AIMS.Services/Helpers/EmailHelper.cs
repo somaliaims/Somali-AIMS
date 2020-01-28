@@ -156,14 +156,16 @@ namespace AIMS.Services.Helpers
         private string GetUserRegistrationMessageForAdmin(string organizationName, string message = null, string footerMessage = null)
         {
             List<string> messageList = new List<string>();
-            messageList.Add("<h3>Dear user,</h3><p>New User Registration for " + organizationName + "</p>");
+            messageList.Add("<h3>Dear user,</h3>");
             if (message != null)
             {
                 messageList.Add("<p>" + message + "</p>");
+                messageList.Add("<p>Organization name " + organizationName + "</p>");
             }
             else
             {
                 messageList.Add("<p>A new user has just submitted the request for registration.</p>");
+                messageList.Add("<p>Organization name " + organizationName + "</p>");
                 messageList.Add("<p>Please open your notification area using AIMS, and approve/disapprove the request.</p>");
             }
             footerMessage = (footerMessage != null) ? footerMessage : FOOTER_LINE;
