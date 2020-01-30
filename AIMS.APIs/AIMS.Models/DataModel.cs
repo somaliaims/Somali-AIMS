@@ -77,7 +77,9 @@ namespace AIMS.Models
         ProjectDeletionApproved = 14,
         ProjectDeletionCancelled = 15,
         ResetPassword = 16,
-        NewIATIOrganization = 17
+        NewIATIOrganization = 17,
+        MergeOrganizationRequest = 18,
+        MergeOrganizationRejected = 19,
     }
 
     public enum HelpForEntity
@@ -365,6 +367,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public bool IsApproved { get; set; }
         public DateTime Dated { get; set; }
+        public string OrganizationIdsJson { get; set; }
         public ICollection<EFOrganizationsToMerge> Organizations { get; set; }
     }
 

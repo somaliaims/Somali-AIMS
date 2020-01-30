@@ -211,6 +211,13 @@ namespace AIMS.Services.Helpers
         string NewIATISectorsAddedMessage(string sectorCount);
 
         /// <summary>
+        /// Formatted message for merge organizations request
+        /// </summary>
+        /// <param name="organizations"></param>
+        /// <returns></returns>
+        string OrganizationsMergeRequest(List<string> organizations);
+
+        /// <summary>
         /// Formats merged organizations message
         /// </summary>
         /// <param name="organizations"></param>
@@ -664,6 +671,18 @@ namespace AIMS.Services.Helpers
         public string GetCannotBeDeleted(string entity)
         {
             return ("Delete operation is not allowed for " + entity);
+        }
+
+        public string OrganizationsMergeRequest(List<string> organizations)
+        {
+            List<string> formattedMessageList = new List<string>();
+            formattedMessageList.Add("<p>Requested organizations for merge: </p><ul>");
+            foreach (var org in organizations)
+            {
+                formattedMessageList.Add("<li>" + org + "</li>");
+            }
+            formattedMessageList.Add("</ul>");
+            return (String.Join("", formattedMessageList));
         }
 
         public string OrganizationsMergedMessage(List<string> organizations, string newOrganization, string message, string footerMessage)
