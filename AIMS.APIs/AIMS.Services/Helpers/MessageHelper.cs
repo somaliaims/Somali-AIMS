@@ -370,6 +370,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string UnattributedCannotBeDeleted(string entity);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string UnAuthorizedOrganizationsMerge();
     }
 
     public class MessageHelper : IMessageHelper
@@ -411,6 +417,7 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_FINANCIAL_YEAR = "Financial year you requested is not allowed.";
         private readonly string INVALID_STARTING_FINANCIAL_YEAR = "The project you provided has a different starting financial year than provided for disbursements. Please change the financial year for project and try again";
         private readonly string INVALID_ENDING_FINANCIAL_YEAR = "The project you provided has a different ending financial year than provided for disbursements. Please change the financial year for project and try again";
+        private readonly string UNAUTHORIZED_ORGANIZATIONS_MERGE = "You are not not authorized to approve/reject this request for organizations merge";
 
         public string GetNotFound(string entity)
         {
@@ -460,6 +467,11 @@ namespace AIMS.Services.Helpers
         public string PrimarySectorTypeMissing()
         {
             return (PRIMARY_SECTOR_TYPE_MISSING);
+        }
+
+        public string UnAuthorizedOrganizationsMerge()
+        {
+            return (UNAUTHORIZED_ORGANIZATIONS_MERGE);
         }
 
         public string UnattributedCannotBeDeleted(string entity)

@@ -27,6 +27,20 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <returns></returns>
         Task<ActionResponse> AddAsync(MergeOrganizationModel model);
+
+        /// <summary>
+        /// Approves merge request for organizations
+        /// </summary>
+        /// <returns></returns>
+        ActionResponse ApproveMergeRequest(int requestId, int userOrgId);
+
+        /// <summary>
+        /// Rejects merge request for organizations
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <param name="userOrgId"></param>
+        /// <returns></returns>
+        ActionResponse RejectRequest(int requestId, int userOrgId, string email);
     }
 
 
@@ -157,7 +171,7 @@ namespace AIMS.Services
                 if (userData != null)
                 {
                     organizationId = userData.OrganizationId;
-                    var requests = unitWork.OrganizationsToMergeRepository.GetWithInclude(r => r.OrganizationId != 0, new string[] { "Organization" });
+                    var requests = unitWork.OrganizationsToMergeRepository.GetWithInclude(r => r.OrganizationId != 0 && r.Request.IsApproved == false, new string[] { "Organization", "Request" });
                     var userRequests = (from req in requests
                                         where req.OrganizationId == organizationId
                                         select req.RequestId);
@@ -186,6 +200,119 @@ namespace AIMS.Services
                     }
                 }
                 return mergeRequests;
+            }
+        }
+
+        public ActionResponse ApproveMergeRequest(int requestId, int userOrgId)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                var request = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Id == requestId && r.IsApproved == false, new string[] { "Organizations" }).FirstOrDefault();
+                if (request == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Organization merge request");
+                    response.Success = false;
+                    return response;
+                }
+
+                var orgId = (from o in request.Organizations
+                              where o.OrganizationId == userOrgId
+                              select o.OrganizationId).FirstOrDefault();
+
+                if (orgId == 0)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.UnAuthorizedOrganizationsMerge();
+                    response.Success = false;
+                    return response;
+                }
+
+                request.IsApproved = true;
+                unitWork.OrganizationMergeRequestsRepository.Update(request);
+                unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse RejectRequest(int requestId, int userOrgId, string userEmail)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                var request = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Id == requestId && r.IsApproved == false, new string[] { "Organizations" }).FirstOrDefault();
+                if (request == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Organization merge request");
+                    response.Success = false;
+                    return response;
+                }
+
+                var orgId = (from o in request.Organizations
+                             where o.OrganizationId == userOrgId
+                             select o.OrganizationId).FirstOrDefault();
+
+                if (orgId == 0)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.UnAuthorizedOrganizationsMerge();
+                    response.Success = false;
+                    return response;
+                }
+
+                var organizationNames = (from o in request.Organizations
+                                         select o.Organization.OrganizationName).ToList();
+
+                var orgIds = (from o in request.Organizations
+                              select o.OrganizationId);
+
+                string subject = "", message = "", footerMessage = "";
+                var users = unitWork.UserRepository.GetManyQueryable(u => orgIds.Contains(u.OrganizationId));
+                if (users != null)
+                {
+                    List<EmailAddress> emailsList = (from u in users
+                                                     select new EmailAddress()
+                                                     {
+                                                         Email = u.Email
+                                                     }).ToList();
+
+                    if (emailsList.Count > 0)
+                    {
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.MergeOrganizationRejected);
+                        if (emailMessage != null)
+                        {
+                            subject = emailMessage.Subject;
+                            message = emailMessage.Message;
+                            footerMessage = emailMessage.FooterMessage;
+                        }
+
+                        mHelper = new MessageHelper();
+                        message = "<p>Request rejected by: " + userEmail + "</p>";
+                        message += mHelper.OrganizationsMergeRequest(organizationNames);
+                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                        var smtpSettings = smtpService.GetPrivate();
+                        SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                        if (smtpSettings != null)
+                        {
+                            smtpSettingsModel.Host = smtpSettings.Host;
+                            smtpSettingsModel.Port = smtpSettings.Port;
+                            smtpSettingsModel.Username = smtpSettings.Username;
+                            smtpSettingsModel.Password = smtpSettings.Password;
+                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                            smtpSettingsModel.SenderName = smtpSettings.SenderName;
+                        }
+                        IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
+                        emailHelper.SendEmailToUsers(emailsList, subject, "", message, footerMessage);
+                    }
+                }
+
+                unitWork.OrganizationMergeRequestsRepository.Delete(request);
+                unitWork.Save();
+                return response;
             }
         }
     }
