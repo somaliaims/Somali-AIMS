@@ -1507,7 +1507,7 @@ namespace AIMS.Services
                     {
                         locationProjectIds = unitWork.ProjectLocationsRepository.GetProjection(p => p.LocationId == model.LocationId, p => p.ProjectId).ToList();
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => locationProjectIds.Contains(p.Id),
-                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         if (locationProjectIds.Count > 0)
                         {
                             projectsInLocation = unitWork.ProjectLocationsRepository.GetManyQueryable(l => l.LocationId == model.LocationId && locationProjectIds.Contains(l.ProjectId));
@@ -1519,7 +1519,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
-                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -1536,20 +1536,20 @@ namespace AIMS.Services
                             if (model.StartingYear > 0 && model.EndingYear <= 0)
                             {
                                 projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartingFinancialYear.FinancialYear >= model.StartingYear || (p.EndingFinancialYear.FinancialYear >= model.StartingYear))),
-                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                             }
 
                             else if(model.EndingYear > 0 && model.StartingYear <= 0)
                             {
                                 projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.EndingFinancialYear.FinancialYear <= model.EndingYear || p.StartingFinancialYear.FinancialYear <= model.EndingYear)),
-                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                             }
 
                             else if (model.StartingYear > 0 && model.EndingYear > 0)
                             {
                                 projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.StartingFinancialYear.FinancialYear <= model.EndingYear) || (p.StartingFinancialYear.FinancialYear <= model.StartingYear && p.EndingFinancialYear.FinancialYear >= model.StartingYear)
                                                         || (p.EndingFinancialYear.FinancialYear <= model.EndingYear && p.EndingFinancialYear.FinancialYear >= model.StartingYear)),
-                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                             }
                         }
                         else
@@ -1592,7 +1592,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
-                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -1612,7 +1612,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
-                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -1640,7 +1640,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
-                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -1653,7 +1653,7 @@ namespace AIMS.Services
                     if (projectProfileList == null)
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndingFinancialYear.FinancialYear >= year),
-                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     projectSectors = from pSector in projectSectors

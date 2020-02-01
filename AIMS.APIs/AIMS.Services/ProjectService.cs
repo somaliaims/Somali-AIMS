@@ -269,6 +269,13 @@ namespace AIMS.Services
         Task<IEnumerable<ProjectDisbursementView>> AdjustProjectDisbursementsAsync(int id);
 
         /// <summary>
+        /// Creates project disbursements after project creation
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<IEnumerable<ProjectDisbursementView>> CreateProjectDisbursementsAsync(int id);
+
+        /// <summary>
         /// Gets project documents
         /// </summary>
         /// <param name="id"></param>
@@ -1178,6 +1185,136 @@ namespace AIMS.Services
             }
         }
 
+        public async Task<IEnumerable<ProjectDisbursementView>> CreateProjectDisbursementsAsync(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                decimal exchangeRate = 0;
+                List<ProjectDisbursementView> disbursementsList = new List<ProjectDisbursementView>();
+                var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == id, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Disbursements", "Disbursements.Year" }).FirstOrDefault();
+                
+                if (project != null)
+                {
+                    if (project.Disbursements.Count == 0)
+                    {
+                        var strategy = context.Database.CreateExecutionStrategy();
+                        await strategy.ExecuteAsync(async () =>
+                        {
+                            using (var transaction = context.Database.BeginTransaction())
+                            {
+                                var financialYears = await unitWork.FinancialYearRepository.GetManyQueryableAsync(f => f.Id != 0);
+                                exchangeRate = project.ExchangeRate;
+                                var fySettings = await unitWork.FinancialYearSettingsRepository.GetOneAsync(f => f.Id != 0);
+                                int fyMonth = 0, fyDay = 0, currentYear = DateTime.Now.Year,
+                                    startMonth = project.StartDate.Month, startDay = project.StartDate.Day;
+                                int startYear = project.StartingFinancialYear.FinancialYear, endYear = project.EndingFinancialYear.FinancialYear;
+                                if (fySettings != null)
+                                {
+                                    fyMonth = fySettings.Month;
+                                    fyDay = fySettings.Day;
+                                }
+
+                                bool isSimilarToCalendarYear = (fyMonth == 1 && fyDay == 1) ? true : false;
+                                int startingYear = 0, endingYear = 0, currentActiveYear = DateTime.Now.Year;
+                                startMonth = project.StartDate.Month;
+                                startDay = project.StartDate.Day;
+                                currentActiveYear = DateTime.Now.Year;
+                                startingYear = project.StartingFinancialYear.FinancialYear;
+                                endingYear = project.EndingFinancialYear.FinancialYear;
+
+                                if (!isSimilarToCalendarYear)
+                                {
+                                    if (startMonth < fyMonth)
+                                    {
+                                        --currentActiveYear;
+                                    }
+                                    else if (startMonth == fyMonth && startDay < fyDay)
+                                    {
+                                        --currentActiveYear;
+                                    }
+                                }
+
+                                for (int yr = startingYear; yr <= endingYear; yr++)
+                                {
+                                    var financialYear = (from fy in financialYears
+                                                         where fy.FinancialYear == yr
+                                                         select fy).FirstOrDefault();
+                                    if (financialYear == null)
+                                    {
+                                        string label = (isSimilarToCalendarYear) ? "FY " + yr : "FY " + yr + "/" + (yr + 1);
+                                        financialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                        {
+                                            Label = label,
+                                            FinancialYear = yr
+                                        });
+                                        unitWork.Save();
+                                    }
+
+                                    if (yr < currentActiveYear)
+                                    {
+                                        unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                        {
+                                            Project = project,
+                                            Year = financialYear,
+                                            Amount = 0,
+                                            Currency = project.ProjectCurrency,
+                                            DisbursementType = DisbursementTypes.Actual,
+                                            ExchangeRate = project.ExchangeRate,
+                                        });
+                                        unitWork.Save();
+                                    }
+                                    else if (yr == currentActiveYear)
+                                    {
+                                        unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                        {
+                                            Project = project,
+                                            Year = financialYear,
+                                            Amount = 0,
+                                            Currency = project.ProjectCurrency,
+                                            DisbursementType = DisbursementTypes.Actual,
+                                            ExchangeRate = project.ExchangeRate,
+                                        });
+                                        unitWork.Save();
+
+                                        unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                        {
+                                            Project = project,
+                                            Year = financialYear,
+                                            Amount = 0,
+                                            Currency = project.ProjectCurrency,
+                                            DisbursementType = DisbursementTypes.Planned,
+                                            ExchangeRate = project.ExchangeRate,
+                                        });
+                                        unitWork.Save();
+                                    }
+                                    else if (yr > currentActiveYear)
+                                    {
+                                        unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                        {
+                                            Project = project,
+                                            Year = financialYear,
+                                            Amount = 0,
+                                            Currency = project.ProjectCurrency,
+                                            DisbursementType = DisbursementTypes.Planned,
+                                            ExchangeRate = project.ExchangeRate,
+                                        });
+                                        unitWork.Save();
+                                    }
+                                }
+                                transaction.Commit();
+                                var disbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(p => p.ProjectId == id, new string[] { "Year" } );
+                                if (disbursements.Any())
+                                {
+                                    disbursementsList = mapper.Map<List<ProjectDisbursementView>>(disbursements);
+                                }
+                            }
+                        });
+                    }
+                }
+                return disbursementsList;
+            }
+        }
+
         public async Task<IEnumerable<ProjectDisbursementView>> AdjustProjectDisbursementsAsync(int id)
         {
             using (var unitWork = new UnitOfWork(context))
@@ -1206,9 +1343,7 @@ namespace AIMS.Services
                             }
 
                             bool isSimilarToCalendarYear = (fyMonth == 1 && fyDay == 1) ? true : false;
-
                             int startingYear = 0, endingYear = 0, currentActiveYear = DateTime.Now.Year;
-                            var adjustProjects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndDate.Year >= currentActiveYear, new string[] { "EndingFinancialYear", "Disbursements", "Disbursements.Year" });
                             startMonth = project.StartDate.Month;
                             startDay = project.StartDate.Day;
                             currentActiveYear = DateTime.Now.Year;
