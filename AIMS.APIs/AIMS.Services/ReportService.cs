@@ -649,22 +649,6 @@ namespace AIMS.Services
                         }
                     }
 
-                    /*if (model.SectorId > 0)
-                    {
-                        var sectorIds = unitWork.SectorRepository.GetProjection(s => s.ParentSectorId == model.SectorId, p => p.Id);
-                        if (sectorIds.Count() > 0)
-                        {
-                            sectorProjectIds = unitWork.ProjectSectorsRepository.GetProjection(p => sectorIds.Contains(p.SectorId), p => p.ProjectId).ToList();
-                        }
-                        else
-                        {
-                            sectorProjectIds = unitWork.ProjectSectorsRepository.GetProjection(p => p.SectorId == model.SectorId, p => p.ProjectId).ToList();
-                        }
-                        
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => sectorProjectIds.Contains(p.Id),
-                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
-                    }*/
-
                     if (model.ProjectIds.Count > 0)
                     {
                         if (projectProfileList == null)
@@ -785,7 +769,7 @@ namespace AIMS.Services
                                                   where p.ProjectId == project.Id
                                                   select p.FundsPercentage).FirstOrDefault();
                             projectValue = (project.ProjectValue * (exchangeRate / projectExchangeRate));
-                            projectValue = (sectorPercentage != 0) ? ((sectorPercentage / 100) * projectValue) : 0;
+                            projectValue = (sectorPercentage > 0) ? ((sectorPercentage / 100) * projectValue) : 0;
                         }
                         else
                         {
@@ -870,9 +854,11 @@ namespace AIMS.Services
                         var projectIds = (from p in locationByProject.Projects
                                           select p.ProjectId);
 
-                        var locationProjects = (from project in projectsList
+                        var projectsForLocation = (from project in projectsList
                                                 where projectIds.Contains(project.Id)
                                                 select project).ToList<ProjectProfileView>();
+                        var projectsJson = JsonConvert.SerializeObject(projectsForLocation);
+                        var locationProjects = JsonConvert.DeserializeObject<List<ProjectProfileView>>(projectsJson);
 
                         int projectTotalPercentage = 0;
                         decimal totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0, locationPercentage = 0,
@@ -887,7 +873,7 @@ namespace AIMS.Services
                                 decimal projectValue = 0;
                                 if (locationPercentage > 0)
                                 {
-                                    projectValue = (project.ProjectValue > 0) ? Math.Round(((project.ProjectValue / 100) * locationPercentage), MidpointRounding.AwayFromZero) : 0;
+                                    projectValue = (project.ProjectValue > 0) ? Math.Round(((locationPercentage / 100) * project.ProjectValue), MidpointRounding.AwayFromZero) : 0;
                                 }
                                 project.ProjectValue = projectValue;
                                 projectTotalPercentage += Convert.ToInt32(locationPercentage);
@@ -904,6 +890,10 @@ namespace AIMS.Services
                                 locationPercentage = (from l in project.Locations
                                                       where l.LocationId == currentLocationId
                                                       select l.FundsPercentage).FirstOrDefault();
+                                if (locationPercentage > 0)
+                                {
+                                   locationPercentage = (locationPercentage / 100);
+                                }
                                 if (project.Disbursements.Count() > 0)
                                 {
                                     if (model.StartingYear > 0 && model.EndingYear > 0)
@@ -925,13 +915,33 @@ namespace AIMS.Services
                                                                  where d.Year <= model.EndingYear
                                                                  select d).ToList();
                                     }
+                                    
+                                    decimal actualDisbursements = 0, plannedDisbursements = 0;
+                                    if (model.SectorId == 0)
+                                    {
+                                        sectorPercentage = 1;
+                                    }
+                                    else
+                                    {
+                                        sectorPercentage = (1 / 100);
+                                    }
+                                    if (locationPercentage > 0)
+                                    {
+                                        actualDisbursements = ((((from d in project.Disbursements
+                                                                  where d.DisbursementType == DisbursementTypes.Actual && d.Amount > 0
+                                                                  select (d.Amount * (exchangeRate / project.ExchangeRate))).Sum())));
+                                        plannedDisbursements = ((((from d in project.Disbursements
+                                                                   where d.DisbursementType == DisbursementTypes.Planned && d.Amount > 0
+                                                                   select (d.Amount * (exchangeRate / project.ExchangeRate))).Sum())));
+                                        actualDisbursements = (locationPercentage * actualDisbursements);
+                                        plannedDisbursements = (locationPercentage * plannedDisbursements);
+                                    }
 
-                                    decimal actualDisbursements = ((((from d in project.Disbursements
-                                                                      where d.DisbursementType == DisbursementTypes.Actual && d.Amount > 0
-                                                                      select (d.Amount * (exchangeRate / project.ExchangeRate))).Sum()) / 100) * locationPercentage);
-                                    decimal plannedDisbursements = ((((from d in project.Disbursements
-                                                                       where d.DisbursementType == DisbursementTypes.Planned && d.Amount > 0
-                                                                       select (d.Amount * (exchangeRate / project.ExchangeRate))).Sum()) / 100) * locationPercentage);
+                                    if (model.SectorId > 0)
+                                    {
+                                        actualDisbursements = (sectorPercentage * actualDisbursements);
+                                        plannedDisbursements = (sectorPercentage * plannedDisbursements);
+                                    }
 
                                     totalDisbursements = (actualDisbursements + plannedDisbursements);
                                     UtilityHelper helper = new UtilityHelper();
@@ -1664,7 +1674,7 @@ namespace AIMS.Services
                     decimal locationPercentage = 0;
                     foreach (var project in projectProfileList)
                     {
-                        decimal projectValue = 0;
+                        //decimal projectValue = 0;
                         decimal projectExchangeRate = (project.ExchangeRate == 0) ? 1 : project.ExchangeRate;
                         locationPercentage = (model.LocationId == 0) ? 1 : 0;
                         if (model.LocationId > 0)
@@ -1672,12 +1682,13 @@ namespace AIMS.Services
                             locationPercentage = (from p in projectsInLocation
                                                   where p.ProjectId == project.Id
                                                   select p.FundsPercentage).FirstOrDefault();
-                            projectValue = Math.Round((project.ProjectValue * (exchangeRate / projectExchangeRate)), MidpointRounding.AwayFromZero);
-                            projectValue = Math.Round((locationPercentage != 0) ? ((locationPercentage / 100) * projectValue) : 0, MidpointRounding.AwayFromZero);
+                            //projectValue = Math.Round((project.ProjectValue * (exchangeRate / projectExchangeRate)), MidpointRounding.AwayFromZero);
+                            //projectValue = Math.Round((locationPercentage != 0) ? ((locationPercentage / 100) * projectValue) : 0, MidpointRounding.AwayFromZero);
                         }
                         else
                         {
-                            projectValue = Math.Round((project.ProjectValue * (exchangeRate / projectExchangeRate)), MidpointRounding.AwayFromZero);
+                            locationPercentage = 1;
+                            //projectValue = Math.Round((project.ProjectValue * (exchangeRate / projectExchangeRate)), MidpointRounding.AwayFromZero);
                         }
                         
                         ProjectProfileView profileView = new ProjectProfileView();
@@ -1685,7 +1696,7 @@ namespace AIMS.Services
                         profileView.Title = project.Title;
                         profileView.Description = project.Description;
                         profileView.ProjectCurrency = project.ProjectCurrency;
-                        profileView.ProjectValue = projectValue;
+                        profileView.ProjectValue = project.ProjectValue;
                         profileView.ExchangeRate = projectExchangeRate;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
@@ -1781,8 +1792,15 @@ namespace AIMS.Services
 
                         decimal totalFundingPercentage = 0, totalDisbursements = 0, totalDisbursementsPercentage = 0, sectorPercentage = 0,
                             sectorActualDisbursements = 0, sectorPlannedDisbursements = 0;
+                        if (model.LocationId > 0)
+                        {
+                            locationPercentage = (locationPercentage / 100);
+                        }
+                        else
+                        {
+                            locationPercentage = 1;
+                        }
 
-                        List<ProjectProfileView> generatedProjectsList = new List<ProjectProfileView>();
                         foreach (var project in sectorProjects)
                         {
                             if (project.Sectors != null)
@@ -1792,9 +1810,10 @@ namespace AIMS.Services
                                                     select s.FundsPercentage).FirstOrDefault();
 
                                 decimal projectValue = 0;
+                                //project.ExchangeRate = (project.ExchangeRate <= 0) ? 1 : project.ExchangeRate;
                                 if (sectorPercentage > 0)
                                 {
-                                    project.ProjectPercentValue = (project.ProjectValue > 0) ? Math.Round(((project.ProjectValue / 100) * sectorPercentage), MidpointRounding.AwayFromZero) : 0;
+                                    project.ProjectPercentValue = (project.ProjectValue > 0) ? Math.Round(( (sectorPercentage / 100) * (locationPercentage * (project.ProjectValue * (exchangeRate/project.ExchangeRate)))), MidpointRounding.AwayFromZero) : 0;
                                     project.ProjectValue = project.ProjectPercentValue;
                                 }
                                 else
@@ -1810,7 +1829,6 @@ namespace AIMS.Services
                         {
                             if (project.Sectors != null)
                             {
-                                project.ExchangeRate = (project.ExchangeRate <= 0) ? 1 : project.ExchangeRate;
                                 sectorPercentage = (from s in project.Sectors
                                                     where s.SectorId == currentSectorId
                                                     select s.FundsPercentage).FirstOrDefault();
@@ -1836,14 +1854,14 @@ namespace AIMS.Services
                                                                  select d).ToList();
                                     }
 
-                                    decimal actualDisbursements = Math.Round((from d in project.Disbursements
-                                                                   where d.DisbursementType == DisbursementTypes.Actual && d.Amount > 0
-                                                                   select (d.Amount * ( exchangeRate / project.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
-                                    decimal plannedDisbursements = Math.Round((from d in project.Disbursements
-                                                                    where d.DisbursementType == DisbursementTypes.Planned && d.Amount > 0
-                                                                    select (d.Amount * (exchangeRate / project.ExchangeRate))).Sum(), MidpointRounding.AwayFromZero);
-                                    
+                                    decimal actualDisbursements = 0, plannedDisbursements = 0;
 
+                                    actualDisbursements = Math.Round((locationPercentage * ((from d in project.Disbursements
+                                                                                             where d.DisbursementType == DisbursementTypes.Actual && d.Amount > 0
+                                                                                             select (d.Amount * (exchangeRate / project.ExchangeRate))).Sum())), MidpointRounding.AwayFromZero);
+                                    plannedDisbursements = Math.Round((locationPercentage * (from d in project.Disbursements
+                                                                                             where d.DisbursementType == DisbursementTypes.Planned && d.Amount > 0
+                                                                                             select (d.Amount * (exchangeRate / project.ExchangeRate))).Sum()), MidpointRounding.AwayFromZero);
                                     UtilityHelper helper = new UtilityHelper();
                                     if (sectorPercentage > 0)
                                     {

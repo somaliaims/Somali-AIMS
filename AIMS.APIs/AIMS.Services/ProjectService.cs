@@ -1616,6 +1616,26 @@ namespace AIMS.Services
                         response.Message = mHelper.GetNotFound("Currency");
                         return response;
                     }
+                    var manualExcahngeRates = unitWork.ManualRatesRepository.GetManyQueryable(y => y.Year == model.StartingFinancialYear || y.Year == model.EndingFinancialYear || y.Year == DateTime.Now.Year);
+                    model.ExchangeRate = (from m in manualExcahngeRates
+                                          where m.Currency == currency.Currency
+                                          select m.ExchangeRate).Average();
+                   
+                    if (model.ExchangeRate <= 0)
+                    {
+                        model.ExchangeRate = (from m in manualExcahngeRates
+                                              where m.Currency == currency.Currency
+                                              && m.Year == DateTime.Now.Year
+                                              select m.ExchangeRate).Average();
+                    }
+
+                    if (model.ExchangeRate == 0)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Exchange rate for project financial years");
+                        return response;
+                    }
 
                     var startingFinancialYear = (from fy in financialYears
                                                  where fy.FinancialYear == model.StartingFinancialYear
