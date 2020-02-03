@@ -365,8 +365,11 @@ namespace AIMS.Models
     {
         [Key]
         public int Id { get; set; }
-        public bool IsApproved { get; set; }
+        public bool IsApproved { get; set; } = false;
+        [Required]
         public DateTime Dated { get; set; }
+        [Required]
+        public string NewName { get; set; }
         public string OrganizationIdsJson { get; set; }
         public ICollection<EFOrganizationsToMerge> Organizations { get; set; }
     }
