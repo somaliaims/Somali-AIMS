@@ -19,7 +19,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        ICollection<OrganizationMergeRequests> GetForUser(int userId);
+        IEnumerable<OrganizationMergeRequests> GetForUser(int userId);
 
         /// <summary>
         /// Adds new request for merging organizations
@@ -41,10 +41,16 @@ namespace AIMS.Services
         /// <param name="userOrgId"></param>
         /// <returns></returns>
         ActionResponse RejectRequest(int requestId, int userOrgId, string email);
+
+        /// <summary>
+        /// Approves requests older two weeks
+        /// </summary>
+        /// <returns></returns>
+        List<MergeOrganizationsRequest> GetRequestOlderTwoWeeks();
     }
 
 
-    public class OrganizationMergeService
+    public class OrganizationMergeService : IOrganizationMergeService
     {
         AIMSDbContext context;
 
@@ -314,6 +320,23 @@ namespace AIMS.Services
                 unitWork.Save();
                 return response;
             }
+        }
+
+        public List<MergeOrganizationsRequest> GetRequestOlderTwoWeeks()
+        {
+            List<MergeOrganizationsRequest> mergeRequestOlderTwoWeeks = new List<MergeOrganizationsRequest>();
+            var unitWork = new UnitOfWork(context);
+            DateTime dateTwoWeeksBefore = DateTime.Now.AddDays(-14);
+            var requests = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Dated.Date <= dateTwoWeeksBefore.Date && r.IsApproved == false, new string[] { "Organizations" });
+            foreach(var request in requests)
+            {
+                mergeRequestOlderTwoWeeks.Add(new MergeOrganizationsRequest()
+                {
+                    RequestId = request.Id,
+                    OrganizationIds = (request.Organizations.Count > 0 ) ? request.Organizations.Select(o => o.OrganizationId).ToList() : new List<int>()
+                });
+            }
+            return mergeRequestOlderTwoWeeks;
         }
     }
 }

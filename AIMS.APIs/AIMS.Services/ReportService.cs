@@ -16,13 +16,6 @@ namespace AIMS.Services
     public interface IReportService
     {
         /// <summary>
-        /// Get projects report by sectors and title
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        //Task<ProjectProfileReportBySector> GetProjectsBySector(ReportModelForProjectSectors model);
-
-        /// <summary>
         /// Search matching projects by sector wise grouped for the provided criteria
         /// </summary>
         /// <param name="model"></param>
@@ -2124,9 +2117,11 @@ namespace AIMS.Services
 
                         projectsViewForYear = new List<ProjectViewForYear>();
                         var projectIds = yearProject.Projects;
-                        var yearlyProjectsProfile = (from project in projectsList
+                        var projectsForYear = (from project in projectsList
                                                      where projectIds.Contains(project.Id)
                                                      select project).ToList<ProjectProfileView>();
+                        var projectsJson = JsonConvert.SerializeObject(projectsForYear);
+                        var yearlyProjectsProfile = JsonConvert.DeserializeObject<List<ProjectProfileView>>(projectsJson);
 
                         decimal totalFunding = 0, totalDisbursements = 0, totalProjectValue = 0, totalPlannedDisbursements = 0,
                             totalActualDisbursements = 0;

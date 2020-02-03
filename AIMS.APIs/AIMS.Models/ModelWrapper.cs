@@ -445,6 +445,7 @@ namespace AIMS.Models
         public string SectorType { get; set; }
         public string ParentSector { get; set; }
         public string SectorName { get; set; }
+        public string SectorWithCode { get; set; }
         public bool IsDefault { get; set; } = false;
         public bool IsUnAttributed { get; set; }
         public bool IsSourceType { get; set; } = false;
@@ -456,6 +457,8 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string ParentSector { get; set; }
         public string SectorName { get; set; }
+        public string SectorWithCode { get; set; }
+        public int? IATICode { get; set; }
         public bool IsUnAttributed { get; set; }
     }
 
@@ -2112,6 +2115,17 @@ namespace AIMS.Models
         public string MappingSector { get; set; }
         [Required]
         public string Percentage { get; set; }
+    }
+
+    public class MergeOrganizationsRequest
+    {
+        public int RequestId { get; set; }
+        public List<int> OrganizationIds { get; set; }
+    }
+
+    public class OrganizationsMergeForRequest
+    {
+        public int OrganizationId { get; set; }
     }
 
     public class ProjectLocationHelp
