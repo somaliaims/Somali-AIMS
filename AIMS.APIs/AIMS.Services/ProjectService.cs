@@ -3757,6 +3757,32 @@ namespace AIMS.Services
                     return response;
                 }
 
+                bool isCurrencyUpdated = false;
+                if (project.ProjectCurrency != model.ProjectCurrency)
+                {
+                    isCurrencyUpdated = true;
+                    var manualExcahngeRates = unitWork.ManualRatesRepository.GetManyQueryable(y => y.Year == model.StartingFinancialYear || y.Year == model.EndingFinancialYear || y.Year == DateTime.Now.Year);
+                    model.ExchangeRate = (from m in manualExcahngeRates
+                                          where m.Currency == currency.Currency
+                                          select m.ExchangeRate).Average();
+
+                    if (model.ExchangeRate <= 0)
+                    {
+                        model.ExchangeRate = (from m in manualExcahngeRates
+                                              where m.Currency == currency.Currency
+                                              && m.Year == DateTime.Now.Year
+                                              select m.ExchangeRate).Average();
+                    }
+
+                    if (model.ExchangeRate == 0)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Exchange rate for project financial years");
+                        return response;
+                    }
+                }
+
                 int fyMonth = 1, fyDay = 1, startingMonth = model.StartDate.Month, startDay = model.StartDate.Day,
                         endingMonth = model.EndDate.Month, endingDay = model.EndDate.Day;
                 var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
@@ -3855,6 +3881,17 @@ namespace AIMS.Services
                                     unitWork.ProjectRepository.Update(project);
                                     await unitWork.SaveAsync();
                                 }
+                            }
+                            if (isCurrencyUpdated)
+                            {
+                                var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.Id != 0);
+                                foreach(var disbursement in disbursements)
+                                {
+                                    disbursement.Currency = project.ProjectCurrency;
+                                    disbursement.ExchangeRate = project.ExchangeRate;
+                                    unitWork.ProjectDisbursementsRepository.Update(disbursement);
+                                }
+                                await unitWork.SaveAsync();
                             }
                             transaction.Commit();
                         }
