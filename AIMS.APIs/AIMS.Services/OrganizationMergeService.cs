@@ -118,6 +118,7 @@ namespace AIMS.Services
                         {
                             var request = unitWork.OrganizationMergeRequestsRepository.Insert(new EFOrganizationMergeRequests()
                             {
+                                OrganizationTypeId = model.OrganizationTypeId,
                                 NewName = model.NewName,
                                 IsApproved = false,
                                 Dated = DateTime.Now,
@@ -334,6 +335,8 @@ namespace AIMS.Services
                 mergeRequestOlderTwoWeeks.Add(new MergeOrganizationsRequest()
                 {
                     RequestId = request.Id,
+                    OrganizationTypeId = request.OrganizationTypeId,
+                    NewName = request.NewName,
                     OrganizationIds = (request.Organizations.Count > 0 ) ? request.Organizations.Select(o => o.OrganizationId).ToList() : new List<int>()
                 });
             }

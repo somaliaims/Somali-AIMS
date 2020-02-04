@@ -2120,6 +2120,8 @@ namespace AIMS.Models
     public class MergeOrganizationsRequest
     {
         public int RequestId { get; set; }
+        public int OrganizationTypeId { get; set; }
+        public string NewName { get; set; }
         public List<int> OrganizationIds { get; set; }
     }
 

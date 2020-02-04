@@ -369,6 +369,8 @@ namespace AIMS.Models
         [Required]
         public DateTime Dated { get; set; }
         [Required]
+        public int OrganizationTypeId { get; set; }
+        [Required]
         public string NewName { get; set; }
         public string OrganizationIdsJson { get; set; }
         public ICollection<EFOrganizationsToMerge> Organizations { get; set; }
