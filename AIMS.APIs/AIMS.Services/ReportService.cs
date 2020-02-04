@@ -1956,16 +1956,63 @@ namespace AIMS.Services
                     {
                         var locationProjectIds = unitWork.ProjectLocationsRepository.GetProjection(p => p.LocationId == model.LocationId, p => p.ProjectId).ToList();
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => locationProjectIds.Contains(p.Id),
-                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     if (model.ProjectIds.Count > 0)
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
-                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     if (model.StartingYear > 0 || model.EndingYear > 0)
+                    {
+                        if (projectProfileList == null)
+                        {
+                            if (model.StartingYear > 0 && model.EndingYear <= 0)
+                            {
+                                projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartingFinancialYear.FinancialYear >= model.StartingYear || (p.EndingFinancialYear.FinancialYear >= model.StartingYear))),
+                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            }
+
+                            else if (model.EndingYear > 0 && model.StartingYear <= 0)
+                            {
+                                projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.EndingFinancialYear.FinancialYear <= model.EndingYear || p.StartingFinancialYear.FinancialYear <= model.EndingYear)),
+                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            }
+
+                            else if (model.StartingYear > 0 && model.EndingYear > 0)
+                            {
+                                projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.StartingFinancialYear.FinancialYear <= model.EndingYear) || (p.StartingFinancialYear.FinancialYear <= model.StartingYear && p.EndingFinancialYear.FinancialYear >= model.StartingYear)
+                                                        || (p.EndingFinancialYear.FinancialYear <= model.EndingYear && p.EndingFinancialYear.FinancialYear >= model.StartingYear)),
+                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            }
+                        }
+                        else
+                        {
+                            if (model.StartingYear > 0 && model.EndingYear <= 0)
+                            {
+                                projectProfileList = from p in projectProfileList
+                                                     where (p.StartingFinancialYear.FinancialYear >= model.StartingYear || p.EndingFinancialYear.FinancialYear >= model.StartingYear)
+                                                     select p;
+                            }
+                            else if (model.EndingYear > 0 && model.StartingYear <= 0)
+                            {
+                                projectProfileList = from p in projectProfileList
+                                                     where (p.EndingFinancialYear.FinancialYear <= model.EndingYear || p.StartingFinancialYear.FinancialYear <= model.EndingYear)
+                                                     select p;
+                            }
+                            else if (model.StartingYear > 0 && model.EndingYear > 0)
+                            {
+                                projectProfileList = from p in projectProfileList
+                                                     where ((p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.StartingFinancialYear.FinancialYear <= model.EndingYear) || (p.StartingFinancialYear.FinancialYear <= model.StartingYear && p.EndingFinancialYear.FinancialYear >= model.StartingYear)
+                                                        || (p.EndingFinancialYear.FinancialYear <= model.EndingYear && p.EndingFinancialYear.FinancialYear >= model.StartingYear))
+                                                     select p;
+                            }
+                        }
+                    }
+
+                    /*if (model.StartingYear > 0 || model.EndingYear > 0)
                     {
                         if (projectProfileList == null)
                         {
@@ -2009,7 +2056,7 @@ namespace AIMS.Services
                                                      select project;
                             }
                         }
-                    }
+                    }*/
 
                     if (model.OrganizationIds.Count > 0)
                     {
@@ -2020,7 +2067,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
-                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -2033,7 +2080,7 @@ namespace AIMS.Services
                     if (projectProfileList == null)
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndingFinancialYear.FinancialYear >= year),
-                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
                     if (model.SectorIds.Count > 0)
@@ -2044,7 +2091,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
-                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         }
                         else
                         {
@@ -2106,8 +2153,7 @@ namespace AIMS.Services
                             {
                                 Year = yr,
                                 Projects = (from p in projectProfileList
-                                            where yr >= p.StartingFinancialYear.FinancialYear && 
-                                            (p.EndingFinancialYear.FinancialYear <= yr || p.EndingFinancialYear.FinancialYear > yr)
+                                            where (yr >= p.StartingFinancialYear.FinancialYear && yr <= p.EndingFinancialYear.FinancialYear)
                                             select p.Id).ToList<int>()
                             });
                         }
@@ -2135,23 +2181,23 @@ namespace AIMS.Services
                             
                             if (project.Disbursements.Count() > 0)
                             {
-                                if (model.StartingYear > 0 && model.EndingYear > 0 )
+                                if (model.StartingYear > 0 && model.EndingYear > 0)
                                 {
                                     project.Disbursements = (from d in project.Disbursements
-                                                             where d.Year >= model.StartingYear &&
-                                                             d.Year <= model.EndingYear
+                                                             where d.Year >= model.StartingYear
+                                                             && d.Year <= model.EndingYear
                                                              select d).ToList();
                                 }
                                 else if (model.StartingYear > 0 && model.EndingYear <= 0)
                                 {
                                     project.Disbursements = (from d in project.Disbursements
-                                                             where d.Year == model.StartingYear
+                                                             where d.Year >= model.StartingYear
                                                              select d).ToList();
                                 }
-                                else if (model.StartingYear <= 0 && model.EndingYear > 0)
+                                if (model.StartingYear <= 0 && model.EndingYear > 0)
                                 {
                                     project.Disbursements = (from d in project.Disbursements
-                                                             where d.Year == model.EndingYear
+                                                             where d.Year <= model.EndingYear
                                                              select d).ToList();
                                 }
                                 var disbursements = (from d in project.Disbursements
@@ -2183,7 +2229,7 @@ namespace AIMS.Services
                                 EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
-                                ProjectValue = (project.ProjectValue * (exchangeRate / project.ExchangeRate)),
+                                ProjectValue = project.ProjectValue,
                                 ActualDisbursements = project.ActualDisbursements,
                                 PlannedDisbursements = project.PlannedDisbursements,
                             });
