@@ -48,7 +48,7 @@ namespace AIMS.APIs
                 if (context.EmailMessages.Count() == 0)
                 {
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewUser, TypeDefinition = "New user registration", Subject= "New user registration", Message = "New user registered" });
-                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewProjectToOrg, TypeDefinition = "New project to organization", Subject="Project added to organization", Message = "New project added to organanization" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewProjectToOrg, TypeDefinition = "Organization added to project", Subject="Organization added to project", Message = "New project added to organanization" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.UserInactive, TypeDefinition = "User inactive", Subject="User account deactivated", Message = "User is inactive" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.ChangedMappingEffectedProject, TypeDefinition = "Sector mapping updated", Subject="Sector mapping updated", Message = "Sector mapping updated" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewIATISector, TypeDefinition = "Sector added from IATI", Subject="Sector/s added from IATI", Message = "New sector/s added from IATI" });

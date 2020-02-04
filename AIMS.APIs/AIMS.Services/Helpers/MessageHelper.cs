@@ -215,7 +215,7 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <param name="organizations"></param>
         /// <returns></returns>
-        string OrganizationsMergeRequest(List<string> organizations);
+        string OrganizationsMergeRequest(List<string> organizations, string suggestedName);
 
         /// <summary>
         /// Formats merged organizations message
@@ -644,7 +644,7 @@ namespace AIMS.Services.Helpers
         {
             List<string> messageList = new List<string>();
             messageList.Add("<h4>Project name: <i>" + project + "</i><h4>");
-            messageList.Add("<h5>Added organization/s<h5>");
+            messageList.Add("<h5>Organization/s<h5>");
             messageList.Add("<ul>");
             messageList.Add("<li>" + organizations + "</li>");
             messageList.Add("</ul>");
@@ -685,7 +685,7 @@ namespace AIMS.Services.Helpers
             return ("Delete operation is not allowed for " + entity);
         }
 
-        public string OrganizationsMergeRequest(List<string> organizations)
+        public string OrganizationsMergeRequest(List<string> organizations, string suggestedName)
         {
             List<string> formattedMessageList = new List<string>();
             formattedMessageList.Add("<p>Requested organizations for merge: </p><ul>");
@@ -694,6 +694,7 @@ namespace AIMS.Services.Helpers
                 formattedMessageList.Add("<li>" + org + "</li>");
             }
             formattedMessageList.Add("</ul>");
+            formattedMessageList.Add("<p><b>Suggested name after merge: " + suggestedName + "</b></p>");
             return (String.Join("", formattedMessageList));
         }
 

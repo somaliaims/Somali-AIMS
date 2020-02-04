@@ -118,6 +118,7 @@ namespace AIMS.Services
                         {
                             var request = unitWork.OrganizationMergeRequestsRepository.Insert(new EFOrganizationMergeRequests()
                             {
+                                NewName = model.NewName,
                                 IsApproved = false,
                                 Dated = DateTime.Now,
                                 OrganizationIdsJson = string.Join("-", orgIds)
@@ -157,7 +158,7 @@ namespace AIMS.Services
                             }
 
                             mHelper = new MessageHelper();
-                            message += mHelper.OrganizationsMergeRequest(organizationNames);
+                            message += mHelper.OrganizationsMergeRequest(organizationNames, model.NewName);
                             IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                             emailHelper.SendEmailToUsers(emailsList, subject, "", message, footerMessage);
                         }
@@ -298,7 +299,7 @@ namespace AIMS.Services
 
                         mHelper = new MessageHelper();
                         message = "<p>Request rejected by: " + userEmail + "</p>";
-                        message += mHelper.OrganizationsMergeRequest(organizationNames);
+                        message += mHelper.OrganizationsMergeRequest(organizationNames, request.NewName);
                         ISMTPSettingsService smtpService = new SMTPSettingsService(context);
                         var smtpSettings = smtpService.GetPrivate();
                         SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
