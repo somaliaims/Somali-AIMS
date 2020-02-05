@@ -746,7 +746,7 @@ namespace AIMS.Services
 
                     if (projectProfileList == null)
                     {
-                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.StartingFinancialYear.FinancialYear >= year),
+                        projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.Id != 0),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                     }
 
@@ -941,7 +941,7 @@ namespace AIMS.Services
                                     UtilityHelper helper = new UtilityHelper();
                                     project.ActualDisbursements = Math.Round(actualDisbursements, MidpointRounding.AwayFromZero);
                                     project.PlannedDisbursements = Math.Round(plannedDisbursements, MidpointRounding.AwayFromZero);
-                                    project.ProjectValue = totalDisbursements;
+                                    project.ProjectValue = Math.Round(totalDisbursements, MidpointRounding.AwayFromZero);
                                     totalDisbursementsPercentage += totalDisbursements;
                                     locationActualDisbursements += project.ActualDisbursements;
                                     locationPlannedDisbursements += project.PlannedDisbursements;
@@ -1871,7 +1871,7 @@ namespace AIMS.Services
                                     {
                                         project.PlannedDisbursements = 0;
                                     }
-                                    totalDisbursements = (project.ActualDisbursements + project.PlannedDisbursements);
+                                    totalDisbursements = Math.Round((project.ActualDisbursements + project.PlannedDisbursements), MidpointRounding.AwayFromZero);
                                     //This is where project value is calculated using disbursements
                                     project.ProjectValue = totalDisbursements;
                                     totalDisbursementsPercentage += totalDisbursements;

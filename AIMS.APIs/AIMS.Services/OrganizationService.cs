@@ -123,6 +123,13 @@ namespace AIMS.Services
         ActionResponse Approve(int id);
 
         /// <summary>
+        /// Returns true or false if an organization is registered with a user
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        bool CheckIfOrganizationsHaveUsers(List<int> ids);
+
+        /// <summary>
         /// Gets list of organizations
         /// </summary>
         /// <returns></returns>
@@ -194,6 +201,13 @@ namespace AIMS.Services
                 }
                 return mapper.Map<List<OrganizationView>>(organizations);
             }
+        }
+
+        public bool CheckIfOrganizationsHaveUsers(List<int> ids)
+        {
+            var unitWork = new UnitOfWork(context);
+            var users = unitWork.UserRepository.GetManyQueryable(u => ids.Contains(u.OrganizationId));
+            return (users.Any()) ? true : false;
         }
 
         public IEnumerable<IATIOrganizationView> GetIATIOrganizations()
