@@ -53,5 +53,58 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(true);
         }
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet("ApproveRequest/{id}")]
+        public async Task<IActionResult> ApproveRequest(int requestId)
+        {
+            int organizationId = 0;
+            string organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            if (!string.IsNullOrEmpty(organizationIdVal))
+            {
+                organizationId = Convert.ToInt32(organizationIdVal);
+            }
+            if (organizationId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = service.ApproveMergeRequest(requestId, organizationId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            response = await service.MergeOrganizations(requestId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpGet("RejectRequest/{id}")]
+        public IActionResult RejectRequest(int requestId)
+        {
+            int organizationId = 0;
+            string organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
+            if (!string.IsNullOrEmpty(organizationIdVal))
+            {
+                organizationId = Convert.ToInt32(organizationIdVal);
+            }
+            if (organizationId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            string userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = service.RejectRequest(requestId, organizationId, userEmail);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
     }
 }
