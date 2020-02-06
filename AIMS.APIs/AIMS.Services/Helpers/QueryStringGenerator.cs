@@ -134,6 +134,16 @@ namespace AIMS.Services.Helpers
             {
                 queryString += ("&ctype=" + model.ChartType);
             }
+
+            if (model.MarkerId > 0)
+            {
+                queryString += ("&mid=" + model.MarkerId);
+            }
+
+            if (!string.IsNullOrEmpty(model.MarkerValue))
+            {
+                queryString += ("&mvalue=" + model.MarkerValue);
+            }
             return queryString;
         }
 

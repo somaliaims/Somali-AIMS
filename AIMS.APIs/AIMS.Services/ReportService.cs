@@ -736,7 +736,7 @@ namespace AIMS.Services
                         List<int> projectIds = new List<int>();
                         string value = model.MarkerValue;
                         var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId && m.Values.Equals(model.MarkerValue, StringComparison.OrdinalIgnoreCase));
-                        if (string.IsNullOrEmpty(value))
+                        if (!string.IsNullOrEmpty(value))
                         {
                             foreach (var marker in projectMarkers)
                             {
