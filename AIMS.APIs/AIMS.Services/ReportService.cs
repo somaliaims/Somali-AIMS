@@ -636,7 +636,7 @@ namespace AIMS.Services
                     {
                         sectorProjectIds = unitWork.ProjectSectorsRepository.GetProjection(p => p.SectorId == model.SectorId, p => p.ProjectId).ToList();
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => sectorProjectIds.Contains(p.Id),
-                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Markers", "Markers.Marker" });
                         if (sectorProjectIds.Count > 0)
                         {
                             projectsInSector = unitWork.ProjectSectorsRepository.GetManyQueryable(s => s.SectorId == model.SectorId && sectorProjectIds.Contains(s.ProjectId));
@@ -648,7 +648,7 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id),
-                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Markers", "Markers.Marker" });
                         }
                         else
                         {
@@ -665,20 +665,20 @@ namespace AIMS.Services
                             if (model.StartingYear > 0 && model.EndingYear <= 0)
                             {
                                 projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartingFinancialYear.FinancialYear >= model.StartingYear || (p.EndingFinancialYear.FinancialYear >= model.StartingYear))),
-                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Markers", "Markers.Marker" });
                             }
 
                             else if (model.EndingYear > 0 && model.StartingYear <= 0)
                             {
                                 projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.EndingFinancialYear.FinancialYear <= model.EndingYear || p.StartingFinancialYear.FinancialYear <= model.EndingYear)),
-                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Markers", "Markers.Marker" });
                             }
 
                             else if (model.StartingYear > 0 && model.EndingYear > 0)
                             {
                                 projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.StartingFinancialYear.FinancialYear <= model.EndingYear) || (p.StartingFinancialYear.FinancialYear <= model.StartingYear && p.EndingFinancialYear.FinancialYear >= model.StartingYear)
                                                         || (p.EndingFinancialYear.FinancialYear <= model.EndingYear && p.EndingFinancialYear.FinancialYear >= model.StartingYear)),
-                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Markers", "Markers.Marker" });
                             }
                         }
                         else
@@ -721,13 +721,50 @@ namespace AIMS.Services
                         if (projectProfileList == null)
                         {
                             projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIdsList.Contains(p.Id)
-                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Markers", "Markers.Marker" });
                         }
                         else
                         {
                             projectProfileList = from project in projectProfileList
                                                  where projectIdsList.Contains(project.Id)
                                                  select project;
+                        }
+                    }
+
+                    if (model.MarkerId != 0)
+                    {
+                        List<int> projectIds = new List<int>();
+                        string value = model.MarkerValue;
+                        var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId && m.Values.Equals(model.MarkerValue, StringComparison.OrdinalIgnoreCase));
+                        if (string.IsNullOrEmpty(value))
+                        {
+                            foreach (var marker in projectMarkers)
+                            {
+                                if (marker.Values.Split(",").Contains(value))
+                                {
+                                    projectIds.Add(marker.ProjectId);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            projectIds = (from p in projectMarkers
+                                          select p.ProjectId).ToList();
+                        }
+                        
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id)
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Markers", "Markers.Marker" });
+                        }
+                        else
+                        {
+                            if (projectProfileList.Any())
+                            {
+                                projectProfileList = (from p in projectProfileList
+                                                      where projectIds.Contains(p.Id)
+                                                      select p);
+                            }
                         }
                     }
 

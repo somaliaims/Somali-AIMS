@@ -1786,6 +1786,8 @@ namespace AIMS.Models
         public int LocationId { get; set; }
         public List<int> SectorIds { get; set; } = new List<int>();
         public int ChartType { get; set; } = 0;
+        public int MarkerId { get; set; } = 0;
+        public string MarkerValue { get; set; }
         public NoSectorOptions SectorOption { get; set; } = NoSectorOptions.ProjectsWithSectors;
     }
 
@@ -1806,6 +1808,8 @@ namespace AIMS.Models
         public int EndingYear { get; set; } = 0;
         public List<int> LocationIds { get; set; } = new List<int>();
         public int SectorId { get; set; } = 0;
+        public int MarkerId { get; set; }
+        public string MarkerValue { get; set; }
         public int ChartType { get; set; } = 0;
         public NoLocationOptions LocationOption { get; set; } = NoLocationOptions.ProjectsWithLocations;
     }
@@ -1895,6 +1899,12 @@ namespace AIMS.Models
         [Required]
         public FieldTypes FieldType { get; set; }
         [Required]
+        public string Values { get; set; }
+    }
+
+    public class MarkerSearchView
+    {
+        public int Id { get; set; }
         public string Values { get; set; }
     }
 
