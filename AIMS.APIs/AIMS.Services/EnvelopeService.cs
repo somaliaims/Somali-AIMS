@@ -327,7 +327,27 @@ namespace AIMS.Services
                 try
                 {
                     var envelope = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == funderId);
-                    int currentYear = DateTime.Now.Year;
+                    int fyMonth = 1, fyDay = 1;
+                    var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(fy => fy.Id != 0);
+                    if (fySettings != null)
+                    {
+                        fyMonth = fySettings.Month;
+                        fyDay = fySettings.Day;
+                    }
+
+                    int currentYear = DateTime.Now.Year, currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
+                    bool isSimilarToCalendarYear = (fyMonth == 1 && fyDay == 1) ? true : false;
+                    if (!isSimilarToCalendarYear)
+                    {
+                        if (currentMonth < fyMonth)
+                        {
+                            --currentYear;
+                        }
+                        else if (currentMonth == fyMonth && currentDay < fyDay)
+                        {
+                            --currentYear;
+                        }
+                    }
                     var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear >= (currentYear - 1) && y.FinancialYear <= (currentYear + 1));
                     var envelopeTypes = unitWork.EnvelopeTypesRepository.GetManyQueryable(e => e.Id != 0);
 

@@ -23,8 +23,13 @@ namespace AIMS.APIs.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            var financialYears = financialYearService.GetAll();
-            return Ok(financialYears);
+            return Ok(financialYearService.GetAll());
+        }
+
+        [HttpGet("GetForEnvelope")]
+        public IActionResult GetForEnvelope()
+        {
+            return Ok(financialYearService.GetForEnvelope());
         }
 
         [HttpGet]

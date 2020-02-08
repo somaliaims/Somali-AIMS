@@ -21,6 +21,12 @@ namespace AIMS.Services
         IEnumerable<FinancialYearView> GetAll();
 
         /// <summary>
+        /// Get all years for envelope
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<FinancialYearView> GetForEnvelope();
+
+        /// <summary>
         /// Gets the location for the provided id
         /// </summary>
         /// <param name="id"></param>
@@ -86,6 +92,85 @@ namespace AIMS.Services
                 years = (from y in years
                          orderby y.FinancialYear
                          select y);
+                return mapper.Map<List<FinancialYearView>>(years);
+            }
+        }
+
+        public IEnumerable<FinancialYearView> GetForEnvelope()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                int fyMonth = 1, fyDay = 1;
+                var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(fy => fy.Id != 0);
+                if (fySettings != null)
+                {
+                    fyMonth = fySettings.Month;
+                    fyDay = fySettings.Day;
+                }
+
+                int currentYear = DateTime.Now.Year, currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
+                bool isSimilarToCalendarYear = (fyMonth == 1 && fyDay == 1) ? true : false;
+                if (!isSimilarToCalendarYear)
+                {
+                    if (currentMonth < fyMonth)
+                    {
+                        --currentYear;
+                    }
+                    else if (currentMonth == fyMonth && currentDay < fyDay)
+                    {
+                        --currentYear;
+                    }
+                }
+                
+                int previousYear = (currentYear - 1), nextYear = (currentYear + 1);
+                var years = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear >= previousYear && y.FinancialYear <= nextYear).ToList();
+                var previousFinancialYear = (from y in years
+                                            where y.FinancialYear == previousYear
+                                            select y).FirstOrDefault();
+                if (previousFinancialYear == null)
+                {
+                    string label = (isSimilarToCalendarYear) ? "FY" + previousYear : ("FY " + previousYear + "/" + (previousYear + 1));
+                    previousFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                    {
+                        Label = label,
+                        FinancialYear = previousYear,
+                    });
+                    unitWork.Save();
+                    years.Add(previousFinancialYear);
+                }
+
+                var currentFinancialYear = (from y in years
+                                             where y.FinancialYear == currentYear
+                                             select y).FirstOrDefault();
+                if (currentFinancialYear == null)
+                {
+                    string label = (isSimilarToCalendarYear) ? "FY" + currentYear : ("FY " + currentYear + "/" + (currentYear + 1));
+                    currentFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                    {
+                        Label = label,
+                        FinancialYear = previousYear,
+                    });
+                    unitWork.Save();
+                    years.Add(currentFinancialYear);
+                }
+
+                var nextFinancialYear = (from y in years
+                                            where y.FinancialYear == nextYear
+                                            select y).FirstOrDefault();
+                if (nextFinancialYear == null)
+                {
+                    string label = (isSimilarToCalendarYear) ? "FY" + nextYear : ("FY " + nextYear + "/" + (nextYear + 1));
+                    nextFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                    {
+                        Label = label,
+                        FinancialYear = previousYear,
+                    });
+                    unitWork.Save();
+                    years.Add(nextFinancialYear);
+                }
+                years = (from y in years
+                         orderby y.FinancialYear
+                         select y).ToList();
                 return mapper.Map<List<FinancialYearView>>(years);
             }
         }
