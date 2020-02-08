@@ -1226,7 +1226,7 @@ namespace AIMS.Models
         public string FieldTitle { get; set; }
         public int ProjectId { get; set; }
         public FieldTypes FieldType { get; set; }
-        public string Values { get; set; }
+        public string Values { get; set; } = null;
     }
 
     public class ProjectDocumentModel
@@ -1947,6 +1947,11 @@ namespace AIMS.Models
     public class ReportSubscriptionView
     {
         public int ReportId { get; set; }
+    }
+
+    public class IdsModel
+    {
+        public List<int> Ids { get; set; }
     }
 
     public class EmailMessageModel

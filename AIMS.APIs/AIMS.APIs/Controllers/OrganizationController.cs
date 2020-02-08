@@ -43,6 +43,12 @@ namespace AIMS.APIs.Controllers
             return Ok(organizationService.GetWithType());
         }
 
+        [HttpPost("CheckIfOrganizationsHaveUsers")]
+        public IActionResult CheckIfOrganizationsHaveUsers([FromBody] IdsModel model)
+        {
+            return Ok(organizationService.CheckIfOrganizationsHaveUsers(model.Ids));
+        }
+
         [HttpGet("GetUserOrganizations")]
         public IActionResult GetUserOrganizations()
         {

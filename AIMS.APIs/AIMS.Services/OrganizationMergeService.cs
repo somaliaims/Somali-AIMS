@@ -143,6 +143,7 @@ namespace AIMS.Services
                                 });    
                             }
                             unitWork.Save();
+                            transaction.Commit();
 
                             ISMTPSettingsService smtpService = new SMTPSettingsService(context);
                             var smtpSettings = smtpService.GetPrivate();
@@ -158,7 +159,7 @@ namespace AIMS.Services
                             }
 
                             string subject = "", message = "", footerMessage = "";
-                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewProjectToOrg);
+                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.MergeOrganizationRequest);
                             if (emailMessage != null)
                             {
                                 subject = emailMessage.Subject;
@@ -190,6 +191,7 @@ namespace AIMS.Services
                     var requests = unitWork.OrganizationsToMergeRepository.GetWithInclude(r => r.OrganizationId != 0 && r.Request.IsApproved == false, new string[] { "Organization", "Request" });
                     var userRequests = (from req in requests
                                         where req.OrganizationId == organizationId
+                                        orderby req.Request.Dated descending
                                         select req.RequestId);
                     if (userRequests.Any())
                     {

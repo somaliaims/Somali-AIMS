@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Security.Permissions;
+using Newtonsoft.Json.Linq;
 
 namespace AIMS.Services
 {
@@ -326,9 +327,13 @@ namespace AIMS.Services
                                     }
                                     else
                                     {
-                                        List<MarkerValues> parsedValues = JsonConvert.DeserializeObject<List<MarkerValues>>(projectMarker.Values);
-                                        string values = string.Join(",", (from pv in parsedValues
-                                                                          select pv.Value).ToList());
+                                        string values = projectMarker.Values;
+                                        if (CheckIfStringIsJson(projectMarker.Values))
+                                        {
+                                            List<MarkerValues> parsedValues = JsonConvert.DeserializeObject<List<MarkerValues>>(projectMarker.Values);
+                                            values = string.Join(",", (from pv in parsedValues
+                                                                              select pv.Value).ToList());
+                                        }
                                         markerCell.SetCellValue(values);
                                     }
                                 }
@@ -1399,6 +1404,19 @@ namespace AIMS.Services
         private string ApplyThousandFormat(decimal number)
         {
             return (Math.Round(number).ToString("#,##0.00"));
+        }
+
+        private bool CheckIfStringIsJson(string isJosn)
+        {
+            try
+            {
+                var result = JObject.Parse(isJosn);
+                return true;
+            }
+            catch(Exception)
+            {
+                return false;
+            }
         }
     }
 }

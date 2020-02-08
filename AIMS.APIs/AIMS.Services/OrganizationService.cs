@@ -127,7 +127,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        bool CheckIfOrganizationsHaveUsers(List<int> ids);
+        ActionResponse CheckIfOrganizationsHaveUsers(List<int> ids);
 
         /// <summary>
         /// Gets list of organizations
@@ -203,11 +203,13 @@ namespace AIMS.Services
             }
         }
 
-        public bool CheckIfOrganizationsHaveUsers(List<int> ids)
+        public ActionResponse CheckIfOrganizationsHaveUsers(List<int> ids)
         {
             var unitWork = new UnitOfWork(context);
-            var users = unitWork.UserRepository.GetManyQueryable(u => ids.Contains(u.OrganizationId));
-            return (users.Any()) ? true : false;
+            ActionResponse response = new ActionResponse();
+            var users = unitWork.UserRepository.GetProjection(u => ids.Contains(u.OrganizationId), u => u.Id);
+            response.ReturnedId = (users.Any()) ? users.Count() : 0;
+            return response;
         }
 
         public IEnumerable<IATIOrganizationView> GetIATIOrganizations()

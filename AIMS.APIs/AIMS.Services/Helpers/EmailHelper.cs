@@ -160,12 +160,10 @@ namespace AIMS.Services.Helpers
             if (message != null)
             {
                 messageList.Add("<p>" + message + "</p>");
-                messageList.Add("<p>Organization name " + organizationName + "</p>");
             }
             else
             {
                 messageList.Add("<p>A new user has just submitted the request for registration.</p>");
-                messageList.Add("<p>Organization name " + organizationName + "</p>");
                 messageList.Add("<p>Please open your notification area using AIMS, and approve/disapprove the request.</p>");
             }
             footerMessage = (footerMessage != null) ? footerMessage : FOOTER_LINE;
