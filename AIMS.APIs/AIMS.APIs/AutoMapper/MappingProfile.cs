@@ -15,11 +15,11 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(s => s.ParentSector, opts => opts.MapFrom(source => source.ParentSector.SectorName))
                 .ForMember(s => s.SectorTypeId, opts => opts.MapFrom(source => source.SectorType.Id))
                 .ForMember(s => s.SectorType, opts => opts.MapFrom(source => source.SectorType.TypeName))
-                .ForMember(s => s.SectorWithCode, opts => opts.MapFrom(source => (source.IATICode != null) ? (source.IATICode) + ": " + source.SectorName : source.SectorName));
+                .ForMember(s => s.SectorWithCode, opts => opts.MapFrom(source => (source.IATICode != null) ? (source.IATICode + ": " + source.SectorName) : source.SectorName));
 
             CreateMap<EFSector, SectorView>()
                 .ForMember(s => s.ParentSector, opts => opts.MapFrom(source => source.ParentSector.SectorName))
-                .ForMember(s => s.SectorWithCode, opts => opts.MapFrom(source => (source.IATICode != null) ? (source.IATICode) + ": " + source.SectorName : source.SectorName));
+                .ForMember(s => s.SectorWithCode, opts => opts.MapFrom(source => (source.IATICode != null) ? (source.IATICode + ": " + source.SectorName) : source.SectorName));
 
             CreateMap<EFSector, SectorViewWithParent>()
                 .ForMember(s => s.ParentSector, opts => opts.MapFrom(source => source.ParentSector.SectorName))

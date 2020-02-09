@@ -133,7 +133,7 @@ namespace AIMS.Models
         public string TypeName { get; set; }
         public bool? IsPrimary { get; set; }
         public bool IsSourceType { get; set; } = true;
-        public int? IATICode { get; set; }
+        public string IATICode { get; set; }
         public string SourceUrl { get; set; }
         public IEnumerable<EFSector> Sectors { get; set; }
     }
@@ -191,7 +191,8 @@ namespace AIMS.Models
         [ForeignKey("ParentSector")]
         public int? ParentSectorId { get; set; }
         public EFSector ParentSector { get; set; }
-        public int? IATICode { get; set; }
+        [MaxLength(10)]
+        public string IATICode { get; set; } = null;
         public bool IsUnAttributed { get; set; } = false;
         public DateTime TimeStamp { get; set; }
     }

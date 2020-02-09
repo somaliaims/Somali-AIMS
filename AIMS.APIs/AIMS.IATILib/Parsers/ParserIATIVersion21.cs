@@ -1036,26 +1036,17 @@ namespace AIMS.IATILib.Parsers
                         {
                             foreach (var sector in aSectors)
                             {
-                                int? sectorTypeVocabulary = null, sectorCode = null;
+                                string sectorTypeVocabulary = null; 
+                                string sectorCode = null;
                                 string sectorName = "";
                                 if (sector.Attribute("vocabulary")?.Value != null)
                                 {
-                                    int sectorVocabCode = 0;
-                                    int.TryParse(sector.Attribute("vocabulary")?.Value, out sectorVocabCode);
-                                    if (sectorVocabCode != 0)
-                                    {
-                                        sectorTypeVocabulary = sectorVocabCode;
-                                    }
+                                    sectorTypeVocabulary = sector.Attribute("vocabulary")?.Value;
                                 }
 
                                 if (sector.Attribute("code") != null)
                                 {
-                                    int sCode = 0;
-                                    int.TryParse(sector.Attribute("code")?.Value, out sCode);
-                                    if (sCode != 0)
-                                    {
-                                        sectorCode = sCode;
-                                    }
+                                    sectorCode = sector.Attribute("code")?.Value;
                                 }
 
                                 var setorNarrative = sector.Element("narrative");
@@ -1107,18 +1098,9 @@ namespace AIMS.IATILib.Parsers
                         {
                             foreach (var item in items)
                             {
-                                int? sectorCode = null;
+                                string sectorCode = null;
                                 string sectorName = "";
-                                int extractedCode = 0;
-
-                                if (item.Element("code") != null)
-                                {
-                                    bool isValid = int.TryParse(item.Element("code")?.Value, out extractedCode);
-                                    if (isValid)
-                                    {
-                                        sectorCode = extractedCode;
-                                    }
-                                }
+                                sectorCode = item.Element("code")?.Value;
                                 var sectorNameElement = item.Element("name");
                                 var narratives = sectorNameElement.Elements("narrative");
                                 foreach(var narrative in narratives)

@@ -114,7 +114,7 @@ namespace AIMS.APIs
                         TypeName = "Somali Sectors", 
                         IsPrimary = true, 
                         IsSourceType = false, 
-                        IATICode = 0 
+                        IATICode = null
                     });
                     context.SaveChanges();
                     //context.SectorTypes.Add(new EFSectorTypes() { TypeName = "Default" });

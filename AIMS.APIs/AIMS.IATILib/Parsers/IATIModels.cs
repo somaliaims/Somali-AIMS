@@ -27,7 +27,7 @@ namespace AIMS.IATILib.Parsers
 
     public class IATISectorsVocabulary
     {
-        public int Code { get; set; }
+        public string Code { get; set; }
         public string Name { get; set; }
     }
 
@@ -70,8 +70,8 @@ namespace AIMS.IATILib.Parsers
 
     public class IATISectorModel
     {
-        public int? SectorTypeCode { get; set; }
-        public int? SectorCode { get; set; }
+        public string SectorTypeCode { get; set; }
+        public string SectorCode { get; set; } = null;
         public string SectorName { get; set; }
     }
 
@@ -83,7 +83,7 @@ namespace AIMS.IATILib.Parsers
 
     public class SourceSectorModel
     {
-        public int? SectorCode { get; set; }
+        public string SectorCode { get; set; }
         public string SectorName { get; set; }
     }
 

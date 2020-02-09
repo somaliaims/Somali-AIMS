@@ -2048,7 +2048,7 @@ namespace AIMS.Services
                         TypeName = "Somali Sectors",
                         IsPrimary = true,
                         IsSourceType = false,
-                        IATICode = 0
+                        IATICode = null
                     });
                 }
                 int currentYear = DateTime.Now.Year, fyMonth = 1, fyDay = 1;
@@ -2909,7 +2909,7 @@ namespace AIMS.Services
                                     }
                                     else
                                     {
-                                        sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IATICode == sector.SectorTypeId);
+                                        sectorType = unitWork.SectorTypesRepository.GetOne(s => s.Id == sector.SectorTypeId);
                                     }
 
                                     newSector = unitWork.SectorRepository.GetOne(s => s.SectorName.Equals(sector.Sector, StringComparison.OrdinalIgnoreCase));

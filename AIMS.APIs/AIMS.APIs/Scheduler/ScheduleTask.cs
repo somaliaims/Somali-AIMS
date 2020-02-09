@@ -134,7 +134,7 @@ namespace AIMS.APIs.Scheduler
                                 if (!string.IsNullOrEmpty(stype.SourceUrl))
                                 {
                                     sectorsXml = client.DownloadString(stype.SourceUrl);
-                                    int counter = (stype.IATICode == null) ? fileCounter : (int)stype.IATICode;
+                                    int counter = (stype.IATICode == null) ? fileCounter : Convert.ToInt32(stype.IATICode);
                                     var newFilePath = sectorsFilePath + counter + ".xml";
                                     File.WriteAllText(newFilePath, sectorsXml);
                                     stype.FilePath = newFilePath;

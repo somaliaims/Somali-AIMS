@@ -416,7 +416,7 @@ namespace AIMS.Services
                 {
                     sectorVocabs.Add(new IATISectorsVocabulary()
                     {
-                        Code = (int)tCode["code"],
+                        Code = (string)tCode["code"],
                         Name = (string)tCode["name"]
                     });
                 }
@@ -459,7 +459,7 @@ namespace AIMS.Services
                 {
                     sectorVocabs.Add(new IATISectorsVocabulary()
                     {
-                        Code = (int)tCode["code"],
+                        Code = (string)tCode["code"],
                         Name = (string)tCode["name"]
                     });
                 }
@@ -778,34 +778,43 @@ namespace AIMS.Services
                 }
 
                 var sectorsList = sectorsView.SectorsList;
-                if (sectorsList.Count() > 0)
+                var sectorsInDB = unitWork.SectorRepository.GetManyQueryable(s => s.SectorTypeId == sectorTypeId);
+                bool isSaved = false;
+                foreach (var sector in sectorsList)
                 {
-                    var sectorsInDB = unitWork.SectorRepository.GetManyQueryable(s => s.IATICode != null && s.SectorTypeId == sectorTypeId);
-                    bool isSaved = false;
-                    foreach (var sector in sectorsList)
+                    var isInDb = (from s in sectorsInDB
+                                  where s.IATICode == sector.SectorCode
+                                  select s).FirstOrDefault();
+                    if (isInDb != null)
                     {
-                        var isInDb = (from s in sectorsInDB
-                                      where s.IATICode == sector.SectorCode
-                                      select s).FirstOrDefault();
-                        if (isInDb != null)
-                        {
-                            isInDb.SectorName = sector.SectorName;
-                            unitWork.SectorRepository.Update(isInDb);
-                            isSaved = true;
-                        }
+                        isInDb.SectorName = sector.SectorName;
+                        unitWork.SectorRepository.Update(isInDb);
+                        isSaved = true;
                     }
-                    if (isSaved)
+                    else
                     {
+                        unitWork.SectorRepository.Insert(new EFSector()
+                        {
+                            SectorType = sectorType,
+                            SectorName = sector.SectorName,
+                            IATICode = sector.SectorCode,
+                            IsUnAttributed = false,
+                            TimeStamp = DateTime.Now,
+                            ParentSector = null
+                        });
                         unitWork.Save();
                     }
                 }
+                if (isSaved)
+                {
+                    unitWork.Save();
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = ex.Message;
             }
-            
             return response;
         }
 
@@ -866,7 +875,7 @@ namespace AIMS.Services
                                                where v.Code == sector.SectorTypeCode
                                                select v).FirstOrDefault();
 
-                            if (sectorVocab != null && (sectorVocab.Code != 99 && sectorVocab.Code != 98))
+                            if (sectorVocab != null && (sectorVocab.Code != "99" && sectorVocab.Code != "98"))
                             {
                                 sectorType = unitWork.SectorTypesRepository.Insert(new EFSectorTypes()
                                 {

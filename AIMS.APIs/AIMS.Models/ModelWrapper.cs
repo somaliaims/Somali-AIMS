@@ -431,7 +431,7 @@ namespace AIMS.Models
     {
         [Required]
         public string TypeName { get; set; }
-        public int? IATICode { get; set; } = null;
+        public string IATICode { get; set; } = null;
         public bool IsPrimary { get; set; } = false;
         public bool IsSourceType { get; set; } = false;
         [Url]
@@ -449,7 +449,7 @@ namespace AIMS.Models
         public bool IsDefault { get; set; } = false;
         public bool IsUnAttributed { get; set; }
         public bool IsSourceType { get; set; } = false;
-        public int? IATICode { get; set; } = null;
+        public string IATICode { get; set; } = null;
     }
 
     public class SectorView
@@ -458,7 +458,7 @@ namespace AIMS.Models
         public string ParentSector { get; set; }
         public string SectorName { get; set; }
         public string SectorWithCode { get; set; }
-        public int? IATICode { get; set; }
+        public string IATICode { get; set; }
         public bool IsUnAttributed { get; set; }
     }
 
@@ -486,7 +486,7 @@ namespace AIMS.Models
         public int? ParentId { get; set; }
         [Required]
         public string SectorName { get; set; }
-        public int? IATICode { get; set; }
+        public string IATICode { get; set; }
     }
 
     public class SearchSectorMappingModel
@@ -538,7 +538,7 @@ namespace AIMS.Models
         public string SectorName { get; set; }
         [Required]
         public int MappingSectorId { get; set; }
-        public int? IATICode { get; set; }
+        public string IATICode { get; set; } = null;
     }
 
     public class SectorMappingsModel
@@ -2105,7 +2105,7 @@ namespace AIMS.Models
     public class SectorSourceView
     {
         public int Id { get; set; }
-        public int? IATICode { get; set; }
+        public string IATICode { get; set; } = null;
         public string SourceUrl { get; set; }
         public string FilePath { get; set; } = null;
     }
