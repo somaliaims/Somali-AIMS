@@ -56,7 +56,7 @@ namespace AIMS.APIs.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("ApproveRequest/{id}")]
-        public async Task<IActionResult> ApproveRequest(int requestId)
+        public async Task<IActionResult> ApproveRequest(int id)
         {
             int organizationId = 0;
             string organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
@@ -68,12 +68,12 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Unauthorized user access to api");
             }
-            var response = service.ApproveMergeRequest(requestId, organizationId);
+            var response = service.ApproveMergeRequest(id, organizationId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
             }
-            response = await service.MergeOrganizations(requestId);
+            response = await service.MergeOrganizations(id);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -82,7 +82,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet("RejectRequest/{id}")]
-        public IActionResult RejectRequest(int requestId)
+        public IActionResult RejectRequest(int id)
         {
             int organizationId = 0;
             string organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
@@ -99,7 +99,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Unauthorized user access to api");
             }
-            var response = service.RejectRequest(requestId, organizationId, userEmail);
+            var response = service.RejectRequest(id, organizationId, userEmail);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

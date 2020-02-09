@@ -701,14 +701,13 @@ namespace AIMS.Services.Helpers
         public string OrganizationsMergedMessage(List<string> organizations, string newOrganization, string message, string footerMessage)
         {
             List<string> formattedMessageList = new List<string>();
-            formattedMessageList.Add("<h4>" + message + "</h4><p>Organizations combined with: </p><ul>");
+            formattedMessageList.Add("<p>Organizations merged: </p><ul>");
             foreach(var org in organizations)
             {
                 formattedMessageList.Add("<li>" + org + "</li>");
             }
-            formattedMessageList.Add("</ul><ul>");
-            formattedMessageList.Add("<li>New name for combined organization: " + newOrganization + "</li>");
             formattedMessageList.Add("</ul>");
+            formattedMessageList.Add("<p>New name for combined organizations: <b>" + newOrganization + "</b></p>");
             return (String.Join("", formattedMessageList));
         }
 

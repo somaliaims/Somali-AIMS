@@ -223,36 +223,34 @@ namespace AIMS.Services
 
         public ActionResponse ApproveMergeRequest(int requestId, int userOrgId)
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            IMessageHelper mHelper;
+            ActionResponse response = new ActionResponse();
+            var request = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Id == requestId && r.IsApproved == false, new string[] { "Organizations" }).FirstOrDefault();
+            if (request == null)
             {
-                IMessageHelper mHelper;
-                ActionResponse response = new ActionResponse();
-                var request = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Id == requestId && r.IsApproved == false, new string[] { "Organizations" }).FirstOrDefault();
-                if (request == null)
-                {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.GetNotFound("Organization merge request");
-                    response.Success = false;
-                    return response;
-                }
-
-                var orgId = (from o in request.Organizations
-                              where o.OrganizationId == userOrgId
-                              select o.OrganizationId).FirstOrDefault();
-
-                if (orgId == 0)
-                {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.UnAuthorizedOrganizationsMerge();
-                    response.Success = false;
-                    return response;
-                }
-
-                request.IsApproved = true;
-                unitWork.OrganizationMergeRequestsRepository.Update(request);
-                unitWork.Save();
+                mHelper = new MessageHelper();
+                response.Message = mHelper.GetNotFound("Organization merge request");
+                response.Success = false;
                 return response;
             }
+
+            var orgId = (from o in request.Organizations
+                         where o.OrganizationId == userOrgId
+                         select o.OrganizationId).FirstOrDefault();
+
+            if (orgId == 0)
+            {
+                mHelper = new MessageHelper();
+                response.Message = mHelper.UnAuthorizedOrganizationsMerge();
+                response.Success = false;
+                return response;
+            }
+
+            request.IsApproved = true;
+            unitWork.OrganizationMergeRequestsRepository.Update(request);
+            unitWork.Save();
+            return response;
         }
 
         public ActionResponse RejectRequest(int requestId, int userOrgId, string userEmail)
@@ -261,7 +259,7 @@ namespace AIMS.Services
             {
                 IMessageHelper mHelper;
                 ActionResponse response = new ActionResponse();
-                var request = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Id == requestId && r.IsApproved == false, new string[] { "Organizations" }).FirstOrDefault();
+                var request = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Id == requestId && r.IsApproved == false, new string[] { "Organizations", "Organizations.Organization" }).FirstOrDefault();
                 if (request == null)
                 {
                     mHelper = new MessageHelper();
@@ -359,7 +357,7 @@ namespace AIMS.Services
             {
                 IMessageHelper mHelper;
                 ActionResponse response = new ActionResponse();
-                var request = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Id == requestId, new string[] { "Organizations" }).FirstOrDefault();
+                var request = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Id == requestId && r.IsApproved == true, new string[] { "Organizations" }).FirstOrDefault();
                 if (request == null)
                 {
                     mHelper = new MessageHelper();
@@ -465,6 +463,9 @@ namespace AIMS.Services
                             unitWork.OrganizationRepository.Delete(organization);
                             unitWork.Save();
                         }
+                        //Now delete the request
+                        unitWork.OrganizationMergeRequestsRepository.Delete(request);
+                        unitWork.Save();
 
                         string subject = "", message = "", footerMessage = "";
                         var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.OrganizationMerged);
