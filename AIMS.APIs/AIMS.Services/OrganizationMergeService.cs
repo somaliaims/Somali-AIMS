@@ -366,7 +366,6 @@ namespace AIMS.Services
             var allOrganizationNames = (from org in allOrganizations
                                         select org.OrganizationName).ToList<string>();
             var organizationTypes = await unitWork.OrganizationTypesRepository.GetManyQueryableAsync(t => t.Id != 0);
-            var users = unitWork.UserRepository.GetManyQueryable(u => u.Id != 0);
 
             var strategy = context.Database.CreateExecutionStrategy();
             await strategy.ExecuteAsync(async () =>
@@ -375,7 +374,7 @@ namespace AIMS.Services
                 {
                     foreach (int requestId in ids)
                     {
-                        var request = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Id == requestId && r.IsApproved == true, new string[] { "Organizations" }).FirstOrDefault();
+                        var request = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Id == requestId, new string[] { "Organizations" }).FirstOrDefault();
                         if (request == null)
                         {
                             continue;
@@ -411,6 +410,7 @@ namespace AIMS.Services
                         });
                         unitWork.Save();
 
+                        var users = unitWork.UserRepository.GetManyQueryable(u => u.IsApproved == true && orgIds.Contains(u.OrganizationId));
                         List<string> emailsList = new List<string>();
                         foreach (var user in users)
                         {
@@ -488,8 +488,8 @@ namespace AIMS.Services
                         mHelper = new MessageHelper();
                         message += mHelper.OrganizationsMergedMessage(organizationNames, newOrganization.OrganizationName, emailMessage.Message, emailMessage.FooterMessage);
 
-                            //Send email
-                            ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                        //Send email
+                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
                         var smtpSettings = smtpService.GetPrivate();
                         SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
                         if (smtpSettings != null)

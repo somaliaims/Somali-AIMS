@@ -106,6 +106,7 @@ namespace AIMS.APIs.Scheduler
                     IFinancialYearSettingsService fySettingsService = new FinancialYearSettingsService(dbContext);
                     ISectorTypesService sectorTypeService = new SectorTypesService(dbContext, imapper);
                     IProjectService projectService = new ProjectService(dbContext, imapper);
+                    IOrganizationMergeService orgMergeService = new OrganizationMergeService(dbContext);
 
                     var iatiSettings = service.GetIATISettings();
                     if (iatiSettings != null)
@@ -194,6 +195,14 @@ namespace AIMS.APIs.Scheduler
                         if (response.Success)
                         {
                         }
+                    }
+
+                    var pendingOrgMergeRequests = orgMergeService.GetTwoWeeksOlderRequests();
+                    if (pendingOrgMergeRequests.Any())
+                    {
+                        var requests = (from r in pendingOrgMergeRequests
+                                          select r.RequestId).ToList();
+                        orgMergeService.MergeOrganizationsAuto(requests).GetAwaiter().GetResult();
                     }
                 }
 
