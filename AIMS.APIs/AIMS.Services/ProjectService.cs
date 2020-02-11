@@ -18,7 +18,7 @@ namespace AIMS.Services
         /// Gets all projects
         /// </summary>
         /// <returns></returns>
-        IEnumerable<ProjectView> GetAll();
+        IEnumerable<ProjectView> GetAll(decimal exchangeRate);
 
         /// <summary>
         /// Gets list of project titles
@@ -91,7 +91,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<IEnumerable<ProjectProfileView>> SearchProjectsByCriteria(SearchProjectModel model);
+        Task<IEnumerable<ProjectProfileView>> SearchProjectsByCriteria(SearchProjectModel model, decimal exchangeRate);
 
         /// <summary>
         /// Gets lighter version of projects for the provided criteria
@@ -402,15 +402,32 @@ namespace AIMS.Services
             mapper = autoMapper;
         }
 
-        public IEnumerable<ProjectView> GetAll()
+        public IEnumerable<ProjectView> GetAll(decimal exchangeRate)
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                exchangeRate = (exchangeRate <= 0) ? 1 : exchangeRate;
                 var projects = unitWork.ProjectRepository.GetWithInclude(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                 projects = (from p in projects
                             orderby p.DateUpdated descending
                             select p);
-                return mapper.Map<List<ProjectView>>(projects);
+
+                List<ProjectView> projectsList = new List<ProjectView>();
+                foreach(var project in projects)
+                {
+                    project.ExchangeRate = (project.ExchangeRate <= 0) ? 1 : project.ExchangeRate;
+                    projectsList.Add(new ProjectView()
+                    {
+                        Id = project.Id,
+                        Title = project.Title,
+                        Description = project.Description,
+                        ProjectValueInDefaultCurrency = Math.Round(((exchangeRate / project.ExchangeRate) * project.ProjectValue), MidpointRounding.AwayFromZero),
+                        StartDate = project.StartDate.ToShortDateString(),
+                        EndDate = project.EndDate.ToShortDateString(),
+                        DateUpdated = project.DateUpdated.ToShortDateString(),
+                    });
+                }
+                return projectsList;
             }
         }
 
@@ -740,7 +757,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<IEnumerable<ProjectProfileView>> SearchProjectsByCriteria(SearchProjectModel model)
+        public async Task<IEnumerable<ProjectProfileView>> SearchProjectsByCriteria(SearchProjectModel model, decimal exchangeRate)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -749,6 +766,7 @@ namespace AIMS.Services
 
                 try
                 {
+                    exchangeRate = (exchangeRate <= 0) ? 1 : exchangeRate;
                     if (model.ProjectIds.Count > 0)
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id)
@@ -859,8 +877,10 @@ namespace AIMS.Services
                     foreach (var project in projectProfileList)
                     {
                         ProjectProfileView profileView = new ProjectProfileView();
+                        project.ExchangeRate = (project.ExchangeRate <= 0) ? 1 : project.ExchangeRate;
                         profileView.Id = project.Id;
-                        profileView.Title = project.Title;
+                        profileView.Title = project.Title;                        
+                        profileView.ProjectValueInDefaultCurrency = ((exchangeRate / project.ExchangeRate) * project.ProjectValue);
                         profileView.Description = project.Description;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
@@ -873,6 +893,68 @@ namespace AIMS.Services
                         profileView.Markers = mapper.Map<List<ProjectMarkersView>>(project.Markers);
 
                         projectsList.Add(profileView);
+                    }
+
+                    if (model.FinancialRange > 0)
+                    {
+                        IDictionary<int, string> financialRange = new Dictionary<int, string>()
+                        {
+                            { 1, "1000000" },
+                            { 2, "10000000" },
+                            { 3, "20000000" },
+                            { 4, "30000000" },
+                            { 5, "40000000" },
+                            { 6, "50000000" }
+                        };
+
+                        decimal lowerRange = 0, upperRange = 0;
+                        switch (model.FinancialRange)
+                        {
+                            case FinancialRangeConstants.OneToTenMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[1]);
+                                upperRange = Convert.ToDecimal(financialRange[2]);
+                                break;
+
+                            case FinancialRangeConstants.TenToTwentyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[2]);
+                                upperRange = Convert.ToDecimal(financialRange[3]);
+                                break;
+
+                            case FinancialRangeConstants.TwentyToThirtyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[3]);
+                                upperRange = Convert.ToDecimal(financialRange[4]);
+                                break;
+
+                            case FinancialRangeConstants.ThirtyToFourtyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[4]);
+                                upperRange = Convert.ToDecimal(financialRange[5]);
+                                break;
+
+                            case FinancialRangeConstants.FourtyToFiftyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[5]);
+                                upperRange = Convert.ToDecimal(financialRange[6]);
+                                break;
+
+                            case FinancialRangeConstants.FiftyMillionOrMore:
+                                lowerRange = Convert.ToDecimal(financialRange[6]);
+                                break;
+                        }
+
+                        if (lowerRange > 0 && upperRange > 0)
+                        {
+                            projectProfileList = (from p in projectProfileList
+                                                  where p.ProjectValue >= lowerRange &&
+                                                  p.ProjectValue <= upperRange
+                                                  orderby p.ProjectValue ascending
+                                                  select p);
+                        }
+                        else if (lowerRange > 0 && upperRange == 0)
+                        {
+                            projectProfileList = (from p in projectProfileList
+                                                  where p.ProjectValue >= lowerRange
+                                                  orderby p.ProjectValue ascending
+                                                  select p);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -1054,25 +1136,25 @@ namespace AIMS.Services
                                 upperRange = Convert.ToDecimal(financialRange[6]);
                                 break;
 
-                            case FinancialRangeConstants.GreaterThanFiftyMillion:
+                            case FinancialRangeConstants.FiftyMillionOrMore:
                                 lowerRange = Convert.ToDecimal(financialRange[6]);
                                 break;
                         }
 
                         if (lowerRange > 0 && upperRange > 0)
                         {
-                            projectProfileList = (from p in projectProfileList
-                                                  where p.ProjectValue >= lowerRange &&
-                                                  p.ProjectValue <= upperRange
-                                                  orderby p.ProjectValue ascending
-                                                  select p);
+                            projectsList = (from p in projectsList
+                                                  where p.ProjectValueInDefaultCurrency >= lowerRange &&
+                                                  p.ProjectValueInDefaultCurrency <= upperRange
+                                                  orderby p.ProjectValueInDefaultCurrency ascending
+                                                  select p).ToList();
                         }
                         else if (lowerRange > 0 && upperRange == 0)
                         {
-                            projectProfileList = (from p in projectProfileList
-                                                  where p.ProjectValue >= lowerRange 
-                                                  orderby p.ProjectValue ascending
-                                                  select p);
+                            projectsList = (from p in projectsList
+                                                  where p.ProjectValueInDefaultCurrency >= lowerRange 
+                                                  orderby p.ProjectValueInDefaultCurrency ascending
+                                                  select p).ToList();
                         }
                     }
                 }

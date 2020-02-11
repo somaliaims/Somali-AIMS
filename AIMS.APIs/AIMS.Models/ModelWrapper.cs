@@ -38,7 +38,7 @@ namespace AIMS.Models
         TwentyToThirtyMillion = 3,
         ThirtyToFourtyMillion = 4,
         FourtyToFiftyMillion = 5,
-        GreaterThanFiftyMillion = 6
+        FiftyMillionOrMore = 6
     }
 
     public class ActionResponse
@@ -973,6 +973,7 @@ namespace AIMS.Models
         public int FundingTypeId { get; set; }
         public string FundingType { get; set; }
         public string Title { get; set; }
+        public decimal ProjectValueInDefaultCurrency { get; set; }
         public string Description { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }

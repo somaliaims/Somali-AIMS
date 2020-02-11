@@ -37,9 +37,36 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            var projects = projectService.GetAll();
+            var defaultCurrencyObj = currencyService.GetDefaultCurrency();
+            if (defaultCurrencyObj == null)
+            {
+                return BadRequest("Default currency is not set. Please contact administrator");
+            }
+
+            string defaultCurrency = defaultCurrencyObj.Currency;
+            decimal exchangeRate = 1;
+            if (!string.IsNullOrEmpty(defaultCurrency))
+            {
+                var dated = DateTime.Now;
+                var rates = await ratesService.GetCurrencyRatesForDate(dated);
+                if (rates.Rates == null)
+                {
+                    string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                    rates = await ratesHttpService.GetRatesAsync(apiKey);
+                    if (rates.Rates != null)
+                    {
+                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        exchangeRate = projectService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                    }
+                }
+                else
+                {
+                    exchangeRate = projectService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                }
+            }
+            var projects = projectService.GetAll(exchangeRate);
             return Ok(projects);
         }
 
@@ -549,7 +576,35 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var projects = await projectService.SearchProjectsByCriteria(model);
+
+            var defaultCurrencyObj = currencyService.GetDefaultCurrency();
+            if (defaultCurrencyObj == null)
+            {
+                return BadRequest("Default currency is not set. Please contact administrator");
+            }
+
+            string defaultCurrency = defaultCurrencyObj.Currency;
+            decimal exchangeRate = 1;
+            if (!string.IsNullOrEmpty(defaultCurrency))
+            {
+                var dated = DateTime.Now;
+                var rates = await ratesService.GetCurrencyRatesForDate(dated);
+                if (rates.Rates == null)
+                {
+                    string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                    rates = await ratesHttpService.GetRatesAsync(apiKey);
+                    if (rates.Rates != null)
+                    {
+                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        exchangeRate = projectService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                    }
+                }
+                else
+                {
+                    exchangeRate = projectService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                }
+            }
+            var projects = await projectService.SearchProjectsViewByCriteria(model, exchangeRate);
             return Ok(projects);
         }
 
