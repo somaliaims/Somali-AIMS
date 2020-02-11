@@ -19,13 +19,20 @@ namespace AIMS.APIs.Controllers
         IProjectService projectService;
         IHostingEnvironment hostingEnvironment;
         IConfiguration config;
+        IExchangeRateService ratesService;
+        IExchangeRateHttpService ratesHttpService;
+        ICurrencyService currencyService;
         string projectUrl = "";
 
-        public ProjectController(IProjectService service, IHostingEnvironment _hostingEnvironment, IConfiguration conf)
+        public ProjectController(IProjectService service, IHostingEnvironment _hostingEnvironment, IConfiguration conf,
+            IExchangeRateHttpService exRatesHttpService, IExchangeRateService exRatesService, ICurrencyService curService)
         {
             hostingEnvironment = _hostingEnvironment;
             projectService = service;
             config = conf;
+            ratesService = exRatesService;
+            ratesHttpService = exRatesHttpService;
+            currencyService = curService;
             projectUrl = config["ProjectUrl"];
         }
 
@@ -554,8 +561,34 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var defaultCurrencyObj = currencyService.GetDefaultCurrency();
+            if (defaultCurrencyObj == null)
+            {
+                return BadRequest("Default currency is not set. Please contact administrator");
+            }
 
-            var projects = await projectService.SearchProjectsViewByCriteria(model);
+            string defaultCurrency = defaultCurrencyObj.Currency;
+            decimal exchangeRate = 1;
+            if (!string.IsNullOrEmpty(defaultCurrency))
+            {
+                var dated = DateTime.Now;
+                var rates = await ratesService.GetCurrencyRatesForDate(dated);
+                if (rates.Rates == null)
+                {
+                    string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                    rates = await ratesHttpService.GetRatesAsync(apiKey);
+                    if (rates.Rates != null)
+                    {
+                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        exchangeRate = projectService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                    }
+                }
+                else
+                {
+                    exchangeRate = projectService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                }
+            }
+            var projects = await projectService.SearchProjectsViewByCriteria(model, exchangeRate);
             return Ok(projects);
         }
 

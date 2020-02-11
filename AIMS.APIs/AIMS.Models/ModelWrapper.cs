@@ -31,6 +31,16 @@ namespace AIMS.Models
         ProjectsWithoutSectors = 2
     }
 
+    public enum FinancialRangeConstants
+    {
+        OneToTenMillion = 1,
+        TenToTwentyMillion = 2,
+        TwentyToThirtyMillion = 3,
+        ThirtyToFourtyMillion = 4,
+        FourtyToFiftyMillion = 5,
+        GreaterThanFiftyMillion = 6
+    }
+
     public class ActionResponse
     {
         public int ReturnedId { get; set; } = 0;
@@ -750,6 +760,7 @@ namespace AIMS.Models
         public string Description { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
+        public decimal ProjectValueInDefaultCurrency { get; set; }
         public string StartingFinancialYear { get; set; }
         public string EndingFinancialYear { get; set; }
         public string DateUpdated { get; set; }
@@ -1871,6 +1882,7 @@ namespace AIMS.Models
         public List<int> SectorIds { get; set; } = new List<int>();
         public List<int> LocationIds { get; set; } = new List<int>();
         public string Description { get; set; }
+        public FinancialRangeConstants FinancialRange { get; set; } = 0;
     }
 
     public class MarkerModel
@@ -2108,6 +2120,13 @@ namespace AIMS.Models
         public string IATICode { get; set; } = null;
         public string SourceUrl { get; set; }
         public string FilePath { get; set; } = null;
+    }
+
+    public class UserRoleSettlementRequest
+    {
+        [Required]
+        public int UserId { get; set; }
+        public UserTypes RequestedRole { get; set; }
     }
 
     public class OrganizationMergeRequests

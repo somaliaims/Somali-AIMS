@@ -377,6 +377,22 @@ namespace AIMS.Models
         public ICollection<EFOrganizationsToMerge> Organizations { get; set; }
     }
 
+    public class EFUserRoleSettlementRequests
+    {
+        [Key]
+        public int Id { get; set; }
+        [ForeignKey("User")]
+        public int UserId { get; set; }
+        [Required]
+        public EFUser User { get; set; }
+        [Required]
+        public UserTypes RequestedUserType { get; set; }
+        [Required]
+        public DateTime Dated { get; set; }
+        [Required]
+        public bool Status { get; set; } = false;
+    }
+
     public class EFOrganizationsToMerge
     {
         [ForeignKey("Request")]

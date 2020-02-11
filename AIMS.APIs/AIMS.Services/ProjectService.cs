@@ -98,7 +98,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<IEnumerable<ProjectView>> SearchProjectsViewByCriteria(SearchProjectModel model);
+        Task<IEnumerable<ProjectView>> SearchProjectsViewByCriteria(SearchProjectModel model, decimal exchangeRate);
 
         /// <summary>
         /// Gets project profiles for the provided project ids
@@ -380,6 +380,14 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         Task<ActionResponse> AdjustDisbursementsForProjectsAsync();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="currency"></param>
+        /// <param name="ratesList"></param>
+        /// <returns></returns>
+        decimal GetExchangeRateForCurrency(string currency, List<CurrencyWithRates> ratesList);
     }
 
     public class ProjectService : IProjectService
@@ -875,10 +883,11 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<IEnumerable<ProjectView>> SearchProjectsViewByCriteria(SearchProjectModel model)
+        public async Task<IEnumerable<ProjectView>> SearchProjectsViewByCriteria(SearchProjectModel model, decimal exchangeRate)
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                exchangeRate = (exchangeRate <= 0) ? 1 : exchangeRate;
                 IQueryable<EFProject> projectProfileList = null;
                 List<ProjectView> projectsList = new List<ProjectView>();
 
@@ -991,9 +1000,11 @@ namespace AIMS.Services
 
                     foreach (var project in projectProfileList)
                     {
+                        project.ExchangeRate = (project.ExchangeRate <= 0) ? 1 : project.ExchangeRate;
                         ProjectView profileView = new ProjectView();
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
+                        profileView.ProjectValueInDefaultCurrency = ((exchangeRate / project.ExchangeRate) * project.ProjectValue);
                         profileView.Description = project.Description;
                         profileView.StartDate = project.StartDate.ToShortDateString();
                         profileView.EndDate = project.EndDate.ToShortDateString();
@@ -1001,6 +1012,68 @@ namespace AIMS.Services
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.DateUpdated = project.DateUpdated.ToShortDateString();
                         projectsList.Add(profileView);
+                    }
+
+                    if (model.FinancialRange > 0)
+                    {
+                        IDictionary<int, string> financialRange = new Dictionary<int, string>()
+                        {
+                            { 1, "1000000" },
+                            { 2, "10000000" },
+                            { 3, "20000000" },
+                            { 4, "30000000" },
+                            { 5, "40000000" },
+                            { 6, "50000000" }
+                        };
+
+                        decimal lowerRange = 0, upperRange = 0;
+                        switch(model.FinancialRange)
+                        {
+                            case FinancialRangeConstants.OneToTenMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[1]);
+                                upperRange = Convert.ToDecimal(financialRange[2]);
+                                break;
+
+                            case FinancialRangeConstants.TenToTwentyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[2]);
+                                upperRange = Convert.ToDecimal(financialRange[3]);
+                                break;
+
+                            case FinancialRangeConstants.TwentyToThirtyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[3]);
+                                upperRange = Convert.ToDecimal(financialRange[4]);
+                                break;
+
+                            case FinancialRangeConstants.ThirtyToFourtyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[4]);
+                                upperRange = Convert.ToDecimal(financialRange[5]);
+                                break;
+
+                            case FinancialRangeConstants.FourtyToFiftyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[5]);
+                                upperRange = Convert.ToDecimal(financialRange[6]);
+                                break;
+
+                            case FinancialRangeConstants.GreaterThanFiftyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[6]);
+                                break;
+                        }
+
+                        if (lowerRange > 0 && upperRange > 0)
+                        {
+                            projectProfileList = (from p in projectProfileList
+                                                  where p.ProjectValue >= lowerRange &&
+                                                  p.ProjectValue <= upperRange
+                                                  orderby p.ProjectValue ascending
+                                                  select p);
+                        }
+                        else if (lowerRange > 0 && upperRange == 0)
+                        {
+                            projectProfileList = (from p in projectProfileList
+                                                  where p.ProjectValue >= lowerRange 
+                                                  orderby p.ProjectValue ascending
+                                                  select p);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -1714,18 +1787,7 @@ namespace AIMS.Services
                                 FundsPercentage = 100
                             });
                             unitWork.Save();
-
-                            /*var otherParentSector = unitWork.SectorRepository.GetOne(s => s.SectorName.Equals(OTHER, StringComparison.OrdinalIgnoreCase) && s.ParentSectorId == null);
-                            if (otherParentSector == null)
-                            {
-                                otherParentSector = unitWork.SectorRepository.Insert(new EFSector()
-                                {
-                                    SectorName = OTHER,
-                                    SectorType = primarySectorType,
-                                    ParentSector = null,
-                                    IsUnAttributed = false
-                                });
-                            }*/
+                           
                             var unattributedSector = unitWork.SectorRepository.GetOne(s => s.SectorName.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase));
                             if (unattributedSector == null)
                             {
@@ -4551,6 +4613,13 @@ namespace AIMS.Services
                 });
                 return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
+        }
+
+        public decimal GetExchangeRateForCurrency(string currency, List<CurrencyWithRates> ratesList)
+        {
+            return (from rate in ratesList
+                    where rate.Currency.Equals(currency)
+                    select rate.Rate).FirstOrDefault();
         }
     }
 }
