@@ -195,6 +195,48 @@ namespace AIMS.APIs.Controllers
             return Ok(successModel);
         }
         
+        [HttpGet("PromoteUser/{id}")]
+        public IActionResult PromoteUser(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid user id provided");
+            }
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdVal))
+            {
+                return BadRequest("Invalid attempt");
+            }
+            int loggedInUserId = Convert.ToInt32(userIdVal);
+            var response = userService.PromoteUser(id, loggedInUserId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpGet("DemoteUser/{id}")]
+        public IActionResult DemoteUser(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid user id provided");
+            }
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdVal))
+            {
+                return BadRequest("Invalid attempt");
+            }
+            int loggedInUserId = Convert.ToInt32(userIdVal);
+            var response = userService.DemoteUser(id, loggedInUserId);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpGet]
         [Route("[action]/{email}")]
         public IActionResult CheckEmailAvailability(string email)

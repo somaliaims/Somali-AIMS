@@ -382,6 +382,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string UnAuthorizedUserAccountChange();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string ManagerAccountCannotBeDemoted();
     }
 
     public class MessageHelper : IMessageHelper
@@ -425,6 +431,7 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_ENDING_FINANCIAL_YEAR = "The project you provided has a different ending financial year than provided for disbursements. Please change the financial year for project and try again";
         private readonly string UNAUTHORIZED_ORGANIZATIONS_MERGE = "You are not not authorized to approve/reject this request for organizations merge";
         private readonly string UNAUTHORIZED_USER_ACCOUNT_CHANGE = "You are not authorized to change user account settings";
+        private readonly string MANAGER_ACCOUNT_CANNOT_BE_DEMOTED = "There must be at least one manager account available all the times in AIMS. Account cannot be demoted.";
 
         public string GetNotFound(string entity)
         {
@@ -454,6 +461,11 @@ namespace AIMS.Services.Helpers
         public string UnAuthorizedUserAccountChange()
         {
             return (UNAUTHORIZED_USER_ACCOUNT_CHANGE);
+        }
+
+        public string ManagerAccountCannotBeDemoted()
+        {
+            return (MANAGER_ACCOUNT_CANNOT_BE_DEMOTED);
         }
 
         public string InvalidAccountDeletionAttempt()

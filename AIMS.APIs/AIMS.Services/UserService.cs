@@ -273,7 +273,6 @@ namespace AIMS.Services
                     return response;
                 }
 
-
                 userToPromote.UserType = UserTypes.Manager;
                 unitwork.UserRepository.Update(userToPromote);
                 unitwork.Save();
@@ -286,6 +285,48 @@ namespace AIMS.Services
             using (var unitwork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                var users = unitwork.UserRepository.GetManyQueryable(u => u.Id == userId || u.UserType == UserTypes.Manager);
+                var userToDemote = (from u in users
+                                     where u.Id == userId
+                                     select u).FirstOrDefault();
+
+                var managerUser = (from u in users
+                                   where u.Id == userId
+                                   && u.UserType == UserTypes.Manager
+                                   select u).FirstOrDefault();
+
+                if (userToDemote == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("User to promote");
+                    response.Success = false;
+                    return response;
+                }
+
+                if (managerUser == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.UnAuthorizedUserAccountChange();
+                    response.Success = false;
+                    return response;
+                }
+
+                var managerUserCount = (from u in users
+                                        where u.UserType == UserTypes.Manager
+                                        select u).Count();
+
+                if (managerUserCount <= 1)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.ManagerAccountCannotBeDemoted();
+                    response.Success = false;
+                    return response;
+                }
+
+                userToDemote.UserType = UserTypes.Standard;
+                unitwork.UserRepository.Update(userToDemote);
+                unitwork.Save();
                 return response;
             }
         }
