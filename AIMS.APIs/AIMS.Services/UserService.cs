@@ -114,6 +114,20 @@ namespace AIMS.Services
         ActionResponse ActivateUserAccount(UserApprovalModel model, string loginUrl);
 
         /// <summary>
+        /// Promotes user to management
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        ActionResponse PromoteUser(int userId, int loggedInUserId);
+
+        /// <summary>
+        /// Demotes user to standard
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        ActionResponse DemoteUser(int userId, int loggedInUserId);
+
+        /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
@@ -224,6 +238,55 @@ namespace AIMS.Services
                     }
                 }
                 return foundUser;
+            }
+        }
+
+        public ActionResponse PromoteUser(int userId, int loggedInUserId)
+        {
+            using (var unitwork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                var users = unitwork.UserRepository.GetManyQueryable(u => u.Id == userId || u.Id == loggedInUserId);
+                var userToPromote = (from u in users
+                                     where u.Id == userId
+                                     select u).FirstOrDefault();
+
+                var managerUser = (from u in users
+                                   where u.Id == userId
+                                   && u.UserType == UserTypes.Manager
+                                   select u).FirstOrDefault();
+
+                if (userToPromote == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("User to promote");
+                    response.Success = false;
+                    return response;
+                }
+
+                if (managerUser == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.UnAuthorizedUserAccountChange();
+                    response.Success = false;
+                    return response;
+                }
+
+
+                userToPromote.UserType = UserTypes.Manager;
+                unitwork.UserRepository.Update(userToPromote);
+                unitwork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse DemoteUser(int userId, int loggedInUserId)
+        {
+            using (var unitwork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                return response;
             }
         }
 

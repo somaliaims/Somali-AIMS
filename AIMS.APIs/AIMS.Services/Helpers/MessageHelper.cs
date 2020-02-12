@@ -376,6 +376,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string UnAuthorizedOrganizationsMerge();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string UnAuthorizedUserAccountChange();
     }
 
     public class MessageHelper : IMessageHelper
@@ -418,6 +424,7 @@ namespace AIMS.Services.Helpers
         private readonly string INVALID_STARTING_FINANCIAL_YEAR = "The project you provided has a different starting financial year than provided for disbursements. Please change the financial year for project and try again";
         private readonly string INVALID_ENDING_FINANCIAL_YEAR = "The project you provided has a different ending financial year than provided for disbursements. Please change the financial year for project and try again";
         private readonly string UNAUTHORIZED_ORGANIZATIONS_MERGE = "You are not not authorized to approve/reject this request for organizations merge";
+        private readonly string UNAUTHORIZED_USER_ACCOUNT_CHANGE = "You are not authorized to change user account settings";
 
         public string GetNotFound(string entity)
         {
@@ -442,6 +449,11 @@ namespace AIMS.Services.Helpers
         public string GetInvalidAttempt(string entity)
         {
             return (entity + INVALID_ATTEMPT);
+        }
+
+        public string UnAuthorizedUserAccountChange()
+        {
+            return (UNAUTHORIZED_USER_ACCOUNT_CHANGE);
         }
 
         public string InvalidAccountDeletionAttempt()
