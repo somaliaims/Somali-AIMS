@@ -137,6 +137,7 @@ namespace AIMS.APIs.Controllers
             {
                 UserReturnView uView = new UserReturnView()
                 {
+                    Id = foundUser.Id,
                     Token = null,
                     UserType = 0,
                     OrganizationId = foundUser.OrganizationId,
@@ -163,6 +164,7 @@ namespace AIMS.APIs.Controllers
                 var jwtToken = tManager.GenerateToken(tModel);
                 UserReturnView uView = new UserReturnView()
                 {
+                    Id = foundUser.Id,
                     Token = jwtToken,
                     UserType = foundUser.UserType,
                     OrganizationId = foundUser.OrganizationId,
@@ -208,6 +210,10 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid attempt");
             }
             int loggedInUserId = Convert.ToInt32(userIdVal);
+            if (id == loggedInUserId)
+            {
+                return BadRequest("You cannot promote your own account");
+            }
             var response = userService.PromoteUser(id, loggedInUserId);
             if (!response.Success)
             {
@@ -229,6 +235,10 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid attempt");
             }
             int loggedInUserId = Convert.ToInt32(userIdVal);
+            if (id == loggedInUserId)
+            {
+                return BadRequest("You cannot demote your own account");
+            }
             var response = userService.DemoteUser(id, loggedInUserId);
             if (!response.Success)
             {

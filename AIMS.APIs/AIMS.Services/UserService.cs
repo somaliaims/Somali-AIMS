@@ -180,10 +180,14 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                List<UserView> usersList = new List<UserView>();
                 var users = unitWork.UserRepository.GetWithInclude(u => u.Id != 0 && u.UserType == UserTypes.Standard, new string[] { "Organization" });
-                usersList = mapper.Map<List<UserView>>(users);
-                return usersList;
+                if (users.Any())
+                {
+                    users = (from user in users
+                             orderby user.Email
+                             select user);
+                }
+                return mapper.Map<List<UserView>>(users);
             }
         }
 
@@ -191,10 +195,14 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                List<UserView> usersList = new List<UserView>();
                 var users = unitWork.UserRepository.GetWithInclude(u => u.Id != 0 && u.UserType == UserTypes.Manager, new string[] { "Organization" });
-                usersList = mapper.Map<List<UserView>>(users);
-                return usersList;
+                if (users.Any())
+                {
+                    users = (from user in users
+                             orderby user.Email
+                             select user);
+                }
+                return mapper.Map<List<UserView>>(users);
             }
         }
 
@@ -253,7 +261,7 @@ namespace AIMS.Services
                                      select u).FirstOrDefault();
 
                 var managerUser = (from u in users
-                                   where u.Id == userId
+                                   where u.Id == loggedInUserId
                                    && u.UserType == UserTypes.Manager
                                    select u).FirstOrDefault();
 
@@ -292,7 +300,7 @@ namespace AIMS.Services
                                      select u).FirstOrDefault();
 
                 var managerUser = (from u in users
-                                   where u.Id == userId
+                                   where u.Id == loggedInUserId
                                    && u.UserType == UserTypes.Manager
                                    select u).FirstOrDefault();
 

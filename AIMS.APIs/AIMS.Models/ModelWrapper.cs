@@ -620,6 +620,7 @@ namespace AIMS.Models
 
     public class UserReturnView
     {
+        public int Id { get; set; }
         public string Token { get; set; }
         public int OrganizationId { get; set; }
         public string OrganizationName { get; set; }
