@@ -1850,7 +1850,7 @@ namespace AIMS.Services
                             await unitWork.SaveAsync();
                             response.ReturnedId = newProject.Id;
 
-                            var unattributedLocation = unitWork.LocationRepository.GetOne(l => l.Location.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase));
+                            /*var unattributedLocation = unitWork.LocationRepository.GetOne(l => l.Location.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase));
                             if (unattributedLocation == null)
                             {
                                 unattributedLocation = unitWork.LocationRepository.Insert(new EFLocation()
@@ -1888,7 +1888,7 @@ namespace AIMS.Services
                                 Sector = unattributedSector,
                                 FundsPercentage = 100
                             });
-                            unitWork.Save();
+                            unitWork.Save();*/
                             transaction.Commit();
                         }
                     });
