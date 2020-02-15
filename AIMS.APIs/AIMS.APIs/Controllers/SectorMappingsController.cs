@@ -20,6 +20,12 @@ namespace AIMS.APIs.Controllers
             mappingService = mService;
         }
 
+        [HttpGet("GetAllMappings")]
+        public IActionResult GetAllMappings()
+        {
+            return Ok(mappingService.GetAllMappings());
+        }
+
         [HttpGet]
         [Route("GetForSector/{id}")]
         public IActionResult GetForSector(int id)
@@ -60,6 +66,17 @@ namespace AIMS.APIs.Controllers
         public async Task<IActionResult> Add(SectorMappingsModel model)
         {
             var response = await mappingService.AddAsync(model);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddOrUpdate(SectorMappingModel model)
+        {
+            var response = await mappingService.AddOrUpdateAsync(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

@@ -559,6 +559,14 @@ namespace AIMS.Models
         public List<int> MappingIds { get; set; }
     }
 
+    public class SectorMappingModel
+    {
+        [Required]
+        public int SectorTypeId { get; set; }
+        public int SectorId { get; set; }
+        public int MappingId { get; set; }
+    }
+
     public class MappingSectors
     {
         public int SectorTypeId { get; set; }

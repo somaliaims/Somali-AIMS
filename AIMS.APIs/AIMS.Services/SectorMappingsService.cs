@@ -15,6 +15,12 @@ namespace AIMS.Services
     public interface ISectorMappingsService
     {
         /// <summary>
+        /// Gets all mappings
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<SectorView> GetAllMappings();
+
+        /// <summary>
         /// Gets list of mappings for provided sector id
         /// </summary>
         /// <returns></returns>
@@ -40,6 +46,13 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <returns></returns>
         Task<ActionResponse> AddAsync(SectorMappingsModel model);
+
+        /// <summary>
+        /// Adds or update sector mapping
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        Task<ActionResponse> AddOrUpdateAsync(SectorMappingModel model);
 
         /// <summary>
         /// Deletes a mapping
@@ -123,6 +136,30 @@ namespace AIMS.Services
                 }
                 
                 return mappingsView;
+            }
+        }
+
+        public IEnumerable<SectorView> GetAllMappings()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<SectorView> mappingsList = new List<SectorView>();
+                var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsPrimary == true);
+                IEnumerable<EFSector> sectorsList = new List<EFSector>();
+
+                if (sectorType != null)
+                {
+                    var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => (m.SectorId != 0));
+                    List<int> mappingIds = new List<int>();
+                    if (mappings != null)
+                    {
+                        mappingIds = (from s in mappings
+                                      select s.MappedSectorId).ToList<int>();
+
+                        sectorsList = unitWork.SectorRepository.GetManyQueryable(s => mappingIds.Contains(s.Id));
+                    }
+                }
+                return mapper.Map<List<SectorView>>(sectorsList);
             }
         }
 
@@ -258,6 +295,91 @@ namespace AIMS.Services
                     });
                 }
                 catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+            }
+        }
+
+        public async Task<ActionResponse> AddOrUpdateAsync(SectorMappingModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                try
+                {
+                    var sectorType = unitWork.SectorTypesRepository.GetByID(model.SectorTypeId);
+                    if (sectorType == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Sector Type");
+                        return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                    }
+
+                    if (sectorType.IsPrimary == true)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.InvalidSectorMapping(sectorType.TypeName);
+                        return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                    }
+
+                    var sectors = unitWork.SectorRepository.GetManyQueryable(s => (model.MappingId == s.Id) || (s.Id == model.SectorId));
+                    var sector = (from s in sectors
+                                  where s.Id == model.SectorId
+                                  select s).FirstOrDefault();
+
+                    if (sector == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Sector to map");
+                        return response;
+                    }
+
+                    var sectorToMap = (from s in sectors
+                                  where s.Id == model.MappingId
+                                  select s).FirstOrDefault();
+
+                    if (sectorToMap == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("Primary sector for mapping");
+                        return response;
+                    }
+
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
+                    {
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            var sectorMapping = await unitWork.SectorMappingsRepository.GetOneAsync(m => m.SectorId == model.SectorId);
+                            if (sectorMapping == null)
+                            {
+                                unitWork.SectorMappingsRepository.Insert(new EFSectorMappings()
+                                {
+                                    SectorId = sector.Id,
+                                    SectorTypeId = sectorType.Id,
+                                    MappedSectorId = sectorToMap.Id
+                                });
+                                await unitWork.SaveAsync();
+                            } 
+                            else
+                            {
+                                sectorMapping.MappedSectorId = sectorToMap.Id;
+                                unitWork.SectorMappingsRepository.Update(sectorMapping);
+                                await unitWork.SaveAsync();
+                                transaction.Commit();
+                            }
+                        }
+                    });
+                }
+                catch (Exception ex)
                 {
                     response.Success = false;
                     response.Message = ex.Message;
