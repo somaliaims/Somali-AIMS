@@ -374,8 +374,8 @@ namespace AIMS.Services
                                 sectorMapping.MappedSectorId = sectorToMap.Id;
                                 unitWork.SectorMappingsRepository.Update(sectorMapping);
                                 await unitWork.SaveAsync();
-                                transaction.Commit();
                             }
+                            transaction.Commit();
                         }
                     });
                 }

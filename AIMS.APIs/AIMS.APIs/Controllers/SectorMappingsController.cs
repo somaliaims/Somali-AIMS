@@ -73,7 +73,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
-        [HttpPost]
+        [HttpPost("AddOrUpdate")]
         public async Task<IActionResult> AddOrUpdate(SectorMappingModel model)
         {
             var response = await mappingService.AddOrUpdateAsync(model);
