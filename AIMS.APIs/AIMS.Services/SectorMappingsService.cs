@@ -18,7 +18,7 @@ namespace AIMS.Services
         /// Gets all mappings
         /// </summary>
         /// <returns></returns>
-        IEnumerable<SectorView> GetAllMappings();
+        IEnumerable<SectorMappingView> GetAllMappings();
 
         /// <summary>
         /// Gets list of mappings for provided sector id
@@ -139,27 +139,18 @@ namespace AIMS.Services
             }
         }
 
-        public IEnumerable<SectorView> GetAllMappings()
+        public IEnumerable<SectorMappingView> GetAllMappings()
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                List<SectorView> mappingsList = new List<SectorView>();
+                IQueryable<EFSectorMappings> mappings = null;
                 var sectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsPrimary == true);
-                IEnumerable<EFSector> sectorsList = new List<EFSector>();
 
                 if (sectorType != null)
                 {
-                    var mappings = unitWork.SectorMappingsRepository.GetManyQueryable(m => (m.SectorId != 0));
-                    List<int> mappingIds = new List<int>();
-                    if (mappings != null)
-                    {
-                        mappingIds = (from s in mappings
-                                      select s.MappedSectorId).ToList<int>();
-
-                        sectorsList = unitWork.SectorRepository.GetManyQueryable(s => mappingIds.Contains(s.Id));
-                    }
+                    mappings = unitWork.SectorMappingsRepository.GetWithInclude(m => (m.SectorId != 0));
                 }
-                return mapper.Map<List<SectorView>>(sectorsList);
+                return mapper.Map<List<SectorMappingView>>(mappings);
             }
         }
 
@@ -358,23 +349,19 @@ namespace AIMS.Services
                     {
                         using (var transaction = context.Database.BeginTransaction())
                         {
-                            var sectorMapping = await unitWork.SectorMappingsRepository.GetOneAsync(m => m.SectorId == model.SectorId);
-                            if (sectorMapping == null)
+                            var sectorMappings = await unitWork.SectorMappingsRepository.GetManyQueryableAsync(m => m.SectorId == model.SectorId);
+                            foreach(var mapping in sectorMappings)
                             {
-                                unitWork.SectorMappingsRepository.Insert(new EFSectorMappings()
-                                {
-                                    SectorId = sector.Id,
-                                    SectorTypeId = sectorType.Id,
-                                    MappedSectorId = sectorToMap.Id
-                                });
-                                await unitWork.SaveAsync();
-                            } 
-                            else
-                            {
-                                sectorMapping.MappedSectorId = sectorToMap.Id;
-                                unitWork.SectorMappingsRepository.Update(sectorMapping);
+                                unitWork.SectorMappingsRepository.Delete(mapping);
                                 await unitWork.SaveAsync();
                             }
+                            unitWork.SectorMappingsRepository.Insert(new EFSectorMappings()
+                            {
+                                SectorId = sector.Id,
+                                SectorTypeId = sectorType.Id,
+                                MappedSectorId = sectorToMap.Id
+                            });
+                            await unitWork.SaveAsync();
                             transaction.Commit();
                         }
                     });

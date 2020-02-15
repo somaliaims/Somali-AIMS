@@ -580,6 +580,12 @@ namespace AIMS.Models
         public string Sector { get; set; }
     }
 
+    public class SectorMappingView
+    {
+        public int SectorId { get; set; }
+        public int MappedSectorId { get; set; }
+    }
+
     public class SectorMappingsView
     {
         public string Sector { get; set; }
