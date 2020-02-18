@@ -192,6 +192,16 @@ namespace AIMS.Services.Helpers
                 queryString += ("&eyear=" + model.EndingYear);
             }
 
+            if (model.MarkerId > 0)
+            {
+                queryString += ("&mid=" + model.MarkerId);
+            }
+
+            if (!string.IsNullOrEmpty(model.MarkerValue))
+            {
+                queryString += ("&mvalue=" + model.MarkerValue.Replace(" ", "+"));
+            }
+
             if (model.ChartType > 0)
             {
                 queryString += ("&ctype=" + model.ChartType);

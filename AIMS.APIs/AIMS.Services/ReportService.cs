@@ -2073,53 +2073,7 @@ namespace AIMS.Services
                             }
                         }
                     }
-
-                    /*if (model.StartingYear > 0 || model.EndingYear > 0)
-                    {
-                        if (projectProfileList == null)
-                        {
-                            if (model.StartingYear > 0 && model.EndingYear <= 0)
-                            {
-                                projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartingFinancialYear.FinancialYear == model.StartingYear)),
-                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
-                            }
-
-                            else if (model.EndingYear > 0 && model.StartingYear <= 0)
-                            {
-                                projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.EndingFinancialYear.FinancialYear == model.EndingYear)),
-                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
-                            }
-
-                            else if (model.StartingYear > 0 && model.EndingYear > 0)
-                            {
-                                projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartingFinancialYear.FinancialYear >= model.StartingYear && p.EndingFinancialYear.FinancialYear <= model.EndingYear)),
-                                    new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
-                            }
-                        }
-                        else
-                        {
-                            if (model.StartingYear > 0 && model.EndingYear <= 0)
-                            {
-                                projectProfileList = from project in projectProfileList
-                                                     where project.StartingFinancialYear.FinancialYear == model.StartingYear
-                                                     select project;
-                            }
-                            else if (model.EndingYear > 0 && model.StartingYear <= 0)
-                            {
-                                projectProfileList = from project in projectProfileList
-                                                     where project.EndingFinancialYear.FinancialYear == model.EndingYear
-                                                     select project;
-                            }
-                            else if (model.StartingYear > 0 && model.EndingYear > 0)
-                            {
-                                projectProfileList = from project in projectProfileList
-                                                     where project.StartingFinancialYear.FinancialYear >= model.StartingYear
-                                                     && project.EndingFinancialYear.FinancialYear <= model.EndingYear
-                                                     select project;
-                            }
-                        }
-                    }*/
-
+                    
                     if (model.OrganizationIds.Count > 0)
                     {
                         var projectIdsFunders = unitWork.ProjectFundersRepository.GetProjection(f => model.OrganizationIds.Contains(f.FunderId), f => f.ProjectId);
@@ -2160,6 +2114,43 @@ namespace AIMS.Services
                             projectProfileList = from project in projectProfileList
                                                  where projectIdsList.Contains(project.Id)
                                                  select project;
+                        }
+                    }
+
+                    if (model.MarkerId != 0)
+                    {
+                        List<int> projectIds = new List<int>();
+                        string value = model.MarkerValue;
+                        var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId && m.Values.Equals(model.MarkerValue, StringComparison.OrdinalIgnoreCase));
+                        if (!string.IsNullOrEmpty(value))
+                        {
+                            foreach (var marker in projectMarkers)
+                            {
+                                if (marker.Values.Split(",").Contains(value))
+                                {
+                                    projectIds.Add(marker.ProjectId);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            projectIds = (from p in projectMarkers
+                                          select p.ProjectId).ToList();
+                        }
+
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id)
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
+                        }
+                        else
+                        {
+                            if (projectProfileList.Any())
+                            {
+                                projectProfileList = (from p in projectProfileList
+                                                      where projectIds.Contains(p.Id)
+                                                      select p);
+                            }
                         }
                     }
 

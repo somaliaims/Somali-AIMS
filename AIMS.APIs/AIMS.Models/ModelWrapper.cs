@@ -1850,6 +1850,8 @@ namespace AIMS.Models
         public int EndingYear { get; set; } = 0;
         public int ChartType { get; set; } = 0;
         public int LocationId { get; set; }
+        public int MarkerId { get; set; }
+        public string MarkerValue { get; set; }
         public List<int> SectorIds { get; set; } = new List<int>();
     }
 
