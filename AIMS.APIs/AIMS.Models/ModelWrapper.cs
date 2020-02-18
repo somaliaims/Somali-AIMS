@@ -453,6 +453,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public int SectorTypeId { get; set; }
         public string SectorType { get; set; }
+        public int ParentSectorId { get; set; }
         public string ParentSector { get; set; }
         public string SectorName { get; set; }
         public string SectorWithCode { get; set; }

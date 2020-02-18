@@ -1689,6 +1689,43 @@ namespace AIMS.Services
                         }
                     }
 
+                    if (model.MarkerId != 0)
+                    {
+                        List<int> projectIds = new List<int>();
+                        string value = model.MarkerValue;
+                        var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId && m.Values.Equals(model.MarkerValue, StringComparison.OrdinalIgnoreCase));
+                        if (!string.IsNullOrEmpty(value))
+                        {
+                            foreach (var marker in projectMarkers)
+                            {
+                                if (marker.Values.Split(",").Contains(value))
+                                {
+                                    projectIds.Add(marker.ProjectId);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            projectIds = (from p in projectMarkers
+                                          select p.ProjectId).ToList();
+                        }
+
+                        if (projectProfileList == null)
+                        {
+                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => projectIds.Contains(p.Id)
+                            , new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Markers", "Markers.Marker" });
+                        }
+                        else
+                        {
+                            if (projectProfileList.Any())
+                            {
+                                projectProfileList = (from p in projectProfileList
+                                                      where projectIds.Contains(p.Id)
+                                                      select p);
+                            }
+                        }
+                    }
+
                     if (projectProfileList == null)
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.EndingFinancialYear.FinancialYear >= year),
