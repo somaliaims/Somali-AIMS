@@ -69,6 +69,15 @@ namespace AIMS.Services
         Task<ProjectsBudgetReportSummary> GetProjectsBudgetReportSummary(string reportUrl, string defaultCurrency, decimal exchangeRate, int chartType = 0);
 
         /// <summary>
+        /// Gets budget report
+        /// </summary>
+        /// <param name="reportUrl"></param>
+        /// <param name="defaultCurrency"></param>
+        /// <param name="chartType"></param>
+        /// <returns></returns>
+        Task<BudgetReport> GetBudgetReport(string reportUrl, string defaultCurrency, decimal exchangeRate, int chartType = 0);
+
+        /// <summary>
         /// Gets envelope report
         /// </summary>
         /// <param name="model"></param>
@@ -1015,6 +1024,107 @@ namespace AIMS.Services
                     string error = ex.Message;
                 }
                 return await Task<ProjectProfileReportByLocation>.Run(() => locationProjectsReport).ConfigureAwait(false);
+            }
+        }
+
+        public async Task<BudgetReport> GetBudgetReport(string reportUrl, string defaultCurrency, decimal exchangeRate, int chartType = 0)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                exchangeRate = (exchangeRate <= 0) ? 1 : exchangeRate;
+                BudgetReport budgetReport = new BudgetReport();
+                IQueryable<EFProject> projectProfileList = null;
+                try
+                {
+                    string queryString = "?load=true";
+                    if (chartType != 0)
+                    {
+                        queryString += "&ctype=" + chartType;
+                    }
+                    budgetReport.ReportSettings = new Report()
+                    {
+                        Title = ReportConstants.PROJECTS_BUDGET_REPORT_TITLE,
+                        SubTitle = ReportConstants.PROJECTS_BUDGET_REPORT_SUBTITLE,
+                        Footer = ReportConstants.PROJECTS_BUDGET_REPORT_FOOTER,
+                        Dated = DateTime.Now.ToLongDateString(),
+                        ReportUrl = reportUrl + ReportConstants.BUDGET_REPORT_URL + queryString
+                    };
+
+                    int currentYear = DateTime.Now.Year;
+                    int previousYear = (currentYear - 1);
+                    int futureYearsLimit = (currentYear + 3);
+
+                    List<ProjectBudgetSummaryView> projectBudgetsList = new List<ProjectBudgetSummaryView>();
+
+                    projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndingFinancialYear.FinancialYear >= currentYear,
+                            new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Disbursements", "Disbursements.Year" });
+
+                    projectProfileList = (from p in projectProfileList
+                                          orderby p.DateUpdated descending
+                                          select p);
+                    List<int> projectIds = (from p in projectProfileList
+                                            select p.Id).ToList();
+
+                    UtilityHelper utilityHelper = new UtilityHelper();
+                    List<YearlyTotalDisbursementsSummary> totalDisbursementsSummaryList = new List<YearlyTotalDisbursementsSummary>();
+                    var sectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsPrimary == true && s.ParentSector != null, new string[] { "SectorType" });
+                    if (sectors.Any())
+                    {
+                        sectors = (from sector in sectors
+                                   orderby sector.SectorName
+                                   select sector);
+                    }
+                    var locations = unitWork.LocationRepository.GetProjection(l => l.Id != 0, l => new { l.Id, l.Location });
+                    if (locations.Any())
+                    {
+                        locations = (from location in locations
+                                     orderby location.Location
+                                     select location);
+                    }
+
+                    var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear >= previousYear && y.FinancialYear <= futureYearsLimit);
+                    var projectDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => projectIds.Contains(d.ProjectId), "FinancialYear");
+                    var projectSectors = unitWork.ProjectSectorsRepository.GetManyQueryable(s => projectIds.Contains(s.ProjectId));
+                    List<BudgetSectorDisbursements> yearlySectorDisbursements = new List<BudgetSectorDisbursements>();
+                    foreach (var sector in sectors)
+                    {
+                        var sectorProjectIds = (from s in projectSectors
+                                                where s.SectorId == sector.Id
+                                                select s.ProjectId);
+
+                        for(int yr = previousYear; yr <= futureYearsLimit; yr++)
+                        {
+                            decimal yearlyDisbursementsForProject = 0;
+                            foreach(var project in projectProfileList)
+                            {
+                                if (project.Sectors.Any())
+                                {
+                                    var sectorPercentage = (from s in project.Sectors
+                                                            where s.SectorId == sector.Id
+                                                            select s.FundsPercentage).FirstOrDefault();
+
+                                    if (sectorPercentage > 0)
+                                    {
+                                        decimal amountPercentage = 0;
+                                        if (project.Disbursements.Any())
+                                        {
+                                            amountPercentage = (from d in project.Disbursements
+                                                                             where d.Year.FinancialYear == yr
+                                                                             select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum();
+                                        }
+                                        yearlyDisbursementsForProject += amountPercentage;
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    string message = ex.Message; 
+                }
+                return await Task<BudgetReport>.Run(() => budgetReport).ConfigureAwait(false);
             }
         }
 
