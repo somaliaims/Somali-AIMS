@@ -1082,7 +1082,34 @@ namespace AIMS.Services
                                      select location);
                     }
 
-                    var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear >= previousYear && y.FinancialYear <= futureYearsLimit);
+                    int fyMonth = 1, fyDay = 1;
+                    var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(s => s.Id != 0);
+                    if (fySettings != null)
+                    {
+                        fyMonth = fySettings.Month;
+                        fyDay = fySettings.Day;
+                    }
+                    bool isSimilarToCalendarYear = (fyMonth == 1 && fyDay == 1) ? true : false;
+                    List<BudgetFinancialYears> yearsList = new List<BudgetFinancialYears>();
+                    var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear >= previousYear && y.FinancialYear <= futureYearsLimit).ToList();
+                    for(int yr=previousYear; yr <= futureYearsLimit; yr++)
+                    {
+                        var financialYear = (from f in financialYears
+                                             where f.FinancialYear == yr
+                                             select f).FirstOrDefault();
+                        if (financialYear == null)
+                        {
+                            string label = (isSimilarToCalendarYear) ? ("FY " + yr) : ("FY " + yr + "/" + (yr + 1)); 
+                            financialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                            {
+                                Label = label,
+                                FinancialYear = yr
+                            });
+                            unitWork.Save();
+                            financialYears.Add(financialYear);
+                        }
+                        yearsList.Add(new BudgetFinancialYears() { Year = yr, Label = financialYear.Label });
+                    }
                     var projectDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => projectIds.Contains(d.ProjectId), "FinancialYear");
                     var projectSectors = unitWork.ProjectSectorsRepository.GetManyQueryable(s => projectIds.Contains(s.ProjectId));
                     var projectLocations = unitWork.ProjectLocationsRepository.GetManyQueryable(l => projectIds.Contains(l.ProjectId));
@@ -1128,7 +1155,7 @@ namespace AIMS.Services
                             disbursements.Add(new YearlyDisbursements()
                             {
                                 Year = yr,
-                                TotalValue = yearlyDisbursementsTotal
+                                TotalValue = Math.Round(yearlyDisbursementsTotal, MidpointRounding.AwayFromZero)
                             });
                         }
                         sectorDisbursements.Disbursements = disbursements;
@@ -1174,12 +1201,13 @@ namespace AIMS.Services
                             disbursements.Add(new YearlyDisbursements()
                             {
                                 Year = yr,
-                                TotalValue = yearlyDisbursementsTotal
+                                TotalValue = Math.Round(yearlyDisbursementsTotal, MidpointRounding.AwayFromZero)
                             });
                         }
                         locationDisbursements.Disbursements = disbursements;
                         yearlyLocationDisbursements.Add(locationDisbursements);
                     }
+                    budgetReport.Years = yearsList;
                     budgetReport.SectorDisbursements = yearlySectorDisbursements;
                     budgetReport.LocationDisbursements = yearlyLocationDisbursements;
                 }

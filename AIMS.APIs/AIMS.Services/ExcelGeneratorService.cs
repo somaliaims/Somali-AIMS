@@ -47,6 +47,13 @@ namespace AIMS.Services
         ActionResponse GenerateProjectBudgetReportSummary(ProjectsBudgetReportSummary report);
 
         /// <summary>
+        /// Generates excel for project budget report
+        /// </summary>
+        /// <param name="report"></param>
+        /// <returns></returns>
+        ActionResponse GenerateBudgetReport(BudgetReport report);
+
+        /// <summary>
         /// Generates excel report for Envelope
         /// </summary>
         /// <param name="report"></param>
@@ -993,6 +1000,179 @@ namespace AIMS.Services
             {
                 response.Message = ex.Message;
                 response.Success = false;
+            }
+            return response;
+        }
+
+        public ActionResponse GenerateBudgetReport(BudgetReport report)
+        {
+            ActionResponse response = new ActionResponse();
+            try
+            {
+                var yearsList = (from y in report.Years
+                                       orderby y.Year ascending
+                                       select y).ToList();
+
+                string sFileName = @"ProjectBudget-" + DateTime.UtcNow.Ticks.ToString() + ".xlsx";
+                FileInfo file = new FileInfo(Path.Combine(sWebRootFolder, sFileName));
+                var memory = new MemoryStream();
+                using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
+                {
+                    int rowCounter = 0, totalColumns = 7;
+                    IWorkbook workbook;
+                    workbook = new XSSFWorkbook();
+                    ISheet excelSheet = workbook.CreateSheet("Report");
+
+                    ICellStyle titleStyle = workbook.CreateCellStyle();
+                    IFont fontTitle = workbook.CreateFont();
+                    fontTitle.Color = IndexedColors.DarkBlue.Index;
+                    fontTitle.IsBold = true;
+                    fontTitle.FontHeightInPoints = 16;
+                    titleStyle.SetFont(fontTitle);
+                    titleStyle.Alignment = HorizontalAlignment.CenterSelection;
+                    titleStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle linkStyle = workbook.CreateCellStyle();
+                    IFont linkFont = workbook.CreateFont();
+                    linkFont.Color = IndexedColors.DarkBlue.Index;
+                    linkFont.IsBold = true;
+                    linkFont.FontHeightInPoints = 14;
+                    linkStyle.SetFont(linkFont);
+                    linkStyle.Alignment = HorizontalAlignment.CenterSelection;
+                    linkStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle headerStyle = workbook.CreateCellStyle();
+                    IFont fontHeader = workbook.CreateFont();
+                    fontHeader.Color = IndexedColors.Black.Index;
+                    fontHeader.IsBold = true;
+                    fontHeader.FontHeightInPoints = 12;
+                    headerStyle.SetFont(fontHeader);
+                    headerStyle.Alignment = HorizontalAlignment.Center;
+                    headerStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle highlightStyle = workbook.CreateCellStyle();
+                    IFont fontHighlight = workbook.CreateFont();
+                    fontHighlight.Color = IndexedColors.DarkBlue.Index;
+                    fontHighlight.FontHeightInPoints = 12;
+                    highlightStyle.SetFont(fontHighlight);
+                    highlightStyle.Alignment = HorizontalAlignment.Center;
+                    highlightStyle.VerticalAlignment = VerticalAlignment.Center;
+
+
+                    ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
+                    IFont groupFontHeader = workbook.CreateFont();
+                    groupFontHeader.Color = IndexedColors.DarkYellow.Index;
+                    groupFontHeader.FontHeightInPoints = 12;
+                    groupFontHeader.IsBold = true;
+                    groupHeaderStyle.SetFont(groupFontHeader);
+                    groupHeaderStyle.Alignment = HorizontalAlignment.Center;
+                    groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle dataCellStyle = workbook.CreateCellStyle();
+                    dataCellStyle.WrapText = true;
+                    dataCellStyle.Alignment = HorizontalAlignment.Center;
+                    dataCellStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    IRow row = excelSheet.CreateRow(rowCounter);
+                    row.CreateCell(0, CellType.Blank);
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns
+                        ));
+
+                    row = excelSheet.CreateRow(++rowCounter);
+                    var titleCell = row.CreateCell(0, CellType.String);
+                    titleCell.SetCellValue("SomaliAIMS budget report - generated on " + DateTime.Now.ToLongDateString());
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns));
+                    titleCell.CellStyle = titleStyle;
+
+                    row = excelSheet.CreateRow(++rowCounter);
+                    row.CreateCell(0, CellType.Blank);
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns
+                        ));
+
+                    row = excelSheet.CreateRow(++rowCounter);
+                    var sectorHeaderCell = row.CreateCell(0, CellType.String);
+                    sectorHeaderCell.SetCellValue("Sectors");
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns));
+                    sectorHeaderCell.CellStyle = titleStyle;
+
+                    row = excelSheet.CreateRow(++rowCounter);
+                    row.CreateCell(0, CellType.Blank);
+                    int index = 0;
+                    foreach (var year in yearsList)
+                    {
+                        var yearCol = row.CreateCell(++index);
+                        yearCol.SetCellValue(year.Label);
+                        yearCol.CellStyle = headerStyle;
+                    }
+
+                    var sectorDisbursements = report.SectorDisbursements;
+                    foreach(var disbursement in sectorDisbursements)
+                    {
+                        row = excelSheet.CreateRow(++rowCounter);
+                        var sectorCell = row.CreateCell(0, CellType.String);
+                        sectorCell.SetCellValue(disbursement.SectorName);
+                        sectorCell.CellStyle = dataCellStyle;
+
+                        index = 0;
+                        foreach(var yearDisbursement in disbursement.Disbursements)
+                        {
+                            var disbursementCol = row.CreateCell(++index, CellType.Numeric);
+                            disbursementCol.SetCellValue(yearDisbursement.TotalValue.ToString());
+                            disbursementCol.CellStyle = dataCellStyle;
+                        }
+                    }
+
+                    row = excelSheet.CreateRow(++rowCounter);
+                    var locationHeaderCell = row.CreateCell(0, CellType.String);
+                    locationHeaderCell.SetCellValue("Locations");
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns));
+                    locationHeaderCell.CellStyle = titleStyle;
+
+                    var locationDisbursements = report.LocationDisbursements;
+                    foreach (var disbursement in locationDisbursements)
+                    {
+                        row = excelSheet.CreateRow(++rowCounter);
+                        var sectorCell = row.CreateCell(0, CellType.String);
+                        sectorCell.SetCellValue(disbursement.LocationName);
+                        sectorCell.CellStyle = dataCellStyle;
+
+                        index = 0;
+                        foreach (var yearDisbursement in disbursement.Disbursements)
+                        {
+                            var disbursementCol = row.CreateCell(++index, CellType.Numeric);
+                            disbursementCol.SetCellValue(yearDisbursement.TotalValue.ToString());
+                            disbursementCol.CellStyle = dataCellStyle;
+                        }
+                    }
+
+                    row = excelSheet.CreateRow(++rowCounter);
+                    var emptyCell = row.CreateCell(0, CellType.Blank);
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns));
+
+                    row = excelSheet.CreateRow(++rowCounter);
+                    var linkCell = row.CreateCell(0, CellType.String);
+                    XSSFHyperlink urlLink = new XSSFHyperlink(HyperlinkType.Url)
+                    {
+                        Address = report.ReportSettings.ReportUrl
+                    };
+                    linkCell.SetCellValue("Click to view latest report");
+                    linkCell.Hyperlink = (urlLink);
+                    linkCell.CellStyle = linkStyle;
+                    excelSheet.AddMergedRegion(new CellRangeAddress(
+                        rowCounter, rowCounter, 0, totalColumns));
+
+                    workbook.Write(fs);
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
             }
             return response;
         }

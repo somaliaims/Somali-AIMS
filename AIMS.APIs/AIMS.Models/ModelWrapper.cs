@@ -1596,8 +1596,15 @@ namespace AIMS.Models
     public class BudgetReport
     {
         public Report ReportSettings { get; set; }
+        public IEnumerable<BudgetFinancialYears> Years { get; set; }
         public IEnumerable<BudgetSectorDisbursements> SectorDisbursements { get; set; }
         public IEnumerable<BudgetLocationDisbursements> LocationDisbursements { get; set; }
+    }
+
+    public class BudgetFinancialYears
+    {
+        public int Year { get; set; }
+        public string Label { get; set; }
     }
 
     public class SearchAllProjectsModel

@@ -74,6 +74,46 @@ namespace AIMS.APIs.Controllers
             return Ok(report);
         }
 
+        [HttpGet]
+        [Route("GetBudgetReport")]
+        public async Task<IActionResult> GetBudgetReport()
+        {
+            var defaultCurrencyObj = currencyService.GetDefaultCurrency();
+            if (defaultCurrencyObj == null)
+            {
+                return BadRequest("Default currency is not set. Please contact administrator");
+            }
+
+            string defaultCurrency = defaultCurrencyObj.Currency;
+            decimal exchangeRate = 1;
+            if (!string.IsNullOrEmpty(defaultCurrency))
+            {
+                var dated = DateTime.Now;
+                var rates = await ratesService.GetCurrencyRatesForDate(dated);
+                if (rates.Rates == null)
+                {
+                    string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                    rates = await ratesHttpService.GetRatesAsync(apiKey);
+                    if (rates.Rates != null)
+                    {
+                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                    }
+                }
+                else
+                {
+                    exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                }
+            }
+            var report = await reportService.GetBudgetReport(clientUrl, defaultCurrency, exchangeRate);
+            var response = excelService.GenerateBudgetReport(report);
+            if (response.Success)
+            {
+                report.ReportSettings.ExcelReportName = response.Message;
+            }
+            return Ok(report);
+        }
+
         [HttpGet("GetProjectReport/{id}")]
         public async Task<IActionResult> GetProjectReport(int id)
         {
