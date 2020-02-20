@@ -1710,6 +1710,7 @@ namespace AIMS.Models
     {
         public int SectorId { get; set; }
         public string SectorName { get; set; }
+        public List<YearlyDisbursements> Disbursements { get; set; }
     }
 
     public class YearlyDisbursements
@@ -1722,6 +1723,7 @@ namespace AIMS.Models
     {
         public int LocationId { get; set; }
         public string LocationName { get; set; }
+        public List<YearlyDisbursements> Disbursements { get; set; }
     }
 
     public class YearlyLocationDisbursements

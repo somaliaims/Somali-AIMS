@@ -1085,16 +1085,25 @@ namespace AIMS.Services
                     var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear >= previousYear && y.FinancialYear <= futureYearsLimit);
                     var projectDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => projectIds.Contains(d.ProjectId), "FinancialYear");
                     var projectSectors = unitWork.ProjectSectorsRepository.GetManyQueryable(s => projectIds.Contains(s.ProjectId));
+                    var projectLocations = unitWork.ProjectLocationsRepository.GetManyQueryable(l => projectIds.Contains(l.ProjectId));
                     List<BudgetSectorDisbursements> yearlySectorDisbursements = new List<BudgetSectorDisbursements>();
+                    List<BudgetLocationDisbursements> yearlyLocationDisbursements = new List<BudgetLocationDisbursements>();
+
                     foreach (var sector in sectors)
                     {
                         var sectorProjectIds = (from s in projectSectors
                                                 where s.SectorId == sector.Id
                                                 select s.ProjectId);
 
+                        BudgetSectorDisbursements sectorDisbursements = new BudgetSectorDisbursements()
+                        {
+                            SectorId = sector.Id,
+                            SectorName = sector.SectorName,
+                        };
+                        List<YearlyDisbursements> disbursements = new List<YearlyDisbursements>();
                         for(int yr = previousYear; yr <= futureYearsLimit; yr++)
                         {
-                            decimal yearlyDisbursementsForProject = 0;
+                            decimal yearlyDisbursementsTotal = 0;
                             foreach(var project in projectProfileList)
                             {
                                 if (project.Sectors.Any())
@@ -1108,17 +1117,71 @@ namespace AIMS.Services
                                         decimal amountPercentage = 0;
                                         if (project.Disbursements.Any())
                                         {
-                                            amountPercentage = (from d in project.Disbursements
+                                            amountPercentage = ((sectorPercentage / 100) * (from d in project.Disbursements
                                                                              where d.Year.FinancialYear == yr
-                                                                             select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum();
+                                                                             select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum());
                                         }
-                                        yearlyDisbursementsForProject += amountPercentage;
+                                        yearlyDisbursementsTotal += amountPercentage;
                                     }
                                 }
                             }
-
+                            disbursements.Add(new YearlyDisbursements()
+                            {
+                                Year = yr,
+                                TotalValue = yearlyDisbursementsTotal
+                            });
                         }
+                        sectorDisbursements.Disbursements = disbursements;
+                        yearlySectorDisbursements.Add(sectorDisbursements);
                     }
+
+                    foreach (var location in locations)
+                    {
+                        var sectorProjectIds = (from l in projectLocations
+                                                where l.LocationId == location.Id
+                                                select l.ProjectId);
+
+                        BudgetLocationDisbursements locationDisbursements = new BudgetLocationDisbursements()
+                        {
+                            LocationId = location.Id,
+                            LocationName = location.Location,
+                        };
+                        List<YearlyDisbursements> disbursements = new List<YearlyDisbursements>();
+                        for (int yr = previousYear; yr <= futureYearsLimit; yr++)
+                        {
+                            decimal yearlyDisbursementsTotal = 0;
+                            foreach (var project in projectProfileList)
+                            {
+                                if (project.Locations.Any())
+                                {
+                                    var locationPercentage = (from l in project.Locations
+                                                            where l.LocationId == location.Id
+                                                            select l.FundsPercentage).FirstOrDefault();
+
+                                    if (locationPercentage > 0)
+                                    {
+                                        decimal amountPercentage = 0;
+                                        if (project.Disbursements.Any())
+                                        {
+                                            amountPercentage = ((locationPercentage / 100) * (from d in project.Disbursements
+                                                                                            where d.Year.FinancialYear == yr
+                                                                                            select (d.Amount * (exchangeRate / d.ExchangeRate))).Sum());
+                                        }
+                                        yearlyDisbursementsTotal += amountPercentage;
+                                    }
+                                }
+                            }
+                            disbursements.Add(new YearlyDisbursements()
+                            {
+                                Year = yr,
+                                TotalValue = yearlyDisbursementsTotal
+                            });
+                        }
+                        locationDisbursements.Disbursements = disbursements;
+                        yearlyLocationDisbursements.Add(locationDisbursements);
+                    }
+                    budgetReport.SectorDisbursements = yearlySectorDisbursements;
+                    budgetReport.LocationDisbursements = yearlyLocationDisbursements;
                 }
                 catch(Exception ex)
                 {
