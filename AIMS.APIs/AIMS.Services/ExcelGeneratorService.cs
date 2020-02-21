@@ -1121,7 +1121,7 @@ namespace AIMS.Services
                         foreach(var yearDisbursement in disbursement.Disbursements)
                         {
                             var disbursementCol = row.CreateCell(++index, CellType.Numeric);
-                            disbursementCol.SetCellValue(yearDisbursement.TotalValue.ToString());
+                            disbursementCol.SetCellValue(ApplyThousandFormat(yearDisbursement.TotalValue));
                             disbursementCol.CellStyle = dataCellStyle;
                         }
                     }
@@ -1145,7 +1145,7 @@ namespace AIMS.Services
                         foreach (var yearDisbursement in disbursement.Disbursements)
                         {
                             var disbursementCol = row.CreateCell(++index, CellType.Numeric);
-                            disbursementCol.SetCellValue(yearDisbursement.TotalValue.ToString());
+                            disbursementCol.SetCellValue(ApplyThousandFormat(yearDisbursement.TotalValue));
                             disbursementCol.CellStyle = dataCellStyle;
                         }
                     }
@@ -1169,6 +1169,7 @@ namespace AIMS.Services
 
                     workbook.Write(fs);
                 }
+                response.Message = sFileName;
             }
             catch (Exception ex)
             {

@@ -1717,6 +1717,8 @@ namespace AIMS.Models
     {
         public int SectorId { get; set; }
         public string SectorName { get; set; }
+        public int ParentSectorId { get; set; }
+        public string ParentSectorName { get; set; }
         public List<YearlyDisbursements> Disbursements { get; set; }
     }
 

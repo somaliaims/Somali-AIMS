@@ -1067,7 +1067,14 @@ namespace AIMS.Services
 
                     UtilityHelper utilityHelper = new UtilityHelper();
                     List<YearlyTotalDisbursementsSummary> totalDisbursementsSummaryList = new List<YearlyTotalDisbursementsSummary>();
-                    var sectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsPrimary == true && s.ParentSector != null, new string[] { "SectorType" });
+                    var allSectors = unitWork.SectorRepository.GetWithInclude(s => s.SectorType.IsPrimary == true, new string[] { "SectorType" });
+                    var parentSectors = (from sec in allSectors
+                                         where sec.ParentSector == null
+                                         select sec);
+                    var sectors = (from sec in allSectors
+                                   where sec.ParentSector != null
+                                   select sec);
+
                     if (sectors.Any())
                     {
                         sectors = (from sector in sectors
@@ -1114,8 +1121,9 @@ namespace AIMS.Services
                     var projectSectors = unitWork.ProjectSectorsRepository.GetManyQueryable(s => projectIds.Contains(s.ProjectId));
                     var projectLocations = unitWork.ProjectLocationsRepository.GetManyQueryable(l => projectIds.Contains(l.ProjectId));
                     List<BudgetSectorDisbursements> yearlySectorDisbursements = new List<BudgetSectorDisbursements>();
+                    List<BudgetSectorDisbursements> yearlyParentSectorDisbursements = new List<BudgetSectorDisbursements>();
                     List<BudgetLocationDisbursements> yearlyLocationDisbursements = new List<BudgetLocationDisbursements>();
-
+                    
                     foreach (var sector in sectors)
                     {
                         var sectorProjectIds = (from s in projectSectors
@@ -1124,6 +1132,7 @@ namespace AIMS.Services
 
                         BudgetSectorDisbursements sectorDisbursements = new BudgetSectorDisbursements()
                         {
+                            ParentSectorId = (int)sector.ParentSectorId,
                             SectorId = sector.Id,
                             SectorName = sector.SectorName,
                         };
@@ -1160,6 +1169,18 @@ namespace AIMS.Services
                         }
                         sectorDisbursements.Disbursements = disbursements;
                         yearlySectorDisbursements.Add(sectorDisbursements);
+                    }
+
+                    foreach(var sector in parentSectors)
+                    {
+                        var foundSectors = (from sec in yearlySectorDisbursements
+                                            where sec.ParentSectorId == sector.Id
+                                            select sec);
+                        
+                        for (int yr = previousYear; yr <= futureYearsLimit; yr++)
+                        {
+                            
+                        }
                     }
 
                     foreach (var location in locations)
