@@ -1109,7 +1109,7 @@ namespace AIMS.Services
                         yearCol.CellStyle = headerStyle;
                     }
 
-                    var sectorDisbursements = report.SectorDisbursements;
+                    var sectorDisbursements = report.ParentSectorDisbursements;
                     foreach(var disbursement in sectorDisbursements)
                     {
                         row = excelSheet.CreateRow(++rowCounter);

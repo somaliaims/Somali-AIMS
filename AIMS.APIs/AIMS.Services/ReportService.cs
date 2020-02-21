@@ -1173,14 +1173,37 @@ namespace AIMS.Services
 
                     foreach(var sector in parentSectors)
                     {
+                        int parentSectorId = (sector.ParentSectorId == null) ? 0 : (int)sector.ParentSectorId;
+                        BudgetSectorDisbursements sectorDisbursements = new BudgetSectorDisbursements()
+                        {
+                            ParentSectorId = parentSectorId,
+                            SectorId = sector.Id,
+                            SectorName = sector.SectorName,
+                        };
+
                         var foundSectors = (from sec in yearlySectorDisbursements
                                             where sec.ParentSectorId == sector.Id
                                             select sec);
-                        
+
+                        decimal totalValue = 0;
+                        List<YearlyDisbursements> disbursements = new List<YearlyDisbursements>();
                         for (int yr = previousYear; yr <= futureYearsLimit; yr++)
                         {
-                            
+                            totalValue = 0;
+                            foreach(var foundSector in foundSectors)
+                            {
+                                totalValue += (from d in foundSector.Disbursements
+                                               where d.Year == yr
+                                               select d.TotalValue).FirstOrDefault();
+                            }
+                            disbursements.Add(new YearlyDisbursements()
+                            {
+                                Year = yr,
+                                TotalValue = totalValue
+                            });
                         }
+                        sectorDisbursements.Disbursements = disbursements;
+                        yearlyParentSectorDisbursements.Add(sectorDisbursements);
                     }
 
                     foreach (var location in locations)
@@ -1229,6 +1252,7 @@ namespace AIMS.Services
                         yearlyLocationDisbursements.Add(locationDisbursements);
                     }
                     budgetReport.Years = yearsList;
+                    budgetReport.ParentSectorDisbursements = yearlyParentSectorDisbursements;
                     budgetReport.SectorDisbursements = yearlySectorDisbursements;
                     budgetReport.LocationDisbursements = yearlyLocationDisbursements;
                 }
