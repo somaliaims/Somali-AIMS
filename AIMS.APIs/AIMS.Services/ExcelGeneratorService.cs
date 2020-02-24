@@ -845,7 +845,6 @@ namespace AIMS.Services
                     headerStyle.Alignment = HorizontalAlignment.Center;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
 
-
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
                     IFont groupFontHeader = workbook.CreateFont();
                     groupFontHeader.Color = IndexedColors.DarkYellow.Index;
@@ -963,7 +962,6 @@ namespace AIMS.Services
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, groupHeaderColumns));
 
-
                     var grandFundTotalCell = row.CreateCell(3, CellType.Numeric);
                     grandFundTotalCell.SetCellValue(ApplyThousandFormat(grandTotalFunding));
                     grandFundTotalCell.CellStyle = headerStyle;
@@ -1057,7 +1055,6 @@ namespace AIMS.Services
                     highlightStyle.SetFont(fontHighlight);
                     highlightStyle.Alignment = HorizontalAlignment.Center;
                     highlightStyle.VerticalAlignment = VerticalAlignment.Center;
-
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
                     IFont groupFontHeader = workbook.CreateFont();

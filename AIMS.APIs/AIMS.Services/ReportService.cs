@@ -292,6 +292,15 @@ namespace AIMS.Services
                     Markers = mapper.Map<List<MarkerAbstractView>>(project.Markers)
                 });
             }
+
+
+            if (sectorsList.Any())
+            {
+                sectorsList = (from s in sectorsList
+                               orderby s.ParentSector
+                               select s).ToList();
+            }
+
             projectsReport.StartingFinancialYear = startingFinancialYear;
             projectsReport.EndingFinancialYear = endingFinancialYear;
             projectsReport.Markers = markersList;
@@ -581,7 +590,7 @@ namespace AIMS.Services
                             Title = project.Title.Replace("\"", ""),
                             StartingFinancialYear = project.StartingFinancialYear,
                             EndingFinancialYear = project.EndingFinancialYear,
-                            Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
+                            Funders = string.Join(", ", project.Funders.Select(f => f.Funder)),
                             Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
                             //ProjectValue = projectValue,
                             ProjectValue = (project.ActualDisbursements + project.PlannedDisbursements),
@@ -999,7 +1008,7 @@ namespace AIMS.Services
                                 Title = project.Title.Replace("\"", ""),
                                 StartingFinancialYear = project.StartingFinancialYear,
                                 EndingFinancialYear = project.EndingFinancialYear,
-                                Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
+                                Funders = string.Join(", ", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
                                 ProjectValue = project.ProjectValue,
                                 ProjectPercentValue = project.ProjectValue,
@@ -1729,7 +1738,7 @@ namespace AIMS.Services
                             Title = project.Title.Replace("\"", ""),
                             StartingFinancialYear = project.StartingFinancialYear,
                             EndingFinancialYear = project.EndingFinancialYear,
-                            Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
+                            Funders = string.Join(", ", project.Funders.Select(f => f.Funder)),
                             Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
                             ProjectValue = projectValue,
                             ProjectPercentValue = projectValue,
@@ -2199,7 +2208,7 @@ namespace AIMS.Services
                                 Title = project.Title.Replace("\"", ""),
                                 StartingFinancialYear = project.StartingFinancialYear,
                                 EndingFinancialYear = project.EndingFinancialYear,
-                                Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
+                                Funders = string.Join(", ", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
                                 ProjectValue = project.ProjectValue,
                                 ProjectPercentValue = (project.ActualDisbursements + project.PlannedDisbursements),
@@ -2526,7 +2535,7 @@ namespace AIMS.Services
                                 Title = project.Title.Replace("\"", ""),
                                 StartingFinancialYear = project.StartingFinancialYear,
                                 EndingFinancialYear = project.EndingFinancialYear,
-                                Funders = string.Join(",", project.Funders.Select(f => f.Funder)),
+                                Funders = string.Join(", ", project.Funders.Select(f => f.Funder)),
                                 Implementers = string.Join(", ", project.Implementers.Select(i => i.Implementer)),
                                 ProjectValue = project.ProjectValue,
                                 ActualDisbursements = project.ActualDisbursements,
