@@ -124,13 +124,26 @@ namespace AIMS.Services
                     fontHeader.IsBold = true;
                     fontHeader.FontHeightInPoints = 12;
                     headerStyle.SetFont(fontHeader);
-                    headerStyle.Alignment = HorizontalAlignment.Center;
+                    headerStyle.Alignment = HorizontalAlignment.Left;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericHeaderStyle = workbook.CreateCellStyle();
+                    fontHeader.Color = IndexedColors.Black.Index;
+                    fontHeader.IsBold = true;
+                    fontHeader.FontHeightInPoints = 12;
+                    numericHeaderStyle.SetFont(fontHeader);
+                    numericHeaderStyle.Alignment = HorizontalAlignment.Right;
+                    numericHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle dataCellStyle = workbook.CreateCellStyle();
                     dataCellStyle.WrapText = true;
-                    dataCellStyle.Alignment = HorizontalAlignment.Center;
+                    dataCellStyle.Alignment = HorizontalAlignment.Left;
                     dataCellStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericCellStyle = workbook.CreateCellStyle();
+                    numericCellStyle.WrapText = true;
+                    numericCellStyle.Alignment = HorizontalAlignment.Right;
+                    numericCellStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     int colIndex = 0;
                     var row = excelSheet.CreateRow(rowCounter);
@@ -249,11 +262,11 @@ namespace AIMS.Services
 
                         var projectValueCell = row.CreateCell(++col, CellType.Numeric);
                         projectValueCell.SetCellValue(ApplyThousandFormat(project.ProjectValue));
-                        projectValueCell.CellStyle = dataCellStyle;
+                        projectValueCell.CellStyle = numericCellStyle;
 
                         var exchangeRateCell = row.CreateCell(++col, CellType.Numeric);
                         exchangeRateCell.SetCellValue(project.ExchangeRate.ToString());
-                        exchangeRateCell.CellStyle = dataCellStyle;
+                        exchangeRateCell.CellStyle = numericCellStyle;
 
                         var disbursements = project.Disbursements;
                         for(int yr = startingYear; yr <= endingYear; yr++)
@@ -271,7 +284,7 @@ namespace AIMS.Services
                             {
                                 disbursementCell.SetCellValue(ApplyThousandFormat(disbursement.Disbursement));
                             }
-                            disbursementCell.CellStyle = dataCellStyle;
+                            disbursementCell.CellStyle = numericCellStyle;
                         }
 
                         var projectSectors = project.Sectors;
@@ -290,7 +303,7 @@ namespace AIMS.Services
                             {
                                 projectSectorCell.SetCellValue("0");
                             }
-                            projectSectorCell.CellStyle = dataCellStyle;
+                            projectSectorCell.CellStyle = numericCellStyle;
                         }
 
                         var projectLocations = project.Locations;
@@ -309,7 +322,7 @@ namespace AIMS.Services
                             {
                                 projectLocationCell.SetCellValue("0");
                             }
-                            projectLocationCell.CellStyle = dataCellStyle;
+                            projectLocationCell.CellStyle = numericCellStyle;
                         }
 
                         var projectMarkers = project.Markers;
@@ -432,8 +445,13 @@ namespace AIMS.Services
                     fontHeader.IsBold = true;
                     fontHeader.FontHeightInPoints = 12;
                     headerStyle.SetFont(fontHeader);
-                    headerStyle.Alignment = HorizontalAlignment.Center;
+                    headerStyle.Alignment = HorizontalAlignment.Left;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericHeaderStyle = workbook.CreateCellStyle();
+                    numericHeaderStyle.SetFont(fontHeader);
+                    numericHeaderStyle.Alignment = HorizontalAlignment.Left;
+                    numericHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
@@ -442,13 +460,23 @@ namespace AIMS.Services
                     groupFontHeader.FontHeightInPoints = 12;
                     groupFontHeader.IsBold = true;
                     groupHeaderStyle.SetFont(groupFontHeader);
-                    groupHeaderStyle.Alignment = HorizontalAlignment.Center;
+                    groupHeaderStyle.Alignment = HorizontalAlignment.Left;
                     groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericGroupHeaderStyle = workbook.CreateCellStyle();
+                    numericGroupHeaderStyle.SetFont(groupFontHeader);
+                    numericGroupHeaderStyle.Alignment = HorizontalAlignment.Right;
+                    numericGroupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle dataCellStyle = workbook.CreateCellStyle();
                     dataCellStyle.WrapText = true;
-                    dataCellStyle.Alignment = HorizontalAlignment.Center;
+                    dataCellStyle.Alignment = HorizontalAlignment.Left;
                     dataCellStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericCellStyle = workbook.CreateCellStyle();
+                    numericCellStyle.WrapText = true;
+                    numericCellStyle.Alignment = HorizontalAlignment.Right;
+                    numericCellStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     IRow row = excelSheet.CreateRow(rowCounter);
                     row.CreateCell(0, CellType.Blank);
@@ -511,11 +539,11 @@ namespace AIMS.Services
 
                         var groupFundTotalCell = row.CreateCell(3, CellType.Numeric);
                         groupFundTotalCell.SetCellValue(ApplyThousandFormat(sector.TotalFunding));
-                        groupFundTotalCell.CellStyle = groupHeaderStyle;
+                        groupFundTotalCell.CellStyle = numericHeaderStyle;
 
                         var groupDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
                         groupDisbursementTotalCell.SetCellValue(ApplyThousandFormat(sector.TotalDisbursements));
-                        groupDisbursementTotalCell.CellStyle = groupHeaderStyle;
+                        groupDisbursementTotalCell.CellStyle = numericHeaderStyle;
 
                         var groupPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Numeric);
                         groupPlannedDisbursementTotalCell.SetCellValue("");
@@ -537,15 +565,15 @@ namespace AIMS.Services
 
                             var projectCostDataCell = row.CreateCell(3, CellType.Numeric);
                             projectCostDataCell.SetCellValue(ApplyThousandFormat(project.ProjectValue));
-                            projectCostDataCell.CellStyle = dataCellStyle;
+                            projectCostDataCell.CellStyle = numericCellStyle;
 
                             var actualDisbursementDataCell = row.CreateCell(4, CellType.Numeric);
                             actualDisbursementDataCell.SetCellValue(ApplyThousandFormat(project.ActualDisbursements));
-                            actualDisbursementDataCell.CellStyle = dataCellStyle;
+                            actualDisbursementDataCell.CellStyle = numericCellStyle;
 
                             var plannedDisbursementDataCell = row.CreateCell(5, CellType.Numeric);
                             plannedDisbursementDataCell.SetCellValue(ApplyThousandFormat(project.PlannedDisbursements));
-                            plannedDisbursementDataCell.CellStyle = dataCellStyle;
+                            plannedDisbursementDataCell.CellStyle = numericCellStyle;
                         }
                     }
 
@@ -558,14 +586,14 @@ namespace AIMS.Services
 
                     var grandFundTotalCell = row.CreateCell(3, CellType.Numeric);
                     grandFundTotalCell.SetCellValue(ApplyThousandFormat(grandTotalFunding));
-                    grandFundTotalCell.CellStyle = headerStyle;
+                    grandFundTotalCell.CellStyle = numericHeaderStyle;
 
                     var grandDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
                     grandDisbursementTotalCell.SetCellValue(ApplyThousandFormat(grandTotalDisbursement));
-                    grandDisbursementTotalCell.CellStyle = headerStyle;
+                    grandDisbursementTotalCell.CellStyle = numericHeaderStyle;
 
                     var grandPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Blank);
-                    grandPlannedDisbursementTotalCell.CellStyle = headerStyle;
+                    grandPlannedDisbursementTotalCell.CellStyle = numericHeaderStyle;
 
                     row = excelSheet.CreateRow(++rowCounter);
                     var emptyCell = row.CreateCell(0, CellType.Blank);
@@ -608,7 +636,6 @@ namespace AIMS.Services
                 {
                     int rowCounter = 0, totalColumns = 5, groupHeaderColumns = 2;
                     decimal grandTotalFunding = 0, grandTotalDisbursement = 0;
-
                     
                     IWorkbook workbook;
                     workbook = new XSSFWorkbook();
@@ -638,9 +665,13 @@ namespace AIMS.Services
                     fontHeader.IsBold = true;
                     fontHeader.FontHeightInPoints = 12;
                     headerStyle.SetFont(fontHeader);
-                    headerStyle.Alignment = HorizontalAlignment.Center;
+                    headerStyle.Alignment = HorizontalAlignment.Left;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
 
+                    ICellStyle numericHeaderStyle = workbook.CreateCellStyle();
+                    numericHeaderStyle.SetFont(fontHeader);
+                    numericHeaderStyle.Alignment = HorizontalAlignment.Right;
+                    numericHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
                     IFont groupFontHeader = workbook.CreateFont();
@@ -648,13 +679,23 @@ namespace AIMS.Services
                     groupFontHeader.FontHeightInPoints = 12;
                     groupFontHeader.IsBold = true;
                     groupHeaderStyle.SetFont(groupFontHeader);
-                    groupHeaderStyle.Alignment = HorizontalAlignment.Center;
+                    groupHeaderStyle.Alignment = HorizontalAlignment.Left;
                     groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericGroupHeaderStyle = workbook.CreateCellStyle();
+                    numericGroupHeaderStyle.SetFont(groupFontHeader);
+                    numericGroupHeaderStyle.Alignment = HorizontalAlignment.Right;
+                    numericGroupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle dataCellStyle = workbook.CreateCellStyle();
                     dataCellStyle.WrapText = true;
                     dataCellStyle.Alignment = HorizontalAlignment.Center;
                     dataCellStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericCellStyle = workbook.CreateCellStyle();
+                    numericCellStyle.WrapText = true;
+                    numericCellStyle.Alignment = HorizontalAlignment.Right;
+                    numericCellStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     IRow row = excelSheet.CreateRow(rowCounter);
                     row.CreateCell(0, CellType.Blank);
@@ -714,11 +755,11 @@ namespace AIMS.Services
 
                         var groupFundTotalCell = row.CreateCell(3, CellType.Numeric);
                         groupFundTotalCell.SetCellValue(ApplyThousandFormat(location.TotalFunding));
-                        groupFundTotalCell.CellStyle = groupHeaderStyle;
+                        groupFundTotalCell.CellStyle = numericGroupHeaderStyle;
 
                         var groupDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
                         groupDisbursementTotalCell.SetCellValue(ApplyThousandFormat(location.TotalDisbursements));
-                        groupDisbursementTotalCell.CellStyle = groupHeaderStyle;
+                        groupDisbursementTotalCell.CellStyle = numericGroupHeaderStyle;
 
                         var groupPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Numeric);
                         groupPlannedDisbursementTotalCell.SetCellValue("");
@@ -740,15 +781,15 @@ namespace AIMS.Services
 
                             var projectCostDataCell = row.CreateCell(3, CellType.Numeric);
                             projectCostDataCell.SetCellValue(ApplyThousandFormat(project.ProjectValue));
-                            projectCostDataCell.CellStyle = dataCellStyle;
+                            projectCostDataCell.CellStyle = numericCellStyle;
 
                             var actualDisbursementDataCell = row.CreateCell(4, CellType.Numeric);
                             actualDisbursementDataCell.SetCellValue(ApplyThousandFormat(project.ActualDisbursements));
-                            actualDisbursementDataCell.CellStyle = dataCellStyle;
+                            actualDisbursementDataCell.CellStyle = numericCellStyle;
 
                             var plannedDisbursementDataCell = row.CreateCell(5, CellType.Numeric);
                             plannedDisbursementDataCell.SetCellValue(ApplyThousandFormat(project.PlannedDisbursements));
-                            plannedDisbursementDataCell.CellStyle = dataCellStyle;
+                            plannedDisbursementDataCell.CellStyle = numericCellStyle;
                         }
                     }
 
@@ -758,15 +799,14 @@ namespace AIMS.Services
                     footerCell.CellStyle = headerStyle;
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, groupHeaderColumns));
-                    
 
                     var grandFundTotalCell = row.CreateCell(3, CellType.Numeric);
                     grandFundTotalCell.SetCellValue(ApplyThousandFormat(grandTotalFunding));
-                    grandFundTotalCell.CellStyle = headerStyle;
+                    grandFundTotalCell.CellStyle = numericHeaderStyle;
 
                     var grandDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
                     grandDisbursementTotalCell.SetCellValue(ApplyThousandFormat(grandTotalDisbursement));
-                    grandDisbursementTotalCell.CellStyle = headerStyle;
+                    grandDisbursementTotalCell.CellStyle = numericHeaderStyle;
 
                     var grandPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Blank);
                     grandPlannedDisbursementTotalCell.CellStyle = headerStyle;
@@ -813,7 +853,6 @@ namespace AIMS.Services
                     int rowCounter = 0, totalColumns = 5, groupHeaderColumns = 2;
                     decimal grandTotalFunding = 0, grandTotalDisbursement = 0;
 
-
                     IWorkbook workbook;
                     workbook = new XSSFWorkbook();
                     ISheet excelSheet = workbook.CreateSheet("Report");
@@ -842,8 +881,13 @@ namespace AIMS.Services
                     fontHeader.IsBold = true;
                     fontHeader.FontHeightInPoints = 12;
                     headerStyle.SetFont(fontHeader);
-                    headerStyle.Alignment = HorizontalAlignment.Center;
+                    headerStyle.Alignment = HorizontalAlignment.Left;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
+                    
+                    ICellStyle numericHeaderStyle = workbook.CreateCellStyle();
+                    numericHeaderStyle.SetFont(fontHeader);
+                    numericHeaderStyle.Alignment = HorizontalAlignment.Right;
+                    numericHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
                     IFont groupFontHeader = workbook.CreateFont();
@@ -851,13 +895,23 @@ namespace AIMS.Services
                     groupFontHeader.FontHeightInPoints = 12;
                     groupFontHeader.IsBold = true;
                     groupHeaderStyle.SetFont(groupFontHeader);
-                    groupHeaderStyle.Alignment = HorizontalAlignment.Center;
+                    groupHeaderStyle.Alignment = HorizontalAlignment.Left;
                     groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericGroupHeaderStyle = workbook.CreateCellStyle();
+                    numericGroupHeaderStyle.SetFont(groupFontHeader);
+                    numericGroupHeaderStyle.Alignment = HorizontalAlignment.Right;
+                    numericGroupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle dataCellStyle = workbook.CreateCellStyle();
                     dataCellStyle.WrapText = true;
-                    dataCellStyle.Alignment = HorizontalAlignment.Center;
+                    dataCellStyle.Alignment = HorizontalAlignment.Left;
                     dataCellStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericCellStyle = workbook.CreateCellStyle();
+                    numericCellStyle.WrapText = true;
+                    numericCellStyle.Alignment = HorizontalAlignment.Right;
+                    numericCellStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     IRow row = excelSheet.CreateRow(rowCounter);
                     row.CreateCell(0, CellType.Blank);
@@ -917,11 +971,11 @@ namespace AIMS.Services
 
                         var groupFundTotalCell = row.CreateCell(3, CellType.Numeric);
                         groupFundTotalCell.SetCellValue(ApplyThousandFormat(year.TotalFunding));
-                        groupFundTotalCell.CellStyle = groupHeaderStyle;
+                        groupFundTotalCell.CellStyle = numericGroupHeaderStyle;
 
                         var groupDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
                         groupDisbursementTotalCell.SetCellValue(ApplyThousandFormat(year.TotalDisbursements));
-                        groupDisbursementTotalCell.CellStyle = groupHeaderStyle;
+                        groupDisbursementTotalCell.CellStyle = numericGroupHeaderStyle;
 
                         var groupPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Numeric);
                         groupPlannedDisbursementTotalCell.SetCellValue("");
@@ -943,15 +997,15 @@ namespace AIMS.Services
 
                             var projectCostDataCell = row.CreateCell(3, CellType.Numeric);
                             projectCostDataCell.SetCellValue(ApplyThousandFormat(project.ProjectValue));
-                            projectCostDataCell.CellStyle = dataCellStyle;
+                            projectCostDataCell.CellStyle = numericCellStyle;
 
                             var actualDisbursementDataCell = row.CreateCell(4, CellType.Numeric);
                             actualDisbursementDataCell.SetCellValue(ApplyThousandFormat(project.ActualDisbursements));
-                            actualDisbursementDataCell.CellStyle = dataCellStyle;
+                            actualDisbursementDataCell.CellStyle = numericCellStyle;
 
                             var plannedDisbursementDataCell = row.CreateCell(5, CellType.Numeric);
                             plannedDisbursementDataCell.SetCellValue(ApplyThousandFormat(project.PlannedDisbursements));
-                            plannedDisbursementDataCell.CellStyle = dataCellStyle;
+                            plannedDisbursementDataCell.CellStyle = numericCellStyle;
                         }
                     }
 
@@ -964,11 +1018,11 @@ namespace AIMS.Services
 
                     var grandFundTotalCell = row.CreateCell(3, CellType.Numeric);
                     grandFundTotalCell.SetCellValue(ApplyThousandFormat(grandTotalFunding));
-                    grandFundTotalCell.CellStyle = headerStyle;
+                    grandFundTotalCell.CellStyle = numericHeaderStyle;
 
                     var grandDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
                     grandDisbursementTotalCell.SetCellValue(ApplyThousandFormat(grandTotalDisbursement));
-                    grandDisbursementTotalCell.CellStyle = headerStyle;
+                    grandDisbursementTotalCell.CellStyle = numericHeaderStyle;
 
                     var grandPlannedDisbursementTotalCell = row.CreateCell(5, CellType.Blank);
                     grandPlannedDisbursementTotalCell.CellStyle = headerStyle;
@@ -1045,15 +1099,20 @@ namespace AIMS.Services
                     fontHeader.IsBold = true;
                     fontHeader.FontHeightInPoints = 12;
                     headerStyle.SetFont(fontHeader);
-                    headerStyle.Alignment = HorizontalAlignment.Center;
+                    headerStyle.Alignment = HorizontalAlignment.Left;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericHeaderStyle = workbook.CreateCellStyle();
+                    numericHeaderStyle.SetFont(fontHeader);
+                    numericHeaderStyle.Alignment = HorizontalAlignment.Right;
+                    numericHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle highlightStyle = workbook.CreateCellStyle();
                     IFont fontHighlight = workbook.CreateFont();
                     fontHighlight.Color = IndexedColors.DarkBlue.Index;
                     fontHighlight.FontHeightInPoints = 12;
                     highlightStyle.SetFont(fontHighlight);
-                    highlightStyle.Alignment = HorizontalAlignment.Center;
+                    highlightStyle.Alignment = HorizontalAlignment.Left;
                     highlightStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
@@ -1062,13 +1121,23 @@ namespace AIMS.Services
                     groupFontHeader.FontHeightInPoints = 12;
                     groupFontHeader.IsBold = true;
                     groupHeaderStyle.SetFont(groupFontHeader);
-                    groupHeaderStyle.Alignment = HorizontalAlignment.Center;
+                    groupHeaderStyle.Alignment = HorizontalAlignment.Left;
                     groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericGroupHeaderStyle = workbook.CreateCellStyle();
+                    numericGroupHeaderStyle.SetFont(groupFontHeader);
+                    numericGroupHeaderStyle.Alignment = HorizontalAlignment.Right;
+                    numericGroupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle dataCellStyle = workbook.CreateCellStyle();
                     dataCellStyle.WrapText = true;
-                    dataCellStyle.Alignment = HorizontalAlignment.Center;
+                    dataCellStyle.Alignment = HorizontalAlignment.Left;
                     dataCellStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericCellStyle = workbook.CreateCellStyle();
+                    numericCellStyle.WrapText = true;
+                    numericCellStyle.Alignment = HorizontalAlignment.Right;
+                    numericCellStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     IRow row = excelSheet.CreateRow(rowCounter);
                     row.CreateCell(0, CellType.Blank);
@@ -1119,7 +1188,7 @@ namespace AIMS.Services
                         {
                             var disbursementCol = row.CreateCell(++index, CellType.Numeric);
                             disbursementCol.SetCellValue(ApplyThousandFormat(yearDisbursement.TotalValue));
-                            disbursementCol.CellStyle = dataCellStyle;
+                            disbursementCol.CellStyle = numericCellStyle;
                         }
                     }
 
@@ -1143,7 +1212,7 @@ namespace AIMS.Services
                         {
                             var disbursementCol = row.CreateCell(++index, CellType.Numeric);
                             disbursementCol.SetCellValue(ApplyThousandFormat(yearDisbursement.TotalValue));
-                            disbursementCol.CellStyle = dataCellStyle;
+                            disbursementCol.CellStyle = numericCellStyle;
                         }
                     }
 
@@ -1218,7 +1287,7 @@ namespace AIMS.Services
                     fontHeader.IsBold = true;
                     fontHeader.FontHeightInPoints = 12;
                     headerStyle.SetFont(fontHeader);
-                    headerStyle.Alignment = HorizontalAlignment.Center;
+                    headerStyle.Alignment = HorizontalAlignment.Left;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle highlightStyle = workbook.CreateCellStyle();
@@ -1226,9 +1295,8 @@ namespace AIMS.Services
                     fontHighlight.Color = IndexedColors.DarkBlue.Index;
                     fontHighlight.FontHeightInPoints = 12;
                     highlightStyle.SetFont(fontHighlight);
-                    highlightStyle.Alignment = HorizontalAlignment.Center;
+                    highlightStyle.Alignment = HorizontalAlignment.Left;
                     highlightStyle.VerticalAlignment = VerticalAlignment.Center;
-
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
                     IFont groupFontHeader = workbook.CreateFont();
@@ -1236,13 +1304,23 @@ namespace AIMS.Services
                     groupFontHeader.FontHeightInPoints = 12;
                     groupFontHeader.IsBold = true;
                     groupHeaderStyle.SetFont(groupFontHeader);
-                    groupHeaderStyle.Alignment = HorizontalAlignment.Center;
+                    groupHeaderStyle.Alignment = HorizontalAlignment.Left;
                     groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericGroupHeaderStyle = workbook.CreateCellStyle();
+                    numericGroupHeaderStyle.SetFont(groupFontHeader);
+                    numericGroupHeaderStyle.Alignment = HorizontalAlignment.Right;
+                    numericGroupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle dataCellStyle = workbook.CreateCellStyle();
                     dataCellStyle.WrapText = true;
-                    dataCellStyle.Alignment = HorizontalAlignment.Center;
+                    dataCellStyle.Alignment = HorizontalAlignment.Left;
                     dataCellStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericCellStyle = workbook.CreateCellStyle();
+                    numericCellStyle.WrapText = true;
+                    numericCellStyle.Alignment = HorizontalAlignment.Left;
+                    numericCellStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     IRow row = excelSheet.CreateRow(rowCounter);
                     row.CreateCell(0, CellType.Blank);
@@ -1273,7 +1351,6 @@ namespace AIMS.Services
                         funderCol.SetCellValue(year.ToString());
                         funderCol.CellStyle = headerStyle;
                     }
-
                     
                     foreach (var project in report.Projects)
                     {
@@ -1289,7 +1366,7 @@ namespace AIMS.Services
                         {
                             var disbursementCol = row.CreateCell(++index, CellType.Numeric);
                             disbursementCol.SetCellValue(ApplyThousandFormat(disbursement.Disbursements));
-                            disbursementCol.CellStyle = dataCellStyle;
+                            disbursementCol.CellStyle = numericCellStyle;
                         }
 
                         index = 1;
@@ -1302,7 +1379,7 @@ namespace AIMS.Services
                         {
                             var disbursementCol = row.CreateCell(++index, CellType.Numeric);
                             disbursementCol.SetCellValue(ApplyThousandFormat(disbursement.ActualDisbursements));
-                            disbursementCol.CellStyle = dataCellStyle;
+                            disbursementCol.CellStyle = numericCellStyle;
                         }
 
                         index = 1;
@@ -1315,7 +1392,7 @@ namespace AIMS.Services
                         {
                             var disbursementCol = row.CreateCell(++index, CellType.Numeric);
                             disbursementCol.SetCellValue(disbursement.ExpectedDisbursements.ToString());
-                            disbursementCol.CellStyle = dataCellStyle;
+                            disbursementCol.CellStyle = numericCellStyle;
                         }
                     }
 
@@ -1332,7 +1409,7 @@ namespace AIMS.Services
                     {
                         var yearCell = row.CreateCell(++index, CellType.Numeric);
                         yearCell.SetCellValue(year);
-                        yearCell.CellStyle = groupHeaderStyle;
+                        yearCell.CellStyle = numericGroupHeaderStyle;
                     }
 
                     row = excelSheet.CreateRow(++rowCounter);
@@ -1347,7 +1424,7 @@ namespace AIMS.Services
                     {
                         var disbursementCell = row.CreateCell(++index, CellType.Numeric);
                         disbursementCell.SetCellValue(ApplyThousandFormat(d.TotalDisbursements));
-                        disbursementCell.CellStyle = dataCellStyle;
+                        disbursementCell.CellStyle = numericCellStyle;
                     }
 
                     row = excelSheet.CreateRow(++rowCounter);
@@ -1360,7 +1437,7 @@ namespace AIMS.Services
                     {
                         var eDisbursementsCell = row.CreateCell(++index, CellType.Numeric);
                         eDisbursementsCell.SetCellValue(ApplyThousandFormat(d.TotalExpectedDisbursements));
-                        eDisbursementsCell.CellStyle = dataCellStyle;
+                        eDisbursementsCell.CellStyle = numericCellStyle;
                     }
 
                     row = excelSheet.CreateRow(++rowCounter);
@@ -1435,17 +1512,21 @@ namespace AIMS.Services
                     fontHeader.IsBold = true;
                     fontHeader.FontHeightInPoints = 12;
                     headerStyle.SetFont(fontHeader);
-                    headerStyle.Alignment = HorizontalAlignment.Center;
+                    headerStyle.Alignment = HorizontalAlignment.Left;
                     headerStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericHeaderStyle = workbook.CreateCellStyle();
+                    numericHeaderStyle.SetFont(fontHeader);
+                    numericHeaderStyle.Alignment = HorizontalAlignment.Right;
+                    numericHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle highlightStyle = workbook.CreateCellStyle();
                     IFont fontHighlight = workbook.CreateFont();
                     fontHighlight.Color = IndexedColors.DarkBlue.Index;
                     fontHighlight.FontHeightInPoints = 12;
                     highlightStyle.SetFont(fontHighlight);
-                    highlightStyle.Alignment = HorizontalAlignment.Center;
+                    highlightStyle.Alignment = HorizontalAlignment.Left;
                     highlightStyle.VerticalAlignment = VerticalAlignment.Center;
-
 
                     ICellStyle groupHeaderStyle = workbook.CreateCellStyle();
                     IFont groupFontHeader = workbook.CreateFont();
@@ -1453,13 +1534,23 @@ namespace AIMS.Services
                     groupFontHeader.FontHeightInPoints = 12;
                     groupFontHeader.IsBold = true;
                     groupHeaderStyle.SetFont(groupFontHeader);
-                    groupHeaderStyle.Alignment = HorizontalAlignment.Center;
+                    groupHeaderStyle.Alignment = HorizontalAlignment.Left;
+                    groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericGroupHeaderStyle = workbook.CreateCellStyle();
+                    groupHeaderStyle.SetFont(groupFontHeader);
+                    groupHeaderStyle.Alignment = HorizontalAlignment.Right;
                     groupHeaderStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     ICellStyle dataCellStyle = workbook.CreateCellStyle();
                     dataCellStyle.WrapText = true;
-                    dataCellStyle.Alignment = HorizontalAlignment.Center;
+                    dataCellStyle.Alignment = HorizontalAlignment.Left;
                     dataCellStyle.VerticalAlignment = VerticalAlignment.Center;
+
+                    ICellStyle numericCellStyle = workbook.CreateCellStyle();
+                    numericCellStyle.WrapText = true;
+                    numericCellStyle.Alignment = HorizontalAlignment.Right;
+                    numericCellStyle.VerticalAlignment = VerticalAlignment.Center;
 
                     IRow row = excelSheet.CreateRow(rowCounter);
                     row.CreateCell(0, CellType.Blank);
@@ -1505,7 +1596,6 @@ namespace AIMS.Services
                         rowCounter, rowCounter, 0, totalColumns
                         ));
                         funderTitleCell.SetCellValue(envelope.Funder);
-
                         index = 0;
                         foreach(var breakupByType in envelope.EnvelopeBreakupsByType)
                         {
@@ -1518,13 +1608,13 @@ namespace AIMS.Services
                             foreach(var yearly in breakupByType.YearlyBreakup)
                             {
                                 var yearlyCell = row.CreateCell(++yearlyIndex, CellType.Numeric);
-                                yearlyCell.CellStyle = dataCellStyle;
+                                yearlyCell.CellStyle = numericCellStyle;
                                 double yearlyAmount = Convert.ToDouble(yearly.Amount);
                                 yearlyCell.SetCellValue(yearlyAmount);
                                 envelopeTypeTotalAmount += yearlyAmount;
                             }
                             var yearlyTotalCell = row.CreateCell(++yearlyIndex, CellType.Numeric);
-                            yearlyTotalCell.CellStyle = headerStyle;
+                            yearlyTotalCell.CellStyle = numericHeaderStyle;
                             yearlyTotalCell.SetCellValue(envelopeTypeTotalAmount);
                         }
 
@@ -1544,7 +1634,7 @@ namespace AIMS.Services
                                                              select y.Amount).FirstOrDefault();
                             }
                             var yearlyTotalCell = row.CreateCell(++index, CellType.Numeric);
-                            yearlyTotalCell.CellStyle = headerStyle;
+                            yearlyTotalCell.CellStyle = numericHeaderStyle;
                             yearlyTotalCell.SetCellValue(yearlyTotalAmount);
                         }
                         
@@ -1581,7 +1671,8 @@ namespace AIMS.Services
 
         private string ApplyThousandFormat(decimal number)
         {
-            return (Math.Round(number).ToString("#,##0.00"));
+            //return (Math.Round(number).ToString("#,##0.00"));
+            return number.ToString("N2");
         }
 
         private bool CheckIfStringIsJson(string isJosn)
