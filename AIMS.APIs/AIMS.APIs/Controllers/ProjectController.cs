@@ -295,6 +295,24 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Unauthorized user access to api");
             }
             project.ProjectUrl = projectUrl;
+            decimal exchangeRate = 1;
+            var dated = DateTime.Now;
+            var rates = await ratesService.GetCurrencyRatesForDate(dated);
+            if (rates.Rates == null)
+            {
+                string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                rates = await ratesHttpService.GetRatesAsync(apiKey);
+                if (rates.Rates != null)
+                {
+                    ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                    exchangeRate = projectService.GetExchangeRateForCurrency(project.ProjectCurrency, rates.Rates);
+                }
+            }
+            else
+            {
+                exchangeRate = projectService.GetExchangeRateForCurrency(project.ProjectCurrency, rates.Rates);
+            }
+            project.ExchangeRate = exchangeRate;
             var response = await projectService.AddAsync(project, userId);
             if (!response.Success)
             {
@@ -656,6 +674,24 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
+            decimal exchangeRate = 1;
+            var dated = DateTime.Now;
+            var rates = await ratesService.GetCurrencyRatesForDate(dated);
+            if (rates.Rates == null)
+            {
+                string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                rates = await ratesHttpService.GetRatesAsync(apiKey);
+                if (rates.Rates != null)
+                {
+                    ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                    exchangeRate = projectService.GetExchangeRateForCurrency(project.ProjectCurrency, rates.Rates);
+                }
+            }
+            else
+            {
+                exchangeRate = projectService.GetExchangeRateForCurrency(project.ProjectCurrency, rates.Rates);
+            }
+            project.ExchangeRate = exchangeRate;
             var response = await projectService.UpdateAsync(id, project);
             if (!response.Success)
             {

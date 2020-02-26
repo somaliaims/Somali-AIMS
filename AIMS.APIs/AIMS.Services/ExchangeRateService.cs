@@ -143,31 +143,21 @@ namespace AIMS.Services
                 if (exchangeRates.Any())
                 {
                     int entriesUpdated = 0;
-                    foreach (var rate in exchangeRates)
+                    foreach (var rate in ratesList)
                     {
-                        string currency = rate.Currency;
-                        string rateDefaultCurrency = rate.DefaultCurrency;
-                        decimal newExRate = (from nRate in ratesList
-                                             where nRate.Currency == currency
-                                             select nRate.Rate).FirstOrDefault();
+                        var currency = (from r in exchangeRates
+                                        where r.Currency == rate.Currency
+                                        select r).FirstOrDefault();
 
-                        if (rateDefaultCurrency == defaultCurrency)
+                        if (currency == null)
                         {
-                            if (newExRate > 0)
+                            unitWork.ManualRatesRepository.Insert(new EFManualExchangeRates()
                             {
-                                rate.ExchangeRate = ((rate.ExchangeRate + newExRate) / 2);
-                                unitWork.ManualRatesRepository.Update(rate);
-                                ++entriesUpdated;
-                            }
-                        }
-                        else
-                        {
-                            if (newExRate > 0)
-                            {
-                                rate.ExchangeRate = newExRate;
-                                unitWork.ManualRatesRepository.Update(rate);
-                                ++entriesUpdated;
-                            }
+                                Year = year,
+                                ExchangeRate = rate.Rate,
+                                Currency = rate.Currency
+                            });
+                            ++entriesUpdated;
                         }
                     }
 
