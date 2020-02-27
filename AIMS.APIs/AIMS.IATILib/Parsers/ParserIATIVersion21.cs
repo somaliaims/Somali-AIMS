@@ -145,20 +145,6 @@ namespace AIMS.IATILib.Parsers
                     foreach (var activity in activities)
                     {
                         string startDate = "", startPlanned = "", endDate = "", endPlanned = "", projectTitle = "", defaultFinanceType = "";
-
-                        /*var activityStatus = activity.Element("activity-status");
-                        if (activityStatus.Attribute("code") != null)
-                        {
-                            int activityStatusVal = 0;
-                            if (int.TryParse(activityStatus.Attribute("code")?.Value, out activityStatusVal))
-                            {
-                                if (activityStatusVal == 4 || activityStatusVal == 5)
-                                {
-                                    continue;
-                                }
-                            }
-                        }*/
-
                         
                         //Extracting dates
                         var dates = activity.Elements("activity-date");
