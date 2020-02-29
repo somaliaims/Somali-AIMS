@@ -255,7 +255,6 @@ namespace AIMS.Services
                 IEnumerable<string> implementerNames = (from i in project.Implementers
                                                         select i.Implementer.OrganizationName);
                 IEnumerable<string> organizations = funderNames.Union(implementerNames);
-
                 List<OrganizationAbstractView> fundersList = new List<OrganizationAbstractView>();
                 foreach (string org in funderNames)
                 {
