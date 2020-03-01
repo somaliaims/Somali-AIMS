@@ -33,12 +33,18 @@ namespace AIMS.Models
 
     public enum FinancialRangeConstants
     {
-        OneToTenMillion = 1,
-        TenToTwentyMillion = 2,
-        TwentyToThirtyMillion = 3,
-        ThirtyToFourtyMillion = 4,
-        FourtyToFiftyMillion = 5,
-        FiftyMillionOrMore = 6
+        LessThanOneMillion = 1,
+        LessThanTenMillion = 2,
+        LessThanTwentyMillion = 3,
+        LessThanThirtyMillion = 4,
+        LessThanFourtyMillion = 5,
+        LessThanFiftyMillion = 6,
+        OneToTenMillion = 7,
+        TenToTwentyMillion = 8,
+        TwentyToThirtyMillion = 9,
+        ThirtyToFourtyMillion = 10,
+        FourtyToFiftyMillion = 11,
+        FiftyMillionOrMore = 12
     }
 
     public class ActionResponse

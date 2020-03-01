@@ -1155,9 +1155,40 @@ namespace AIMS.Services
                             { 6, "50000000" }
                         };
 
-                        decimal lowerRange = 0, upperRange = 0;
+                        decimal lowerRange = 0, upperRange = 0; 
+                        bool isLessThan = false;
                         switch(model.FinancialRange)
                         {
+                            case FinancialRangeConstants.LessThanOneMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[1]);
+                                isLessThan = true;
+                                break;
+
+                            case FinancialRangeConstants.LessThanTenMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[2]);
+                                isLessThan = true;
+                                break;
+
+                            case FinancialRangeConstants.LessThanTwentyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[3]);
+                                isLessThan = true;
+                                break;
+
+                            case FinancialRangeConstants.LessThanThirtyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[4]);
+                                isLessThan = true;
+                                break;
+
+                            case FinancialRangeConstants.LessThanFourtyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[5]);
+                                isLessThan = true;
+                                break;
+
+                            case FinancialRangeConstants.LessThanFiftyMillion:
+                                lowerRange = Convert.ToDecimal(financialRange[6]);
+                                isLessThan = true;
+                                break;
+
                             case FinancialRangeConstants.OneToTenMillion:
                                 lowerRange = Convert.ToDecimal(financialRange[1]);
                                 upperRange = Convert.ToDecimal(financialRange[2]);
@@ -1188,21 +1219,32 @@ namespace AIMS.Services
                                 break;
                         }
 
-                        if (lowerRange > 0 && upperRange > 0)
+                        if (isLessThan)
                         {
                             projectsList = (from p in projectsList
-                                                  where p.ProjectValueInDefaultCurrency >= lowerRange &&
-                                                  p.ProjectValueInDefaultCurrency <= upperRange
-                                                  orderby p.ProjectValueInDefaultCurrency ascending
-                                                  select p).ToList();
+                                            where p.ProjectValueInDefaultCurrency < lowerRange
+                                            orderby p.ProjectValueInDefaultCurrency ascending
+                                            select p).ToList();
                         }
-                        else if (lowerRange > 0 && upperRange == 0)
+                        else
                         {
-                            projectsList = (from p in projectsList
-                                                  where p.ProjectValueInDefaultCurrency >= lowerRange 
-                                                  orderby p.ProjectValueInDefaultCurrency ascending
-                                                  select p).ToList();
+                            if (lowerRange > 0 && upperRange > 0)
+                            {
+                                projectsList = (from p in projectsList
+                                                where p.ProjectValueInDefaultCurrency >= lowerRange &&
+                                                p.ProjectValueInDefaultCurrency <= upperRange
+                                                orderby p.ProjectValueInDefaultCurrency ascending
+                                                select p).ToList();
+                            }
+                            else if (lowerRange > 0 && upperRange == 0)
+                            {
+                                projectsList = (from p in projectsList
+                                                where p.ProjectValueInDefaultCurrency >= lowerRange
+                                                orderby p.ProjectValueInDefaultCurrency ascending
+                                                select p).ToList();
+                            }
                         }
+                        
                     }
                 }
                 catch (Exception ex)
