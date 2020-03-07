@@ -45,7 +45,18 @@ namespace AIMS.APIs
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
-            string connectionString = Configuration.GetSection("ConnectionStrings:DefaultConnection").Value;
+            string connectionString = "";
+            string hostName = Environment.GetEnvironmentVariable("SQLSERVER_HOST");
+            string hostPassword = Environment.GetEnvironmentVariable("SQLSERVER_SA_PASSWORD"); 
+            if (!string.IsNullOrEmpty(hostName) && !string.IsNullOrEmpty(hostPassword))
+            {
+                connectionString = $"Server={hostName};Database=AIMSDb;User ID=sa;Password={hostPassword}; MultipleActiveResultSets=true";
+            }
+            else
+            {
+                connectionString = Configuration.GetSection("ConnectionStrings:DefaultConnection").Value;
+            }
+            
             services.AddDbContext<AIMSDbContext>(
                 options =>
                 {

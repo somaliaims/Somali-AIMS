@@ -57,7 +57,7 @@ namespace AIMS.APIs
                 options.ValidateScopes = context.HostingEnvironment.IsDevelopment();
             })
             .UseStartup<Startup>()
-            .UseUrls("http://localhost:7000")
+            //.UseUrls("http://localhost:7000")
             .Build();
 
     }
