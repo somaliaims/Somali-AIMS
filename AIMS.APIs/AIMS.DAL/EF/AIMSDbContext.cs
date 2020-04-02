@@ -1,5 +1,6 @@
 ﻿using AIMS.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,12 +12,19 @@ namespace AIMS.DAL.EF
 {
     public class AIMSDbContext : DbContext
     {
+        public string ConnectionString { get; set; }
         public AIMSDbContext()
         {
         }
 
         public AIMSDbContext(DbContextOptions options) : base(options)
         {
+            var sqlServerOptionsExtension =
+                   options.FindExtension<SqlServerOptionsExtension>();
+            if (sqlServerOptionsExtension != null)
+            {
+                ConnectionString = sqlServerOptionsExtension.ConnectionString;
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

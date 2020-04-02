@@ -71,12 +71,13 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 IEnumerable<EFProjectDeletionRequests> projectRequests = null;
+                var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == orgId, p => p.ProjectId);
+                var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == orgId, p => p.ProjectId);
+                var userOwnedProjects = unitWork.ProjectRepository.GetProjection(p => p.CreatedById == userId, p => p.Id);
+                var projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
+
                 if (uType == UserTypes.Standard)
                 {
-                    var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == orgId, p => p.ProjectId);
-                    var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == orgId, p => p.ProjectId);
-                    var userOwnedProjects = unitWork.ProjectRepository.GetProjection(p => p.CreatedById == userId, p => p.Id);
-                    var projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
                     List<int> userOwnedProjectIds = new List<int>();
                     foreach (var pid in userOwnedProjects)
                     {
@@ -87,7 +88,7 @@ namespace AIMS.Services
                 }
                 else if (uType == UserTypes.Manager || uType == UserTypes.SuperAdmin)
                 {
-                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => (p.Status == ProjectDeletionStatus.Approved || (p.Status == ProjectDeletionStatus.Requested && p.RequestedOn <= DateTime.Now.AddDays(-7))), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
+                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => (p.Status == ProjectDeletionStatus.Approved || (p.RequestedOn <= DateTime.Now.AddDays(-7) && p.Status == ProjectDeletionStatus.Requested && p.UserId != userId) || (projectIds.Contains(p.ProjectId) && userId != p.UserId)), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
                 }
                 return mapper.Map<List<ProjectDeletionRequestView>>(projectRequests);
             }
@@ -108,7 +109,7 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var user = unitWork.UserRepository.GetOne(u => u.Id == model.UserId);
+                var user = unitWork.UserRepository.GetWithInclude(u => u.Id == model.UserId, new string[] { "Organization" }).FirstOrDefault();
                 if (user == null)
                 {
                     mHelper = new MessageHelper();
@@ -190,11 +191,12 @@ namespace AIMS.Services
 
                     string message = "", subject = "", footerMessage = "";
                     string projectTitle = "<h5>Project title: " + project.Title + "</h5>";
+                    string requestedBy = "<h5>Requested by: " + user.Email + " (" + user.Organization.OrganizationName + ")</h5>";
                     var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectDeletionRequest);
                     if (emailMessage != null)
                     {
                         subject = emailMessage.Subject;
-                        message = projectTitle + emailMessage.Message;
+                        message = projectTitle + requestedBy + emailMessage.Message;
                         footerMessage = emailMessage.FooterMessage;
                     }
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);

@@ -127,7 +127,7 @@ namespace AIMS.Services
                 }
                 else if (uType == UserTypes.Manager || uType == UserTypes.SuperAdmin)
                 {
-                    deletionsCount = unitWork.ProjectDeletionRepository.GetProjectionCount(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn <= DateTime.Now.AddDays(-7) && d.Status == ProjectDeletionStatus.Requested)), d => d.ProjectId);
+                    deletionsCount = unitWork.ProjectDeletionRepository.GetProjectionCount(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn <= DateTime.Now.AddDays(-7) && d.Status == ProjectDeletionStatus.Requested && d.UserId != userId) || (projectIds.Contains(d.ProjectId) && userId != d.UserId)), d => d.ProjectId);
                 }
                 var orgsInRequests = unitWork.OrganizationsToMergeRepository.GetProjection(m => m.OrganizationId == organizationId, m => m.OrganizationId);
                 int mergeOrgsCount = 0;
