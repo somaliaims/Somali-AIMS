@@ -52,14 +52,14 @@ namespace AIMS.APIs.Scheduler
                 string organizationTypesUrl = configuration.GetValue<string>("IATI:OrganizationTypesUrl");
                 string countriesUrl = configuration.GetValue<string>("IATI:CountriesUrl");
                 string sectorsUrl = configuration.GetValue<string>("IATI:SectorsUrl");
-                string filePath = sWebRootFolder + "/IATISomali.xml";
-                string sectorsFilePath = sWebRootFolder + "/Sectors";
-                string organizationTypesPath = sWebRootFolder + "/OrganizationTypes.json";
-                string currenciesFilePath = sWebRootFolder + "/Currency.json";
-                string countriesFilePath = sWebRootFolder + "/Country.json";
-                string transactionTypesPath = sWebRootFolder + "/IATITransactionTypes.json";
-                string financeTypesPath = sWebRootFolder + "/IATIFinanceTypes.json";
-                string sectorsVocabPath = sWebRootFolder + "/IATISectorVocabulary.json";
+                string filePath = Path.Combine(sWebRootFolder, "IATISomali.xml");
+                string sectorsFilePath = Path.Combine(sWebRootFolder, "Sectors");
+                string organizationTypesPath = Path.Combine(sWebRootFolder, "OrganizationTypes.json");
+                string currenciesFilePath = Path.Combine(sWebRootFolder, "Currency.json");
+                string countriesFilePath = Path.Combine(sWebRootFolder, "Country.json");
+                string transactionTypesPath = Path.Combine(sWebRootFolder, "IATITransactionTypes.json");
+                string financeTypesPath = Path.Combine(sWebRootFolder, "IATIFinanceTypes.json");
+                string sectorsVocabPath = Path.Combine(sWebRootFolder, "IATISectorVocabulary.json");
                 string xml = "", sectorsXml = "", json = "", transactionTypesJson = "", financeTypesJson = "", sectorsVocabJson = "",
                     organizationTypesJson = "", countriesJson = "";
 
@@ -207,7 +207,7 @@ namespace AIMS.APIs.Scheduler
                 }
 
                 //File cleanup
-                string excelFiles = sWebRootFolder + "\\ExcelFiles";
+                string excelFiles = Path.Combine(sWebRootFolder, "ExcelFiles");
                 var directory = Directory.CreateDirectory(excelFiles);
 
                 if (directory.GetFiles().Any())

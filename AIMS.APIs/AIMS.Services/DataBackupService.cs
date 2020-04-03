@@ -61,7 +61,7 @@ namespace AIMS.Services
         public DataBackupService(IHostingEnvironment _hostingEnvironment, AIMSDbContext context)
         {
             hostingEnvironment = _hostingEnvironment;
-            backupDir = hostingEnvironment.WebRootPath + "\\DataBackups\\";
+            backupDir = Path.Combine(hostingEnvironment.WebRootPath, "DataBackups");
             Directory.CreateDirectory(backupDir);
             FileIOPermission fp = new FileIOPermission(FileIOPermissionAccess.Write, backupDir);
             try
@@ -90,7 +90,9 @@ namespace AIMS.Services
                     sqlConnection.Open();
                     foreach (string dbName in saDatabases)
                     {
-                        string backupFileNameWithoutExt = String.Format("{0}\\{1}_{2:yyyy-MM-dd-hh-mm-ss-tt}", backupDir, dbName, DateTime.Now);
+                        string dateStr = String.Format("{0}_{1:yyyy-MM-dd-hh-mm-ss-tt}", dbName, DateTime.Now);
+                        string backupFileNameWithoutExt = Path.Combine(backupDir, dateStr);
+                        //string backupFileNameWithoutExt = String.Format("{0}\\{1}_{2:yyyy-MM-dd-hh-mm-ss-tt}", backupDir, dbName, DateTime.Now);
                         string backupFileNameWithExt = String.Format("{0}.bak", backupFileNameWithoutExt);
                         string zipFileName = String.Format("{0}.zip", backupFileNameWithoutExt);
 
@@ -110,7 +112,7 @@ namespace AIMS.Services
                             if (Directory.Exists(backupFileNameWithoutExt))
                             {
                                 string fileName = Path.GetFileName(backupFileNameWithExt);
-                                string newFilePath = backupFileNameWithoutExt + "\\" + fileName;
+                                string newFilePath = Path.Combine(backupFileNameWithoutExt, fileName);
                                 File.Copy(backupFileNameWithExt, newFilePath);
                                 ZipFile.CreateFromDirectory(backupFileNameWithoutExt, zipFileName);
                                 await Task.Delay(1000);
@@ -124,20 +126,6 @@ namespace AIMS.Services
                     }
                     sqlConnection.Close();
                 }
-                /*ServerConnection serverConnection = new ServerConnection(".", "sa", "master002");
-                Server server = new Server(serverConnection);
-                Database database = server.Databases["AIMSDb"];
-                Backup backup = new Backup();
-                backup.Action = BackupActionType.Database;
-                backup.BackupSetDescription = "AIMSDb - full backup";
-                backup.BackupSetName = "AIMSDb backup";
-                backup.Database = "AIMSDb";
-
-                BackupDeviceItem deviceItem = new BackupDeviceItem("AIMSDb_Full_Backup.bak", DeviceType.File);
-                backup.Devices.Add(deviceItem);
-                backup.Incremental = false;
-                backup.LogTruncation = BackupTruncateLogType.Truncate;
-                backup.SqlBackup(server);*/
             }
             catch (Exception ex)
             {
