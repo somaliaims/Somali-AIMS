@@ -407,14 +407,42 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 exchangeRate = (exchangeRate <= 0) ? 1 : exchangeRate;
+                var financialYearSettings = unitWork.FinancialYearSettingsRepository.GetOne(fy => fy.Id != 0);
+                int fyDay = 1, fyMonth = 1;
+                if (financialYearSettings != null)
+                {
+                    fyDay = financialYearSettings.Day;
+                    fyMonth = financialYearSettings.Month;
+                }
+
+                int currentFinancialYear = DateTime.Now.Year;
+                int currentMonth = DateTime.Now.Month;
+                int currentDay = DateTime.Now.Day;
+
+                if (fyDay != 1 && fyMonth != 1)
+                {
+                    if (currentMonth < fyMonth)
+                    {
+                        --currentFinancialYear;
+                    }
+                    else if (currentMonth == fyMonth && currentDay < fyDay)
+                    {
+                        --currentFinancialYear;
+                    }
+                }
+
                 var projects = unitWork.ProjectRepository.GetWithInclude(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                 projects = (from p in projects
                             orderby p.DateUpdated descending
                             select p);
 
+                var projectDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == currentFinancialYear && d.DisbursementType == DisbursementTypes.Planned, new string[] { "Year" });
                 List<ProjectView> projectsList = new List<ProjectView>();
                 foreach(var project in projects)
                 {
+                    decimal currentFYPlannedDisbursements = (from d in projectDisbursements
+                                                             where d.ProjectId == project.Id && d.Year.FinancialYear == currentFinancialYear
+                                                             select ((exchangeRate / d.ExchangeRate) * d.Amount)).FirstOrDefault();
                     project.ExchangeRate = (project.ExchangeRate <= 0) ? 1 : project.ExchangeRate;
                     projectsList.Add(new ProjectView()
                     {
@@ -425,6 +453,7 @@ namespace AIMS.Services
                         StartDate = project.StartDate.ToShortDateString(),
                         EndDate = project.EndDate.ToShortDateString(),
                         DateUpdated = project.DateUpdated.ToShortDateString(),
+                        CurrentYearPlannedDisbursements = currentFYPlannedDisbursements
                     });
                 }
                 return projectsList;
@@ -976,6 +1005,29 @@ namespace AIMS.Services
 
                 try
                 {
+                    var financialYearSettings = unitWork.FinancialYearSettingsRepository.GetOne(fy => fy.Id != 0);
+                    int fyDay = 1, fyMonth = 1;
+                    if (financialYearSettings != null)
+                    {
+                        fyDay = financialYearSettings.Day;
+                        fyMonth = financialYearSettings.Month;
+                    }
+
+                    int currentFinancialYear = DateTime.Now.Year;
+                    int currentMonth = DateTime.Now.Month;
+                    int currentDay = DateTime.Now.Day;
+
+                    if (fyDay != 1 && fyMonth != 1)
+                    {
+                        if (currentMonth < fyMonth)
+                        {
+                            --currentFinancialYear;
+                        }
+                        else if (currentMonth == fyMonth && currentDay < fyDay)
+                        {
+                            --currentFinancialYear;
+                        }
+                    }
                     if (model.ProjectIds.Count > 0)
                     {
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => model.ProjectIds.Contains(p.Id)
@@ -1128,8 +1180,12 @@ namespace AIMS.Services
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                     }
 
+                    var projectDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == currentFinancialYear && d.DisbursementType == DisbursementTypes.Planned, new string[] { "Year" });
                     foreach (var project in projectProfileList)
                     {
+                        decimal currentFYPlannedDisbursements = (from d in projectDisbursements
+                                                                 where d.ProjectId == project.Id && d.Year.FinancialYear == currentFinancialYear
+                                                                 select ((exchangeRate / d.ExchangeRate) * d.Amount)).FirstOrDefault();
                         project.ExchangeRate = (project.ExchangeRate <= 0) ? 1 : project.ExchangeRate;
                         ProjectView profileView = new ProjectView();
                         profileView.Id = project.Id;
@@ -1141,6 +1197,7 @@ namespace AIMS.Services
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.DateUpdated = project.DateUpdated.ToShortDateString();
+                        profileView.CurrentYearPlannedDisbursements = currentFYPlannedDisbursements;
                         projectsList.Add(profileView);
                     }
 

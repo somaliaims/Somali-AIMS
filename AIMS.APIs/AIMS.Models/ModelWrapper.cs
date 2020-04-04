@@ -786,6 +786,7 @@ namespace AIMS.Models
         public string StartingFinancialYear { get; set; }
         public string EndingFinancialYear { get; set; }
         public string DateUpdated { get; set; }
+        public decimal CurrentYearPlannedDisbursements { get; set; }
     }
 
     public class ProjectTitle
