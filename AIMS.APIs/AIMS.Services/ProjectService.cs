@@ -568,6 +568,7 @@ namespace AIMS.Services
                         ProjectCurrency = project.ProjectCurrency,
                         StartDate = project.StartDate.ToShortDateString(),
                         EndDate = project.EndDate.ToShortDateString(),
+                        DateUpdated = project.DateUpdated.ToShortDateString(),
                         StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
                         EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
                         Organizations = organizationsList,

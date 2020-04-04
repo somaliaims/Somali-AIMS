@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Security.Permissions;
 using Newtonsoft.Json.Linq;
+using System.Threading;
+using System.Globalization;
 
 namespace AIMS.Services
 {
@@ -409,6 +411,7 @@ namespace AIMS.Services
             ActionResponse response = new ActionResponse();
             try
             {
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("en-Us");
                 string sFileName = @"SectorProjects-" + DateTime.UtcNow.Ticks.ToString() + ".xlsx";
                 FileInfo file = new FileInfo(Path.Combine(sWebRootFolder, sFileName));
                 var memory = new MemoryStream();
@@ -509,10 +512,6 @@ namespace AIMS.Services
                     implementerCol.SetCellValue("Implementers");
                     implementerCol.CellStyle = headerStyle;
 
-                    /*var projectCostCol = row.CreateCell(3);
-                    projectCostCol.SetCellValue("Project value");
-                    projectCostCol.CellStyle = headerStyle;*/
-
                     var actualDisbursementsCol = row.CreateCell(3);
                     actualDisbursementsCol.SetCellValue("Actual disbursements");
                     actualDisbursementsCol.CellStyle = headerStyle;
@@ -535,10 +534,6 @@ namespace AIMS.Services
                             rowCounter, rowCounter, 0, groupHeaderColumns));
                         groupTitleCell.SetCellValue(sector.SectorName);
                         groupTitleCell.CellStyle = groupHeaderStyle;
-
-                        /*var groupFundTotalCell = row.CreateCell(3, CellType.Numeric);
-                        groupFundTotalCell.SetCellValue(ApplyThousandFormat(sector.TotalFunding));
-                        groupFundTotalCell.CellStyle = numericGroupHeaderStyle;*/
 
                         var groupDisbursementTotalCell = row.CreateCell(3, CellType.Numeric);
                         groupDisbursementTotalCell.SetCellValue(ApplyThousandFormat(sector.TotalDisbursements));
