@@ -1948,7 +1948,8 @@ namespace AIMS.Models
         public List<int> SectorIds { get; set; } = new List<int>();
         public List<int> LocationIds { get; set; } = new List<int>();
         public string Description { get; set; }
-        public FinancialRangeConstants FinancialRange { get; set; } = 0;
+        public decimal LowerRange { get; set; } = 0;
+        public decimal UpperRange { get; set; }
     }
 
     public class MarkerModel

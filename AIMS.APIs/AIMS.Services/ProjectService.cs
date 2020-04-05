@@ -930,67 +930,21 @@ namespace AIMS.Services
                         projectsList.Add(profileView);
                     }
 
-                    if (model.FinancialRange > 0)
+                    if (model.LowerRange > 0)
                     {
-                        IDictionary<int, string> financialRange = new Dictionary<int, string>()
-                        {
-                            { 1, "1000000" },
-                            { 2, "10000000" },
-                            { 3, "20000000" },
-                            { 4, "30000000" },
-                            { 5, "40000000" },
-                            { 6, "50000000" }
-                        };
-
-                        decimal lowerRange = 0, upperRange = 0;
-                        switch (model.FinancialRange)
-                        {
-                            case FinancialRangeConstants.OneToTenMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[1]);
-                                upperRange = Convert.ToDecimal(financialRange[2]);
-                                break;
-
-                            case FinancialRangeConstants.TenToTwentyMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[2]);
-                                upperRange = Convert.ToDecimal(financialRange[3]);
-                                break;
-
-                            case FinancialRangeConstants.TwentyToThirtyMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[3]);
-                                upperRange = Convert.ToDecimal(financialRange[4]);
-                                break;
-
-                            case FinancialRangeConstants.ThirtyToFourtyMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[4]);
-                                upperRange = Convert.ToDecimal(financialRange[5]);
-                                break;
-
-                            case FinancialRangeConstants.FourtyToFiftyMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[5]);
-                                upperRange = Convert.ToDecimal(financialRange[6]);
-                                break;
-
-                            case FinancialRangeConstants.FiftyMillionOrMore:
-                                lowerRange = Convert.ToDecimal(financialRange[6]);
-                                break;
-                        }
-
-                        if (lowerRange > 0 && upperRange > 0)
-                        {
-                            projectProfileList = (from p in projectProfileList
-                                                  where p.ProjectValue >= lowerRange &&
-                                                  p.ProjectValue <= upperRange
-                                                  orderby p.ProjectValue ascending
-                                                  select p);
-                        }
-                        else if (lowerRange > 0 && upperRange == 0)
-                        {
-                            projectProfileList = (from p in projectProfileList
-                                                  where p.ProjectValue >= lowerRange
-                                                  orderby p.ProjectValue ascending
-                                                  select p);
-                        }
+                        projectsList = (from p in projectsList
+                                        where p.ProjectValueInDefaultCurrency >= model.LowerRange
+                                        select p).ToList();
                     }
+
+                    if (model.UpperRange > 0)
+                    {
+                        projectsList = (from p in projectsList
+                                        where p.ProjectValueInDefaultCurrency <= model.UpperRange
+                                        select p).ToList();
+                    }
+
+
                 }
                 catch (Exception ex)
                 {
@@ -1101,23 +1055,6 @@ namespace AIMS.Services
                         }
                     }
 
-                    /*if (model.StartingYear != 0 && model.EndingYear != 0)
-                    {
-                        if (projectProfileList == null)
-                        {
-                            projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => (p.StartingFinancialYear.FinancialYear >= model.StartingYear
-                            && p.EndingFinancialYear.FinancialYear <= model.EndingYear),
-                                new string[] { "StartingFinancialYear", "EndingFinancialYear" });
-                        }
-                        else
-                        {
-                            projectProfileList = (from project in projectProfileList
-                                                  where project.StartingFinancialYear.FinancialYear >= model.StartingYear &&
-                                                  project.EndingFinancialYear.FinancialYear <= model.EndingYear
-                                                  select project);
-                        }
-                    }*/
-
                     if (model.SectorIds.Count > 0)
                     {
                         var projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(s => model.SectorIds.Contains(s.SectorId) ||
@@ -1209,108 +1146,18 @@ namespace AIMS.Services
                         projectsList.Add(profileView);
                     }
 
-                    if (model.FinancialRange > 0)
+                    if (model.LowerRange > 0)
                     {
-                        IDictionary<int, string> financialRange = new Dictionary<int, string>()
-                        {
-                            { 1, "1000000" },
-                            { 2, "10000000" },
-                            { 3, "20000000" },
-                            { 4, "30000000" },
-                            { 5, "40000000" },
-                            { 6, "50000000" }
-                        };
+                        projectsList = (from p in projectsList
+                                        where p.ProjectValueInDefaultCurrency >= model.LowerRange
+                                        select p).ToList();
+                    }
 
-                        decimal lowerRange = 0, upperRange = 0; 
-                        bool isLessThan = false;
-                        switch(model.FinancialRange)
-                        {
-                            case FinancialRangeConstants.LessThanOneMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[1]);
-                                isLessThan = true;
-                                break;
-
-                            case FinancialRangeConstants.LessThanTenMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[2]);
-                                isLessThan = true;
-                                break;
-
-                            case FinancialRangeConstants.LessThanTwentyMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[3]);
-                                isLessThan = true;
-                                break;
-
-                            case FinancialRangeConstants.LessThanThirtyMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[4]);
-                                isLessThan = true;
-                                break;
-
-                            case FinancialRangeConstants.LessThanFourtyMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[5]);
-                                isLessThan = true;
-                                break;
-
-                            case FinancialRangeConstants.LessThanFiftyMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[6]);
-                                isLessThan = true;
-                                break;
-
-                            case FinancialRangeConstants.OneToTenMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[1]);
-                                upperRange = Convert.ToDecimal(financialRange[2]);
-                                break;
-
-                            case FinancialRangeConstants.TenToTwentyMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[2]);
-                                upperRange = Convert.ToDecimal(financialRange[3]);
-                                break;
-
-                            case FinancialRangeConstants.TwentyToThirtyMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[3]);
-                                upperRange = Convert.ToDecimal(financialRange[4]);
-                                break;
-
-                            case FinancialRangeConstants.ThirtyToFourtyMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[4]);
-                                upperRange = Convert.ToDecimal(financialRange[5]);
-                                break;
-
-                            case FinancialRangeConstants.FourtyToFiftyMillion:
-                                lowerRange = Convert.ToDecimal(financialRange[5]);
-                                upperRange = Convert.ToDecimal(financialRange[6]);
-                                break;
-
-                            case FinancialRangeConstants.FiftyMillionOrMore:
-                                lowerRange = Convert.ToDecimal(financialRange[6]);
-                                break;
-                        }
-
-                        if (isLessThan)
-                        {
-                            projectsList = (from p in projectsList
-                                            where p.ProjectValueInDefaultCurrency < lowerRange
-                                            orderby p.ProjectValueInDefaultCurrency ascending
-                                            select p).ToList();
-                        }
-                        else
-                        {
-                            if (lowerRange > 0 && upperRange > 0)
-                            {
-                                projectsList = (from p in projectsList
-                                                where p.ProjectValueInDefaultCurrency >= lowerRange &&
-                                                p.ProjectValueInDefaultCurrency <= upperRange
-                                                orderby p.ProjectValueInDefaultCurrency ascending
-                                                select p).ToList();
-                            }
-                            else if (lowerRange > 0 && upperRange == 0)
-                            {
-                                projectsList = (from p in projectsList
-                                                where p.ProjectValueInDefaultCurrency >= lowerRange
-                                                orderby p.ProjectValueInDefaultCurrency ascending
-                                                select p).ToList();
-                            }
-                        }
-                        
+                    if (model.UpperRange > 0)
+                    {
+                        projectsList = (from p in projectsList
+                                        where p.ProjectValueInDefaultCurrency <= model.UpperRange
+                                        select p).ToList();
                     }
                 }
                 catch (Exception ex)
