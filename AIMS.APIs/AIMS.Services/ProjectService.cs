@@ -438,6 +438,13 @@ namespace AIMS.Services
 
                 var projectDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == currentFinancialYear && d.DisbursementType == DisbursementTypes.Planned, new string[] { "Year" });
                 List<ProjectView> projectsList = new List<ProjectView>();
+                string yearLabel = "";
+                if (projects.Any())
+                {
+                    yearLabel = (from d in projectDisbursements
+                                 where d.Year.FinancialYear == currentFinancialYear
+                                 select d.Year.Label).FirstOrDefault();
+                }
                 foreach(var project in projects)
                 {
                     decimal currentFYPlannedDisbursements = (from d in projectDisbursements
@@ -450,10 +457,8 @@ namespace AIMS.Services
                         Title = project.Title,
                         Description = project.Description,
                         ProjectValueInDefaultCurrency = Math.Round(((exchangeRate / project.ExchangeRate) * project.ProjectValue), MidpointRounding.AwayFromZero),
-                        StartDate = project.StartDate.ToShortDateString(),
-                        EndDate = project.EndDate.ToShortDateString(),
-                        DateUpdated = project.DateUpdated.ToShortDateString(),
-                        CurrentYearPlannedDisbursements = currentFYPlannedDisbursements
+                        CurrentYearPlannedDisbursements = currentFYPlannedDisbursements,
+                        CurrentYearLabel = yearLabel
                     });
                 }
                 return projectsList;
@@ -1181,6 +1186,13 @@ namespace AIMS.Services
                     }
 
                     var projectDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.Year.FinancialYear == currentFinancialYear && d.DisbursementType == DisbursementTypes.Planned, new string[] { "Year" });
+                    string yearLabel = "";
+                    if (projectProfileList.Any())
+                    {
+                        yearLabel = (from d in projectDisbursements
+                                     where d.Year.FinancialYear == currentFinancialYear
+                                     select d.Year.Label).FirstOrDefault();
+                    }
                     foreach (var project in projectProfileList)
                     {
                         decimal currentFYPlannedDisbursements = (from d in projectDisbursements
@@ -1192,11 +1204,7 @@ namespace AIMS.Services
                         profileView.Title = project.Title;
                         profileView.ProjectValueInDefaultCurrency = ((exchangeRate / project.ExchangeRate) * project.ProjectValue);
                         profileView.Description = project.Description;
-                        profileView.StartDate = project.StartDate.ToShortDateString();
-                        profileView.EndDate = project.EndDate.ToShortDateString();
-                        profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
-                        profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
-                        profileView.DateUpdated = project.DateUpdated.ToShortDateString();
+                        profileView.CurrentYearLabel = yearLabel;
                         profileView.CurrentYearPlannedDisbursements = currentFYPlannedDisbursements;
                         projectsList.Add(profileView);
                     }

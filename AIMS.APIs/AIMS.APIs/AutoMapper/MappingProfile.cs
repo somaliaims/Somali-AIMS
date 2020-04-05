@@ -45,12 +45,7 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFLocation, LocationView>().ReverseMap();
 
-            CreateMap<EFProject, ProjectView>()
-                .ForMember(p => p.StartingFinancialYear, opts => opts.MapFrom(source => source.StartingFinancialYear.FinancialYear.ToString()))
-                .ForMember(p => p.EndingFinancialYear, opts => opts.MapFrom(source => source.EndingFinancialYear.FinancialYear.ToString()))
-                .ForMember(p => p.StartDate, opts => opts.MapFrom(source => source.StartDate.ToShortDateString()))
-                .ForMember(p => p.EndDate, opts => opts.MapFrom(source => source.EndDate.ToShortDateString()))
-                .ForMember(p => p.DateUpdated, opts => opts.MapFrom(source => source.DateUpdated.ToShortDateString()));
+            CreateMap<EFProject, ProjectView>();
 
             CreateMap<EFProject, ProjectModelView>()
                 .ForMember(p => p.StartDate, opts => opts.MapFrom(source => source.StartDate.ToShortDateString()))
