@@ -17,23 +17,28 @@ namespace AIMS.APIs.Controllers
     public class ProjectController : ControllerBase
     {
         IProjectService projectService;
+        IDataBackupService backupService;
         IHostingEnvironment hostingEnvironment;
         IConfiguration config;
         IExchangeRateService ratesService;
         IExchangeRateHttpService ratesHttpService;
         ICurrencyService currencyService;
         string projectUrl = "";
+        string connectionString = "";
 
         public ProjectController(IProjectService service, IHostingEnvironment _hostingEnvironment, IConfiguration conf,
-            IExchangeRateHttpService exRatesHttpService, IExchangeRateService exRatesService, ICurrencyService curService)
+            IExchangeRateHttpService exRatesHttpService, IExchangeRateService exRatesService, ICurrencyService curService,
+            IDataBackupService dataBackupService)
         {
             hostingEnvironment = _hostingEnvironment;
             projectService = service;
+            backupService = dataBackupService;
             config = conf;
             ratesService = exRatesService;
             ratesHttpService = exRatesHttpService;
             currencyService = curService;
-            projectUrl = config["ProjectUrl"];
+            projectUrl = config.GetValue<string>("ProjectUrl"); ;
+            connectionString = config.GetValue<string>("ConnectionStrings:DefaultConnection"); ;
         }
 
         [HttpGet]
@@ -494,6 +499,7 @@ namespace AIMS.APIs.Controllers
         [HttpGet("AdjustDisbursementsForProjects")]
         public async Task<IActionResult> AdjustDisbursementsForProjects()
         {
+            var result = await backupService.BackupData(connectionString);
             var response = await projectService.AdjustDisbursementsForProjectsAsync();
             if (!response.Success)
             {

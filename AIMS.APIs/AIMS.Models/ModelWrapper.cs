@@ -2298,4 +2298,11 @@ namespace AIMS.Models
         public string DownloadPath { get; set; }
         public DateTime TakenOn { get; set; }
     }
+
+    public class FinancialYearTransitionView
+    {
+        public bool Exists { get; set; } = false;
+        public int Year { get; set; }
+    }
+
 }

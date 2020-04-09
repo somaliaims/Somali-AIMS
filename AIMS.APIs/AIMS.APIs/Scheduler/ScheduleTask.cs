@@ -4,6 +4,7 @@ using AIMS.Models;
 using AIMS.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -43,6 +44,7 @@ namespace AIMS.APIs.Scheduler
             try
             {
                 string sWebRootFolder = hostingEnvironment.WebRootPath;
+                string connectionString = configuration.GetValue<string>("ConnectionStrings:DefaultConnection");
                 string url = configuration.GetValue<string>("IATI:Url");
                 string countryCode = configuration.GetValue<string>("IATI:Country");
                 string currencyUrl = configuration.GetValue<string>("IATI:CurrencyUrl");
@@ -97,6 +99,7 @@ namespace AIMS.APIs.Scheduler
                 using (var scope = scopeFactory.CreateScope())
                 {
                     HttpClient httpClient = new HttpClient();
+                    IHostingEnvironment hostingEnvironment = new HostingEnvironment();
                     ExchangeRateHttpService httpService = new ExchangeRateHttpService(httpClient);
                     AIMSDbContext dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
                     IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
@@ -107,6 +110,8 @@ namespace AIMS.APIs.Scheduler
                     ISectorTypesService sectorTypeService = new SectorTypesService(dbContext, imapper);
                     IProjectService projectService = new ProjectService(dbContext, imapper);
                     IOrganizationMergeService orgMergeService = new OrganizationMergeService(dbContext);
+                    IDataBackupService backupService = new DataBackupService(hostingEnvironment, dbContext);
+                    IFinancialYearTransitionService financialYearTransitionService = new FinancialYearTransitionService(dbContext, imapper);
 
                     var iatiSettings = service.GetIATISettings();
                     if (iatiSettings != null)
@@ -189,9 +194,16 @@ namespace AIMS.APIs.Scheduler
                         fyDay = fySettings.Day;
                     }
 
-                    if (fyMonth == currentMonth && fyDay == currentDay)
+                    var financialTransitionForYear = financialYearTransitionService.IsFinancialTransitionApplied();
+                    if ((fyMonth == currentMonth && fyDay == currentDay) || !financialTransitionForYear.Exists)
                     {
-                        var response = projectService.AdjustDisbursementsForProjectsAsync().GetAwaiter().GetResult();
+                        int year = 0;
+                        if (!financialTransitionForYear.Exists)
+                        {
+                            year = financialTransitionForYear.Year;
+                        }
+                        var backup = backupService.BackupData("");
+                        var response = projectService.AdjustDisbursementsForProjectsAsync(year).GetAwaiter().GetResult();
                         if (response.Success)
                         {
                         }

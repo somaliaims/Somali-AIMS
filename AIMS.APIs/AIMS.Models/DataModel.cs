@@ -640,4 +640,11 @@ namespace AIMS.Models
         public string IntroductionHeading { get; set; }
         public string IntroductionText { get; set; }
     }
+
+    public class EFFinancialYearTransition
+    {
+        public int Id { get; set; }
+        public int Year { get; set; }
+        public DateTime AppliedOn { get; set; }
+    }
 }
