@@ -10,6 +10,7 @@ using System.Linq;
 using AIMS.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace AIMS.Services
 {
@@ -752,14 +753,28 @@ namespace AIMS.Services
                     {
                         List<int> projectIds = new List<int>();
                         string value = model.MarkerValue;
-                        var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId && m.Values.Equals(model.MarkerValue, StringComparison.OrdinalIgnoreCase));
+                        var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId);
                         if (!string.IsNullOrEmpty(value))
                         {
                             foreach (var marker in projectMarkers)
                             {
-                                if (marker.Values.Split(",").Contains(value))
+                                var markerValues = ParseAndExtractIfJson(marker.Values);
+                                if (markerValues != null && markerValues.Any())
                                 {
-                                    projectIds.Add(marker.ProjectId);
+                                    var valueMatch = (from v in markerValues
+                                                      where v.Value.Equals(value, StringComparison.OrdinalIgnoreCase)
+                                                      select v).FirstOrDefault();
+                                    if (valueMatch != null)
+                                    {
+                                        projectIds.Add(marker.ProjectId);
+                                    }
+                                }
+                                else
+                                {
+                                    if (marker.Values.Equals(value, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        projectIds.Add(marker.ProjectId);
+                                    }
                                 }
                             }
                         }
@@ -1947,14 +1962,28 @@ namespace AIMS.Services
                     {
                         List<int> projectIds = new List<int>();
                         string value = model.MarkerValue;
-                        var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId && m.Values.Equals(model.MarkerValue, StringComparison.OrdinalIgnoreCase));
+                        var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId);
                         if (!string.IsNullOrEmpty(value))
                         {
                             foreach (var marker in projectMarkers)
                             {
-                                if (marker.Values.Split(",").Contains(value))
+                                var markerValues = ParseAndExtractIfJson(marker.Values);
+                                if (markerValues != null && markerValues.Any())
                                 {
-                                    projectIds.Add(marker.ProjectId);
+                                    var valueMatch = (from v in markerValues
+                                                      where v.Value.Equals(value, StringComparison.OrdinalIgnoreCase)
+                                                      select v).FirstOrDefault();
+                                    if (valueMatch != null)
+                                    {
+                                        projectIds.Add(marker.ProjectId);
+                                    }
+                                }
+                                else 
+                                {
+                                    if (marker.Values.Equals(value, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        projectIds.Add(marker.ProjectId);
+                                    }
                                 }
                             }
                         }
@@ -2375,14 +2404,28 @@ namespace AIMS.Services
                     {
                         List<int> projectIds = new List<int>();
                         string value = model.MarkerValue;
-                        var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId && m.Values.Equals(model.MarkerValue, StringComparison.OrdinalIgnoreCase));
+                        var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId);
                         if (!string.IsNullOrEmpty(value))
                         {
                             foreach (var marker in projectMarkers)
                             {
-                                if (marker.Values.Split(",").Contains(value))
+                                var markerValues = ParseAndExtractIfJson(marker.Values);
+                                if (markerValues != null && markerValues.Any())
                                 {
-                                    projectIds.Add(marker.ProjectId);
+                                    var valueMatch = (from v in markerValues
+                                                      where v.Value.Equals(value, StringComparison.OrdinalIgnoreCase)
+                                                      select v).FirstOrDefault();
+                                    if (valueMatch != null)
+                                    {
+                                        projectIds.Add(marker.ProjectId);
+                                    }
+                                }
+                                else
+                                {
+                                    if (marker.Values.Equals(value, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        projectIds.Add(marker.ProjectId);
+                                    }
                                 }
                             }
                         }
@@ -2582,6 +2625,19 @@ namespace AIMS.Services
             return (from rate in ratesList
                     where rate.Currency.Equals(currency)
                     select rate.Rate).FirstOrDefault();
+        }
+
+        private IEnumerable<MarkerValues> ParseAndExtractIfJson(String json)
+        {
+            List<MarkerValues> markerValues = new List<MarkerValues>();
+            try
+            {
+                markerValues = JsonConvert.DeserializeObject<List<MarkerValues>>(json);
+            }
+            catch (Exception)
+            {
+            }
+            return markerValues;
         }
 
     }

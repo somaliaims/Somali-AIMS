@@ -167,7 +167,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                return unitWork.OrganizationRepository.GetProjection(o => o.IsApproved == true, o => o.Id).Count();
+                return unitWork.OrganizationRepository.GetProjectionCount(o => o.IsApproved == true, o => o.Id);
             }
         }
 

@@ -61,25 +61,25 @@ namespace AIMS.Services.Helpers
                                      where user.UserType == UserTypes.Manager
                                      || user.UserType == UserTypes.SuperAdmin
                                      select user.Email);
-            string managersEmailString = String.Join(',', managersEmailList);
+            //string managersEmailString = String.Join(',', managersEmailList);
 
             var usersEmailList = (from user in emailList
                                   where user.UserType == UserTypes.Standard
                                   select user.Email);
-            usersEmailList = (from email in usersEmailList
+            /*usersEmailList = (from email in usersEmailList
                               where !managersEmailList.Contains(email)
-                              select email);
-
+                              select email);*/
+            usersEmailList = managersEmailList.Union(usersEmailList);
             string usersEmailString = String.Join(',', usersEmailList);
             //Sending bulk email to Managers
-            if (managersEmailList.Count() > 0)
+            /*if (managersEmailList.Count() > 0)
             {
                 string emailMessage = this.GetUserRegistrationMessageForAdmin(organizationName, message, footerMessage);
                 mailMessage.To.Add(managersEmailString);
                 mailMessage.Body = emailMessage;
                 mailMessage.Subject = subject;
                 client.Send(mailMessage);
-            }
+            }*/
 
             if (usersEmailList.Count() > 0)
             {

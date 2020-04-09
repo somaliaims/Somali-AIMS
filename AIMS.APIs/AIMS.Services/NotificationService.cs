@@ -198,7 +198,7 @@ namespace AIMS.Services
                         smtpSettingsModel.Username = smtpSettings.Username;
                         smtpSettingsModel.Password = smtpSettings.Password;
                         smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
-                    smtpSettingsModel.SenderName = smtpSettings.SenderName;
+                        smtpSettingsModel.SenderName = smtpSettings.SenderName;
                     }
 
                     IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
