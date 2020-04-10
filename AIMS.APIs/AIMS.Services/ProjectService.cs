@@ -1941,7 +1941,7 @@ namespace AIMS.Services
                             var disbursementsToDelete = (from disbursement in project.Disbursements
                                                          where (disbursement.Year.FinancialYear < startingYear) ||
                                                          (disbursement.Year.FinancialYear > endingYear) ||
-                                                         (disbursement.Year.FinancialYear != currentActiveYear &&
+                                                         (disbursement.Year.FinancialYear > currentActiveYear &&
                                                             disbursement.DisbursementType == DisbursementTypes.Actual)
                                                          select disbursement);
                             bool isDeleted = false;
