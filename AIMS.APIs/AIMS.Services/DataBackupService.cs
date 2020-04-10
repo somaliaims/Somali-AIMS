@@ -179,7 +179,7 @@ namespace AIMS.Services
             ActionResponse response = new ActionResponse();
             try
             {
-                backupFile = backupDir + backupFile;
+                backupFile = Path.Combine(backupDir, backupFile);
                 using (var sqlConnection = new SqlConnection(connectionString))
                 {
                     using (SqlCommand sqlCommand = new SqlCommand())

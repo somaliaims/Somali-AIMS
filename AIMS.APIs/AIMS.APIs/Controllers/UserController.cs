@@ -52,7 +52,6 @@ namespace AIMS.APIs.Controllers
             return Ok(users);
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("GetActiveUsersCount")]
         public IActionResult GetActiveUsersCount()
         {
