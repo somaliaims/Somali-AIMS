@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -62,6 +63,7 @@ namespace AIMS.APIs.Controllers
             return Ok(service.GetHelpForProjectDocumentsFields());
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("AddProjectHelp")]
         public IActionResult AddProjectHelp([FromBody] ProjectHelp model)
         {
@@ -77,6 +79,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("AddProjectFunderHelp")]
         public IActionResult AddProjectFunderHelp([FromBody] ProjectFunderHelp model)
         {
@@ -92,6 +95,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("AddProjectImplementerHelp")]
         public IActionResult AddProjectImplementerHelp([FromBody] ProjectImplementerHelp model)
         {
@@ -107,6 +111,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("AddProjectSectorHelp")]
         public IActionResult AddProjectSectorHelp([FromBody] ProjectSectorHelp model)
         {
@@ -122,6 +127,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("AddProjectLocationHelp")]
         public IActionResult AddProjectLocationHelp([FromBody] ProjectLocationHelp model)
         {
@@ -137,6 +143,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("AddProjectDisbursementHelp")]
         public IActionResult AddProjectDisbursementHelp([FromBody] ProjectDisbursementHelp model)
         {
@@ -152,6 +159,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("AddProjectDocumentHelp")]
         public IActionResult AddProjectDocumentHelp([FromBody] ProjectDocumentHelp model)
         {

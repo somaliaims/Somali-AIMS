@@ -75,10 +75,15 @@ namespace AIMS.Services
                 var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == orgId, p => p.ProjectId);
                 var userOwnedProjects = unitWork.ProjectRepository.GetProjection(p => p.CreatedById == userId, p => p.Id);
                 var projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
+                List<int> userOwnedProjectIds = new List<int>();
+                foreach (var pid in userOwnedProjects)
+                {
+                    userOwnedProjectIds.Add((int)pid);
+                }
+                projectIds = projectIds.Union(userOwnedProjectIds).ToList<int>();
 
                 if (uType == UserTypes.Standard)
                 {
-                    List<int> userOwnedProjectIds = new List<int>();
                     foreach (var pid in userOwnedProjects)
                     {
                         userOwnedProjectIds.Add((int)pid);
@@ -88,7 +93,7 @@ namespace AIMS.Services
                 }
                 else if (uType == UserTypes.Manager || uType == UserTypes.SuperAdmin)
                 {
-                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => (p.Status == ProjectDeletionStatus.Approved || (p.RequestedOn <= DateTime.Now.AddDays(-7) && p.Status == ProjectDeletionStatus.Requested && p.UserId != userId) || (projectIds.Contains(p.ProjectId) && userId != p.UserId)), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
+                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn <= DateTime.Now.AddDays(-7) && d.Status == ProjectDeletionStatus.Requested && d.UserId != userId) || (projectIds.Contains(d.ProjectId) && userId != d.UserId)), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
                 }
                 return mapper.Map<List<ProjectDeletionRequestView>>(projectRequests);
             }

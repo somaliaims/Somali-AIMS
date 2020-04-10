@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -60,6 +61,7 @@ namespace AIMS.APIs.Controllers
             return Ok(sectors);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         [Route("SetChild/{sectorId}/{childId}")]
         public IActionResult SetChild(int sectorId, int childId)
@@ -72,6 +74,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         [Route("RemoveChild/{sectorId}/{childId}")]
         public IActionResult RemoveChild(int sectorId, int childId)
@@ -91,6 +94,7 @@ namespace AIMS.APIs.Controllers
             return Ok(sectors);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         public IActionResult Post([FromBody] SectorModel sector)
         {
@@ -107,6 +111,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("AddSectorWithMapping")]
         public IActionResult AddSectorWithMapping([FromBody] MappingSectorModel model)
@@ -124,6 +129,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] SectorModel sector)
         {
@@ -140,6 +146,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.Message);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete]
         [Route("Delete/{id}/{newId}")]
         public async Task<IActionResult> Delete(int id, int newId)

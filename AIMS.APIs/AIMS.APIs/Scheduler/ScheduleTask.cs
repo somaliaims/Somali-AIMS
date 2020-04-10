@@ -4,7 +4,6 @@ using AIMS.Models;
 using AIMS.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -99,7 +98,7 @@ namespace AIMS.APIs.Scheduler
                 using (var scope = scopeFactory.CreateScope())
                 {
                     HttpClient httpClient = new HttpClient();
-                    IHostingEnvironment hostingEnvironment = new HostingEnvironment();
+                    IHostingEnvironment hostingEnvironment = scope.ServiceProvider.GetRequiredService<IHostingEnvironment>();
                     ExchangeRateHttpService httpService = new ExchangeRateHttpService(httpClient);
                     AIMSDbContext dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
                     IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
@@ -202,7 +201,7 @@ namespace AIMS.APIs.Scheduler
                         {
                             year = financialTransitionForYear.Year;
                         }
-                        var backup = backupService.BackupData("");
+                        var backup = backupService.BackupData(connectionString);
                         var response = projectService.AdjustDisbursementsForProjectsAsync(year).GetAwaiter().GetResult();
                         if (response.Success)
                         {

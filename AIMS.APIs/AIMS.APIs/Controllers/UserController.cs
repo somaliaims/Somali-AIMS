@@ -9,6 +9,7 @@ using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
 using AIMS.Services.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -43,6 +44,7 @@ namespace AIMS.APIs.Controllers
             return Ok();
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("GetStandardUsers")]
         public IActionResult GetStandardUsers()
         {
@@ -50,12 +52,14 @@ namespace AIMS.APIs.Controllers
             return Ok(users);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("GetActiveUsersCount")]
         public IActionResult GetActiveUsersCount()
         {
             return Ok(userService.GetActiveUserCount());
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("GetManagerUsers")]
         public IActionResult GetManagerUsers()
         {
@@ -178,6 +182,7 @@ namespace AIMS.APIs.Controllers
             return Ok(errModel);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("Activate")]
         public IActionResult Activate([FromBody] UserApprovalModel model)
@@ -196,7 +201,8 @@ namespace AIMS.APIs.Controllers
             SuccessModel successModel = new SuccessModel() { Message = response.ReturnedId.ToString() };
             return Ok(successModel);
         }
-        
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("PromoteUser/{id}")]
         public IActionResult PromoteUser(int id)
         {
@@ -222,6 +228,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("DemoteUser/{id}")]
         public IActionResult DemoteUser(int id)
         {
@@ -287,6 +294,10 @@ namespace AIMS.APIs.Controllers
             TokenUtility utility = new TokenUtility();
             var tokenTime = utility.GetDecodedResetToken(model.Token);
             var response = userService.ResetPassword(model, tokenTime);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
             return Ok(response);
         }
 

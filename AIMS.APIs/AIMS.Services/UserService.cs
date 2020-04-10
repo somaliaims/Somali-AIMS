@@ -793,7 +793,7 @@ namespace AIMS.Services
                             else
                             {
                                 response.Success = false;
-                                response.Message = "User not found for the provided email";
+                                response.Message = "AIMS could not find any account with the provided email";
                             }
                         }
                         catch (Exception ex)
@@ -805,13 +805,13 @@ namespace AIMS.Services
                     else
                     {
                         response.Success = false;
-                        response.Message = "Token is expired";
+                        response.Message = "Password reset token is expired";
                     }
                 }
                 else
                 {
                     response.Success = false;
-                    response.Message = "Token expired or not found";
+                    response.Message = "Password reset token expired or not found";
                 }
                 return response;
             }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,6 +21,7 @@ namespace AIMS.APIs.Controllers
             emailService = eService;
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("SendEmailToUsers")]
         public IActionResult SendEmailToUsers([FromBody] EmailModel model)
         {
@@ -36,6 +38,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("ContactRequest")]
         public IActionResult SendContactEmailRequest([FromBody] ContactEmailRequestModel model)
         {

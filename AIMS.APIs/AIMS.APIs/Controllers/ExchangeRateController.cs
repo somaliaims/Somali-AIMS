@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -146,6 +147,7 @@ namespace AIMS.APIs.Controllers
             return Ok(ratesView);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("SetExchangeRateAutoSetting")]
         public IActionResult SetExchangeRatesAutoSettings([FromBody] ExRateAutoSetting model)
@@ -162,6 +164,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("SaveManualCurrencyRates")]
         public IActionResult SaveManualCurrencyRates(ManualCurrencyRateModel model)
@@ -178,6 +181,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("SaveAPIKeyForOpenExchange")]
         public IActionResult SaveAPIKeyForOpenExchange([FromBody] ExchangeRateAPIKeyModel model)
@@ -196,6 +200,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [Route("SetLabelForManualExRates")]
         public IActionResult SetLabelForManualExRates([FromBody] ManualExRateSourceModel model)
         {

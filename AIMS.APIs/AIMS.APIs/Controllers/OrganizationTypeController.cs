@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,6 +40,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         public IActionResult Post([FromBody] OrganizationTypeModel model)
         {
@@ -54,6 +56,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] OrganizationTypeModel model)
         {
@@ -69,6 +72,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.Message);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete("{id}/{newId}")]
         public async Task<IActionResult> Delete(int id, int newId = 0)
         {

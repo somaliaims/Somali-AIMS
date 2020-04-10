@@ -10,6 +10,8 @@
     <Compile Remove="Migrations\20200128161358_Added_Org_Merge_Requests_Model.Designer.cs" />
     <Compile Remove="Migrations\20200128162130_Empty_Model.cs" />
     <Compile Remove="Migrations\20200128162130_Empty_Model.Designer.cs" />
+    <Compile Remove="Migrations\20200410150718_Added_Financial_Transition_Model.cs" />
+    <Compile Remove="Migrations\20200410150718_Added_Financial_Transition_Model.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

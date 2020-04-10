@@ -1930,7 +1930,7 @@ namespace AIMS.Services
                             }
                         }
                         
-                        var adjustProjects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndDate.Year >= currentActiveYear, new string[] { "EndingFinancialYear", "Disbursements", "Disbursements.Year" });
+                        var adjustProjects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndDate.Year >= currentActiveYear, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Disbursements", "Disbursements.Year" });
                         foreach (var project in adjustProjects)
                         {
                             startMonth = project.StartDate.Month;

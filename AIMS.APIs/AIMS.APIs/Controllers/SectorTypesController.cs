@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -59,6 +60,7 @@ namespace AIMS.APIs.Controllers
             return Ok(sectorTypes);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         public IActionResult Post([FromBody] SectorTypesModel sectorType)
         {
@@ -75,6 +77,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut]
         [Route("SetAsDefault/{id}")]
         public async Task<IActionResult> SetAsDefault(int id)
@@ -91,6 +94,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut]
         [Route("SetAsIATIType/{id}")]
         public async Task<IActionResult> SetAsIATIType(int id)
@@ -107,6 +111,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] SectorTypesModel sectorType)
         {
@@ -123,6 +128,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {

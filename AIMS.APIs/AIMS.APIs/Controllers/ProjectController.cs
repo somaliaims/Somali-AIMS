@@ -93,6 +93,7 @@ namespace AIMS.APIs.Controllers
             return Ok(projectService.GetLatest());
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("UpdateFinancialYearsForProjects")]
         public IActionResult UpdateFinancialYearsForProjects()
         {

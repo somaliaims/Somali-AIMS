@@ -30,7 +30,7 @@ namespace AIMS.APIs.Controllers
         {
             return Ok(service.GetActiveCountry());
         }
-
+       
         [HttpPost("SetActiveCountry/{code}")]
         public IActionResult SetActiveCountry(string code)
         {

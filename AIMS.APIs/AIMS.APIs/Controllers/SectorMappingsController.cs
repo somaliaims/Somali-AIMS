@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -50,6 +51,7 @@ namespace AIMS.APIs.Controllers
             return Ok(sectors);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("GetSectorMappingsByName")]
         public IActionResult GetSectorMappingsByName([FromBody] SearchSectorMappingModel model)
@@ -62,6 +64,7 @@ namespace AIMS.APIs.Controllers
             return Ok(sectors);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         public async Task<IActionResult> Add(SectorMappingsModel model)
         {
@@ -73,6 +76,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost("AddOrUpdate")]
         public async Task<IActionResult> AddOrUpdate(SectorMappingModel model)
         {
@@ -84,6 +88,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete("{sectorId}/{mappingId}")]
         public IActionResult Delete(int sectorId, int mappingId)
         {

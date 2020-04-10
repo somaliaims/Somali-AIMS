@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AIMS.DAL.EF;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -104,6 +105,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("Merge")]
         public async Task<IActionResult> Merge([FromBody] MergeOrganizationModel model)
@@ -121,6 +123,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut]
         [Route("Rename/{id}")]
         public async Task<IActionResult> RenameOrganization(int id, [FromBody] OrganizationModel model)
@@ -137,6 +140,7 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] OrganizationModel model)
         {
@@ -153,6 +157,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response.ReturnedId);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("Approve/{id}")]
         public IActionResult Post(int id)
@@ -170,6 +175,7 @@ namespace AIMS.APIs.Controllers
             return BadRequest(response.Message);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpDelete]
         [Route("Delete/{id}/{newId}")]
         public async Task<IActionResult> Delete(int id, int newId = 0)

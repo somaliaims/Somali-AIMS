@@ -138,6 +138,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFOrganizationMergeRequests> OrganizationMergeRequests { get; set; }
         public DbSet<EFOrganizationsToMerge> OrganizationsToMerge { get; set; }
         public DbSet<EFUserRoleSettlementRequests> UserRoleSettlementRequests { get; set; }
+        public DbSet<EFFinancialYearTransition> FinancialTransitions { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime
