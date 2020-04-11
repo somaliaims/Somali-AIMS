@@ -374,6 +374,9 @@ namespace AIMS.Models
         [Required]
         public string NewName { get; set; }
         public string OrganizationIdsJson { get; set; }
+        [ForeignKey("RequestedBy")]
+        public int? RequestedById { get; set; }
+        public EFUser RequestedBy { get; set; }
         public ICollection<EFOrganizationsToMerge> Organizations { get; set; }
     }
 

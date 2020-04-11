@@ -129,13 +129,9 @@ namespace AIMS.Services
                 {
                     deletionsCount = unitWork.ProjectDeletionRepository.GetProjectionCount(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn <= DateTime.Now.AddDays(-7) && d.Status == ProjectDeletionStatus.Requested && d.UserId != userId) || (projectIds.Contains(d.ProjectId) && userId != d.UserId)), d => d.ProjectId);
                 }
-                var orgsInRequests = unitWork.OrganizationsToMergeRepository.GetWithInclude(m => m.OrganizationId == organizationId && m.Request.IsApproved == false, new string[] { "Request"});
-                int mergeOrgsCount = 0;
-                if (orgsInRequests.Any())
-                {
-                    mergeOrgsCount = 1;
-                }
-                return (count + requestsCount + deletionsCount + mergeOrgsCount);
+                var orgsInRequests = unitWork.OrganizationMergeRequestsRepository.GetProjection(r => r.RequestedById != userId, r => r.Id);
+                var userRelatedRequests = unitWork.OrganizationsToMergeRepository.GetProjection(o => orgsInRequests.Contains(o.RequestId) && o.OrganizationId == organizationId, o => o.OrganizationId);
+                return (count + requestsCount + deletionsCount + userRelatedRequests.Count());
             }
         }
 

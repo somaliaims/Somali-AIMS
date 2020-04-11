@@ -22,7 +22,6 @@ namespace AIMS.APIs.Controllers
             service = mergeService;
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("GetUserRequests")]
         public IActionResult GetUserRequests()
         {
@@ -39,15 +38,25 @@ namespace AIMS.APIs.Controllers
             return Ok(service.GetForUser(userId));
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] MergeOrganizationModel model)
         {
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var response = await service.AddAsync(model);
+            var response = await service.AddAsync(model, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -55,7 +64,6 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("ApproveRequest/{id}")]
         public async Task<IActionResult> ApproveRequest(int id)
         {

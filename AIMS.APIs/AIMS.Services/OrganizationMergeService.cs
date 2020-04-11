@@ -26,7 +26,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ActionResponse> AddAsync(MergeOrganizationModel model);
+        Task<ActionResponse> AddAsync(MergeOrganizationModel model, int userId);
 
         /// <summary>
         /// Approves merge request for organizations
@@ -73,7 +73,7 @@ namespace AIMS.Services
             context = cntxt;
         }
 
-        public async Task<ActionResponse> AddAsync(MergeOrganizationModel model)
+        public async Task<ActionResponse> AddAsync(MergeOrganizationModel model, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -111,75 +111,96 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var strategy = context.Database.CreateExecutionStrategy();
-                await strategy.ExecuteAsync(async () =>
+                var requestedBy = unitWork.UserRepository.GetOne(u => u.Id == userId);
+                if (requestedBy == null)
                 {
-                    using (var transaction = context.Database.BeginTransaction())
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("User");
+                    response.Success = false;
+                    return response;
+                }
+
+                try
+                {
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        var users = await unitWork.UserRepository.GetManyQueryableAsync(u => (orgIds.Contains(u.OrganizationId)));
-                        List<EmailAddress> emailsList = new List<EmailAddress>();
-                        foreach (var user in users)
+                        using (var transaction = context.Database.BeginTransaction())
                         {
-                            emailsList.Add(new EmailAddress() { Email = user.Email });
-                        }
-
-                        if (emailsList.Count == 0)
-                        {
-                            response.ReturnedId = 1;
-                            response.Message = "Merge";
-                        }
-                        else
-                        {
-                            var request = unitWork.OrganizationMergeRequestsRepository.Insert(new EFOrganizationMergeRequests()
+                            var users = await unitWork.UserRepository.GetManyQueryableAsync(u => (orgIds.Contains(u.OrganizationId)));
+                            List<EmailAddress> emailsList = new List<EmailAddress>();
+                            foreach (var user in users)
                             {
-                                OrganizationTypeId = model.OrganizationTypeId,
-                                NewName = model.NewName,
-                                IsApproved = false,
-                                Dated = DateTime.Now,
-                                OrganizationIdsJson = string.Join("-", orgIds)
-                            });
-                            unitWork.Save();
+                                emailsList.Add(new EmailAddress() { Email = user.Email });
+                            }
 
-                            foreach (var organization in organizations)
+                            if (emailsList.Count == 0)
                             {
-                                unitWork.OrganizationsToMergeRepository.Insert(new EFOrganizationsToMerge()
+                                response.ReturnedId = 1;
+                                response.Message = "Merge";
+                            }
+                            else
+                            {
+                                var request = unitWork.OrganizationMergeRequestsRepository.Insert(new EFOrganizationMergeRequests()
                                 {
-                                    Request = request,
-                                    Organization = organization
-                                });    
-                            }
-                            unitWork.Save();
-                            transaction.Commit();
+                                    OrganizationTypeId = model.OrganizationTypeId,
+                                    NewName = model.NewName,
+                                    IsApproved = false,
+                                    Dated = DateTime.Now,
+                                    OrganizationIdsJson = string.Join("-", orgIds),
+                                    RequestedBy = requestedBy
+                                });
+                                unitWork.Save();
 
-                            ISMTPSettingsService smtpService = new SMTPSettingsService(context);
-                            var smtpSettings = smtpService.GetPrivate();
-                            SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
-                            if (smtpSettings != null)
-                            {
-                                smtpSettingsModel.Host = smtpSettings.Host;
-                                smtpSettingsModel.Port = smtpSettings.Port;
-                                smtpSettingsModel.Username = smtpSettings.Username;
-                                smtpSettingsModel.Password = smtpSettings.Password;
-                                smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
-                                smtpSettingsModel.SenderName = smtpSettings.SenderName;
-                            }
+                                foreach (var organization in organizations)
+                                {
+                                    unitWork.OrganizationsToMergeRepository.Insert(new EFOrganizationsToMerge()
+                                    {
+                                        Request = request,
+                                        Organization = organization
+                                    });
+                                }
+                                unitWork.Save();
+                                transaction.Commit();
 
-                            string subject = "", message = "", footerMessage = "";
-                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.MergeOrganizationRequest);
-                            if (emailMessage != null)
-                            {
-                                subject = emailMessage.Subject;
-                                message = emailMessage.Message;
-                                footerMessage = emailMessage.FooterMessage;
-                            }
+                                ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                                var smtpSettings = smtpService.GetPrivate();
+                                SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                                if (smtpSettings != null)
+                                {
+                                    smtpSettingsModel.Host = smtpSettings.Host;
+                                    smtpSettingsModel.Port = smtpSettings.Port;
+                                    smtpSettingsModel.Username = smtpSettings.Username;
+                                    smtpSettingsModel.Password = smtpSettings.Password;
+                                    smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                                    smtpSettingsModel.SenderName = smtpSettings.SenderName;
+                                }
 
-                            mHelper = new MessageHelper();
-                            message += mHelper.OrganizationsMergeRequest(organizationNames, model.NewName);
-                            IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
-                            emailHelper.SendEmailToUsers(emailsList, subject, "", message, footerMessage);
+                                string subject = "", message = "", footerMessage = "";
+                                var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.MergeOrganizationRequest);
+                                if (emailMessage != null)
+                                {
+                                    subject = emailMessage.Subject;
+                                    message = emailMessage.Message;
+                                    footerMessage = emailMessage.FooterMessage;
+                                }
+
+                                mHelper = new MessageHelper();
+                                message += mHelper.OrganizationsMergeRequest(organizationNames, model.NewName);
+                                IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
+                                emailHelper.SendEmailToUsers(emailsList, subject, "", message, footerMessage);
+                            }
                         }
+                    });
+                }
+                catch(Exception ex)
+                {
+                    if (ex.InnerException != null)
+                    {
+                        response.Message = ex.InnerException.Message;
                     }
-                });
+                    response.Success = false;
+                }
                 return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
@@ -194,17 +215,24 @@ namespace AIMS.Services
                 if (userData != null)
                 {
                     organizationId = userData.OrganizationId;
-                    var requests = unitWork.OrganizationsToMergeRepository.GetWithInclude(r => r.OrganizationId != 0 && r.Request.IsApproved == false, new string[] { "Organization", "Request" });
-                    var userRequests = (from req in requests
-                                        where req.OrganizationId == organizationId
-                                        orderby req.Request.Dated descending
-                                        select req.RequestId);
+                    var requests = unitWork.OrganizationMergeRequestsRepository.GetManyQueryable(r => r.RequestedById != userId);
+                    List<int> requestIds = new List<int>();
+                    foreach(var request in requests)
+                    {
+                        var orgIds = request.OrganizationIdsJson.Split("-").ToList();
+                        if (orgIds.Contains(organizationId.ToString()))
+                        {
+                            requestIds.Add(request.Id);
+                        }
+                    }
+                    var userRequests = unitWork.OrganizationsToMergeRepository.GetManyQueryable(m => requestIds.Contains(m.RequestId));
+                    
                     if (userRequests.Any())
                     {
                         var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
-                        foreach(int requestId in userRequests)
+                        foreach(int requestId in requestIds)
                         {
-                            var organizationIds = (from rq in requests
+                            var organizationIds = (from rq in userRequests
                                                    where rq.RequestId == requestId
                                                    select rq.OrganizationId);
                             var organizationsToMerge = (from org in organizations

@@ -169,8 +169,8 @@ namespace AIMS.Services
                     orgIds.Add(user.OrganizationId);
                 }
 
-                var userEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Standard && orgIds.Contains(u.OrganizationId), u => u.Email);
-                var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager, u => u.Email);
+                var userEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Standard && orgIds.Contains(u.OrganizationId) && u.Id != user.Id, u => u.Email);
+                var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager && u.Id != user.Id, u => u.Email);
                 var allEmails = userEmails.Union(adminEmails);
 
                 List<EmailAddress> usersEmailList = new List<EmailAddress>();
