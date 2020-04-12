@@ -77,17 +77,12 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Unauthorized user access to api");
             }
-            var response = service.ApproveMergeRequest(id, organizationId);
+            var response = await service.ApproveMergeRequestAsync(id, organizationId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
             }
-            response = await service.MergeOrganizations(id);
-            if (!response.Success)
-            {
-                return BadRequest(response.Message);
-            }
-            return Ok(true);
+            return Ok(response.ReturnedId);
         }
 
         [HttpGet("RejectRequest/{id}")]

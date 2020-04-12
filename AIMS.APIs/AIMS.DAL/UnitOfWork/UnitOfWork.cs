@@ -4,6 +4,8 @@ using AIMS.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -366,26 +368,6 @@ namespace AIMS.DAL.UnitOfWork
             }
         }
 
-        /*public GenericRepository<EFSectorCategory> SectorCategoryRepository
-        {
-            get
-            {
-                if (this.sectorCategoryRepository == null)
-                    this.sectorCategoryRepository = new GenericRepository<EFSectorCategory>(context);
-                return this.sectorCategoryRepository;
-            }
-        }
-
-        public GenericRepository<EFSectorSubCategory> SectorSubCategoryRepository
-        {
-            get
-            {
-                if (this.sectorSubCategoryRepository == null)
-                    this.sectorSubCategoryRepository = new GenericRepository<EFSectorSubCategory>(context);
-                return this.sectorSubCategoryRepository;
-            }
-        }*/
-
         public GenericRepository<EFSector> SectorRepository
         {
             get
@@ -445,16 +427,6 @@ namespace AIMS.DAL.UnitOfWork
                 return this.implementersRepository;
             }
         }
-
-        /*public GenericRepository<EFProjectFundings> ProjectFundsRepository
-        {
-            get
-            {
-                if (this.fundingsRepository == null)
-                    this.fundingsRepository = new GenericRepository<EFProjectFundings>(context);
-                return this.fundingsRepository;
-            }
-        }*/
 
         public GenericRepository<EFLocation> LocationRepository
         {
@@ -577,12 +549,22 @@ namespace AIMS.DAL.UnitOfWork
             }
             catch (Exception e)
             {
+                if (e.InnerException != null)
+                {
+                    e = e.InnerException;
+                }
                 List<string> lines = new List<string>();
                 foreach (var error in e.Data)
                 {
                     lines.Add(error.ToString());
                 }
-                //System.IO.File.AppendAllLines(@"E:\errors.txt", lines);
+                string errorsFilePath = "errors.txt";
+                if (!File.Exists(errorsFilePath))
+                {
+                    File.Create(errorsFilePath);
+                    FileIOPermission fp = new FileIOPermission(FileIOPermissionAccess.AllAccess, errorsFilePath);
+                }
+                File.AppendAllLines("errors.txt", lines);
                 throw e;
             }
         }
@@ -598,12 +580,22 @@ namespace AIMS.DAL.UnitOfWork
             }
             catch (Exception e)
             {
+                if (e.InnerException != null)
+                {
+                    e = e.InnerException;
+                }
                 List<string> lines = new List<string>();
                 foreach (var error in e.Data)
                 {
                     lines.Add(error.ToString());
                 }
-                System.IO.File.AppendAllLines(@"E:\errors.txt", lines);
+                string errorsFilePath = "errors.txt";
+                if (!File.Exists(errorsFilePath))
+                {
+                    File.Create(errorsFilePath);
+                    FileIOPermission fp = new FileIOPermission(FileIOPermissionAccess.AllAccess, errorsFilePath);
+                }
+                File.AppendAllLines("errors.txt", lines);
                 throw e;
             }
         }

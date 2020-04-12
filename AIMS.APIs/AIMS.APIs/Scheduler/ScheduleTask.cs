@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Permissions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -40,30 +41,30 @@ namespace AIMS.APIs.Scheduler
 
         public override Task ProcessInScope(IServiceProvider serviceProvider)
         {
+            string sWebRootFolder = hostingEnvironment.WebRootPath;
+            string connectionString = configuration.GetValue<string>("ConnectionStrings:DefaultConnection");
+            string url = configuration.GetValue<string>("IATI:Url");
+            string countryCode = configuration.GetValue<string>("IATI:Country");
+            string currencyUrl = configuration.GetValue<string>("IATI:CurrencyUrl");
+            string transactionTypesUrl = configuration.GetValue<string>("IATI:TransactionTypesUrl");
+            string financeTypesUrl = configuration.GetValue<string>("IATI:FinanceTypesUrl");
+            string sectorVocabularyUrl = configuration.GetValue<string>("IATI:SectorsVocabulary");
+            string organizationTypesUrl = configuration.GetValue<string>("IATI:OrganizationTypesUrl");
+            string countriesUrl = configuration.GetValue<string>("IATI:CountriesUrl");
+            string sectorsUrl = configuration.GetValue<string>("IATI:SectorsUrl");
+            string filePath = Path.Combine(sWebRootFolder, "IATISomali.xml");
+            string sectorsFilePath = Path.Combine(sWebRootFolder, "Sectors");
+            string organizationTypesPath = Path.Combine(sWebRootFolder, "OrganizationTypes.json");
+            string currenciesFilePath = Path.Combine(sWebRootFolder, "Currency.json");
+            string countriesFilePath = Path.Combine(sWebRootFolder, "Country.json");
+            string transactionTypesPath = Path.Combine(sWebRootFolder, "IATITransactionTypes.json");
+            string financeTypesPath = Path.Combine(sWebRootFolder, "IATIFinanceTypes.json");
+            string sectorsVocabPath = Path.Combine(sWebRootFolder, "IATISectorVocabulary.json");
+            string xml = "", sectorsXml = "", json = "", transactionTypesJson = "", financeTypesJson = "", sectorsVocabJson = "",
+                organizationTypesJson = "", countriesJson = "", errorsFile = "errors.txt", errorsFilePath = "";
+
             try
             {
-                string sWebRootFolder = hostingEnvironment.WebRootPath;
-                string connectionString = configuration.GetValue<string>("ConnectionStrings:DefaultConnection");
-                string url = configuration.GetValue<string>("IATI:Url");
-                string countryCode = configuration.GetValue<string>("IATI:Country");
-                string currencyUrl = configuration.GetValue<string>("IATI:CurrencyUrl");
-                string transactionTypesUrl = configuration.GetValue<string>("IATI:TransactionTypesUrl");
-                string financeTypesUrl = configuration.GetValue<string>("IATI:FinanceTypesUrl");
-                string sectorVocabularyUrl = configuration.GetValue<string>("IATI:SectorsVocabulary");
-                string organizationTypesUrl = configuration.GetValue<string>("IATI:OrganizationTypesUrl");
-                string countriesUrl = configuration.GetValue<string>("IATI:CountriesUrl");
-                string sectorsUrl = configuration.GetValue<string>("IATI:SectorsUrl");
-                string filePath = Path.Combine(sWebRootFolder, "IATISomali.xml");
-                string sectorsFilePath = Path.Combine(sWebRootFolder, "Sectors");
-                string organizationTypesPath = Path.Combine(sWebRootFolder, "OrganizationTypes.json");
-                string currenciesFilePath = Path.Combine(sWebRootFolder, "Currency.json");
-                string countriesFilePath = Path.Combine(sWebRootFolder, "Country.json");
-                string transactionTypesPath = Path.Combine(sWebRootFolder, "IATITransactionTypes.json");
-                string financeTypesPath = Path.Combine(sWebRootFolder, "IATIFinanceTypes.json");
-                string sectorsVocabPath = Path.Combine(sWebRootFolder, "IATISectorVocabulary.json");
-                string xml = "", sectorsXml = "", json = "", transactionTypesJson = "", financeTypesJson = "", sectorsVocabJson = "",
-                    organizationTypesJson = "", countriesJson = "";
-
                 using (var client = new WebClient())
                 {
                     json = client.DownloadString(currencyUrl);
@@ -172,9 +173,7 @@ namespace AIMS.APIs.Scheduler
                     }
                     
                     service.ExtractAndSaveLocations(filePath);
-                    //Oldservice.ExtractAndSaveOrganizationTypes(cleanedOrgTypesVocabJson);
                     var orgResponse = service.ExtractAndSaveOrganizations(filePath, cleanedOrgTypesVocabJson);
-                    //notificationService.SendNotificationsForNewOrganizations(orgResponse.ReturnedId, Convert.ToInt32(orgResponse.Message));
                     notificationService.SendNotificationsForNewSectors(sectorResponse.ReturnedId);
 
                     var currencyList = httpService.ParseAndExtractCurrencyList(json);
@@ -237,11 +236,21 @@ namespace AIMS.APIs.Scheduler
                         }
                     }
                 }
-                
             }
             catch(Exception ex)
             {
-                Debug.WriteLine(ex.Message);
+                errorsFilePath = Path.Combine(sWebRootFolder, errorsFile);
+                if (!File.Exists(errorsFilePath))
+                {
+                    File.Create(errorsFilePath);
+                    FileIOPermission fp = new FileIOPermission(FileIOPermissionAccess.AllAccess, errorsFilePath);
+                }
+                string errorMessage = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    errorMessage = ex.InnerException.Message;
+                }
+                File.AppendAllText(errorsFilePath, errorMessage);
             }
             return Task.CompletedTask;
         }
