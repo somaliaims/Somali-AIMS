@@ -299,146 +299,163 @@ namespace AIMS.Services
                 return response;
             }
 
-            var strategy = context.Database.CreateExecutionStrategy();
-            await strategy.ExecuteAsync(async () =>
+            try
             {
-                using (var transaction = context.Database.BeginTransaction())
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
                 {
-                    var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => orgIds.Contains(o.Id));
-                    var organizationNames = (from org in organizations
-                                             select org.OrganizationName).ToList<string>();
-
-                    var users = unitWork.UserRepository.GetManyQueryable(u => (orgIds.Contains(u.OrganizationId)));
-                    var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                    using (var transaction = context.Database.BeginTransaction())
                     {
-                        OrganizationType = organizationType,
-                        OrganizationName = request.NewName,
-                        IsApproved = true
-                    });
-                    await unitWork.SaveAsync();
+                        var organizations = unitWork.OrganizationRepository.GetManyQueryable(o => orgIds.Contains(o.Id));
+                        var organizationNames = (from org in organizations
+                                                 select org.OrganizationName).ToList<string>();
 
-                    List<string> emailsList = new List<string>();
-                    foreach (var user in users)
-                    {
-                        emailsList.Add(user.Email);
-                        user.Organization = newOrganization;
-                        unitWork.UserRepository.Update(user);
-                    }
-                    await unitWork.SaveAsync();
-
-                    var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => orgIds.Contains(f.FunderId));
-                    List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
-                    foreach (var funder in projectFunders)
-                    {
-                        fundersList.Add(new EFProjectFunders()
+                        var users = unitWork.UserRepository.GetManyQueryable(u => (orgIds.Contains(u.OrganizationId)));
+                        var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
                         {
-                            ProjectId = funder.ProjectId,
-                            FunderId = newOrganization.Id,
+                            OrganizationType = organizationType,
+                            OrganizationName = request.NewName,
+                            IsApproved = true
                         });
-                        unitWork.ProjectFundersRepository.Delete(funder);
-                    }
-
-                    if (fundersList.Count > 0)
-                    {
                         await unitWork.SaveAsync();
-                        unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
-                        await unitWork.SaveAsync();
-                    }
 
-                    var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(i => orgIds.Contains(i.ImplementerId));
-                    List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
-                    foreach (var implementer in projectImplementers)
-                    {
-                        implementersList.Add(new EFProjectImplementers()
+                        List<string> emailsList = new List<string>();
+                        foreach (var user in users)
                         {
-                            ImplementerId = newOrganization.Id,
-                            ProjectId = implementer.ProjectId
-                        });
-                        unitWork.ProjectImplementersRepository.Delete(implementer);
-                    }
-
-                    if (implementersList.Count > 0)
-                    {
-                        await unitWork.SaveAsync();
-                        unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
-                        await unitWork.SaveAsync();
-                    }
-
-                    var envelopesToUpdate = unitWork.EnvelopeRepository.GetManyQueryable(e => orgIds.Contains(e.FunderId));
-                    foreach(var envelope in envelopesToUpdate)
-                    {
-                        envelope.Funder = newOrganization;
-                        unitWork.EnvelopeRepository.Update(envelope);
-                    }
-                    if (envelopesToUpdate.Any())
-                    {
-                        await unitWork.SaveAsync();
-                    }
-
-                    //Update notifications
-                    var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => n.OrganizationId != null && orgIds.Contains((int)n.OrganizationId));
-                    foreach (var notification in notifications)
-                    {
-                        notification.OrganizationId = newOrganization.Id;
-                        unitWork.NotificationsRepository.Update(notification);
-                        await unitWork.SaveAsync();
-                    }
-
-                    foreach (var organization in organizations)
-                    {
-                        unitWork.OrganizationRepository.Delete(organization);
-                    }
-                    await unitWork.SaveAsync();
-
-                    //Now delete the request
-                    unitWork.OrganizationMergeRequestsRepository.Delete(request);
-                    await unitWork.SaveAsync();
-                    response.ReturnedId = newOrganization.Id;
-                    transaction.Commit();
-
-                    string subject = "", message = "", footerMessage = "";
-                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.OrganizationMerged);
-                    if (emailMessage != null)
-                    {
-                        subject = emailMessage.Subject;
-                        message = emailMessage.Message;
-                        footerMessage = emailMessage.FooterMessage;
-                    }
-
-                    mHelper = new MessageHelper();
-                    message += mHelper.OrganizationsMergedMessage(organizationNames, newOrganization.OrganizationName, emailMessage.Message, emailMessage.FooterMessage);
-
-                    //Send email
-                    ISMTPSettingsService smtpService = new SMTPSettingsService(context);
-                    var smtpSettings = smtpService.GetPrivate();
-                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
-                    if (smtpSettings != null)
-                    {
-                        smtpSettingsModel.Host = smtpSettings.Host;
-                        smtpSettingsModel.Port = smtpSettings.Port;
-                        smtpSettingsModel.Username = smtpSettings.Username;
-                        smtpSettingsModel.Password = smtpSettings.Password;
-                        smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
-                        smtpSettingsModel.SenderName = smtpSettings.SenderName;
-                    }
-
-                    if (emailsList.Count > 0)
-                    {
-                        List<EmailAddress> emailAddresses = new List<EmailAddress>();
-                        foreach (var email in emailsList)
-                        {
-                            emailAddresses.Add(new EmailAddress()
-                            {
-                                Email = email
-                            });
+                            emailsList.Add(user.Email);
+                            user.Organization = newOrganization;
+                            unitWork.UserRepository.Update(user);
                         }
-                        IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
-                        emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
+                        await unitWork.SaveAsync();
+
+                        var envelopesToUpdate = unitWork.EnvelopeRepository.GetManyQueryable(e => orgIds.Contains(e.FunderId));
+                        foreach (var envelope in envelopesToUpdate)
+                        {
+                            envelope.Funder = newOrganization;
+                            unitWork.EnvelopeRepository.Update(envelope);
+                        }
+                        if (envelopesToUpdate.Any())
+                        {
+                            await unitWork.SaveAsync();
+                        }
+
+                        var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => n.OrganizationId != null && orgIds.Contains((int)n.OrganizationId));
+                        foreach (var notification in notifications)
+                        {
+                            notification.OrganizationId = newOrganization.Id;
+                            unitWork.NotificationsRepository.Update(notification);
+                            await unitWork.SaveAsync();
+                        }
+
+                        var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => orgIds.Contains(f.FunderId));
+                        List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
+                        foreach (var funder in projectFunders)
+                        {
+                            var funderExists = (from f in fundersList
+                                                where f.FunderId == funder.FunderId && f.ProjectId == funder.ProjectId
+                                                select f).FirstOrDefault();
+
+                            if (funderExists == null)
+                            {
+                                fundersList.Add(new EFProjectFunders()
+                                {
+                                    ProjectId = funder.ProjectId,
+                                    FunderId = newOrganization.Id,
+                                });
+                            }
+                        }
+                        if (projectFunders.Any())
+                        {
+                            await unitWork.SaveAsync();
+                        }
+
+                        var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(i => orgIds.Contains(i.ImplementerId));
+                        List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
+                        foreach (var implementer in projectImplementers)
+                        {
+                            var implementerExists = (from i in implementersList
+                                                     where i.ImplementerId == i.ImplementerId && i.ProjectId == i.ProjectId
+                                                     select i).FirstOrDefault();
+
+                            if (implementerExists == null)
+                            {
+                                implementersList.Add(new EFProjectImplementers()
+                                {
+                                    ImplementerId = newOrganization.Id,
+                                    ProjectId = implementer.ProjectId
+                                });
+                            }
+                        }
+
+                        if (projectImplementers.Any())
+                        {
+                            await unitWork.SaveAsync();
+                        }
+
+                        foreach (var organization in organizations)
+                        {
+                            unitWork.OrganizationRepository.Delete(organization);
+                        }
+                        await unitWork.SaveAsync();
+
+                        unitWork.OrganizationMergeRequestsRepository.Delete(request);
+                        await unitWork.SaveAsync();
+                        response.ReturnedId = newOrganization.Id;
+                        transaction.Commit();
+
+                        string subject = "", message = "", footerMessage = "";
+                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.OrganizationMerged);
+                        if (emailMessage != null)
+                        {
+                            subject = emailMessage.Subject;
+                            message = emailMessage.Message;
+                            footerMessage = emailMessage.FooterMessage;
+                        }
+
+                        mHelper = new MessageHelper();
+                        message += mHelper.OrganizationsMergedMessage(organizationNames, newOrganization.OrganizationName, emailMessage.Message, emailMessage.FooterMessage);
+
+                        //Send email
+                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                        var smtpSettings = smtpService.GetPrivate();
+                        SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                        if (smtpSettings != null)
+                        {
+                            smtpSettingsModel.Host = smtpSettings.Host;
+                            smtpSettingsModel.Port = smtpSettings.Port;
+                            smtpSettingsModel.Username = smtpSettings.Username;
+                            smtpSettingsModel.Password = smtpSettings.Password;
+                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                            smtpSettingsModel.SenderName = smtpSettings.SenderName;
+                        }
+
+                        if (emailsList.Count > 0)
+                        {
+                            List<EmailAddress> emailAddresses = new List<EmailAddress>();
+                            foreach (var email in emailsList)
+                            {
+                                emailAddresses.Add(new EmailAddress()
+                                {
+                                    Email = email
+                                });
+                            }
+                            IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
+                            emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
+                        }
                     }
+                    return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                });
+            }
+            catch(Exception ex)
+            {
+                response.Message = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    response.Message = ex.InnerException.Message;
                 }
-                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
-            });
-            return response;
+                response.Success = false;
+            }
+            return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
         }
 
         public ActionResponse RejectRequest(int requestId, int userOrgId, string userEmail)
@@ -549,175 +566,194 @@ namespace AIMS.Services
                                         select org.OrganizationName).ToList<string>();
             var organizationTypes = await unitWork.OrganizationTypesRepository.GetManyQueryableAsync(t => t.Id != 0);
 
-            var strategy = context.Database.CreateExecutionStrategy();
-            await strategy.ExecuteAsync(async () =>
+            try
             {
-                using (var transaction = context.Database.BeginTransaction())
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
                 {
-                    foreach (int requestId in ids)
+                    using (var transaction = context.Database.BeginTransaction())
                     {
-                        var request = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Id == requestId, new string[] { "Organizations" }).FirstOrDefault();
-                        if (request == null)
+                        foreach (int requestId in ids)
                         {
-                            continue;
-                        }
+                            var request = unitWork.OrganizationMergeRequestsRepository.GetWithInclude(r => r.Id == requestId, new string[] { "Organizations" }).FirstOrDefault();
+                            if (request == null)
+                            {
+                                continue;
+                            }
 
-                        var orgIds = request.Organizations.Select(o => o.OrganizationId);
-                        if (orgIds.Count() < 2)
-                        {
-                            continue;
-                        }
+                            var orgIds = request.Organizations.Select(o => o.OrganizationId);
+                            if (orgIds.Count() < 2)
+                            {
+                                continue;
+                            }
 
-                        var organizations = (from org in allOrganizations
-                                             where orgIds.Contains(org.Id)
-                                             select org);
-                        var organizationNames = (from org in allOrganizations
+                            var organizations = (from org in allOrganizations
                                                  where orgIds.Contains(org.Id)
-                                                 select org.OrganizationName).ToList();
+                                                 select org);
+                            var organizationNames = (from org in allOrganizations
+                                                     where orgIds.Contains(org.Id)
+                                                     select org.OrganizationName).ToList();
 
-                        var organizationType = (from t in organizationTypes
-                                                where t.Id == request.OrganizationTypeId
-                                                select t).FirstOrDefault();
+                            var organizationType = (from t in organizationTypes
+                                                    where t.Id == request.OrganizationTypeId
+                                                    select t).FirstOrDefault();
 
-                        if (organizationType == null)
-                        {
-                            continue;
-                        }
-
-                        var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
-                        {
-                            OrganizationType = organizationType,
-                            OrganizationName = request.NewName,
-                            IsApproved = true
-                        });
-                        await unitWork.SaveAsync();
-
-                        var users = unitWork.UserRepository.GetManyQueryable(u => u.IsApproved == true && orgIds.Contains(u.OrganizationId));
-                        List<string> emailsList = new List<string>();
-                        foreach (var user in users)
-                        {
-                            emailsList.Add(user.Email);
-                            user.Organization = newOrganization;
-                            unitWork.UserRepository.Update(user);
-                        }
-
-                        if (users.Any())
-                        {
-                            await unitWork.SaveAsync();
-                        }
-
-                        var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => orgIds.Contains(f.FunderId));
-                        List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
-                        foreach (var funder in projectFunders)
-                        {
-                            fundersList.Add(new EFProjectFunders()
+                            if (organizationType == null)
                             {
-                                ProjectId = funder.ProjectId,
-                                FunderId = newOrganization.Id,
-                            });
-                            unitWork.ProjectFundersRepository.Delete(funder);
-                        }
+                                continue;
+                            }
 
-                        if (fundersList.Count > 0)
-                        {
-                            await unitWork.SaveAsync();
-                            unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
-                            await unitWork.SaveAsync();
-                        }
-
-                        var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(i => orgIds.Contains(i.ImplementerId));
-                        List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
-                        foreach (var implementer in projectImplementers)
-                        {
-                            implementersList.Add(new EFProjectImplementers()
+                            var newOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
                             {
-                                ImplementerId = newOrganization.Id,
-                                ProjectId = implementer.ProjectId
+                                OrganizationType = organizationType,
+                                OrganizationName = request.NewName,
+                                IsApproved = true
                             });
-                            unitWork.ProjectImplementersRepository.Delete(implementer);
-                        }
-
-                        if (implementersList.Count > 0)
-                        {
                             await unitWork.SaveAsync();
-                            unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
-                            await unitWork.SaveAsync();
-                        }
 
-                        var envelopesToUpdate = unitWork.EnvelopeRepository.GetManyQueryable(e => orgIds.Contains(e.FunderId));
-                        foreach (var envelope in envelopesToUpdate)
-                        {
-                            envelope.Funder = newOrganization;
-                            unitWork.EnvelopeRepository.Update(envelope);
-                        }
-                        if (envelopesToUpdate.Any())
-                        {
-                            await unitWork.SaveAsync();
-                        }
+                            var users = unitWork.UserRepository.GetManyQueryable(u => u.IsApproved == true && orgIds.Contains(u.OrganizationId));
+                            List<string> emailsList = new List<string>();
+                            foreach (var user in users)
+                            {
+                                emailsList.Add(user.Email);
+                                user.Organization = newOrganization;
+                                unitWork.UserRepository.Update(user);
+                            }
 
-                        //Update notifications
-                        var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => n.OrganizationId != null && orgIds.Contains((int)n.OrganizationId));
-                        foreach (var notification in notifications)
-                        {
-                            notification.OrganizationId = newOrganization.Id;
-                            unitWork.NotificationsRepository.Update(notification);
-                            unitWork.Save();
-                        }
+                            if (users.Any())
+                            {
+                                await unitWork.SaveAsync();
+                            }
 
-                        foreach (var organization in organizations)
-                        {
-                            unitWork.OrganizationRepository.Delete(organization);
-                            unitWork.Save();
-                        }
+                            var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => orgIds.Contains(f.FunderId));
+                            List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
+                            foreach (var funder in projectFunders)
+                            {
+                                var funderExists = (from f in fundersList
+                                                    where f.FunderId == funder.FunderId && f.ProjectId == funder.ProjectId
+                                                    select f).FirstOrDefault();
+
+                                if (funderExists == null)
+                                {
+                                    fundersList.Add(new EFProjectFunders()
+                                    {
+                                        ProjectId = funder.ProjectId,
+                                        FunderId = newOrganization.Id,
+                                    });
+                                }
+                            }
+                            if (projectFunders.Any())
+                            {
+                                await unitWork.SaveAsync();
+                            }
+
+                            var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(i => orgIds.Contains(i.ImplementerId));
+                            List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
+                            foreach (var implementer in projectImplementers)
+                            {
+                                var implementerExists = (from i in implementersList
+                                                         where i.ImplementerId == i.ImplementerId && i.ProjectId == i.ProjectId
+                                                         select i).FirstOrDefault();
+
+                                if (implementerExists == null)
+                                {
+                                    implementersList.Add(new EFProjectImplementers()
+                                    {
+                                        ImplementerId = newOrganization.Id,
+                                        ProjectId = implementer.ProjectId
+                                    });
+                                }
+                            }
+                            if (projectImplementers.Any())
+                            {
+                                await unitWork.SaveAsync();
+                            }
+
+                            var envelopesToUpdate = unitWork.EnvelopeRepository.GetManyQueryable(e => orgIds.Contains(e.FunderId));
+                            foreach (var envelope in envelopesToUpdate)
+                            {
+                                envelope.Funder = newOrganization;
+                                unitWork.EnvelopeRepository.Update(envelope);
+                            }
+                            if (envelopesToUpdate.Any())
+                            {
+                                await unitWork.SaveAsync();
+                            }
+
+                            //Update notifications
+                            var notifications = unitWork.NotificationsRepository.GetManyQueryable(n => n.OrganizationId != null && orgIds.Contains((int)n.OrganizationId));
+                            foreach (var notification in notifications)
+                            {
+                                notification.OrganizationId = newOrganization.Id;
+                                unitWork.NotificationsRepository.Update(notification);
+                                unitWork.Save();
+                            }
+
+                            foreach (var organization in organizations)
+                            {
+                                unitWork.OrganizationRepository.Delete(organization);
+                                unitWork.Save();
+                            }
+
                             //Now delete the request
                             unitWork.OrganizationMergeRequestsRepository.Delete(request);
-                        unitWork.Save();
+                            unitWork.Save();
 
-                        string subject = "", message = "", footerMessage = "";
-                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.OrganizationMerged);
-                        if (emailMessage != null)
-                        {
-                            subject = emailMessage.Subject;
-                            message = emailMessage.Message;
-                            footerMessage = emailMessage.FooterMessage;
-                        }
-
-                        mHelper = new MessageHelper();
-                        message += mHelper.OrganizationsMergedMessage(organizationNames, newOrganization.OrganizationName, emailMessage.Message, emailMessage.FooterMessage);
-
-                        //Send email
-                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
-                        var smtpSettings = smtpService.GetPrivate();
-                        SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
-                        if (smtpSettings != null)
-                        {
-                            smtpSettingsModel.Host = smtpSettings.Host;
-                            smtpSettingsModel.Port = smtpSettings.Port;
-                            smtpSettingsModel.Username = smtpSettings.Username;
-                            smtpSettingsModel.Password = smtpSettings.Password;
-                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
-                            smtpSettingsModel.SenderName = smtpSettings.SenderName;
-                        }
-
-                        transaction.Commit();
-                        response.ReturnedId = newOrganization.Id;
-
-                        if (emailsList.Count > 0)
-                        {
-                            List<EmailAddress> emailAddresses = new List<EmailAddress>();
-                            foreach (var email in emailsList)
+                            string subject = "", message = "", footerMessage = "";
+                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.OrganizationMerged);
+                            if (emailMessage != null)
                             {
-                                emailAddresses.Add(new EmailAddress()
-                                {
-                                    Email = email
-                                });
+                                subject = emailMessage.Subject;
+                                message = emailMessage.Message;
+                                footerMessage = emailMessage.FooterMessage;
                             }
-                            IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
-                            emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
+
+                            mHelper = new MessageHelper();
+                            message += mHelper.OrganizationsMergedMessage(organizationNames, newOrganization.OrganizationName, emailMessage.Message, emailMessage.FooterMessage);
+
+                            //Send email
+                            ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                            var smtpSettings = smtpService.GetPrivate();
+                            SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                            if (smtpSettings != null)
+                            {
+                                smtpSettingsModel.Host = smtpSettings.Host;
+                                smtpSettingsModel.Port = smtpSettings.Port;
+                                smtpSettingsModel.Username = smtpSettings.Username;
+                                smtpSettingsModel.Password = smtpSettings.Password;
+                                smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                                smtpSettingsModel.SenderName = smtpSettings.SenderName;
+                            }
+
+                            transaction.Commit();
+                            response.ReturnedId = newOrganization.Id;
+
+                            if (emailsList.Count > 0)
+                            {
+                                List<EmailAddress> emailAddresses = new List<EmailAddress>();
+                                foreach (var email in emailsList)
+                                {
+                                    emailAddresses.Add(new EmailAddress()
+                                    {
+                                        Email = email
+                                    });
+                                }
+                                IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
+                                emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
+                            }
                         }
                     }
+                });
+            }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    response.Message = ex.InnerException.Message;
                 }
-            });
+            }
             return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
         }
 
