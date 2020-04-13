@@ -4048,6 +4048,15 @@ namespace AIMS.Services
                     return response;
                 }
 
+                var project = unitWork.ProjectRepository.GetByID(projectId);
+                if (project == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
                 var projectLocation = unitWork.ProjectLocationsRepository.Get(p => p.ProjectId == projectId && p.LocationId == locationId);
                 if (projectLocation == null)
                 {
@@ -4092,6 +4101,9 @@ namespace AIMS.Services
                                 await unitWork.SaveAsync();
                             }
                         }
+                        project.DateUpdated = DateTime.Now;
+                        unitWork.ProjectRepository.Update(project);
+                        await unitWork.SaveAsync();
                         transaction.Commit();
                     }
                 });
@@ -4111,6 +4123,15 @@ namespace AIMS.Services
                 {
                     mHelper = new MessageHelper();
                     response.Message = mHelper.GetNotFound("Sector");
+                    response.Success = false;
+                    return response;
+                }
+
+                var project = unitWork.ProjectRepository.GetByID(projectId);
+                if (project == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project");
                     response.Success = false;
                     return response;
                 }
@@ -4184,6 +4205,9 @@ namespace AIMS.Services
                                 }
                             }
                         }
+                        project.DateUpdated = DateTime.Now;
+                        unitWork.ProjectRepository.Update(project);
+                        await unitWork.SaveAsync();
                         transaction.Commit();
                     }
                 });
@@ -4196,8 +4220,19 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectFunder = unitWork.ProjectFundersRepository.Get(f => f.ProjectId == projectId && f.FunderId == funderId);
                 IMessageHelper mHelper;
+
+                var project = unitWork.ProjectRepository.GetByID(projectId);
+                if (project == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
+                var projectFunder = unitWork.ProjectFundersRepository.Get(f => f.ProjectId == projectId && f.FunderId == funderId);
+                
                 if (projectFunder == null)
                 {
                     mHelper = new MessageHelper();
@@ -4208,6 +4243,10 @@ namespace AIMS.Services
 
                 unitWork.ProjectFundersRepository.Delete(projectFunder);
                 unitWork.Save();
+
+                project.DateUpdated = DateTime.Now;
+                unitWork.ProjectRepository.Update(project);
+                unitWork.Save();
                 return response;
             }
         }
@@ -4217,8 +4256,18 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectImplementer = unitWork.ProjectImplementersRepository.Get(i => i.ProjectId == projectId && i.ImplementerId == implementerId);
                 IMessageHelper mHelper;
+
+                var project = unitWork.ProjectRepository.GetByID(projectId);
+                if (project == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
+                var projectImplementer = unitWork.ProjectImplementersRepository.Get(i => i.ProjectId == projectId && i.ImplementerId == implementerId);
                 if (projectImplementer == null)
                 {
                     mHelper = new MessageHelper();
@@ -4229,6 +4278,10 @@ namespace AIMS.Services
 
                 unitWork.ProjectImplementersRepository.Delete(projectImplementer);
                 unitWork.Save();
+
+                project.DateUpdated = DateTime.Now;
+                unitWork.ProjectRepository.Update(project);
+                unitWork.Save();
                 return response;
             }
         }
@@ -4238,8 +4291,18 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectMarker = unitWork.ProjectMarkersRepository.Get(f => f.ProjectId == projectId && f.MarkerId == customFieldId);
                 IMessageHelper mHelper;
+
+                var project = unitWork.ProjectRepository.GetByID(projectId);
+                if (project == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
+                var projectMarker = unitWork.ProjectMarkersRepository.Get(f => f.ProjectId == projectId && f.MarkerId == customFieldId);
                 if (projectMarker == null)
                 {
                     mHelper = new MessageHelper();
@@ -4249,6 +4312,10 @@ namespace AIMS.Services
                 }
 
                 unitWork.ProjectMarkersRepository.Delete(projectMarker);
+                unitWork.Save();
+
+                project.DateUpdated = DateTime.Now;
+                unitWork.ProjectRepository.Update(project);
                 unitWork.Save();
                 return response;
             }
@@ -4261,8 +4328,8 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetByID(id);
                     IMessageHelper mHelper;
+                    var projectDisbursement = unitWork.ProjectDisbursementsRepository.GetByID(id);
                     if (projectDisbursement == null)
                     {
                         mHelper = new MessageHelper();
@@ -4271,7 +4338,20 @@ namespace AIMS.Services
                         return response;
                     }
 
+                    var project = unitWork.ProjectRepository.GetByID(projectDisbursement.ProjectId);
+                    if (project == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                        return response;
+                    }
+
                     unitWork.ProjectDisbursementsRepository.Delete(projectDisbursement);
+                    unitWork.Save();
+
+                    project.DateUpdated = DateTime.Now;
+                    unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
                 }
                 catch (Exception ex)
@@ -4288,8 +4368,9 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var projectDocument = unitWork.ProjectDocumentRepository.GetByID(id);
                 IMessageHelper mHelper;
+
+                var projectDocument = unitWork.ProjectDocumentRepository.GetByID(id);
                 if (projectDocument == null)
                 {
                     mHelper = new MessageHelper();
@@ -4298,7 +4379,20 @@ namespace AIMS.Services
                     return response;
                 }
 
+                var project = unitWork.ProjectRepository.GetByID(projectDocument.ProjectId);
+                if (project == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
                 unitWork.ProjectDocumentRepository.Delete(projectDocument);
+                unitWork.Save();
+
+                project.DateUpdated = DateTime.Now;
+                unitWork.ProjectRepository.Update(project);
                 unitWork.Save();
                 return response;
             }

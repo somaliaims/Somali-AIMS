@@ -130,7 +130,7 @@ namespace AIMS.Services
                 if (sectors.Count() > 1)
                 {
                     sectors = (from sector in sectors
-                               orderby sector.SectorName ascending
+                               orderby sector.IATICode, sector.SectorName ascending
                                select sector);
                 }
                 return mapper.Map<List<SectorDetailedView>>(sectors);
@@ -145,7 +145,7 @@ namespace AIMS.Services
                 if (sectors.Count() > 1)
                 {
                     sectors = (from sector in sectors
-                               orderby sector.SectorName ascending
+                               orderby sector.IATICode, sector.SectorName ascending
                                select sector);
                 }
                 return mapper.Map<List<SectorViewWithParent>>(sectors);
