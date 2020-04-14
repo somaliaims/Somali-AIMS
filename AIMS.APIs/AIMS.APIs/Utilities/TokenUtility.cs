@@ -1,12 +1,11 @@
 ﻿using AIMS.Models;
 using Microsoft.IdentityModel.Tokens;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AIMS.APIs.Utilities
 {
@@ -40,15 +39,24 @@ namespace AIMS.APIs.Utilities
         {
             byte[] time = BitConverter.GetBytes(DateTime.UtcNow.ToBinary());
             byte[] key = Guid.NewGuid().ToByteArray();
-            string token = Convert.ToBase64String(time.Concat(key).ToArray());
+            string token = Convert.ToBase64String((time.Concat(key).ToArray()));
             return token;
         }
 
         public DateTime GetDecodedResetToken(string token)
         {
-            byte[] data = Convert.FromBase64String(token);
-            PasswordTokenModel model = new PasswordTokenModel();
-            DateTime tokenTime = DateTime.FromBinary(BitConverter.ToInt64(data, 0));
+            DateTime tokenTime = DateTime.Now;
+            try
+            {
+                byte[] data = Convert.FromBase64String(token);
+                PasswordTokenModel model = new PasswordTokenModel();
+                tokenTime = DateTime.FromBinary(BitConverter.ToInt64(data, 0));
+                return tokenTime;
+            }
+            catch(Exception ex)
+            {
+                string message = ex.Message;
+            }
             return tokenTime;
         }
     }

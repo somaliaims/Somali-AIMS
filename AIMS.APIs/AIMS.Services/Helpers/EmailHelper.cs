@@ -198,7 +198,7 @@ namespace AIMS.Services.Helpers
             messageList.Add("<h3>Dear user</h3>");
             messageList.Add("<p>We have received a password reset request for your email. If it was not you, please ignore this email.</p>");
             messageList.Add("<p>Click on the link below and follow the instructions to reset password. This link will expire in two hours</p>");
-            messageList.Add("<p><a target='_blank' href='" + url + token + "'>Password Reset Link</a></p>");
+            messageList.Add("<p><a target='_blank' href='" + url + WebUtility.UrlEncode(token) + "'>Password Reset Link</a></p>");
             messageList.Add("<h5>" + FOOTER_LINE + "</h5>");
             messageList.Add("<h5><b>" + EMAIL_SIGNATURE + "</b></h5>");
             return (String.Join(string.Empty, messageList));

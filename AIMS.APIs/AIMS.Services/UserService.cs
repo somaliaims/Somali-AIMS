@@ -94,7 +94,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse ResetPassword(PasswordResetModel model, DateTime tokenTime);
+        Task<ActionResponse> ResetPasswordAsync(PasswordResetModel model, DateTime tokenTime);
 
         //ActionResponse SendEmailToUsers();
 
@@ -736,83 +736,102 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ResetPassword(PasswordResetModel model, DateTime tokenTime)
+        public async Task<ActionResponse> ResetPasswordAsync(PasswordResetModel model, DateTime tokenTime)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var isTokenExists = unitWork.PasswordRecoveryRepository.GetOne(r => r.Token == model.Token && r.Dated.Date == tokenTime.Date);
-                if (isTokenExists != null)
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
                 {
-                    DateTime expirationTime = isTokenExists.Dated.AddHours(2);
-                    if (expirationTime >= DateTime.Now)
+                    using (var transaction = context.Database.BeginTransaction())
                     {
-                        try
+                        var isTokenExists = await unitWork.PasswordRecoveryRepository.GetOneAsync(r => r.Token == model.Token && r.Dated.Date == tokenTime.Date);
+                        if (isTokenExists != null)
                         {
-                            var user = unitWork.UserRepository.GetOne(u => u.Email == isTokenExists.Email);
-                            if (user != null)
+                            DateTime expirationTime = isTokenExists.Dated.AddHours(12);
+                            if (expirationTime >= DateTime.Now)
                             {
-                                ISecurityHelper sHelper = new SecurityHelper();
-                                var passwordHash = sHelper.GetPasswordHash(model.NewPassword);
-                                user.Password = passwordHash;
-
-                                unitWork.UserRepository.Update(user);
-                                unitWork.PasswordRecoveryRepository.Delete(isTokenExists);
-                                unitWork.Save();
-
-                                //Send emails
-                                ISMTPSettingsService smtpService = new SMTPSettingsService(context);
-                                var smtpSettings = smtpService.GetPrivate();
-                                SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
-                                List<EmailAddress> usersEmailList = new List<EmailAddress>();
-                                usersEmailList.Add(new EmailAddress()
+                                try
                                 {
-                                    Email = user.Email
-                                });
-                                if (smtpSettings != null)
-                                {
-                                    smtpSettingsModel.Host = smtpSettings.Host;
-                                    smtpSettingsModel.Port = smtpSettings.Port;
-                                    smtpSettingsModel.Username = smtpSettings.Username;
-                                    smtpSettingsModel.Password = smtpSettings.Password;
-                                    smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
-                                    smtpSettingsModel.SenderName = smtpSettings.SenderName;
+                                    var user = await unitWork.UserRepository.GetOneAsync(u => u.Email == isTokenExists.Email);
+                                    if (user != null)
+                                    {
+                                        ISecurityHelper sHelper = new SecurityHelper();
+                                        var passwordHash = sHelper.GetPasswordHash(model.NewPassword);
+                                        user.Password = passwordHash;
+
+                                        unitWork.UserRepository.Update(user);
+                                        unitWork.PasswordRecoveryRepository.Delete(isTokenExists);
+                                        await unitWork.SaveAsync();
+
+                                        var resetRequests = unitWork.PasswordRecoveryRepository.GetManyQueryable(r => r.Email == user.Email);
+                                        foreach(var request in resetRequests)
+                                        {
+                                            unitWork.PasswordRecoveryRepository.Delete(request);
+                                        }
+                                        if (resetRequests.Any())
+                                        {
+                                            await unitWork.SaveAsync();
+                                        }
+                                        transaction.Commit();
+
+                                        //Send emails
+                                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                                        var smtpSettings = smtpService.GetPrivate();
+                                        SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                                        List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                                        usersEmailList.Add(new EmailAddress()
+                                        {
+                                            Email = user.Email
+                                        });
+                                        if (smtpSettings != null)
+                                        {
+                                            smtpSettingsModel.Host = smtpSettings.Host;
+                                            smtpSettingsModel.Port = smtpSettings.Port;
+                                            smtpSettingsModel.Username = smtpSettings.Username;
+                                            smtpSettingsModel.Password = smtpSettings.Password;
+                                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                                            smtpSettingsModel.SenderName = smtpSettings.SenderName;
+                                        }
+
+                                        string message = "", subject = "", footerMessage = "";
+                                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ResetPassword);
+                                        if (emailMessage != null)
+                                        {
+                                            subject = emailMessage.Subject;
+                                            message = emailMessage.Message;
+                                            footerMessage = emailMessage.FooterMessage;
+                                        }
+                                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
+                                        emailHelper.SendEmailToUsers(usersEmailList, emailMessage.Subject, "", message, footerMessage);
+                                    }
+                                    else
+                                    {
+                                        response.Success = false;
+                                        response.Message = "AIMS could not find any account with the provided email";
+                                    }
                                 }
-
-                                string message = "", subject = "", footerMessage = "";
-                                var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ResetPassword);
-                                if (emailMessage != null)
+                                catch (Exception ex)
                                 {
-                                    subject = emailMessage.Subject;
-                                    message = emailMessage.Message;
-                                    footerMessage = emailMessage.FooterMessage;
+                                    response.Success = false;
+                                    response.Message = ex.Message;
                                 }
-                                IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName,  smtpSettingsModel);
-                                emailHelper.SendEmailToUsers(usersEmailList, emailMessage.Subject, "", message, footerMessage);
                             }
                             else
                             {
                                 response.Success = false;
-                                response.Message = "AIMS could not find any account with the provided email";
+                                response.Message = "Password reset token is expired";
                             }
                         }
-                        catch (Exception ex)
+                        else
                         {
                             response.Success = false;
-                            response.Message = ex.Message;
+                            response.Message = "Password reset token expired or not found";
                         }
                     }
-                    else
-                    {
-                        response.Success = false;
-                        response.Message = "Password reset token is expired";
-                    }
-                }
-                else
-                {
-                    response.Success = false;
-                    response.Message = "Password reset token expired or not found";
-                }
+                });
+                
                 return response;
             }
         }

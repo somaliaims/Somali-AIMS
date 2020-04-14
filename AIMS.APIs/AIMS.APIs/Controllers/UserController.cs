@@ -284,7 +284,7 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("ResetPassword")]
-        public IActionResult ResetPassword([FromBody] PasswordResetModel model)
+        public async Task<IActionResult> ResetPassword([FromBody] PasswordResetModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -292,7 +292,7 @@ namespace AIMS.APIs.Controllers
             }
             TokenUtility utility = new TokenUtility();
             var tokenTime = utility.GetDecodedResetToken(model.Token);
-            var response = userService.ResetPassword(model, tokenTime);
+            var response = await userService.ResetPasswordAsync(model, tokenTime);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
