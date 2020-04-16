@@ -62,8 +62,8 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == funderId, p => p.FunderId);
-                var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == funderId, p => p.ImplementerId);
+                var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == funderId, p => p.ProjectId);
+                var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == funderId, p => p.ProjectId);
                 var userOwnedProjects = unitWork.ProjectRepository.GetProjection(p => p.CreatedById == userId, p => p.Id);
                 var projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
                 List<int> userOwnedProjectIds = new List<int>(); 
@@ -72,7 +72,7 @@ namespace AIMS.Services
                     userOwnedProjectIds.Add((int)pid);
                 }
                 projectIds = projectIds.Union(userOwnedProjectIds).ToList<int>();
-                var requests = unitWork.ProjectMembershipRepository.GetWithInclude(r => projectIds.Contains(r.ProjectId) && r.IsApproved == false, new string[] { "Project", "User", "User.Organization" });
+                var requests = unitWork.ProjectMembershipRepository.GetWithInclude(r => projectIds.Contains(r.ProjectId) && r.UserId != userId && r.IsApproved == false, new string[] { "Project", "User", "User.Organization" });
                 return mapper.Map<List<ProjectMembershipRequestView>>(requests);
             }
         }
@@ -193,7 +193,7 @@ namespace AIMS.Services
                         }
 
                         mHelper = new MessageHelper();
-                        message += mHelper.NewOrganizationForProject(requestingOrganization);
+                        message += mHelper.NewOrganizationForProject(requestingOrganization, project.Title);
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                         emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                     }

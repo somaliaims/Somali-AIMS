@@ -40,14 +40,34 @@ namespace AIMS.Services
                 List<EmailAddress> emailAddressList = new List<EmailAddress>();
                 IEnumerable<int> projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(p => p.ProjectId == id, p => p.FunderId);
                 IEnumerable<int> projectImplementerIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ProjectId == id, p => p.ImplementerId);
+                int userId = (int)unitWork.ProjectRepository.GetProjection(p => p.Id == id, p => p.CreatedById).FirstOrDefault();
+                if (userId > 0)
+                {
+                    var email = unitWork.UserRepository.GetProjection(u => u.Id == id, u => u.Email).FirstOrDefault();
+                    if (email != null)
+                    {
+                        emailAddressList.Add(new EmailAddress()
+                        {
+                            Email = email
+                        });
+                    }
+                }
+
                 projectFunderIds = projectFunderIds.Union(projectImplementerIds);
                 var emails = unitWork.UserRepository.GetProjection(u => projectFunderIds.Contains(u.OrganizationId), u => u.Email);
                 foreach (var email in emails)
                 {
-                    emailAddressList.Add(new EmailAddress()
+                    var emailExists = (from e in emailAddressList
+                                       where e.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
+                                       select e).FirstOrDefault();
+
+                    if (emailExists == null)
                     {
-                        Email = email
-                    });
+                        emailAddressList.Add(new EmailAddress()
+                        {
+                            Email = email
+                        });
+                    }
                 }
                 if (emailAddressList.Count == 0)
                 {

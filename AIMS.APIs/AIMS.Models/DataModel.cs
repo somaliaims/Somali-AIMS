@@ -357,7 +357,9 @@ namespace AIMS.Models
         [ForeignKey("User")]
         public int UserId { get; set; }
         public EFUser User { get; set; }
-        public int OrganizationId { get; set; } = 0;
+        [ForeignKey("Organization")]
+        public int? OrganizationId { get; set; } = 0;
+        public EFOrganization Organization { get; set; }
         public DateTime Dated { get; set; }
         public bool IsApproved { get; set; }
     }
@@ -621,7 +623,7 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
         [ForeignKey("RequestedBy")]
-        public int UserId { get; set; }
+        public int RequestedById { get; set; }
         public EFUser RequestedBy { get; set; }
         public DateTime RequestedOn { get; set; }
         public DateTime StatusUpdatedOn { get; set; }

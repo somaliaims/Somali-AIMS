@@ -73,7 +73,7 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <param name="organization"></param>
         /// <returns></returns>
-        string NewOrganizationForProject(string organization);
+        string NewOrganizationForProject(string organization, string project);
 
         /// <summary>
         /// 
@@ -745,9 +745,9 @@ namespace AIMS.Services.Helpers
             return (String.Join("", formattedMessageList));
         }
 
-        public string NewOrganizationForProject(string organization)
+        public string NewOrganizationForProject(string organization, string project)
         {
-            return ("<h4>Organization name: </h4><p>" + organization + "</p>");
+            return ("<h4>Requested project to join: " + project +  "</h4><h4>Organization name: </h4><p>" + organization + "</p>");
         }
 
         public string ProjectPermissionGranted(string project)

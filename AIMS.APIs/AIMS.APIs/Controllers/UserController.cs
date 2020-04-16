@@ -67,7 +67,7 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] UserModel user)
+        public async Task<IActionResult> Post([FromBody] UserModel user)
         {
             if (!ModelState.IsValid)
             {
@@ -78,7 +78,7 @@ namespace AIMS.APIs.Controllers
                                 .GetValue<String>("Email:Smtp:AdminEmail");
             string apiUrl = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
                                 .GetValue<String>("Email:Smtp:AdminEmail");
-            var response = userService.Add(user, adminEmail);
+            var response = await userService.AddAsync(user, adminEmail);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -141,6 +141,7 @@ namespace AIMS.APIs.Controllers
                 UserReturnView uView = new UserReturnView()
                 {
                     Id = foundUser.Id,
+                    Email = foundUser.Email,
                     Token = null,
                     UserType = 0,
                     OrganizationId = foundUser.OrganizationId,
@@ -169,6 +170,7 @@ namespace AIMS.APIs.Controllers
                 {
                     Id = foundUser.Id,
                     Token = jwtToken,
+                    Email = foundUser.Email,
                     UserType = foundUser.UserType,
                     OrganizationId = foundUser.OrganizationId,
                     OrganizationName = foundUser.OrganizationName,

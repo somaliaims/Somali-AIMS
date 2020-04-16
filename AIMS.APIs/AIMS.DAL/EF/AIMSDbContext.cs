@@ -80,7 +80,7 @@ namespace AIMS.DAL.EF
                 .HasKey(o => new { o.RequestId, o.OrganizationId });
 
             modelBuilder.Entity<EFProjectDeletionRequests>()
-                .HasKey(d => new { d.ProjectId, d.UserId });
+                .HasKey(d => new { d.ProjectId, d.RequestedById });
 
             modelBuilder.Entity<EFExchangeRatesUsageSettings>()
                 .HasIndex(e => new { e.Source, e.UsageSection })

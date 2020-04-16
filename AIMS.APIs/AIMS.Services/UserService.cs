@@ -73,7 +73,7 @@ namespace AIMS.Services
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
-        ActionResponse Add(UserModel user, string adminEmail);
+        Task<ActionResponse> AddAsync(UserModel user, string adminEmail);
 
         /// <summary>
         /// Updates a user's organization
@@ -423,7 +423,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Add(UserModel model, string adminEmail)
+        public async Task<ActionResponse> AddAsync(UserModel model, string adminEmail)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -431,6 +431,7 @@ namespace AIMS.Services
                 try
                 {
                     EFOrganization organization = null;
+                    EFOrganizationTypes organizationType = null;
                     ISecurityHelper sHelper = new SecurityHelper();
                     IMessageHelper mHelper;
 
@@ -449,99 +450,117 @@ namespace AIMS.Services
                     {
                         if (model.IsNewOrganization)
                         {
-                            organization = new EFOrganization()
+                            organizationType = unitWork.OrganizationTypesRepository.GetOne(t => t.Id == model.OrganizationTypeId);
+                            if (organizationType == null)
                             {
-                                OrganizationName = model.OrganizationName,
-                            };
-
-                            unitWork.Save();
-                            model.OrganizationId = organization.Id;
+                                mHelper = new MessageHelper();
+                                response.Success = false;
+                                response.Message = mHelper.GetNotFound("Organization Type");
+                                return response;
+                            }
                         }
                     }
 
-                    string passwordHash = sHelper.GetPasswordHash(model.Password);
-                    var newUser = unitWork.UserRepository.Insert(new EFUser()
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        Email = model.Email,
-                        UserType = UserTypes.Standard,
-                        Organization = organization,
-                        Password = passwordHash,
-                        IsApproved = false,
-                        RegistrationDate = DateTime.Now
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            if (model.IsNewOrganization)
+                            {
+                                organization = new EFOrganization()
+                                {
+                                    OrganizationType = organizationType,
+                                    OrganizationName = model.OrganizationName,
+                                };
+                                await unitWork.SaveAsync();
+                                model.OrganizationId = organization.Id;
+                            }
+                            string passwordHash = sHelper.GetPasswordHash(model.Password);
+                            var newUser = unitWork.UserRepository.Insert(new EFUser()
+                            {
+                                Email = model.Email,
+                                UserType = UserTypes.Standard,
+                                Organization = organization,
+                                Password = passwordHash,
+                                IsApproved = false,
+                                RegistrationDate = DateTime.Now
+                            });
+                            await unitWork.SaveAsync();
+                            //Get emails for all the users
+                            var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) && u.IsApproved == true);
+                            List<EmailsModel> usersEmailList = new List<EmailsModel>();
+                            foreach (var user in users)
+                            {
+                                if (user.Email != model.Email)
+                                {
+                                    usersEmailList.Add(new EmailsModel()
+                                    {
+                                        Email = user.Email,
+                                        UserType = user.UserType
+                                    });
+                                }
+                            }
+
+                            var managerUsers = unitWork.UserRepository.GetMany(u => u.UserType == UserTypes.Manager || u.UserType == UserTypes.SuperAdmin);
+                            foreach (var user in managerUsers)
+                            {
+                                if (user.Email != model.Email)
+                                {
+                                    usersEmailList.Add(new EmailsModel()
+                                    {
+                                        Email = user.Email,
+                                        UserType = user.UserType
+                                    });
+                                }
+                            }
+
+                            if (usersEmailList.Count > 0)
+                            {
+                                //Send emails
+                                ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                                var smtpSettings = smtpService.GetPrivate();
+                                SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                                if (smtpSettings != null)
+                                {
+                                    smtpSettingsModel.Host = smtpSettings.Host;
+                                    smtpSettingsModel.Port = smtpSettings.Port;
+                                    smtpSettingsModel.Username = smtpSettings.Username;
+                                    smtpSettingsModel.Password = smtpSettings.Password;
+                                    smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                                    smtpSettingsModel.SenderName = smtpSettings.SenderName;
+                                }
+
+                                string message = "", subject = "", footerMessage = "";
+                                var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewUser);
+                                if (emailMessage != null)
+                                {
+                                    subject = emailMessage.Subject;
+                                    message = emailMessage.Message;
+                                    footerMessage = emailMessage.FooterMessage;
+                                }
+                                mHelper = new MessageHelper();
+                                //Add notification
+                                unitWork.NotificationsRepository.Insert(new EFUserNotifications()
+                                {
+                                    UserType = UserTypes.Standard,
+                                    Organization = organization,
+                                    Message = message,
+                                    TreatmentId = newUser.Id,
+                                    Email = newUser.Email,
+                                    Dated = DateTime.Now,
+                                    IsSeen = false,
+                                    NotificationType = NotificationTypes.NewUser
+                                });
+                                await unitWork.SaveAsync();
+                                transaction.Commit();
+                                message += mHelper.NewUserForOrganization(organization.OrganizationName, model.Email);
+                                IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
+                                emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, subject, message, footerMessage);
+                            }
+                            response.ReturnedId = newUser.Id;
+                        }
                     });
-                    unitWork.Save();
-                    //Get emails for all the users
-                    var users = unitWork.UserRepository.GetMany(u => u.OrganizationId.Equals(organization.Id) && u.IsApproved == true);
-                    List<EmailsModel> usersEmailList = new List<EmailsModel>();
-                    foreach (var user in users)
-                    {
-                        if (user.Email != model.Email)
-                        {
-                            usersEmailList.Add(new EmailsModel()
-                            {
-                                Email = user.Email,
-                                UserType = user.UserType
-                            });
-                        }
-                    }
-
-                    var managerUsers = unitWork.UserRepository.GetMany(u => u.UserType == UserTypes.Manager || u.UserType == UserTypes.SuperAdmin);
-                    foreach (var user in managerUsers)
-                    {
-                        if (user.Email != model.Email)
-                        {
-                            usersEmailList.Add(new EmailsModel()
-                            {
-                                Email = user.Email,
-                                UserType = user.UserType
-                            });
-                        }
-                    }
-
-                    if (usersEmailList.Count > 0)
-                    {
-                        //Send emails
-                        ISMTPSettingsService smtpService = new SMTPSettingsService(context);
-                        var smtpSettings = smtpService.GetPrivate();
-                        SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
-                        if (smtpSettings != null)
-                        {
-                            smtpSettingsModel.Host = smtpSettings.Host;
-                            smtpSettingsModel.Port = smtpSettings.Port;
-                            smtpSettingsModel.Username = smtpSettings.Username;
-                            smtpSettingsModel.Password = smtpSettings.Password;
-                            smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
-                            smtpSettingsModel.SenderName = smtpSettings.SenderName;
-                        }
-
-                        string message = "", subject = "", footerMessage = "";
-                        var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.NewUser);
-                        if (emailMessage != null)
-                        {
-                            subject = emailMessage.Subject;
-                            message = emailMessage.Message;
-                            footerMessage = emailMessage.FooterMessage;
-                        }
-                        mHelper = new MessageHelper();
-                        //Add notification
-                        unitWork.NotificationsRepository.Insert(new EFUserNotifications()
-                        {
-                            UserType = UserTypes.Standard,
-                            Organization = organization,
-                            Message = message,
-                            TreatmentId = newUser.Id,
-                            Email = newUser.Email,
-                            Dated = DateTime.Now,
-                            IsSeen = false,
-                            NotificationType = NotificationTypes.NewUser
-                        });
-                        unitWork.Save();
-
-                        message += mHelper.NewUserForOrganization(organization.OrganizationName, model.Email);
-                        IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
-                        emailHelper.SendNewRegistrationEmail(usersEmailList, organization.OrganizationName, subject, message, footerMessage);
-                    }
-                    response.ReturnedId = newUser.Id;
                 }
                 catch (Exception ex)
                 {

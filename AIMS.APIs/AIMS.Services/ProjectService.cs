@@ -1015,7 +1015,7 @@ namespace AIMS.Services
                             if (model.StartingYear > 0 && model.EndingYear <= 0)
                             {
                                 projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => ((p.StartingFinancialYear.FinancialYear >= model.StartingYear || (p.EndingFinancialYear.FinancialYear >= model.StartingYear))),
-                                    new string[] { "StartingFinancialYear", "EndingFinancialYear"});
+                                    new string[] { "StartingFinancialYear", "EndingFinancialYear" });
                             }
 
                             else if (model.EndingYear > 0 && model.StartingYear <= 0)
@@ -1826,7 +1826,7 @@ namespace AIMS.Services
                                 ExchangeRate = model.ExchangeRate,
                                 ProjectCurrency = model.ProjectCurrency,
                                 DateUpdated = DateTime.Now,
-                                CreatedById = userId
+                                CreatedBy = createdBy
                             });
                             await unitWork.SaveAsync();
                             //Add user organization to valid funders
@@ -1834,6 +1834,7 @@ namespace AIMS.Services
                             {
                                 ProjectId = newProject.Id,
                                 UserId = userId,
+                                OrganizationId = createdBy.OrganizationId,
                                 Dated = DateTime.Now,
                                 IsApproved = true
                             });

@@ -89,11 +89,11 @@ namespace AIMS.Services
                         userOwnedProjectIds.Add((int)pid);
                     }
                     projectIds = projectIds.Union(userOwnedProjectIds).ToList<int>();
-                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => (p.Status == ProjectDeletionStatus.Requested && p.UserId != userId && projectIds.Contains(p.ProjectId)), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
+                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(p => (p.Status == ProjectDeletionStatus.Requested && p.RequestedBy.Id != userId && projectIds.Contains(p.ProjectId)), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
                 }
                 else if (uType == UserTypes.Manager || uType == UserTypes.SuperAdmin)
                 {
-                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn <= DateTime.Now.AddDays(-7) && d.Status == ProjectDeletionStatus.Requested && d.UserId != userId) || (projectIds.Contains(d.ProjectId) && userId != d.UserId)), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
+                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn <= DateTime.Now.AddDays(-7) && d.Status == ProjectDeletionStatus.Requested && d.RequestedBy.Id != userId) || (projectIds.Contains(d.ProjectId) && userId != d.RequestedBy.Id)), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
                 }
                 return mapper.Map<List<ProjectDeletionRequestView>>(projectRequests);
             }
@@ -262,12 +262,29 @@ namespace AIMS.Services
                     combinedProjectIds = combinedProjectIds.Union(membershipProjectIds);
                     if (!combinedProjectIds.Contains(projectId))
                     {
-                        mHelper = new MessageHelper();
-                        response.Success = false;
-                        response.Message = mHelper.GetInvalidProjectEdit();
-                        return response;
+                        canEditProject = false;
                     }
-                    canEditProject = true;
+                    else
+                    {
+                        canEditProject = true;
+                    }
+                }
+
+                if (!canEditProject)
+                {
+                    var user = unitWork.UserRepository.GetOne(u => u.Id == userId);
+                    if (user.UserType == UserTypes.Manager || user.UserType == UserTypes.SuperAdmin)
+                    {
+                        canEditProject = true;
+                    }
+                }
+
+                if (!canEditProject)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetInvalidProjectEdit();
+                    return response;
                 }
 
                 if (canEditProject)

@@ -643,6 +643,7 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string Token { get; set; }
+        public string Email { get; set; }
         public int OrganizationId { get; set; }
         public string OrganizationName { get; set; }
         public UserTypes UserType { get; set; }
@@ -711,7 +712,7 @@ namespace AIMS.Models
         public UserTypes UserType { get; set; }
         public int OrganizationId { get; set; }
         public string OrganizationName { get; set; }
-        //public int OrganizationTypeId { get; set; }
+        public int OrganizationTypeId { get; set; }
         public bool IsNewOrganization { get; set; }
         public string LoginUrl { get; set; }
     }
