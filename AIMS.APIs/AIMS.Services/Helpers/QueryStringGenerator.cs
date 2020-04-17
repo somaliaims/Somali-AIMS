@@ -1,6 +1,7 @@
 ﻿using AIMS.Models;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 
 namespace AIMS.Services.Helpers
@@ -93,9 +94,13 @@ namespace AIMS.Services.Helpers
                 queryString += ("&mid=" + model.MarkerId);
             }
 
-            if (!string.IsNullOrEmpty(model.MarkerValue))
+            if (model.MarkerValues.Count > 0)
             {
-                queryString += ("&mvalue=" + model.MarkerValue.Replace(" ", "+"));
+                for(int m=0; m < model.MarkerValues.Count; m++)
+                {
+                    model.MarkerValues[m] = WebUtility.UrlEncode(model.MarkerValues[m]);
+                }
+                queryString += ("&mvalue=" + string.Join(",", model.MarkerValues));
             }
             return queryString;
         }
@@ -150,9 +155,13 @@ namespace AIMS.Services.Helpers
                 queryString += ("&mid=" + model.MarkerId);
             }
 
-            if (!string.IsNullOrEmpty(model.MarkerValue))
+            if (model.MarkerValues.Count > 0)
             {
-                queryString += ("&mvalue=" + model.MarkerValue.Replace(" ", "+"));
+                for (int m = 0; m < model.MarkerValues.Count; m++)
+                {
+                    model.MarkerValues[m] = WebUtility.UrlEncode(model.MarkerValues[m]);
+                }
+                queryString += ("&mvalue=" + string.Join(",", model.MarkerValues));
             }
             return queryString;
         }
@@ -197,9 +206,13 @@ namespace AIMS.Services.Helpers
                 queryString += ("&mid=" + model.MarkerId);
             }
 
-            if (!string.IsNullOrEmpty(model.MarkerValue))
+            if (model.MarkerValues.Count > 0)
             {
-                queryString += ("&mvalue=" + model.MarkerValue.Replace(" ", "+"));
+                for (int m = 0; m < model.MarkerValues.Count; m++)
+                {
+                    model.MarkerValues[m] = WebUtility.UrlEncode(model.MarkerValues[m]);
+                }
+                queryString += ("&mvalue=" + string.Join(",", model.MarkerValues));
             }
 
             if (model.ChartType > 0)

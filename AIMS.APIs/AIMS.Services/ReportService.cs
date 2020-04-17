@@ -752,9 +752,9 @@ namespace AIMS.Services
                     if (model.MarkerId != 0)
                     {
                         List<int> projectIds = new List<int>();
-                        string value = model.MarkerValue;
+                        List<string> values = model.MarkerValues;
                         var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId);
-                        if (!string.IsNullOrEmpty(value))
+                        if (values.Count > 0)
                         {
                             foreach (var marker in projectMarkers)
                             {
@@ -762,7 +762,7 @@ namespace AIMS.Services
                                 if (markerValues != null && markerValues.Any())
                                 {
                                     var valueMatch = (from v in markerValues
-                                                      where v.Value.Equals(value, StringComparison.OrdinalIgnoreCase)
+                                                      where values.Contains(v.Value, StringComparer.OrdinalIgnoreCase)
                                                       select v).FirstOrDefault();
                                     if (valueMatch != null)
                                     {
@@ -771,7 +771,7 @@ namespace AIMS.Services
                                 }
                                 else
                                 {
-                                    if (marker.Values.Equals(value, StringComparison.OrdinalIgnoreCase))
+                                    if (values.Contains(marker.Values, StringComparer.OrdinalIgnoreCase))
                                     {
                                         projectIds.Add(marker.ProjectId);
                                     }
@@ -1961,9 +1961,9 @@ namespace AIMS.Services
                     if (model.MarkerId != 0)
                     {
                         List<int> projectIds = new List<int>();
-                        string value = model.MarkerValue;
+                        var values = model.MarkerValues;
                         var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId);
-                        if (!string.IsNullOrEmpty(value))
+                        if (values.Count > 0)
                         {
                             foreach (var marker in projectMarkers)
                             {
@@ -1971,7 +1971,7 @@ namespace AIMS.Services
                                 if (markerValues != null && markerValues.Any())
                                 {
                                     var valueMatch = (from v in markerValues
-                                                      where v.Value.Equals(value, StringComparison.OrdinalIgnoreCase)
+                                                      where values.Contains(v.Value, StringComparer.OrdinalIgnoreCase)
                                                       select v).FirstOrDefault();
                                     if (valueMatch != null)
                                     {
@@ -1980,7 +1980,7 @@ namespace AIMS.Services
                                 }
                                 else 
                                 {
-                                    if (marker.Values.Equals(value, StringComparison.OrdinalIgnoreCase))
+                                    if (values.Contains(marker.Values, StringComparer.OrdinalIgnoreCase))
                                     {
                                         projectIds.Add(marker.ProjectId);
                                     }
@@ -2403,9 +2403,9 @@ namespace AIMS.Services
                     if (model.MarkerId != 0)
                     {
                         List<int> projectIds = new List<int>();
-                        string value = model.MarkerValue;
+                        List<string> values = model.MarkerValues;
                         var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId);
-                        if (!string.IsNullOrEmpty(value))
+                        if (values.Count > 0)
                         {
                             foreach (var marker in projectMarkers)
                             {
@@ -2413,7 +2413,7 @@ namespace AIMS.Services
                                 if (markerValues != null && markerValues.Any())
                                 {
                                     var valueMatch = (from v in markerValues
-                                                      where v.Value.Equals(value, StringComparison.OrdinalIgnoreCase)
+                                                      where values.Contains(v.Value, StringComparer.OrdinalIgnoreCase)
                                                       select v).FirstOrDefault();
                                     if (valueMatch != null)
                                     {
@@ -2422,7 +2422,7 @@ namespace AIMS.Services
                                 }
                                 else
                                 {
-                                    if (marker.Values.Equals(value, StringComparison.OrdinalIgnoreCase))
+                                    if (values.Contains(marker.Values, StringComparer.OrdinalIgnoreCase))
                                     {
                                         projectIds.Add(marker.ProjectId);
                                     }
@@ -2463,7 +2463,6 @@ namespace AIMS.Services
                     {
                         financialYears = unitWork.FinancialYearRepository.GetProjection(y => (y.FinancialYear != 0), y => y.FinancialYear);
                     }
-
 
                     List<ProjectProfileView> projectsList = new List<ProjectProfileView>();
                     foreach (var project in projectProfileList)
