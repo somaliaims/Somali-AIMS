@@ -528,10 +528,10 @@ namespace AIMS.Services
                     foreach (var sector in report.SectorProjectsList)
                     {
                         decimal totalFunding = 0, totalDisbursements = 0;
-                        totalFunding = Math.Round(sector.TotalFunding, MidpointRounding.AwayFromZero);
+                        totalFunding = Math.Round(sector.ActualDisbursements, MidpointRounding.AwayFromZero);
                         totalDisbursements = Math.Round(sector.TotalDisbursements, MidpointRounding.AwayFromZero);
                         row = excelSheet.CreateRow(++rowCounter);
-                        grandTotalFunding += Math.Round(sector.TotalFunding, MidpointRounding.AwayFromZero);
+                        grandTotalFunding += Math.Round(sector.ActualDisbursements, MidpointRounding.AwayFromZero);
                         grandTotalDisbursement += Math.Round(sector.TotalDisbursements, MidpointRounding.AwayFromZero);
 
                         var groupTitleCell = row.CreateCell(0, CellType.String);
@@ -562,10 +562,6 @@ namespace AIMS.Services
                             implementerDataCell.SetCellValue(project.Implementers);
                             implementerDataCell.CellStyle = dataCellStyle;
 
-                            /*var projectCostDataCell = row.CreateCell(3, CellType.Numeric);
-                            projectCostDataCell.SetCellValue(project.ProjectValue));
-                            projectCostDataCell.CellStyle = numericCellStyle;*/
-
                             var actualDisbursementDataCell = row.CreateCell(3, CellType.Numeric);
                             actualDisbursementDataCell.SetCellValue(Convert.ToDouble(project.ActualDisbursements));
                             actualDisbursementDataCell.CellStyle = numericCellStyle;
@@ -582,10 +578,6 @@ namespace AIMS.Services
                     footerCell.CellStyle = headerStyle;
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, groupHeaderColumns));
-
-                    /*var grandFundTotalCell = row.CreateCell(3, CellType.Numeric);
-                    grandFundTotalCell.SetCellValue(grandTotalFunding));
-                    grandFundTotalCell.CellStyle = numericHeaderStyle;*/
 
                     var grandDisbursementTotalCell = row.CreateCell(3, CellType.Numeric);
                     grandDisbursementTotalCell.SetCellValue(Convert.ToDouble(grandTotalDisbursement));
@@ -731,10 +723,6 @@ namespace AIMS.Services
                     implementerCol.SetCellValue("Implementers");
                     implementerCol.CellStyle = headerStyle;
 
-                    /*var projectCostCol = row.CreateCell(3);
-                    projectCostCol.SetCellValue("Project value");
-                    projectCostCol.CellStyle = headerStyle;*/
-
                     var actualDisbursementsCol = row.CreateCell(3);
                     actualDisbursementsCol.SetCellValue("Actual disbursements");
                     actualDisbursementsCol.CellStyle = headerStyle;
@@ -747,7 +735,7 @@ namespace AIMS.Services
                     {
                         row = excelSheet.CreateRow(++rowCounter);
                         grandTotalFunding += Math.Round(location.TotalFunding, MidpointRounding.AwayFromZero);
-                        grandTotalDisbursement += Math.Round(location.TotalDisbursements, MidpointRounding.AwayFromZero);
+                        grandTotalDisbursement += Math.Round(location.ActualDisbursements, MidpointRounding.AwayFromZero);
 
                         var groupTitleCell = row.CreateCell(0, CellType.String);
                         excelSheet.AddMergedRegion(new CellRangeAddress(
@@ -755,12 +743,8 @@ namespace AIMS.Services
                         groupTitleCell.SetCellValue(location.LocationName);
                         groupTitleCell.CellStyle = groupHeaderStyle;
 
-                        /*var groupFundTotalCell = row.CreateCell(3, CellType.Numeric);
-                        groupFundTotalCell.SetCellValue(location.TotalFunding));
-                        groupFundTotalCell.CellStyle = numericGroupHeaderStyle;*/
-
                         var groupDisbursementTotalCell = row.CreateCell(3, CellType.Numeric);
-                        groupDisbursementTotalCell.SetCellValue(Convert.ToDouble(location.TotalDisbursements));
+                        groupDisbursementTotalCell.SetCellValue(Convert.ToDouble(location.ActualDisbursements));
                         groupDisbursementTotalCell.CellStyle = numericGroupHeaderStyle;
 
                         var groupPlannedDisbursementTotalCell = row.CreateCell(4);
@@ -781,10 +765,6 @@ namespace AIMS.Services
                             implementerDataCell.SetCellValue(project.Implementers);
                             implementerDataCell.CellStyle = dataCellStyle;
 
-                            /*var projectCostDataCell = row.CreateCell(3, CellType.Numeric);
-                            projectCostDataCell.SetCellValue(project.ProjectValue));
-                            projectCostDataCell.CellStyle = numericCellStyle;*/
-
                             var actualDisbursementDataCell = row.CreateCell(3, CellType.Numeric);
                             actualDisbursementDataCell.SetCellValue(Convert.ToDouble(project.ActualDisbursements));
                             actualDisbursementDataCell.CellStyle = numericCellStyle;
@@ -801,10 +781,6 @@ namespace AIMS.Services
                     footerCell.CellStyle = headerStyle;
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, groupHeaderColumns));
-
-                    /*var grandFundTotalCell = row.CreateCell(3, CellType.Numeric);
-                    grandFundTotalCell.SetCellValue(grandTotalFunding));
-                    grandFundTotalCell.CellStyle = numericHeaderStyle;*/
 
                     var grandDisbursementTotalCell = row.CreateCell(3, CellType.Numeric);
                     grandDisbursementTotalCell.SetCellValue(Convert.ToDouble(grandTotalDisbursement));
@@ -950,10 +926,6 @@ namespace AIMS.Services
                     implementerCol.SetCellValue("Implementers");
                     implementerCol.CellStyle = headerStyle;
 
-                    /*var projectCostCol = row.CreateCell(3);
-                    projectCostCol.SetCellValue("Project value");
-                    projectCostCol.CellStyle = headerStyle;*/
-
                     var actualDisbursementsCol = row.CreateCell(3);
                     actualDisbursementsCol.SetCellValue("Actual disbursements");
                     actualDisbursementsCol.CellStyle = headerStyle;
@@ -966,20 +938,16 @@ namespace AIMS.Services
                     {
                         row = excelSheet.CreateRow(++rowCounter);
                         grandTotalFunding += Math.Round(year.TotalFunding, MidpointRounding.AwayFromZero);
-                        grandTotalDisbursement += Math.Round(year.TotalDisbursements, MidpointRounding.AwayFromZero);
+                        grandTotalDisbursement += Math.Round(year.TotalActualDisbursements, MidpointRounding.AwayFromZero);
 
                         var groupTitleCell = row.CreateCell(0, CellType.Numeric);
                         excelSheet.AddMergedRegion(new CellRangeAddress(
                             rowCounter, rowCounter, 0, groupHeaderColumns));
                         groupTitleCell.SetCellValue(year.Year);
                         groupTitleCell.CellStyle = groupHeaderStyle;
-
-                        /*var groupFundTotalCell = row.CreateCell(3, CellType.Numeric);
-                        groupFundTotalCell.SetCellValue(year.TotalFunding));
-                        groupFundTotalCell.CellStyle = numericGroupHeaderStyle;*/
-
+                        
                         var groupDisbursementTotalCell = row.CreateCell(3, CellType.Numeric);
-                        groupDisbursementTotalCell.SetCellValue(Convert.ToDouble(year.TotalDisbursements));
+                        groupDisbursementTotalCell.SetCellValue(Convert.ToDouble(year.TotalActualDisbursements));
                         groupDisbursementTotalCell.CellStyle = numericGroupHeaderStyle;
 
                         var groupPlannedDisbursementTotalCell = row.CreateCell(4);
@@ -999,11 +967,7 @@ namespace AIMS.Services
                             var implementerDataCell = row.CreateCell(2);
                             implementerDataCell.SetCellValue(project.Implementers);
                             implementerDataCell.CellStyle = dataCellStyle;
-
-                            /*var projectCostDataCell = row.CreateCell(3, CellType.Numeric);
-                            projectCostDataCell.SetCellValue(project.ProjectValue));
-                            projectCostDataCell.CellStyle = numericCellStyle;*/
-
+                            
                             var actualDisbursementDataCell = row.CreateCell(3, CellType.Numeric);
                             actualDisbursementDataCell.SetCellValue(Convert.ToDouble(project.ActualDisbursements));
                             actualDisbursementDataCell.CellStyle = numericCellStyle;
@@ -1020,10 +984,6 @@ namespace AIMS.Services
                     footerCell.CellStyle = headerStyle;
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, groupHeaderColumns));
-
-                    /*var grandFundTotalCell = row.CreateCell(3, CellType.Numeric);
-                    grandFundTotalCell.SetCellValue(grandTotalFunding));
-                    grandFundTotalCell.CellStyle = numericHeaderStyle;*/
 
                     var grandDisbursementTotalCell = row.CreateCell(3, CellType.Numeric);
                     grandDisbursementTotalCell.SetCellValue(Convert.ToDouble(grandTotalDisbursement));
