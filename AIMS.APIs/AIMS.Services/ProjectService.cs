@@ -1697,7 +1697,8 @@ namespace AIMS.Services
                 var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(f => f.FunderId == funderId, f => f.ProjectId).ToList();
                 var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ImplementerId == funderId, i => i.ProjectId).ToList();
                 var membershipProjectIds = unitWork.ProjectMembershipRepository.GetProjection(m => (m.UserId == userId && m.IsApproved == true), m => m.ProjectId);
-                var combinedProjectIds = funderProjectIds.Union(implementerProjectIds);
+                var ownedProjectIds = unitWork.ProjectRepository.GetProjection(p => p.CreatedById == userId, p => p.Id);
+                var combinedProjectIds = ownedProjectIds.Union(funderProjectIds.Union(implementerProjectIds));
                 membershipProjectIds = membershipProjectIds.Union(combinedProjectIds);
                 List<UserProjectsView> projectIds = new List<UserProjectsView>();
                 foreach (var id in membershipProjectIds)
@@ -1906,7 +1907,7 @@ namespace AIMS.Services
                     using (var transaction = context.Database.BeginTransaction())
                     {
                         int fyMonth = 0, fyDay = 0;
-                        int startingYear = 0, endingYear = 0, startMonth = 0, startDay = 0, currentActiveYear = financialYear;
+                        int startingYear = 0, endingYear = 0, startMonth = 1, startDay = 1, currentActiveYear = financialYear;
                         if (financialYear <= 0)
                         {
                             currentActiveYear = DateTime.Now.Year;
@@ -3846,6 +3847,15 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
+                    IMessageHelper mHelper;
+                    var project = unitWork.ProjectRepository.GetOne(p => p.Id == model.ProjectId);
+                    if (project == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                        return response;
+                    }
                     var customField = unitWork.ProjectMarkersRepository.GetOne(p => p.ProjectId == model.ProjectId && p.MarkerId == model.MarkerId);
                     if (customField != null)
                     {
@@ -3861,6 +3871,9 @@ namespace AIMS.Services
                             Values = model.Values
                         });
                     }
+                    project.DateUpdated = DateTime.Now;
+                    unitWork.ProjectRepository.Update(project);
+                    unitWork.Save();
                 }
                 catch (Exception ex)
                 {
