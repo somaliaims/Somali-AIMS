@@ -1859,11 +1859,11 @@ namespace AIMS.Models
         public List<int> OrganizationIds { get; set; } = new List<int>();
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
-        public int LocationId { get; set; }
+        public int LocationId { get; set; } = 0;
         public List<int> SectorIds { get; set; } = new List<int>();
         public int ChartType { get; set; } = 0;
         public int MarkerId { get; set; } = 0;
-        public List<string> MarkerValues { get; set; }
+        public List<string> MarkerValues { get; set; } = new List<string>();
         public NoSectorOptions SectorOption { get; set; } = NoSectorOptions.ProjectsWithSectors;
     }
 
@@ -1884,8 +1884,8 @@ namespace AIMS.Models
         public int EndingYear { get; set; } = 0;
         public List<int> LocationIds { get; set; } = new List<int>();
         public int SectorId { get; set; } = 0;
-        public int MarkerId { get; set; }
-        public List<string> MarkerValues { get; set; }
+        public int MarkerId { get; set; } = 0;
+        public List<string> MarkerValues { get; set; } = new List<string>();
         public int ChartType { get; set; } = 0;
         public NoLocationOptions LocationOption { get; set; } = NoLocationOptions.ProjectsWithLocations;
     }
@@ -1897,9 +1897,9 @@ namespace AIMS.Models
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
         public int ChartType { get; set; } = 0;
-        public int LocationId { get; set; }
-        public int MarkerId { get; set; }
-        public List<string> MarkerValues { get; set; }
+        public int LocationId { get; set; } = 0;
+        public int MarkerId { get; set; } = 0;
+        public List<string> MarkerValues { get; set; } = new List<string>();
         public List<int> SectorIds { get; set; } = new List<int>();
     }
 
