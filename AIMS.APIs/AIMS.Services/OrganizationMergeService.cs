@@ -48,7 +48,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ActionResponse> MergeOrganizations(int requestId);
+        //Task<ActionResponse> MergeOrganizations(int requestId);
 
         /// <summary>
         /// Merge all the provided organizations
@@ -79,6 +79,7 @@ namespace AIMS.Services
             {
                 IMessageHelper mHelper;
                 ActionResponse response = new ActionResponse();
+                EFOrganization envelopeOrganization = null;
 
                 if (model.Ids.Count < 2)
                 {
@@ -120,6 +121,30 @@ namespace AIMS.Services
                     return response;
                 }
 
+                if (model.EnvelopeOrganizationId != null)
+                {
+                    envelopeOrganization = (from o in organizations
+                                            where o.Id == model.EnvelopeOrganizationId
+                                            select o).FirstOrDefault();
+
+                    if (envelopeOrganization == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Provided Organization for Envelope");
+                        response.Success = false;
+                        return response;
+                    }
+
+                    var envelopeExists = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == model.EnvelopeOrganizationId);
+                    if (envelopeExists == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Envelope");
+                        response.Success = false;
+                        return response;
+                    }
+                }
+
                 try
                 {
                     var strategy = context.Database.CreateExecutionStrategy();
@@ -148,7 +173,8 @@ namespace AIMS.Services
                                     IsApproved = false,
                                     Dated = DateTime.Now,
                                     OrganizationIdsJson = string.Join("-", orgIds),
-                                    RequestedBy = requestedBy
+                                    RequestedBy = requestedBy,
+                                    EnvelopeOrganization = envelopeOrganization
                                 });
                                 unitWork.Save();
 
@@ -328,14 +354,11 @@ namespace AIMS.Services
                         }
                         await unitWork.SaveAsync();
 
-                        var envelopesToUpdate = unitWork.EnvelopeRepository.GetManyQueryable(e => orgIds.Contains(e.FunderId));
-                        foreach (var envelope in envelopesToUpdate)
+                        if (request.EnvelopeOrganizationId != null)
                         {
-                            envelope.Funder = newOrganization;
-                            unitWork.EnvelopeRepository.Update(envelope);
-                        }
-                        if (envelopesToUpdate.Any())
-                        {
+                            var envelopeToUpdate = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == request.EnvelopeOrganizationId);
+                            envelopeToUpdate.Funder = newOrganization;
+                            unitWork.EnvelopeRepository.Update(envelopeToUpdate);
                             await unitWork.SaveAsync();
                         }
 
@@ -366,6 +389,7 @@ namespace AIMS.Services
                         }
                         if (projectFunders.Any())
                         {
+                            unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
                             await unitWork.SaveAsync();
                         }
 
@@ -389,6 +413,7 @@ namespace AIMS.Services
 
                         if (projectImplementers.Any())
                         {
+                            unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
                             await unitWork.SaveAsync();
                         }
 
@@ -398,6 +423,7 @@ namespace AIMS.Services
                         }
                         await unitWork.SaveAsync();
 
+                        //Manage envelope data
                         unitWork.OrganizationMergeRequestsRepository.Delete(request);
                         await unitWork.SaveAsync();
                         response.ReturnedId = newOrganization.Id;
@@ -644,6 +670,7 @@ namespace AIMS.Services
                             }
                             if (projectFunders.Any())
                             {
+                                unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
                                 await unitWork.SaveAsync();
                             }
 
@@ -666,18 +693,19 @@ namespace AIMS.Services
                             }
                             if (projectImplementers.Any())
                             {
+                                unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
                                 await unitWork.SaveAsync();
                             }
 
-                            var envelopesToUpdate = unitWork.EnvelopeRepository.GetManyQueryable(e => orgIds.Contains(e.FunderId));
-                            foreach (var envelope in envelopesToUpdate)
+                            if (request.EnvelopeOrganizationId != null)
                             {
-                                envelope.Funder = newOrganization;
-                                unitWork.EnvelopeRepository.Update(envelope);
-                            }
-                            if (envelopesToUpdate.Any())
-                            {
-                                await unitWork.SaveAsync();
+                                var envelopeToUpdate = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == request.EnvelopeOrganizationId);
+                                if (envelopeToUpdate != null)
+                                {
+                                    envelopeToUpdate.Funder = newOrganization;
+                                    unitWork.EnvelopeRepository.Update(envelopeToUpdate);
+                                    await unitWork.SaveAsync();
+                                }
                             }
 
                             //Update notifications
@@ -757,7 +785,7 @@ namespace AIMS.Services
             return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
         }
 
-        public async Task<ActionResponse> MergeOrganizations(int requestId)
+        /*public async Task<ActionResponse> MergeOrganizations(int requestId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -920,6 +948,6 @@ namespace AIMS.Services
                 });
                 return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
-        }
+        }*/
     }
 }

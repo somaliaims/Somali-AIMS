@@ -106,7 +106,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ActionResponse> MergeOrganizationsAutoAsync(List<MergeOrganizationsRequest> mergeRequests);
+        //Task<ActionResponse> MergeOrganizationsAutoAsync(List<MergeOrganizationsRequest> mergeRequests);
 
         /// <summary>
         /// Updates a organization
@@ -523,12 +523,10 @@ namespace AIMS.Services
                                 ProjectId = funder.ProjectId,
                                 FunderId = newOrganization.Id,
                             });
-                            unitWork.ProjectFundersRepository.Delete(funder);
                         }
 
                         if (fundersList.Count > 0)
                         {
-                            unitWork.Save();
                             unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
                             unitWork.Save();
                         }
@@ -616,7 +614,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> MergeOrganizationsAutoAsync(List<MergeOrganizationsRequest> mergeRequests)
+        /*public async Task<ActionResponse> MergeOrganizationsAutoAsync(List<MergeOrganizationsRequest> mergeRequests)
         {
             var unitWork = new UnitOfWork(context);
             ActionResponse response = new ActionResponse();
@@ -757,7 +755,7 @@ namespace AIMS.Services
                 }
             });
             return await Task.Run<ActionResponse>(() => response).ConfigureAwait(false);
-        }
+        }*/
 
         public ActionResponse Approve(int id)
         {

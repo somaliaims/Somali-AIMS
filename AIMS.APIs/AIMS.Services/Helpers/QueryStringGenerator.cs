@@ -84,6 +84,15 @@ namespace AIMS.Services.Helpers
                 queryString += ("&noSectors=true");
             }
 
+            if (model.SectorLevel == SectorLevels.Parent)
+            {
+                queryString += ("&level=" + (int)SectorLevels.Parent);
+            }
+            else if(model.SectorLevel == SectorLevels.Child)
+            {
+                queryString += ("&level=" + (int)SectorLevels.Child);
+            }
+
             if (model.ChartType > 0)
             {
                 queryString += ("&ctype=" + model.ChartType);

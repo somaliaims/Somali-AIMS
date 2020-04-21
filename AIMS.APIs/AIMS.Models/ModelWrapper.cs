@@ -31,6 +31,12 @@ namespace AIMS.Models
         ProjectsWithoutSectors = 2
     }
 
+    public enum SectorLevels
+    {
+        Parent = 1,
+        Child = 2
+    }
+
     public enum FinancialRangeConstants
     {
         LessThanOneMillion = 1,
@@ -373,9 +379,11 @@ namespace AIMS.Models
 
     public class MergeOrganizationModel
     {
+        [Required]
         public int OrganizationTypeId { get; set; }
         [Required]
         public string NewName { get; set; }
+        public int? EnvelopeOrganizationId { get; set; }
         [Required]
         public List<int> Ids { get; set; }
     }
@@ -1568,6 +1576,7 @@ namespace AIMS.Models
     public class Report
     {
         public string Title { get; set; }
+        public string DefaultCurrency { get; set; }
         public string ReportUrl { get; set; }
         public string ExcelReportName { get; set; }
         public string SubTitle { get; set; }
@@ -1860,6 +1869,7 @@ namespace AIMS.Models
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
         public int LocationId { get; set; } = 0;
+        public SectorLevels SectorLevel { get; set; } = SectorLevels.Parent;
         public List<int> SectorIds { get; set; } = new List<int>();
         public int ChartType { get; set; } = 0;
         public int MarkerId { get; set; } = 0;

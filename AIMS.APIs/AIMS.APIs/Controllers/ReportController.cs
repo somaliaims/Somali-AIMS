@@ -66,6 +66,7 @@ namespace AIMS.APIs.Controllers
                 }
             }
             var report = await reportService.GetProjectsBudgetReportSummary(clientUrl, defaultCurrency, exchangeRate);
+            report.ReportSettings.DefaultCurrency = defaultCurrency;
             var response = excelService.GenerateProjectBudgetReportSummary(report);
             if (response.Success)
             {
@@ -106,6 +107,7 @@ namespace AIMS.APIs.Controllers
                 }
             }
             var report = await reportService.GetBudgetReport(clientUrl, defaultCurrency, exchangeRate);
+            report.ReportSettings.DefaultCurrency = defaultCurrency;
             var response = excelService.GenerateBudgetReport(report);
             if (response.Success)
             {
@@ -182,6 +184,7 @@ namespace AIMS.APIs.Controllers
                 }
             }
             var report = await reportService.GetEnvelopeReport(model, clientUrl, defaultCurrency, exchangeRate);
+            report.ReportSettings.DefaultCurrency = defaultCurrency;
             var response = excelService.GenerateEnvelopeReport(report);
             if (response.Success)
             {
@@ -227,6 +230,7 @@ namespace AIMS.APIs.Controllers
                 }
             }
             var report = await reportService.GetProjectsBySectors(model, clientUrl, defaultCurrency, exchangeRate);
+            report.ReportSettings.DefaultCurrency = defaultCurrency;
             var response = excelService.GenerateSectorProjectsReport(report);
             if (response.Success)
             {
@@ -272,6 +276,7 @@ namespace AIMS.APIs.Controllers
                 }
             }
             var report = await reportService.GetProjectsWithoutSectors(model, clientUrl, defaultCurrency, exchangeRate);
+            report.ReportSettings.DefaultCurrency = defaultCurrency;
             var response = excelService.GenerateSectorProjectsReport(report);
             if (response.Success)
             {
@@ -317,6 +322,7 @@ namespace AIMS.APIs.Controllers
                 }
             }
             var report = await reportService.GetProjectsByLocations(model, clientUrl, defaultCurrency, exchangeRate);
+            report.ReportSettings.DefaultCurrency = defaultCurrency;
             var response = excelService.GenerateLocationProjectsReport(report);
             if (response.Success)
             {
@@ -362,6 +368,7 @@ namespace AIMS.APIs.Controllers
                 }
             }
             var report = await reportService.GetProjectsWithoutLocations(model, clientUrl, defaultCurrency, exchangeRate);
+            report.ReportSettings.DefaultCurrency = defaultCurrency;
             var response = excelService.GenerateLocationProjectsReport(report);
             if (response.Success)
             {
@@ -407,6 +414,7 @@ namespace AIMS.APIs.Controllers
                 }
             }
             var report = await reportService.GetProjectsByYear(model, clientUrl, defaultCurrency, exchangeRate);
+            report.ReportSettings.DefaultCurrency = defaultCurrency;
             var response = excelService.GenerateYearlyProjectsReport(report);
             if (response.Success)
             {

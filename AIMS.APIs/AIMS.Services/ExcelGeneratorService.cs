@@ -518,11 +518,11 @@ namespace AIMS.Services
                     implementerCol.CellStyle = headerStyle;
 
                     var actualDisbursementsCol = row.CreateCell(3);
-                    actualDisbursementsCol.SetCellValue("Actual disbursements");
+                    actualDisbursementsCol.SetCellValue("Actual disbursements (" + report.ReportSettings.DefaultCurrency + ")");
                     actualDisbursementsCol.CellStyle = headerStyle;
 
                     var plannedDisbursementsCol = row.CreateCell(4);
-                    plannedDisbursementsCol.SetCellValue("Planned disbursements");
+                    plannedDisbursementsCol.SetCellValue("Planned disbursements (" + report.ReportSettings.DefaultCurrency + ")");
                     plannedDisbursementsCol.CellStyle = headerStyle;
 
                     foreach (var sector in report.SectorProjectsList)
@@ -724,11 +724,11 @@ namespace AIMS.Services
                     implementerCol.CellStyle = headerStyle;
 
                     var actualDisbursementsCol = row.CreateCell(3);
-                    actualDisbursementsCol.SetCellValue("Actual disbursements");
+                    actualDisbursementsCol.SetCellValue("Actual disbursements (" + report.ReportSettings.DefaultCurrency + ")");
                     actualDisbursementsCol.CellStyle = headerStyle;
 
                     var plannedDisbursementsCol = row.CreateCell(4);
-                    plannedDisbursementsCol.SetCellValue("Planned disbursements");
+                    plannedDisbursementsCol.SetCellValue("Planned disbursements (" + report.ReportSettings.DefaultCurrency + ")");
                     plannedDisbursementsCol.CellStyle = headerStyle;
 
                     foreach (var location in report.LocationProjectsList)
@@ -927,11 +927,11 @@ namespace AIMS.Services
                     implementerCol.CellStyle = headerStyle;
 
                     var actualDisbursementsCol = row.CreateCell(3);
-                    actualDisbursementsCol.SetCellValue("Actual disbursements");
+                    actualDisbursementsCol.SetCellValue("Actual disbursements (" + report.ReportSettings.DefaultCurrency + ")");
                     actualDisbursementsCol.CellStyle = headerStyle;
 
                     var plannedDisbursementsCol = row.CreateCell(4);
-                    plannedDisbursementsCol.SetCellValue("Planned disbursements");
+                    plannedDisbursementsCol.SetCellValue("Planned disbursements (" + report.ReportSettings.DefaultCurrency + ")");
                     plannedDisbursementsCol.CellStyle = headerStyle;
 
                     foreach (var year in report.YearlyProjectsList)
@@ -1115,7 +1115,7 @@ namespace AIMS.Services
 
                     row = excelSheet.CreateRow(++rowCounter);
                     var titleCell = row.CreateCell(0, CellType.String);
-                    titleCell.SetCellValue("SomaliAIMS budget report - generated on " + DateTime.Now.ToLongDateString());
+                    titleCell.SetCellValue("SomaliAIMS budget report - generated on " + DateTime.Now.ToLongDateString() + " (Currency: " + report.ReportSettings.DefaultCurrency + ")");
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns));
                     titleCell.CellStyle = titleStyle;
@@ -1300,7 +1300,7 @@ namespace AIMS.Services
 
                     row = excelSheet.CreateRow(++rowCounter);
                     var titleCell = row.CreateCell(0, CellType.String);
-                    titleCell.SetCellValue("SomaliAIMS budget report - generated on " + DateTime.Now.ToLongDateString());
+                    titleCell.SetCellValue("SomaliAIMS budget report - generated on " + DateTime.Now.ToLongDateString() + " (Currency: " + report.ReportSettings.DefaultCurrency + ")");
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns));
                     titleCell.CellStyle = titleStyle;
@@ -1533,7 +1533,7 @@ namespace AIMS.Services
 
                     row = excelSheet.CreateRow(++rowCounter);
                     var titleCell = row.CreateCell(0, CellType.String);
-                    titleCell.SetCellValue("SomaliAIMS envelope report - generated on " + DateTime.Now.ToLongDateString());
+                    titleCell.SetCellValue("SomaliAIMS envelope report - generated on " + DateTime.Now.ToLongDateString() + " (Currency: " + report.ReportSettings.DefaultCurrency + ")");
                     excelSheet.AddMergedRegion(new CellRangeAddress(
                         rowCounter, rowCounter, 0, totalColumns));
                     titleCell.CellStyle = titleStyle;

@@ -4,14 +4,16 @@ using AIMS.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    partial class AIMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200421053116_Added_Envelope_Merge_Organizations")]
+    partial class Added_Envelope_Merge_Organizations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -473,8 +475,6 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<DateTime>("Dated");
 
-                    b.Property<int?>("EnvelopeOrganizationId");
-
                     b.Property<bool>("IsApproved");
 
                     b.Property<string>("NewName")
@@ -488,8 +488,6 @@ namespace AIMS.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EnvelopeOrganizationId");
-
                     b.HasIndex("RequestedById");
 
                     b.ToTable("OrganizationMergeRequests");
@@ -501,7 +499,11 @@ namespace AIMS.DAL.Migrations
 
                     b.Property<int>("OrganizationId");
 
+                    b.Property<int?>("EnvelopeOrganizationId");
+
                     b.HasKey("RequestId", "OrganizationId");
+
+                    b.HasIndex("EnvelopeOrganizationId");
 
                     b.HasIndex("OrganizationId");
 
@@ -989,10 +991,6 @@ namespace AIMS.DAL.Migrations
 
             modelBuilder.Entity("AIMS.Models.EFOrganizationMergeRequests", b =>
                 {
-                    b.HasOne("AIMS.Models.EFOrganization", "EnvelopeOrganization")
-                        .WithMany()
-                        .HasForeignKey("EnvelopeOrganizationId");
-
                     b.HasOne("AIMS.Models.EFUser", "RequestedBy")
                         .WithMany()
                         .HasForeignKey("RequestedById");
@@ -1000,6 +998,10 @@ namespace AIMS.DAL.Migrations
 
             modelBuilder.Entity("AIMS.Models.EFOrganizationsToMerge", b =>
                 {
+                    b.HasOne("AIMS.Models.EFOrganization", "EnvelopeOrganization")
+                        .WithMany()
+                        .HasForeignKey("EnvelopeOrganizationId");
+
                     b.HasOne("AIMS.Models.EFOrganization", "Organization")
                         .WithMany()
                         .HasForeignKey("OrganizationId")

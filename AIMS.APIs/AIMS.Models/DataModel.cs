@@ -379,6 +379,9 @@ namespace AIMS.Models
         [ForeignKey("RequestedBy")]
         public int? RequestedById { get; set; }
         public EFUser RequestedBy { get; set; }
+        [ForeignKey("EnvelopeOrganization")]
+        public int? EnvelopeOrganizationId { get; set; }
+        public EFOrganization EnvelopeOrganization { get; set; }
         public ICollection<EFOrganizationsToMerge> Organizations { get; set; }
     }
 
