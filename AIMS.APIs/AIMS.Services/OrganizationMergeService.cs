@@ -417,6 +417,25 @@ namespace AIMS.Services
                             await unitWork.SaveAsync();
                         }
 
+                        var updateProjectMembershipRequests = unitWork.ProjectMembershipRepository.GetManyQueryable(m => orgIds.Contains((int)m.OrganizationId));
+                        if (updateProjectMembershipRequests.Any())
+                        {
+                            foreach (var membership in updateProjectMembershipRequests)
+                            {
+                                membership.OrganizationId = newOrganization.Id;
+                                unitWork.ProjectMembershipRepository.Update(membership);
+                            }
+                            await unitWork.SaveAsync();
+                        }
+
+                        var updateEnvelope = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == request.EnvelopeOrganizationId);
+                        if (updateEnvelope != null)
+                        {
+                            updateEnvelope.FunderId = newOrganization.Id;
+                            unitWork.EnvelopeRepository.Update(updateEnvelope);
+                            await unitWork.SaveAsync();
+                        }
+
                         foreach (var organization in organizations)
                         {
                             unitWork.OrganizationRepository.Delete(organization);
@@ -694,6 +713,17 @@ namespace AIMS.Services
                             if (projectImplementers.Any())
                             {
                                 unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
+                                await unitWork.SaveAsync();
+                            }
+
+                            var updateProjectMembershipRequests = unitWork.ProjectMembershipRepository.GetManyQueryable(m => orgIds.Contains((int)m.OrganizationId));
+                            if (updateProjectMembershipRequests.Any())
+                            {
+                                foreach (var membership in updateProjectMembershipRequests)
+                                {
+                                    membership.OrganizationId = newOrganization.Id;
+                                    unitWork.ProjectMembershipRepository.Update(membership);
+                                }
                                 await unitWork.SaveAsync();
                             }
 

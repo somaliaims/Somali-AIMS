@@ -4502,288 +4502,333 @@ namespace AIMS.Services
                                            where fy.FinancialYear == model.EndingFinancialYear
                                            select fy).FirstOrDefault();
 
-                var strategy = context.Database.CreateExecutionStrategy();
-                await strategy.ExecuteAsync(async () =>
+                try
                 {
-                    using (var transaction = context.Database.BeginTransaction())
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        var newProject = unitWork.ProjectRepository.Insert(new EFProject()
+                        using (var transaction = context.Database.BeginTransaction())
                         {
-                            Title = model.Title,
-                            Description = model.Description,
-                            StartingFinancialYear = startingFinancialYear,
-                            EndingFinancialYear = endingFinancialYear,
-                            ProjectCurrency = model.ProjectCurrency,
-                            ProjectValue = model.ProjectValue,
-                            ExchangeRate = model.ExchangeRate,
-                            FundingType = fundingType,
-                            DateUpdated = DateTime.Now,
-                            CreatedBy = createdBy
-                        });
-                        await unitWork.SaveAsync();
-
-                        unitWork.ProjectMembershipRepository.Insert(new EFProjectMembershipRequests()
-                        {
-                            ProjectId = newProject.Id,
-                            UserId = userId,
-                            Dated = DateTime.Now,
-                            IsApproved = true
-                        });
-                        await unitWork.SaveAsync();
-
-                        if (model.FunderIds.Count > 0)
-                        {
-                            List<EFProjectFunders> newFunders = new List<EFProjectFunders>();
-                            EFOrganization funder = null;
-                            foreach (var funderId in model.FunderIds)
+                            var newProject = unitWork.ProjectRepository.Insert(new EFProject()
                             {
-                                if (organizations != null)
-                                {
-                                    funder = (from org in organizations
-                                              where org.Id == funderId
-                                              select org).FirstOrDefault();
-                                }
+                                Title = model.Title,
+                                Description = model.Description,
+                                StartingFinancialYear = startingFinancialYear,
+                                EndingFinancialYear = endingFinancialYear,
+                                ProjectCurrency = model.ProjectCurrency,
+                                ProjectValue = model.ProjectValue,
+                                ExchangeRate = model.ExchangeRate,
+                                FundingType = fundingType,
+                                DateUpdated = DateTime.Now,
+                                CreatedBy = createdBy
+                            });
+                            await unitWork.SaveAsync();
 
-                                var isFunderAdded = (from f in newFunders
-                                                     where f.FunderId == funderId
-                                                     select f).FirstOrDefault();
-
-                                if (funder != null && isFunderAdded == null)
+                            if (model.FunderIds.Count > 0)
+                            {
+                                List<EFProjectFunders> newFunders = new List<EFProjectFunders>();
+                                EFOrganization funder = null;
+                                foreach (var funderId in model.FunderIds)
                                 {
-                                    newFunders.Add(new EFProjectFunders()
+                                    if (organizations != null)
                                     {
-                                        Project = newProject,
-                                        Funder = funder
-                                    });
-                                }
-                            }
+                                        funder = (from org in organizations
+                                                  where org.Id == funderId
+                                                  select org).FirstOrDefault();
+                                    }
 
-                            if (newFunders.Count > 0)
-                            {
-                                unitWork.ProjectFundersRepository.InsertMultiple(newFunders);
-                                await unitWork.SaveAsync();
-                            }
-                        }
+                                    var isFunderAdded = (from f in newFunders
+                                                         where f.Funder.Id == funderId
+                                                         select f).FirstOrDefault();
 
-                        if (model.ImplementerIds.Count > 0)
-                        {
-                            List<EFProjectImplementers> newImplementers = new List<EFProjectImplementers>();
-                            EFOrganization implementer = null;
-                            foreach (var implementerId in model.ImplementerIds)
-                            {
-                                if (organizations != null)
-                                {
-                                    implementer = (from org in organizations
-                                                   where org.Id == implementerId
-                                                   select org).FirstOrDefault();
-                                }
-                                var isImplementerAdded = (from i in newImplementers
-                                                          where i.ImplementerId == implementerId
-                                                          select i).FirstOrDefault();
-
-                                if (implementer != null && isImplementerAdded == null)
-                                {
-                                    newImplementers.Add(new EFProjectImplementers()
+                                    if (funder != null && isFunderAdded == null)
                                     {
-                                        Project = newProject,
-                                        Implementer = implementer
-                                    });
+                                        newFunders.Add(new EFProjectFunders()
+                                        {
+                                            Project = newProject,
+                                            ProjectId = newProject.Id,
+                                            Funder = funder,
+                                            FunderId = funder.Id
+                                        });
+                                    }
+                                }
+
+                                if (newFunders.Count > 0)
+                                {
+                                    unitWork.ProjectFundersRepository.InsertMultiple(newFunders);
+                                    await unitWork.SaveAsync();
                                 }
                             }
 
-                            if (newImplementers.Count > 0)
+                            if (model.ImplementerIds.Count > 0)
                             {
-                                unitWork.ProjectImplementersRepository.InsertMultiple(newImplementers);
-                                await unitWork.SaveAsync();
-                            }
-                        }
-
-                        if (model.Sectors.Count > 0)
-                        {
-                            List<EFProjectSectors> newSectors = new List<EFProjectSectors>();
-                            EFSector sector = null;
-                            foreach (var sectorModel in model.Sectors)
-                            {
-                                if (sectors != null)
+                                List<EFProjectImplementers> newImplementers = new List<EFProjectImplementers>();
+                                EFOrganization implementer = null;
+                                foreach (var implementerId in model.ImplementerIds)
                                 {
-                                    sector = (from s in sectors
-                                              where s.Id == sectorModel.SectorId
-                                              select s).FirstOrDefault();
-                                }
-
-                                var isSectorAdded = (from s in newSectors
-                                                     where s.SectorId == sectorModel.SectorId
-                                                     select s).FirstOrDefault();
-
-                                if (sector != null && isSectorAdded == null)
-                                {
-                                    newSectors.Add(new EFProjectSectors()
+                                    if (organizations != null)
                                     {
-                                        Project = newProject,
-                                        SectorId = sector.Id,
-                                        Sector = sector,
-                                        FundsPercentage = sectorModel.FundsPercentage,
-                                    });
-                                }
-                                else if (isSectorAdded != null)
-                                {
-                                    isSectorAdded.FundsPercentage += sectorModel.FundsPercentage;
-                                }
-                            }
+                                        implementer = (from org in organizations
+                                                       where org.Id == implementerId
+                                                       select org).FirstOrDefault();
+                                    }
+                                    var isImplementerAdded = (from i in newImplementers
+                                                              where i.ImplementerId == implementerId
+                                                              select i).FirstOrDefault();
 
-                            if (newSectors.Count > 0)
-                            {
-                                unitWork.ProjectSectorsRepository.InsertMultiple(newSectors);
-                                await unitWork.SaveAsync();
-                            }
-                        }
-
-                        if (model.Locations.Count > 0)
-                        {
-                            List<EFProjectLocations> newLocations = new List<EFProjectLocations>();
-                            EFLocation location = null;
-                            foreach (var locationModel in model.Locations)
-                            {
-                                if (locations != null)
-                                {
-                                    location = (from l in locations
-                                                where l.Id == locationModel.LocationId
-                                                select l).FirstOrDefault();
-                                }
-
-                                var isLocationAdded = (from l in newLocations
-                                                       where l.LocationId == locationModel.LocationId && l.ProjectId == newProject.Id
-                                                       select l).FirstOrDefault();
-
-                                if (location != null && isLocationAdded == null)
-                                {
-                                    newLocations.Add(new EFProjectLocations()
+                                    if (implementer != null && isImplementerAdded == null)
                                     {
-                                        Project = newProject,
-                                        LocationId = location.Id,
-                                        Location = location,
-                                        FundsPercentage = locationModel.FundsPercentage,
-                                    });
+                                        newImplementers.Add(new EFProjectImplementers()
+                                        {
+                                            Project = newProject,
+                                            ProjectId = newProject.Id,
+                                            Implementer = implementer,
+                                            ImplementerId = implementer.Id,
+                                        });
+                                    }
                                 }
-                                else if (isLocationAdded != null)
+
+                                if (newImplementers.Count > 0)
                                 {
-                                    isLocationAdded.FundsPercentage += locationModel.FundsPercentage;
+                                    unitWork.ProjectImplementersRepository.InsertMultiple(newImplementers);
+                                    await unitWork.SaveAsync();
                                 }
                             }
 
-                            if (newLocations.Count > 0)
+                            if (model.Sectors.Count > 0)
                             {
-                                unitWork.ProjectLocationsRepository.InsertMultiple(newLocations);
-                                await unitWork.SaveAsync();
+                                List<EFProjectSectors> newSectors = new List<EFProjectSectors>();
+                                EFSector sector = null;
+                                foreach (var sectorModel in model.Sectors)
+                                {
+                                    if (sectors != null)
+                                    {
+                                        sector = (from s in sectors
+                                                  where s.Id == sectorModel.SectorId
+                                                  select s).FirstOrDefault();
+                                    }
+
+                                    var isSectorAdded = (from s in newSectors
+                                                         where s.SectorId == sectorModel.SectorId
+                                                         select s).FirstOrDefault();
+
+                                    if (sector != null && isSectorAdded == null)
+                                    {
+                                        newSectors.Add(new EFProjectSectors()
+                                        {
+                                            Project = newProject,
+                                            SectorId = sector.Id,
+                                            Sector = sector,
+                                            FundsPercentage = sectorModel.FundsPercentage,
+                                        });
+                                    }
+                                    else if (isSectorAdded != null)
+                                    {
+                                        isSectorAdded.FundsPercentage += sectorModel.FundsPercentage;
+                                    }
+                                }
+
+                                if (newSectors.Count > 0)
+                                {
+                                    unitWork.ProjectSectorsRepository.InsertMultiple(newSectors);
+                                    await unitWork.SaveAsync();
+                                }
                             }
-                        }
 
-                        if (model.Disbursements.Count > 0)
-                        {
-                            List<EFProjectDisbursements> newDisbursements = new List<EFProjectDisbursements>();
-                            EFFinancialYears financialYear = null;
-                            foreach (var disbursement in model.Disbursements)
+                            if (model.Locations.Count > 0)
                             {
-                                financialYear = (from y in financialYears
-                                                 where y.FinancialYear == disbursement.Year
-                                                 select y).FirstOrDefault();
+                                List<EFProjectLocations> newLocations = new List<EFProjectLocations>();
+                                EFLocation location = null;
+                                foreach (var locationModel in model.Locations)
+                                {
+                                    if (locations != null)
+                                    {
+                                        location = (from l in locations
+                                                    where l.Id == locationModel.LocationId
+                                                    select l).FirstOrDefault();
+                                    }
 
-                                var isDisbursementAdded = (from d in newDisbursements
-                                                           where d.Year.FinancialYear == disbursement.Year && disbursement.DisbursementType == d.DisbursementType
+                                    var isLocationAdded = (from l in newLocations
+                                                           where l.LocationId == locationModel.LocationId && l.ProjectId == newProject.Id
+                                                           select l).FirstOrDefault();
+
+                                    if (location != null && isLocationAdded == null)
+                                    {
+                                        newLocations.Add(new EFProjectLocations()
+                                        {
+                                            Project = newProject,
+                                            LocationId = location.Id,
+                                            Location = location,
+                                            FundsPercentage = locationModel.FundsPercentage,
+                                        });
+                                    }
+                                    else if (isLocationAdded != null)
+                                    {
+                                        isLocationAdded.FundsPercentage += locationModel.FundsPercentage;
+                                    }
+                                }
+
+                                if (newLocations.Count > 0)
+                                {
+                                    unitWork.ProjectLocationsRepository.InsertMultiple(newLocations);
+                                    await unitWork.SaveAsync();
+                                }
+                            }
+
+                            if (model.Disbursements.Count > 0)
+                            {
+                                List<EFProjectDisbursements> newDisbursements = new List<EFProjectDisbursements>();
+                                EFFinancialYears financialYear = null;
+                                foreach (var disbursement in model.Disbursements)
+                                {
+                                    financialYear = (from y in financialYears
+                                                     where y.FinancialYear == disbursement.Year
+                                                     select y).FirstOrDefault();
+
+                                    var isDisbursementAdded = (from d in newDisbursements
+                                                               where d.Year.FinancialYear == disbursement.Year && disbursement.DisbursementType == d.DisbursementType
+                                                               select d).FirstOrDefault();
+
+                                    if (financialYear != null && isDisbursementAdded == null)
+                                    {
+                                        newDisbursements.Add(new EFProjectDisbursements()
+                                        {
+                                            Project = newProject,
+                                            DisbursementType = disbursement.DisbursementType,
+                                            Year = financialYear,
+                                            Amount = disbursement.Amount,
+                                            Currency = newProject.ProjectCurrency,
+                                            ExchangeRate = newProject.ExchangeRate
+                                        });
+                                    }
+                                }
+
+                                if (newDisbursements.Count > 0)
+                                {
+                                    unitWork.ProjectDisbursementsRepository.InsertMultiple(newDisbursements);
+                                    await unitWork.SaveAsync();
+                                }
+                            }
+
+                            if (model.Documents.Count > 0)
+                            {
+                                List<EFProjectDocuments> newDocuments = new List<EFProjectDocuments>();
+                                foreach (var document in model.Documents)
+                                {
+                                    var isDocumentAdded = (from d in newDocuments
+                                                           where d.DocumentTitle.Equals(document.DocumentTitle, StringComparison.OrdinalIgnoreCase)
                                                            select d).FirstOrDefault();
 
-                                if (financialYear != null && isDisbursementAdded == null)
-                                {
-                                    newDisbursements.Add(new EFProjectDisbursements()
+                                    if (isDocumentAdded == null)
                                     {
-                                        Project = newProject,
-                                        DisbursementType = disbursement.DisbursementType,
-                                        Year = financialYear,
-                                        Amount = disbursement.Amount,
-                                        Currency = newProject.ProjectCurrency,
-                                        ExchangeRate = newProject.ExchangeRate
-                                    });
+                                        newDocuments.Add(new EFProjectDocuments()
+                                        {
+                                            Project = newProject,
+                                            DocumentTitle = document.DocumentTitle,
+                                            DocumentUrl = document.DocumentUrl
+                                        });
+                                    }
+                                }
+
+                                if (newDocuments.Count > 0)
+                                {
+                                    unitWork.ProjectDocumentRepository.InsertMultiple(newDocuments);
+                                    await unitWork.SaveAsync();
                                 }
                             }
 
-                            if (newDisbursements.Count > 0)
+                            if (model.Markers.Count > 0)
                             {
-                                unitWork.ProjectDisbursementsRepository.InsertMultiple(newDisbursements);
-                                await unitWork.SaveAsync();
-                            }
-                        }
-
-                        if (model.Documents.Count > 0)
-                        {
-                            List<EFProjectDocuments> newDocuments = new List<EFProjectDocuments>();
-                            foreach (var document in model.Documents)
-                            {
-                                var isDocumentAdded = (from d in newDocuments
-                                                       where d.DocumentTitle.Equals(document.DocumentTitle, StringComparison.OrdinalIgnoreCase)
-                                                       select d).FirstOrDefault();
-
-                                if (isDocumentAdded == null)
+                                List<EFProjectMarkers> newMarkersList = new List<EFProjectMarkers>();
+                                EFMarkers marker = null;
+                                foreach (var mark in model.Markers)
                                 {
-                                    newDocuments.Add(new EFProjectDocuments()
+                                    marker = (from m in markers
+                                              where m.Id == mark.MarkerId
+                                              select m).FirstOrDefault();
+
+                                    var isMarkerAdded = (from m in newMarkersList
+                                                         where m.MarkerId == mark.MarkerId
+                                                         select m).FirstOrDefault();
+                                    if (isMarkerAdded == null)
                                     {
-                                        Project = newProject,
-                                        DocumentTitle = document.DocumentTitle,
-                                        DocumentUrl = document.DocumentUrl
-                                    });
+                                        newMarkersList.Add(new EFProjectMarkers()
+                                        {
+                                            Project = newProject,
+                                            Marker = marker,
+                                            MarkerId = marker.Id,
+                                            Values = mark.Values
+                                        });
+                                    }
+                                }
+                                if (newMarkersList.Count > 0)
+                                {
+                                    unitWork.ProjectMarkersRepository.InsertMultiple(newMarkersList);
+                                    await unitWork.SaveAsync();
                                 }
                             }
 
-                            if (newDocuments.Count > 0)
+                            //Update project memberships
+                            var projectMemberships = unitWork.ProjectMembershipRepository.GetManyQueryable(m => model.ProjectIds.Contains(m.ProjectId));
+                            if (projectMemberships.Any())
                             {
-                                unitWork.ProjectDocumentRepository.InsertMultiple(newDocuments);
-                                await unitWork.SaveAsync();
-                            }
-                        }
-
-                        if (model.Markers.Count > 0)
-                        {
-                            List<EFProjectMarkers> newMarkersList = new List<EFProjectMarkers>();
-                            EFMarkers marker = null;
-                            foreach (var mark in model.Markers)
-                            {
-                                marker = (from m in markers
-                                          where m.Id == mark.MarkerId
-                                          select m).FirstOrDefault();
-
-                                var isMarkerAdded = (from m in newMarkersList
-                                                     where m.MarkerId == mark.MarkerId
-                                                     select m).FirstOrDefault();
-                                if (isMarkerAdded == null)
+                                List<EFProjectMembershipRequests> newMemberships = new List<EFProjectMembershipRequests>();
+                                foreach (var membership in projectMemberships)
                                 {
-                                    newMarkersList.Add(new EFProjectMarkers()
+                                    var membershipExists = (from m in newMemberships
+                                                            where 
+                                                            m.ProjectId == newProject.Id && m.UserId == membership.UserId
+                                                            select m).FirstOrDefault();
+                                    if (membershipExists == null)
                                     {
-                                        Project = newProject,
-                                        Marker = marker,
-                                        Values = mark.Values
-                                    });
+                                        newMemberships.Add(new EFProjectMembershipRequests()
+                                        {
+                                            ProjectId = newProject.Id,
+                                            UserId = membership.UserId,
+                                            OrganizationId = membership.OrganizationId
+                                        });
+                                    }    
                                 }
-                            }
-                            if (newMarkersList.Count > 0)
-                            {
-                                unitWork.ProjectMarkersRepository.InsertMultiple(newMarkersList);
+                                if (newMemberships.Count > 0)
+                                {
+                                    unitWork.ProjectMembershipRepository.InsertMultiple(newMemberships);
+                                    await unitWork.SaveAsync();
+                                }
+
+                                foreach(var membership in projectMemberships)
+                                {
+                                    unitWork.ProjectMembershipRepository.Delete(membership);
+                                }
                                 await unitWork.SaveAsync();
                             }
-                        }
 
-                        //Now delete the old projects
-                        if (model.ProjectIds.Count > 0)
-                        {
-                            var projectsToDelete = unitWork.ProjectRepository.GetManyQueryable(p => model.ProjectIds.Contains(p.Id));
-                            foreach (var project in projectsToDelete)
+                            //Now delete the old projects
+                            if (model.ProjectIds.Count > 0)
                             {
-                                unitWork.ProjectRepository.Delete(project);
+                                var projectsToDelete = unitWork.ProjectRepository.GetManyQueryable(p => model.ProjectIds.Contains(p.Id));
+                                foreach (var project in projectsToDelete)
+                                {
+                                    unitWork.ProjectRepository.Delete(project);
+                                }
+                                await unitWork.SaveAsync();
                             }
-                            await unitWork.SaveAsync();
+                            transaction.Commit();
+                            response.ReturnedId = newProject.Id;
                         }
-                        transaction.Commit();
-                        response.ReturnedId = newProject.Id;
+                    });
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    if (ex.InnerException != null)
+                    {
+                        response.Message = ex.InnerException.Message;
                     }
-                });
+                    else
+                    {
+                        response.Message = ex.Message;
+                    }
+                }
                 return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
