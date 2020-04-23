@@ -111,7 +111,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse ActivateUserAccount(UserApprovalModel model, string loginUrl);
+        Task<ActionResponse> ActivateUserAccountAsync(UserApprovalModel model, string loginUrl, string defaultUserEmail);
 
         /// <summary>
         /// Promotes user to management
@@ -578,7 +578,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ActivateUserAccount(UserApprovalModel model, string loginUrl)
+        public async Task<ActionResponse> ActivateUserAccountAsync(UserApprovalModel model, string loginUrl, string defaultUserEmail)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -623,50 +623,88 @@ namespace AIMS.Services
                     return response;
                 }
 
-                userAccount.IsApproved = true;
-                //userAccount.ApprovedBy = approvedByAccount;
-                userAccount.ApprovedOn = DateTime.Now;
-
-                unitWork.UserRepository.Update(userAccount);
-                unitWork.NotificationsRepository.Delete(notification);
-                unitWork.Save();
-
-                List<EmailAddress> usersEmailList = new List<EmailAddress>();
-                usersEmailList.Add(new EmailAddress()
+                try
                 {
-                    Email = userAccount.Email
-                });
-                if (usersEmailList.Count > 0)
-                {
-                    //Send emails
-                    ISMTPSettingsService smtpService = new SMTPSettingsService(context);
-                    var smtpSettings = smtpService.GetPrivate();
-                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
-                    if (smtpSettings != null)
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        smtpSettingsModel.Host = smtpSettings.Host;
-                        smtpSettingsModel.Port = smtpSettings.Port;
-                        smtpSettingsModel.Username = smtpSettings.Username;
-                        smtpSettingsModel.Password = smtpSettings.Password;
-                        smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
-                        smtpSettingsModel.SenderName = smtpSettings.SenderName;
-                    }
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            userAccount.IsApproved = true;
+                            userAccount.ApprovedOn = DateTime.Now;
 
-                    string message = "", subject = "", footerMessage = "";
-                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.UserApproved);
-                    if (emailMessage != null)
-                    {
-                        subject = emailMessage.Subject;
-                        message = emailMessage.Message;
-                        footerMessage = emailMessage.FooterMessage;
-                    }
-                    mHelper = new MessageHelper();
-                    message = mHelper.FormUserApprovedMessage(emailMessage.Message, loginUrl, emailMessage.FooterMessage);
-                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
-                    emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
+                            unitWork.UserRepository.Update(userAccount);
+                            unitWork.NotificationsRepository.Delete(notification);
+                            await unitWork.SaveAsync();
+
+                            var userCount = unitWork.UserRepository.GetProjection(u => u.OrganizationId == userAccount.OrganizationId && u.IsApproved == true, u => u.Id).Count();
+                            if (userCount == 0)
+                            {
+                                var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(f => f.FunderId == userAccount.OrganizationId, f => f.ProjectId);
+                                var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ImplementerId == userAccount.OrganizationId, i => i.ProjectId);
+                                var projectIds = funderProjectIds.Union(implementerProjectIds);
+                                if (projectIds.Any())
+                                {
+                                    var defaultUser = unitWork.UserRepository.GetOne(u => u.Email == defaultUserEmail);
+                                    if (defaultUser != null)
+                                    {
+                                        var projects = unitWork.ProjectRepository.GetManyQueryable(p => projectIds.Contains(p.Id) && p.CreatedById == defaultUser.Id);
+                                        if (projects.Any())
+                                        {
+                                            foreach (var project in projects)
+                                            {
+                                                project.CreatedBy = userAccount;
+                                                unitWork.ProjectRepository.Update(project);
+                                            }
+                                            await unitWork.SaveAsync();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                        usersEmailList.Add(new EmailAddress()
+                        {
+                            Email = userAccount.Email
+                        });
+                        if (usersEmailList.Count > 0)
+                        {
+                            //Send emails
+                            ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                            var smtpSettings = smtpService.GetPrivate();
+                            SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                            if (smtpSettings != null)
+                            {
+                                smtpSettingsModel.Host = smtpSettings.Host;
+                                smtpSettingsModel.Port = smtpSettings.Port;
+                                smtpSettingsModel.Username = smtpSettings.Username;
+                                smtpSettingsModel.Password = smtpSettings.Password;
+                                smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                                smtpSettingsModel.SenderName = smtpSettings.SenderName;
+                            }
+
+                            string message = "", subject = "", footerMessage = "";
+                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.UserApproved);
+                            if (emailMessage != null)
+                            {
+                                subject = emailMessage.Subject;
+                                message = emailMessage.Message;
+                                footerMessage = emailMessage.FooterMessage;
+                            }
+                            mHelper = new MessageHelper();
+                            message = mHelper.FormUserApprovedMessage(emailMessage.Message, loginUrl, emailMessage.FooterMessage);
+                            IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
+                            emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
+                        }
+                        response.ReturnedId = userAccount.Id;
+                    });
                 }
-                response.ReturnedId = userAccount.Id;
-                return response;
+                catch(Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.Success = false;
+                }
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
 

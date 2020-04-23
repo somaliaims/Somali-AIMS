@@ -24,12 +24,14 @@ namespace AIMS.APIs.Controllers
         IUserService userService;
         IConfiguration configuration;
         string clientUrl = "";
+        string defaultUserEmail = "";
 
         public UserController(IUserService service, IConfiguration config)
         {
             userService = service;
             configuration = config;
-            clientUrl = configuration["clientUrl"];
+            clientUrl = configuration["ClientUrl"];
+            defaultUserEmail = configuration["DefaultUserEmail"];
         }
 
         [HttpGet]
@@ -186,7 +188,7 @@ namespace AIMS.APIs.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("Activate")]
-        public IActionResult Activate([FromBody] UserApprovalModel model)
+        public async Task<IActionResult> Activate([FromBody] UserApprovalModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -194,7 +196,7 @@ namespace AIMS.APIs.Controllers
             }
             string loginUrl = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
                                 .GetValue<String>("LoginUrl");
-            var response = userService.ActivateUserAccount(model, loginUrl);
+            var response = await userService.ActivateUserAccountAsync(model, loginUrl, defaultUserEmail);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -264,7 +266,7 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Email value cannot be null");
             }
             var response = userService.CheckEmailAvailability(email);
-            return Ok(response.Success);
+            return Ok(response);
         }
 
         [HttpPost]
@@ -326,9 +328,10 @@ namespace AIMS.APIs.Controllers
             return Ok(response.Success);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("ActivateAccount")]
-        public IActionResult ActivateAccount([FromBody] UserApprovalModel model)
+        public async Task<IActionResult> ActivateAccount([FromBody] UserApprovalModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -345,7 +348,7 @@ namespace AIMS.APIs.Controllers
             model.ApprovedById = approvedById;
             string loginUrl = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
                                 .GetValue<String>("LoginUrl");
-            var response = userService.ActivateUserAccount(model, loginUrl);
+            var response = await userService.ActivateUserAccountAsync(model, loginUrl, defaultUserEmail);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
