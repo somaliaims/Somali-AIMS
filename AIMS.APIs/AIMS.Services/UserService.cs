@@ -296,8 +296,8 @@ namespace AIMS.Services
                 IMessageHelper mHelper;
                 var users = unitwork.UserRepository.GetManyQueryable(u => u.Id == userId || u.UserType == UserTypes.Manager);
                 var userToDemote = (from u in users
-                                     where u.Id == userId
-                                     select u).FirstOrDefault();
+                                    where u.Id == userId
+                                    select u).FirstOrDefault();
 
                 var managerUser = (from u in users
                                    where u.Id == loggedInUserId
@@ -637,30 +637,27 @@ namespace AIMS.Services
                             unitWork.NotificationsRepository.Delete(notification);
                             await unitWork.SaveAsync();
 
-                            var userCount = unitWork.UserRepository.GetProjection(u => u.OrganizationId == userAccount.OrganizationId && u.IsApproved == true, u => u.Id).Count();
-                            if (userCount == 0)
+                            var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(f => f.FunderId == userAccount.OrganizationId, f => f.ProjectId);
+                            var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ImplementerId == userAccount.OrganizationId, i => i.ProjectId);
+                            var projectIds = funderProjectIds.Union(implementerProjectIds);
+                            if (projectIds.Any())
                             {
-                                var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(f => f.FunderId == userAccount.OrganizationId, f => f.ProjectId);
-                                var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(i => i.ImplementerId == userAccount.OrganizationId, i => i.ProjectId);
-                                var projectIds = funderProjectIds.Union(implementerProjectIds);
-                                if (projectIds.Any())
+                                var defaultUser = unitWork.UserRepository.GetOne(u => u.Email == defaultUserEmail);
+                                if (defaultUser != null)
                                 {
-                                    var defaultUser = unitWork.UserRepository.GetOne(u => u.Email == defaultUserEmail);
-                                    if (defaultUser != null)
+                                    var projects = unitWork.ProjectRepository.GetManyQueryable(p => projectIds.Contains(p.Id) && p.CreatedById == defaultUser.Id);
+                                    if (projects.Any())
                                     {
-                                        var projects = unitWork.ProjectRepository.GetManyQueryable(p => projectIds.Contains(p.Id) && p.CreatedById == defaultUser.Id);
-                                        if (projects.Any())
+                                        foreach (var project in projects)
                                         {
-                                            foreach (var project in projects)
-                                            {
-                                                project.CreatedBy = userAccount;
-                                                unitWork.ProjectRepository.Update(project);
-                                            }
-                                            await unitWork.SaveAsync();
+                                            project.CreatedBy = userAccount;
+                                            unitWork.ProjectRepository.Update(project);
                                         }
+                                        await unitWork.SaveAsync();
                                     }
                                 }
                             }
+                            transaction.Commit();
                         }
                         List<EmailAddress> usersEmailList = new List<EmailAddress>();
                         usersEmailList.Add(new EmailAddress()
@@ -699,7 +696,7 @@ namespace AIMS.Services
                         response.ReturnedId = userAccount.Id;
                     });
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     response.Message = ex.Message;
                     response.Success = false;
@@ -823,7 +820,7 @@ namespace AIMS.Services
                                         await unitWork.SaveAsync();
 
                                         var resetRequests = unitWork.PasswordRecoveryRepository.GetManyQueryable(r => r.Email == user.Email);
-                                        foreach(var request in resetRequests)
+                                        foreach (var request in resetRequests)
                                         {
                                             unitWork.PasswordRecoveryRepository.Delete(request);
                                         }
@@ -888,7 +885,7 @@ namespace AIMS.Services
                         }
                     }
                 });
-                
+
                 return response;
             }
         }
