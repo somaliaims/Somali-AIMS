@@ -644,6 +644,8 @@ namespace AIMS.Models
     public class EFHomePageSettings
     {
         public int Id { get; set; }
+        public string AIMSTitleBarText { get; set; }
+        public string FaviconPath { get; set; }
         public string AIMSTitle { get; set; }
         public string IntroductionHeading { get; set; }
         public string IntroductionText { get; set; }

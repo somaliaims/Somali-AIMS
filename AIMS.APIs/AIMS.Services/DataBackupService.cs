@@ -92,7 +92,6 @@ namespace AIMS.Services
                     {
                         string dateStr = String.Format("{0}_{1:yyyy-MM-dd-hh-mm-ss-tt}", dbName, DateTime.Now);
                         string backupFileNameWithoutExt = Path.Combine(backupDir, dateStr);
-                        //string backupFileNameWithoutExt = String.Format("{0}\\{1}_{2:yyyy-MM-dd-hh-mm-ss-tt}", backupDir, dbName, DateTime.Now);
                         string backupFileNameWithExt = String.Format("{0}.bak", backupFileNameWithoutExt);
                         string zipFileName = String.Format("{0}.zip", backupFileNameWithoutExt);
 
