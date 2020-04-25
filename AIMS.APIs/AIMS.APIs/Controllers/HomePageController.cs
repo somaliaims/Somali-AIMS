@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AIMS.APIs.Helpers;
 using AIMS.Models;
 using AIMS.Services;
 using Microsoft.AspNetCore.Http;
@@ -39,6 +40,36 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(response.Message);
             }
             return Ok(true);
+        }
+
+        [HttpPost("SetFavicon"), DisableRequestSizeLimit]
+        public async Task<IActionResult> SetFavicon()
+        {
+            ActionResponse response = new ActionResponse();
+            try
+            {
+                IImageHelper imageHelper = new ImageHelper();
+                var file = Request.Form.Files[0];
+                var fileValidity = imageHelper.IsImageFormatValid(file);
+                if (!fileValidity.IsImageValid)
+                {
+                    return BadRequest("Image file provided with invalid format. Valid image formats are (bmp,jpeg,gif,tiff,png,)");
+                }
+                if (!fileValidity.IsImageSizeValid)
+                {
+                    return BadRequest("Image file cannot be greater than 2 MB in size.");
+                }
+                response = await service.SetFaviconAsync(file);
+                if (!response.Success)
+                {
+                    return BadRequest(response.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok(response);
         }
     }
 }

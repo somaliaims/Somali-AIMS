@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AIMS.Services.Helpers
+namespace AIMS.APIs.Helpers
 {
     public interface IImageHelper
     {
@@ -26,7 +26,6 @@ namespace AIMS.Services.Helpers
 
         public ImageHelper()
         {
-
         }
 
         public enum ImageFormat
@@ -88,8 +87,6 @@ namespace AIMS.Services.Helpers
             validityModel.IsImageSizeValid = (fileSizeInBytes <= MAX_IMAGE_SIZE);
             return validityModel;
         }
-
-       
 
     }
 }

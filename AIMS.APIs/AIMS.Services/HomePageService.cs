@@ -33,7 +33,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        ActionResponse SetFavicon(string filePath);
+        Task<ActionResponse> SetFaviconAsync(IFormFile file);
 
         /// <summary>
         /// Writes the image to disk
@@ -117,13 +117,14 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse SetFavicon(string filePath)
+        public async Task<ActionResponse> SetFaviconAsync(IFormFile file)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 try
                 {
+                    var fileName = await this.WriteFile(file);
                     var settings = unitWork.HomePageRepository.GetOne(h => h.Id != 0);
                     if (settings == null)
                     {
@@ -133,15 +134,16 @@ namespace AIMS.Services
                             AIMSTitleBarText = "AIMS",
                             IntroductionHeading = "Introduction",
                             IntroductionText = "Welcome to AIMS",
-                            FaviconPath = filePath
+                            FaviconPath = fileName
                         });
                     }
                     else
                     {
-                        settings.FaviconPath = filePath;
+                        settings.FaviconPath = fileName;
                         unitWork.HomePageRepository.Update(settings);
                     }
                     unitWork.Save();
+                    response.Message = fileName;
                 }
                 catch (Exception ex)
                 {
