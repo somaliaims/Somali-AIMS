@@ -88,6 +88,8 @@ namespace AIMS.APIs.Controllers
                 usersEmails = service.GetProjectUsersEmails(projectId).ToList();
             }
 
+            string messageTail = "<p><b>Sender name: " + model.SenderName + "</b><br/><b>Sender email: " + model.SenderEmail + "</b></p>";
+            model.Message = "<p>" + model.Message + "</p>" + messageTail;
             ActionResponse response = null;
             if (usersEmails.Count > 0)
             {
