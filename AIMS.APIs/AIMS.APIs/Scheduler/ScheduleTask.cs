@@ -123,7 +123,7 @@ namespace AIMS.APIs.Scheduler
                     }
 
                     //Download latest iati
-                    using (var client = new WebClient())
+                    /*using (var client = new WebClient())
                     {
                         xml = client.DownloadString(url);
                     }
@@ -181,7 +181,7 @@ namespace AIMS.APIs.Scheduler
                     {
                         ICurrencyService currencyService = new CurrencyService(dbContext, imapper);
                         currencyService.AddMultiple(currencyList);
-                    }
+                    }*/
 
                     var fySettings = fySettingsService.Get();
                     int fyMonth = 0, fyDay = 0;

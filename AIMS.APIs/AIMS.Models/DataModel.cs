@@ -125,6 +125,7 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string TypeName { get; set; }
+        public bool IsUnAffiliated { get; set; } = false;
     }
 
     public class EFSectorTypes
@@ -146,6 +147,7 @@ namespace AIMS.Models
         public bool IsApproved { get; set; } = true;
         [ForeignKey("OrganizationType")]
         public int? OrganizationTypeId { get; set; }
+        public bool IsUnAffiliated { get; set; } = false;
         public virtual EFOrganizationTypes OrganizationType { get; set; }
     }
 
@@ -175,6 +177,7 @@ namespace AIMS.Models
         public int OrganizationId { get; set; }
         public EFOrganization Organization { get; set; }
         public bool IsApproved { get; set; }
+        public bool IsUnAffiliated { get; set; } = false;
         public DateTime? ApprovedOn { get; set; }
         public DateTime RegistrationDate { get; set; }
         public DateTime? LastLogin { get; set; }

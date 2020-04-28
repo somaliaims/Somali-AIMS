@@ -356,6 +356,34 @@ namespace AIMS.APIs.Controllers
             return Ok(response.Success);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        [Route("ActivateWithInactiveOrganization")]
+        public async Task<IActionResult> ActivateWithInactiveOrganization([FromBody] UserApprovalModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdVal))
+            {
+                return BadRequest("Invalid attempt");
+            }
+
+            int approvedById = Convert.ToInt32(userIdVal);
+            model.ApprovedById = approvedById;
+            string loginUrl = HttpContext.RequestServices.GetRequiredService<IConfiguration>()
+                                .GetValue<String>("LoginUrl");
+            var response = await userService.ActivateWithInactiveOrganization(model, loginUrl, defaultUserEmail);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(response.Success);
+        }
+
         [HttpPost]
         [Route("DeleteAccount")]
         public IActionResult Delete(DeleteAccountModel model)

@@ -114,6 +114,12 @@ namespace AIMS.Services
         Task<ActionResponse> ActivateUserAccountAsync(UserApprovalModel model, string loginUrl, string defaultUserEmail);
 
         /// <summary>
+        /// Approves a user with an organization not active
+        /// </summary>
+        /// <returns></returns>
+        Task<ActionResponse> ActivateWithInactiveOrganization(UserApprovalModel model, string loginUrl, string defaultUserEmail);
+
+        /// <summary>
         /// Promotes user to management
         /// </summary>
         /// <param name="userId"></param>
@@ -657,6 +663,150 @@ namespace AIMS.Services
                                     }
                                 }
                             }
+                            transaction.Commit();
+                        }
+                        List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                        usersEmailList.Add(new EmailAddress()
+                        {
+                            Email = userAccount.Email
+                        });
+                        if (usersEmailList.Count > 0)
+                        {
+                            //Send emails
+                            ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                            var smtpSettings = smtpService.GetPrivate();
+                            SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                            if (smtpSettings != null)
+                            {
+                                smtpSettingsModel.Host = smtpSettings.Host;
+                                smtpSettingsModel.Port = smtpSettings.Port;
+                                smtpSettingsModel.Username = smtpSettings.Username;
+                                smtpSettingsModel.Password = smtpSettings.Password;
+                                smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                                smtpSettingsModel.SenderName = smtpSettings.SenderName;
+                            }
+
+                            string message = "", subject = "", footerMessage = "";
+                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.UserApproved);
+                            if (emailMessage != null)
+                            {
+                                subject = emailMessage.Subject;
+                                message = emailMessage.Message;
+                                footerMessage = emailMessage.FooterMessage;
+                            }
+                            mHelper = new MessageHelper();
+                            message = mHelper.FormUserApprovedMessage(emailMessage.Message, loginUrl, emailMessage.FooterMessage);
+                            IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
+                            emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
+                        }
+                        response.ReturnedId = userAccount.Id;
+                    });
+                }
+                catch (Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.Success = false;
+                }
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+            }
+        }
+
+        public async Task<ActionResponse> ActivateWithInactiveOrganization(UserApprovalModel model, string loginUrl, string defaultUserEmail)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                IMessageHelper mHelper;
+                EFUser userAccount = null;
+                EFUser approvedByAccount = null;
+                string UNAFFILIATED = "Un-Affiliated";
+
+                var userAccounts = unitWork.UserRepository.GetMany(u => u.Id.Equals(model.ApprovedById) || u.Id.Equals(model.UserId));
+                foreach (var user in userAccounts)
+                {
+                    if (user.Id.Equals(model.ApprovedById))
+                    {
+                        approvedByAccount = user;
+                    }
+                    else if (user.Id.Equals(model.UserId))
+                    {
+                        userAccount = user;
+                    }
+                }
+                if (approvedByAccount == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Approved By");
+                    response.Success = false;
+                    return response;
+                }
+                if (userAccount == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("User");
+                    response.Success = false;
+                    return response;
+                }
+
+                var notification = unitWork.NotificationsRepository.GetByID(model.NotificationId);
+                if (notification == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("Notification");
+                    return response;
+                }
+
+                try
+                {
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
+                    {
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            var unAffiliatedOrgType = unitWork.OrganizationTypesRepository.GetOne(t => t.IsUnAffiliated == true);
+                            if (unAffiliatedOrgType == null)
+                            {
+                                unAffiliatedOrgType = unitWork.OrganizationTypesRepository.Insert(new EFOrganizationTypes()
+                                {
+                                    TypeName = UNAFFILIATED,
+                                    IsUnAffiliated = true
+                                });
+                                await unitWork.SaveAsync();
+                            }
+
+                            var unAffiliatedOrganization = unitWork.OrganizationRepository.GetOne(o => o.IsUnAffiliated == true);
+                            if (unAffiliatedOrganization == null)
+                            {
+                                unAffiliatedOrganization = unitWork.OrganizationRepository.Insert(new EFOrganization()
+                                {
+                                    OrganizationType = unAffiliatedOrgType,
+                                    OrganizationName = UNAFFILIATED,
+                                    IsApproved = true,
+                                    IsUnAffiliated = true
+                                });
+                            }
+
+                            int userOrganizationId = userAccount.OrganizationId;
+                            var orgUsers = unitWork.UserRepository.GetProjection(u => u.OrganizationId == userAccount.OrganizationId, u => u.Id);
+                            userAccount.IsApproved = true;
+                            userAccount.ApprovedOn = DateTime.Now;
+                            userAccount.Organization = unAffiliatedOrganization;
+                            unitWork.UserRepository.Update(userAccount);
+                            await unitWork.SaveAsync();
+
+                            if (orgUsers.Count() <= 1)
+                            {
+                                var orgToDelete = unitWork.OrganizationRepository.GetOne(o => o.Id == userOrganizationId);
+                                if (orgToDelete != null)
+                                {
+                                    unitWork.OrganizationRepository.Delete(orgToDelete);
+                                    await unitWork.SaveAsync();
+                                }
+                            }
+
+                            unitWork.NotificationsRepository.Delete(notification);
+                            await unitWork.SaveAsync();
                             transaction.Commit();
                         }
                         List<EmailAddress> usersEmailList = new List<EmailAddress>();

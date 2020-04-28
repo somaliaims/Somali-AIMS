@@ -5,11 +5,13 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AIMS.APIs.Controllers
 {
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     [ApiController]
     public class ContactController : ControllerBase
@@ -22,6 +24,7 @@ namespace AIMS.APIs.Controllers
             service = contactService;
             emailService = eService;
         }
+
 
         [HttpPost("SendSuggestionEmailForProject")]
         public IActionResult SendSuggestionEmailForProject([FromBody] ProjectHelpEmail model)
