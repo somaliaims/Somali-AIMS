@@ -1898,13 +1898,19 @@ namespace AIMS.Services
         {
             ActionResponse response = new ActionResponse();
             var unitWork = new UnitOfWork(context);
-
+            IMessageHelper mHelper;
             try
             {
                 if (!isAutomated && userId <= 0)
                 {
-                    response.Success = false;
-                    response.Message = "";
+                    var user = unitWork.UserRepository.GetOne(u => u.Id == userId);
+                    if (user == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("User");
+                        response.Success = false;
+                        return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+                    }
 
                 }
                 var strategy = context.Database.CreateExecutionStrategy();

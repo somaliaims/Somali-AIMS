@@ -24,7 +24,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ActionResponse> AddAsync(FinancialYearSettingModel model);
+        Task<ActionResponse> AddAsync(FinancialYearSettingModel model, int userId);
     }
 
     public class FinancialYearSettingsService : IFinancialYearSettingsService
@@ -49,7 +49,7 @@ namespace AIMS.Services
             return view;
         }
 
-        public async Task<ActionResponse> AddAsync(FinancialYearSettingModel model)
+        public async Task<ActionResponse> AddAsync(FinancialYearSettingModel model, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -65,6 +65,16 @@ namespace AIMS.Services
                     {
                         mHelper = new MessageHelper();
                         response.Message = mHelper.InvalidMonthDayFound();
+                        response.Success = false;
+                        return response;
+                    }
+
+                    var user = unitWork.UserRepository.GetOne(u => u.Id == userId);
+                    if (user == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("User");
+                        response.Success = false;
                         return response;
                     }
 
@@ -377,7 +387,9 @@ namespace AIMS.Services
                                     transition = unitWork.FinancialTransitionRepository.Insert(new EFFinancialYearTransition()
                                     {
                                         Year = currentActiveYear,
-                                        AppliedOn = DateTime.Now
+                                        AppliedOn = DateTime.Now,
+                                        AppliedBy = user,
+                                        IsAutomated = false
                                     });
                                     await unitWork.SaveAsync();
                                 }

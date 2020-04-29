@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AIMS.Models;
 using AIMS.Services;
@@ -34,7 +35,19 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var response = await service.AddAsync(model);
+
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+
+            var response = await service.AddAsync(model, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
