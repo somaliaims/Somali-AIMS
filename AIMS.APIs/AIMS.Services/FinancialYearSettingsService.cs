@@ -216,7 +216,7 @@ namespace AIMS.Services
                             }
 
                             //Adjust disbursements
-                            int fyMonth = 0, fyDay = 0;
+                            int fyMonth = 1, fyDay = 1;
                             if (fySettings != null)
                             {
                                 fyMonth = fySettings.Month;
@@ -255,7 +255,7 @@ namespace AIMS.Services
                                 decimal deletedActualDisbursements = 0, deletedPlannedDisbursements = 0;
                                 foreach (var disbursement in disbursementsToDelete)
                                 {
-                                    if (disbursement.DisbursementType == DisbursementTypes.Actual)
+                                    if (disbursement.DisbursementType == DisbursementTypes.Actual && disbursement.Year.FinancialYear > currentActiveYear)
                                     {
                                         deletedActualDisbursements += disbursement.Amount;
                                     }
@@ -336,10 +336,10 @@ namespace AIMS.Services
                                     }
                                 }
 
-                                if (project.EndingFinancialYear.FinancialYear > currentActiveYear)
+                                if (project.EndingFinancialYear.FinancialYear >= currentActiveYear)
                                 {
                                     var projectDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(p => p.ProjectId == project.Id, new string[] { "Year" });
-                                    for(int yr = (currentActiveYear + 1); yr <= project.EndingFinancialYear.FinancialYear; yr++)
+                                    for(int yr = (currentActiveYear); yr <= project.EndingFinancialYear.FinancialYear; yr++)
                                     {
                                         var yearDisbursement = (from d in projectDisbursements
                                                                 where d.Year.FinancialYear == yr &&
@@ -369,6 +369,17 @@ namespace AIMS.Services
                                             unitWork.Save();
                                         }
                                     }
+                                }
+
+                                var transition = unitWork.FinancialTransitionRepository.GetOne(t => t.Year == currentActiveYear);
+                                if (transition == null)
+                                {
+                                    transition = unitWork.FinancialTransitionRepository.Insert(new EFFinancialYearTransition()
+                                    {
+                                        Year = currentActiveYear,
+                                        AppliedOn = DateTime.Now
+                                    });
+                                    await unitWork.SaveAsync();
                                 }
                             }
                             transaction.Commit();

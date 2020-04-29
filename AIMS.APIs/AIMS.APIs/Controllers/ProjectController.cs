@@ -497,11 +497,22 @@ namespace AIMS.APIs.Controllers
             return Ok(true);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet("AdjustDisbursementsForProjects")]
         public async Task<IActionResult> AdjustDisbursementsForProjects()
         {
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
             var result = await backupService.BackupData(connectionString);
-            var response = await projectService.AdjustDisbursementsForProjectsAsync();
+            var response = await projectService.AdjustDisbursementsForProjectsAsync(userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

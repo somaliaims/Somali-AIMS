@@ -658,6 +658,10 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public int Year { get; set; }
+        public bool IsAutomated { get; set; } = false;
+        [ForeignKey("AppliedBy")]
+        public int? AppliedById { get; set; }
+        public EFUser AppliedBy { get; set; }
         public DateTime AppliedOn { get; set; }
     }
 }

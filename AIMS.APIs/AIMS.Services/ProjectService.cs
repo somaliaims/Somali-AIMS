@@ -379,7 +379,7 @@ namespace AIMS.Services
         /// Adjust planned disbursements for active projects
         /// </summary>
         /// <returns></returns>
-        Task<ActionResponse> AdjustDisbursementsForProjectsAsync(int financialYear = 0);
+        Task<ActionResponse> AdjustDisbursementsForProjectsAsync(int userId = 0, int financialYear = 0, bool isAutomated = false);
 
         /// <summary>
         /// 
@@ -1894,19 +1894,25 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> AdjustDisbursementsForProjectsAsync(int financialYear = 0)
+        public async Task<ActionResponse> AdjustDisbursementsForProjectsAsync(int userId = 0, int financialYear = 0, bool isAutomated = false)
         {
             ActionResponse response = new ActionResponse();
             var unitWork = new UnitOfWork(context);
 
             try
             {
+                if (!isAutomated && userId <= 0)
+                {
+                    response.Success = false;
+                    response.Message = "";
+
+                }
                 var strategy = context.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
                 {
                     using (var transaction = context.Database.BeginTransaction())
                     {
-                        int fyMonth = 0, fyDay = 0;
+                        int fyMonth = 1, fyDay = 1;
                         int startingYear = 0, endingYear = 0, startMonth = 1, startDay = 1, currentActiveYear = financialYear;
                         if (financialYear <= 0)
                         {
@@ -1950,7 +1956,7 @@ namespace AIMS.Services
                             decimal deletedActualDisbursements = 0, deletedPlannedDisbursements = 0;
                             foreach (var disbursement in disbursementsToDelete)
                             {
-                                if (disbursement.DisbursementType == DisbursementTypes.Actual)
+                                if (disbursement.DisbursementType == DisbursementTypes.Actual && disbursement.Year.FinancialYear > currentActiveYear)
                                 {
                                     deletedActualDisbursements += disbursement.Amount;
                                 }
@@ -2034,7 +2040,9 @@ namespace AIMS.Services
                             transition = unitWork.FinancialTransitionRepository.Insert(new EFFinancialYearTransition()
                             {
                                 Year = currentActiveYear,
-                                AppliedOn = DateTime.Now
+                                AppliedOn = DateTime.Now,
+                                IsAutomated = isAutomated,
+                                AppliedById = userId
                             });
                             await unitWork.SaveAsync();
                         }
