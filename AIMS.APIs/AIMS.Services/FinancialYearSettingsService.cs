@@ -112,7 +112,7 @@ namespace AIMS.Services
                             unitWork.Save();
 
                             //Update project financial years
-                            int month = 0, day = 1;
+                            int month = 1, day = 1;
                             if (fySettings != null)
                             {
                                 month = fySettings.Month;
@@ -226,42 +226,36 @@ namespace AIMS.Services
                             }
 
                             //Adjust disbursements
-                            int fyMonth = 1, fyDay = 1;
-                            if (fySettings != null)
+                            int fyMonth = model.Month, fyDay = model.Day;
+                            int startingYear = 0, endingYear = 0, startMonth = 0, startDay = 0, currentActiveYear = DateTime.Now.Year;
+                            if (!isSimilarToCalendarYear)
                             {
-                                fyMonth = fySettings.Month;
-                                fyDay = fySettings.Day;
+                                if (startMonth < fyMonth)
+                                {
+                                    --currentActiveYear;
+                                }
+                                else if (startMonth == fyMonth && startDay < fyDay)
+                                {
+                                    --currentActiveYear;
+                                }
                             }
 
-                            int startingYear = 0, endingYear = 0, startMonth = 0, startDay = 0, currentActiveYear = DateTime.Now.Year;
                             var adjustProjects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndDate.Year >= currentActiveYear, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Disbursements", "Disbursements.Year" });
                             foreach (var project in adjustProjects)
                             {
                                 startMonth = project.StartDate.Month;
                                 startDay = project.StartDate.Day;
-                                currentActiveYear = DateTime.Now.Year;
                                 startingYear = project.StartingFinancialYear.FinancialYear;
                                 endingYear = project.EndingFinancialYear.FinancialYear;
-
-                                if (!isSimilarToCalendarYear)
-                                {
-                                    if (startMonth < fyMonth)
-                                    {
-                                        --currentActiveYear;
-                                    }
-                                    else if (startMonth == fyMonth && startDay < fyDay)
-                                    {
-                                        --currentActiveYear;
-                                    }
-                                }
                                 
                                 var disbursementsToDelete = (from disbursement in project.Disbursements
                                                              where (disbursement.Year.FinancialYear < startingYear) ||
                                                              (disbursement.Year.FinancialYear > endingYear) ||
+                                                             (disbursement.Year.FinancialYear < currentActiveYear &&
+                                                             disbursement.DisbursementType == DisbursementTypes.Planned) ||
                                                              (disbursement.Year.FinancialYear > currentActiveYear &&
                                                                 disbursement.DisbursementType == DisbursementTypes.Actual)
                                                              select disbursement);
-                                bool isDeleted = false; 
                                 decimal deletedActualDisbursements = 0, deletedPlannedDisbursements = 0;
                                 foreach (var disbursement in disbursementsToDelete)
                                 {
@@ -269,14 +263,13 @@ namespace AIMS.Services
                                     {
                                         deletedActualDisbursements += disbursement.Amount;
                                     }
-                                    else if (disbursement.DisbursementType == DisbursementTypes.Planned)
+                                    else if (disbursement.DisbursementType == DisbursementTypes.Planned && disbursement.Year.FinancialYear < currentActiveYear)
                                     {
                                         deletedPlannedDisbursements += disbursement.Amount;
                                     }
                                     unitWork.ProjectDisbursementsRepository.Delete(disbursement);
-                                    isDeleted = true;
                                 }
-                                if (isDeleted)
+                                if (disbursementsToDelete.Any())
                                 {
                                     unitWork.Save();
                                 }
@@ -284,9 +277,7 @@ namespace AIMS.Services
                                 if (project.StartingFinancialYear.FinancialYear <= currentActiveYear)
                                 {
                                     var disbursementsForCurrentYear = (from disbursement in project.Disbursements
-                                                                       where (disbursement.Year.FinancialYear == currentActiveYear) &&
-                                                                       (disbursement.DisbursementType == DisbursementTypes.Planned ||
-                                                                       disbursement.DisbursementType == DisbursementTypes.Actual)
+                                                                       where (disbursement.Year.FinancialYear == currentActiveYear)
                                                                        select disbursement);
                                     var actualDisbursementCurrentYear = (from disbursement in disbursementsForCurrentYear
                                                                          where disbursement.DisbursementType == DisbursementTypes.Actual

@@ -379,7 +379,7 @@ namespace AIMS.Services
         /// Adjust planned disbursements for active projects
         /// </summary>
         /// <returns></returns>
-        Task<ActionResponse> AdjustDisbursementsForProjectsAsync(int userId = 0, int financialYear = 0, bool isAutomated = false);
+        Task<ActionResponse> AdjustDisbursementsForProjectsAsync(int? userId = null, int financialYear = 0, bool isAutomated = false);
 
         /// <summary>
         /// 
@@ -1894,14 +1894,14 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> AdjustDisbursementsForProjectsAsync(int userId = 0, int financialYear = 0, bool isAutomated = false)
+        public async Task<ActionResponse> AdjustDisbursementsForProjectsAsync(int? userId = null, int financialYear = 0, bool isAutomated = false)
         {
             ActionResponse response = new ActionResponse();
             var unitWork = new UnitOfWork(context);
             IMessageHelper mHelper;
             try
             {
-                if (!isAutomated && userId <= 0)
+                if (!isAutomated && userId == null)
                 {
                     var user = unitWork.UserRepository.GetOne(u => u.Id == userId);
                     if (user == null)

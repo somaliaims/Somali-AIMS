@@ -201,7 +201,7 @@ namespace AIMS.APIs.Scheduler
                             year = financialTransitionForYear.Year;
                         }
                         var backup = backupService.BackupData(connectionString);
-                        var response = projectService.AdjustDisbursementsForProjectsAsync(0, year, true).GetAwaiter().GetResult();
+                        var response = projectService.AdjustDisbursementsForProjectsAsync(null, year, true).GetAwaiter().GetResult();
                         if (response.Success)
                         {
                         }
