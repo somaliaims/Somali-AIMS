@@ -168,6 +168,7 @@ namespace AIMS.APIs.Controllers
             return Ok(await projectService.GetProjectDisbursementsAsync(id));
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         [Route("CreateDisbursements/{id}")]
         public async Task<IActionResult> CreateDisbursements(int id)
@@ -175,6 +176,7 @@ namespace AIMS.APIs.Controllers
             return Ok(await projectService.CreateProjectDisbursementsAsync(id));
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         [Route("AdjustDisbursements/{id}")]
         public async Task<IActionResult> AdjustDisbursements(int id)
@@ -217,6 +219,7 @@ namespace AIMS.APIs.Controllers
             return Ok(projects);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpGet]
         [Route("GetUserProjects")]
         public IActionResult GetUserProjects()

@@ -62,7 +62,7 @@ namespace AIMS.Services
             }
 
             tView.Year = currentYear;
-            var transitionExists = unitWork.FinancialTransitionRepository.GetOne(t => t.Year == currentYear);
+            var transitionExists = unitWork.FinancialTransitionRepository.GetOne(t => t.Year == currentYear && t.IsAutomated == true);
             if (transitionExists != null)
             {
                 tView.Exists = true;

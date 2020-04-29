@@ -372,18 +372,15 @@ namespace AIMS.Services
                                     }
                                 }
 
-                                var transition = unitWork.FinancialTransitionRepository.GetOne(t => t.Year == currentActiveYear);
-                                if (transition == null)
+                                var transition = unitWork.FinancialTransitionRepository.Insert(new EFFinancialYearTransition()
                                 {
-                                    transition = unitWork.FinancialTransitionRepository.Insert(new EFFinancialYearTransition()
-                                    {
-                                        Year = currentActiveYear,
-                                        AppliedOn = DateTime.Now,
-                                        AppliedBy = user,
-                                        IsAutomated = false
-                                    });
-                                    await unitWork.SaveAsync();
-                                }
+                                    Year = currentActiveYear,
+                                    AppliedOn = DateTime.Now,
+                                    AppliedBy = user,
+                                    IsAutomated = false
+                                });
+                                await unitWork.SaveAsync();
+
                             }
                             transaction.Commit();
                         }

@@ -1524,24 +1524,24 @@ namespace AIMS.Services
                                                          where (disbursement.Year.FinancialYear < startingYear) ||
                                                          (disbursement.Year.FinancialYear > endingYear) ||
                                                          (disbursement.Year.FinancialYear > currentActiveYear &&
-                                                            disbursement.DisbursementType == DisbursementTypes.Actual)
+                                                            disbursement.DisbursementType == DisbursementTypes.Actual) ||
+                                                         (disbursement.Year.FinancialYear < currentActiveYear &&
+                                                            disbursement.DisbursementType == DisbursementTypes.Planned)
                                                          select disbursement);
-                            bool isDeleted = false;
                             decimal deletedActualDisbursements = 0, deletedPlannedDisbursements = 0;
                             foreach (var disbursement in disbursementsToDelete)
                             {
-                                if (disbursement.DisbursementType == DisbursementTypes.Actual)
+                                if (disbursement.DisbursementType == DisbursementTypes.Actual && disbursement.Year.FinancialYear > currentActiveYear)
                                 {
                                     deletedActualDisbursements += disbursement.Amount;
                                 }
-                                else if (disbursement.DisbursementType == DisbursementTypes.Planned)
+                                else if (disbursement.DisbursementType == DisbursementTypes.Planned && disbursement.Year.FinancialYear < currentActiveYear)
                                 {
                                     deletedPlannedDisbursements += disbursement.Amount;
                                 }
                                 unitWork.ProjectDisbursementsRepository.Delete(disbursement);
-                                isDeleted = true;
                             }
-                            if (isDeleted)
+                            if (disbursementsToDelete.Any())
                             {
                                 unitWork.Save();
                             }
