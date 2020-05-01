@@ -250,6 +250,11 @@ namespace AIMS.Services
                         unitWork.UserRepository.Update(findUser);
                         unitWork.Save();
                     }
+
+                    if (findUser.IsUnAffiliated)
+                    {
+                        foundUser.IsUnAffiliated = true;
+                    }
                 }
                 return foundUser;
             }

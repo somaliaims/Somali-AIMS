@@ -644,7 +644,8 @@ namespace AIMS.Models
         public int OrganizationId { get; set; }
         public string OrganizationName { get; set; }
         public UserTypes UserType { get; set; }
-        public bool IsApproved { get; set; }
+        public bool IsApproved { get; set; } = true;
+        public bool IsUnAffiliated { get; set; } = false;
     }
 
     public class UserReturnView
@@ -656,6 +657,7 @@ namespace AIMS.Models
         public string OrganizationName { get; set; }
         public UserTypes UserType { get; set; }
         public bool IsApproved { get; set; }
+        public bool IsUnAffiliated { get; set; }
     }
 
     public class EmailsModel

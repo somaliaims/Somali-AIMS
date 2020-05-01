@@ -176,7 +176,8 @@ namespace AIMS.APIs.Controllers
                     UserType = foundUser.UserType,
                     OrganizationId = foundUser.OrganizationId,
                     OrganizationName = foundUser.OrganizationName,
-                    IsApproved = foundUser.IsApproved
+                    IsApproved = foundUser.IsApproved,
+                    IsUnAffiliated = foundUser.IsUnAffiliated
                 };
                 return Ok(uView);
             }
