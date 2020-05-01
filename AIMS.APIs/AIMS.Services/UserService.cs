@@ -792,6 +792,7 @@ namespace AIMS.Services
                             userAccount.IsApproved = true;
                             userAccount.ApprovedOn = DateTime.Now;
                             userAccount.Organization = unAffiliatedOrganization;
+                            userAccount.IsUnAffiliated = true;
                             unitWork.UserRepository.Update(userAccount);
                             await unitWork.SaveAsync();
 

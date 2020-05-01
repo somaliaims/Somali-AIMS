@@ -2040,8 +2040,30 @@ namespace AIMS.Services
                                 await unitWork.SaveAsync();
                             }
                         }
-                        var transition = unitWork.FinancialTransitionRepository.GetOne(t => t.Year == currentActiveYear);
-                        if (transition == null)
+                        EFFinancialYearTransition transition = null;
+                        if (isAutomated == true)
+                        {
+                            transition = unitWork.FinancialTransitionRepository.GetOne(t => t.Year == currentActiveYear && isAutomated == true);
+                            if (transition == null)
+                            {
+                                transition = unitWork.FinancialTransitionRepository.Insert(new EFFinancialYearTransition()
+                                {
+                                    Year = currentActiveYear,
+                                    AppliedOn = DateTime.Now,
+                                    IsAutomated = isAutomated,
+                                    AppliedById = userId
+                                });
+                                await unitWork.SaveAsync();
+                            }
+                            else
+                            {
+                                transition.AppliedOn = DateTime.Now;
+                                isAutomated = true;
+                                unitWork.FinancialTransitionRepository.Update(transition);
+                                await unitWork.SaveAsync();
+                            }
+                        }
+                        else
                         {
                             transition = unitWork.FinancialTransitionRepository.Insert(new EFFinancialYearTransition()
                             {
@@ -2052,6 +2074,7 @@ namespace AIMS.Services
                             });
                             await unitWork.SaveAsync();
                         }
+                        
                         transaction.Commit();
                     }
                 });

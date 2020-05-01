@@ -77,13 +77,21 @@ namespace AIMS.Services
                         response.Success = false;
                         return response;
                     }
+                    var fySettings = await unitWork.FinancialYearSettingsRepository.GetOneAsync(f => f.Id != 0);
+                    if (fySettings != null)
+                    {
+                        if (fySettings.Month == model.Month && fySettings.Day == model.Day)
+                        {
+                            response.Success = true;
+                            return response;
+                        }
+                    }
 
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
                     {
                         using (var transaction = context.Database.BeginTransaction())
                         {
-                            var fySettings = await unitWork.FinancialYearSettingsRepository.GetOneAsync(f => f.Id != 0);
                             if (fySettings != null)
                             {
                                 fySettings.Day = model.Day;
