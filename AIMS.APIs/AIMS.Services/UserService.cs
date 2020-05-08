@@ -837,7 +837,7 @@ namespace AIMS.Services
                             }
 
                             string message = "", subject = "", footerMessage = "";
-                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.UserApproved);
+                            var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.UserApprovedUnAffiliated);
                             if (emailMessage != null)
                             {
                                 subject = emailMessage.Subject;

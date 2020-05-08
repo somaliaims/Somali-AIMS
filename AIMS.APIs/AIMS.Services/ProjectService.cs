@@ -1943,7 +1943,8 @@ namespace AIMS.Services
                                 }
                             }
                         }
-                        
+
+                        var financialYears = await unitWork.FinancialYearRepository.GetManyQueryableAsync(y => y.Id != 0);
                         var adjustProjects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndDate.Year >= currentActiveYear, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Disbursements", "Disbursements.Year" });
                         foreach (var project in adjustProjects)
                         {
@@ -1989,7 +1990,9 @@ namespace AIMS.Services
                             var plannedDisbursementCurrentYear = (from disbursement in disbursementsForCurrentYear
                                                                   where disbursement.DisbursementType == DisbursementTypes.Planned
                                                                   select disbursement).FirstOrDefault();
-                            var currentFinancialYear = unitWork.FinancialYearRepository.GetOne(f => f.FinancialYear == currentActiveYear);
+                            var currentFinancialYear = (from fy in financialYears
+                                                        where fy.FinancialYear == currentActiveYear
+                                                        select fy).FirstOrDefault();
                             if (currentFinancialYear == null)
                             {
                                 string label = (fyMonth == 1 && fyDay == 1) ? "FY " + currentActiveYear : "FY " + currentActiveYear + "/" + (currentActiveYear + 1);
@@ -2038,6 +2041,48 @@ namespace AIMS.Services
                                 plannedDisbursementCurrentYear.Amount += deletedPlannedDisbursements;
                                 unitWork.ProjectDisbursementsRepository.Update(plannedDisbursementCurrentYear);
                                 await unitWork.SaveAsync();
+                            }
+
+                            if (endingYear >= (currentActiveYear + 1))
+                            {
+                                var futurePlannedDisbursements = (from d in project.Disbursements
+                                                                  where d.Year.FinancialYear > (currentActiveYear + 1)
+                                                                  && d.DisbursementType == DisbursementTypes.Planned
+                                                                  select d);
+
+                                for(int yr = (currentActiveYear + 1); yr <= endingYear; yr++)
+                                {
+                                    var plannedDisbursementForYear = (from d in futurePlannedDisbursements
+                                                                      where d.Year.FinancialYear == yr
+                                                                      select d).FirstOrDefault();
+
+                                    if (plannedDisbursementForYear == null)
+                                    {
+                                        var futureFinancialYear = (from fy in financialYears
+                                                                    where fy.FinancialYear == yr
+                                                                    select fy).FirstOrDefault();
+                                        if (futureFinancialYear == null)
+                                        {
+                                            string label = (fyMonth == 1 && fyDay == 1) ? "FY " + yr : "FY " + yr + "/" + (yr + 1);
+                                            futureFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                                            {
+                                                FinancialYear = yr,
+                                                Label = label
+                                            });
+                                            await unitWork.SaveAsync();
+                                        }
+                                        unitWork.ProjectDisbursementsRepository.Insert(new EFProjectDisbursements()
+                                        {
+                                            Project = project,
+                                            Year = futureFinancialYear,
+                                            Currency = project.ProjectCurrency,
+                                            Amount = 0,
+                                            ExchangeRate = project.ExchangeRate,
+                                            DisbursementType = DisbursementTypes.Planned
+                                        });
+                                        await unitWork.SaveAsync();
+                                    }
+                                }
                             }
                         }
                         EFFinancialYearTransition transition = null;

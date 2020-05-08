@@ -66,6 +66,7 @@ namespace AIMS.APIs
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.NewIATIOrganization, TypeDefinition = "New IATI organizations", Subject="New organization/s", Message = "Some new organizations are added through IATI to AIMS DB." });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.MergeOrganizationRequest, TypeDefinition = "Organizations merge request", Subject = "Organizations merge request", Message = "" });
                     context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.MergeOrganizationRejected, TypeDefinition = "Organizations merge rejection", Subject = "Organizations merge rejection", Message = "" });
+                    context.EmailMessages.Add(new EFEmailMessages() { MessageType = EmailMessageType.MergeOrganizationRejected, TypeDefinition = "User approved un-affiliated", Subject = "User approved un-affiliated", Message = "" });
                     context.SaveChanges();
                 }
 
