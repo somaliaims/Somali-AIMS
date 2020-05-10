@@ -2073,6 +2073,7 @@ namespace AIMS.Models
         [Required]
         [EmailAddress]
         public string UserEmail { get; set; }
+        public MembershipTypes MembershipType { get; set; }
     }
 
     public class ProjectDeletionRequestModel
@@ -2112,6 +2113,7 @@ namespace AIMS.Models
         public int UserId { get; set; }
         [Required]
         public int ProjectId { get; set; }
+        public MembershipTypes MembershipType { get; set; }
     }
 
     public class UserProjectsView

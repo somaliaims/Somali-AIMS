@@ -99,7 +99,7 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("ApproveRequest")]
-        public IActionResult ApproveRequest([FromBody] ProjectRequestStatusModel model)
+        public async Task<IActionResult> ApproveRequest([FromBody] ProjectRequestStatusModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -122,7 +122,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Unauthorized request");
             }
-            var response = service.ApproveMembershipRequest(model.UserId, model.ProjectId, organizationId, ownerId);
+            var response = await service.ApproveMembershipRequestAsync(model.UserId, model.ProjectId, organizationId, ownerId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -155,7 +155,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Unauthorized request");
             }
-            var response = service.UnApproveMembershipRequest(model.UserId, model.ProjectId, organizationId, ownerId);
+            var response = service.UnApproveMembershipRequest(model.UserId, model.ProjectId, organizationId, ownerId, model.MembershipType);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

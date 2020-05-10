@@ -47,6 +47,12 @@ namespace AIMS.Models
         Manual = 2
     }
 
+    public enum MembershipTypes
+    {
+        Funder = 1,
+        Implementer = 2
+    }
+
     public enum NotificationTypes
     {
         NewUser = 1,
@@ -364,6 +370,7 @@ namespace AIMS.Models
         [ForeignKey("Organization")]
         public int? OrganizationId { get; set; } = 0;
         public EFOrganization Organization { get; set; }
+        public MembershipTypes MembershipType { get; set; }
         public DateTime Dated { get; set; }
         public bool IsApproved { get; set; }
     }

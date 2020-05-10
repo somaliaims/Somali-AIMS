@@ -7,6 +7,9 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace AIMS.Services
 {
@@ -38,14 +41,14 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse ApproveMembershipRequest(int userId, int projectId, int funderId, int ownerId);
+        Task<ActionResponse> ApproveMembershipRequestAsync(int userId, int projectId, int funderId, int ownerId);
 
         /// <summary>
         /// Un-Approves membership request
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse UnApproveMembershipRequest(int userId, int projectId, int funderId, int ownerId);
+        ActionResponse UnApproveMembershipRequest(int userId, int projectId, int funderId, int ownerId, MembershipTypes membershipType);
     }
     public class ProjectMembershipService : IProjectMembershipService
     {
@@ -122,20 +125,21 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var isRequestExists = unitWork.ProjectMembershipRepository.GetOne(r => (r.ProjectId == model.ProjectId && r.UserId == user.Id));
-                    if (isRequestExists != null)
+                    var requestExists = unitWork.ProjectMembershipRepository.GetOne(r => (r.ProjectId == model.ProjectId && r.UserId == user.Id && r.MembershipType == model.MembershipType));
+                    if (requestExists != null)
                     {
-                        isRequestExists.Dated = DateTime.Now;
-                        unitWork.ProjectMembershipRepository.Update(isRequestExists);
+                        requestExists.Dated = DateTime.Now;
+                        unitWork.ProjectMembershipRepository.Update(requestExists);
                     }
                     else
                     {
-                        unitWork.ProjectMembershipRepository.Insert(new EFProjectMembershipRequests()
+                        requestExists = unitWork.ProjectMembershipRepository.Insert(new EFProjectMembershipRequests()
                         {
                             Project = project,
                             User = user,
                             OrganizationId = user.OrganizationId,
                             Dated = DateTime.Now,
+                            MembershipType = model.MembershipType,
                             IsApproved = false
                         });
                     }
@@ -193,7 +197,8 @@ namespace AIMS.Services
                         }
 
                         mHelper = new MessageHelper();
-                        message += mHelper.NewOrganizationForProject(requestingOrganization, project.Title);
+                        string role = model.MembershipType.ToString();
+                        message += mHelper.NewOrganizationForProject(requestingOrganization, project.Title, role);
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                         emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
                     }
@@ -207,7 +212,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse ApproveMembershipRequest(int userId, int projectId, int funderId, int ownerId)
+        public async Task<ActionResponse> ApproveMembershipRequestAsync(int userId, int projectId, int funderId, int ownerId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -247,6 +252,15 @@ namespace AIMS.Services
                     return response;
                 }
 
+                var userOrganization = unitWork.OrganizationRepository.GetOne(o => o.Id == user.OrganizationId);
+                if (userOrganization == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("User Organization");
+                    response.Success = false;
+                    return response;
+                }
+
                 var requests = unitWork.ProjectMembershipRepository.GetManyQueryable(r => r.ProjectId == projectId && r.OrganizationId == user.OrganizationId);
                 if (requests == null)
                 {
@@ -256,13 +270,50 @@ namespace AIMS.Services
                     return response;
                 }
 
-                foreach(var request in requests)
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
                 {
-                    request.IsApproved = true;
-                    unitWork.ProjectMembershipRepository.Update(request);
-                }
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        var approvalRequest = (from r in requests
+                                       select r).FirstOrDefault();
+
+                        foreach (var request in requests)
+                        {
+                            request.IsApproved = true;
+                            unitWork.ProjectMembershipRepository.Update(request);
+                        }
+                        await unitWork.SaveAsync();
+
+                        if (approvalRequest.MembershipType == MembershipTypes.Funder)
+                        {
+                            var projectFunder = unitWork.ProjectFundersRepository.GetOne(f => f.ProjectId == projectId && f.FunderId == user.OrganizationId);
+                            if (projectFunder == null)
+                            {
+                                unitWork.ProjectFundersRepository.Insert(new EFProjectFunders()
+                                {
+                                    ProjectId = projectId,
+                                    FunderId = user.OrganizationId
+                                });
+                                await unitWork.SaveAsync();
+                            }
+                        }
+                        else if(approvalRequest.MembershipType == MembershipTypes.Implementer)
+                        {
+                            var projectImplementer = unitWork.ProjectImplementersRepository.GetOne(i => i.ProjectId == projectId && i.ImplementerId == user.OrganizationId);
+                            if (projectImplementer == null)
+                            {
+                                unitWork.ProjectImplementersRepository.Insert(new EFProjectImplementers()
+                                {
+                                    ProjectId = projectId,
+                                    ImplementerId = user.OrganizationId
+                                });
+                                await unitWork.SaveAsync();
+                            }
+                        }
+                    }
+                });
                 
-                unitWork.Save();
 
                 //Send status email
                 string requestedProject = project.Title;
@@ -306,7 +357,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse UnApproveMembershipRequest(int userId, int projectId, int funderId, int ownerId)
+        public ActionResponse UnApproveMembershipRequest(int userId, int projectId, int funderId, int ownerId, MembershipTypes membershipType)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -346,7 +397,7 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var isRequestExists = unitWork.ProjectMembershipRepository.GetOne(r => r.ProjectId == projectId && r.UserId == user.Id);
+                var isRequestExists = unitWork.ProjectMembershipRepository.GetOne(r => r.ProjectId == projectId && r.UserId == user.Id && r.MembershipType == membershipType);
                 if (isRequestExists == null)
                 {
                     mHelper = new MessageHelper();
