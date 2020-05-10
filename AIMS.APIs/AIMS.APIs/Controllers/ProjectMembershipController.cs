@@ -70,12 +70,12 @@ namespace AIMS.APIs.Controllers
             return Ok(requests);
         }
 
-        [HttpPost("{id}")]
-        public IActionResult Post(int id)
+        [HttpPost]
+        public IActionResult Post(ProjectMembershipModel model)
         {
-            if (id < 1)
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid id provided");
+                return BadRequest(ModelState);
             }
 
             string email = User.FindFirst(ClaimTypes.Email)?.Value;
@@ -84,12 +84,13 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid attempt");
             }
 
-            ProjectMembershipRequestModel model = new ProjectMembershipRequestModel()
+            ProjectMembershipRequestModel requestModel = new ProjectMembershipRequestModel()
             {
-                ProjectId = id,
-                UserEmail = email
+                ProjectId = model.ProjectId,
+                UserEmail = email,
+                MembershipType = model.MembershipType
             };
-            var response = service.AddMembershipRequest(model);
+            var response = service.AddMembershipRequest(requestModel);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

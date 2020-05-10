@@ -2066,6 +2066,13 @@ namespace AIMS.Models
         public string FooterMessage { get; set; }
     }
 
+    public class ProjectMembershipModel
+    {
+        [Required]
+        public int ProjectId { get; set; }
+        public MembershipTypes MembershipType { get; set; }
+    }
+
     public class ProjectMembershipRequestModel
     {
         [Required]
