@@ -125,11 +125,15 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var requestExists = unitWork.ProjectMembershipRepository.GetOne(r => (r.ProjectId == model.ProjectId && r.UserId == user.Id && r.MembershipType == model.MembershipType));
+                    int membershipConstant = (int)model.MembershipType;
+                    var requestExists = unitWork.ProjectMembershipRepository.GetOne(r => (r.ProjectId == model.ProjectId && r.UserId == user.Id && r.MembershipType == (MembershipTypes)model.MembershipType));
                     if (requestExists != null)
                     {
+                        mHelper = new MessageHelper();
                         requestExists.Dated = DateTime.Now;
                         unitWork.ProjectMembershipRepository.Update(requestExists);
+                        response.Message = mHelper.AlreadyExists("Membership request");
+                        return response;
                     }
                     else
                     {

@@ -74,7 +74,7 @@ namespace AIMS.DAL.EF
                 .HasKey(m => new { m.SectorId, m.MappedSectorId });
 
             modelBuilder.Entity<EFProjectMembershipRequests>()
-                .HasKey(m => new { m.ProjectId, m.UserId });
+                .HasKey(m => new { m.ProjectId, m.UserId, m.MembershipType });
 
             modelBuilder.Entity<EFOrganizationsToMerge>()
                 .HasKey(o => new { o.RequestId, o.OrganizationId });
