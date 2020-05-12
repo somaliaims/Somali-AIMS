@@ -97,11 +97,11 @@ namespace AIMS.APIs.Controllers
         [HttpGet("UpdateFinancialYearsForProjects")]
         public IActionResult UpdateFinancialYearsForProjects()
         {
-            var response = projectService.UpdateFinancialYearsForProjects();
+            /*var response = projectService.UpdateFinancialYearsForProjects();
             if (!response.Success)
             {
                 return BadRequest(response.Message);
-            }
+            }*/
             return Ok(true);
         }
 

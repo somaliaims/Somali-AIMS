@@ -123,7 +123,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Unauthorized request");
             }
-            var response = await service.ApproveMembershipRequestAsync(model.UserId, model.ProjectId, organizationId, ownerId);
+            var response = await service.ApproveMembershipRequestAsync(model.UserId, model.ProjectId, organizationId, ownerId, model.MembershipType);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

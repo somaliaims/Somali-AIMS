@@ -41,7 +41,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ActionResponse> ApproveMembershipRequestAsync(int userId, int projectId, int funderId, int ownerId);
+        Task<ActionResponse> ApproveMembershipRequestAsync(int userId, int projectId, int funderId, int ownerId, MembershipTypes membershipType);
 
         /// <summary>
         /// Un-Approves membership request
@@ -212,7 +212,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> ApproveMembershipRequestAsync(int userId, int projectId, int funderId, int ownerId)
+        public async Task<ActionResponse> ApproveMembershipRequestAsync(int userId, int projectId, int funderId, int ownerId, MembershipTypes membershipType)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -261,8 +261,8 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var requests = unitWork.ProjectMembershipRepository.GetManyQueryable(r => r.ProjectId == projectId && r.OrganizationId == user.OrganizationId);
-                if (requests == null)
+                var requests = unitWork.ProjectMembershipRepository.GetManyQueryable(r => r.ProjectId == projectId && r.OrganizationId == user.OrganizationId && r.MembershipType == membershipType);
+                if (requests.Count() == 0)
                 {
                     mHelper = new MessageHelper();
                     response.Message = mHelper.GetNotFound("Membership Request");
@@ -311,6 +311,7 @@ namespace AIMS.Services
                                 await unitWork.SaveAsync();
                             }
                         }
+                        transaction.Commit();
                     }
                 });
                 

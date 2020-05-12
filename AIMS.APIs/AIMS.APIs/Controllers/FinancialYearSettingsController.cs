@@ -27,7 +27,7 @@ namespace AIMS.APIs.Controllers
             return Ok(service.Get());
         }
 
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        /*[Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] FinancialYearSettingModel model)
         {
@@ -52,6 +52,13 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(response.Message);
             }
+            return Ok(true);
+        }*/
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPost]
+        public IActionResult Post([FromBody] FinancialYearSettingModel model)
+        {
             return Ok(true);
         }
     }

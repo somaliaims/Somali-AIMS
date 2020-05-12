@@ -108,6 +108,8 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFProjectMembershipRequests, ProjectMembershipRequestView>()
                 .ForMember(m => m.Project, opts => opts.MapFrom(source => source.Project.Title))
                 .ForMember(m => m.UserEmail, opts => opts.MapFrom(source => source.User.Email))
+                .ForMember(m => m.MembershipType, opts => opts.MapFrom(source => source.MembershipType))
+                .ForMember(m => m.MembershipTypeId, opts => opts.MapFrom(source => source.MembershipType))
                 .ForMember(m => m.UserOrganization, opts => opts.MapFrom(source => source.User.Organization.OrganizationName));
 
             CreateMap<EFProjectLocations, LocationAbstractView>()

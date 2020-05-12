@@ -2097,6 +2097,8 @@ namespace AIMS.Models
         public int UserId { get; set; }
         public string UserEmail { get; set; }
         public string Project { get; set; }
+        public string MembershipType { get; set; }
+        public int MembershipTypeId { get; set; }
         public string UserOrganization { get; set; }
         public string Dated { get; set; }
         public bool IsApproved { get; set; }

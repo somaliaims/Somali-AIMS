@@ -1911,7 +1911,6 @@ namespace AIMS.Services
                         response.Success = false;
                         return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                     }
-
                 }
                 var strategy = context.Database.CreateExecutionStrategy();
                 await strategy.ExecuteAsync(async () =>
@@ -1965,14 +1964,15 @@ namespace AIMS.Services
                             {
                                 if (disbursement.DisbursementType == DisbursementTypes.Actual && disbursement.Year.FinancialYear > currentActiveYear)
                                 {
+                                    unitWork.ProjectDisbursementsRepository.Delete(disbursement);
                                     deletedActualDisbursements += disbursement.Amount;
+                                    unitWork.ProjectDisbursementsRepository.Delete(disbursement);
                                 }
-                                else if (disbursement.DisbursementType == DisbursementTypes.Planned)
+                                else if (disbursement.DisbursementType == DisbursementTypes.Planned && (disbursement.Year.FinancialYear < currentActiveYear || disbursement.Year.FinancialYear > endingYear))
                                 {
                                     deletedPlannedDisbursements += disbursement.Amount;
+                                    unitWork.ProjectDisbursementsRepository.Delete(disbursement);
                                 }
-                                unitWork.ProjectDisbursementsRepository.Delete(disbursement);
-                                isDeleted = true;
                             }
                             if (isDeleted)
                             {
@@ -2046,7 +2046,7 @@ namespace AIMS.Services
                             if (endingYear >= (currentActiveYear + 1))
                             {
                                 var futurePlannedDisbursements = (from d in project.Disbursements
-                                                                  where d.Year.FinancialYear > (currentActiveYear + 1)
+                                                                  where d.Year.FinancialYear >= (currentActiveYear + 1)
                                                                   && d.DisbursementType == DisbursementTypes.Planned
                                                                   select d);
 
@@ -2086,6 +2086,7 @@ namespace AIMS.Services
                             }
                         }
                         EFFinancialYearTransition transition = null;
+                        bool isCommitTransaction = false;
                         if (isAutomated == true)
                         {
                             transition = unitWork.FinancialTransitionRepository.GetOne(t => t.Year == currentActiveYear && isAutomated == true);
@@ -2099,13 +2100,14 @@ namespace AIMS.Services
                                     AppliedById = userId
                                 });
                                 await unitWork.SaveAsync();
+                                isCommitTransaction = true;
                             }
                             else
                             {
-                                transition.AppliedOn = DateTime.Now;
+                                /*transition.AppliedOn = DateTime.Now;
                                 isAutomated = true;
                                 unitWork.FinancialTransitionRepository.Update(transition);
-                                await unitWork.SaveAsync();
+                                await unitWork.SaveAsync();*/
                             }
                         }
                         else
@@ -2118,9 +2120,13 @@ namespace AIMS.Services
                                 AppliedById = userId
                             });
                             await unitWork.SaveAsync();
+                            isCommitTransaction = true;
                         }
                         
-                        transaction.Commit();
+                        if (isCommitTransaction)
+                        {
+                            transaction.Commit();
+                        }
                     }
                 });
             }
@@ -2137,7 +2143,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                int month = 0, day = 1;
+                int month = 1, day = 1;
                 ActionResponse response = new ActionResponse();
                 var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(s => s.Id != 0);
                 if (fySettings != null)
@@ -4088,8 +4094,12 @@ namespace AIMS.Services
                             unitWork.ProjectRepository.Update(project);
                             await unitWork.SaveAsync();
 
-                            var deleteDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id &&
-                                d.Year.FinancialYear < model.StartingFinancialYear || d.Year.FinancialYear > model.EndingFinancialYear);
+                            var projectDisbursements = unitWork.ProjectDisbursementsRepository.GetWithInclude(d => d.ProjectId == id);
+                            var deleteDisbursements = (from d in projectDisbursements
+                                                       where (d.Year.FinancialYear < model.StartingFinancialYear ||
+                                                                d.Year.FinancialYear > model.EndingFinancialYear)
+                                                       select d);
+
                             foreach (var disbursement in deleteDisbursements)
                             {
                                 unitWork.ProjectDisbursementsRepository.Delete(disbursement);

@@ -143,6 +143,29 @@ namespace AIMS.Services
                         response.Success = false;
                         return response;
                     }
+
+                    string orgsJson = string.Join("-", orgIds);
+                    var requestExists = unitWork.OrganizationMergeRequestsRepository.GetOne(r => r.EnvelopeOrganizationId == model.EnvelopeOrganizationId);
+                    if (requestExists != null)
+                    {
+                        var storedOrgIds = requestExists.OrganizationIdsJson.Split("-");
+                        bool unMatchFound = false;
+                        foreach(var o in storedOrgIds)
+                        {
+                            int orgId = Convert.ToInt32(o);
+                            if (!orgIds.Contains(orgId))
+                            {
+                                unMatchFound = true;
+                                break;
+                            }
+                        }
+
+                        if (!unMatchFound)
+                        {
+                            response.Message = "Merge request already exists";
+                            return response;
+                        }
+                    }
                 }
 
                 try
@@ -428,24 +451,26 @@ namespace AIMS.Services
                             await unitWork.SaveAsync();
                         }
 
-                        var updateEnvelope = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == request.EnvelopeOrganizationId);
-                        if (updateEnvelope != null)
+                        var orgIdsToDelete = (from o in organizations
+                                      select o.Id).ToList<int>();
+                        var deleteRequestsForDeleted = unitWork.OrganizationMergeRequestsRepository.GetManyQueryable(r => orgIdsToDelete.Contains((int)r.EnvelopeOrganizationId));
+                        foreach(var requestToDelete in deleteRequestsForDeleted)
                         {
-                            updateEnvelope.FunderId = newOrganization.Id;
-                            unitWork.EnvelopeRepository.Update(updateEnvelope);
+                            unitWork.OrganizationMergeRequestsRepository.Delete(requestToDelete);
+                        }
+                        if (deleteRequestsForDeleted.Any())
+                        {
                             await unitWork.SaveAsync();
                         }
 
+                        response.ReturnedId = newOrganization.Id;
                         foreach (var organization in organizations)
                         {
                             unitWork.OrganizationRepository.Delete(organization);
                         }
                         await unitWork.SaveAsync();
 
-                        //Manage envelope data
-                        unitWork.OrganizationMergeRequestsRepository.Delete(request);
-                        await unitWork.SaveAsync();
-                        response.ReturnedId = newOrganization.Id;
+                        
                         transaction.Commit();
 
                         string subject = "", message = "", footerMessage = "";

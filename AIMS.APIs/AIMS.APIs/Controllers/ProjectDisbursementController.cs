@@ -37,7 +37,7 @@ namespace AIMS.APIs.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] ProjectDisbursementModel model)
         {
-            if (!ModelState.IsValid)
+            /*if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -46,8 +46,8 @@ namespace AIMS.APIs.Controllers
             if (!response.Success)
             {
                 return BadRequest(response.Message);
-            }
-            return Ok(response.ReturnedId);
+            }*/
+            return Ok();
         }
 
     }

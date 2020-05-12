@@ -33,7 +33,7 @@ namespace AIMS.APIs.Controllers
             ratesHttpService = exRateHttpService;
         }
 
-        [HttpPost("UploadDataImportFileEighteen"), DisableRequestSizeLimit]
+        /*[HttpPost("UploadDataImportFileEighteen"), DisableRequestSizeLimit]
         public IActionResult UploadDataImportFileEighteen()
         {
             try
@@ -233,7 +233,7 @@ namespace AIMS.APIs.Controllers
             var pathToFiles = Path.Combine(Directory.GetCurrentDirectory(), folderName);
             string fileName = service.GenerateExcelFileForActiveProjects(pathToFiles);
             return Ok(fileName);
-        }
+        }*/
 
 
     }

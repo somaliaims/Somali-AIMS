@@ -184,7 +184,7 @@ namespace AIMS.APIs.Scheduler
                     }
 
                     var fySettings = fySettingsService.Get();
-                    int fyMonth = 0, fyDay = 0;
+                    int fyMonth = 1, fyDay = 1;
                     int currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
                     if (fySettings != null)
                     {
@@ -192,8 +192,8 @@ namespace AIMS.APIs.Scheduler
                         fyDay = fySettings.Day;
                     }
 
-                    var financialTransitionForYear = financialYearTransitionService.IsFinancialTransitionApplied();
-                    if ((fyMonth == currentMonth && fyDay == currentDay) || !financialTransitionForYear.Exists)
+                    /*var financialTransitionForYear = financialYearTransitionService.IsFinancialTransitionApplied();
+                    if ((fyMonth == currentMonth && fyDay == currentDay) || financialTransitionForYear.Exists == false)
                     {
                         int year = 0;
                         if (!financialTransitionForYear.Exists)
@@ -205,7 +205,7 @@ namespace AIMS.APIs.Scheduler
                         if (response.Success)
                         {
                         }
-                    }
+                    }*/
 
                     var pendingOrgMergeRequests = orgMergeService.GetTwoWeeksOlderRequests();
                     if (pendingOrgMergeRequests.Any())
