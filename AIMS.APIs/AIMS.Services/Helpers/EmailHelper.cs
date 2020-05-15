@@ -84,7 +84,11 @@ namespace AIMS.Services.Helpers
             if (usersEmailList.Count() > 0)
             {
                 string emailMessage = this.GetUserRegistrationMessageForUser(organizationName, message, footerMessage);
-                mailMessage.To.Add(usersEmailString);
+                //mailMessage.To.Add(usersEmailString);
+                foreach(var emailAddress in usersEmailList)
+                {
+                    mailMessage.Bcc.Add(new MailAddress(emailAddress));
+                }
                 mailMessage.Body = emailMessage;
                 mailMessage.Subject = subject;
                 client.Send(mailMessage);
@@ -125,7 +129,8 @@ namespace AIMS.Services.Helpers
                 MailMessage mailMessage = new MailMessage();
                 foreach (var emailAddress in emailAddresses)
                 {
-                    mailMessage.To.Add(new MailAddress(emailAddress));
+                    //mailMessage.To.Add(new MailAddress(emailAddress));
+                    mailMessage.Bcc.Add(new MailAddress(emailAddress));
                 }
                 mailMessage.IsBodyHtml = true;
                 mailMessage.From = new MailAddress(this.emailFrom, senderName);

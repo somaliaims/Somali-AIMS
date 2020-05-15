@@ -38,6 +38,12 @@ namespace AIMS.APIs.Controllers
             return Ok(service.GetForUser(userId));
         }
 
+        [HttpGet("GetOrganizationsAppliedForMerge")]
+        public IActionResult GetOrganizationsAppliedForMerge()
+        {
+            return Ok(service.GetOrganizationsAppliedForMerge());
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] MergeOrganizationModel model)
         {

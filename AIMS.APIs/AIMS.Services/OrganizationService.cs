@@ -144,7 +144,7 @@ namespace AIMS.Services
         public OrganizationService(AIMSDbContext cntxt, IMapper mappr)
         {
             context = cntxt;
-            this.mapper = mappr;
+            mapper = mappr;
         }
 
         public IEnumerable<OrganizationView> GetAll()

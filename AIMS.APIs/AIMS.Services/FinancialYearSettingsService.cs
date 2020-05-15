@@ -257,8 +257,8 @@ namespace AIMS.Services
                                 endingYear = project.EndingFinancialYear.FinancialYear;
                                 
                                 var disbursementsToDelete = (from disbursement in project.Disbursements
-                                                             where (disbursement.Year.FinancialYear < startingYear) ||
-                                                             (disbursement.Year.FinancialYear > endingYear) ||
+                                                             where ((disbursement.Year.FinancialYear < startingYear) ||
+                                                             (disbursement.Year.FinancialYear > endingYear)) ||
                                                              (disbursement.Year.FinancialYear < currentActiveYear &&
                                                              disbursement.DisbursementType == DisbursementTypes.Planned) ||
                                                              (disbursement.Year.FinancialYear > currentActiveYear &&
@@ -270,12 +270,13 @@ namespace AIMS.Services
                                     if (disbursement.DisbursementType == DisbursementTypes.Actual && disbursement.Year.FinancialYear > currentActiveYear)
                                     {
                                         deletedActualDisbursements += disbursement.Amount;
+                                        unitWork.ProjectDisbursementsRepository.Delete(disbursement);
                                     }
                                     else if (disbursement.DisbursementType == DisbursementTypes.Planned && disbursement.Year.FinancialYear < currentActiveYear)
                                     {
                                         deletedPlannedDisbursements += disbursement.Amount;
+                                        unitWork.ProjectDisbursementsRepository.Delete(disbursement);
                                     }
-                                    unitWork.ProjectDisbursementsRepository.Delete(disbursement);
                                 }
                                 if (disbursementsToDelete.Any())
                                 {

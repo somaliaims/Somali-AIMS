@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using AIMS.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
 namespace AIMS.Services
 {
@@ -20,6 +19,12 @@ namespace AIMS.Services
         /// <param name="userId"></param>
         /// <returns></returns>
         IEnumerable<OrganizationMergeRequests> GetForUser(int userId);
+
+        /// <summary>
+        /// Gets list of organizations that are currently requested for merge
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<OrganizationMiniView> GetOrganizationsAppliedForMerge();
 
         /// <summary>
         /// Adds new request for merging organizations
@@ -71,6 +76,23 @@ namespace AIMS.Services
         public OrganizationMergeService(AIMSDbContext cntxt)
         {
             context = cntxt;
+        }
+
+        public IEnumerable<OrganizationMiniView> GetOrganizationsAppliedForMerge()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var orgIds = unitWork.OrganizationsToMergeRepository.GetProjection(o => o.OrganizationId != 0, o => o.OrganizationId).Distinct();
+                List<OrganizationMiniView> organizationsList = new List<OrganizationMiniView>();
+                foreach(var id in orgIds)
+                {
+                    organizationsList.Add(new OrganizationMiniView()
+                    {
+                        Id= id
+                    });
+                }
+                return organizationsList;
+            }
         }
 
         public async Task<ActionResponse> AddAsync(MergeOrganizationModel model, int userId)
