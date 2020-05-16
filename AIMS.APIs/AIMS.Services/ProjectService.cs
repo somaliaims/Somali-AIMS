@@ -3228,22 +3228,26 @@ namespace AIMS.Services
                                 }
                             }
 
-                            var sectorsPercentage = unitWork.ProjectSectorsRepository.GetProjection(s => s.ProjectId == model.ProjectId, s => s.FundsPercentage).Sum();
+                            var notAvailableSector = unitWork.SectorRepository.GetOne(s => s.SectorTypeId == defaultSectorType.Id && s.SectorName.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase));
+                            if (notAvailableSector == null)
+                            {
+                                notAvailableSector = unitWork.SectorRepository.Insert(new EFSector()
+                                {
+                                    SectorType = defaultSectorType,
+                                    SectorName = UNATTRIBUTED,
+                                    ParentSector = null,
+                                    IsUnAttributed = true
+                                });
+                                unitWork.Save();
+                            }
+
+                            var sectorsPercentage = unitWork.ProjectSectorsRepository.GetProjection(s => s.ProjectId == model.ProjectId && s.SectorId != notAvailableSector.Id, s => s.FundsPercentage).Sum();
                             decimal leftPercentage = (100 - sectorsPercentage);
                             if (leftPercentage > 0)
                             {
-                                var notAvailableSector = unitWork.SectorRepository.GetOne(s => s.SectorTypeId == defaultSectorType.Id && s.SectorName.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase));
-                                if (notAvailableSector == null)
+                                var sectorExists = unitWork.ProjectSectorsRepository.GetOne(s => s.ProjectId == project.Id && s.SectorId == notAvailableSector.Id);
+                                if (sectorExists == null)
                                 {
-                                    notAvailableSector = unitWork.SectorRepository.Insert(new EFSector()
-                                    {
-                                        SectorType = defaultSectorType,
-                                        SectorName = UNATTRIBUTED,
-                                        ParentSector = null,
-                                        IsUnAttributed = true
-                                    });
-                                    unitWork.Save();
-
                                     unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
                                     {
                                         Project = project,
@@ -3254,23 +3258,9 @@ namespace AIMS.Services
                                 }
                                 else
                                 {
-                                    var sectorExists = unitWork.ProjectSectorsRepository.GetOne(s => s.SectorId == notAvailableSector.Id);
-                                    if (sectorExists == null)
-                                    {
-                                        unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
-                                        {
-                                            Project = project,
-                                            Sector = notAvailableSector,
-                                            FundsPercentage = leftPercentage
-                                        });
-                                        unitWork.Save();
-                                    }
-                                    else
-                                    {
-                                        sectorExists.FundsPercentage = leftPercentage;
-                                        unitWork.ProjectSectorsRepository.Update(sectorExists);
-                                        unitWork.Save();
-                                    }
+                                    sectorExists.FundsPercentage = leftPercentage;
+                                    unitWork.ProjectSectorsRepository.Update(sectorExists);
+                                    unitWork.Save();
                                 }
                             }
                             project.DateUpdated = DateTime.Now;
@@ -4180,7 +4170,7 @@ namespace AIMS.Services
                         unitWork.ProjectLocationsRepository.Delete(projectLocation);
                         unitWork.Save();
 
-                        if (!location.Location.Equals("Unattributed", StringComparison.OrdinalIgnoreCase))
+                        if (!location.Location.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase))
                         {
                             decimal fundsPercentage = unitWork.ProjectLocationsRepository.GetProjection(p => p.ProjectId == projectId, p => p.FundsPercentage).Sum();
                             if (fundsPercentage < 100)
@@ -4191,7 +4181,7 @@ namespace AIMS.Services
                                 {
                                     unAttributedLocation = unitWork.LocationRepository.Insert(new EFLocation()
                                     {
-                                        Location = "Unattributed",
+                                        Location = UNATTRIBUTED,
                                         Latitude = 0,
                                         Longitude = 0
                                     });
@@ -4261,25 +4251,34 @@ namespace AIMS.Services
 
                         if (!sector.SectorName.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase))
                         {
-                            var fundsPercentage = unitWork.ProjectSectorsRepository.GetProjection(s => s.ProjectId == projectId, s => s.FundsPercentage).Sum();
-                            decimal leftPercentage = (100 - fundsPercentage);
-                            if (leftPercentage > 0)
+                            EFSector notAvailableSector = null;
+                            var defaultSectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsPrimary == true);
+                            if (defaultSectorType != null)
                             {
-                                var defaultSectorType = unitWork.SectorTypesRepository.GetOne(s => s.IsPrimary == true);
-                                if (defaultSectorType != null)
+                                notAvailableSector = unitWork.SectorRepository.GetOne(s => s.SectorTypeId == defaultSectorType.Id && s.SectorName.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase));
+                                if (notAvailableSector == null)
                                 {
-                                    var notAvailableSector = unitWork.SectorRepository.GetOne(s => s.SectorTypeId == defaultSectorType.Id && s.SectorName.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase));
-                                    if (notAvailableSector == null)
+                                    notAvailableSector = unitWork.SectorRepository.Insert(new EFSector()
                                     {
-                                        notAvailableSector = unitWork.SectorRepository.Insert(new EFSector()
-                                        {
-                                            SectorType = defaultSectorType,
-                                            SectorName = UNATTRIBUTED,
-                                            ParentSector = null,
-                                            IsUnAttributed = true
-                                        });
-                                        unitWork.Save();
+                                        SectorType = defaultSectorType,
+                                        SectorName = UNATTRIBUTED,
+                                        ParentSector = null,
+                                        IsUnAttributed = true
+                                    });
+                                    unitWork.Save();
+                                }
+                            }
+                            
+                            if (notAvailableSector != null)
+                            {
+                                decimal fundsPercentage = unitWork.ProjectSectorsRepository.GetProjection(s => s.ProjectId == projectId && s.SectorId != notAvailableSector.Id, s => s.FundsPercentage).Sum();
+                                decimal leftPercentage = (100 - fundsPercentage);
+                                if (leftPercentage > 0)
+                                {
 
+                                    var sectorExists = unitWork.ProjectSectorsRepository.GetOne(s => s.ProjectId == projectId && s.SectorId == notAvailableSector.Id);
+                                    if (sectorExists == null)
+                                    {
                                         unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
                                         {
                                             ProjectId = projectId,
@@ -4290,23 +4289,9 @@ namespace AIMS.Services
                                     }
                                     else
                                     {
-                                        var sectorExists = unitWork.ProjectSectorsRepository.GetOne(s => s.SectorId == notAvailableSector.Id);
-                                        if (sectorExists == null)
-                                        {
-                                            unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
-                                            {
-                                                ProjectId = projectId,
-                                                Sector = notAvailableSector,
-                                                FundsPercentage = leftPercentage
-                                            });
-                                            unitWork.Save();
-                                        }
-                                        else
-                                        {
-                                            sectorExists.FundsPercentage = leftPercentage;
-                                            unitWork.ProjectSectorsRepository.Update(sectorExists);
-                                            unitWork.Save();
-                                        }
+                                        sectorExists.FundsPercentage = leftPercentage;
+                                        unitWork.ProjectSectorsRepository.Update(sectorExists);
+                                        unitWork.Save();
                                     }
                                 }
                             }
