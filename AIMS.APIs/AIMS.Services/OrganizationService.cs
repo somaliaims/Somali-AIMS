@@ -73,6 +73,12 @@ namespace AIMS.Services
         IEnumerable<OrganizationView> GetOrganizationsHavingEnvelope();
 
         /// <summary>
+        /// Gets organizations ids only having envelope data available
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<OrganizationMiniView> GetOrganizationIdsHavingEnvelope();
+
+        /// <summary>
         /// Adds a new section
         /// </summary>
         /// <returns>Response with success/failure details</returns>
@@ -244,6 +250,23 @@ namespace AIMS.Services
                                      select org);
                 }
                 return mapper.Map<List<OrganizationView>>(organizations);
+            }
+        }
+
+        public IEnumerable<OrganizationMiniView> GetOrganizationIdsHavingEnvelope()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<OrganizationMiniView> organizationsList = new List<OrganizationMiniView>();
+                var organizationIds = unitWork.EnvelopeRepository.GetProjection(e => e.Id != 0, e => e.FunderId);
+                foreach(var id in organizationIds)
+                {
+                    organizationsList.Add(new OrganizationMiniView()
+                    {
+                        Id = id
+                    });
+                }
+                return organizationsList;
             }
         }
 

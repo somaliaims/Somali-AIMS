@@ -62,6 +62,12 @@ namespace AIMS.APIs.Controllers
             return Ok(organizationService.GetOrganizationsHavingEnvelope());
         }
 
+        [HttpGet("GetOrganizationIdsHavingEnvelope")]
+        public IActionResult GetOrganizationIdsHavingEnvelope()
+        {
+            return Ok(organizationService.GetOrganizationIdsHavingEnvelope());
+        }
+
         [HttpGet("GetIATIOrganizations")]
         public IActionResult GetIATIOrganizations()
         {

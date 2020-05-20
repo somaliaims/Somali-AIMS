@@ -93,7 +93,8 @@ namespace AIMS.Services
                 }
                 else if (uType == UserTypes.Manager || uType == UserTypes.SuperAdmin)
                 {
-                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn <= DateTime.Now.AddDays(-7) && d.Status == ProjectDeletionStatus.Requested && d.RequestedBy.Id != userId) || (projectIds.Contains(d.ProjectId) && userId != d.RequestedBy.Id)), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
+                    //projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn <= DateTime.Now.AddDays(-7) && d.Status == ProjectDeletionStatus.Requested && d.RequestedBy.Id != userId) || (projectIds.Contains(d.ProjectId) && userId != d.RequestedBy.Id)), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
+                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(d => userId != d.RequestedBy.Id, new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
                 }
                 return mapper.Map<List<ProjectDeletionRequestView>>(projectRequests);
             }

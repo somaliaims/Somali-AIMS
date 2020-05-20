@@ -652,12 +652,23 @@ namespace AIMS.Services
 
                     if (model.SectorId > 0)
                     {
-                        sectorProjectIds = unitWork.ProjectSectorsRepository.GetProjection(p => p.SectorId == model.SectorId, p => p.ProjectId).ToList();
+                        var sectorIds = unitWork.SectorRepository.GetProjection(s => s.ParentSectorId == model.SectorId, s => s.Id);
+                        var sectorProjects = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorId.Equals(p.SectorId) || sectorIds.Contains(p.SectorId), new string[] { "Sector" });
+                        sectorProjectIds = (from p in sectorProjects
+                                            select p.ProjectId).Distinct().ToList<int>();
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => sectorProjectIds.Contains(p.Id),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Locations", "Locations.Location", "Disbursements", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Markers", "Markers.Marker" });
                         if (sectorProjectIds.Count > 0)
                         {
-                            projectsInSector = unitWork.ProjectSectorsRepository.GetManyQueryable(s => s.SectorId == model.SectorId && sectorProjectIds.Contains(s.ProjectId));
+                            if (sectorIds.Count() > 0)
+                            {
+                                projectsInSector = unitWork.ProjectSectorsRepository.GetManyQueryable(s => sectorIds.Contains(s.SectorId) && sectorProjectIds.Contains(s.ProjectId));
+                            }
+                            else
+                            {
+                                projectsInSector = unitWork.ProjectSectorsRepository.GetManyQueryable(s => s.SectorId == model.SectorId && sectorProjectIds.Contains(s.ProjectId));
+                            }
+                            
                         }
                     }
 
@@ -1078,7 +1089,6 @@ namespace AIMS.Services
                     int futureYearsLimit = (currentYear + 3);
 
                     List<ProjectBudgetSummaryView> projectBudgetsList = new List<ProjectBudgetSummaryView>();
-
                     projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.EndingFinancialYear.FinancialYear >= currentYear,
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Disbursements", "Disbursements.Year" });
 
