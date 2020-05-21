@@ -639,6 +639,7 @@ namespace AIMS.Models
         public int OrganizationId { get; set; }
         public string Organization { get; set; }
         public bool IsApproved { get; set; }
+        public bool IsUnAffiliated { get; set; }
         public string RegistrationDate { get; set; }
     }
 
