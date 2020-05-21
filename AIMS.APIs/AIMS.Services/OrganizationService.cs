@@ -499,6 +499,25 @@ namespace AIMS.Services
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                 }
 
+                var envelopeIds = unitWork.EnvelopeRepository.GetProjection(e => e.Id != 0, e => e.FunderId);
+                bool hasEnvelope = false;
+                foreach(int orgId in model.Ids)
+                {
+                    if (envelopeIds.Contains(orgId))
+                    {
+                        hasEnvelope = true;
+                        break;
+                    }
+                }
+
+                if (hasEnvelope && (model.EnvelopeOrganizationId == null || model.EnvelopeOrganizationId <= 0))
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Provided Organization for Envelope");
+                    response.Success = false;
+                    return response;
+                }
+
                 try
                 {
                     var strategy = context.Database.CreateExecutionStrategy();

@@ -143,7 +143,26 @@ namespace AIMS.Services
                     return response;
                 }
 
-                if (model.EnvelopeOrganizationId != null)
+                var envelopeIds = unitWork.EnvelopeRepository.GetProjection(e => e.Id != 0, e => e.FunderId);
+                bool hasEnvelope = false;
+                foreach (int orgId in model.Ids)
+                {
+                    if (envelopeIds.Contains(orgId))
+                    {
+                        hasEnvelope = true;
+                        break;
+                    }
+                }
+
+                if (hasEnvelope && (model.EnvelopeOrganizationId == null || model.EnvelopeOrganizationId <= 0))
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("Provided Organization for Envelope");
+                    response.Success = false;
+                    return response;
+                }
+
+                if (model.EnvelopeOrganizationId > 0)
                 {
                     envelopeOrganization = (from o in organizations
                                             where o.Id == model.EnvelopeOrganizationId
@@ -475,7 +494,7 @@ namespace AIMS.Services
 
                         var orgIdsToDelete = (from o in organizations
                                       select o.Id).ToList<int>();
-                        var deleteRequestsForDeleted = unitWork.OrganizationMergeRequestsRepository.GetManyQueryable(r => orgIdsToDelete.Contains((int)r.EnvelopeOrganizationId));
+                        var deleteRequestsForDeleted = unitWork.OrganizationMergeRequestsRepository.GetManyQueryable(r => r.EnvelopeOrganizationId != null && orgIdsToDelete.Contains((int)r.EnvelopeOrganizationId));
                         foreach(var requestToDelete in deleteRequestsForDeleted)
                         {
                             unitWork.OrganizationMergeRequestsRepository.Delete(requestToDelete);

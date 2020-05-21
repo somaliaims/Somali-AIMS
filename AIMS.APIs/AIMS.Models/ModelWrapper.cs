@@ -807,7 +807,13 @@ namespace AIMS.Models
         public string Title { get; set; }
     }
 
-    public class LatestProjectView
+    public class LatestProjectsView
+    {
+        public string DefaultCurrency { get; set; }
+        public ICollection<LatestProjects> Projects { get; set; }
+    }
+
+    public class LatestProjects
     {
         public int Id { get; set; }
         public string Title { get; set; }

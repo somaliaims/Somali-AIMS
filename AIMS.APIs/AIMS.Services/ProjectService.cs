@@ -56,7 +56,7 @@ namespace AIMS.Services
         /// Gets latest list of projects
         /// </summary>
         /// <returns></returns>
-        IEnumerable<LatestProjectView> GetLatest();
+        LatestProjectsView GetLatest(decimal exchangeRate, string defaultCurrency);
 
         /// <summary>
         /// Get project reports filtered through sector id
@@ -498,24 +498,27 @@ namespace AIMS.Services
             }
         }
 
-        public IEnumerable<LatestProjectView> GetLatest()
+        public LatestProjectsView GetLatest(decimal exchangeRate, string defaultCurrency)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                List<LatestProjectView> projects = new List<LatestProjectView>();
+                List<LatestProjects> projects = new List<LatestProjects>();
+                LatestProjectsView projectsView = new LatestProjectsView() { DefaultCurrency = defaultCurrency, Projects = projects };
                 var latestProjects = unitWork.ProjectRepository.GetWithIncludeOrderByDescending(p => p.Id != 0, p => p.DateUpdated, 5, new string[] { "Funders", "Funders.Funder", "StartingFinancialYear", "EndingFinancialYear" });
                 foreach (var project in latestProjects)
                 {
-                    projects.Add(new LatestProjectView()
+                    projects.Add(new LatestProjects()
                     {
                         Id = project.Id,
                         Title = project.Title,
                         StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
                         EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
-                        ProjectCost = project.ProjectValue
+                        ProjectCost = (project.ProjectValue * (exchangeRate / project.ExchangeRate)),
+
                     });
                 }
-                return projects;
+                projectsView.Projects = projects;
+                return projectsView;
             }
         }
 

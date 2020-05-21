@@ -88,9 +88,36 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpGet("GetLatest")]
-        public IActionResult GetLatest()
+        public async Task<IActionResult> GetLatest()
         {
-            return Ok(projectService.GetLatest());
+            var defaultCurrencyObj = currencyService.GetDefaultCurrency();
+            if (defaultCurrencyObj == null)
+            {
+                return BadRequest("Default currency is not set. Please contact administrator");
+            }
+
+            string defaultCurrency = defaultCurrencyObj.Currency;
+            decimal exchangeRate = 1;
+            if (!string.IsNullOrEmpty(defaultCurrency))
+            {
+                var dated = DateTime.Now;
+                var rates = await ratesService.GetCurrencyRatesForDate(dated);
+                if (rates.Rates == null)
+                {
+                    string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                    rates = await ratesHttpService.GetRatesAsync(apiKey);
+                    if (rates.Rates != null)
+                    {
+                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        exchangeRate = projectService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                    }
+                }
+                else
+                {
+                    exchangeRate = projectService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
+                }
+            }
+            return Ok(projectService.GetLatest(exchangeRate, defaultCurrency));
         }
 
         [Authorize(AuthenticationSchemes = "Bearer")]
