@@ -177,8 +177,7 @@ namespace AIMS.Services
             List<ProjectDetailView> projectsList = new List<ProjectDetailView>();
             List<ProjectDetailSectorView> sectorsList = new List<ProjectDetailSectorView>();
             IQueryable<EFProject> projects;
-            int startingFinancialYear = 0;
-            int endingFinancialYear = 0;
+            int startingFinancialYear = 0, endingFinancialYear = 0, currentActiveYear = DateTime.Now.Year;
 
             var financialYearsList = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear > 0);
             financialYearsList = (from fy in financialYearsList
@@ -258,9 +257,7 @@ namespace AIMS.Services
                                       select fy);
             }
 
-            int fyDay = 1, fyMonth = 1, currentActiveYear = DateTime.Now.Year,
-                currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
-
+            int fyDay = 1, fyMonth = 1, currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
             if (financialYearSettings != null)
             {
                 fyDay = financialYearSettings.Day;
@@ -371,8 +368,7 @@ namespace AIMS.Services
             List<ProjectDetailView> projectsList = new List<ProjectDetailView>();
             List<ProjectDetailSectorView> sectorsList = new List<ProjectDetailSectorView>();
             IQueryable<EFProject> projects;
-            int startingFinancialYear = 0;
-            int endingFinancialYear = 0;
+            int startingFinancialYear = 0, endingFinancialYear = 0, currentActiveYear = DateTime.Now.Year;
 
             var financialYears = unitWork.FinancialYearRepository.GetProjection(y => y.FinancialYear > 0, y => y.FinancialYear);
             var sectors = unitWork.SectorRepository.GetWithInclude(s => s.ParentSectorId != null && s.SectorType.IsPrimary == true, new string[] { "ParentSector" });

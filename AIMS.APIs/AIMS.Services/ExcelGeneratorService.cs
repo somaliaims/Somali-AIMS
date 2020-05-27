@@ -203,6 +203,8 @@ namespace AIMS.Services
                         else if (year.FinancialYear == projectsReport.CurrentFinancialYear)
                         {
                             yearCell.SetCellValue("Actual disbursements " + year.Label);
+                            yearCell.CellStyle = headerStyle;
+                            yearCell = row.CreateCell(++colIndex);
                             yearCell.SetCellValue("Planned disbursements " + year.Label);
                         }
                         else if(year.FinancialYear > projectsReport.CurrentFinancialYear)
@@ -291,22 +293,42 @@ namespace AIMS.Services
                         exchangeRateCell.CellStyle = numericCellStyle;
 
                         var disbursements = project.Disbursements;
+                        DisbursementAbstractView actualDisbursement = null, plannedDisbursement = null;
                         for(int yr = projectsReport.StartingFinancialYear; yr <= projectsReport.EndingFinancialYear; yr++)
                         {
-                            var disbursement = (from disb in disbursements
-                                        where disb.Year == yr
+                            actualDisbursement = (from disb in disbursements
+                                        where disb.Year == yr && disb.DisbursementType == "Actual"
                                         select disb).FirstOrDefault();
 
                             var disbursementCell = row.CreateCell(++col, CellType.Numeric);
-                            if (disbursement == null)
+                            if (actualDisbursement == null)
                             {
                                 disbursementCell.SetCellValue("0");
                             }
                             else
                             {
-                                disbursementCell.SetCellValue(Convert.ToDouble(disbursement.Disbursement));
+                                disbursementCell.SetCellValue(Convert.ToDouble(actualDisbursement.Disbursement));
                             }
                             disbursementCell.CellStyle = numericCellStyle;
+
+                            if (yr == projectsReport.CurrentFinancialYear)
+                            {
+                                plannedDisbursement = (from disb in disbursements
+                                                      where disb.Year == yr && disb.DisbursementType == "Planned"
+                                                      select disb).FirstOrDefault();
+
+                                var plannedDisbursementCell = row.CreateCell(++col, CellType.Numeric);
+                                if (plannedDisbursement == null)
+                                {
+                                    plannedDisbursementCell.SetCellValue("0");
+                                }
+                                else
+                                {
+                                    plannedDisbursementCell.SetCellValue(Convert.ToDouble(plannedDisbursement.Disbursement));
+                                }
+                                plannedDisbursementCell.CellStyle = numericCellStyle;
+                            }
+
                         }
 
                         var projectSectors = project.Sectors;
