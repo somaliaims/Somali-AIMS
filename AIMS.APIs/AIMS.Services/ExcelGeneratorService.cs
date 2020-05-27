@@ -1692,7 +1692,7 @@ namespace AIMS.Services
         {
             try
             {
-                var result = JObject.Parse(isJosn);
+                var result = JArray.Parse(isJosn);
                 return true;
             }
             catch(Exception)
