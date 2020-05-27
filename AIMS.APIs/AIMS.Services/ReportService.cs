@@ -180,7 +180,11 @@ namespace AIMS.Services
             int startingFinancialYear = 0;
             int endingFinancialYear = 0;
 
-            var financialYears = unitWork.FinancialYearRepository.GetProjection(y => y.FinancialYear > 0, y => y.FinancialYear);
+            var financialYearsList = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear > 0);
+            financialYearsList = (from fy in financialYearsList
+                                  orderby fy.FinancialYear
+                                  select fy);
+
             var sectors = unitWork.SectorRepository.GetWithInclude(s => s.ParentSectorId != null && s.SectorType.IsPrimary == true, new string[] { "ParentSector" });
             if (sectors.Any())
             {
@@ -195,9 +199,8 @@ namespace AIMS.Services
             
             var locations = unitWork.LocationRepository.GetProjection(l => l.Id != 0, l => new { l.Id, l.Location });
             var markers = unitWork.MarkerRepository.GetProjection(m => m.Id != 0, m => new { m.Id, m.FieldTitle });
+            var financialYearSettings = unitWork.FinancialYearSettingsRepository.GetOne(y => y.Id != 0);
             projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers", "Markers.Marker" });
-            startingFinancialYear = financialYears.Min();
-            endingFinancialYear = financialYears.Max();
 
             List<ProjectDetailLocationView> locationsList = new List<ProjectDetailLocationView>();
             if (locations.Any())
@@ -238,6 +241,9 @@ namespace AIMS.Services
                             where p.StartingFinancialYear.FinancialYear >= model.StartingYear ||
                             p.EndingFinancialYear.FinancialYear >= model.StartingYear
                             select p);
+                financialYearsList = (from fy in financialYearsList
+                                      where fy.FinancialYear >= startingFinancialYear
+                                      select fy);
             }
 
             if (model.EndingYear > 0)
@@ -247,6 +253,44 @@ namespace AIMS.Services
                             where p.EndingFinancialYear.FinancialYear <= model.EndingYear ||
                             p.StartingFinancialYear.FinancialYear <= model.EndingYear
                             select p);
+                financialYearsList = (from fy in financialYearsList
+                                      where fy.FinancialYear <= endingFinancialYear
+                                      select fy);
+            }
+
+            int fyDay = 1, fyMonth = 1, currentActiveYear = DateTime.Now.Year,
+                currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
+
+            if (financialYearSettings != null)
+            {
+                fyDay = financialYearSettings.Day;
+                fyMonth = financialYearSettings.Month;
+
+                if (fyDay != 1 && fyMonth != 1)
+                {
+                    if (currentMonth < fyMonth)
+                    {
+                        --currentActiveYear;
+                    }
+                    else if (currentMonth == fyMonth && currentDay < fyDay)
+                    {
+                        --currentActiveYear;
+                    }
+                }
+            }
+
+            var financialYears = (from y in financialYearsList
+                                  select y.FinancialYear);
+            startingFinancialYear = financialYears.Min();
+            endingFinancialYear = financialYears.Max();
+            List<FinancialYearMiniView> yearsView = new List<FinancialYearMiniView>();
+            foreach (var yr in financialYearsList)
+            {
+                yearsView.Add(new FinancialYearMiniView()
+                {
+                    FinancialYear = yr.FinancialYear,
+                    Label = yr.Label
+                });
             }
 
             foreach (var project in projects)
@@ -293,7 +337,6 @@ namespace AIMS.Services
                 });
             }
 
-
             if (sectorsList.Any())
             {
                 sectorsList = (from s in sectorsList
@@ -301,6 +344,8 @@ namespace AIMS.Services
                                select s).ToList();
             }
 
+            projectsReport.CurrentFinancialYear = currentActiveYear;
+            projectsReport.FinancialYears = yearsView;
             projectsReport.StartingFinancialYear = startingFinancialYear;
             projectsReport.EndingFinancialYear = endingFinancialYear;
             projectsReport.Markers = markersList;

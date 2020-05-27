@@ -81,6 +81,12 @@ namespace AIMS.APIs.Controllers
             return Ok(await projectService.GetAllDetailAsync());
         }
 
+        [HttpGet("FixProjectCurrencyInDisbursements")]
+        public async Task<IActionResult> FixProjectCurrencyInDisbursements()
+        {
+            return Ok(await projectService.FixProjectCurrencyInDisbursements());
+        }
+
         [HttpGet("GetProjectTitles")]
         public IActionResult GetProjectTitles()
         {

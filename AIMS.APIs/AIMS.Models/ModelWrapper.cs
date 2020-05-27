@@ -844,6 +844,8 @@ namespace AIMS.Models
     {
         public int StartingFinancialYear { get; set; }
         public int EndingFinancialYear { get; set; }
+        public int CurrentFinancialYear { get; set; }
+        public List<FinancialYearMiniView> FinancialYears { get; set; }
         public List<ProjectDetailSectorView> Sectors { get; set; }
         public List<ProjectDetailLocationView> Locations { get; set; }
         public List<ProjectDetailMarkerView> Markers { get; set; }
@@ -1416,6 +1418,12 @@ namespace AIMS.Models
     public class FinancialYearView
     {
         public int Id { get; set; }
+        public int FinancialYear { get; set; }
+        public string Label { get; set; }
+    }
+
+    public class FinancialYearMiniView
+    {
         public int FinancialYear { get; set; }
         public string Label { get; set; }
     }

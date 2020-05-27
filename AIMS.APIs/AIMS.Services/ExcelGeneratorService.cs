@@ -187,10 +187,28 @@ namespace AIMS.Services
                     exchangeRate.SetCellValue("Exchange rate");
                     exchangeRate.CellStyle = headerStyle;
 
-                    for (int yr = startingYear; yr <= endingYear; yr++)
+                    /*for (int yr = startingYear; yr <= endingYear; yr++)
                     {
                         var yearCell = row.CreateCell(++colIndex);
                         yearCell.SetCellValue("Disbursements " + yr.ToString());
+                        yearCell.CellStyle = headerStyle;
+                    }*/
+                    foreach(var year in projectsReport.FinancialYears)
+                    {
+                        var yearCell = row.CreateCell(++colIndex);
+                        if (year.FinancialYear < projectsReport.CurrentFinancialYear)
+                        {
+                            yearCell.SetCellValue("Actual disbursements " + year.Label);
+                        }
+                        else if (year.FinancialYear == projectsReport.CurrentFinancialYear)
+                        {
+                            yearCell.SetCellValue("Actual disbursements " + year.Label);
+                            yearCell.SetCellValue("Planned disbursements " + year.Label);
+                        }
+                        else if(year.FinancialYear > projectsReport.CurrentFinancialYear)
+                        {
+                            yearCell.SetCellValue("Planned disbursements " + year.Label);
+                        }
                         yearCell.CellStyle = headerStyle;
                     }
 
@@ -273,7 +291,7 @@ namespace AIMS.Services
                         exchangeRateCell.CellStyle = numericCellStyle;
 
                         var disbursements = project.Disbursements;
-                        for(int yr = startingYear; yr <= endingYear; yr++)
+                        for(int yr = projectsReport.StartingFinancialYear; yr <= projectsReport.EndingFinancialYear; yr++)
                         {
                             var disbursement = (from disb in disbursements
                                         where disb.Year == yr

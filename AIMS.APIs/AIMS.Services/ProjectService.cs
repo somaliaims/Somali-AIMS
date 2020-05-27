@@ -388,6 +388,12 @@ namespace AIMS.Services
         /// <param name="ratesList"></param>
         /// <returns></returns>
         decimal GetExchangeRateForCurrency(string currency, List<CurrencyWithRates> ratesList);
+
+        /// <summary>
+        /// Temporary written API for data correction only
+        /// </summary>
+        /// <returns></returns>
+        Task<ActionResponse> FixProjectCurrencyInDisbursements();
     }
 
     public class ProjectService : IProjectService
@@ -3767,7 +3773,7 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var disbursementCurrency = unitWork.CurrencyRepository.GetOne(c => c.Currency == model.Currency);
+                    var disbursementCurrency = unitWork.CurrencyRepository.GetOne(c => c.Currency == project.ProjectCurrency);
                     if (disbursementCurrency == null)
                     {
                         mHelper = new MessageHelper();
@@ -4129,7 +4135,7 @@ namespace AIMS.Services
                             }
                             if (isCurrencyUpdated)
                             {
-                                var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.Id != 0);
+                                var disbursements = unitWork.ProjectDisbursementsRepository.GetManyQueryable(d => d.ProjectId == project.Id);
                                 foreach(var disbursement in disbursements)
                                 {
                                     disbursement.Currency = project.ProjectCurrency;
@@ -4933,6 +4939,37 @@ namespace AIMS.Services
                     }
                 }
                 return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
+            }
+        }
+
+        public async Task<ActionResponse> FixProjectCurrencyInDisbursements()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "Disbursements" });
+                        foreach (var project in projects)
+                        {
+                            string projectCurrency = project.ProjectCurrency;
+                            decimal exchangeRate = project.ExchangeRate;
+
+                            foreach (var disbursement in project.Disbursements)
+                            {
+                                disbursement.Currency = project.ProjectCurrency;
+                                disbursement.ExchangeRate = project.ExchangeRate;
+                                unitWork.ProjectDisbursementsRepository.Update(disbursement);
+                            }
+                        }
+                        unitWork.Save();
+                        transaction.Commit();
+                    }
+                });
+                return response;
             }
         }
 
