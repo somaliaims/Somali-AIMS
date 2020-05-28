@@ -199,8 +199,30 @@ namespace AIMS.Services
             var locations = unitWork.LocationRepository.GetProjection(l => l.Id != 0, l => new { l.Id, l.Location });
             var markers = unitWork.MarkerRepository.GetProjection(m => m.Id != 0, m => new { m.Id, m.FieldTitle });
             var financialYearSettings = unitWork.FinancialYearSettingsRepository.GetOne(y => y.Id != 0);
-            projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers", "Markers.Marker" });
 
+            List<int> filterProjectIds = new List<int>();
+            if (model.OrganizationId > 0)
+            {
+                var projectFunders = unitWork.ProjectFundersRepository.GetMany(f => model.OrganizationId == f.FunderId);
+                var projectIdsFunders = (from pFunder in projectFunders
+                                         select pFunder.ProjectId).ToList<int>().Distinct();
+
+                var projectImplementers = unitWork.ProjectImplementersRepository.GetMany(f => model.OrganizationId == f.ImplementerId);
+                var projectIdsImplementers = (from pImplementer in projectImplementers
+                                              select pImplementer.ProjectId).ToList<int>().Distinct();
+
+                filterProjectIds = projectIdsFunders.Union(projectIdsImplementers).ToList();
+            }
+
+            if (filterProjectIds.Count > 0)
+            {
+                projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => filterProjectIds.Contains(p.Id), new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers", "Markers.Marker" });
+            }
+            else
+            {
+                projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers", "Markers.Marker" });
+            }
+            
             List<ProjectDetailLocationView> locationsList = new List<ProjectDetailLocationView>();
             if (locations.Any())
             {

@@ -1649,6 +1649,7 @@ namespace AIMS.Models
     {
         public int StartingYear { get; set; }
         public int EndingYear { get; set; }
+        public int OrganizationId { get; set; } = 0;
     }
 
     public class SearchEnvelopeModel
