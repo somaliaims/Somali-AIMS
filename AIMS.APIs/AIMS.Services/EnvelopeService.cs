@@ -74,7 +74,28 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                int currentYear = DateTime.Now.Year;
+                int currentYear = DateTime.Now.Year, fyMonth = 1, fyDay = 1;
+                int currentMonth = DateTime.Now.Month;
+                int currentDay = DateTime.Now.Day;
+                var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(s => s.Id != 0);
+                if (fySettings != null)
+                {
+                    fyMonth = fySettings.Month;
+                    fyDay = fySettings.Day;
+
+                    if (fyMonth != 1 && fyDay != 1)
+                    {
+                        if (currentMonth < fyMonth)
+                        {
+                            --currentYear;
+                        }
+                        else if (currentMonth == fyMonth && currentDay < fyDay)
+                        {
+                            --currentYear;
+                        }
+                    }
+                }
+
                 int previousYear = currentYear - 1;
                 int upperYearLimit = currentYear + 1;
                 EnvelopeYearlyView envelopeView = new EnvelopeYearlyView();
