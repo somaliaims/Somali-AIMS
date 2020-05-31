@@ -392,7 +392,11 @@ namespace AIMS.Services
             IQueryable<EFProject> projects;
             int startingFinancialYear = 0, endingFinancialYear = 0, currentActiveYear = DateTime.Now.Year;
 
-            var financialYears = unitWork.FinancialYearRepository.GetProjection(y => y.FinancialYear > 0, y => y.FinancialYear);
+            var financialYearsList = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear > 0);
+            financialYearsList = (from fy in financialYearsList
+                                  orderby fy.FinancialYear
+                                  select fy);
+
             var sectors = unitWork.SectorRepository.GetWithInclude(s => s.ParentSectorId != null && s.SectorType.IsPrimary == true, new string[] { "ParentSector" });
             if (sectors.Any())
             {
@@ -408,8 +412,6 @@ namespace AIMS.Services
             var locations = unitWork.LocationRepository.GetProjection(l => l.Id != 0, l => new { l.Id, l.Location });
             var markers = unitWork.MarkerRepository.GetProjection(m => m.Id != 0, m => new { m.Id, m.FieldTitle });
             projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id == id, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers", "Markers.Marker" });
-            startingFinancialYear = financialYears.Min();
-            endingFinancialYear = financialYears.Max();
 
             List<ProjectDetailLocationView> locationsList = new List<ProjectDetailLocationView>();
             if (locations.Any())
@@ -449,6 +451,45 @@ namespace AIMS.Services
             {
                 startingFinancialYear = firstProject.StartingFinancialYear.FinancialYear;
                 endingFinancialYear = firstProject.EndingFinancialYear.FinancialYear;
+            }
+
+            var financialYearSettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
+            int fyDay = 1, fyMonth = 1, currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
+            if (financialYearSettings != null)
+            {
+                fyDay = financialYearSettings.Day;
+                fyMonth = financialYearSettings.Month;
+                if (fyDay != 1 && fyMonth != 1)
+                {
+                    if (currentMonth < fyMonth)
+                    {
+                        --currentActiveYear;
+                    }
+                    else if (currentMonth == fyMonth && currentDay < fyDay)
+                    {
+                        --currentActiveYear;
+                    }
+                }
+            }
+
+            financialYearsList = (from fy in financialYearsList
+                                  where fy.FinancialYear >= startingFinancialYear &&
+                                  fy.FinancialYear <= endingFinancialYear
+                                  orderby fy.FinancialYear ascending
+                                  select fy);
+            var financialYears = (from y in financialYearsList
+                                  select y.FinancialYear);
+
+            startingFinancialYear = financialYears.Min();
+            endingFinancialYear = financialYears.Max();
+            List<FinancialYearMiniView> yearsView = new List<FinancialYearMiniView>();
+            foreach (var yr in financialYearsList)
+            {
+                yearsView.Add(new FinancialYearMiniView()
+                {
+                    FinancialYear = yr.FinancialYear,
+                    Label = yr.Label
+                });
             }
 
             foreach (var project in projects)
@@ -495,6 +536,8 @@ namespace AIMS.Services
                     Markers = mapper.Map<List<MarkerAbstractView>>(project.Markers)
                 });
             }
+            projectsReport.FinancialYears = yearsView;
+            projectsReport.CurrentFinancialYear = currentActiveYear;
             projectsReport.StartingFinancialYear = startingFinancialYear;
             projectsReport.EndingFinancialYear = endingFinancialYear;
             projectsReport.Markers = markersList;

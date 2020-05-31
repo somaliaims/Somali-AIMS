@@ -101,7 +101,7 @@ namespace AIMS.Services
                 {
                     int rowCounter = 0;
                     int currentYear = DateTime.Now.Year;
-                    int startingYear = (projectsReport.StartingFinancialYear < 2000) ? (currentYear - 3) : projectsReport.StartingFinancialYear,
+                    int startingYear = projectsReport.StartingFinancialYear,
                         endingYear = projectsReport.EndingFinancialYear;
                     var locations = projectsReport.Locations;
                     var markers = projectsReport.Markers;
@@ -294,24 +294,29 @@ namespace AIMS.Services
 
                         var disbursements = project.Disbursements;
                         DisbursementAbstractView actualDisbursement = null, plannedDisbursement = null;
-                        for(int yr = projectsReport.StartingFinancialYear; yr <= projectsReport.EndingFinancialYear; yr++)
+                        foreach(var year in projectsReport.FinancialYears)
                         {
-                            actualDisbursement = (from disb in disbursements
-                                        where disb.Year == yr && disb.DisbursementType == "Actual"
-                                        select disb).FirstOrDefault();
-
-                            var disbursementCell = row.CreateCell(++col, CellType.Numeric);
-                            if (actualDisbursement == null)
+                            int yr = year.FinancialYear;
+                            if (yr <= projectsReport.CurrentFinancialYear)
                             {
-                                disbursementCell.SetCellValue("0");
-                            }
-                            else
-                            {
-                                disbursementCell.SetCellValue(Convert.ToDouble(actualDisbursement.Disbursement));
-                            }
-                            disbursementCell.CellStyle = numericCellStyle;
+                                actualDisbursement = (from disb in disbursements
+                                                      where disb.Year == yr && disb.DisbursementType == "Actual"
+                                                      select disb).FirstOrDefault();
 
-                            if (yr == projectsReport.CurrentFinancialYear)
+                                var disbursementCell = row.CreateCell(++col, CellType.Numeric);
+                                if (actualDisbursement == null)
+                                {
+                                    disbursementCell.SetCellValue("0");
+                                }
+                                else
+                                {
+                                    disbursementCell.SetCellValue(Convert.ToDouble(actualDisbursement.Disbursement));
+                                }
+                                disbursementCell.CellStyle = numericCellStyle;
+                            }
+                            
+
+                            if (yr >= projectsReport.CurrentFinancialYear)
                             {
                                 plannedDisbursement = (from disb in disbursements
                                                       where disb.Year == yr && disb.DisbursementType == "Planned"
@@ -1650,7 +1655,6 @@ namespace AIMS.Services
                             yearlyTotalCell.CellStyle = numericHeaderStyle;
                             yearlyTotalCell.SetCellValue(yearlyTotalAmount);
                         }
-                        
                     }
 
                     row = excelSheet.CreateRow(++rowCounter);

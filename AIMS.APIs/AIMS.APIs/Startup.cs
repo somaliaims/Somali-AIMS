@@ -29,11 +29,13 @@ using AIMS.APIs.Scheduler;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Http;
+using AIMS.Models;
 
 namespace AIMS.APIs
 {
     public class Startup
     {
+        string managerEmail = "";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -47,7 +49,8 @@ namespace AIMS.APIs
             services.AddCors();
             string connectionString = "";
             string hostName = Environment.GetEnvironmentVariable("SQLSERVER_HOST");
-            string hostPassword = Environment.GetEnvironmentVariable("SQLSERVER_SA_PASSWORD"); 
+            string hostPassword = Environment.GetEnvironmentVariable("SQLSERVER_SA_PASSWORD");
+            managerEmail = Environment.GetEnvironmentVariable("MANAGER_EMAIL");
             if (!string.IsNullOrEmpty(hostName) && !string.IsNullOrEmpty(hostPassword))
             {
                 connectionString = $"Server={hostName};Database=AIMSDb;User ID=sa;Password={hostPassword}; MultipleActiveResultSets=true";
@@ -167,7 +170,7 @@ namespace AIMS.APIs
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         // Included full qualified for Ihosting environment because of ambiguity for same name with other namespace
         public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env,
-            Microsoft.AspNetCore.Hosting.IApplicationLifetime lifetime, IDistributedCache cache)
+            Microsoft.AspNetCore.Hosting.IApplicationLifetime lifetime, IDistributedCache cache, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -205,7 +208,21 @@ namespace AIMS.APIs
                 FileProvider = new PhysicalFileProvider(
                 Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot/ExcelFiles")),
                 RequestPath = new PathString("/StaticFiles")
-            }); ;
+            });
+
+            if (!string.IsNullOrEmpty(managerEmail))
+            {
+                AIMSDbContext dbContext = serviceProvider.GetRequiredService<AIMSDbContext>();
+                IMapper imapper = serviceProvider.GetRequiredService<IMapper>();
+                IUserService userService = new UserService(dbContext, imapper);
+                userService.AddAsync(new UserModel()
+                {
+                    Email = managerEmail,
+                    Password = "",
+                    UserType = UserTypes.Manager,
+                }, "").GetAwaiter().GetResult();
+
+            }
         }
     }
 }

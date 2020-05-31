@@ -76,6 +76,13 @@ namespace AIMS.Services
         Task<ActionResponse> AddAsync(UserModel user, string adminEmail);
 
         /// <summary>
+        /// Adds first manager account
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        ActionResponse AddSystemManager(string email);
+
+        /// <summary>
         /// Updates a user's organization
         /// </summary>
         /// <param name="user"></param>
@@ -156,6 +163,7 @@ namespace AIMS.Services
     {
         AIMSDbContext context;
         IMapper mapper;
+        readonly string DEFAULT_ORGANIZATION = "Default Organization";
 
         public UserService(AIMSDbContext cntxt, IMapper mappr)
         {
@@ -585,6 +593,16 @@ namespace AIMS.Services
                         response.Message = ex.Message;
                     }
                 }
+                return response;
+            }
+        }
+
+        public ActionResponse AddSystemManager(string email)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var defaultOrganization = unitWork.OrganizationRepository.GetOne(o => o.OrganizationName.Equals(DEFAULT_ORGANIZATION, StringComparison.OrdinalIgnoreCase));
                 return response;
             }
         }
