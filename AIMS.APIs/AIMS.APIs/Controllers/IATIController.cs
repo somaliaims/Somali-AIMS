@@ -140,6 +140,18 @@ namespace AIMS.APIs.Controllers
             return Ok(settings);
         }
 
+        [HttpPost("FixInactiveOrganizations")]
+        public IActionResult FixInactiveOrganizations()
+        {
+            string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
+            var response = iatiService.DeleteInActiveOrganizations(iatiFilePath);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpPost]
         [Route("SetIATISettings")]
         public IActionResult SetIATISettings([FromBody] IATISettings model)

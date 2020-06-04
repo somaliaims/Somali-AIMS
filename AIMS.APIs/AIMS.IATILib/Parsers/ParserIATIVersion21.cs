@@ -1211,53 +1211,80 @@ namespace AIMS.IATILib.Parsers
                 {
                     foreach (var activity in activities)
                     {
-                        var organizations = activity.Elements("participating-org");
-                        if (organizations.Any())
+                        bool isIncludeActivity = false;
+                        var transactions = activity.Elements("transaction");
+                        if (transactions.Any())
                         {
-                            foreach (var organization in organizations)
+                            DateTime transactionDate;
+                            DateTime anYearOldDate = DateTime.Now.AddYears(-1);
+                            foreach (var transaction in transactions)
                             {
-                                if (organization.HasAttributes && organization.Attribute("role") != null)
+                                if (DateTime.TryParse(transaction.Element("transaction-date")?.Attribute("iso-date")?.Value, out transactionDate))
                                 {
-                                    var narratives = organization.Elements("narrative");
-                                    string organizationName = "";
-                                    int code = 0;
-
-                                    if (organization.Attribute("type") != null)
+                                    if (transactionDate > anYearOldDate)
                                     {
-                                        int.TryParse(organization.Attribute("type")?.Value, out code);
+                                        isIncludeActivity = true;
+                                        break;
                                     }
+                                }
+                            }
 
-                                    if (narratives.Count() > 0)
+                            if (!isIncludeActivity)
+                            {
+                                continue;
+                            }
+                        }
+
+                        if (isIncludeActivity)
+                        {
+                            var organizations = activity.Elements("participating-org");
+                            if (organizations.Any())
+                            {
+                                foreach (var organization in organizations)
+                                {
+                                    if (organization.HasAttributes && organization.Attribute("role") != null)
                                     {
-                                        if (narratives.FirstOrDefault().HasAttributes)
+                                        var narratives = organization.Elements("narrative");
+                                        string organizationName = "";
+                                        int code = 0;
+
+                                        if (organization.Attribute("type") != null)
                                         {
-                                            organizationName = (from n in narratives
-                                                                where n.FirstAttribute.Value == "en"
-                                                                select n.Value).FirstOrDefault();
+                                            int.TryParse(organization.Attribute("type")?.Value, out code);
                                         }
-                                        else
+
+                                        if (narratives.Count() > 0)
                                         {
-                                            if (organization.HasElements && organization.Element("narrative") != null)
+                                            if (narratives.FirstOrDefault().HasAttributes)
                                             {
-                                                organizationName = organization.Element("narrative")?.Value;
-                                                organizationName = organizationName != null ? organizationName.Trim() : organizationName;
+                                                organizationName = (from n in narratives
+                                                                    where n.FirstAttribute.Value == "en"
+                                                                    select n.Value).FirstOrDefault();
+                                            }
+                                            else
+                                            {
+                                                if (organization.HasElements && organization.Element("narrative") != null)
+                                                {
+                                                    organizationName = organization.Element("narrative")?.Value;
+                                                    organizationName = organizationName != null ? organizationName.Trim() : organizationName;
+                                                }
                                             }
                                         }
-                                    }
 
-                                    if (!string.IsNullOrEmpty(organizationName) && !string.IsNullOrWhiteSpace(organizationName))
-                                    {
-                                        var isOrgExists = (from org in organizationsList
-                                                           where org.Name.ToLower() == organizationName.ToLower()
-                                                           select org).FirstOrDefault();
-
-                                        if (isOrgExists == null)
+                                        if (!string.IsNullOrEmpty(organizationName) && !string.IsNullOrWhiteSpace(organizationName))
                                         {
-                                            organizationsList.Add(new IATIOrganizationModel()
+                                            var isOrgExists = (from org in organizationsList
+                                                               where org.Name.ToLower() == organizationName.ToLower()
+                                                               select org).FirstOrDefault();
+
+                                            if (isOrgExists == null)
                                             {
-                                                Code = code,
-                                                Name = organizationName,
-                                            });
+                                                organizationsList.Add(new IATIOrganizationModel()
+                                                {
+                                                    Code = code,
+                                                    Name = organizationName,
+                                                });
+                                            }
                                         }
                                     }
                                 }

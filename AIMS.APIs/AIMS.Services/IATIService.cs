@@ -182,6 +182,13 @@ namespace AIMS.Services
         /// <param name="datedLessThan"></param>
         /// <returns></returns>
         ActionResponse Delete(DateTime datedLessThan);
+
+        /// <summary>
+        /// Deletes inactive organizations (Temporary API to fix data)
+        /// </summary>
+        /// <param name="dataFilePath"></param>
+        /// <returns></returns>
+        ActionResponse DeleteInActiveOrganizations(string dataFilePath);
     }
 
     public class IATIService : IIATIService
@@ -620,6 +627,30 @@ namespace AIMS.Services
                 else
                 {
                     response.Message = "0"; 
+                }
+
+                //Temporary script to delete any irrelevent IATI Organizations
+                List<EFIATIOrganization> iatiOrgsToDelete = new List<EFIATIOrganization>();
+                organizationsList = unitWork.IATIOrganizationRepository.GetManyQueryable(o => o.Id != 0);
+                foreach(var org in organizationsList)
+                {
+                    var isOrgInIATI = (from o in organizations
+                                       where o.Name.Trim().Equals(org.OrganizationName.Trim(), StringComparison.OrdinalIgnoreCase)
+                                       select o).FirstOrDefault();
+
+                    if (isOrgInIATI == null)
+                    {
+                        iatiOrgsToDelete.Add(org);
+                    }    
+                }
+
+                if (iatiOrgsToDelete.Count > 0)
+                {
+                    foreach(var org in iatiOrgsToDelete)
+                    {
+                        unitWork.IATIOrganizationRepository.Delete(org);
+                    }
+                    unitWork.Save();
                 }
             }
             catch(Exception ex)
@@ -1115,6 +1146,51 @@ namespace AIMS.Services
                     unitWork.IATIDataRepository.Delete(data);
                 }
                 unitWork.Save();
+                return response;
+            }
+        }
+
+        public ActionResponse DeleteInActiveOrganizations(string dataFilePath)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    XmlReader xReader = XmlReader.Create(dataFilePath);
+                    XDocument xDoc = XDocument.Load(xReader);
+                    var activity = (from el in xDoc.Descendants("iati-activity")
+                                    select el.FirstAttribute).FirstOrDefault();
+                    IParser parser = new ParserIATIVersion21();
+                    var organizations = parser.ExtractOrganizations(xDoc);
+                    List<EFIATIOrganization> iatiOrgsToDelete = new List<EFIATIOrganization>();
+                    var organizationsList = unitWork.IATIOrganizationRepository.GetManyQueryable(o => o.Id != 0);
+                    foreach (var org in organizationsList)
+                    {
+                        var isOrgInIATI = (from o in organizations
+                                           where o.Name.Trim().Equals(org.OrganizationName.Trim(), StringComparison.OrdinalIgnoreCase)
+                                           select o).FirstOrDefault();
+
+                        if (isOrgInIATI == null)
+                        {
+                            iatiOrgsToDelete.Add(org);
+                        }
+                    }
+
+                    if (iatiOrgsToDelete.Count > 0)
+                    {
+                        foreach (var org in iatiOrgsToDelete)
+                        {
+                            unitWork.IATIOrganizationRepository.Delete(org);
+                        }
+                        unitWork.Save();
+                    }
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
                 return response;
             }
         }
