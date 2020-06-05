@@ -389,9 +389,10 @@ namespace AIMS.Services
             ProjectReportView projectsReport = new ProjectReportView();
             List<ProjectDetailView> projectsList = new List<ProjectDetailView>();
             List<ProjectDetailSectorView> sectorsList = new List<ProjectDetailSectorView>();
+            List<OrganizationAbstractView> fundersList = new List<OrganizationAbstractView>();
+            List<OrganizationAbstractView> implementersList = new List<OrganizationAbstractView>();
             IQueryable<EFProject> projects;
             int startingFinancialYear = 0, endingFinancialYear = 0, currentActiveYear = DateTime.Now.Year;
-
             var financialYearsList = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear > 0);
             financialYearsList = (from fy in financialYearsList
                                   orderby fy.FinancialYear
@@ -500,7 +501,6 @@ namespace AIMS.Services
                                                         select i.Implementer.OrganizationName);
                 IEnumerable<string> organizations = funderNames.Union(implementerNames);
 
-                List<OrganizationAbstractView> fundersList = new List<OrganizationAbstractView>();
                 foreach (string org in funderNames)
                 {
                     fundersList.Add(new OrganizationAbstractView()
@@ -509,7 +509,6 @@ namespace AIMS.Services
                     });
                 }
 
-                List<OrganizationAbstractView> implementersList = new List<OrganizationAbstractView>();
                 foreach (string org in implementerNames)
                 {
                     implementersList.Add(new OrganizationAbstractView()
@@ -525,6 +524,8 @@ namespace AIMS.Services
                     ProjectCurrency = project.ProjectCurrency,
                     ProjectValue = project.ProjectValue,
                     ExchangeRate = project.ExchangeRate,
+                    StartDate = project.StartDate.Date.ToString(),
+                    EndDate = project.EndDate.Date.ToString(),
                     StartingFinancialYear = project.StartingFinancialYear.FinancialYear,
                     EndingFinancialYear = project.EndingFinancialYear.FinancialYear,
                     Funders = fundersList,

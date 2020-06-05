@@ -140,7 +140,7 @@ namespace AIMS.APIs.Controllers
             return Ok(settings);
         }
 
-        [HttpPost("FixInactiveOrganizations")]
+        [HttpPost("FixInactiveOrganizations")]  
         public IActionResult FixInactiveOrganizations()
         {
             string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
