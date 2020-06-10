@@ -526,6 +526,7 @@ namespace AIMS.Services
                     ExchangeRate = project.ExchangeRate,
                     StartDate = project.StartDate.Date.ToString(),
                     EndDate = project.EndDate.Date.ToString(),
+                    DateUpdated = project.DateUpdated.Date.ToString(),
                     StartingFinancialYear = project.StartingFinancialYear.FinancialYear,
                     EndingFinancialYear = project.EndingFinancialYear.FinancialYear,
                     Funders = fundersList,
@@ -1900,6 +1901,7 @@ namespace AIMS.Services
             {
                 exchangeRate = (exchangeRate <= 0) ? 1 : exchangeRate;
                 ProjectProfileReportBySector sectorProjectsReport = new ProjectProfileReportBySector();
+                sectorProjectsReport.SectorLevel = model.SectorLevel;
                 try
                 {
                     IQueryStringGenerator queryStringGenerator = new QueryStringGenerator();
@@ -2220,6 +2222,7 @@ namespace AIMS.Services
                     foreach (var sectorByProject in sectorsByProjects)
                     {
                         projectsBySector = new ProjectsBySector();
+                        projectsBySector.SectorId = sectorByProject.SectorId;
                         projectsBySector.SectorName = sectorByProject.Sector;
                         projectsBySector.ParentSectorId = sectorByProject.ParentSectorId;
                         if (projectsBySector.ParentSectorId > 0)

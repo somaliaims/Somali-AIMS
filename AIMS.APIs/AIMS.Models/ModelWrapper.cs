@@ -338,6 +338,8 @@ namespace AIMS.Models
         public decimal Amount { get; set; }
         public string DisbursementType { get; set; }
         public decimal Disbursement { get; set; }
+        public string Currency { get; set; }
+        public decimal ExchangeRate { get; set; }
     }
 
     public class MarkerAbstractView
@@ -499,6 +501,12 @@ namespace AIMS.Models
         public string ParentSector { get; set; }
         public string SectorName { get; set; }
         public bool IsUnAttributed { get; set; }
+    }
+
+    public class SectorMiniView
+    {
+        public int SectorId { get; set; }
+        public string SectorName { get; set; }
     }
 
     public class SectorViewModel
@@ -880,6 +888,7 @@ namespace AIMS.Models
         public string Description { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
+        public string DateUpdated { get; set; }
         public int StartingFinancialYear { get; set; }
         public int EndingFinancialYear { get; set; }
         public string ProjectCurrency { get; set; }
@@ -1827,6 +1836,7 @@ namespace AIMS.Models
 
     public class ProjectsBySector
     {
+        public int SectorId { get; set; }
         public string SectorName { get; set; }
         public int ParentSectorId { get; set; }
         public string ParentSector { get; set; }
@@ -1840,6 +1850,7 @@ namespace AIMS.Models
     public class ProjectProfileReportBySector
     {
         public Report ReportSettings { get; set; }
+        public SectorLevels SectorLevel { get; set; } = SectorLevels.Parent;
         public IEnumerable<ProjectsBySector> SectorProjectsList { get; set; }
     }
 

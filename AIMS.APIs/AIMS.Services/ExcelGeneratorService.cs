@@ -15,6 +15,7 @@ using System.Security.Permissions;
 using Newtonsoft.Json.Linq;
 using System.Threading;
 using System.Globalization;
+using System.Security.Cryptography;
 
 namespace AIMS.Services
 {
@@ -458,6 +459,25 @@ namespace AIMS.Services
             ActionResponse response = new ActionResponse();
             try
             {
+                var parentSectorIds = (from p in report.SectorProjectsList
+                                       where p.ParentSectorId != 0
+                                       select p.ParentSectorId).Distinct();
+                List<SectorMiniView> parentSectors = new List<SectorMiniView>();
+                foreach(var sectorId in parentSectorIds)
+                {
+                    string sectorName = (from s in report.SectorProjectsList
+                                         where s.ParentSectorId.Equals(sectorId)
+                                         select s.ParentSector).FirstOrDefault();
+                    parentSectors.Add(new SectorMiniView() { SectorId = sectorId, SectorName = sectorName });
+                }
+                if (parentSectors.Count() > 0)
+                {
+                    parentSectors = (from s in parentSectors
+                                     orderby s.SectorName
+                                     select s).ToList();
+                }
+                
+
                 Thread.CurrentThread.CurrentCulture = new CultureInfo("en-Us");
                 string sFileName = @"SectorProjects-" + DateTime.UtcNow.Ticks.ToString() + ".xlsx";
                 FileInfo file = new FileInfo(Path.Combine(sWebRootFolder, sFileName));
@@ -570,50 +590,121 @@ namespace AIMS.Services
                     plannedDisbursementsCol.SetCellValue("Planned disbursements (" + report.ReportSettings.DefaultCurrency + ")");
                     plannedDisbursementsCol.CellStyle = headerStyle;
 
-                    foreach (var sector in report.SectorProjectsList)
+                    if (report.SectorLevel == SectorLevels.Parent)
                     {
-                        decimal totalFunding = 0, totalDisbursements = 0;
-                        totalFunding = Math.Round(sector.ActualDisbursements, MidpointRounding.AwayFromZero);
-                        totalDisbursements = Math.Round(sector.TotalDisbursements, MidpointRounding.AwayFromZero);
-                        row = excelSheet.CreateRow(++rowCounter);
-                        grandTotalFunding += Math.Round(sector.ActualDisbursements, MidpointRounding.AwayFromZero);
-                        grandTotalDisbursement += Math.Round(sector.TotalDisbursements, MidpointRounding.AwayFromZero);
-
-                        var groupTitleCell = row.CreateCell(0, CellType.String);
-                        excelSheet.AddMergedRegion(new CellRangeAddress(
-                            rowCounter, rowCounter, 0, groupHeaderColumns));
-                        groupTitleCell.SetCellValue(sector.SectorName);
-                        groupTitleCell.CellStyle = groupHeaderStyle;
-
-                        var groupDisbursementTotalCell = row.CreateCell(3, CellType.Numeric);
-                        groupDisbursementTotalCell.SetCellValue(Convert.ToDouble(sector.TotalDisbursements));
-                        groupDisbursementTotalCell.CellStyle = numericGroupHeaderStyle;
-
-                        var groupPlannedDisbursementTotalCell = row.CreateCell(4);
-                        groupPlannedDisbursementTotalCell.SetCellValue("");
-
-                        foreach (var project in sector.Projects)
+                        foreach(var sector in parentSectors)
                         {
+                            decimal totalFunding = 0, totalDisbursements = 0, actualDisbursements = 0, plannedDisbursements = 0;
+                            actualDisbursements = (from p in report.SectorProjectsList
+                                                  where p.ParentSectorId.Equals(sector.SectorId)
+                                                  select p.ActualDisbursements).Sum();
+                            plannedDisbursements = (from p in report.SectorProjectsList
+                                                   where p.ParentSectorId.Equals(sector.SectorId)
+                                                   select p.PlannedDisbursements).Sum();
+                            totalDisbursements = (from p in report.SectorProjectsList
+                                                   where p.ParentSectorId.Equals(sector.SectorId)
+                                                   select p.TotalDisbursements).Sum();
+
+                            totalFunding = Math.Round(actualDisbursements, MidpointRounding.AwayFromZero);
+                            totalDisbursements = Math.Round(totalDisbursements, MidpointRounding.AwayFromZero);
                             row = excelSheet.CreateRow(++rowCounter);
-                            var titleDataCell = row.CreateCell(0);
-                            titleDataCell.SetCellValue(project.Title);
-                            titleDataCell.CellStyle = dataCellStyle;
+                            grandTotalFunding += totalFunding;
+                            grandTotalDisbursement += totalDisbursements;
 
-                            var funderDataCell = row.CreateCell(1);
-                            funderDataCell.SetCellValue(project.Funders);
-                            funderDataCell.CellStyle = dataCellStyle;
+                            var groupTitleCell = row.CreateCell(0, CellType.String);
+                            excelSheet.AddMergedRegion(new CellRangeAddress(
+                                rowCounter, rowCounter, 0, groupHeaderColumns));
+                            groupTitleCell.SetCellValue(sector.SectorName);
+                            groupTitleCell.CellStyle = groupHeaderStyle;
 
-                            var implementerDataCell = row.CreateCell(2);
-                            implementerDataCell.SetCellValue(project.Implementers);
-                            implementerDataCell.CellStyle = dataCellStyle;
+                            var groupDisbursementTotalCell = row.CreateCell(3, CellType.Numeric);
+                            groupDisbursementTotalCell.SetCellValue(Convert.ToDouble(actualDisbursements));
+                            groupDisbursementTotalCell.CellStyle = numericGroupHeaderStyle;
 
-                            var actualDisbursementDataCell = row.CreateCell(3, CellType.Numeric);
-                            actualDisbursementDataCell.SetCellValue(Convert.ToDouble(project.ActualDisbursements));
-                            actualDisbursementDataCell.CellStyle = numericCellStyle;
+                            var groupPlannedDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
+                            groupPlannedDisbursementTotalCell.SetCellValue(Convert.ToDouble(plannedDisbursements));
+                            groupPlannedDisbursementTotalCell.CellStyle = numericGroupHeaderStyle;
 
-                            var plannedDisbursementDataCell = row.CreateCell(4, CellType.Numeric);
-                            plannedDisbursementDataCell.SetCellValue(Convert.ToDouble(project.PlannedDisbursements));
-                            plannedDisbursementDataCell.CellStyle = numericCellStyle;
+                            var sectorProjectsList = (from p in report.SectorProjectsList
+                                                  where p.ParentSectorId.Equals(sector.SectorId)
+                                                  select p);
+
+                            foreach (var projectsList in sectorProjectsList)
+                            {
+                                foreach(var project in projectsList.Projects)
+                                {
+                                    row = excelSheet.CreateRow(++rowCounter);
+                                    var titleDataCell = row.CreateCell(0);
+                                    titleDataCell.SetCellValue(project.Title);
+                                    titleDataCell.CellStyle = dataCellStyle;
+
+                                    var funderDataCell = row.CreateCell(1);
+                                    funderDataCell.SetCellValue(project.Funders);
+                                    funderDataCell.CellStyle = dataCellStyle;
+
+                                    var implementerDataCell = row.CreateCell(2);
+                                    implementerDataCell.SetCellValue(project.Implementers);
+                                    implementerDataCell.CellStyle = dataCellStyle;
+
+                                    var actualDisbursementDataCell = row.CreateCell(3, CellType.Numeric);
+                                    actualDisbursementDataCell.SetCellValue(Convert.ToDouble(project.ActualDisbursements));
+                                    actualDisbursementDataCell.CellStyle = numericCellStyle;
+
+                                    var plannedDisbursementDataCell = row.CreateCell(4, CellType.Numeric);
+                                    plannedDisbursementDataCell.SetCellValue(Convert.ToDouble(project.PlannedDisbursements));
+                                    plannedDisbursementDataCell.CellStyle = numericCellStyle;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var sector in report.SectorProjectsList)
+                        {
+                            decimal totalFunding = 0, totalDisbursements = 0;
+                            totalFunding = Math.Round(sector.ActualDisbursements, MidpointRounding.AwayFromZero);
+                            totalDisbursements = Math.Round(sector.TotalDisbursements, MidpointRounding.AwayFromZero);
+                            row = excelSheet.CreateRow(++rowCounter);
+                            grandTotalFunding += Math.Round(sector.ActualDisbursements, MidpointRounding.AwayFromZero);
+                            grandTotalDisbursement += Math.Round(sector.TotalDisbursements, MidpointRounding.AwayFromZero);
+
+                            var groupTitleCell = row.CreateCell(0, CellType.String);
+                            excelSheet.AddMergedRegion(new CellRangeAddress(
+                                rowCounter, rowCounter, 0, groupHeaderColumns));
+                            groupTitleCell.SetCellValue(sector.SectorName);
+                            groupTitleCell.CellStyle = groupHeaderStyle;
+
+                            var groupDisbursementTotalCell = row.CreateCell(3, CellType.Numeric);
+                            groupDisbursementTotalCell.SetCellValue(Convert.ToDouble(sector.ActualDisbursements));
+                            groupDisbursementTotalCell.CellStyle = numericGroupHeaderStyle;
+
+                            var groupPlannedDisbursementTotalCell = row.CreateCell(4, CellType.Numeric);
+                            groupPlannedDisbursementTotalCell.SetCellValue(Convert.ToDouble(sector.PlannedDisbursements));
+                            groupPlannedDisbursementTotalCell.CellStyle = numericGroupHeaderStyle;
+
+                            foreach (var project in sector.Projects)
+                            {
+                                row = excelSheet.CreateRow(++rowCounter);
+                                var titleDataCell = row.CreateCell(0);
+                                titleDataCell.SetCellValue(project.Title);
+                                titleDataCell.CellStyle = dataCellStyle;
+
+                                var funderDataCell = row.CreateCell(1);
+                                funderDataCell.SetCellValue(project.Funders);
+                                funderDataCell.CellStyle = dataCellStyle;
+
+                                var implementerDataCell = row.CreateCell(2);
+                                implementerDataCell.SetCellValue(project.Implementers);
+                                implementerDataCell.CellStyle = dataCellStyle;
+
+                                var actualDisbursementDataCell = row.CreateCell(3, CellType.Numeric);
+                                actualDisbursementDataCell.SetCellValue(Convert.ToDouble(project.ActualDisbursements));
+                                actualDisbursementDataCell.CellStyle = numericCellStyle;
+
+                                var plannedDisbursementDataCell = row.CreateCell(4, CellType.Numeric);
+                                plannedDisbursementDataCell.SetCellValue(Convert.ToDouble(project.PlannedDisbursements));
+                                plannedDisbursementDataCell.CellStyle = numericCellStyle;
+                            }
                         }
                     }
 
