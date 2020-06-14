@@ -1163,7 +1163,7 @@ namespace AIMS.Services
                                     select el.FirstAttribute).FirstOrDefault();
                     IParser parser = new ParserIATIVersion21();
                     var organizations = parser.ExtractOrganizations(xDoc);
-                    List<EFIATIOrganization> iatiOrgsToDelete = new List<EFIATIOrganization>();
+                    /*List<EFIATIOrganization> iatiOrgsToDelete = new List<EFIATIOrganization>();
                     var organizationsList = unitWork.IATIOrganizationRepository.GetManyQueryable(o => o.Id != 0);
                     foreach (var org in organizationsList)
                     {
@@ -1184,7 +1184,22 @@ namespace AIMS.Services
                             unitWork.IATIOrganizationRepository.Delete(org);
                         }
                         unitWork.Save();
+                    }*/
+                    var organizationsToDelete = unitWork.IATIOrganizationRepository.GetManyQueryable(o => o.Id != 0);
+                    foreach(var org in organizationsToDelete)
+                    {
+                        unitWork.IATIOrganizationRepository.Delete(org);
                     }
+                    unitWork.Save();
+
+                    foreach(var org in organizations)
+                    {
+                        unitWork.IATIOrganizationRepository.Insert(new EFIATIOrganization()
+                        {
+                            OrganizationName = org.Name.Trim(),
+                        });
+                    }
+                    unitWork.Save();
                 }
                 catch(Exception ex)
                 {

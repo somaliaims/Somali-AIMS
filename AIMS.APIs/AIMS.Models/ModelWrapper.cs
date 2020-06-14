@@ -1851,6 +1851,7 @@ namespace AIMS.Models
     {
         public Report ReportSettings { get; set; }
         public SectorLevels SectorLevel { get; set; } = SectorLevels.Parent;
+        public int UnAttributedSectorId { get; set; } = 0;
         public IEnumerable<ProjectsBySector> SectorProjectsList { get; set; }
     }
 

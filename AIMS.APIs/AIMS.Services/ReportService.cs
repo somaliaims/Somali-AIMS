@@ -2165,7 +2165,10 @@ namespace AIMS.Services
                     List<ProjectViewForSector> projectsListForSector = null;
                     ICollection<SectorWithProjects> sectorsByProjects = new List<SectorWithProjects>();
 
-                    var sectors = unitWork.SectorRepository.GetProjection(s => s.Id != 0, s => new { s.Id, s.SectorName });
+                    var sectors = unitWork.SectorRepository.GetProjection(s => s.Id != 0, s => new { s.Id, s.SectorName, s.IsUnAttributed });
+                    sectorProjectsReport.UnAttributedSectorId = (from s in sectors
+                                                                 where s.IsUnAttributed == true
+                                                                 select s.Id).FirstOrDefault();
                     projectSectors = (from ps in projectSectors
                                       orderby ps.Sector.SectorName
                                       select ps);

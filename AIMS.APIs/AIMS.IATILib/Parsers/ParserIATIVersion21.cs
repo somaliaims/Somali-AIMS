@@ -800,10 +800,10 @@ namespace AIMS.IATILib.Parsers
                                               where p.TrimmedTitle.Contains(trimmedTitle, StringComparison.OrdinalIgnoreCase)
                                               select p).FirstOrDefault();
 
-                        if (isProjectAdded != null)
+                        /*if (isProjectAdded != null)
                         {
                             continue;
-                        }
+                        }*/
 
                         var financeType = activity.Element("default-finance-type");
                         if (financeType != null)
@@ -852,6 +852,114 @@ namespace AIMS.IATILib.Parsers
                         var organizations = activity.Elements("participating-org");
                         List<IATIOrganizationView> organizationList = new List<IATIOrganizationView>();
                         if (organizations.Any())
+                        {
+                            foreach (var organization in organizations)
+                            {
+                                if (organization.HasAttributes && organization.Attribute("role") != null)
+                                {
+                                    var narratives = organization.Elements("narrative");
+                                    string organizationName = "";
+                                    int code = 0;
+
+                                    if (organization.Attribute("type") != null)
+                                    {
+                                        int.TryParse(organization.Attribute("type")?.Value, out code);
+                                    }
+
+                                    if (narratives.Count() > 0)
+                                    {
+                                        if (narratives.FirstOrDefault().HasAttributes)
+                                        {
+                                            organizationName = (from n in narratives
+                                                                where n.FirstAttribute.Value == "en"
+                                                                select n.Value).FirstOrDefault();
+                                        }
+                                        else
+                                        {
+                                            if (organization.HasElements && organization.Element("narrative") != null)
+                                            {
+                                                organizationName = organization.Element("narrative")?.Value;
+                                                organizationName = organizationName != null ? organizationName.Trim() : organizationName;
+                                            }
+                                        }
+                                    }
+
+                                    if (!string.IsNullOrEmpty(organizationName))
+                                    {
+                                        var isOrganizationExists = (from o in organizationList
+                                                                    where o.Name.ToLower() == organizationName.ToLower()
+                                                                    select o).FirstOrDefault();
+
+                                        if (isOrganizationExists == null && !string.IsNullOrEmpty(organizationName))
+                                        {
+                                            organizationList.Add(new IATIOrganizationView()
+                                            {
+                                                Id = orgCounter,
+                                                Code = code,
+                                                Name = organizationName,
+                                            });
+                                        }
+                                        ++orgCounter;
+                                    }
+                                }
+                            }
+                        }
+                        /*var organizations = activity.Elements("participating-org");
+                        List<IATIOrganizationView> organizationList = new List<IATIOrganizationView>();
+                        if (organizations.Any())
+                        {
+                            foreach (var organization in organizations)
+                            {
+                                if (organization.HasAttributes && organization.Attribute("role") != null)
+                                {
+                                    var narratives = organization.Elements("narrative");
+                                    string organizationName = "";
+                                    int code = 0;
+
+                                    if (organization.Attribute("type") != null)
+                                    {
+                                        int.TryParse(organization.Attribute("type")?.Value, out code);
+                                    }
+
+                                    if (narratives.Count() > 0)
+                                    {
+                                        if (narratives.FirstOrDefault().HasAttributes)
+                                        {
+                                            organizationName = (from n in narratives
+                                                                where n.FirstAttribute.Value == "en"
+                                                                select n.Value).FirstOrDefault();
+                                        }
+                                        else
+                                        {
+                                            if (organization.HasElements && organization.Element("narrative") != null)
+                                            {
+                                                organizationName = organization.Element("narrative")?.Value;
+                                                organizationName = organizationName != null ? organizationName.Trim() : organizationName;
+                                            }
+                                        }
+                                    }
+
+                                    if (!string.IsNullOrEmpty(organizationName))
+                                    {
+                                        var isOrganizationExists = (from o in organizationList
+                                                                    where o.Name.ToLower() == organizationName.ToLower()
+                                                                    select o).FirstOrDefault();
+
+                                        if (isOrganizationExists == null && !string.IsNullOrEmpty(organizationName))
+                                        {
+                                            organizationList.Add(new IATIOrganizationView()
+                                            {
+                                                Id = orgCounter,
+                                                Code = code,
+                                                Name = organizationName,
+                                            });
+                                        }
+                                        ++orgCounter;
+                                    }
+                                }
+                            }
+                        }*/
+                        /*if (organizations.Any())
                         {
                             foreach (var organization in organizations)
                             {
@@ -906,7 +1014,7 @@ namespace AIMS.IATILib.Parsers
                                     }
                                 }
                             }
-                        }
+                        }*/
 
                         var aSectors = activity.Elements("sector");
                         List<IATISectorView> sectors = new List<IATISectorView>();
@@ -1232,6 +1340,19 @@ namespace AIMS.IATILib.Parsers
                             if (!isIncludeActivity)
                             {
                                 continue;
+                            }
+                        }
+
+                        var activityStatus = activity.Element("activity-status");
+                        if (activityStatus.Attribute("code") != null)
+                        {
+                            int activityStatusVal = 0;
+                            if (int.TryParse(activityStatus.Attribute("code")?.Value, out activityStatusVal))
+                            {
+                                if (activityStatusVal == 4 || activityStatusVal == 5)
+                                {
+                                    continue;
+                                }
                             }
                         }
 

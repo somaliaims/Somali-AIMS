@@ -16,6 +16,7 @@ using Newtonsoft.Json.Linq;
 using System.Threading;
 using System.Globalization;
 using System.Security.Cryptography;
+using NPOI.POIFS.Properties;
 
 namespace AIMS.Services
 {
@@ -461,7 +462,7 @@ namespace AIMS.Services
             {
                 var parentSectorIds = (from p in report.SectorProjectsList
                                        where p.ParentSectorId != 0
-                                       select p.ParentSectorId).Distinct();
+                                       select p.ParentSectorId).Distinct().ToList();
                 List<SectorMiniView> parentSectors = new List<SectorMiniView>();
                 foreach(var sectorId in parentSectorIds)
                 {
@@ -470,13 +471,22 @@ namespace AIMS.Services
                                          select s.ParentSector).FirstOrDefault();
                     parentSectors.Add(new SectorMiniView() { SectorId = sectorId, SectorName = sectorName });
                 }
+
+                if (report.SectorLevel == SectorLevels.Parent && report.UnAttributedSectorId > 0)
+                {
+                    string sectorName = (from s in report.SectorProjectsList
+                                         where s.SectorId.Equals(report.UnAttributedSectorId)
+                                         select s.SectorName).FirstOrDefault();
+                    parentSectors.Add(new SectorMiniView() { SectorId = report.UnAttributedSectorId, SectorName = sectorName });
+                    parentSectorIds.Add(report.UnAttributedSectorId);
+                }
+
                 if (parentSectors.Count() > 0)
                 {
                     parentSectors = (from s in parentSectors
                                      orderby s.SectorName
                                      select s).ToList();
                 }
-                
 
                 Thread.CurrentThread.CurrentCulture = new CultureInfo("en-Us");
                 string sFileName = @"SectorProjects-" + DateTime.UtcNow.Ticks.ToString() + ".xlsx";
@@ -595,15 +605,31 @@ namespace AIMS.Services
                         foreach(var sector in parentSectors)
                         {
                             decimal totalFunding = 0, totalDisbursements = 0, actualDisbursements = 0, plannedDisbursements = 0;
-                            actualDisbursements = (from p in report.SectorProjectsList
-                                                  where p.ParentSectorId.Equals(sector.SectorId)
-                                                  select p.ActualDisbursements).Sum();
-                            plannedDisbursements = (from p in report.SectorProjectsList
-                                                   where p.ParentSectorId.Equals(sector.SectorId)
-                                                   select p.PlannedDisbursements).Sum();
-                            totalDisbursements = (from p in report.SectorProjectsList
-                                                   where p.ParentSectorId.Equals(sector.SectorId)
-                                                   select p.TotalDisbursements).Sum();
+                            
+                            if (sector.SectorId == report.UnAttributedSectorId)
+                            {
+                                actualDisbursements = (from p in report.SectorProjectsList
+                                                       where p.SectorId.Equals(sector.SectorId)
+                                                       select p.ActualDisbursements).Sum();
+                                plannedDisbursements = (from p in report.SectorProjectsList
+                                                        where p.SectorId.Equals(sector.SectorId)
+                                                        select p.PlannedDisbursements).Sum();
+                                totalDisbursements = (from p in report.SectorProjectsList
+                                                      where p.SectorId.Equals(sector.SectorId)
+                                                      select p.TotalDisbursements).Sum();
+                            }
+                            else
+                            {
+                                actualDisbursements = (from p in report.SectorProjectsList
+                                                       where p.ParentSectorId.Equals(sector.SectorId)
+                                                       select p.ActualDisbursements).Sum();
+                                plannedDisbursements = (from p in report.SectorProjectsList
+                                                        where p.ParentSectorId.Equals(sector.SectorId)
+                                                        select p.PlannedDisbursements).Sum();
+                                totalDisbursements = (from p in report.SectorProjectsList
+                                                      where p.ParentSectorId.Equals(sector.SectorId)
+                                                      select p.TotalDisbursements).Sum();
+                            }
 
                             totalFunding = Math.Round(actualDisbursements, MidpointRounding.AwayFromZero);
                             totalDisbursements = Math.Round(totalDisbursements, MidpointRounding.AwayFromZero);
@@ -625,9 +651,24 @@ namespace AIMS.Services
                             groupPlannedDisbursementTotalCell.SetCellValue(Convert.ToDouble(plannedDisbursements));
                             groupPlannedDisbursementTotalCell.CellStyle = numericGroupHeaderStyle;
 
-                            var sectorProjectsList = (from p in report.SectorProjectsList
-                                                  where p.ParentSectorId.Equals(sector.SectorId)
-                                                  select p);
+                            IEnumerable<ProjectsBySector> sectorProjectsList = null;
+                            if (sector.SectorId == report.UnAttributedSectorId)
+                            {
+                                sectorProjectsList = (from p in report.SectorProjectsList
+                                                      where p.SectorId.Equals(sector.SectorId)
+                                                      select p);
+                            }
+                            else
+                            {
+                                sectorProjectsList = (from p in report.SectorProjectsList
+                                                      where p.ParentSectorId.Equals(sector.SectorId)
+                                                      select p);
+                            }
+                                
+                            if (sectorProjectsList == null)
+                            {
+                                sectorProjectsList = new List<ProjectsBySector>();
+                            }
 
                             foreach (var projectsList in sectorProjectsList)
                             {
