@@ -363,6 +363,14 @@ namespace AIMS.Models
         public decimal FundsPercentage { get; set; }
     }
 
+    public class PercentInProjectView
+    {
+        public int ProjectId { get; set; }
+        public decimal Percentage { get; set; }
+    }
+
+
+
     public class SectorAbstractView
     {
         public string Name { get; set; }
@@ -1089,6 +1097,10 @@ namespace AIMS.Models
         public decimal ExchangeRate { get; set; }
         public int FundingTypeId { get; set; }
         public string Description { get; set; }
+        [Required(ErrorMessage = "Provide a valid project start date")]
+        public DateTime StartDate { get; set; }
+        [Required(ErrorMessage = "Provide a valid project end date")]
+        public DateTime EndDate { get; set; }
         [Required]
         public int StartingFinancialYear { get; set; }
         [Required]

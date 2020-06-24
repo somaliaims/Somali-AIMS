@@ -384,6 +384,24 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Unauthorized user access to api");
             }
+            decimal exchangeRate = 1;
+            var dated = DateTime.Now;
+            var rates = await ratesService.GetCurrencyRatesForDate(dated);
+            if (rates.Rates == null)
+            {
+                string apiKey = ratesService.GetAPIKeyForOpenExchange();
+                rates = await ratesHttpService.GetRatesAsync(apiKey);
+                if (rates.Rates != null)
+                {
+                    ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                    exchangeRate = projectService.GetExchangeRateForCurrency(model.ProjectCurrency, rates.Rates);
+                }
+            }
+            else
+            {
+                exchangeRate = projectService.GetExchangeRateForCurrency(model.ProjectCurrency, rates.Rates);
+            }
+            model.ExchangeRate = exchangeRate;
             var response = await projectService.MergeProjectsAsync(model, userId);
             if (!response.Success)
             {
