@@ -4545,6 +4545,8 @@ namespace AIMS.Services
                     return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
                 }
 
+                model.StartingFinancialYear = model.StartDate.Year;
+                model.EndingFinancialYear = model.EndDate.Year;
                 int fyMonth = 1, fyDay = 1, startingMonth = model.StartDate.Month, startDay = model.StartDate.Day,
                         endingMonth = model.EndDate.Month, endingDay = model.EndDate.Day;
                 var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
