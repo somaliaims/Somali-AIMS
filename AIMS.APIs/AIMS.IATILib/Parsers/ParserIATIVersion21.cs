@@ -1320,11 +1320,15 @@ namespace AIMS.IATILib.Parsers
                     foreach (var activity in activities)
                     {
                         bool isIncludeActivity = false;
+                        DateTime todaysDate = DateTime.Now;
+                        DateTime parsedDate = DateTime.Now;
+                        string startDate = "", startPlanned = "", endDate = "", endPlanned = "";
                         var transactions = activity.Elements("transaction");
                         if (transactions.Any())
                         {
                             DateTime transactionDate;
                             DateTime anYearOldDate = DateTime.Now.AddYears(-1);
+                            
                             foreach (var transaction in transactions)
                             {
                                 if (DateTime.TryParse(transaction.Element("transaction-date")?.Attribute("iso-date")?.Value, out transactionDate))
@@ -1350,6 +1354,59 @@ namespace AIMS.IATILib.Parsers
                             if (int.TryParse(activityStatus.Attribute("code")?.Value, out activityStatusVal))
                             {
                                 if (activityStatusVal == 4 || activityStatusVal == 5)
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+
+                        //Extracting dates
+                        var dates = activity.Elements("activity-date");
+                        if (dates.Any())
+                        {
+                            foreach (var date in dates)
+                            {
+                                if (date.HasAttributes && date.Attribute("type") != null)
+                                {
+                                    if (date.Attribute("type").Value.Equals("1"))
+                                    {
+                                        startPlanned = date.Attribute("iso-date")?.Value;
+                                    }
+                                    else if (date.Attribute("type").Value.Equals("2"))
+                                    {
+                                        startDate = date.Attribute("iso-date")?.Value;
+                                    }
+                                    else if (date.Attribute("type").Value.Equals("3"))
+                                    {
+                                        endPlanned = date.Attribute("iso-date")?.Value;
+                                    }
+                                    else if (date.Attribute("type").Value.Equals("2"))
+                                    {
+                                        endDate = date.Attribute("iso-date")?.Value;
+                                    }
+                                }
+                            }
+                            if (string.IsNullOrEmpty(startDate))
+                            {
+                                startDate = startPlanned;
+                            }
+                            if (string.IsNullOrEmpty(endDate))
+                            {
+                                endDate = endPlanned;
+                            }
+                        }
+
+                        if (string.IsNullOrEmpty(startDate))
+                        {
+                            startDate = "N/A";
+                        }
+
+                        if (!string.IsNullOrEmpty(endDate))
+                        {
+                            if (DateTime.TryParse(endDate, out parsedDate))
+                            {
+                                TimeSpan timeSpan = todaysDate - parsedDate;
+                                if (timeSpan.Days > 365)
                                 {
                                     continue;
                                 }

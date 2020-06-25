@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AIMS.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace AIMS.Services
 {
@@ -435,47 +436,37 @@ namespace AIMS.Services
                         }
 
                         var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => orgIds.Contains(f.FunderId));
+                        var funderProjectIds = (from p in projectFunders
+                                                select p.ProjectId).Distinct();
                         List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
-                        foreach (var funder in projectFunders)
+                        foreach (var projectId in funderProjectIds)
                         {
-                            var funderExists = (from f in fundersList
-                                                where f.FunderId == funder.FunderId && f.ProjectId == funder.ProjectId
-                                                select f).FirstOrDefault();
-
-                            if (funderExists == null)
+                            fundersList.Add(new EFProjectFunders()
                             {
-                                fundersList.Add(new EFProjectFunders()
-                                {
-                                    ProjectId = funder.ProjectId,
-                                    FunderId = newOrganization.Id,
-                                });
-                            }
+                                ProjectId = projectId,
+                                FunderId = newOrganization.Id,
+                            });
                         }
-                        if (projectFunders.Any())
+                        if (fundersList.Any())
                         {
                             unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
                             await unitWork.SaveAsync();
                         }
 
                         var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(i => orgIds.Contains(i.ImplementerId));
+                        var implementerProjectIds = (from p in projectImplementers
+                                                     select p.ProjectId).Distinct();
                         List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
-                        foreach (var implementer in projectImplementers)
+                        foreach (var projectId in implementerProjectIds)
                         {
-                            var implementerExists = (from i in implementersList
-                                                     where i.ImplementerId == i.ImplementerId && i.ProjectId == i.ProjectId
-                                                     select i).FirstOrDefault();
-
-                            if (implementerExists == null)
+                            implementersList.Add(new EFProjectImplementers()
                             {
-                                implementersList.Add(new EFProjectImplementers()
-                                {
-                                    ImplementerId = newOrganization.Id,
-                                    ProjectId = implementer.ProjectId
-                                });
-                            }
+                                ImplementerId = newOrganization.Id,
+                                ProjectId = projectId
+                            });
                         }
 
-                        if (projectImplementers.Any())
+                        if (implementersList.Any())
                         {
                             unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
                             await unitWork.SaveAsync();
@@ -737,46 +728,36 @@ namespace AIMS.Services
                             }
 
                             var projectFunders = unitWork.ProjectFundersRepository.GetManyQueryable(f => orgIds.Contains(f.FunderId));
+                            var funderProjectIds = (from f in projectFunders
+                                                    select f.ProjectId).Distinct();
                             List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
-                            foreach (var funder in projectFunders)
+                            foreach (var projectId in funderProjectIds)
                             {
-                                var funderExists = (from f in fundersList
-                                                    where f.FunderId == funder.FunderId && f.ProjectId == funder.ProjectId
-                                                    select f).FirstOrDefault();
-
-                                if (funderExists == null)
+                                fundersList.Add(new EFProjectFunders()
                                 {
-                                    fundersList.Add(new EFProjectFunders()
-                                    {
-                                        ProjectId = funder.ProjectId,
-                                        FunderId = newOrganization.Id,
-                                    });
-                                }
+                                    ProjectId = projectId,
+                                    FunderId = newOrganization.Id,
+                                });
                             }
-                            if (projectFunders.Any())
+                            if (fundersList.Any())
                             {
                                 unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
                                 await unitWork.SaveAsync();
                             }
 
                             var projectImplementers = unitWork.ProjectImplementersRepository.GetManyQueryable(i => orgIds.Contains(i.ImplementerId));
+                            var implementerProjectIds = (from i in projectImplementers
+                                                     select i.ProjectId).Distinct();
                             List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
-                            foreach (var implementer in projectImplementers)
+                            foreach (var projectId in implementerProjectIds)
                             {
-                                var implementerExists = (from i in implementersList
-                                                         where i.ImplementerId == i.ImplementerId && i.ProjectId == i.ProjectId
-                                                         select i).FirstOrDefault();
-
-                                if (implementerExists == null)
+                                implementersList.Add(new EFProjectImplementers()
                                 {
-                                    implementersList.Add(new EFProjectImplementers()
-                                    {
-                                        ImplementerId = newOrganization.Id,
-                                        ProjectId = implementer.ProjectId
-                                    });
-                                }
+                                    ImplementerId = newOrganization.Id,
+                                    ProjectId = projectId
+                                });
                             }
-                            if (projectImplementers.Any())
+                            if (implementersList.Any())
                             {
                                 unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
                                 await unitWork.SaveAsync();
