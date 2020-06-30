@@ -243,6 +243,15 @@ namespace AIMS.Services.Helpers
         string ChangedMappingAffectedProjectsMessage(List<string> affectedProjects, string oldSector, string newSector);
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="affectedProjects"></param>
+        /// <param name="oldOrganization"></param>
+        /// <param name="newOrganization"></param>
+        /// <returns></returns>
+        string OrganizationDeletedAndMappingMessage(List<string> affectedProjects, string oldOrganization, string newOrganization);
+
+        /// <summary>
         /// Formats user approval message
         /// </summary>
         /// <param name="message"></param>
@@ -783,6 +792,20 @@ namespace AIMS.Services.Helpers
             formattedMessageList.Add("</ul>");
             formattedMessageList.Add("<h4>Old sector</h4><p>" + oldSector + "</p>");
             formattedMessageList.Add("<h4>New sector</h4><p>" + newSector + "</p>");
+            return (String.Join("", formattedMessageList));
+        }
+
+        public string OrganizationDeletedAndMappingMessage(List<string> affectedProjects, string oldOrganization, string newOrganization)
+        {
+            List<string> formattedMessageList = new List<string>();
+            formattedMessageList.Add("<h4>Projects affected</h4><ul>");
+            foreach (var project in affectedProjects)
+            {
+                formattedMessageList.Add("<li>" + project + "</li>");
+            }
+            formattedMessageList.Add("</ul>");
+            formattedMessageList.Add("<h4>Deleted organization name</h4><p>" + oldOrganization + "</p>");
+            formattedMessageList.Add("<h4>Mapped to organization name </h4><p>" + newOrganization + "</p>");
             return (String.Join("", formattedMessageList));
         }
     }

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using System.Security.Cryptography;
 
 namespace AIMS.Services
 {
@@ -922,7 +923,6 @@ namespace AIMS.Services
                 {
                     using (var transaction = context.Database.BeginTransaction())
                     {
-                        //var projectFundersList = await unitWork.ProjectFundersRepository.GetManyQueryableAsync(p => (p.FunderId == id || p.FunderId == newId));
                         var projectImplementersList = await unitWork.ProjectImplementersRepository.GetManyQueryableAsync(i => (i.ImplementerId == id || i.ImplementerId == newId));
                         List<EFProjectFunders> fundersList = new List<EFProjectFunders>();
                         List<EFProjectImplementers> implementersList = new List<EFProjectImplementers>();
@@ -1001,6 +1001,29 @@ namespace AIMS.Services
                             }
                         }
                         await unitWork.SaveAsync();
+
+                        var envelopeForOrganizations = unitWork.EnvelopeRepository.GetManyQueryable(e => e.FunderId == id || e.FunderId == newId);
+                        var envelopeForDeletingOrganization = (from e in envelopeForOrganizations
+                                                               where e.FunderId == id
+                                                               select e).FirstOrDefault();
+                        var envelopeForNewOrganization = (from e in envelopeForOrganizations
+                                                          where e.FunderId == newId
+                                                          select e).FirstOrDefault();
+
+                        if (envelopeForDeletingOrganization != null)
+                        {
+                            if (envelopeForNewOrganization == null)
+                            {
+                                envelopeForDeletingOrganization.FunderId = newId;
+                                unitWork.EnvelopeRepository.Update(envelopeForDeletingOrganization);
+                                await unitWork.SaveAsync();
+                            }
+                            else
+                            {
+                                unitWork.EnvelopeRepository.Delete(envelopeForDeletingOrganization);
+                                await unitWork.SaveAsync();
+                            }
+                        }
                             
                         unitWork.ProjectFundersRepository.InsertMultiple(fundersList);
                         unitWork.ProjectImplementersRepository.InsertMultiple(implementersList);
@@ -1051,7 +1074,7 @@ namespace AIMS.Services
                                 }
 
                                 string subject = "", message = "", footerMessage = "";
-                                var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ChangedMappingEffectedProject);
+                                var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.OrganizationDeletedAndMapped);
                                 if (emailMessage != null)
                                 {
                                     subject = emailMessage.Subject;
@@ -1060,9 +1083,9 @@ namespace AIMS.Services
                                 }
 
                                 mHelper = new MessageHelper();
-                                string oldSectorName = oldOrganization != null ? oldOrganization.OrganizationName : null;
-                                string newSectorName = newOrganization != null ? newOrganization.OrganizationName : null;
-                                message += mHelper.ChangedMappingAffectedProjectsMessage(projectNames, oldSectorName, newSectorName);
+                                string oldOrganizationName = oldOrganization != null ? oldOrganization.OrganizationName : null;
+                                string newOrganizationName = newOrganization != null ? newOrganization.OrganizationName : null;
+                                message += mHelper.OrganizationDeletedAndMappingMessage(projectNames, oldOrganizationName, newOrganizationName);
                                 IEmailHelper emailHelper = new EmailHelper(smtpSettings.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                                 emailHelper.SendEmailToUsers(emailAddresses, subject, "", message);
                             }

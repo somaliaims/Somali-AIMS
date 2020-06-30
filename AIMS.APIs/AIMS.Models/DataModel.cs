@@ -86,7 +86,8 @@ namespace AIMS.Models
         NewIATIOrganization = 17,
         MergeOrganizationRequest = 18,
         MergeOrganizationRejected = 19,
-        UserApprovedUnAffiliated = 20
+        UserApprovedUnAffiliated = 20,
+        OrganizationDeletedAndMapped = 21
     }
 
     public enum HelpForEntity

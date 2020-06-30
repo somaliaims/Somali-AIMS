@@ -1684,20 +1684,26 @@ namespace AIMS.Services
                                 }
                             }
 
-                            if (envelopeTypeTotal != 0)
-                            {
+                            //if (envelopeTypeTotal > 0)
+                            //{
                                 breakupView.YearlyBreakup = yearlyBreakupList;
                                 envelopeView.EnvelopeBreakupsByType.Add(breakupView);
-                            }
+                            //}
                         }
 
-                        if (envelopeTypeTotal != 0)
+                        decimal envelopeValue = 0;
+                        foreach(var eType in envelopeView.EnvelopeBreakupsByType)
+                        {
+                            envelopeValue += (from y in eType.YearlyBreakup
+                                              select y.Amount).Sum();
+                        }
+                        if (envelopeValue > 0)
                         {
                             envelopeViewList.Add(envelopeView);
                         }
                     }
                     envelopeViewList = (from e in envelopeViewList
-                                        orderby e.Funder ascending
+                                        orderby e.Funder.Trim() ascending
                                         select e).ToList();
                     envelopeReport.Envelope = envelopeViewList;
                 }
