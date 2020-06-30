@@ -345,9 +345,17 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
+                //IMessageHelper mHelper;
                 try
                 {
                     var envelope = unitWork.EnvelopeRepository.GetOne(e => e.FunderId == funderId);
+                    /*if (envelope == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Envelope");
+                        response.Success = false;
+                        return response;
+                    }*/
                     int fyMonth = 1, fyDay = 1;
                     var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(fy => fy.Id != 0);
                     if (fySettings != null)

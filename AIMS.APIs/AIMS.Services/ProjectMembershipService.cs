@@ -20,7 +20,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="projectIds"></param>
         /// <returns></returns>
-        IEnumerable<ProjectMembershipRequestView> GetRequestsForFunder(int funderId, int userId);
+        IEnumerable<ProjectMembershipRequestView> GetRequestsForFunder(int funderId, int userId, UserTypes userType = UserTypes.Standard);
 
         /// <summary>
         /// Gets list of projects for which membership is approved
@@ -61,21 +61,29 @@ namespace AIMS.Services
             mapper = autoMapper;
         }
 
-        public IEnumerable<ProjectMembershipRequestView> GetRequestsForFunder(int funderId, int userId)
+        public IEnumerable<ProjectMembershipRequestView> GetRequestsForFunder(int funderId, int userId, UserTypes userType = UserTypes.Standard)
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == funderId, p => p.ProjectId);
-                var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == funderId, p => p.ProjectId);
-                var userOwnedProjects = unitWork.ProjectRepository.GetProjection(p => p.CreatedById == userId, p => p.Id);
-                var projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
-                List<int> userOwnedProjectIds = new List<int>(); 
-                foreach(var pid in userOwnedProjects)
+                IQueryable<EFProjectMembershipRequests> requests = null;
+                if (userType != UserTypes.Manager && userType != UserTypes.SuperAdmin)
                 {
-                    userOwnedProjectIds.Add((int)pid);
+                    var funderProjectIds = unitWork.ProjectFundersRepository.GetProjection(p => p.FunderId == funderId, p => p.ProjectId);
+                    var implementerProjectIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ImplementerId == funderId, p => p.ProjectId);
+                    var userOwnedProjects = unitWork.ProjectRepository.GetProjection(p => p.CreatedById == userId, p => p.Id);
+                    var projectIds = funderProjectIds.Union(implementerProjectIds).ToList<int>();
+                    List<int> userOwnedProjectIds = new List<int>();
+                    foreach (var pid in userOwnedProjects)
+                    {
+                        userOwnedProjectIds.Add((int)pid);
+                    }
+                    projectIds = projectIds.Union(userOwnedProjectIds).ToList<int>();
+                    requests = unitWork.ProjectMembershipRepository.GetWithInclude(r => projectIds.Contains(r.ProjectId) && r.UserId != userId && r.IsApproved == false, new string[] { "Project", "User", "User.Organization" });
                 }
-                projectIds = projectIds.Union(userOwnedProjectIds).ToList<int>();
-                var requests = unitWork.ProjectMembershipRepository.GetWithInclude(r => projectIds.Contains(r.ProjectId) && r.UserId != userId && r.IsApproved == false, new string[] { "Project", "User", "User.Organization" });
+                else
+                {
+                    requests = unitWork.ProjectMembershipRepository.GetWithInclude(r => r.UserId != userId && r.IsApproved == false, new string[] { "Project", "User", "User.Organization" });
+                }
                 return mapper.Map<List<ProjectMembershipRequestView>>(requests);
             }
         }
@@ -222,21 +230,7 @@ namespace AIMS.Services
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
-
-                var isUserOwner = unitWork.ProjectRepository.GetOne(p => (p.Id == projectId && p.CreatedById == ownerId));
-                if (isUserOwner == null)
-                {
-                    var isFunderOwner = unitWork.ProjectFundersRepository.GetOne(f => f.FunderId == funderId && f.ProjectId == projectId);
-                    var isImplementerOwner = unitWork.ProjectImplementersRepository.GetOne(i => i.ImplementerId == funderId && i.ProjectId == projectId);
-
-                    if (isFunderOwner == null && isImplementerOwner == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.GetInvalidFunderApprovalMessage();
-                        response.Success = false;
-                        return response;
-                    }
-                }
+                UserTypes userType = UserTypes.Standard;
 
                 var user = unitWork.UserRepository.GetOne(u => u.Id == userId);
                 if (user == null)
@@ -245,6 +239,30 @@ namespace AIMS.Services
                     response.Message = mHelper.GetNotFound("User");
                     response.Success = false;
                     return response;
+                }
+
+                var actionUser = unitWork.UserRepository.GetOne(u => u.Id == ownerId);
+                if (actionUser != null)
+                {
+                    userType = actionUser.UserType;
+                }
+
+                if (userType != UserTypes.Manager && userType != UserTypes.SuperAdmin)
+                {
+                    var isUserOwner = unitWork.ProjectRepository.GetOne(p => (p.Id == projectId && p.CreatedById == ownerId));
+                    if (isUserOwner == null)
+                    {
+                        var isFunderOwner = unitWork.ProjectFundersRepository.GetOne(f => f.FunderId == funderId && f.ProjectId == projectId);
+                        var isImplementerOwner = unitWork.ProjectImplementersRepository.GetOne(i => i.ImplementerId == funderId && i.ProjectId == projectId);
+
+                        if (isFunderOwner == null && isImplementerOwner == null)
+                        {
+                            mHelper = new MessageHelper();
+                            response.Message = mHelper.GetInvalidFunderApprovalMessage();
+                            response.Success = false;
+                            return response;
+                        }
+                    }
                 }
 
                 var project = unitWork.ProjectRepository.GetOne(p => p.Id == projectId);
@@ -265,13 +283,21 @@ namespace AIMS.Services
                     return response;
                 }
 
-                var requests = unitWork.ProjectMembershipRepository.GetManyQueryable(r => r.ProjectId == projectId && r.OrganizationId == user.OrganizationId && r.MembershipType == membershipType);
-                if (requests.Count() == 0)
+                IQueryable<EFProjectMembershipRequests> requests = null;
+                if (userType == UserTypes.Manager || userType == UserTypes.SuperAdmin)
                 {
-                    mHelper = new MessageHelper();
-                    response.Message = mHelper.GetNotFound("Membership Request");
-                    response.Success = false;
-                    return response;
+                    requests = unitWork.ProjectMembershipRepository.GetManyQueryable(r => r.ProjectId == projectId && r.MembershipType == membershipType);
+                }
+                else
+                {
+                    requests = unitWork.ProjectMembershipRepository.GetManyQueryable(r => r.ProjectId == projectId && r.OrganizationId == user.OrganizationId && r.MembershipType == membershipType);
+                    if (requests.Count() == 0)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Membership Request");
+                        response.Success = false;
+                        return response;
+                    }
                 }
 
                 var strategy = context.Database.CreateExecutionStrategy();
@@ -318,7 +344,6 @@ namespace AIMS.Services
                         transaction.Commit();
                     }
                 });
-                
 
                 //Send status email
                 string requestedProject = project.Title;

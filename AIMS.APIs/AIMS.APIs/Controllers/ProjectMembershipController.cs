@@ -27,8 +27,10 @@ namespace AIMS.APIs.Controllers
         public IActionResult Get()
         {
             int organizationId = 0, userId = 0;
+            UserTypes userType = UserTypes.Standard;
             var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
             var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userTypeVal = User.FindFirst(ClaimTypes.Role)?.Value;
             if (!string.IsNullOrEmpty(organizationIdVal))
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
@@ -42,7 +44,11 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Invalid request");
             }
-            var requests = service.GetRequestsForFunder(organizationId, userId);
+            if (!string.IsNullOrEmpty(userTypeVal))
+            {
+                userType = (UserTypes)Convert.ToInt32(userTypeVal);
+            }
+            var requests = service.GetRequestsForFunder(organizationId, userId, userType);
             return Ok(requests);
         }
 
@@ -51,8 +57,10 @@ namespace AIMS.APIs.Controllers
         public IActionResult GetUserApprovedRequests()
         {
             int organizationId = 0, userId = 0;
+            UserTypes userType = UserTypes.Standard;
             var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
             var userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userTypeVal = User.FindFirst(ClaimTypes.Role)?.Value;
             if (!string.IsNullOrEmpty(organizationIdVal))
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
@@ -66,7 +74,11 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Invalid request");
             }
-            var requests = service.GetRequestsForFunder(organizationId, userId);
+            if (!string.IsNullOrEmpty(userTypeVal))
+            {
+                userType = (UserTypes)Convert.ToInt32(userTypeVal);
+            }
+            var requests = service.GetRequestsForFunder(organizationId, userId, userType);
             return Ok(requests);
         }
 

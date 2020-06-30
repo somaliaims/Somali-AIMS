@@ -17,10 +17,17 @@ namespace AIMS.APIs.Controllers
     public class EnvelopeController : ControllerBase
     {
         IEnvelopeService envelopeService;
+        IExchangeRateService exchangeRateService;
+        IExchangeRateHttpService exchangeRateHttpService;
+        ICurrencyService currencyService;
 
-        public EnvelopeController(IEnvelopeService service)
+        public EnvelopeController(IEnvelopeService service, IExchangeRateService exRateService, 
+            IExchangeRateHttpService exRateHttpService, ICurrencyService currService)
         {
-            this.envelopeService = service;
+            envelopeService = service;
+            exchangeRateService = exRateService;
+            exchangeRateHttpService = exRateHttpService;
+            currencyService = currService;
         }
 
         [HttpGet]
@@ -53,6 +60,24 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("A bad attempt to access the envelope");
             }
 
+            decimal exchangeRate = 1;
+            var dated = DateTime.Now;
+            var rates = await exchangeRateService.GetCurrencyRatesForDate(dated);
+            if (rates.Rates == null)
+            {
+                string apiKey = exchangeRateService.GetAPIKeyForOpenExchange();
+                rates = await exchangeRateHttpService.GetRatesAsync(apiKey);
+                if (rates.Rates != null)
+                {
+                    exchangeRateService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                    exchangeRate = currencyService.GetExchangeRateForCurrency(model.Currency, rates.Rates);
+                }
+            }
+            else
+            {
+                exchangeRate = currencyService.GetExchangeRateForCurrency(model.Currency, rates.Rates);
+            }
+            model.ExchangeRate = exchangeRate;
             var response = await envelopeService.AddAsync(model, organizationId);
             if (!response.Success)
             {
@@ -76,6 +101,25 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("A bad attempt to access the envelope");
             }
+
+            decimal exchangeRate = 1;
+            var dated = DateTime.Now;
+            var rates = await exchangeRateService.GetCurrencyRatesForDate(dated);
+            if (rates.Rates == null)
+            {
+                string apiKey = exchangeRateService.GetAPIKeyForOpenExchange();
+                rates = await exchangeRateHttpService.GetRatesAsync(apiKey);
+                if (rates.Rates != null)
+                {
+                    exchangeRateService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                    exchangeRate = currencyService.GetExchangeRateForCurrency(model.Currency, rates.Rates);
+                }
+            }
+            else
+            {
+                exchangeRate = currencyService.GetExchangeRateForCurrency(model.Currency, rates.Rates);
+            }
+            model.ExchangeRate = exchangeRate;
             var response = await envelopeService.AddAsync(model, organizationId);
             if (!response.Success)
             {

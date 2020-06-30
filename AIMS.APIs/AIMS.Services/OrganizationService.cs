@@ -347,7 +347,7 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var isOrganizationCreated = unitWork.OrganizationRepository.GetOne(o => o.OrganizationName.ToLower() == model.Name.ToLower().Trim());
+                    var isOrganizationCreated = unitWork.OrganizationRepository.GetOne(o => o.OrganizationName.ToLower().Trim() == model.Name.ToLower().Trim());
                     if (isOrganizationCreated != null)
                     {
                         response.ReturnedId = isOrganizationCreated.Id;

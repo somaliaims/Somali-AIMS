@@ -487,12 +487,16 @@ namespace AIMS.Services
                         {
                             if (model.IsNewOrganization)
                             {
-                                organization = new EFOrganization()
+                                organization = unitWork.OrganizationRepository.GetOne(o => o.OrganizationName.Trim().Equals(model.OrganizationName.Trim(), StringComparison.OrdinalIgnoreCase));
+                                if (organization == null)
                                 {
-                                    OrganizationType = organizationType,
-                                    OrganizationName = model.OrganizationName,
-                                };
-                                await unitWork.SaveAsync();
+                                    organization = new EFOrganization()
+                                    {
+                                        OrganizationType = organizationType,
+                                        OrganizationName = model.OrganizationName,
+                                    };
+                                    await unitWork.SaveAsync();
+                                }
                                 model.OrganizationId = organization.Id;
                             }
                             string passwordHash = sHelper.GetPasswordHash(model.Password);
@@ -977,7 +981,7 @@ namespace AIMS.Services
                         var isTokenExists = await unitWork.PasswordRecoveryRepository.GetOneAsync(r => r.Token == model.Token && r.Dated.Date == tokenTime.Date);
                         if (isTokenExists != null)
                         {
-                            DateTime expirationTime = isTokenExists.Dated.AddHours(12);
+                            DateTime expirationTime = isTokenExists.Dated.AddHours(48);
                             if (expirationTime >= DateTime.Now)
                             {
                                 try

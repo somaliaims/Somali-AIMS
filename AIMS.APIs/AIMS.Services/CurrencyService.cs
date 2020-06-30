@@ -97,6 +97,14 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         ActionResponse Delete(int id);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="currency"></param>
+        /// <param name="ratesList"></param>
+        /// <returns></returns>
+        decimal GetExchangeRateForCurrency(string currency, List<CurrencyWithRates> ratesList);
     }
 
     public class CurrencyService : ICurrencyService
@@ -483,6 +491,13 @@ namespace AIMS.Services
                 response.Message = true.ToString();
                 return response;
             }
+        }
+
+        public decimal GetExchangeRateForCurrency(string currency, List<CurrencyWithRates> ratesList)
+        {
+            return (from rate in ratesList
+                    where rate.Currency.Equals(currency)
+                    select rate.Rate).FirstOrDefault();
         }
     }
 }

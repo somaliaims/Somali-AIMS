@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using Microsoft.SqlServer.Management.Smo;
 
 namespace AIMS.Services
 {
@@ -120,7 +121,16 @@ namespace AIMS.Services
                     userOwnedProjectIds.Add((int)pid);
                 }
                 projectIds = projectIds.Union(userOwnedProjectIds).ToList<int>();
-                int requestsCount = unitWork.ProjectMembershipRepository.GetProjectionCount(r => projectIds.Contains(r.ProjectId) && r.UserId != userId && r.IsApproved == false, r => r.ProjectId);
+                int projectMembershipRequestsCount = 0;
+                if (uType == UserTypes.Manager || uType == UserTypes.SuperAdmin)
+                {
+                    projectMembershipRequestsCount = unitWork.ProjectMembershipRepository.GetProjectionCount(r => r.UserId != userId && r.IsApproved == false, r => r.ProjectId);
+                }
+                else
+                {
+                    projectMembershipRequestsCount = unitWork.ProjectMembershipRepository.GetProjectionCount(r => projectIds.Contains(r.ProjectId) && r.UserId != userId && r.IsApproved == false, r => r.ProjectId);
+                }
+                
                 if (uType == UserTypes.Standard)
                 {
                     deletionsCount = unitWork.ProjectDeletionRepository.GetProjectionCount(d => (d.Status == ProjectDeletionStatus.Requested && d.RequestedById != userId && projectIds.Contains(d.ProjectId)), d => d.ProjectId);
@@ -132,7 +142,7 @@ namespace AIMS.Services
                 }
                 var orgsInRequests = unitWork.OrganizationMergeRequestsRepository.GetProjection(r => r.RequestedById != userId, r => r.Id);
                 var userRelatedRequests = unitWork.OrganizationsToMergeRepository.GetProjection(o => orgsInRequests.Contains(o.RequestId) && o.OrganizationId == organizationId, o => o.OrganizationId);
-                return (count + requestsCount + deletionsCount + userRelatedRequests.Count());
+                return (count + projectMembershipRequestsCount + deletionsCount + userRelatedRequests.Count());
             }
         }
 

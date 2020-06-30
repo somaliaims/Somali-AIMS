@@ -3572,7 +3572,7 @@ namespace AIMS.Services
                             footerMessage = emailMessage.FooterMessage;
                         }
                         string projectUrl = model.ProjectUrl + project.Id;
-                        message += mHelper.ProjectToOrganizationMessage(project.Title, string.Join(",", updatedOrganizationNames), projectUrl);
+                        message += mHelper.ProjectToOrganizationMessage(project.Title, string.Join(", ", updatedOrganizationNames), projectUrl);
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                         emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
                     }
@@ -3707,7 +3707,7 @@ namespace AIMS.Services
 
                         string projectUrl = model.ProjectUrl + project.Id;
                         mHelper = new MessageHelper();
-                        message += mHelper.ProjectToOrganizationMessage(project.Title, string.Join(",", updatedOrganizationNames), projectUrl);
+                        message += mHelper.ProjectToOrganizationMessage(project.Title, string.Join(", ", updatedOrganizationNames), projectUrl);
                         IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                         emailHelper.SendEmailToUsers(emailAddresses, subject, "", message, footerMessage);
                     }
