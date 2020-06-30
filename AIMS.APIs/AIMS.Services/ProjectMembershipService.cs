@@ -393,19 +393,29 @@ namespace AIMS.Services
             {
                 ActionResponse response = new ActionResponse();
                 IMessageHelper mHelper;
+                UserTypes userType = UserTypes.Standard;
 
-                var isUserOwner = unitWork.ProjectRepository.GetOne(p => (p.Id == projectId && p.CreatedById == ownerId));
-                if (isUserOwner == null)
+                var actionUser = unitWork.UserRepository.GetOne(u => u.Id == ownerId);
+                if (actionUser != null)
                 {
-                    var isFunderOwner = unitWork.ProjectFundersRepository.GetOne(f => f.FunderId == funderId && f.ProjectId == projectId);
-                    var isImplementerOwner = unitWork.ProjectImplementersRepository.GetOne(i => i.ImplementerId == funderId && i.ProjectId == projectId);
+                    userType = actionUser.UserType;
+                }
 
-                    if (isFunderOwner == null && isImplementerOwner == null)
+                if (userType != UserTypes.Manager && userType != UserTypes.SuperAdmin)
+                {
+                    var isUserOwner = unitWork.ProjectRepository.GetOne(p => (p.Id == projectId && p.CreatedById == ownerId));
+                    if (isUserOwner == null)
                     {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.GetInvalidFunderApprovalMessage();
-                        response.Success = false;
-                        return response;
+                        var isFunderOwner = unitWork.ProjectFundersRepository.GetOne(f => f.FunderId == funderId && f.ProjectId == projectId);
+                        var isImplementerOwner = unitWork.ProjectImplementersRepository.GetOne(i => i.ImplementerId == funderId && i.ProjectId == projectId);
+
+                        if (isFunderOwner == null && isImplementerOwner == null)
+                        {
+                            mHelper = new MessageHelper();
+                            response.Message = mHelper.GetInvalidFunderApprovalMessage();
+                            response.Success = false;
+                            return response;
+                        }
                     }
                 }
 
