@@ -3762,8 +3762,8 @@ namespace AIMS.Services
                     }
 
                     decimal projectValue = (project.ProjectValue);
-                    decimal totalDisbursements = (from d in model.YearlyDisbursements
-                                                  select (d.Amount)).Sum();
+                    decimal totalDisbursements = decimal.Round(((from d in model.YearlyDisbursements
+                                                  select (d.Amount)).Sum()), 2);
 
                     if (totalDisbursements > projectValue)
                     {
