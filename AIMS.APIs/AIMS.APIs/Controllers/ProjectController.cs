@@ -18,7 +18,7 @@ namespace AIMS.APIs.Controllers
     {
         IProjectService projectService;
         IDataBackupService backupService;
-        IHostingEnvironment hostingEnvironment;
+        IWebHostEnvironment hostingEnvironment;
         IConfiguration config;
         IExchangeRateService ratesService;
         IExchangeRateHttpService ratesHttpService;
@@ -26,7 +26,7 @@ namespace AIMS.APIs.Controllers
         string projectUrl = "";
         string connectionString = "";
 
-        public ProjectController(IProjectService service, IHostingEnvironment _hostingEnvironment, IConfiguration conf,
+        public ProjectController(IProjectService service, IWebHostEnvironment _hostingEnvironment, IConfiguration conf,
             IExchangeRateHttpService exRatesHttpService, IExchangeRateService exRatesService, ICurrencyService curService,
             IDataBackupService dataBackupService)
         {

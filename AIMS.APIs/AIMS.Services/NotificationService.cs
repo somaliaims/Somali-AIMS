@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
-using Microsoft.SqlServer.Management.Smo;
 
 namespace AIMS.Services
 {

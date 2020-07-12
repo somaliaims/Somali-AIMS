@@ -129,7 +129,7 @@ namespace AIMS.Services
                                             select y).FirstOrDefault();
                 if (previousFinancialYear == null)
                 {
-                    string label = (isSimilarToCalendarYear) ? "FY" + previousYear : ("FY " + previousYear + "/" + (previousYear + 1));
+                    string label = (isSimilarToCalendarYear) ? "FY " + previousYear : ("FY " + previousYear + "/" + (previousYear + 1));
                     previousFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                     {
                         Label = label,

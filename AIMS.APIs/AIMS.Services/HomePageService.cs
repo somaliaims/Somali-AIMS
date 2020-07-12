@@ -41,21 +41,30 @@ namespace AIMS.Services
         /// <param name="file"></param>
         /// <returns></returns>
         Task<string> WriteFile(IFormFile file);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="webrootPath"></param>
+        void SetDirectoryPath(string webrootPath);
     }
 
     public class HomePageService : IHomePageService
     {
-        IHostingEnvironment hostingEnvironment;
         IMapper mapper;
         AIMSDbContext context;
+        readonly string IMAGES_DIR_PATH = "Images";
         string imagesDir = "";
 
-        public HomePageService(IHostingEnvironment _hostingEnvironment, AIMSDbContext cntxt, IMapper mappr)
+        public HomePageService(AIMSDbContext cntxt, IMapper mappr)
         {
             context = cntxt;
             mapper = mappr;
-            hostingEnvironment = _hostingEnvironment;
-            imagesDir = Path.Combine(hostingEnvironment.WebRootPath, "Images");
+        }
+
+        public void SetDirectoryPath(string webrootPath)
+        {
+            imagesDir = Path.Combine(webrootPath, IMAGES_DIR_PATH);
             Directory.CreateDirectory(imagesDir);
             FileIOPermission fp = new FileIOPermission(FileIOPermissionAccess.Write, imagesDir);
             try

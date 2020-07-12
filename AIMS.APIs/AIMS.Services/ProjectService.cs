@@ -585,39 +585,81 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<ProjectAbstractView> projectsList = new List<ProjectAbstractView>();
-                var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
-                foreach (var project in projects)
+                try
                 {
-                    IEnumerable<string> funderNames = (from f in project.Funders
-                                                       select f.Funder.OrganizationName);
-                    IEnumerable<string> implementerNames = (from i in project.Implementers
-                                                            select i.Implementer.OrganizationName);
-                    IEnumerable<string> organizations = funderNames.Union(implementerNames);
-
-                    List<OrganizationAbstractView> organizationsList = new List<OrganizationAbstractView>();
-                    foreach (string org in organizations)
+                    var allOrganizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
+                    var sectors = unitWork.SectorRepository.GetManyQueryable(s => s.Id != 0);
+                    var locations = unitWork.LocationRepository.GetManyQueryable(l => l.Id != 0);
+                    var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Locations", "Funders", "Implementers" });
+                    
+                    foreach (var project in projects)
                     {
-                        organizationsList.Add(new OrganizationAbstractView()
+                        IEnumerable<int> funderIds = (from o in project.Funders
+                                                      select o.FunderId);
+                        IEnumerable<int> implementerIds = (from i in project.Implementers
+                                                           select i.ImplementerId);
+                        IEnumerable<string> funderNames = (from f in allOrganizations
+                                                           where funderIds.Contains(f.Id)
+                                                           select f.OrganizationName);
+                        IEnumerable<string> implementerNames = (from i in allOrganizations
+                                                                where implementerIds.Contains(i.Id)
+                                                                select i.OrganizationName);
+                        IEnumerable<string> organizations = funderNames.Union(implementerNames);
+
+                        List<LocationAbstractView> locationsList = new List<LocationAbstractView>();
+                        List<SectorAbstractView> sectorsList = new List<SectorAbstractView>();
+
+                        foreach(var location in project.Locations)
                         {
-                            Name = org
+                            locationsList.Add(new LocationAbstractView()
+                            {
+                                Name = (from l in locations
+                                        where l.Id == location.LocationId
+                                        select l.Location).FirstOrDefault(),
+                                FundsPercentage = location.FundsPercentage
+                            });
+                        }
+
+                        foreach(var sector in project.Sectors)
+                        {
+                            sectorsList.Add(new SectorAbstractView()
+                            {
+                                Name = (from s in sectors
+                                        where s.Id.Equals(sector.SectorId)
+                                        select s.SectorName).FirstOrDefault(),
+                                FundsPercentage = sector.FundsPercentage
+                            });
+                        }
+
+                        List<OrganizationAbstractView> organizationsList = new List<OrganizationAbstractView>();
+                        foreach (string org in organizations)
+                        {
+                            organizationsList.Add(new OrganizationAbstractView()
+                            {
+                                Name = org
+                            });
+                        }
+                        projectsList.Add(new ProjectAbstractView()
+                        {
+                            Id = project.Id,
+                            Title = project.Title,
+                            Description = project.Description,
+                            ProjectValue = project.ProjectValue,
+                            ProjectCurrency = project.ProjectCurrency,
+                            StartDate = project.StartDate.ToShortDateString(),
+                            EndDate = project.EndDate.ToShortDateString(),
+                            DateUpdated = project.DateUpdated.ToShortDateString(),
+                            StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
+                            EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
+                            Organizations = organizationsList,
+                            Locations = locationsList,
+                            Sectors = sectorsList
                         });
                     }
-                    projectsList.Add(new ProjectAbstractView()
-                    {
-                        Id = project.Id,
-                        Title = project.Title,
-                        Description = project.Description,
-                        ProjectValue = project.ProjectValue,
-                        ProjectCurrency = project.ProjectCurrency,
-                        StartDate = project.StartDate.ToShortDateString(),
-                        EndDate = project.EndDate.ToShortDateString(),
-                        DateUpdated = project.DateUpdated.ToShortDateString(),
-                        StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
-                        EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
-                        Organizations = organizationsList,
-                        Locations = mapper.Map<List<LocationAbstractView>>(project.Locations),
-                        Sectors = mapper.Map<List<SectorAbstractView>>(project.Sectors)
-                    });
+                }
+                catch(Exception ex)
+                {
+                    string message = ex.Message;
                 }
                 return await Task<IEnumerable<ProjectAbstractView>>.Run(() => projectsList).ConfigureAwait(false);
             }
@@ -1761,6 +1803,7 @@ namespace AIMS.Services
                         fyMonth = fySettings.Month;
                         fyDay = fySettings.Day;
                     }
+                    bool isSimilarToCalendarYear = (fyMonth == 1 && fyDay == 1) ? true : false;
 
                     if (fyMonth > 1)
                     {
@@ -1798,9 +1841,11 @@ namespace AIMS.Services
 
                     if (startingFinancialYear == null)
                     {
+                        string label = (isSimilarToCalendarYear) ? "FY " + model.StartingFinancialYear : ("FY " + (model.StartingFinancialYear - 1) + "/" + (model.StartingFinancialYear));
                         startingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                         {
-                            FinancialYear = model.StartingFinancialYear
+                            FinancialYear = model.StartingFinancialYear,
+                            Label = label
                         });
                         unitWork.Save();
                     }
@@ -1811,9 +1856,11 @@ namespace AIMS.Services
 
                     if (endingFinancialYear == null)
                     {
+                        string label = (isSimilarToCalendarYear) ? "FY " + model.EndingFinancialYear : ("FY " + (model.EndingFinancialYear - 1) + "/" + (model.EndingFinancialYear));
                         endingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                         {
-                            FinancialYear = model.EndingFinancialYear
+                            FinancialYear = model.EndingFinancialYear,
+                            Label = label
                         });
                         unitWork.Save();
                     }
@@ -2989,7 +3036,7 @@ namespace AIMS.Services
 
                             var updatedLocations = unitWork.ProjectLocationsRepository.GetWithInclude(p => p.ProjectId == model.ProjectId, new string[] { "Location" });
                             var unattributedLocation = (from loc in updatedLocations
-                                                        where loc.Location.Location.Equals("Unattributed", StringComparison.OrdinalIgnoreCase)
+                                                        where loc.Location.IsUnAttributed == true
                                                         select loc).FirstOrDefault();
 
                             decimal fundsPercentage = (int)(from loc in updatedLocations
@@ -3730,6 +3777,15 @@ namespace AIMS.Services
 
                 try
                 {
+                    int fyMonth = 1, fyDay = 1;
+                    var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
+                    if (fySettings != null)
+                    {
+                        fyMonth = fySettings.Month;
+                        fyDay = fySettings.Day;
+                    }
+                    bool isSimilarToCalendarYear = (fyMonth == 1 && fyDay == 1) ? true : false;
+
                     int currentYear = DateTime.Now.Year;
                     var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == model.ProjectId, new string[] { "StartingFinancialYear", "EndingFinancialYear" }).FirstOrDefault();
                     if (project == null)
@@ -3795,7 +3851,8 @@ namespace AIMS.Services
 
                         if (isYearExists == null)
                         {
-                            newFinancialYears.Add(new EFFinancialYears() { FinancialYear = year });
+                            string label = (isSimilarToCalendarYear) ? "FY " + year : ("FY " + (year - 1) + "/" + (year));
+                            newFinancialYears.Add(new EFFinancialYears() { FinancialYear = year, Label = label });
                             unitWork.Save();
                         }
                     }
@@ -4038,6 +4095,7 @@ namespace AIMS.Services
                     fyMonth = fySettings.Month;
                     fyDay = fySettings.Day;
                 }
+                bool isSimilarToCalendarYear = (fyMonth == 1 && fyDay == 1) ? true : false;
 
                 if (fyMonth > 1)
                 {
@@ -4080,9 +4138,11 @@ namespace AIMS.Services
                                                          select fy).FirstOrDefault();
                             if (startingFinancialYear == null)
                             {
+                                string label = (isSimilarToCalendarYear) ? "FY " + model.StartingFinancialYear : ("FY " + (model.StartingFinancialYear - 1) + "/" + (model.StartingFinancialYear));
                                 startingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                                 {
-                                    FinancialYear = model.StartingFinancialYear
+                                    FinancialYear = model.StartingFinancialYear,
+                                    Label = label
                                 });
                                 await unitWork.SaveAsync();
                             }
@@ -4092,9 +4152,11 @@ namespace AIMS.Services
                                                        select fy).FirstOrDefault();
                             if (endingFinancialYear == null)
                             {
+                                string label = (isSimilarToCalendarYear) ? "FY " + model.EndingFinancialYear : ("FY " + (model.EndingFinancialYear - 1) + "/" + (model.EndingFinancialYear));
                                 endingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                                 {
-                                    FinancialYear = model.EndingFinancialYear
+                                    FinancialYear = model.EndingFinancialYear,
+                                    Label = label
                                 });
                                 await unitWork.SaveAsync();
                             }
@@ -4555,7 +4617,8 @@ namespace AIMS.Services
                     fyMonth = fySettings.Month;
                     fyDay = fySettings.Day;
                 }
-
+                bool isSimilarToCalendarYear = (fyMonth == 1 && fyDay == 1) ? true : false;
+                
                 if (fyMonth > 1)
                 {
                     if (startingMonth < fyMonth)
@@ -4592,9 +4655,11 @@ namespace AIMS.Services
 
                 if (startingFinancialYear == null)
                 {
+                    string label = (isSimilarToCalendarYear) ? "FY " + model.StartingFinancialYear : ("FY " + (model.StartingFinancialYear - 1) + "/" + (model.StartingFinancialYear));
                     startingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                     {
-                        FinancialYear = model.StartingFinancialYear
+                        FinancialYear = model.StartingFinancialYear,
+                        Label = label
                     });
                     unitWork.Save();
                 }
@@ -4605,9 +4670,11 @@ namespace AIMS.Services
 
                 if (endingFinancialYear == null)
                 {
+                    string label = (isSimilarToCalendarYear) ? "FY " + model.EndingFinancialYear : ("FY " + (model.EndingFinancialYear - 1) + "/" + (model.EndingFinancialYear));
                     endingFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                     {
-                        FinancialYear = model.EndingFinancialYear
+                        FinancialYear = model.EndingFinancialYear,
+                        Label = label
                     });
                     unitWork.Save();
                 }

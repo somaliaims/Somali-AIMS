@@ -305,6 +305,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("EditPassword")]
         public IActionResult EditPassword([FromBody] EditUserPassword model)

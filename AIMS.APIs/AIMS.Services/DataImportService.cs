@@ -67,11 +67,17 @@ namespace AIMS.Services
         /// <param name="dataFilePath"></param>
         /// <returns></returns>
         string GenerateExcelFileForActiveProjects(string fileFolder);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="webrootPath"></param>
+        void SetDirectoryPath(string webrootPath);
     }
 
     public class DataImportService : IDataImportService
     {
-        private IHostingEnvironment hostingEnvironment;
+        readonly string EXCEL_FILE_PATH = "ExcelFiles";
         string sWebRootFolder = "";
         NameValueCollection newDataLocations;
         NameValueCollection oldDataLocations;
@@ -83,12 +89,8 @@ namespace AIMS.Services
         private DataFormatter dataFormatter;
         private IFormulaEvaluator formulaEvaluator;
 
-        public DataImportService(IHostingEnvironment _hostingEnvironment)
+        public DataImportService()
         {
-            hostingEnvironment = _hostingEnvironment;
-            sWebRootFolder = hostingEnvironment.WebRootPath + "/ExcelFiles/";
-            Directory.CreateDirectory(sWebRootFolder);
-
             oldDataLocations = new NameValueCollection()
             {
                 { "39", "FGS" },
@@ -160,6 +162,12 @@ namespace AIMS.Services
                 {"42", "PCVE" },
                 {"43", "Youth" }
             };
+        }
+
+        public void SetDirectoryPath(string webrootPath)
+        {
+            sWebRootFolder = Path.Combine(webrootPath, EXCEL_FILE_PATH);
+            Directory.CreateDirectory(sWebRootFolder);
         }
 
         public List<NewImportedAidData> ImportLatestAidData(string filePath, IFormFile file, List<CurrencyWithRates> exRatesList)

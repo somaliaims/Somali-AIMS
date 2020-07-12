@@ -396,8 +396,7 @@ namespace AIMS.Services
 
                 if (canEditProject)
                 {
-                    deletionRequest.Status = ProjectDeletionStatus.Cancelled;
-                    unitWork.ProjectDeletionRepository.Update(deletionRequest);
+                    unitWork.ProjectDeletionRepository.Delete(deletionRequest);
                     unitWork.Save();
 
                     var projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(f => f.ProjectId == project.Id, f => f.FunderId);

@@ -24,11 +24,11 @@ namespace AIMS.APIs.Scheduler
     public class ScheduleTask : ScheduledProcessor
     {
         IConfiguration configuration;
-        IHostingEnvironment hostingEnvironment;
+        IWebHostEnvironment hostingEnvironment;
         private readonly IServiceScopeFactory scopeFactory;
 
         public ScheduleTask(IServiceScopeFactory serviceScopeFactory, IConfiguration config, 
-            IServiceScopeFactory _scopeFactory, IHostingEnvironment _hostingEnvironment) : base(serviceScopeFactory)
+            IServiceScopeFactory _scopeFactory, IWebHostEnvironment _hostingEnvironment) : base(serviceScopeFactory)
         {
             configuration = config;
             scopeFactory = _scopeFactory;
@@ -99,7 +99,7 @@ namespace AIMS.APIs.Scheduler
                 using (var scope = scopeFactory.CreateScope())
                 {
                     HttpClient httpClient = new HttpClient();
-                    IHostingEnvironment hostingEnvironment = scope.ServiceProvider.GetRequiredService<IHostingEnvironment>();
+                    IWebHostEnvironment hostingEnvironment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
                     ExchangeRateHttpService httpService = new ExchangeRateHttpService(httpClient);
                     AIMSDbContext dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
                     IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
@@ -110,8 +110,9 @@ namespace AIMS.APIs.Scheduler
                     ISectorTypesService sectorTypeService = new SectorTypesService(dbContext, imapper);
                     IProjectService projectService = new ProjectService(dbContext, imapper);
                     IOrganizationMergeService orgMergeService = new OrganizationMergeService(dbContext);
-                    IDataBackupService backupService = new DataBackupService(hostingEnvironment, dbContext);
-                    IFinancialYearTransitionService financialYearTransitionService = new FinancialYearTransitionService(dbContext, imapper);
+                    IDataBackupService backupService = new DataBackupService(dbContext);
+                    backupService.SetDirectoryPath(hostingEnvironment.WebRootPath);
+                    IFinancialYearTransitionService financialYearTransitionService = new FinancialYearTransitionService(dbContext);
 
                     var iatiSettings = service.GetIATISettings();
                     if (iatiSettings != null)

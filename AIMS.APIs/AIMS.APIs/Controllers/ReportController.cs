@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -20,10 +21,12 @@ namespace AIMS.APIs.Controllers
         IExchangeRateService ratesService;
         IExchangeRateHttpService ratesHttpService;
         ICurrencyService currencyService;
+        IWebHostEnvironment hostingEnvironment;
         string clientUrl = "";
 
         public ReportController(IReportService service, IExcelGeneratorService eService, IConfiguration config,
-            IExchangeRateHttpService exRatesHttpService, IExchangeRateService exRatesService, ICurrencyService curService)
+            IExchangeRateHttpService exRatesHttpService, IExchangeRateService exRatesService, ICurrencyService curService,
+            IWebHostEnvironment hostEnvironment)
         {
             reportService = service;
             excelService = eService;
@@ -31,7 +34,10 @@ namespace AIMS.APIs.Controllers
             ratesService = exRatesService;
             ratesHttpService = exRatesHttpService;
             currencyService = curService;
-            clientUrl = configuration["ClientUrl"]; 
+            clientUrl = configuration["ClientUrl"];
+            hostingEnvironment = hostEnvironment;
+
+            excelService.SetDirectoryPath(hostingEnvironment.WebRootPath);
         }
 
         [HttpGet]

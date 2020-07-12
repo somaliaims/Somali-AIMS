@@ -21,9 +21,9 @@ namespace AIMS.APIs.Controllers
     {
         IIATIService iatiService;
         IConfiguration configuration;
-        IHostingEnvironment hostingEnvironment;
+        IWebHostEnvironment hostingEnvironment;
 
-        public IATIController(IIATIService service, IConfiguration config, IHostingEnvironment _hostingEnvironment)
+        public IATIController(IIATIService service, IConfiguration config, IWebHostEnvironment _hostingEnvironment)
         {
             iatiService = service;
             hostingEnvironment = _hostingEnvironment;

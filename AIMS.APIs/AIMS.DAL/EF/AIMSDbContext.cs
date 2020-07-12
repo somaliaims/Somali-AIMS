@@ -15,6 +15,7 @@ namespace AIMS.DAL.EF
         public string ConnectionString { get; set; }
         public AIMSDbContext()
         {
+            Database.SetCommandTimeout(60);
         }
 
         public AIMSDbContext(DbContextOptions options) : base(options)

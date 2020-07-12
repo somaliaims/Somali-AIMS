@@ -106,12 +106,10 @@ namespace AIMS.Services
     public class HelpService : IHelpService
     {
         AIMSDbContext context;
-        IMapper mapper;
 
-        public HelpService(AIMSDbContext cntxt, IMapper autoMapper)
+        public HelpService(AIMSDbContext cntxt)
         {
             context = cntxt;
-            mapper = autoMapper;
         }
 
         public ProjectHelp GetHelpForProjectFields()

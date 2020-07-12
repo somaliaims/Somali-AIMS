@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AIMS.Models;
 using AIMS.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -17,18 +18,21 @@ namespace AIMS.APIs.Controllers
     public class DataBackupController : ControllerBase
     {
         IConfiguration configuration;
-        IDropboxService dropboxService;
+        //IDropboxService dropboxService;
+        IWebHostEnvironment hostingEnvironment;
         IDataBackupService service;
         string connectionString = "";
         string clientUrl = "";
 
-        public DataBackupController(IConfiguration config, IDataBackupService srvc, IDropboxService drpBoxService)
+        public DataBackupController(IConfiguration config, IDataBackupService srvc, IWebHostEnvironment hostEnvironment)
         {
             configuration = config;
             service = srvc;
-            dropboxService = drpBoxService;
+            //dropboxService = drpBoxService;
             connectionString = configuration["ConnectionStrings:DefaultConnection"];
             clientUrl = configuration["clientUrl"];
+            hostingEnvironment = hostEnvironment;
+            service.SetDirectoryPath(hostingEnvironment.WebRootPath);
         }
 
         [HttpGet("PerformBackup")]

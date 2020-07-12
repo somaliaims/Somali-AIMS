@@ -70,16 +70,25 @@ namespace AIMS.Services
         /// <param name="report"></param>
         /// <returns></returns>
         ActionResponse GenerateAllProjectsReport(ProjectReportView projectsReport);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="webrootPath"></param>
+        void SetDirectoryPath(string webrootPath);
     }
 
     public class ExcelGeneratorService : IExcelGeneratorService
     {
-        private IHostingEnvironment hostingEnvironment;
+        readonly string EXCEL_DIR_PATH = "ExcelFiles";
         string sWebRootFolder = "";
-        public ExcelGeneratorService(IHostingEnvironment _hostingEnvironment)
+        public ExcelGeneratorService()
         {
-            hostingEnvironment = _hostingEnvironment;
-            sWebRootFolder = hostingEnvironment.WebRootPath + "/ExcelFiles/";
+        }
+
+        public void SetDirectoryPath(string webrootPath)
+        {
+            sWebRootFolder = Path.Combine(webrootPath, EXCEL_DIR_PATH);
             Directory.CreateDirectory(sWebRootFolder);
             FileIOPermission fp = new FileIOPermission(FileIOPermissionAccess.Write, sWebRootFolder);
             try

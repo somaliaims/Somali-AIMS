@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AIMS.APIs.Helpers;
 using AIMS.Models;
 using AIMS.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,10 +16,13 @@ namespace AIMS.APIs.Controllers
     public class HomePageController : ControllerBase
     {
         IHomePageService service;
+        IWebHostEnvironment hostingEnvironment;
 
-        public HomePageController(IHomePageService homePageService)
+        public HomePageController(IHomePageService homePageService, IWebHostEnvironment hostEnvironment)
         {
             service = homePageService;
+            hostingEnvironment = hostEnvironment;
+            service.SetDirectoryPath(hostingEnvironment.WebRootPath);
         }
 
         [HttpGet("GetSettings")]

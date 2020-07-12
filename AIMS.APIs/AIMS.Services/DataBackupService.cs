@@ -11,8 +11,6 @@ using System.Threading.Tasks;
 using System.Security.AccessControl;
 using System.Security.Permissions;
 using AIMS.DAL.EF;
-using Microsoft.SqlServer.Management.Common;
-using Microsoft.SqlServer.Management.Smo;
 
 namespace AIMS.Services
 {
@@ -51,27 +49,39 @@ namespace AIMS.Services
         /// <returns></returns>
         string GetDataBackupDirectory();
 
+        /// <summary>
+        /// Sets directory path
+        /// </summary>
+        /// <param name="path"></param>
+        void SetDirectoryPath(string webrootPath);
+
     }
 
     public class DataBackupService : IDataBackupService
     {
-        IHostingEnvironment hostingEnvironment;
+        //IWebHostEnvironment hostingEnvironment;
         string backupDir = "", connectionString = "";
+        readonly string BACKUP_DIR_NAME = "DataBackups";
 
-        public DataBackupService(IHostingEnvironment _hostingEnvironment, AIMSDbContext context)
+        public void SetDirectoryPath(string webrootPath)
         {
-            hostingEnvironment = _hostingEnvironment;
-            backupDir = Path.Combine(hostingEnvironment.WebRootPath, "DataBackups");
+            backupDir = Path.Combine(webrootPath, BACKUP_DIR_NAME);
             Directory.CreateDirectory(backupDir);
             FileIOPermission fp = new FileIOPermission(FileIOPermissionAccess.Write, backupDir);
             try
             {
-                connectionString = context.ConnectionString;
                 fp.Demand();
             }
-            catch(Exception)
+            catch (Exception)
             {
             }
+        }
+
+        public DataBackupService(AIMSDbContext context)
+        {
+            //hostingEnvironment = _hostingEnvironment;
+            //backupDir = Path.Combine(hostingEnvironment.WebRootPath, "DataBackups");
+            connectionString = context.ConnectionString;
         }
 
         public string GetDataBackupDirectory()

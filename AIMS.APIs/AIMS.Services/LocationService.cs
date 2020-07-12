@@ -258,7 +258,7 @@ namespace AIMS.Services
                     }
                     await unitWork.SaveAsync();
 
-                if (newId == 0)
+                if (newId == 0 || (id > 0 && newId > 0))
                 {
                     var locationToDelete = (from l in locations
                                             where l.Id == id

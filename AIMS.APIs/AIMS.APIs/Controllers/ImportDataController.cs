@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using AIMS.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,10 +21,11 @@ namespace AIMS.APIs.Controllers
         IOrganizationTypeService organizationTypeService;
         IExchangeRateService ratesService;
         IExchangeRateHttpService ratesHttpService;
+        IWebHostEnvironment hostingEnvironment;
 
         public ImportDataController(IDataImportService dataImportService, IProjectService projService, 
             IEnvelopeService envpService, IOrganizationTypeService orgTypeService, IExchangeRateService exRateService,
-            IExchangeRateHttpService exRateHttpService)
+            IExchangeRateHttpService exRateHttpService, IWebHostEnvironment hostEnvironment)
         {
             service = dataImportService;
             projectService = projService;
@@ -31,6 +33,8 @@ namespace AIMS.APIs.Controllers
             organizationTypeService = orgTypeService;
             ratesService = exRateService;
             ratesHttpService = exRateHttpService;
+            hostingEnvironment = hostEnvironment;
+            service.SetDirectoryPath(hostingEnvironment.WebRootPath);
         }
 
         /*[HttpPost("UploadDataImportFileEighteen"), DisableRequestSizeLimit]

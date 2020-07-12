@@ -15,6 +15,7 @@ namespace AIMS.Services
 {
     public interface IDropboxService
     {
+        /*
         /// <summary>
         /// Get identity of the account
         /// </summary>
@@ -47,17 +48,17 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="tkn"></param>
         /// <returns></returns>
-        void SetToken(string tkn);
+        void SetToken(string tkn);*/
     }
 
     public class DropboxService : IDropboxService
     {
-        IHostingEnvironment hostingEnvironment;
+        /*IWebHostEnvironment hostingEnvironment;
         string token = "40mPFdltTIAAAAAAAAAADx0r3r5TlXdfNF6icOQciANhFYFJiDMRPwsneZXDK_sG";
         string dropboxFolder = "DataBackups";
         string backupDirectory = "";
 
-        public DropboxService(IHostingEnvironment _hostingEnvironment)
+        public DropboxService(IWebHostEnvironment _hostingEnvironment)
         {
             hostingEnvironment = _hostingEnvironment;
             backupDirectory = hostingEnvironment.WebRootPath + "/" + dropboxFolder + "/";
@@ -181,6 +182,6 @@ namespace AIMS.Services
                 response.Message = ex.Message;
             }
             return response;
-        }
+        }*/
     }
 }

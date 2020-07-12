@@ -197,7 +197,7 @@ namespace AIMS.Services
 
         public IATIService(AIMSDbContext cntxt)
         {
-            this.context = cntxt;
+            context = cntxt;
         }
 
         public ICollection<IATIActivity> GetMatchingIATIActivities(string dataFilePath, string criteria)

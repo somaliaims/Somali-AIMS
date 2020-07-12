@@ -11,6 +11,30 @@ namespace AIMS.APIs.AutoMapper
     {
         public MappingProfile()
         {
+            CreateMap<EFCurrency, CurrencyView>();
+
+            CreateMap<EFHomePageSettings, HomePageModel>();
+
+            CreateMap<EFFinancialYears, FinancialYearView>();
+
+            CreateMap<EFSectorTypes, SectorTypesView>();
+
+            CreateMap<EFIATIOrganization, IATIOrganizationView>();
+
+            CreateMap<EFOrganization, IATIOrganizationView>();
+
+            CreateMap<EFOrganization, OrganizationViewModel>();
+
+            CreateMap<EFFundingTypes, FundingTypeView>();
+
+            CreateMap<EFIATICountryCodes, IATICountryModel>();
+
+            CreateMap<EFEnvelope, EnvelopeView>();
+
+            CreateMap<EFManualExchangeRates, ManualRatesView>();
+
+            CreateMap<EFMarkers, MarkerView>();
+
             CreateMap<EFSector, SectorDetailedView>()
                 .ForMember(s => s.ParentSector, opts => opts.MapFrom(source => source.ParentSector.SectorName))
                 .ForMember(s => s.SectorTypeId, opts => opts.MapFrom(source => source.SectorType.Id))
@@ -37,6 +61,12 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(o => o.Id, opts => opts.MapFrom(source => source.Id));
 
             CreateMap<EFOrganizationTypes, OrganizationTypeView>();
+
+            CreateMap<EFSectorMappings, SectorMappingView>();
+
+            CreateMap<EFProjectDocuments, ProjectDocumentView>();
+
+            CreateMap<EFProjectDocuments, DocumentAbstractView>();
 
             CreateMap<EFUser, UserView>()
                 .ForMember(u => u.Organization, opts => opts.MapFrom(source => source.Organization.OrganizationName))

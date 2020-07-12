@@ -8,6 +8,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace AIMS.APIs
@@ -46,7 +47,7 @@ namespace AIMS.APIs
             .UseContentRoot(Directory.GetCurrentDirectory())
             .ConfigureAppConfiguration((builderContext, config) =>
             {
-                IHostingEnvironment env = builderContext.HostingEnvironment;
+                IWebHostEnvironment env = builderContext.HostingEnvironment;
 
                 config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);

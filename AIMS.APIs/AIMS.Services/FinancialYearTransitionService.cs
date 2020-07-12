@@ -28,12 +28,10 @@ namespace AIMS.Services
     public class FinancialYearTransitionService : IFinancialYearTransitionService
     {
         AIMSDbContext context;
-        IMapper mapper;
 
-        public FinancialYearTransitionService(AIMSDbContext cntxt, IMapper autoMapper)
+        public FinancialYearTransitionService(AIMSDbContext cntxt)
         {
             context = cntxt;
-            mapper = autoMapper;
         }
 
         public FinancialYearTransitionView IsFinancialTransitionApplied()

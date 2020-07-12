@@ -758,6 +758,7 @@ namespace AIMS.Services
                     IQueryable<EFProjectLocations> projectLocationsQueryable = null;
                     List<EFProjectLocations> projectLocations = null;
                     IQueryable<EFProjectSectors> projectsInSector = null;
+                    List<PercentInProjectView> sectorPercentageInProjects = new List<PercentInProjectView>();
 
                     if (model.SectorId > 0)
                     {
@@ -777,8 +778,15 @@ namespace AIMS.Services
                             {
                                 projectsInSector = unitWork.ProjectSectorsRepository.GetManyQueryable(s => s.SectorId == model.SectorId && sectorProjectIds.Contains(s.ProjectId));
                             }
-                            
                         }
+
+                        sectorPercentageInProjects = (from s in projectsInSector
+                                                      group s by s.ProjectId into g
+                                                      select new PercentInProjectView
+                                                      {
+                                                          ProjectId = g.Key,
+                                                          Percentage = g.Sum(s => s.FundsPercentage)
+                                                      }).ToList();
                     }
 
                     if (model.ProjectIds.Count > 0)
@@ -948,9 +956,9 @@ namespace AIMS.Services
                         sectorPercentage = (model.SectorId == 0) ? 1 : 0;
                         if (model.SectorId > 0)
                         {
-                            sectorPercentage = (from p in projectsInSector
-                                                  where p.ProjectId == project.Id
-                                                  select p.FundsPercentage).FirstOrDefault();
+                            sectorPercentage = (from p in sectorPercentageInProjects
+                                                where p.ProjectId == project.Id
+                                                select p.Percentage).FirstOrDefault();
                             projectValue = (project.ProjectValue * (exchangeRate / projectExchangeRate));
                             projectValue = (sectorPercentage > 0) ? ((sectorPercentage / 100) * projectValue) : 0;
                         }
@@ -1115,9 +1123,10 @@ namespace AIMS.Services
                                     sectorPercentage = 1;
                                     if (model.SectorId > 0)
                                     {
-                                        sectorPercentage = (from s in projectsInSector
+                                        sectorPercentage = (from s in sectorPercentageInProjects
                                                             where s.ProjectId == project.Id
-                                                            select s.FundsPercentage).FirstOrDefault();
+                                                            select s.Percentage).FirstOrDefault();
+                                        sectorPercentage = (sectorPercentage > 0) ? (sectorPercentage / 100) : sectorPercentage;
                                         actualDisbursements = (sectorPercentage * actualDisbursements);
                                         plannedDisbursements = (sectorPercentage * plannedDisbursements);
                                     }
