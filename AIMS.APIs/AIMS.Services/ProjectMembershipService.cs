@@ -504,7 +504,9 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 var organizations = await unitWork.OrganizationRepository.GetManyQueryableAsync(o => o.Id != 0);
                 var projectTitles = unitWork.ProjectRepository.GetProjection(p => p.Id != 0, p => new { p.Id, p.Title, p.CreatedById });
-                
+                var projectFunders = await unitWork.ProjectFundersRepository.GetManyQueryableAsync(f => f.FunderId != 0);
+                var projectImplementers = await unitWork.ProjectImplementersRepository.GetManyQueryableAsync(i => i.ImplementerId != 0);
+
                 try
                 {
                     var strategy = context.Database.CreateExecutionStrategy();
@@ -512,8 +514,16 @@ namespace AIMS.Services
                     {
                         using (var transaction = context.Database.BeginTransaction())
                         {
-                            List<EFProjectMembershipRequests> newMembershipRequests = new List<EFProjectMembershipRequests>();
-                            foreach (var org in ghostOrganizations)
+                            List<EFProjectFunders> newProjectFunders = new List<EFProjectFunders>();
+                            List<EFProjectImplementers> newProjectImplementers = new List<EFProjectImplementers>();
+                            var ghostFunders = (from f in ghostOrganizations
+                                                where f.MembershipType == MembershipTypes.Funder
+                                                select f);
+                            var ghostImplementers = (from i in ghostOrganizations
+                                                     where i.MembershipType == MembershipTypes.Implementer
+                                                     select i);
+
+                            foreach (var org in ghostFunders)
                             {
                                 var organization = (from o in organizations
                                                     where o.OrganizationName.Trim().Equals(org.OrganizationName.Trim(), StringComparison.OrdinalIgnoreCase)
@@ -527,22 +537,73 @@ namespace AIMS.Services
 
                                     if (project != null)
                                     {
-                                        newMembershipRequests.Add(new EFProjectMembershipRequests()
+                                        var isFunderExists = (from f in projectFunders
+                                                              where f.FunderId == organization.Id
+                                                              && f.ProjectId == project.Id
+                                                              select f).FirstOrDefault();
+
+                                        var isFunderInList = (from f in newProjectFunders
+                                                              where f.FunderId == organization.Id
+                                                              && f.ProjectId == project.Id
+                                                              select f).FirstOrDefault();
+
+                                        if (isFunderExists == null && isFunderInList == null)
                                         {
-                                            OrganizationId = organization.Id,
-                                            ProjectId = project.Id,
-                                            UserId = (int)project.CreatedById,
-                                            MembershipType = org.MembershipType,
-                                            Dated = DateTime.Now,
-                                            IsApproved = true
-                                        });
+                                            newProjectFunders.Add(new EFProjectFunders()
+                                            {
+                                                ProjectId = project.Id,
+                                                FunderId = organization.Id
+                                            });
+                                        }
                                     }
                                 }
                             }
 
-                            if (newMembershipRequests.Any())
+                            if (newProjectFunders.Any())
                             {
-                                unitWork.ProjectMembershipRepository.InsertMultiple(newMembershipRequests);
+                                unitWork.ProjectFundersRepository.InsertMultiple(newProjectFunders);
+                                await unitWork.SaveAsync();
+                            }
+
+                            foreach (var org in ghostImplementers)
+                            {
+                                var organization = (from o in organizations
+                                                    where o.OrganizationName.Trim().Equals(org.OrganizationName.Trim(), StringComparison.OrdinalIgnoreCase)
+                                                    select o).FirstOrDefault();
+
+                                if (organization != null)
+                                {
+                                    var project = (from p in projectTitles
+                                                   where p.Title.Trim().Equals(org.ProjectTitle.Trim(), StringComparison.OrdinalIgnoreCase)
+                                                   select p).FirstOrDefault();
+
+                                    if (project != null)
+                                    {
+                                        var isImplementerExists = (from i in projectImplementers
+                                                              where i.ImplementerId == organization.Id
+                                                              && i.ProjectId == project.Id
+                                                              select i).FirstOrDefault();
+
+                                        var isImplementerInList = (from i in newProjectImplementers
+                                                              where i.ImplementerId == organization.Id
+                                                              && i.ProjectId == project.Id
+                                                              select i).FirstOrDefault();
+
+                                        if (isImplementerExists == null && isImplementerInList == null)
+                                        {
+                                            newProjectImplementers.Add(new EFProjectImplementers()
+                                            {
+                                                ProjectId = project.Id,
+                                                ImplementerId = organization.Id
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (newProjectImplementers.Any())
+                            {
+                                unitWork.ProjectImplementersRepository.InsertMultiple(newProjectImplementers);
                                 await unitWork.SaveAsync();
                             }
                             transaction.Commit();

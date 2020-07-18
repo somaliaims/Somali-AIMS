@@ -1893,6 +1893,7 @@ namespace AIMS.Services
                                 UserId = userId,
                                 OrganizationId = createdBy.OrganizationId,
                                 Dated = DateTime.Now,
+                                MembershipType = MembershipTypes.Funder,
                                 IsApproved = true
                             });
                             await unitWork.SaveAsync();
