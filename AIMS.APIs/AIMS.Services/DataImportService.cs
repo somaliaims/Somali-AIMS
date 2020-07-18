@@ -33,6 +33,13 @@ namespace AIMS.Services
         List<ImportedAidData> ImportAidDataSeventeen(string filePath);
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        ICollection<GhostOrgMembershipFixModel> FixGhostOrganizationMembershipFix(string filePath, IFormFile file);
+
+        /// <summary>
         /// Imports data for testing
         /// </summary>
         /// <param name="filePath"></param>
@@ -934,6 +941,63 @@ namespace AIMS.Services
                 workbook.Write(fs);
                 return sFileName;
             }
+        }
+
+        public ICollection<GhostOrgMembershipFixModel> FixGhostOrganizationMembershipFix(string filePath, IFormFile file)
+        {
+            ActionResponse response = new ActionResponse();
+            List<GhostOrgMembershipFixModel> ghostOrganizations = new List<GhostOrgMembershipFixModel>();
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                int organizationIdIndex = 0, organizationIndex = 1, projectIndex = 2, membershipTypeIndex = 3;
+
+                file.CopyTo(stream);
+                stream.Position = 0;
+
+                XSSFWorkbook hssfwb = new XSSFWorkbook(stream);
+                this.dataFormatter = new DataFormatter(CultureInfo.InvariantCulture);
+                this.formulaEvaluator = WorkbookFactory.CreateFormulaEvaluator(hssfwb);
+
+                ISheet sheet = hssfwb.GetSheetAt(0);
+                IRow headerRow = sheet.GetRow(1);
+                int cellCount = headerRow.LastCellNum;
+                int FUNDER = 1, IMPLEMENTER = 2;
+                string IMPLEMENTER_STRING = "Implementer";
+
+                int organizationId = 0;
+                string organizationName = "", projectTitle = "", membershipTypeString = "";
+                for (int i = (sheet.FirstRowNum + 1); i <= sheet.LastRowNum; i++)
+                {
+                    IRow row = sheet.GetRow(i);
+                    if (row == null)
+                    {
+                        continue;
+                    }
+
+                    MembershipTypes membershipType = MembershipTypes.Funder;
+                    organizationId = Convert.ToInt32(this.GetFormattedValue(row.GetCell(organizationIdIndex)));
+                    organizationName = this.GetFormattedValue(row.GetCell(organizationIndex));
+                    projectTitle = this.GetFormattedValue(row.GetCell(projectIndex));
+                    membershipTypeString = this.GetFormattedValue(row.GetCell(membershipTypeIndex));
+                    if (membershipTypeString.Equals(IMPLEMENTER_STRING, StringComparison.OrdinalIgnoreCase))
+                    {
+                        membershipType = (MembershipTypes)IMPLEMENTER;
+                    }
+                    else
+                    {
+                        membershipType = (MembershipTypes)FUNDER;
+                    }
+                    ghostOrganizations.Add(new GhostOrgMembershipFixModel()
+                    {
+                        OrganizationId = organizationId,
+                        OrganizationName = organizationName,
+                        ProjectTitle = projectTitle,
+                        MembershipType = membershipType
+                    });
+
+                }
+            }
+            return ghostOrganizations;
         }
 
         private string ApplyThousandFormat(decimal number)

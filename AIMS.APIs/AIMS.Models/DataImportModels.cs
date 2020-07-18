@@ -25,6 +25,14 @@ namespace AIMS.Models
         public List<ImportedCustomFields> CustomFields { get; set; }
     }
 
+    public class GhostOrgMembershipFixModel
+    {
+        public int OrganizationId { get; set; }
+        public string OrganizationName { get; set; }
+        public string ProjectTitle { get; set; }
+        public MembershipTypes MembershipType { get; set; }
+    }
+
     public class ImportedEnvelopeData
     {
         public string Organization { get; set; }
