@@ -19,13 +19,15 @@ namespace AIMS.APIs.Controllers
         IProjectService projectService;
         IEnvelopeService envelopeService;
         IOrganizationTypeService organizationTypeService;
+        IProjectMembershipService projectMembershipService;
         IExchangeRateService ratesService;
         IExchangeRateHttpService ratesHttpService;
         IWebHostEnvironment hostingEnvironment;
 
         public ImportDataController(IDataImportService dataImportService, IProjectService projService, 
             IEnvelopeService envpService, IOrganizationTypeService orgTypeService, IExchangeRateService exRateService,
-            IExchangeRateHttpService exRateHttpService, IWebHostEnvironment hostEnvironment)
+            IExchangeRateHttpService exRateHttpService, IWebHostEnvironment hostEnvironment,
+            IProjectMembershipService projectMembshipService)
         {
             service = dataImportService;
             projectService = projService;
@@ -35,6 +37,7 @@ namespace AIMS.APIs.Controllers
             ratesHttpService = exRateHttpService;
             hostingEnvironment = hostEnvironment;
             service.SetDirectoryPath(hostingEnvironment.WebRootPath);
+            projectMembershipService = projectMembshipService;
         }
 
         /*[HttpPost("UploadDataImportFileEighteen"), DisableRequestSizeLimit]
@@ -238,6 +241,45 @@ namespace AIMS.APIs.Controllers
             string fileName = service.GenerateExcelFileForActiveProjects(pathToFiles);
             return Ok(fileName);
         }*/
+
+        [HttpPost("ImportGhostOrganizationFixes"), DisableRequestSizeLimit]
+        public async Task<IActionResult> ImportGhostOrganizationFixes()
+        {
+            try
+            {
+                var file = Request.Form.Files[0];
+                var folderName = Path.Combine("wwwroot", "DataImportFiles");
+                var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+                Directory.CreateDirectory(pathToSave);
+                if (file.Length > 0)
+                {
+                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+                    var filePath = Path.Combine(pathToSave, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
+                    var ghostOrganizations = service.FixGhostOrganizationMembershipFix(filePath, file);
+                    if (ghostOrganizations.Count > 0)
+                    {
+                        var response = await projectMembershipService.FixGhostOrganizationsAsync(ghostOrganizations.ToList());
+                        if (!response.Success)
+                        {
+                            return BadRequest(response.Message);
+                        }
+                    }
+                    return Ok(ghostOrganizations);
+                }
+                else
+                {
+                    return BadRequest("Invalid data file provided");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
 
 
     }

@@ -37,6 +37,13 @@ namespace AIMS.Services
         ActionResponse AddMembershipRequest(ProjectMembershipRequestModel model);
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ghostOrganizations"></param>
+        /// <returns></returns>
+        Task<ActionResponse> FixGhostOrganizationsAsync(List<GhostOrgMembershipFixModel> ghostOrganizations);
+
+        /// <summary>
         /// Approves membership request
         /// </summary>
         /// <param name="model"></param>
@@ -485,6 +492,67 @@ namespace AIMS.Services
                     message += mHelper.ProjectPermissionDenied(requestedProject);
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                     emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
+                }
+                return response;
+            }
+        }
+
+        public async Task<ActionResponse> FixGhostOrganizationsAsync(List<GhostOrgMembershipFixModel> ghostOrganizations)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var organizations = await unitWork.OrganizationRepository.GetManyQueryableAsync(o => o.Id != 0);
+                var projectTitles = unitWork.ProjectRepository.GetProjection(p => p.Id != 0, p => new { p.Id, p.Title, p.CreatedById });
+                
+                try
+                {
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
+                    {
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            List<EFProjectMembershipRequests> newMembershipRequests = new List<EFProjectMembershipRequests>();
+                            foreach (var org in ghostOrganizations)
+                            {
+                                var organization = (from o in organizations
+                                                    where o.OrganizationName.Trim().Equals(org.OrganizationName.Trim(), StringComparison.OrdinalIgnoreCase)
+                                                    select o).FirstOrDefault();
+
+                                if (organization != null)
+                                {
+                                    var project = (from p in projectTitles
+                                                   where p.Title.Trim().Equals(org.ProjectTitle.Trim(), StringComparison.OrdinalIgnoreCase)
+                                                   select p).FirstOrDefault();
+
+                                    if (project != null)
+                                    {
+                                        newMembershipRequests.Add(new EFProjectMembershipRequests()
+                                        {
+                                            OrganizationId = organization.Id,
+                                            ProjectId = project.Id,
+                                            UserId = (int)project.CreatedById,
+                                            MembershipType = org.MembershipType,
+                                            Dated = DateTime.Now,
+                                            IsApproved = true
+                                        });
+                                    }
+                                }
+                            }
+
+                            if (newMembershipRequests.Any())
+                            {
+                                unitWork.ProjectMembershipRepository.InsertMultiple(newMembershipRequests);
+                                await unitWork.SaveAsync();
+                            }
+                            transaction.Commit();
+                        }
+                    });
+                }
+                catch(Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.Success = false;
                 }
                 return response;
             }
