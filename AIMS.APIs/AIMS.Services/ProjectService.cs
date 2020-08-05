@@ -4188,13 +4188,13 @@ namespace AIMS.Services
                             if (deleteDisbursements.Any())
                             {
                                 await unitWork.SaveAsync();
-                                decimal totalDisbursements = unitWork.ProjectDisbursementsRepository.GetProjection(d => d.ProjectId == project.Id, d => d.Amount).Sum();
+                                /*decimal totalDisbursements = unitWork.ProjectDisbursementsRepository.GetProjection(d => d.ProjectId == project.Id, d => d.Amount).Sum();
                                 if (totalDisbursements != project.ProjectValue)
                                 {
                                     project.ProjectValue = totalDisbursements;
                                     unitWork.ProjectRepository.Update(project);
                                     await unitWork.SaveAsync();
-                                }
+                                }*/
                             }
                             if (isCurrencyUpdated)
                             {

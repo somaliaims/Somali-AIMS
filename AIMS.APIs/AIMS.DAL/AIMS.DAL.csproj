@@ -14,11 +14,21 @@
     <Compile Remove="Migrations\20200410150718_Added_Financial_Transition_Model.Designer.cs" />
     <Compile Remove="Migrations\20200411104143_Added_RequestedBy_OrgMergs.cs" />
     <Compile Remove="Migrations\20200411104143_Added_RequestedBy_OrgMergs.Designer.cs" />
+    <Compile Remove="Migrations\20200805152611_Added_UKey_Disbursements.cs" />
+    <Compile Remove="Migrations\20200805152611_Added_UKey_Disbursements.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="System.Security.Permissions" Version="4.7.0" />
   </ItemGroup>
 

@@ -306,6 +306,8 @@ namespace AIMS.Models
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
+        [ForeignKey("Year")]
+        public int YearId { get; set; }
         public EFFinancialYears Year { get; set; }
         [Column(TypeName = "decimal(18, 2)")]
         public DisbursementTypes DisbursementType { get; set; }

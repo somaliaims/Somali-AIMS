@@ -89,6 +89,10 @@ namespace AIMS.DAL.EF
 
             modelBuilder.Entity<EFEnvelopeYearlyBreakup>()
                 .HasKey(e => new { e.EnvelopeTypeId, e.EnvelopeId, e.YearId });
+
+            modelBuilder.Entity<EFProjectDisbursements>()
+                .HasIndex(d => new { d.ProjectId, d.YearId, d.DisbursementType })
+                .IsUnique();
         }
 
         //Creating DB Tables for the Objects
