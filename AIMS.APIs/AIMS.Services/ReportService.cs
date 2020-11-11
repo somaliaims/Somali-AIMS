@@ -2161,7 +2161,7 @@ namespace AIMS.Services
                         decimal projectExchangeRate = (project.ExchangeRate == 0) ? 1 : project.ExchangeRate;
                         ProjectProfileView profileView = new ProjectProfileView();
                         profileView.Id = project.Id;
-                        profileView.Title = project.Title;
+                        profileView.Title = project.Title.Replace("\"", "");
                         profileView.Description = project.Description;
                         profileView.ProjectCurrency = project.ProjectCurrency;
                         profileView.ProjectValue = project.ProjectValue;
@@ -2369,10 +2369,13 @@ namespace AIMS.Services
 
                         foreach (var project in sectorProjects)
                         {
+                            string projectTitle = project.Title.Replace("“", "");
+                            projectTitle = projectTitle.Replace("”", "");
+                            projectTitle = projectTitle.Replace("\"", "");
                             projectsListForSector.Add(new ProjectViewForSector()
                             {
                                 ProjectId = project.Id,
-                                Title = project.Title.Replace("\"", ""),
+                                Title = projectTitle,
                                 StartingFinancialYear = project.StartingFinancialYear,
                                 EndingFinancialYear = project.EndingFinancialYear,
                                 Funders = string.Join(", ", project.Funders.Select(f => f.Funder)),

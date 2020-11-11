@@ -360,6 +360,7 @@ namespace AIMS.Services
                         {
                             OrganizationType = organizationType,
                             OrganizationName = model.Name.Trim(),
+                            DateUpdated = DateTime.Now
                         });
                         unitWork.Save();
                         response.ReturnedId = newOrganization.Id;
@@ -399,6 +400,7 @@ namespace AIMS.Services
 
                 organizationObj.OrganizationName = organization.Name.Trim();
                 organizationObj.OrganizationType = organizationType;
+                organizationObj.DateUpdated = DateTime.Now;
                 unitWork.OrganizationRepository.Update(organizationObj);
                 unitWork.Save();
                 response.ReturnedId = id;
@@ -430,6 +432,7 @@ namespace AIMS.Services
 
                 string oldName = organization.OrganizationName;
                 organization.OrganizationName = newName;
+                organization.DateUpdated = DateTime.Now;
                 unitWork.OrganizationRepository.Update(organization);
                 unitWork.Save();
 
@@ -548,7 +551,8 @@ namespace AIMS.Services
                                 {
                                     OrganizationType = organizationType,
                                     OrganizationName = model.NewName,
-                                    IsApproved = true
+                                    IsApproved = true,
+                                    DateUpdated = DateTime.Now
                                 });
                                 await unitWork.SaveAsync();
 

@@ -234,6 +234,13 @@ namespace AIMS.Services.Helpers
         public string GetQueryStringForEnvelopeReport(SearchEnvelopeModel model)
         {
             string queryString = "?load=true";
+
+            if (model.FunderTypeIds.Count > 0)
+            {
+                string funderTypeIdsStr = string.Join(",", model.FunderTypeIds);
+                queryString += ("&ftypes=" + funderTypeIdsStr);
+            }
+
             if (model.FunderIds.Count > 0)
             {
                 queryString += "&funders=" + string.Join(",", model.FunderIds);

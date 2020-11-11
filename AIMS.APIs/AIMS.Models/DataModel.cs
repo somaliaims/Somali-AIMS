@@ -157,6 +157,7 @@ namespace AIMS.Models
         public int? OrganizationTypeId { get; set; }
         public bool IsUnAffiliated { get; set; } = false;
         public virtual EFOrganizationTypes OrganizationType { get; set; }
+        public DateTime DateUpdated { get; set; } = new DateTime(2020, 03, 20);
     }
 
     public class EFIATIOrganization

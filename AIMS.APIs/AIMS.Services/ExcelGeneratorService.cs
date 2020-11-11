@@ -673,7 +673,7 @@ namespace AIMS.Services
                                                       where p.ParentSectorId.Equals(sector.SectorId)
                                                       select p);
                             }
-                                
+
                             if (sectorProjectsList == null)
                             {
                                 sectorProjectsList = new List<ProjectsBySector>();

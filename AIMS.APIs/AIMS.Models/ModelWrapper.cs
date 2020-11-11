@@ -313,6 +313,7 @@ namespace AIMS.Models
         public int OrganizationTypeId { get; set; }
         public string OrganizationType { get; set; }
         public string OrganizationName { get; set; }
+        public string DateUpdated { get; set; }
     }
 
     public class OrganizationMiniView

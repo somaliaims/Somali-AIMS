@@ -53,7 +53,8 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(s => s.ParentId, opts => opts.MapFrom(source => source.ParentSector.Id));
 
             CreateMap<EFOrganization, OrganizationView>()
-                .ForMember(o => o.OrganizationType, opts => opts.MapFrom(source => source.OrganizationType.TypeName));
+                .ForMember(o => o.OrganizationType, opts => opts.MapFrom(source => source.OrganizationType.TypeName))
+                .ForMember(o => o.DateUpdated, opts => opts.MapFrom(source => source.DateUpdated.ToShortDateString()));
 
             CreateMap<EFIATIOrganization, OrganizationView>();
 
