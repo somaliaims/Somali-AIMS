@@ -178,7 +178,23 @@ namespace AIMS.Services
             List<ProjectDetailView> projectsList = new List<ProjectDetailView>();
             List<ProjectDetailSectorView> sectorsList = new List<ProjectDetailSectorView>();
             IQueryable<EFProject> projects;
+            string defaultCurrency = "", projectCurrency = "";
+            decimal defaultCurrencyExchangeRate = 1, projectValue = 0;
             int startingFinancialYear = 0, endingFinancialYear = 0, currentActiveYear = DateTime.Now.Year;
+
+            if (model.UseDefaultCurrency)
+            {
+                var currency = unitWork.CurrencyRepository.GetOne(c => c.IsDefault == true);
+                if (currency != null)
+                {
+                    defaultCurrency = currency.Currency;
+                }
+                var exchangeRate = unitWork.ManualRatesRepository.GetOne(r => r.Year == DateTime.Now.Year);
+                if (exchangeRate != null)
+                {
+                    defaultCurrencyExchangeRate = exchangeRate.ExchangeRate;
+                }
+            }
 
             var financialYearsList = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear > 0);
             financialYearsList = (from fy in financialYearsList
@@ -337,13 +353,28 @@ namespace AIMS.Services
                         Name = org
                     });
                 }
+
+                projectValue = project.ProjectValue;
+                projectCurrency = project.ProjectCurrency;
+                if (model.UseDefaultCurrency)
+                {
+                    projectCurrency = defaultCurrency;
+                    defaultCurrencyExchangeRate = (defaultCurrencyExchangeRate / project.ExchangeRate);
+                    projectValue = (defaultCurrencyExchangeRate * projectValue);
+                    
+                    foreach(var disbursement in project.Disbursements)
+                    {
+                        disbursement.Amount = (defaultCurrencyExchangeRate * disbursement.Amount);
+                    }
+                }
+
                 projectsList.Add(new ProjectDetailView()
                 {
                     Id = project.Id,
                     Title = project.Title.Replace("\"", ""),
                     Description = project.Description,
                     ProjectCurrency = project.ProjectCurrency,
-                    ProjectValue = project.ProjectValue,
+                    ProjectValue = projectValue,
                     ExchangeRate = project.ExchangeRate,
                     StartingFinancialYear = project.StartingFinancialYear.FinancialYear,
                     EndingFinancialYear = project.EndingFinancialYear.FinancialYear,
@@ -364,6 +395,7 @@ namespace AIMS.Services
                                select s).ToList();
             }
 
+            projectsReport.UseDefaultCurrency = model.UseDefaultCurrency;
             projectsReport.CurrentFinancialYear = currentActiveYear;
             projectsReport.FinancialYears = yearsView;
             projectsReport.StartingFinancialYear = startingFinancialYear;

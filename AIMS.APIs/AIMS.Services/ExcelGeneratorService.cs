@@ -194,16 +194,13 @@ namespace AIMS.Services
                     totalValue.SetCellValue("Total value");
                     totalValue.CellStyle = headerStyle;
 
-                    var exchangeRate = row.CreateCell(++colIndex);
-                    exchangeRate.SetCellValue("Exchange rate");
-                    exchangeRate.CellStyle = headerStyle;
-
-                    /*for (int yr = startingYear; yr <= endingYear; yr++)
+                    if (!projectsReport.UseDefaultCurrency)
                     {
-                        var yearCell = row.CreateCell(++colIndex);
-                        yearCell.SetCellValue("Disbursements " + yr.ToString());
-                        yearCell.CellStyle = headerStyle;
-                    }*/
+                        var exchangeRate = row.CreateCell(++colIndex);
+                        exchangeRate.SetCellValue("Exchange rate");
+                        exchangeRate.CellStyle = headerStyle;
+                    }
+                    
                     foreach(var year in projectsReport.FinancialYears)
                     {
                         var yearCell = row.CreateCell(++colIndex);
@@ -299,9 +296,12 @@ namespace AIMS.Services
                         projectValueCell.SetCellValue(Convert.ToDouble(project.ProjectValue));
                         projectValueCell.CellStyle = numericCellStyle;
 
-                        var exchangeRateCell = row.CreateCell(++col, CellType.Numeric);
-                        exchangeRateCell.SetCellValue(project.ExchangeRate.ToString());
-                        exchangeRateCell.CellStyle = numericCellStyle;
+                        if (!projectsReport.UseDefaultCurrency)
+                        {
+                            var exchangeRateCell = row.CreateCell(++col, CellType.Numeric);
+                            exchangeRateCell.SetCellValue(project.ExchangeRate.ToString());
+                            exchangeRateCell.CellStyle = numericCellStyle;
+                        }
 
                         var disbursements = project.Disbursements;
                         DisbursementAbstractView actualDisbursement = null, plannedDisbursement = null;

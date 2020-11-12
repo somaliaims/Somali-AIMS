@@ -864,6 +864,7 @@ namespace AIMS.Models
         public int CurrentFinancialYear { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
+        public bool UseDefaultCurrency { get; set; }
         public List<FinancialYearMiniView> FinancialYears { get; set; }
         public List<ProjectDetailSectorView> Sectors { get; set; }
         public List<ProjectDetailLocationView> Locations { get; set; }
@@ -1676,6 +1677,7 @@ namespace AIMS.Models
         public int StartingYear { get; set; }
         public int EndingYear { get; set; }
         public int OrganizationId { get; set; } = 0;
+        public bool UseDefaultCurrency { get; set; }
     }
 
     public class SearchEnvelopeModel
