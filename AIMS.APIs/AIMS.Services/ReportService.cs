@@ -359,8 +359,8 @@ namespace AIMS.Services
                 if (model.UseDefaultCurrency)
                 {
                     projectCurrency = defaultCurrency;
-                    defaultCurrencyExchangeRate = (defaultCurrencyExchangeRate / project.ExchangeRate);
-                    projectValue = (defaultCurrencyExchangeRate * projectValue);
+                    var calculatedExchangeRate = (defaultCurrencyExchangeRate / project.ExchangeRate);
+                    projectValue = (calculatedExchangeRate * projectValue);
                     
                     foreach(var disbursement in project.Disbursements)
                     {
@@ -373,7 +373,7 @@ namespace AIMS.Services
                     Id = project.Id,
                     Title = project.Title.Replace("\"", ""),
                     Description = project.Description,
-                    ProjectCurrency = project.ProjectCurrency,
+                    ProjectCurrency = projectCurrency,
                     ProjectValue = projectValue,
                     ExchangeRate = project.ExchangeRate,
                     StartingFinancialYear = project.StartingFinancialYear.FinancialYear,
