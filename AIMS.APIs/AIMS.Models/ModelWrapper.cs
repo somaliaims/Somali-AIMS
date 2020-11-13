@@ -1463,6 +1463,14 @@ namespace AIMS.Models
         public int Day { get; set; }
     }
 
+    public class FinancialYearSettingView
+    {
+        public int CurrentFinancialYear { get; set; }
+        public string CurrentFinancialYearLabel { get; set; }
+        public int Month { get; set; }
+        public int Day { get; set; }
+    }
+
     public class FinancialYearModel
     {
         public int Month { get; set; } = 0;

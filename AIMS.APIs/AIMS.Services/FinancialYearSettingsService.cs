@@ -17,7 +17,7 @@ namespace AIMS.Services
         /// Gets financial year settings
         /// </summary>
         /// <returns></returns>
-        FinancialYearSettingModel Get();
+        FinancialYearSettingView Get();
 
         /// <summary>
         /// Adds or updates month and day settings for financial year
@@ -36,16 +36,43 @@ namespace AIMS.Services
             context = cntxt;
         }
 
-        public FinancialYearSettingModel Get()
+        public FinancialYearSettingView Get()
         {
             var unitWork = new UnitOfWork(context);
-            FinancialYearSettingModel view = new FinancialYearSettingModel();
+            int currentYear = DateTime.Now.Year, currentMonth = DateTime.Now.Month,
+                currentDay = DateTime.Now.Day;
+            int settingsMonth = 0, settingsDay = 0;
+            FinancialYearSettingView view = new FinancialYearSettingView();
             var settings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
             if (settings != null)
             {
-                view.Month = settings.Month;
-                view.Day = settings.Day;
+                settingsMonth = settings.Month;
+                settingsDay = settings.Day;
+
+                if (currentMonth < settingsMonth)
+                {
+                    --currentYear;
+                }
+                else if (currentMonth == settingsMonth && currentDay < settingsDay)
+                {
+                    --currentYear;
+                }
             }
+            var financialYearExists = unitWork.FinancialYearRepository.GetOne(y => y.FinancialYear == currentYear);
+            if (financialYearExists == null)
+            {
+                string label = (settings.Month == 1 && settings.Day == 1) ? "FY " + currentYear : "FY " + (currentYear) + "/" + (currentYear + 1);
+                financialYearExists = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                {
+                    FinancialYear = currentYear,
+                    Label = label
+                });
+                unitWork.Save();
+            }
+            view.Day = settingsDay;
+            view.Month = settingsMonth;
+            view.CurrentFinancialYear = financialYearExists.FinancialYear;
+            view.CurrentFinancialYearLabel = financialYearExists.Label;
             return view;
         }
 
