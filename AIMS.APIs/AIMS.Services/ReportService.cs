@@ -1603,8 +1603,38 @@ namespace AIMS.Services
                     };
 
                     int currentYear = DateTime.Now.Year;
-                    int previousYear = currentYear - 1;
-                    int upperYearLimit = currentYear + 1;
+                    //int previousYear = currentYear - 1;
+                    //int upperYearLimit = currentYear + 1;
+                    int previousYear = model.StartingYear;
+                    int upperYearLimit = model.EndingYear;
+                    if (previousYear == 0 && upperYearLimit == 0)
+                    {
+                        previousYear = (currentYear - 1);
+                        model.StartingYear = previousYear;
+                        upperYearLimit = (currentYear + 1);
+                        model.EndingYear = upperYearLimit;
+                    }
+
+                    var envelopeYears = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(y => y.EnvelopeId != 0, new string[] { "Year" });
+                    var financialYears = (from y in envelopeYears
+                                         select y.Year.FinancialYear).Distinct();
+                    int minYear = (from y in financialYears
+                                   select y).Min();
+                    int maxYear = (from y in financialYears
+                                   select y).Max();
+
+                    if (previousYear == 0 && upperYearLimit != 0)
+                    {
+                        previousYear = minYear;
+                        model.StartingYear = minYear;
+                    }
+
+                    if (previousYear != 0 && upperYearLimit == 0)
+                    {
+                        upperYearLimit = maxYear;
+                        model.EndingYear = maxYear;
+                    }
+
                     List<EnvelopeYearlyView> envelopeViewList = new List<EnvelopeYearlyView>();
                     IQueryable<EFEnvelopeYearlyBreakup> envelopeList = null;
                     IQueryable<EFEnvelope> envelopes = null;
