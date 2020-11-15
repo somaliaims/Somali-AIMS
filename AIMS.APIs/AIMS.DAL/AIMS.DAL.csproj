@@ -16,6 +16,8 @@
     <Compile Remove="Migrations\20200411104143_Added_RequestedBy_OrgMergs.Designer.cs" />
     <Compile Remove="Migrations\20200805152611_Added_UKey_Disbursements.cs" />
     <Compile Remove="Migrations\20200805152611_Added_UKey_Disbursements.Designer.cs" />
+    <Compile Remove="Migrations\20201115080053_Document_Links_Model.cs" />
+    <Compile Remove="Migrations\20201115080053_Document_Links_Model.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2396,4 +2396,24 @@ namespace AIMS.Models
         public int Year { get; set; }
     }
 
+    public class DocumentLinkModel
+    {
+        [Required]
+        [MinLength(6, ErrorMessage = "Title for the document URL must be at least 6 characters long")]
+        [MaxLength(50, ErrorMessage = "Title for the document URL can be at most 50 characters long")]
+        public string Title { get; set; }
+        [Required]
+        [Url]
+        public string URL { get; set; }
+    }
+
+    public class DocumentLinkView
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string URL { get; set; }
+        public string DatePosted { get; set; }
+    }
+
+
 }

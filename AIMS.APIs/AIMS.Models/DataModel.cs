@@ -676,4 +676,16 @@ namespace AIMS.Models
         public EFUser AppliedBy { get; set; }
         public DateTime AppliedOn { get; set; }
     }
+
+    public class EFDocumentLinks
+    {
+        [Key]
+        public int Id { get; set; }
+        [Required]
+        [MaxLength(50)]
+        public string Title { get; set; }
+        [Required]
+        public string URL { get; set; }
+        public DateTime DatePosted { get; set; }
+    }
 }
