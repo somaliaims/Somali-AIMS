@@ -61,6 +61,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFOrganizationsToMerge> organizationsToMergeRepository;
         private GenericRepository<EFUserRoleSettlementRequests> userRolesSettlementRequestsRepository;
         private GenericRepository<EFFinancialYearTransition> financialYearTransitionRepository;
+        private GenericRepository<EFDocumentLinks> documentLinksRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -535,6 +536,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.exRatesAPIsRepository == null)
                     this.exRatesAPIsRepository = new GenericRepository<EFExchangeRatesAPIsCount>(context);
                 return this.exRatesAPIsRepository;
+            }
+        }
+
+        public GenericRepository<EFDocumentLinks> DocumentLinksRepository
+        {
+            get
+            {
+                if (this.documentLinksRepository == null)
+                    this.documentLinksRepository = new GenericRepository<EFDocumentLinks>(context);
+                return this.documentLinksRepository;
             }
         }
 

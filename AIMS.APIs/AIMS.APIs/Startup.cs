@@ -162,6 +162,7 @@ namespace AIMS.APIs
             services.AddScoped<IFinancialYearSettingsService, FinancialYearSettingsService>();
             services.AddScoped<IOrganizationMergeService, OrganizationMergeService>();
             services.AddScoped<IFinancialYearTransitionService, FinancialYearTransitionService>();
+            services.AddScoped<IDocumentLinkService, DocumentLinkService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();

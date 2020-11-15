@@ -19,6 +19,13 @@ namespace AIMS.Services
         IEnumerable<DocumentLinkView> GetAll();
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        ActionResponse Add(DocumentLinkModel model);
+
+        /// <summary>
         /// Deletes a document for the provided id
         /// </summary>
         /// <param name="id"></param>
@@ -46,6 +53,31 @@ namespace AIMS.Services
                          orderby link.DatePosted descending
                          select link);
                 return mapper.Map<List<DocumentLinkView>>(links);
+            }
+        }
+
+        public ActionResponse Add(DocumentLinkModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var newLink = unitWork.DocumentLinksRepository.Insert(new EFDocumentLinks()
+                    {
+                        Title = model.Title,
+                        URL = model.URL,
+                        DatePosted = DateTime.Now
+                    });
+                    unitWork.Save();
+                    response.ReturnedId = newLink.Id;
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return response;
             }
         }
 

@@ -2399,7 +2399,7 @@ namespace AIMS.Models
     public class DocumentLinkModel
     {
         [Required]
-        [MinLength(6, ErrorMessage = "Title for the document URL must be at least 6 characters long")]
+        [MinLength(4, ErrorMessage = "Title for the document URL must be at least 4 characters long")]
         [MaxLength(50, ErrorMessage = "Title for the document URL can be at most 50 characters long")]
         public string Title { get; set; }
         [Required]

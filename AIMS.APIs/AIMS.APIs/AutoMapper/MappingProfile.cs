@@ -167,6 +167,8 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(e => e.UsageSection, opts => opts.MapFrom(source => source.UsageSection.ToString()));
 
             CreateMap<EFEnvelopeTypes, EnvelopeTypeView>();
+
+            CreateMap<EFDocumentLinks, DocumentLinkView>();
         }
     }
 }
