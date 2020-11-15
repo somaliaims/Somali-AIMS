@@ -27,6 +27,12 @@ namespace AIMS.APIs.Controllers
             return Ok(financialYearService.GetAll());
         }
 
+        [HttpGet("[action]")]
+        public IActionResult GetYearsForEnvelope()
+        {
+            return Ok(financialYearService.GetYearsForEnvelope());
+        }
+
         [HttpGet("GetForEnvelope")]
         public IActionResult GetForEnvelope()
         {

@@ -21,6 +21,12 @@ namespace AIMS.Services
         IEnumerable<FinancialYearView> GetAll();
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<FinancialYearView> GetYearsForEnvelope();
+
+        /// <summary>
         /// Get all years for envelope
         /// </summary>
         /// <returns></returns>
@@ -89,6 +95,22 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 var years = unitWork.FinancialYearRepository.GetAll();
+                years = (from y in years
+                         orderby y.FinancialYear
+                         select y);
+                return mapper.Map<List<FinancialYearView>>(years);
+            }
+        }
+
+        public IEnumerable<FinancialYearView> GetYearsForEnvelope()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                var envelopeYears = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(y => y.EnvelopeId != 0, new string[] { "Year" });
+                var yearsList = (from y in envelopeYears
+                                      select y.Year.FinancialYear).Distinct();
+
+                var years = unitWork.FinancialYearRepository.GetManyQueryable(y => yearsList.Contains(y.FinancialYear));
                 years = (from y in years
                          orderby y.FinancialYear
                          select y);
