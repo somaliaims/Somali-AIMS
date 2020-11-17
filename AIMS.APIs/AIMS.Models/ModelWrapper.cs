@@ -2414,6 +2414,4 @@ namespace AIMS.Models
         public string URL { get; set; }
         public string DatePosted { get; set; }
     }
-
-
 }

@@ -738,7 +738,54 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                return unitWork.ProjectRepository.GetProjection(p => p.Id != 0, p => p.Id).Count();
+                int fyMonth = 1, fyDay = 1;
+                var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(fy => fy.Id != 0);
+                if (fySettings != null)
+                {
+                    fyMonth = fySettings.Month;
+                    fyDay = fySettings.Day;
+                }
+
+                int currentYear = DateTime.Now.Year, currentMonth = DateTime.Now.Month, currentDay = DateTime.Now.Day;
+                bool isSimilarToCalendarYear = (fyMonth == 1 && fyDay == 1) ? true : false;
+                if (!isSimilarToCalendarYear)
+                {
+                    if (currentMonth < fyMonth)
+                    {
+                        --currentYear;
+                    }
+                    else if (currentMonth == fyMonth && currentDay < fyDay)
+                    {
+                        --currentYear;
+                    }
+                }
+                var currentFinancialYear = unitWork.FinancialYearRepository.GetOne(y => y.FinancialYear == currentYear);
+                if (currentFinancialYear == null)
+                {
+                    string label = (isSimilarToCalendarYear) ? "FY" + currentYear : ("FY " + currentYear + "/" + (currentYear + 1));
+                    currentFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                    {
+                        Label = label,
+                        FinancialYear = currentYear,
+                    });
+                    unitWork.Save();
+                }
+
+                var projects = unitWork.ProjectRepository.GetWithInclude(p =>
+                                (p.StartingFinancialYear.FinancialYear <= currentYear && p.EndingFinancialYear.FinancialYear >= currentYear),
+                                new string[] { "StartingFinancialYear", "EndingFinancialYear", "Disbursements" });
+                int projectsCount = 0;
+                foreach(var project in projects)
+                {
+                    var disbursements = (from d in project.Disbursements
+                                         where d.YearId == currentFinancialYear.Id
+                                         select d.Amount).Sum();
+                    if (disbursements > 0)
+                    {
+                        ++projectsCount;
+                    }
+                }
+                return projectsCount;
             }
         }
 
