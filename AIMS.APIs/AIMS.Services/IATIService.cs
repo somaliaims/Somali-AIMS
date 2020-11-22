@@ -302,6 +302,11 @@ namespace AIMS.Services
                     parser = new ParserIATIVersion21();
                     activityList = parser.ExtractAcitivitiesForIds(xDoc, ids, transactionTypes, financeTypes);
                     break;
+
+                case "2.03":
+                    parser = new ParserIATIVersion21();
+                    activityList = parser.ExtractAcitivitiesForIds(xDoc, ids, transactionTypes, financeTypes);
+                    break;
             }
 
             //Extract organizations for future use
@@ -575,6 +580,11 @@ namespace AIMS.Services
 
                     case "2.01":
                         parser = new ParserIATIVersion21();
+                        organizations = parser.ExtractOrganizations(xDoc);
+                        break;
+
+                    case "2.03":
+                        parser = new ParserIATIVersion23();
                         organizations = parser.ExtractOrganizations(xDoc);
                         break;
                 }
