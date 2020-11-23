@@ -2414,4 +2414,23 @@ namespace AIMS.Models
         public string URL { get; set; }
         public string DatePosted { get; set; }
     }
+
+    public class ContactMessageModel
+    {
+        [Required]
+        [EmailAddress]
+        public string SenderEmail { get; set; }
+        [Required]
+        public string Message { get; set; }
+    }
+
+    public class ContactMessageView
+    {
+        public int Id { get; set; }
+        public string SenderEmail { get; set; }
+        public string Message { get; set; }
+        public string Dated { get; set; }
+        public bool IsRegistered { get; set; }
+        public bool IsViewed { get; set; }
+    }
 }

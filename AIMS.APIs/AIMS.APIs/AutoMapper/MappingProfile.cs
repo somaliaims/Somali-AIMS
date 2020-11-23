@@ -169,6 +169,9 @@ namespace AIMS.APIs.AutoMapper
             CreateMap<EFEnvelopeTypes, EnvelopeTypeView>();
 
             CreateMap<EFDocumentLinks, DocumentLinkView>();
+
+            CreateMap<EFContactMessages, ContactMessageView>()
+                .ForMember(c => c.Dated, opts => opts.MapFrom(source => source.Dated.ToShortDateString()));
         }
     }
 }

@@ -688,4 +688,16 @@ namespace AIMS.Models
         public string URL { get; set; }
         public DateTime DatePosted { get; set; }
     }
+
+    public class EFContactMessages
+    {
+        [Key]
+        public int Id { get; set; }
+        [Required]
+        [EmailAddress]
+        public string SenderEmail { get; set; }
+        public DateTime Dated { get; set; }
+        public bool IsViewed { get; set; }
+        public bool IsRegistered { get; set; }
+    }
 }

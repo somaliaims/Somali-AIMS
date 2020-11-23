@@ -62,6 +62,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFUserRoleSettlementRequests> userRolesSettlementRequestsRepository;
         private GenericRepository<EFFinancialYearTransition> financialYearTransitionRepository;
         private GenericRepository<EFDocumentLinks> documentLinksRepository;
+        private GenericRepository<EFContactMessages> contactMessagesRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -146,6 +147,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.emailMessagesRepository == null)
                     this.emailMessagesRepository = new GenericRepository<EFEmailMessages>(context);
                 return this.emailMessagesRepository;
+            }
+        }
+
+        public GenericRepository<EFContactMessages> ContactMessagesRepository
+        {
+            get
+            {
+                if (this.contactMessagesRepository == null)
+                    this.contactMessagesRepository = new GenericRepository<EFContactMessages>(context);
+                return this.contactMessagesRepository;
             }
         }
 

@@ -145,6 +145,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFUserRoleSettlementRequests> UserRoleSettlementRequests { get; set; }
         public DbSet<EFFinancialYearTransition> FinancialTransitions { get; set; }
         public DbSet<EFDocumentLinks> DocumentLinks { get; set; }
+        public DbSet<EFContactMessages> ContactMessages { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime
