@@ -694,10 +694,19 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         [Required]
+        public string SenderName { get; set; }
+        [Required]
         [EmailAddress]
         public string SenderEmail { get; set; }
+        [Required]
+        public string Subject { get; set; }
+        [Required]
+        public string Message { get; set; }
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
         public DateTime Dated { get; set; }
         public bool IsViewed { get; set; }
-        public bool IsRegistered { get; set; }
+        public ContactEmailType ContactType { get; set; }
     }
 }

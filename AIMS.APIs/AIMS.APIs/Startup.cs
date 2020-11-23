@@ -163,6 +163,7 @@ namespace AIMS.APIs
             services.AddScoped<IOrganizationMergeService, OrganizationMergeService>();
             services.AddScoped<IFinancialYearTransitionService, FinancialYearTransitionService>();
             services.AddScoped<IDocumentLinkService, DocumentLinkService>();
+            services.AddScoped<IContactMessageService, ContactMessageService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();
