@@ -67,7 +67,7 @@ namespace AIMS.Services
             return emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Title, model.Message, model.FooterMessage);
         }
 
-        public ActionResponse SendContactEmail(EmailModel model, string senderName, string sendEmail, string projectTitle, ContactEmailType emailType)
+        public ActionResponse SendContactEmail(EmailModel model, string senderName, string senderEmail, string projectTitle, ContactEmailType emailType)
         {
             ActionResponse response = new ActionResponse();
             if (emailType == ContactEmailType.Help)
@@ -77,7 +77,16 @@ namespace AIMS.Services
             else if (emailType == ContactEmailType.Information)
             {
                 model.Subject = INFORMATION_REQUEST + model.Subject;
-                model.Message = "<h4>Information request for project (" + projectTitle + ")</h4>" + model.Message;
+                StringBuilder strBuilder = new StringBuilder("<h4>Information request for project (");
+                strBuilder.Append(projectTitle);
+                strBuilder.Append(")</h4>");
+                strBuilder.Append("<br><b>Sender name:</b>");
+                strBuilder.Append(senderName);
+                strBuilder.Append("<br><b>Sender email:</b>");
+                strBuilder.Append(senderEmail);
+                strBuilder.Append("<br><br><b>Message</b><br>");
+                strBuilder.Append(model.Message);
+                model.Message = strBuilder.ToString();
             }
             return emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Subject, model.Message, model.FooterMessage);
         }

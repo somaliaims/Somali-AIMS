@@ -2418,19 +2418,30 @@ namespace AIMS.Models
     public class ContactMessageModel
     {
         [Required]
+        public string SenderName { get; set; }
+        [Required]
         [EmailAddress]
         public string SenderEmail { get; set; }
         [Required]
+        public string Subject { get; set; }
+        [Required]
         public string Message { get; set; }
+        [Required]
+        public int ProjectId { get; set; }
+        [Required]
+        public ContactEmailType ContactType { get; set; }
     }
 
     public class ContactMessageView
     {
         public int Id { get; set; }
+        public string SenderName { get; set; }
+        public string ProjectTitle { get; set; }
         public string SenderEmail { get; set; }
+        public string Subject { get; set; }
         public string Message { get; set; }
         public string Dated { get; set; }
-        public bool IsRegistered { get; set; }
         public bool IsViewed { get; set; }
+        public ContactEmailType ContactType { get; set; }
     }
 }
