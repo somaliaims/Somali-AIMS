@@ -90,7 +90,7 @@ namespace AIMS.APIs.Controllers
                     SenderName = model.SenderName,
                     Subject = model.Subject,
                     Message = model.Message,
-                    ContactType = model.EmailType,
+                    EmailType = model.EmailType,
                     ProjectId = (int)model.ProjectId
                 };
                 response = contactService.Add(contactModel);

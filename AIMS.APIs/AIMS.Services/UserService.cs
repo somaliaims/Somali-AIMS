@@ -381,17 +381,15 @@ namespace AIMS.Services
 
         public ActionResponse CheckEmailAvailability(string email)
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            ActionResponse response = new ActionResponse();
+            var user = unitWork.UserRepository.Get(u => u.Email.Equals(email));
+            if (user != null)
             {
-                ActionResponse response = new ActionResponse();
-                var user = unitWork.UserRepository.Get(u => u.Email.Equals(email));
-                if (user != null)
-                {
-                    response.Success = false;
-                    return response;
-                }
+                response.Success = false;
                 return response;
             }
+            return response;
         }
 
         public ActionResponse ResetPasswordRequest(PasswordResetEmailModel model, DateTime dated, string adminEmail)

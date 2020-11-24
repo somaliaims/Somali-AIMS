@@ -2429,7 +2429,7 @@ namespace AIMS.Models
         [Required]
         public int ProjectId { get; set; }
         [Required]
-        public ContactEmailType ContactType { get; set; }
+        public ContactEmailType EmailType { get; set; }
     }
 
     public class ContactMessageView

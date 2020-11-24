@@ -95,20 +95,12 @@ namespace AIMS.Services
                         return response;
                     }
 
-                    var user = unitWork.UserRepository.GetOne(u => u.Email == model.SenderEmail);
-                    if (user == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Message = mHelper.GetNotFound("User");
-                        response.Success = false;
-                        return response;
-                    }
-
                     var newMessage = unitWork.ContactMessagesRepository.Insert(new EFContactMessages()
                     {
+                        ProjectId = project.Id,
                         SenderEmail = model.SenderEmail,
                         SenderName = model.SenderName,
-                        ContactType = model.ContactType,
+                        EmailType = model.EmailType,
                         Subject = model.Subject,
                         Message = model.Message,
                         Dated = DateTime.Now,
@@ -207,73 +199,69 @@ namespace AIMS.Services
 
         public IEnumerable<EmailAddress> GetProjectUsersEmails(int id)
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            List<EmailAddress> emailAddressList = new List<EmailAddress>();
+            IEnumerable<int> projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(p => p.ProjectId == id, p => p.FunderId);
+            IEnumerable<int> projectImplementerIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ProjectId == id, p => p.ImplementerId);
+            int userId = (int)unitWork.ProjectRepository.GetProjection(p => p.Id == id, p => p.CreatedById).FirstOrDefault();
+            if (userId > 0)
             {
-                List<EmailAddress> emailAddressList = new List<EmailAddress>();
-                IEnumerable<int> projectFunderIds = unitWork.ProjectFundersRepository.GetProjection(p => p.ProjectId == id, p => p.FunderId);
-                IEnumerable<int> projectImplementerIds = unitWork.ProjectImplementersRepository.GetProjection(p => p.ProjectId == id, p => p.ImplementerId);
-                int userId = (int)unitWork.ProjectRepository.GetProjection(p => p.Id == id, p => p.CreatedById).FirstOrDefault();
-                if (userId > 0)
-                {
-                    var email = unitWork.UserRepository.GetProjection(u => u.Id == id, u => u.Email).FirstOrDefault();
-                    if (email != null)
-                    {
-                        emailAddressList.Add(new EmailAddress()
-                        {
-                            Email = email
-                        });
-                    }
-                }
-
-                projectFunderIds = projectFunderIds.Union(projectImplementerIds);
-                var emails = unitWork.UserRepository.GetProjection(u => projectFunderIds.Contains(u.OrganizationId), u => u.Email);
-                foreach (var email in emails)
-                {
-                    var emailExists = (from e in emailAddressList
-                                       where e.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
-                                       select e).FirstOrDefault();
-
-                    if (emailExists == null)
-                    {
-                        emailAddressList.Add(new EmailAddress()
-                        {
-                            Email = email
-                        });
-                    }
-                }
-                if (emailAddressList.Count == 0)
-                {
-                    var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == id, new string[] { "CreatedBy" }).FirstOrDefault();
-                    if (project != null)
-                    {
-                        if (project.CreatedBy != null)
-                        {
-                            emailAddressList.Add(new EmailAddress()
-                            {
-                                Email = project.CreatedBy.Email
-                            });
-                        }
-                    }
-                }
-                return emailAddressList;
-            }
-        }
-
-        public IEnumerable<EmailAddress> GetManagerUsersEmails()
-        {
-            using (var unitWork = new UnitOfWork(context))
-            {
-                List<EmailAddress> emailAddressList = new List<EmailAddress>();
-                var emails = unitWork.UserRepository.GetProjection(u => (u.UserType == UserTypes.Manager || u.UserType == UserTypes.SuperAdmin), u => u.Email);
-                foreach (var email in emails)
+                var email = unitWork.UserRepository.GetProjection(u => u.Id == id, u => u.Email).FirstOrDefault();
+                if (email != null)
                 {
                     emailAddressList.Add(new EmailAddress()
                     {
                         Email = email
                     });
                 }
-                return emailAddressList;
             }
+
+            projectFunderIds = projectFunderIds.Union(projectImplementerIds);
+            var emails = unitWork.UserRepository.GetProjection(u => projectFunderIds.Contains(u.OrganizationId), u => u.Email);
+            foreach (var email in emails)
+            {
+                var emailExists = (from e in emailAddressList
+                                   where e.Email.Equals(email, StringComparison.OrdinalIgnoreCase)
+                                   select e).FirstOrDefault();
+
+                if (emailExists == null)
+                {
+                    emailAddressList.Add(new EmailAddress()
+                    {
+                        Email = email
+                    });
+                }
+            }
+            if (emailAddressList.Count == 0)
+            {
+                var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == id, new string[] { "CreatedBy" }).FirstOrDefault();
+                if (project != null)
+                {
+                    if (project.CreatedBy != null)
+                    {
+                        emailAddressList.Add(new EmailAddress()
+                        {
+                            Email = project.CreatedBy.Email
+                        });
+                    }
+                }
+            }
+            return emailAddressList;
+        }
+
+        public IEnumerable<EmailAddress> GetManagerUsersEmails()
+        {
+            var unitWork = new UnitOfWork(context);
+            List<EmailAddress> emailAddressList = new List<EmailAddress>();
+            var emails = unitWork.UserRepository.GetProjection(u => (u.UserType == UserTypes.Manager || u.UserType == UserTypes.SuperAdmin), u => u.Email);
+            foreach (var email in emails)
+            {
+                emailAddressList.Add(new EmailAddress()
+                {
+                    Email = email
+                });
+            }
+            return emailAddressList;
         }
     }
 
