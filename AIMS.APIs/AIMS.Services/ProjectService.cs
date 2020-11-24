@@ -27,6 +27,13 @@ namespace AIMS.Services
         ICollection<ProjectTitle> GetProjectTitles();
 
         /// <summary>
+        /// Gets title for the provided project id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ProjectTitle GetProjectTitle(int id);
+
+        /// <summary>
         /// Gets all with abstract level details
         /// </summary>
         /// <returns></returns>
@@ -501,6 +508,21 @@ namespace AIMS.Services
                     }
                 }
                 return projectTitles;
+            }
+        }
+
+        public ProjectTitle GetProjectTitle(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ProjectTitle projectTitle = new ProjectTitle();
+                var project = unitWork.ProjectRepository.GetByID(id);
+                if (project != null)
+                {
+                    projectTitle.Id = project.Id;
+                    projectTitle.Title = project.Title;
+                }
+                return projectTitle;
             }
         }
 
