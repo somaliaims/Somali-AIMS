@@ -1,8 +1,10 @@
-﻿using AIMS.Models;
+﻿using AIMS.APIs.Helpers;
+using AIMS.Models;
 using AIMS.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +33,47 @@ namespace AIMS.APIs.Controllers
         public IActionResult Get()
         {
             return Ok(contactService.GetAll());
+        }
+
+        [HttpPost("[action]")]
+        public IActionResult Approve(int id)
+        {
+            if (id <= 0)
+            {
+                ICommonMessageHelper messageHelper = new CommonMessageHelper();
+                return BadRequest(messageHelper.GetInvalidIdMessage());
+            }
+            var response = contactService.Approve(id);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            else if(response.Success)
+            {
+                ContactEmailRequestModel model = JsonConvert.DeserializeObject<ContactEmailRequestModel>(response.Message);
+                List<EmailAddress> usersEmails = null;
+
+                if (model.ProjectId <= 0)
+                {
+                    return BadRequest("Invalid project id provided");
+                }
+                int projectId = (int)model.ProjectId;
+                usersEmails = contactService.GetProjectUsersEmails(projectId).ToList();
+                EmailModel emailModel = new EmailModel()
+                {
+                    Subject = model.Subject,
+                    Message = model.Message,
+                    Title = model.ProjectTitle,
+                    EmailsList = usersEmails
+                };
+                response = emailService.SendContactEmail(emailModel, model.SenderName, model.SenderEmail, model.ProjectTitle, model.EmailType);
+                if (!response.Success)
+                {
+                    return BadRequest(response.Message);
+                }
+                response.ReturnedId = 1;
+            }
+            return Ok(true);
         }
 
         [HttpPost]

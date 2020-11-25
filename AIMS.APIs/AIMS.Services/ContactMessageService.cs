@@ -69,7 +69,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var contactMessages = unitWork.ContactMessagesRepository.GetAll();
+                var contactMessages = unitWork.ContactMessagesRepository.GetWithInclude(m => m.Id != 0, new string[] { "Project" });
                 contactMessages = (from message in contactMessages
                                    orderby message.Dated descending
                                    select message);
