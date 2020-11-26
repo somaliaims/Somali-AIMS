@@ -172,7 +172,8 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFContactMessages, ContactMessageView>()
                 .ForMember(c => c.Dated, opts => opts.MapFrom(source => source.Dated.ToShortDateString()))
-                .ForMember(c => c.ProjectTitle, opts => opts.MapFrom(source => source.Project.Title));
+                .ForMember(c => c.ProjectTitle, opts => opts.MapFrom(source => source.Project.Title))
+                .ForMember(c => c.ProjectId, opts => opts.MapFrom(source => source.Project.Id));
         }
     }
 }

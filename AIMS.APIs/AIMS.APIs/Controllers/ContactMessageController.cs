@@ -35,7 +35,7 @@ namespace AIMS.APIs.Controllers
             return Ok(contactService.GetAll());
         }
 
-        [HttpPost("[action]")]
+        [HttpPost("[action]/{id}")]
         public IActionResult Approve(int id)
         {
             if (id <= 0)

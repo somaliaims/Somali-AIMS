@@ -124,44 +124,44 @@ namespace AIMS.Services
 
         public ActionResponse Approve(int id)
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            IMessageHelper mHelper;
+            ActionResponse response = new ActionResponse();
+
+            try
             {
-                IMessageHelper mHelper;
-                ActionResponse response = new ActionResponse();
-
-                try
+                var contactMessage = unitWork.ContactMessagesRepository.GetWithInclude(m => m.Id == id, new string[] { "Project" }).FirstOrDefault();
+                if (contactMessage == null)
                 {
-                    var contactMessage = unitWork.ContactMessagesRepository.GetByID(id);
-                    if (contactMessage == null)
-                    {
-                        mHelper = new MessageHelper();
-                        response.Success = false;
-                        response.Message = mHelper.GetNotFound("Contact message");
-                        return response;
-                    }
-
-                    ContactEmailRequestModel model = new ContactEmailRequestModel()
-                    {
-                        SenderEmail = contactMessage.SenderEmail,
-                        SenderName = contactMessage.SenderName,
-                        Subject = contactMessage.Subject,
-                        Message = contactMessage.Message,
-                    };
-                    response.Message = JsonConvert.SerializeObject(model);
-                    unitWork.ContactMessagesRepository.Delete(contactMessage);
-                    unitWork.Save();
-                }
-                catch (Exception ex)
-                {
+                    mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = ex.Message;
-                    if (ex.InnerException != null)
-                    {
-                        response.Message = ex.InnerException.Message;
-                    }
+                    response.Message = mHelper.GetNotFound("Contact message");
+                    return response;
                 }
-                return response;
+
+                ContactEmailRequestModel model = new ContactEmailRequestModel()
+                {
+                    SenderEmail = contactMessage.SenderEmail,
+                    SenderName = contactMessage.SenderName,
+                    Subject = contactMessage.Subject,
+                    Message = contactMessage.Message,
+                    ProjectId = contactMessage.ProjectId,
+                    ProjectTitle = contactMessage.Project.Title
+                };
+                response.Message = JsonConvert.SerializeObject(model);
+                unitWork.ContactMessagesRepository.Delete(contactMessage);
+                unitWork.Save();
             }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    response.Message = ex.InnerException.Message;
+                }
+            }
+            return response;
         }
 
         public ActionResponse Delete(int id)

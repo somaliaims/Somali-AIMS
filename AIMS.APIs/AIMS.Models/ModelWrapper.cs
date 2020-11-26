@@ -2436,6 +2436,7 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public string SenderName { get; set; }
+        public int ProjectId { get; set; }
         public string ProjectTitle { get; set; }
         public string SenderEmail { get; set; }
         public string Subject { get; set; }
