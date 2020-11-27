@@ -150,7 +150,7 @@ namespace AIMS.Services.Helpers
         {
             List<string> messageList = new List<string>();
             messageList.Add("<h3>" + title + "</h3>");
-            messageList.Add("<h3>Dear user,</h3>");
+            messageList.Add("Dear user,<br />");
             footerMessage = (!string.IsNullOrEmpty(footerMessage)) ? footerMessage : FOOTER_LINE; 
             messageList.Add(message);
             messageList.Add("<h5>" + footerMessage + "</h5>");

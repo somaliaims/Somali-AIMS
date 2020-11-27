@@ -149,8 +149,8 @@ namespace AIMS.Services
                     ProjectTitle = contactMessage.Project.Title
                 };
                 response.Message = JsonConvert.SerializeObject(model);
-                unitWork.ContactMessagesRepository.Delete(contactMessage);
-                unitWork.Save();
+                //unitWork.ContactMessagesRepository.Delete(contactMessage);
+                //unitWork.Save();
             }
             catch (Exception ex)
             {

@@ -71,6 +71,11 @@ namespace AIMS.APIs.Controllers
                 {
                     return BadRequest(response.Message);
                 }
+                response = contactService.Delete(id);
+                if (!response.Success)
+                {
+                    return BadRequest(response.Message);
+                }
                 response.ReturnedId = 1;
             }
             return Ok(true);
