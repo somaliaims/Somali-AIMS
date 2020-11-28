@@ -111,6 +111,8 @@ namespace AIMS.APIs.Scheduler
                     IProjectService projectService = new ProjectService(dbContext, imapper);
                     IOrganizationMergeService orgMergeService = new OrganizationMergeService(dbContext);
                     IDataBackupService backupService = new DataBackupService(dbContext);
+                    IContactMessageService contactService = new ContactMessageService(dbContext, imapper);
+                    IEmailService emailService = new EmailService(dbContext);
                     backupService.SetDirectoryPath(hostingEnvironment.WebRootPath);
                     IFinancialYearTransitionService financialYearTransitionService = new FinancialYearTransitionService(dbContext);
 
@@ -214,6 +216,21 @@ namespace AIMS.APIs.Scheduler
                         var requests = (from r in pendingOrgMergeRequests
                                           select r.RequestId).ToList();
                         orgMergeService.MergeOrganizationsAuto(requests).GetAwaiter().GetResult();
+                    }
+                    var pendingContactMessages = contactService.GetUnRepliedMessages();
+                    //List<EmailAddress> emailAddresses = (from message in pendingContactMessages
+                      //                                   select new EmailAddress() { Email = message.SenderEmail }).ToList();
+
+                    foreach(var message in pendingContactMessages)
+                    {
+                        EmailModel emailModel = new EmailModel()
+                        {
+                            EmailsList = new List<EmailAddress>() { new EmailAddress() { Email = message.SenderEmail } },
+                            Subject = message.Subject,
+                            Message = message.Message,
+                            FooterMessage = null,
+                        };
+                        emailService.SendEmailForPendingMessages(emailModel, message.SenderName, message.SenderEmail, message.ProjectTitle);
                     }
                 }
 

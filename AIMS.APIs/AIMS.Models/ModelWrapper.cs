@@ -2445,4 +2445,13 @@ namespace AIMS.Models
         public bool IsViewed { get; set; }
         public ContactEmailType ContactType { get; set; }
     }
+
+    public class PendingMessagesView
+    {
+        public string SenderEmail { get; set; }
+        public string SenderName { get; set; }
+        public string ProjectTitle { get; set; }
+        public string Message { get; set; }
+        public string Subject { get; set; }
+    }
 }

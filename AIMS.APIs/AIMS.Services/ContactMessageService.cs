@@ -20,6 +20,12 @@ namespace AIMS.Services
         IEnumerable<ContactMessageView> GetAll();
 
         /// <summary>
+        /// Gets list of contact messages un-replied
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<PendingMessagesView> GetUnRepliedMessages();
+
+        /// <summary>
         /// Adds new contact message
         /// </summary>
         /// <param name=""></param>
@@ -75,6 +81,26 @@ namespace AIMS.Services
                                    select message);
                 return mapper.Map<List<ContactMessageView>>(contactMessages);
             }
+        }
+
+        public IEnumerable<PendingMessagesView> GetUnRepliedMessages()
+        {
+            var unitWork = new UnitOfWork(context);
+            var dateTime = DateTime.Now.AddDays(-14);
+            var contactMessages = unitWork.ContactMessagesRepository.GetWithInclude(m => m.Dated.Date <= dateTime.Date, new string[] { "Project" });
+            List<PendingMessagesView> messagesUnReplied = new List<PendingMessagesView>();
+            foreach (var message in contactMessages)
+            {
+                messagesUnReplied.Add(new PendingMessagesView()
+                {
+                    SenderEmail = message.SenderEmail,
+                    SenderName = message.SenderName,
+                    ProjectTitle = message.Project.Title,
+                    Subject = message.Subject,
+                    Message = message.Message
+                });
+            }
+            return messagesUnReplied;
         }
 
         public ActionResponse Add(ContactMessageModel model)
@@ -149,8 +175,6 @@ namespace AIMS.Services
                     ProjectTitle = contactMessage.Project.Title
                 };
                 response.Message = JsonConvert.SerializeObject(model);
-                //unitWork.ContactMessagesRepository.Delete(contactMessage);
-                //unitWork.Save();
             }
             catch (Exception ex)
             {

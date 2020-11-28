@@ -174,6 +174,7 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(c => c.Dated, opts => opts.MapFrom(source => source.Dated.ToShortDateString()))
                 .ForMember(c => c.ProjectTitle, opts => opts.MapFrom(source => source.Project.Title))
                 .ForMember(c => c.ProjectId, opts => opts.MapFrom(source => source.Project.Id));
+
         }
     }
 }

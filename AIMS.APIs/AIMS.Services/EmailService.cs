@@ -29,6 +29,16 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <returns></returns>
         ActionResponse SendContactEmail(EmailModel model, string senderName, string sendEmail, string projectTitle, ContactEmailType emailType);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="senderName"></param>
+        /// <param name="senderEmail"></param>
+        /// <param name="projectTitle"></param>
+        /// <returns></returns>
+        ActionResponse SendEmailForPendingMessages(EmailModel model, string senderName, string senderEmail, string projectTitle);
     }
 
     public class EmailService : IEmailService
@@ -88,6 +98,25 @@ namespace AIMS.Services
                 strBuilder.Append(model.Message);
                 model.Message = strBuilder.ToString();
             }
+            return emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Subject, model.Message, model.FooterMessage);
+        }
+
+        public ActionResponse SendEmailForPendingMessages(EmailModel model, string senderName, string senderEmail, string projectTitle)
+        {
+            ActionResponse response = new ActionResponse();
+            model.Subject = INFORMATION_REQUEST + model.Subject;
+            StringBuilder strBuilder = new StringBuilder("<h4>Message not seen by Management User<h4>");
+            strBuilder.Append("<p><i>It is to inform you that your message has not been reviewed by any management user and has not been sent to the project owner.</i></p>");
+            strBuilder.Append("Information request for project (");
+            strBuilder.Append(projectTitle);
+            strBuilder.Append(")");
+            strBuilder.Append("<br>Sender name:");
+            strBuilder.Append(senderName);
+            strBuilder.Append("<br>Sender email:");
+            strBuilder.Append(senderEmail);
+            strBuilder.Append("<br><br>Your message: ");
+            strBuilder.Append(model.Message);
+            model.Message = strBuilder.ToString();
             return emailHelper.SendEmailToUsers(model.EmailsList, model.Subject, model.Subject, model.Message, model.FooterMessage);
         }
 
