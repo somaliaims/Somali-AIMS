@@ -33,7 +33,7 @@ namespace AIMS.APIs.Controllers
             return Ok(financialYearService.GetYearsForEnvelope());
         }
 
-        [HttpGet("GetForEnvelope")]
+        [HttpGet("GetYearsForEnvelopeEntry")]
         public IActionResult GetForEnvelope()
         {
             return Ok(financialYearService.GetForEnvelope());

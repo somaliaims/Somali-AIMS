@@ -111,7 +111,7 @@ namespace AIMS.Services
                     envelopeView.FunderId = funderId;
 
                     yearlyBreakup = unitWork.EnvelopeYearlyBreakupRepository.GetWithInclude(
-                        f => f.EnvelopeId == envelope.Id && f.Year.FinancialYear >= previousYear, new string[] { "Year", "EnvelopeType" });
+                        f => f.EnvelopeId == envelope.Id && f.Year.FinancialYear >= previousYear && f.Year.FinancialYear <= upperYearLimit, new string[] { "Year", "EnvelopeType" });
                 }
 
                 if (yearlyBreakup != null)

@@ -39,7 +39,9 @@ namespace AIMS.Services
         public FinancialYearSettingView Get()
         {
             var unitWork = new UnitOfWork(context);
-            int currentYear = DateTime.Now.Year, currentMonth = DateTime.Now.Month,
+            int currentYear = DateTime.Now.Year, previousYear = (DateTime.Now.Year - 1),
+                nextYear = (DateTime.Now.Year + 1),
+                currentMonth = DateTime.Now.Month,
                 currentDay = DateTime.Now.Day;
             int settingsMonth = 0, settingsDay = 0;
             FinancialYearSettingView view = new FinancialYearSettingView();
@@ -51,28 +53,74 @@ namespace AIMS.Services
 
                 if (currentMonth < settingsMonth)
                 {
+                    --previousYear;
                     --currentYear;
+                    --nextYear;
                 }
                 else if (currentMonth == settingsMonth && currentDay < settingsDay)
                 {
+                    --previousYear;
                     --currentYear;
+                    --nextYear;
                 }
             }
-            var financialYearExists = unitWork.FinancialYearRepository.GetOne(y => y.FinancialYear == currentYear);
-            if (financialYearExists == null)
+            bool isSimilarToCalendarYear = ((settings.Month == 1 && settings.Day == 1)) ? true : false;
+            var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(y => (y.FinancialYear == previousYear) ||
+                (y.FinancialYear == currentYear) || (y.FinancialYear == nextYear));
+
+            var previousFinancialYear = (from y in financialYears
+                                        where y.FinancialYear == previousYear
+                                        select y).FirstOrDefault();
+
+            var currentFinancialYear = (from y in financialYears
+                                        where y.FinancialYear == currentYear
+                                        select y).FirstOrDefault();
+
+            var nextFinancialYear = (from y in financialYears
+                                        where y.FinancialYear == nextYear
+                                        select y).FirstOrDefault();
+
+            if (previousFinancialYear == null)
             {
-                string label = (settings.Month == 1 && settings.Day == 1) ? "FY " + currentYear : "FY " + (currentYear) + "/" + (currentYear + 1);
-                financialYearExists = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                string label = (isSimilarToCalendarYear) ? "FY " + previousYear : "FY " + (previousYear) + "/" + (previousYear + 1);
+                previousFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                {
+                    FinancialYear = previousYear,
+                    Label = label
+                });
+                unitWork.Save();
+            }
+
+            if (currentFinancialYear == null)
+            {
+                string label = (isSimilarToCalendarYear) ? "FY " + currentYear : "FY " + (currentYear) + "/" + (currentYear + 1);
+                currentFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
                 {
                     FinancialYear = currentYear,
                     Label = label
                 });
                 unitWork.Save();
             }
+
+            if (nextFinancialYear == null)
+            {
+                string label = (isSimilarToCalendarYear) ? "FY " + nextYear : "FY " + (nextYear) + "/" + (nextYear + 1);
+                nextFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                {
+                    FinancialYear = currentYear,
+                    Label = label
+                });
+                unitWork.Save();
+            }
+
             view.Day = settingsDay;
             view.Month = settingsMonth;
-            view.CurrentFinancialYear = financialYearExists.FinancialYear;
-            view.CurrentFinancialYearLabel = financialYearExists.Label;
+            view.PreviousFinancialYear = previousFinancialYear.FinancialYear;
+            view.PreviousFinancialYearLabel = previousFinancialYear.Label;
+            view.CurrentFinancialYear = currentFinancialYear.FinancialYear;
+            view.CurrentFinancialYearLabel = currentFinancialYear.Label;
+            view.NextFinancialYear = nextFinancialYear.FinancialYear;
+            view.NextFinancialYearLabel = nextFinancialYear.Label;
             return view;
         }
 
