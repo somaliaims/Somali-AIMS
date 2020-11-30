@@ -916,9 +916,10 @@ namespace AIMS.Services
                         var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId);
                         if (values.Count > 0)
                         {
+                            UtilityHelper utilityHelper = new UtilityHelper();
                             foreach (var marker in projectMarkers)
                             {
-                                var markerValues = ParseAndExtractIfJson(marker.Values);
+                                var markerValues = utilityHelper.ParseAndExtractIfJson(marker.Values);
                                 if (markerValues != null && markerValues.Any())
                                 {
                                     var valueMatch = (from v in markerValues
@@ -2162,9 +2163,10 @@ namespace AIMS.Services
                         var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId);
                         if (values.Count > 0)
                         {
+                            UtilityHelper utilityHelper = new UtilityHelper();
                             foreach (var marker in projectMarkers)
                             {
-                                var markerValues = ParseAndExtractIfJson(marker.Values);
+                                var markerValues = utilityHelper.ParseAndExtractIfJson(marker.Values);
                                 if (markerValues != null && markerValues.Any())
                                 {
                                     var valueMatch = (from v in markerValues
@@ -2615,9 +2617,10 @@ namespace AIMS.Services
                         var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => m.MarkerId == model.MarkerId);
                         if (values.Count > 0)
                         {
+                            UtilityHelper utilityHelper = new UtilityHelper();
                             foreach (var marker in projectMarkers)
                             {
-                                var markerValues = ParseAndExtractIfJson(marker.Values);
+                                var markerValues = utilityHelper.ParseAndExtractIfJson(marker.Values);
                                 if (markerValues != null && markerValues.Any())
                                 {
                                     var valueMatch = (from v in markerValues
@@ -2880,7 +2883,7 @@ namespace AIMS.Services
                     select rate.Rate).FirstOrDefault();
         }
 
-        private IEnumerable<MarkerValues> ParseAndExtractIfJson(String json)
+        /*private IEnumerable<MarkerValues> ParseAndExtractIfJson(String json)
         {
             List<MarkerValues> markerValues = new List<MarkerValues>();
             try
@@ -2891,7 +2894,7 @@ namespace AIMS.Services
             {
             }
             return markerValues;
-        }
+        }*/
 
     }
 }

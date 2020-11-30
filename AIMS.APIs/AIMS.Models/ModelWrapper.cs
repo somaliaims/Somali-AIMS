@@ -351,6 +351,13 @@ namespace AIMS.Models
         public string Values { get; set; }
     }
 
+    public class MarkerMiniView
+    {
+        public int MarkerId { get; set; }
+        public string Marker { get; set; }
+        public string Values { get; set; }
+    }
+
     public class DocumentAbstractView
     {
         public string DocumentTitle { get; set; }
@@ -369,8 +376,6 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         public decimal Percentage { get; set; }
     }
-
-
 
     public class SectorAbstractView
     {
@@ -855,6 +860,7 @@ namespace AIMS.Models
         public IEnumerable<SectorAbstractView> Sectors { get; set; }
         public IEnumerable<LocationAbstractView> Locations { get; set; }
         public IEnumerable<OrganizationAbstractView> Organizations { get; set; }
+        public IEnumerable<MarkerMiniView> Markers { get; set; }
     }
 
     public class ProjectReportView

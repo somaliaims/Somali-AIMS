@@ -612,7 +612,8 @@ namespace AIMS.Services
                     var allOrganizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
                     var sectors = unitWork.SectorRepository.GetManyQueryable(s => s.Id != 0);
                     var locations = unitWork.LocationRepository.GetManyQueryable(l => l.Id != 0);
-                    var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Locations", "Funders", "Implementers" });
+                    var markers = unitWork.MarkerRepository.GetManyQueryable(m => m.Id != 0);
+                    var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Locations", "Funders", "Implementers", "Markers" });
                     
                     foreach (var project in projects)
                     {
@@ -630,6 +631,7 @@ namespace AIMS.Services
 
                         List<LocationAbstractView> locationsList = new List<LocationAbstractView>();
                         List<SectorAbstractView> sectorsList = new List<SectorAbstractView>();
+                        List<MarkerMiniView> markersList = new List<MarkerMiniView>();
 
                         foreach(var location in project.Locations)
                         {
@@ -650,6 +652,30 @@ namespace AIMS.Services
                                         where s.Id.Equals(sector.SectorId)
                                         select s.SectorName).FirstOrDefault(),
                                 FundsPercentage = sector.FundsPercentage
+                            });
+                        }
+
+                        UtilityHelper utilityHelper = new UtilityHelper();
+                        foreach(var marker in project.Markers)
+                        {
+                            string markerValuesStr = "";
+                            var markerValues = utilityHelper.ParseAndExtractIfJson(marker.Values);
+                            if (markerValues.Any())
+                            {
+                                markerValuesStr = String.Join(",", (from value in markerValues
+                                                  select value.Value));
+                            }
+                            else
+                            {
+                                markerValuesStr = marker.Values;
+                            }
+                            markersList.Add(new MarkerMiniView()
+                            {
+                                MarkerId = marker.MarkerId,
+                                Marker = (from m in markers
+                                          where m.Id.Equals(marker.MarkerId)
+                                          select m.FieldTitle).FirstOrDefault(),
+                                Values = markerValuesStr
                             });
                         }
 
@@ -675,7 +701,8 @@ namespace AIMS.Services
                             EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
                             Organizations = organizationsList,
                             Locations = locationsList,
-                            Sectors = sectorsList
+                            Sectors = sectorsList,
+                            Markers = markersList
                         });
                     }
                 }
