@@ -8,6 +8,8 @@ using System.Text;
 using System.Linq;
 using AIMS.Services.Helpers;
 using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace AIMS.Services
 {
@@ -45,6 +47,12 @@ namespace AIMS.Services
         /// <param name="id"></param>
         /// <returns></returns>
         ActionResponse Delete(int id);
+
+        /// <summary>
+        /// Sets contact messages as notified
+        /// </summary>
+        /// <returns></returns>
+        Task<ActionResponse> SetMessagesNotifiedAsync();
 
         /// <summary>
         /// Gets list of emails for project users
@@ -87,7 +95,7 @@ namespace AIMS.Services
         {
             var unitWork = new UnitOfWork(context);
             var dateTime = DateTime.Now.AddDays(-14);
-            var contactMessages = unitWork.ContactMessagesRepository.GetWithInclude(m => m.Dated.Date <= dateTime.Date, new string[] { "Project" });
+            var contactMessages = unitWork.ContactMessagesRepository.GetWithInclude(m => m.Dated.Date <= dateTime.Date && !m.IsNotified, new string[] { "Project" });
             List<PendingMessagesView> messagesUnReplied = new List<PendingMessagesView>();
             foreach (var message in contactMessages)
             {
@@ -130,7 +138,7 @@ namespace AIMS.Services
                         Subject = model.Subject,
                         Message = model.Message,
                         Dated = DateTime.Now,
-                        IsViewed = false
+                        IsNotified = false
                     });
                     unitWork.Save();
                     response.ReturnedId = newMessage.Id;
@@ -219,6 +227,29 @@ namespace AIMS.Services
                 }
                 return response;
             }
+        }
+
+        public async Task<ActionResponse> SetMessagesNotifiedAsync()
+        {
+            ActionResponse response = new ActionResponse();
+            var strategy = context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    var unitWork = new UnitOfWork(context);
+                    var dateTime = DateTime.Now.AddDays(-14);
+                    var contactMessages = await unitWork.ContactMessagesRepository.GetManyQueryableAsync(m => m.Dated.Date <= dateTime.Date);
+                    foreach (var message in contactMessages)
+                    {
+                        message.IsNotified = true;
+                        unitWork.ContactMessagesRepository.Update(message);
+                    }
+                    await unitWork.SaveAsync();
+                    transaction.Commit();
+                }
+            });
+            return response;
         }
 
         public IEnumerable<EmailAddress> GetProjectUsersEmails(int id)

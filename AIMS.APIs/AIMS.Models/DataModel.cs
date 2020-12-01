@@ -706,7 +706,7 @@ namespace AIMS.Models
         public int ProjectId { get; set; }
         public EFProject Project { get; set; }
         public DateTime Dated { get; set; }
-        public bool IsViewed { get; set; }
+        public bool IsNotified { get; set; }
         public ContactEmailType EmailType { get; set; }
     }
 }

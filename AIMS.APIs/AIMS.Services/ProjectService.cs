@@ -659,16 +659,20 @@ namespace AIMS.Services
                         foreach(var marker in project.Markers)
                         {
                             string markerValuesStr = "";
-                            var markerValues = utilityHelper.ParseAndExtractIfJson(marker.Values);
-                            if (markerValues.Any())
+                            if (!string.IsNullOrEmpty(marker.Values))
                             {
-                                markerValuesStr = String.Join(",", (from value in markerValues
-                                                  select value.Value));
+                                var markerValues = utilityHelper.ParseAndExtractIfJson(marker.Values);
+                                if (markerValues.Any())
+                                {
+                                    markerValuesStr = String.Join(",", (from value in markerValues
+                                                                        select value.Value));
+                                }
+                                else
+                                {
+                                    markerValuesStr = marker.Values;
+                                }
                             }
-                            else
-                            {
-                                markerValuesStr = marker.Values;
-                            }
+                            
                             markersList.Add(new MarkerMiniView()
                             {
                                 MarkerId = marker.MarkerId,

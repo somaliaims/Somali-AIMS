@@ -2452,7 +2452,7 @@ namespace AIMS.Models
         public string Subject { get; set; }
         public string Message { get; set; }
         public string Dated { get; set; }
-        public bool IsViewed { get; set; }
+        public bool IsNotified { get; set; }
         public ContactEmailType ContactType { get; set; }
     }
 
