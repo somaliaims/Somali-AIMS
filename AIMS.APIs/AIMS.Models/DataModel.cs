@@ -359,11 +359,12 @@ namespace AIMS.Models
         [ForeignKey("Location")]
         public int LocationId { get; set; }
         public EFLocation Location { get; set; }
+        public string SubLocations { get; set; } = null;
         [Column(TypeName = "decimal(9, 2)")]
         public decimal FundsPercentage { get; set; }
     }
 
-   public class EFProjectSubLocations
+   /*public class EFProjectSubLocations
     {
         [ForeignKey("Project")]
         public int ProjectId { get; set; }
@@ -374,7 +375,7 @@ namespace AIMS.Models
         [ForeignKey("SubLocation")]
         public int SubLocationId { get; set; }
         public EFSubLocation SubLocation { get; set; }
-    }
+    }*/
 
     public class EFProjectFunders
     {

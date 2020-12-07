@@ -18,6 +18,10 @@
     <Compile Remove="Migrations\20200805152611_Added_UKey_Disbursements.Designer.cs" />
     <Compile Remove="Migrations\20201115080053_Document_Links_Model.cs" />
     <Compile Remove="Migrations\20201115080053_Document_Links_Model.Designer.cs" />
+    <Compile Remove="Migrations\20201207115746_Added_Sublocations_Model.cs" />
+    <Compile Remove="Migrations\20201207115746_Added_Sublocations_Model.Designer.cs" />
+    <Compile Remove="Migrations\20201207175519_Added_UniqueKeys_LocationPlusSub.cs" />
+    <Compile Remove="Migrations\20201207175519_Added_UniqueKeys_LocationPlusSub.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -94,8 +94,13 @@ namespace AIMS.DAL.EF
                 .HasIndex(d => new { d.ProjectId, d.YearId, d.DisbursementType })
                 .IsUnique();
 
-            modelBuilder.Entity<EFProjectSubLocations>()
-                .HasKey(s => new { s.ProjectId, s.LocationId, s.SubLocationId });
+            modelBuilder.Entity<EFLocation>()
+                .HasIndex(l => new { l.Location })
+                .IsUnique();
+
+            modelBuilder.Entity<EFSubLocation>()
+                .HasIndex(s => new { s.SubLocation })
+                .IsUnique();
         }
 
         //Creating DB Tables for the Objects

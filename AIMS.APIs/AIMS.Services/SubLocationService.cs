@@ -1,6 +1,7 @@
 ﻿using AIMS.DAL.EF;
 using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
+using AIMS.Services.Helpers;
 using AutoMapper;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,7 @@ namespace AIMS.Services
         /// <returns></returns>
         ActionResponse Delete(int id);
     }
-    public class SubLocationService
+    public class SubLocationService : ISubLocationService
     {
         AIMSDbContext context;
         IMapper autoMapper;
@@ -87,12 +88,120 @@ namespace AIMS.Services
             }
         }
 
-        /*public ActionResponse Add(SubLocationModel model)
+        public ActionResponse Add(SubLocationModel model)
         {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var location = unitWork.LocationRepository.GetByID(model.LocationId);
+                    if (location == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Location");
+                        response.Success = false;
+                        return response;
+                    }
 
-        }*/
+                    var subLocation = unitWork.SubLocationRepository.Insert(new EFSubLocation()
+                    {
+                        Location = location,
+                        SubLocation = model.SubLocation
+                    });
+                    unitWork.Save();
+                    response.ReturnedId = subLocation.Id;
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        response.Message = ex.InnerException.Message;
+                    }
+                }
+                return response;
+            }
+        }
 
+        public ActionResponse Update(int id, SubLocationModel model)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var subLocation = unitWork.SubLocationRepository.GetByID(id);
+                    if (subLocation == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Sub-Location");
+                        response.Success = false;
+                        return response;
+                    }
 
+                    var location = unitWork.LocationRepository.GetByID(model.LocationId);
+                    if (location == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Location");
+                        response.Success = false;
+                        return response;
+                    }
 
+                    subLocation.Location = location;
+                    subLocation.SubLocation = model.SubLocation;
+                    unitWork.SubLocationRepository.Update(subLocation);
+                    unitWork.Save();
+                }
+                catch(Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.Success = false;
+                    if (ex.InnerException != null)
+                    {
+                        response.Message = ex.InnerException.Message;
+                    }
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse Delete(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                IMessageHelper mHelper;
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var subLocation = unitWork.SubLocationRepository.GetByID(id);
+                    if (subLocation == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Sub-Location");
+                        response.Success = false;
+                        return response;
+                    }
+
+                    unitWork.SubLocationRepository.Delete(subLocation);
+                    unitWork.Save();
+                    response.ReturnedId = id;
+                }
+                catch (Exception ex)
+                {
+                    response.Message = ex.Message;
+                    response.Success = false;
+                    if (ex.InnerException != null)
+                    {
+                        response.Message = ex.InnerException.Message;
+                    }
+                }
+                return response;
+            }
+        }
     }
 }

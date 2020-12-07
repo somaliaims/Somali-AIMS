@@ -520,12 +520,16 @@ namespace AIMS.DAL.Migrations
                         .HasColumnType("decimal(9, 5)");
 
                     b.Property<string>("Location")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal?>("Longitude")
                         .HasColumnType("decimal(9, 5)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Location")
+                        .IsUnique()
+                        .HasFilter("[Location] IS NOT NULL");
 
                     b.ToTable("Locations");
                 });
@@ -913,6 +917,9 @@ namespace AIMS.DAL.Migrations
                     b.Property<decimal>("FundsPercentage")
                         .HasColumnType("decimal(9, 2)");
 
+                    b.Property<string>("SubLocations")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("ProjectId", "LocationId");
 
                     b.HasIndex("LocationId");
@@ -986,26 +993,6 @@ namespace AIMS.DAL.Migrations
                     b.HasIndex("SectorId");
 
                     b.ToTable("ProjectSectors");
-                });
-
-            modelBuilder.Entity("AIMS.Models.EFProjectSubLocations", b =>
-                {
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubLocationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProjectId", "LocationId", "SubLocationId");
-
-                    b.HasIndex("LocationId");
-
-                    b.HasIndex("SubLocationId");
-
-                    b.ToTable("EFProjectSubLocations");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFReportSubscriptions", b =>
@@ -1157,11 +1144,15 @@ namespace AIMS.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("SubLocation")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LocationId");
+
+                    b.HasIndex("SubLocation")
+                        .IsUnique()
+                        .HasFilter("[SubLocation] IS NOT NULL");
 
                     b.ToTable("SubLocations");
                 });
@@ -1517,27 +1508,6 @@ namespace AIMS.DAL.Migrations
                     b.HasOne("AIMS.Models.EFSector", "Sector")
                         .WithMany()
                         .HasForeignKey("SectorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AIMS.Models.EFProjectSubLocations", b =>
-                {
-                    b.HasOne("AIMS.Models.EFLocation", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AIMS.Models.EFProject", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AIMS.Models.EFSubLocation", "SubLocation")
-                        .WithMany()
-                        .HasForeignKey("SubLocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
