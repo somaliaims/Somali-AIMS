@@ -4,14 +4,16 @@ using AIMS.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIMS.DAL.Migrations
 {
     [DbContext(typeof(AIMSDbContext))]
-    partial class AIMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201204055323_Added_Notified_to_ContactMessages")]
+    partial class Added_Notified_to_ContactMessages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -988,26 +990,6 @@ namespace AIMS.DAL.Migrations
                     b.ToTable("ProjectSectors");
                 });
 
-            modelBuilder.Entity("AIMS.Models.EFProjectSubLocations", b =>
-                {
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubLocationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProjectId", "LocationId", "SubLocationId");
-
-                    b.HasIndex("LocationId");
-
-                    b.HasIndex("SubLocationId");
-
-                    b.ToTable("EFProjectSubLocations");
-                });
-
             modelBuilder.Entity("AIMS.Models.EFReportSubscriptions", b =>
                 {
                     b.Property<int>("UserId")
@@ -1144,26 +1126,6 @@ namespace AIMS.DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("StaticReports");
-                });
-
-            modelBuilder.Entity("AIMS.Models.EFSubLocation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SubLocation")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LocationId");
-
-                    b.ToTable("SubLocations");
                 });
 
             modelBuilder.Entity("AIMS.Models.EFUser", b =>
@@ -1521,27 +1483,6 @@ namespace AIMS.DAL.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AIMS.Models.EFProjectSubLocations", b =>
-                {
-                    b.HasOne("AIMS.Models.EFLocation", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AIMS.Models.EFProject", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AIMS.Models.EFSubLocation", "SubLocation")
-                        .WithMany()
-                        .HasForeignKey("SubLocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("AIMS.Models.EFReportSubscriptions", b =>
                 {
                     b.HasOne("AIMS.Models.EFStaticReports", "Report")
@@ -1566,15 +1507,6 @@ namespace AIMS.DAL.Migrations
                     b.HasOne("AIMS.Models.EFSectorTypes", "SectorType")
                         .WithMany("Sectors")
                         .HasForeignKey("SectorTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AIMS.Models.EFSubLocation", b =>
-                {
-                    b.HasOne("AIMS.Models.EFLocation", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

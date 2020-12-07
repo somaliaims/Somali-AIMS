@@ -93,6 +93,9 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFProjectDisbursements>()
                 .HasIndex(d => new { d.ProjectId, d.YearId, d.DisbursementType })
                 .IsUnique();
+
+            modelBuilder.Entity<EFProjectSubLocations>()
+                .HasKey(s => new { s.ProjectId, s.LocationId, s.SubLocationId });
         }
 
         //Creating DB Tables for the Objects
@@ -106,6 +109,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFSectorMappings> SectorMappings { get; set; }
         public DbSet<EFSector> Sectors { get; set; }
         public DbSet<EFLocation> Locations { get; set; }
+        public DbSet<EFSubLocation> SubLocations { get; set; }
         public DbSet<EFMarkers> Markers { get; set; }
         public DbSet<EFProject> Projects { get; set; }
         public DbSet<EFProjectFunders> ProjectFunders { get; set; }

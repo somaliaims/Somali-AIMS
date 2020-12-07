@@ -159,6 +159,12 @@ namespace AIMS.Services
                             });
                             ++entriesUpdated;
                         }
+                        else
+                        {
+                            /*
+                             * Need to write the logic here for calculating the average of exchange rates
+                             */
+                        }
                     }
 
                     if (entriesUpdated > 0)

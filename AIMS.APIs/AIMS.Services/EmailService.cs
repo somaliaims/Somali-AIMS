@@ -107,7 +107,7 @@ namespace AIMS.Services
             model.Subject = INFORMATION_REQUEST + model.Subject;
             StringBuilder strBuilder = new StringBuilder("<h4>Message not seen by Management User</h4>");
             strBuilder.Append("<p><i>It is to inform you that your message has not been reviewed by any management user and has not been sent to the project owner.</i></p>");
-            strBuilder.Append("Information request for project (");
+            strBuilder.Append("Project: Information request for project (");
             strBuilder.Append(projectTitle);
             strBuilder.Append(")");
             strBuilder.Append("<br>Sender name:");

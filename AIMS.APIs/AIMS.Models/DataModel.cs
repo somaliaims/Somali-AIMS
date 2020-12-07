@@ -231,6 +231,16 @@ namespace AIMS.Models
         public bool IsUnAttributed { get; set; } = false;
     }
 
+    public class EFSubLocation
+    {
+        [Key]
+        public int Id { get; set; }
+        public string SubLocation { get; set; }
+        [ForeignKey("Location")]
+        public int LocationId { get; set; }
+        public EFLocation Location { get; set; }
+    }
+
     /*
      * Need to work on Envelope data at the service level and need to incorporate in the Projects Table
      */
@@ -351,6 +361,19 @@ namespace AIMS.Models
         public EFLocation Location { get; set; }
         [Column(TypeName = "decimal(9, 2)")]
         public decimal FundsPercentage { get; set; }
+    }
+
+   public class EFProjectSubLocations
+    {
+        [ForeignKey("Project")]
+        public int ProjectId { get; set; }
+        public EFProject Project { get; set; }
+        [ForeignKey("Location")]
+        public int LocationId { get; set; }
+        public EFLocation Location { get; set; } 
+        [ForeignKey("SubLocation")]
+        public int SubLocationId { get; set; }
+        public EFSubLocation SubLocation { get; set; }
     }
 
     public class EFProjectFunders
@@ -571,7 +594,6 @@ namespace AIMS.Models
     {
         [Key]
         public string Token { get; set; }
-
     }
 
     public class EFManualExchangeRates

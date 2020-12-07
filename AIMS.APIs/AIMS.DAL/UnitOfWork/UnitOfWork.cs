@@ -19,6 +19,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFSector> sectorRepository;
         private GenericRepository<EFSectorMappings> sectorMappingsRepository;
         private GenericRepository<EFLocation> locationRepository;
+        private GenericRepository<EFSubLocation> sublocationRepository;
         private GenericRepository<EFOrganization> organizationRepository;
         private GenericRepository<EFIATIOrganization> iatiOrganizationRepository;
         private GenericRepository<EFOrganizationTypes> organizationTypesRepository;
@@ -447,6 +448,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.locationRepository == null)
                     this.locationRepository = new GenericRepository<EFLocation>(context);
                 return this.locationRepository;
+            }
+        }
+
+        public GenericRepository<EFSubLocation> SubLocationRepository
+        {
+            get
+            {
+                if (this.sublocationRepository == null)
+                    this.sublocationRepository = new GenericRepository<EFSubLocation>(context);
+                return this.sublocationRepository;
             }
         }
 

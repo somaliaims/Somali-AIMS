@@ -232,6 +232,7 @@ namespace AIMS.APIs.Scheduler
                         };
                         emailService.SendEmailForPendingMessages(emailModel, message.SenderName, message.SenderEmail, message.ProjectTitle);
                     }
+                    contactService.SetMessagesNotifiedAsync().GetAwaiter().GetResult();
                 }
 
                 //File cleanup

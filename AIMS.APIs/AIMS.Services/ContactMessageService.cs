@@ -240,13 +240,16 @@ namespace AIMS.Services
                     var unitWork = new UnitOfWork(context);
                     var dateTime = DateTime.Now.AddDays(-14);
                     var contactMessages = await unitWork.ContactMessagesRepository.GetManyQueryableAsync(m => m.Dated.Date <= dateTime.Date);
-                    foreach (var message in contactMessages)
+                    if (contactMessages.Any())
                     {
-                        message.IsNotified = true;
-                        unitWork.ContactMessagesRepository.Update(message);
+                        foreach (var message in contactMessages)
+                        {
+                            message.IsNotified = true;
+                            unitWork.ContactMessagesRepository.Update(message);
+                        }
+                        await unitWork.SaveAsync();
+                        transaction.Commit();
                     }
-                    await unitWork.SaveAsync();
-                    transaction.Commit();
                 }
             });
             return response;

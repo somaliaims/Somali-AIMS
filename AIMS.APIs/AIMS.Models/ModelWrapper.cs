@@ -791,9 +791,25 @@ namespace AIMS.Models
 
     public class LocationModel
     {
+        [Required]
         public string Location { get; set; }
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
+    }
+
+    public class SubLocationModel
+    {
+        [Required]
+        public int LocationId { get; set; }
+        [Required]
+        public string SubLocation { get; set; }
+    }
+
+    public class SubLocationView
+    {
+        public int Id { get; set; }
+        public int LocationId { get; set; }
+        public string SubLocation { get; set; }
     }
 
     /// <summary>
