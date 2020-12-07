@@ -1,4 +1,7 @@
-﻿using AIMS.Models;
+﻿using AIMS.DAL.EF;
+using AIMS.DAL.UnitOfWork;
+using AIMS.Models;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -51,5 +54,45 @@ namespace AIMS.Services
     }
     public class SubLocationService
     {
+        AIMSDbContext context;
+        IMapper autoMapper;
+
+        public SubLocationService(AIMSDbContext cntxt, IMapper mapper)
+        {
+            context = cntxt;
+            autoMapper = mapper;
+        }
+
+        public IEnumerable<SubLocationView> GetAll()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                return autoMapper.Map<List<SubLocationView>>(unitWork.SubLocationRepository.GetManyQueryable(s => s.Id != 0));
+            }
+        }
+
+        public IEnumerable<SubLocationView> GetForLocation(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                return autoMapper.Map<List<SubLocationView>>(unitWork.SubLocationRepository.GetManyQueryable(s => s.LocationId == id));
+            }
+        }
+
+        public SubLocationView Get(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                return autoMapper.Map<SubLocationView>(unitWork.SubLocationRepository.GetOne(s => s.Id == id));
+            }
+        }
+
+        /*public ActionResponse Add(SubLocationModel model)
+        {
+
+        }*/
+
+
+
     }
 }
