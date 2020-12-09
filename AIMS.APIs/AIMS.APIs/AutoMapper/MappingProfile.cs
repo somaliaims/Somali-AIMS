@@ -175,6 +175,8 @@ namespace AIMS.APIs.AutoMapper
                 .ForMember(c => c.ProjectTitle, opts => opts.MapFrom(source => source.Project.Title))
                 .ForMember(c => c.ProjectId, opts => opts.MapFrom(source => source.Project.Id));
 
+            CreateMap<EFSubLocation, SubLocationView>();
+
         }
     }
 }
