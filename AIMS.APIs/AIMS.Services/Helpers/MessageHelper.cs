@@ -403,6 +403,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string SectorsDifferentFromMappings();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string GetDependentProjectsForSublocationMessage();
     }
 
     public class MessageHelper : IMessageHelper
@@ -448,6 +454,7 @@ namespace AIMS.Services.Helpers
         private readonly string UNAUTHORIZED_USER_ACCOUNT_CHANGE = "You are not authorized to change user account settings";
         private readonly string MANAGER_ACCOUNT_CANNOT_BE_DEMOTED = "There must be at least one manager account available all the times in AIMS. Account cannot be demoted.";
         private readonly string SECTORS_DIFFERENT_FROM_MAPPINGS = "Sectors provided in mappings are different from sectors provided for the project";
+        private readonly string DEPENDENT_PROJECTS_FOR_SUBPLOCATION = "Dependent projects found for the selected sub-location. Please this sub-location from the referenced project before deletion.";
 
         public string GetNotFound(string entity)
         {
@@ -678,6 +685,11 @@ namespace AIMS.Services.Helpers
         public string GetInvalidEndingFinancialYearMessage()
         {
             return (INVALID_ENDING_FINANCIAL_YEAR);
+        }
+
+        public string GetDependentProjectsForSublocationMessage()
+        {
+            return (DEPENDENT_PROJECTS_FOR_SUBPLOCATION);
         }
 
         public string ProjectToOrganizationMessage(string project, string organizations, string url)

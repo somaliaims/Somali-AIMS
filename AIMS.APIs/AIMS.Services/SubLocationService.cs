@@ -6,6 +6,7 @@ using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace AIMS.Services
 {
@@ -187,6 +188,14 @@ namespace AIMS.Services
                         return response;
                     }
 
+                    var isSubLocationReferenced = unitWork.ProjectLocationsRepository.GetManyQueryable(l => (l.SubLocationIds != null && (l.SubLocationIds.Split("-")).Contains(id.ToString())));
+                    if (isSubLocationReferenced.Any())
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetDependentProjectsForSublocationMessage();
+                        response.Success = false;
+                        return response;
+                    }
                     unitWork.SubLocationRepository.Delete(subLocation);
                     unitWork.Save();
                     response.ReturnedId = id;

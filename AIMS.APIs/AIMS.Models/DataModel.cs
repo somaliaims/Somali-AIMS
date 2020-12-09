@@ -360,6 +360,7 @@ namespace AIMS.Models
         public int LocationId { get; set; }
         public EFLocation Location { get; set; }
         public string SubLocations { get; set; } = null;
+        public string SubLocationIds { get; set; } = null;
         [Column(TypeName = "decimal(9, 2)")]
         public decimal FundsPercentage { get; set; }
     }
