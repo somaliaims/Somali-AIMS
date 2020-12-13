@@ -4,6 +4,7 @@ using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -906,6 +907,28 @@ namespace AIMS.Services
                                                select s).ToList();
                         }
 
+                        List<ProjectLocationDetailView> projectLocations = new List<ProjectLocationDetailView>();
+                        if (project.Locations.Count > 0)
+                        {
+                            foreach(var location in project.Locations)
+                            {
+                                List<SubLocationMiniView> subLocations = new List<SubLocationMiniView>();
+                                if (!string.IsNullOrEmpty(location.SubLocations))
+                                {
+                                    subLocations = JsonConvert.DeserializeObject<List<SubLocationMiniView>>(location.SubLocations);
+                                }
+
+                                projectLocations.Add(new ProjectLocationDetailView()
+                                {
+                                    LocationId = location.LocationId,
+                                    Location = location.Location.Location,
+                                    Latitude = 0,
+                                    Longitude = 0,
+                                    FundsPercentage = location.FundsPercentage,
+                                    SubLocations = subLocations
+                                });
+                            }
+                        }
                         string startDate = (project.StartDate != null) ? Convert.ToDateTime(project.StartDate).ToShortDateString() : null;
                         string endDate = (project.EndDate != null) ? Convert.ToDateTime(project.EndDate).ToShortDateString() : null;
                         profileView.Id = project.Id;
@@ -921,7 +944,7 @@ namespace AIMS.Services
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
                         profileView.Sectors = mapper.Map<List<ProjectSectorView>>(project.Sectors);
-                        profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
+                        profileView.Locations = projectLocations;
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                         profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
                         profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(projectDisbursements); profileView.Documents = mapper.Map<List<ProjectDocumentView>>(project.Documents);
@@ -1446,11 +1469,30 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
+                List<LocationView> locationsList = new List<LocationView>();
                 var locations = unitWork.ProjectLocationsRepository.GetWithInclude(l => l.ProjectId == id, new string[] { "Location" });
                 locations = (from l in locations
                              orderby l.Location.Location
                              select l);
-                return mapper.Map<List<LocationView>>(locations);
+                foreach (var location in locations)
+                {
+                    List<SubLocationMiniView> subLocationsList = new List<SubLocationMiniView>();
+                    if (!string.IsNullOrEmpty(location.SubLocations))
+                    {
+                        subLocationsList = JsonConvert.DeserializeObject<List<SubLocationMiniView>>(location.SubLocations);
+                    }
+                    locationsList.Add(new LocationView()
+                    {
+                        Id = location.LocationId,
+                        Location = location.Location.Location,
+                        Latitude = 0,
+                        Longitude = 0,
+                        FundsPercentage = location.FundsPercentage,
+                        IsUnAttributed = location.Location.IsUnAttributed,
+                        SubLocations = subLocationsList
+                    });
+                }
+                return locationsList;
             }
         }
 
@@ -3096,7 +3138,6 @@ namespace AIMS.Services
                         response.Success = false;
                     }
 
-
                     var projectLocations = unitWork.ProjectLocationsRepository.GetManyQueryable(s => (s.ProjectId.Equals(model.ProjectId)));
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
@@ -3112,16 +3153,34 @@ namespace AIMS.Services
                                 if (isProjectLocationExists != null)
                                 {
                                     isProjectLocationExists.FundsPercentage += location.FundsPercentage;
+                                    if (location.SubLocations.Count > 0)
+                                    {
+                                        string locationIds = string.Join("-", (from loc in location.SubLocations
+                                                              select loc.Id).ToList());
+                                        isProjectLocationExists.SubLocations = JsonConvert.SerializeObject(location.SubLocations);
+                                        isProjectLocationExists.SubLocationIds = locationIds;
+                                    }
                                     unitWork.ProjectLocationsRepository.Update(isProjectLocationExists);
                                     await unitWork.SaveAsync();
                                 }
                                 else
                                 {
-                                    unitWork.ProjectLocationsRepository.Insert(new EFProjectLocations()
+                                    string subLocationIds = "";
+                                    string subLocations = "";
+                                    if (location.SubLocations.Count > 0)
+                                    {
+                                        subLocationIds = string.Join("-", (from loc in location.SubLocations
+                                                                               select loc.Id).ToList());
+                                        subLocations = JsonConvert.SerializeObject(location.SubLocations);
+                                    }
+
+                                    isProjectLocationExists = unitWork.ProjectLocationsRepository.Insert(new EFProjectLocations()
                                     {
                                         ProjectId = model.ProjectId,
                                         LocationId = location.LocationId,
-                                        FundsPercentage = location.FundsPercentage
+                                        FundsPercentage = location.FundsPercentage,
+                                        SubLocations = subLocations,
+                                        SubLocationIds = subLocationIds
                                     });
                                     ++newLocations;
                                 }

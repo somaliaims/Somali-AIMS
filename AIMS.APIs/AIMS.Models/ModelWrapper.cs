@@ -787,6 +787,7 @@ namespace AIMS.Models
         public decimal Longitude { get; set; }
         public decimal FundsPercentage { get; set; }
         public bool IsUnAttributed { get; set; }
+        public List<SubLocationMiniView> SubLocations { get; set; }
     }
 
     public class LocationModel
@@ -795,6 +796,12 @@ namespace AIMS.Models
         public string Location { get; set; }
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
+    }
+
+    public class SubLocationAddModel
+    {
+        public int Id { get; set; }
+        public string SubLocation { get; set; }
     }
 
     public class SubLocationModel
@@ -809,6 +816,12 @@ namespace AIMS.Models
     {
         public int Id { get; set; }
         public int LocationId { get; set; }
+        public string SubLocation { get; set; }
+    }
+
+    public class SubLocationMiniView
+    {
+        public int Id { get; set; }
         public string SubLocation { get; set; }
     }
 
@@ -1219,6 +1232,7 @@ namespace AIMS.Models
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
         public decimal FundsPercentage { get; set; }
+        public List<SubLocationMiniView> SubLocations { get; set; }
     }
 
     public class ProjectLocationModel
@@ -1234,6 +1248,7 @@ namespace AIMS.Models
         public int LocationId { get; set; }
         [Required]
         public decimal FundsPercentage { get; set; }
+        public List<SubLocationAddModel> SubLocations { get; set; } = new List<SubLocationAddModel>();
     }
 
     /// <summary>
