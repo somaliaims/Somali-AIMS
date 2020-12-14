@@ -1996,6 +1996,7 @@ namespace AIMS.Models
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
         public List<int> LocationIds { get; set; } = new List<int>();
+        public List<int> SubLocationIds { get; set; } = new List<int>();
         public int SectorId { get; set; } = 0;
         public int MarkerId { get; set; } = 0;
         public List<string> MarkerValues { get; set; } = new List<string>();

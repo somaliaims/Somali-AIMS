@@ -1276,12 +1276,20 @@ namespace AIMS.Services
                     if (model.LocationIds.Count > 0)
                     {
                         var projectLocations = unitWork.ProjectLocationsRepository.GetManyQueryable(l => model.LocationIds.Contains(l.LocationId));
+                        List<EFProjectLocations> projectLocationsList = new List<EFProjectLocations>();
                         if (model.SubLocationIds.Count > 0)
                         {
-                            
+                            foreach(var projectLocation in projectLocations)
+                            {
+                                int[] ids = (!string.IsNullOrEmpty(projectLocation.SubLocationIds)) ? projectLocation.SubLocationIds.Split("-").Select(int.Parse).ToArray() : new int[0];
+                                if (model.SubLocationIds.Intersect(ids).Count() > 0)
+                                {
+                                    projectLocationsList.Add(projectLocation);
+                                }
+                            }
                         }
-                        var projectIds = (from pLocation in projectLocations
-                                          select pLocation.ProjectId).ToList<int>().Distinct();
+                        var projectIds = (from pLocation in projectLocationsList
+                                          select pLocation.ProjectId).Distinct();
 
                         if (projectProfileList == null)
                         {

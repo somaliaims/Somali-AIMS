@@ -961,6 +961,7 @@ namespace AIMS.Services
                         }
                     }
 
+
                     if (model.LocationIds.Count > 0)
                     {
                         projectLocationsQueryable = unitWork.ProjectLocationsRepository.GetWithInclude(l => model.LocationIds.Contains(l.LocationId), new string[] { "Location" });
@@ -970,9 +971,30 @@ namespace AIMS.Services
                         projectLocationsQueryable = unitWork.ProjectLocationsRepository.GetWithInclude(p => p.ProjectId != 0, new string[] { "Location" });
                     }
 
-                    projectLocations = (from pLocation in projectLocationsQueryable
-                                        orderby pLocation.Location.Location
-                                        select pLocation).ToList();
+                    //List<EFProjectLocations> projectLocationsList = new List<EFProjectLocations>();
+                    if (model.SubLocationIds.Count > 0)
+                    {
+                        foreach(var projectLocation in projectLocationsQueryable)
+                        {
+                            int[] ids = (!string.IsNullOrEmpty(projectLocation.SubLocationIds)) ? projectLocation.SubLocationIds.Split("-").Select(int.Parse).ToArray() : new int[0];
+                            if (model.SubLocationIds.Intersect(ids).Count() > 0)
+                            {
+                                projectLocations.Add(projectLocation);
+                            }
+                        }
+                        projectLocations = (from pLocation in projectLocations
+                                            orderby pLocation.Location.Location
+                                            select pLocation).ToList();
+
+                    }
+                    else
+                    {
+                        projectLocations = (from pLocation in projectLocationsQueryable
+                                            orderby pLocation.Location.Location
+                                            select pLocation).ToList();
+                    }
+
+                    
 
                     if (projectProfileList == null)
                     {
