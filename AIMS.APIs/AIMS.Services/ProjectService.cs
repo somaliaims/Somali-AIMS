@@ -1276,6 +1276,10 @@ namespace AIMS.Services
                     if (model.LocationIds.Count > 0)
                     {
                         var projectLocations = unitWork.ProjectLocationsRepository.GetManyQueryable(l => model.LocationIds.Contains(l.LocationId));
+                        if (model.SubLocationIds.Count > 0)
+                        {
+                            
+                        }
                         var projectIds = (from pLocation in projectLocations
                                           select pLocation.ProjectId).ToList<int>().Distinct();
 

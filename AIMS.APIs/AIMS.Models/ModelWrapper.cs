@@ -2061,6 +2061,7 @@ namespace AIMS.Models
         public int EndingYear { get; set; } = 0;
         public List<int> SectorIds { get; set; } = new List<int>();
         public List<int> LocationIds { get; set; } = new List<int>();
+        public List<int> SubLocationIds { get; set; } = new List<int>();
         public string Description { get; set; }
         public decimal LowerRange { get; set; } = 0;
         public decimal UpperRange { get; set; }
