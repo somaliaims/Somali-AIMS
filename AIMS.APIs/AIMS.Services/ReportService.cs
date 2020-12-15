@@ -788,7 +788,7 @@ namespace AIMS.Services
                     int month = dated.Month;
                     IQueryable<EFProject> projectProfileList = null;
                     IQueryable<EFProjectLocations> projectLocationsQueryable = null;
-                    List<EFProjectLocations> projectLocations = null;
+                    List<EFProjectLocations> projectLocations = new List<EFProjectLocations>();
                     IQueryable<EFProjectSectors> projectsInSector = null;
                     List<PercentInProjectView> sectorPercentageInProjects = new List<PercentInProjectView>();
 
@@ -961,7 +961,6 @@ namespace AIMS.Services
                         }
                     }
 
-
                     if (model.LocationIds.Count > 0)
                     {
                         projectLocationsQueryable = unitWork.ProjectLocationsRepository.GetWithInclude(l => model.LocationIds.Contains(l.LocationId), new string[] { "Location" });
@@ -1022,6 +1021,23 @@ namespace AIMS.Services
                             projectValue = (project.ProjectValue * (exchangeRate / projectExchangeRate));
                         }
 
+                        List<ProjectLocationDetailView> projectLocationsList = new List<ProjectLocationDetailView>();
+                        foreach(var pLocation in project.Locations)
+                        {
+                            List<SubLocationMiniView> sublocationsList = new List<SubLocationMiniView>();
+                            if (!string.IsNullOrEmpty(pLocation.SubLocations))
+                            {
+                                sublocationsList = JsonConvert.DeserializeObject<List<SubLocationMiniView>>(pLocation.SubLocations);
+                            }
+                            projectLocationsList.Add(new ProjectLocationDetailView()
+                            {
+                                LocationId = pLocation.LocationId,
+                                FundsPercentage = pLocation.FundsPercentage,
+                                Latitude = (pLocation.Location.Latitude != null) ? (decimal)(pLocation.Location.Latitude) : 0,
+                                Longitude = (pLocation.Location.Longitude != null) ? (decimal)(pLocation.Location.Longitude) : 0,
+                                SubLocations = sublocationsList
+                            });
+                        }
                         ProjectProfileView profileView = new ProjectProfileView();
                         profileView.Id = project.Id;
                         profileView.Title = project.Title;
@@ -1031,7 +1047,7 @@ namespace AIMS.Services
                         profileView.Description = project.Description;
                         profileView.StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString();
                         profileView.EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString();
-                        profileView.Locations = mapper.Map<List<ProjectLocationDetailView>>(project.Locations);
+                        profileView.Locations = projectLocationsList;
                         profileView.Funders = mapper.Map<List<ProjectFunderView>>(project.Funders);
                         profileView.Implementers = mapper.Map<List<ProjectImplementerView>>(project.Implementers);
                         profileView.Disbursements = mapper.Map<List<ProjectDisbursementView>>(project.Disbursements);

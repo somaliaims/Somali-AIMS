@@ -1495,10 +1495,11 @@ namespace AIMS.Services
                     }
                     locationsList.Add(new LocationView()
                     {
-                        Id = location.LocationId,
+                        Id = location.Location.Id,
+                        LocationId = location.LocationId,
                         Location = location.Location.Location,
-                        Latitude = 0,
-                        Longitude = 0,
+                        Latitude = (location.Location.Latitude != null) ? (decimal)(location.Location.Latitude) : 0,
+                        Longitude = (location.Location.Longitude != null) ? (decimal)(location.Location.Longitude) : 0,
                         FundsPercentage = location.FundsPercentage,
                         IsUnAttributed = location.Location.IsUnAttributed,
                         SubLocations = subLocationsList

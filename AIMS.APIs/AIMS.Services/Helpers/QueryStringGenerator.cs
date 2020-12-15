@@ -128,6 +128,12 @@ namespace AIMS.Services.Helpers
                 queryString += ("&locations=" + locationIdsStr);
             }
 
+            if (model.SubLocationIds.Count > 0)
+            {
+                string subLocationIdsStr = string.Join(",", model.SubLocationIds);
+                queryString += ("&slocations=" + subLocationIdsStr);
+            }
+
             if (model.ProjectIds.Count > 0)
             {
                 string projectIdsStr = string.Join(",", model.ProjectIds);
