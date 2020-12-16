@@ -1972,6 +1972,7 @@ namespace AIMS.Models
         public int StartingYear { get; set; } = 0;
         public int EndingYear { get; set; } = 0;
         public int LocationId { get; set; } = 0;
+        public List<int> SubLocationIds { get; set; } = new List<int>();
         public SectorLevels SectorLevel { get; set; } = SectorLevels.Parent;
         public List<int> SectorIds { get; set; } = new List<int>();
         public int ChartType { get; set; } = 0;

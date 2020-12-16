@@ -2049,7 +2049,27 @@ namespace AIMS.Services
 
                     if (model.LocationId > 0)
                     {
-                        locationProjectIds = unitWork.ProjectLocationsRepository.GetProjection(p => p.LocationId == model.LocationId, p => p.ProjectId).ToList();
+                        List<int> locationIds = new List<int>();
+                        if (model.SubLocationIds.Count > 0)
+                        {
+                            var projectsForLocation = unitWork.ProjectLocationsRepository.GetManyQueryable(p => (p.SubLocationIds != null && p.LocationId == model.LocationId));
+                            foreach(var locationProject in projectsForLocation)
+                            {
+                                int[] subLocationIds = locationProject.SubLocationIds.Split("-").Select(int.Parse).ToArray();
+                                if (subLocationIds.Intersect(model.SubLocationIds).Count() > 0)
+                                {
+                                    if (!locationProjectIds.Contains(locationProject.ProjectId))
+                                    {
+                                        locationProjectIds.Add(locationProject.ProjectId);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            locationProjectIds = unitWork.ProjectLocationsRepository.GetProjection(p => p.LocationId == model.LocationId, p => p.ProjectId).ToList();
+                        }
+                        
                         projectProfileList = await unitWork.ProjectRepository.GetWithIncludeAsync(p => locationProjectIds.Contains(p.Id),
                             new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer" });
                         if (locationProjectIds.Count > 0)
