@@ -2013,6 +2013,7 @@ namespace AIMS.Models
         public int EndingYear { get; set; } = 0;
         public int ChartType { get; set; } = 0;
         public int LocationId { get; set; } = 0;
+        public List<int> SubLocationIds { get; set; }
         public int MarkerId { get; set; } = 0;
         public List<string> MarkerValues { get; set; } = new List<string>();
         public List<int> SectorIds { get; set; } = new List<int>();

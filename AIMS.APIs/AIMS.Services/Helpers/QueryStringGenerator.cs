@@ -79,6 +79,12 @@ namespace AIMS.Services.Helpers
                 queryString += ("&locationId=" + model.LocationId);
             }
 
+            if (model.SubLocationIds.Count > 0)
+            {
+                string sublocationsIdsStr = string.Join(",", model.SubLocationIds);
+                queryString += ("&slocations=" + sublocationsIdsStr);
+            }
+
             if (model.SectorOption == NoSectorOptions.ProjectsWithoutSectors)
             {
                 queryString += ("&noSectors=true");
@@ -192,6 +198,11 @@ namespace AIMS.Services.Helpers
             if (model.LocationId > 0)
             {
                 queryString += ("&locationId=" + model.LocationId);
+            }
+
+            if (model.SubLocationIds.Count > 0)
+            {
+                queryString += "&slocations=" + string.Join(",", model.SubLocationIds);
             }
 
             if (model.SectorIds.Count > 0)
