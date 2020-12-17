@@ -1277,6 +1277,7 @@ namespace AIMS.Services
                     {
                         var projectLocations = unitWork.ProjectLocationsRepository.GetManyQueryable(l => model.LocationIds.Contains(l.LocationId));
                         List<EFProjectLocations> projectLocationsList = new List<EFProjectLocations>();
+                        List<int> projectIds = new List<int>();
                         if (model.SubLocationIds.Count > 0)
                         {
                             foreach(var projectLocation in projectLocations)
@@ -1287,9 +1288,14 @@ namespace AIMS.Services
                                     projectLocationsList.Add(projectLocation);
                                 }
                             }
+                            projectIds = (from pLocation in projectLocationsList
+                                          select pLocation.ProjectId).Distinct().ToList();
                         }
-                        var projectIds = (from pLocation in projectLocationsList
-                                          select pLocation.ProjectId).Distinct();
+                        else
+                        {
+                            projectIds = (from p in projectLocations
+                                          select p.ProjectId).Distinct().ToList();
+                        }
 
                         if (projectProfileList == null)
                         {
