@@ -50,13 +50,13 @@ namespace AIMS.APIs.Controllers
 
         [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
-        public IActionResult Post([FromBody] ManualRateModel model)
+        public async Task<IActionResult> Post([FromBody] ManualRateModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var response = service.Add(model);
+            var response = await service.AddAsync(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

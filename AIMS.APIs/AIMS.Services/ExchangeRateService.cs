@@ -291,39 +291,7 @@ namespace AIMS.Services
             List<CurrencyWithRates> exchangeRates = new List<CurrencyWithRates>();
             try
             {
-                //int dateYear = dated.Year;
-                //int month = dated.Month;
-                //int startingDayOfMonth = 1, endingDayOfMonth = 30;
-                //int fyStartingMonth = 1, fyEndingMonth = 6;
                 int proposedYear = dated.Year;
-                //DateTime startDate, endDate;
-
-                /*var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(f => f.Id != 0);
-                if (fySettings != null)
-                {
-                    fyStartingMonth = fySettings.Month;
-                    if (fySettings.Month <= 1)
-                    {
-                        fyEndingMonth = 12;
-                    }
-                    else
-                    {
-                        fyEndingMonth = (fyStartingMonth - 1);
-                    }
-                }
-
-                if (month <= fyEndingMonth)
-                {
-                    --proposedYear;
-                    startDate = new DateTime(proposedYear, fyStartingMonth, startingDayOfMonth);
-                    endDate = new DateTime(dateYear, fyEndingMonth, endingDayOfMonth);
-                }
-                else
-                {
-                    ++proposedYear;
-                    startDate = new DateTime(dateYear, fyStartingMonth, startingDayOfMonth);
-                    endDate = new DateTime(proposedYear, fyEndingMonth, endingDayOfMonth);
-                }*/
                 IQueryable<EFManualExchangeRates> exRates = unitWork.ManualRatesRepository.GetManyQueryable(r => r.Year == dated.Year || r.Year == DateTime.Now.Year);
                 var currencies = unitWork.CurrencyRepository.GetManyQueryable(c => c.Id != 0);
                 if (exRates.Any())
@@ -451,7 +419,7 @@ namespace AIMS.Services
             var unitWork = new UnitOfWork(context);
             ExchangeRatesView ratesView = new ExchangeRatesView();
             List<CurrencyWithRates> ratesList = new List<CurrencyWithRates>();
-            var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
+            /*var exchangeRate = await unitWork.ExchangeRatesRepository.GetOneAsync(e => e.Dated.Date == dated.Date);
             ratesView.Dated = dated.ToShortDateString();
             ratesView.Rates = (exchangeRate != null) ? JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exchangeRate.ExchangeRatesJson) : null;
 
@@ -467,6 +435,20 @@ namespace AIMS.Services
                                              select c.CurrencyName).FirstOrDefault();
                     }
                 }
+            }*/
+            var exchangeRates = await unitWork.ManualRatesRepository.GetManyQueryableAsync(r => r.Year == dated.Year);
+            if (exchangeRates.Any())
+            {
+                foreach(var exRate in exchangeRates)
+                {
+                    ratesList.Add(new CurrencyWithRates()
+                    {
+                        Currency = exRate.Currency,
+                        Rate = exRate.ExchangeRate,
+                        CurrencyName = exRate.Currency
+                    });
+                }
+                ratesView.Rates = ratesList;
             }
             return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
         }

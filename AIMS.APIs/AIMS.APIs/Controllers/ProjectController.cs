@@ -347,7 +347,7 @@ namespace AIMS.APIs.Controllers
                 rates = await ratesHttpService.GetRatesAsync(apiKey);
                 if (rates.Rates != null)
                 {
-                    await ratesService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
+                    await ratesService.SaveCurrencyRatesAsync(rates.Rates, project.StartDate);
                     exchangeRate = projectService.GetExchangeRateForCurrency(project.ProjectCurrency, rates.Rates);
                 }
             }
@@ -756,7 +756,7 @@ namespace AIMS.APIs.Controllers
                 rates = await ratesHttpService.GetRatesAsync(apiKey);
                 if (rates.Rates != null)
                 {
-                    await ratesService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
+                    await ratesService.SaveCurrencyRatesAsync(rates.Rates, project.StartDate);
                     exchangeRate = projectService.GetExchangeRateForCurrency(project.ProjectCurrency, rates.Rates);
                 }
             }

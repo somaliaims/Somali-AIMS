@@ -7,6 +7,8 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using AIMS.Services.Helpers;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace AIMS.Services
 {
@@ -36,7 +38,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse Add(ManualRateModel model);
+        Task<ActionResponse> AddAsync(ManualRateModel model);
 
         /// <summary>
         /// Updates the manual rate
@@ -105,16 +107,17 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Add(ManualRateModel model)
+        public async Task<ActionResponse> AddAsync(ManualRateModel model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
-                var manualRate = unitWork.ManualRatesRepository.GetOne(r => r.Year == model.Year && r.Currency == model.Currency);
+                var manualRate = await unitWork.ManualRatesRepository.GetOneAsync(r => r.Year == model.Year && r.Currency == model.Currency);
 
                 if (manualRate != null)
                 {
                     manualRate.ExchangeRate = model.ExchangeRate;
+                    manualRate.IsEditedByUser = true;
                     unitWork.ManualRatesRepository.Update(manualRate);
                 }
                 else
@@ -131,7 +134,24 @@ namespace AIMS.Services
 
                 try
                 {
-                    unitWork.Save();
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
+                    {
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            await unitWork.SaveAsync();
+                            var projectsInYear = unitWork.ProjectRepository.GetManyQueryable(p => p.StartDate.Year == model.Year && p.ProjectCurrency == model.Currency);
+                            foreach (var project in projectsInYear)
+                            {
+                                project.ExchangeRate = model.ExchangeRate;
+                                unitWork.ProjectRepository.Update(project);
+                            }
+                            await unitWork.SaveAsync();
+
+                            transaction.Commit();
+                        }
+                    });
+                    
                 }
                 catch(Exception ex)
                 {
