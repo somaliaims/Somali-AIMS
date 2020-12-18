@@ -168,31 +168,38 @@ namespace AIMS.Services
                                 }
                                 else
                                 {
-                                    decimal averageRate = (from r in exchangeRates
-                                                           where r.Currency == rate.Currency
-                                                           select r.ExchangeRate).Average();
-                                    averageRate = ((averageRate + rate.Rate) / 2);
-                                    var manualRate = (from r in exchangeRates
-                                                      where r.Currency == rate.Currency
-                                                      select r).FirstOrDefault();
+                                    var manualExRate = (from r in exchangeRates
+                                                        where r.Currency == rate.Currency && r.IsEditedByUser == false
+                                                        select r).FirstOrDefault();
 
-                                    if (manualRate != null)
+                                    if (manualExRate != null)
                                     {
-                                        manualRate.ExchangeRate = averageRate;
-                                        unitWork.ManualRatesRepository.Update(manualRate);
-                                    }
-                                    await unitWork.SaveAsync();
+                                        decimal averageRate = (from r in exchangeRates
+                                                               where r.Currency == rate.Currency
+                                                               select r.ExchangeRate).Average();
+                                        averageRate = ((averageRate + rate.Rate) / 2);
+                                        var manualRate = (from r in exchangeRates
+                                                          where r.Currency == rate.Currency
+                                                          select r).FirstOrDefault();
 
-                                    var projects = (from p in projectsInYear
-                                                    where p.ProjectCurrency == rate.Currency
-                                                    select p);
+                                        if (manualRate != null)
+                                        {
+                                            manualRate.ExchangeRate = averageRate;
+                                            unitWork.ManualRatesRepository.Update(manualRate);
+                                        }
+                                        await unitWork.SaveAsync();
 
-                                    foreach(var project in projects)
-                                    {
-                                        project.ExchangeRate = averageRate;
-                                        unitWork.ProjectRepository.Update(project);
+                                        var projects = (from p in projectsInYear
+                                                        where p.ProjectCurrency == rate.Currency
+                                                        select p);
+
+                                        foreach (var project in projects)
+                                        {
+                                            project.ExchangeRate = averageRate;
+                                            unitWork.ProjectRepository.Update(project);
+                                        }
+                                        await unitWork.SaveAsync();
                                     }
-                                    await unitWork.SaveAsync();
                                 }
                             }
                             transaction.Commit();
