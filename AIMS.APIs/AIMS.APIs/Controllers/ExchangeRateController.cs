@@ -46,6 +46,17 @@ namespace AIMS.APIs.Controllers
             return Ok(ratesView);
         }
 
+        [HttpPost("[action]")]
+        public async Task<IActionResult> FixExchangeRatesForProjects()
+        {
+            var response = await ratesService.ApplyAverageRates();
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
+
         [HttpPost("GetAverageCurrencyRateForDate")]
         public async Task<IActionResult> GetAverageCurrencyRateForDate([FromBody] ExRateFinderModel model)
         {

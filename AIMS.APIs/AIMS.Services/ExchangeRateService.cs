@@ -89,6 +89,12 @@ namespace AIMS.Services
         Task<IEnumerable<CurrencyWithRates>> GetAverageCurrencyRatesForDate(DateTime dated);
 
         /// <summary>
+        /// Temporary API to apply average exchange rates for the entries
+        /// </summary>
+        /// <returns></returns>
+        Task<ActionResponse> ApplyAverageRates();
+
+        /// <summary>
         /// Get apis calls count for current month
         /// </summary>
         /// <returns></returns>
@@ -399,6 +405,49 @@ namespace AIMS.Services
             }
 
             return await Task<ExchangeRatesView>.Run(() => ratesView).ConfigureAwait(false);
+        }
+
+        public async Task<ActionResponse> ApplyAverageRates()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        var manualExRates = await unitWork.ManualRatesRepository.GetManyQueryableAsync(r => r.Id != 0);
+                        var years = (from r in manualExRates
+                                     select r.Year).Distinct().ToList();
+
+                        var projects = await unitWork.ProjectRepository.GetManyQueryableAsync(p => years.Contains(p.StartDate.Year));
+                        foreach (var rate in manualExRates)
+                        {
+                            var currencyProjects = (from project in projects
+                                                    where project.ProjectCurrency == rate.Currency
+                                                    && rate.Year == project.StartDate.Year
+                                                    select project);
+
+                            foreach (var project in currencyProjects)
+                            {
+                                project.ExchangeRate = rate.ExchangeRate;
+                                unitWork.ProjectRepository.Update(project);
+                            }
+                        }
+
+                        if (projects.Any())
+                        {
+                            await unitWork.SaveAsync();
+                            transaction.Commit();
+                        }
+                    }
+                });
+
+                
+                return response;
+            }
         }
 
         public int GetAPIsCallsCount()
