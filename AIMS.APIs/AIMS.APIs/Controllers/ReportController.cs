@@ -62,7 +62,7 @@ namespace AIMS.APIs.Controllers
                     rates = await ratesHttpService.GetRatesAsync(apiKey);
                     if (rates.Rates != null)
                     {
-                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        await ratesService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
                         exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
                     }
                 }
@@ -103,7 +103,7 @@ namespace AIMS.APIs.Controllers
                     rates = await ratesHttpService.GetRatesAsync(apiKey);
                     if (rates.Rates != null)
                     {
-                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        await ratesService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
                         exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
                     }
                 }
@@ -180,7 +180,7 @@ namespace AIMS.APIs.Controllers
                     rates = await ratesHttpService.GetRatesAsync(apiKey);
                     if (rates.Rates != null)
                     {
-                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        await ratesService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
                         exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
                     }
                 }
@@ -226,7 +226,7 @@ namespace AIMS.APIs.Controllers
                     rates = await ratesHttpService.GetRatesAsync(apiKey);
                     if (rates.Rates != null)
                     {
-                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        await ratesService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
                         exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
                     }
                 }
@@ -272,7 +272,7 @@ namespace AIMS.APIs.Controllers
                     rates = await ratesHttpService.GetRatesAsync(apiKey);
                     if (rates.Rates != null)
                     {
-                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        await ratesService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
                         exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
                     }
                 }
@@ -318,7 +318,7 @@ namespace AIMS.APIs.Controllers
                     rates = await ratesHttpService.GetRatesAsync(apiKey);
                     if (rates.Rates != null)
                     {
-                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        await ratesService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
                         exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
                     }
                 }
@@ -364,7 +364,7 @@ namespace AIMS.APIs.Controllers
                     rates = await ratesHttpService.GetRatesAsync(apiKey);
                     if (rates.Rates != null)
                     {
-                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        await ratesService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
                         exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
                     }
                 }
@@ -410,7 +410,7 @@ namespace AIMS.APIs.Controllers
                     rates = await ratesHttpService.GetRatesAsync(apiKey);
                     if (rates.Rates != null)
                     {
-                        ratesService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                        await ratesService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
                         exchangeRate = reportService.GetExchangeRateForCurrency(defaultCurrency, rates.Rates);
                     }
                 }

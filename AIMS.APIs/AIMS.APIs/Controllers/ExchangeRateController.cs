@@ -40,7 +40,7 @@ namespace AIMS.APIs.Controllers
                 ratesView = await ratesHttpService.GetRatesAsync(apiKey);
                 if (ratesView.Rates != null)
                 {
-                    ratesService.SaveCurrencyRates(ratesView.Rates, DateTime.Now);
+                    await ratesService.SaveCurrencyRatesAsync(ratesView.Rates, DateTime.Now);
                 }
             }
             return Ok(ratesView);
@@ -76,7 +76,7 @@ namespace AIMS.APIs.Controllers
                 ratesView = await ratesHttpService.GetRatesAsync(apiKey);
                 if (ratesView.Rates != null)
                 {
-                    ratesService.SaveCurrencyRates(ratesView.Rates, DateTime.Now);
+                    await ratesService.SaveCurrencyRatesAsync(ratesView.Rates, DateTime.Now);
                 }
             }
 
@@ -131,7 +131,7 @@ namespace AIMS.APIs.Controllers
                 ratesView = (isTodaysDate) ? await ratesHttpService.GetRatesAsync(apiKey) : await ratesHttpService.GetRatesForDateAsync(datedStr, apiKey);
                 if (ratesView.Rates != null)
                 {
-                    ratesService.SaveCurrencyRates(ratesView.Rates, dated);
+                    await ratesService.SaveCurrencyRatesAsync(ratesView.Rates, dated);
                 }
                 else
                 {

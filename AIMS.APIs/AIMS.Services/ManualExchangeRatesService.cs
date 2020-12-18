@@ -124,7 +124,8 @@ namespace AIMS.Services
                         Currency = model.Currency,
                         DefaultCurrency = model.DefaultCurrency,
                         Year = model.Year,
-                        ExchangeRate = model.ExchangeRate
+                        ExchangeRate = model.ExchangeRate,
+                        IsEditedByUser = true
                     });
                 }
 
@@ -162,6 +163,7 @@ namespace AIMS.Services
                     manualRate.ExchangeRate = model.ExchangeRate;
                     manualRate.Currency = model.Currency;
                     manualRate.DefaultCurrency = model.DefaultCurrency;
+                    manualRate.IsEditedByUser = true;
                     unitWork.ManualRatesRepository.Update(manualRate);
                 }
 

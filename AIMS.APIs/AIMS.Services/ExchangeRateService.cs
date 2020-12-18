@@ -2,6 +2,7 @@
 using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
 using AIMS.Services.Helpers;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="ratesJson"></param>
         /// <returns></returns>
-        ActionResponse SaveCurrencyRates(List<CurrencyWithRates> ratesList, DateTime dated);
+        Task<ActionResponse> SaveCurrencyRatesAsync(List<CurrencyWithRates> ratesList, DateTime dated);
 
         /// <summary>
         /// Saves new exchange rates for provided date
@@ -103,7 +104,7 @@ namespace AIMS.Services
             context = cntxt;
         }
 
-        public ActionResponse SaveCurrencyRates(List<CurrencyWithRates> ratesList, DateTime dated)
+        public async Task<ActionResponse> SaveCurrencyRatesAsync(List<CurrencyWithRates> ratesList, DateTime dated)
         {
             var unitWork = new UnitOfWork(context);
             ActionResponse response = new ActionResponse();
@@ -111,67 +112,93 @@ namespace AIMS.Services
             if (ratesList.Count > 0)
             {
                 string ratesJson = JsonConvert.SerializeObject(ratesList);
-                var exchangeRate = unitWork.ExchangeRatesRepository.GetOne(e => e.Dated.Date == dated.Date);
-                if (exchangeRate == null)
-                {
-                    unitWork.ExchangeRatesRepository.Insert(new EFExchangeRates()
-                    {
-                        ExchangeRatesJson = ratesJson,
-                        Dated = dated
-                    });
-                    unitWork.Save();
-                }
 
-                var apisCountObj = unitWork.ExchangeRatesAPIsRepository.GetOne(a => (a.Dated.Year == dated.Year && a.Dated.Month == dated.Month));
-                if (apisCountObj != null)
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
                 {
-                    apisCountObj.Count++;
-                    unitWork.ExchangeRatesAPIsRepository.Update(apisCountObj);
-                }
-                else
-                {
-                    unitWork.ExchangeRatesAPIsRepository.Insert(new EFExchangeRatesAPIsCount()
+                    using (var transaction = context.Database.BeginTransaction())
                     {
-                        Count = 1,
-                        Dated = dated
-                    });
-                }
-                unitWork.Save();
-                int year = dated.Year;
-                var exchangeRates = unitWork.ManualRatesRepository.GetManyQueryable(r => r.Year == year);
-                string defaultCurrency = unitWork.CurrencyRepository.GetProjection(c => c.IsDefault == true, c => c.Currency).FirstOrDefault();
-                if (exchangeRates.Any())
-                {
-                    int entriesUpdated = 0;
-                    foreach (var rate in ratesList)
-                    {
-                        var currency = (from r in exchangeRates
-                                        where r.Currency == rate.Currency
-                                        select r).FirstOrDefault();
-
-                        if (currency == null)
+                        var exchangeRate = unitWork.ExchangeRatesRepository.GetOne(e => e.Dated.Date == dated.Date);
+                        if (exchangeRate == null)
                         {
-                            unitWork.ManualRatesRepository.Insert(new EFManualExchangeRates()
+                            unitWork.ExchangeRatesRepository.Insert(new EFExchangeRates()
                             {
-                                Year = year,
-                                ExchangeRate = rate.Rate,
-                                Currency = rate.Currency
+                                ExchangeRatesJson = ratesJson,
+                                Dated = dated
                             });
-                            ++entriesUpdated;
+                            unitWork.Save();
+                        }
+
+                        var apisCountObj = unitWork.ExchangeRatesAPIsRepository.GetOne(a => (a.Dated.Year == dated.Year && a.Dated.Month == dated.Month));
+                        if (apisCountObj != null)
+                        {
+                            apisCountObj.Count++;
+                            unitWork.ExchangeRatesAPIsRepository.Update(apisCountObj);
                         }
                         else
                         {
-                            /*
-                             * Need to write the logic here for calculating the average of exchange rates
-                             */
+                            unitWork.ExchangeRatesAPIsRepository.Insert(new EFExchangeRatesAPIsCount()
+                            {
+                                Count = 1,
+                                Dated = dated
+                            });
+                        }
+                        unitWork.Save();
+                        int year = dated.Year;
+                        var exchangeRates = unitWork.ManualRatesRepository.GetManyQueryable(r => r.Year == year);
+                        string defaultCurrency = unitWork.CurrencyRepository.GetProjection(c => c.IsDefault == true, c => c.Currency).FirstOrDefault();
+                        if (exchangeRates.Any())
+                        {
+                            var projectsInYear = unitWork.ProjectRepository.GetManyQueryable(p => p.StartDate.Year == year);
+                            foreach (var rate in ratesList)
+                            {
+                                var currency = (from r in exchangeRates
+                                                where r.Currency == rate.Currency
+                                                select r).FirstOrDefault();
+
+                                if (currency == null)
+                                {
+                                    unitWork.ManualRatesRepository.Insert(new EFManualExchangeRates()
+                                    {
+                                        Year = year,
+                                        ExchangeRate = rate.Rate,
+                                        Currency = rate.Currency
+                                    });
+                                    await unitWork.SaveAsync();
+                                }
+                                else
+                                {
+                                    decimal averageRate = (from r in exchangeRates
+                                                           where r.Currency == rate.Currency
+                                                           select r.ExchangeRate).Average();
+                                    averageRate = ((averageRate + rate.Rate) / 2);
+                                    var manualRate = (from r in exchangeRates
+                                                      where r.Currency == rate.Currency
+                                                      select r).FirstOrDefault();
+
+                                    if (manualRate != null)
+                                    {
+                                        manualRate.ExchangeRate = averageRate;
+                                        unitWork.ManualRatesRepository.Update(manualRate);
+                                    }
+                                    await unitWork.SaveAsync();
+
+                                    var projects = (from p in projectsInYear
+                                                    where p.ProjectCurrency == rate.Currency
+                                                    select p);
+
+                                    foreach(var project in projects)
+                                    {
+                                        project.ExchangeRate = averageRate;
+                                        unitWork.ProjectRepository.Update(project);
+                                    }
+                                    await unitWork.SaveAsync();
+                                }
+                            }
+                            transaction.Commit();
                         }
                     }
-
-                    if (entriesUpdated > 0)
-                    {
-                        unitWork.Save();
-                    }
-                }
+                });
             }
             return response;
         }

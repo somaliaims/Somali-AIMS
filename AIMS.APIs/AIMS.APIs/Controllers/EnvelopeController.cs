@@ -69,7 +69,7 @@ namespace AIMS.APIs.Controllers
                 rates = await exchangeRateHttpService.GetRatesAsync(apiKey);
                 if (rates.Rates != null)
                 {
-                    exchangeRateService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                    await exchangeRateService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
                     exchangeRate = currencyService.GetExchangeRateForCurrency(model.Currency, rates.Rates);
                 }
             }
@@ -111,7 +111,7 @@ namespace AIMS.APIs.Controllers
                 rates = await exchangeRateHttpService.GetRatesAsync(apiKey);
                 if (rates.Rates != null)
                 {
-                    exchangeRateService.SaveCurrencyRates(rates.Rates, DateTime.Now);
+                    await exchangeRateService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
                     exchangeRate = currencyService.GetExchangeRateForCurrency(model.Currency, rates.Rates);
                 }
             }

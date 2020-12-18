@@ -607,6 +607,7 @@ namespace AIMS.Models
         [Column(TypeName = "decimal(9, 2)")]
         public decimal ExchangeRate { get; set; }
         public string DefaultCurrency { get; set; }
+        public bool IsEditedByUser { get; set; } = false;
     }
 
     public class EFExchangeRatesSettings
