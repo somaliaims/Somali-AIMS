@@ -268,6 +268,14 @@ namespace AIMS.Models
         public decimal Rate { get; set; }
     }
 
+    public class CurrencyWithRatesAndDate
+    {
+        public string Currency { get; set; }
+        public string CurrencyName { get; set; }
+        public decimal Rate { get; set; }
+        public DateTime Dated { get; set; }
+    }
+
     public class CurrencyWithNames
     {
         public string Code { get; set; }

@@ -151,14 +151,30 @@ namespace AIMS.Services
                         }
                         unitWork.Save();
                         int year = dated.Year;
-                        var exchangeRates = unitWork.ManualRatesRepository.GetManyQueryable(r => r.Year == year);
+                        var manualExRates = unitWork.ManualRatesRepository.GetManyQueryable(m => m.Year == dated.Year);
+                        var exchangeRates = unitWork.ExchangeRatesRepository.GetManyQueryable(r => r.Dated.Year == year);
                         string defaultCurrency = unitWork.CurrencyRepository.GetProjection(c => c.IsDefault == true, c => c.Currency).FirstOrDefault();
                         if (exchangeRates.Any())
                         {
+                            List<CurrencyWithRatesAndDate> exRatesListWithDate = new List<CurrencyWithRatesAndDate>();
+                            List<CurrencyWithRates> exRatesList = new List<CurrencyWithRates>();
+                            foreach(var exRate in exchangeRates)
+                            {
+                                exRatesList = JsonConvert.DeserializeObject<List<CurrencyWithRates>>(exRate.ExchangeRatesJson);
+                                foreach(var rate in exRatesList)
+                                {
+                                    exRatesListWithDate.Add(new CurrencyWithRatesAndDate()
+                                    {
+                                        Currency = rate.Currency,
+                                        Rate = rate.Rate,
+                                        Dated = exRate.Dated
+                                    });
+                                }
+                            }
                             var projectsInYear = unitWork.ProjectRepository.GetManyQueryable(p => p.StartDate.Year == year);
                             foreach (var rate in ratesList)
                             {
-                                var currency = (from r in exchangeRates
+                                var currency = (from r in manualExRates
                                                 where r.Currency == rate.Currency
                                                 select r).FirstOrDefault();
 
@@ -174,27 +190,22 @@ namespace AIMS.Services
                                 }
                                 else
                                 {
-                                    var manualExRate = (from r in exchangeRates
+                                    var manualExRate = (from r in manualExRates
                                                         where r.Currency == rate.Currency && r.IsEditedByUser == false
                                                         select r).FirstOrDefault();
 
                                     if (manualExRate != null)
                                     {
-                                        decimal averageRate = (from r in exchangeRates
+                                        decimal averageRate = (from r in exRatesList
                                                                where r.Currency == rate.Currency
-                                                               select r.ExchangeRate).Average();
-                                        averageRate = ((averageRate + rate.Rate) / 2);
-                                        var manualRate = (from r in exchangeRates
-                                                          where r.Currency == rate.Currency
-                                                          select r).FirstOrDefault();
+                                                               select r.Rate).Average();
 
-                                        if (manualRate != null)
+                                        if (manualExRate != null)
                                         {
-                                            manualRate.ExchangeRate = averageRate;
-                                            unitWork.ManualRatesRepository.Update(manualRate);
+                                            manualExRate.ExchangeRate = averageRate;
+                                            unitWork.ManualRatesRepository.Update(manualExRate);
                                         }
                                         await unitWork.SaveAsync();
-
                                         var projects = (from p in projectsInYear
                                                         where p.ProjectCurrency == rate.Currency
                                                         select p);
