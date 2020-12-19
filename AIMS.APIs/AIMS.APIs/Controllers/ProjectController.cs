@@ -340,21 +340,18 @@ namespace AIMS.APIs.Controllers
             project.ProjectUrl = projectUrl;
             decimal exchangeRate = 1;
             var dated = DateTime.Now;
-            var rates = await ratesService.GetCurrencyRatesForDate(dated);
-            if (rates.Rates == null)
+            exchangeRate = ratesService.GetCurrencyRateForDate(dated, project.ProjectCurrency);
+            if (exchangeRate == 0)
             {
                 string apiKey = ratesService.GetAPIKeyForOpenExchange();
-                rates = await ratesHttpService.GetRatesAsync(apiKey);
+                var rates = await ratesHttpService.GetRatesAsync(apiKey);
                 if (rates.Rates != null)
                 {
                     await ratesService.SaveCurrencyRatesAsync(rates.Rates, project.StartDate);
                     exchangeRate = projectService.GetExchangeRateForCurrency(project.ProjectCurrency, rates.Rates);
                 }
             }
-            else
-            {
-                exchangeRate = projectService.GetExchangeRateForCurrency(project.ProjectCurrency, rates.Rates);
-            }
+            
             project.ExchangeRate = exchangeRate;
             var response = await projectService.AddAsync(project, userId);
             if (!response.Success)
@@ -386,21 +383,18 @@ namespace AIMS.APIs.Controllers
             }
             decimal exchangeRate = 1;
             var dated = DateTime.Now;
-            var rates = await ratesService.GetCurrencyRatesForDate(dated);
-            if (rates.Rates == null)
+            exchangeRate = ratesService.GetCurrencyRateForDate(dated, model.ProjectCurrency);
+            if (exchangeRate == 0)
             {
                 string apiKey = ratesService.GetAPIKeyForOpenExchange();
-                rates = await ratesHttpService.GetRatesAsync(apiKey);
+                var rates = await ratesHttpService.GetRatesAsync(apiKey);
                 if (rates.Rates != null)
                 {
                     await ratesService.SaveCurrencyRatesAsync(rates.Rates, DateTime.Now);
                     exchangeRate = projectService.GetExchangeRateForCurrency(model.ProjectCurrency, rates.Rates);
                 }
             }
-            else
-            {
-                exchangeRate = projectService.GetExchangeRateForCurrency(model.ProjectCurrency, rates.Rates);
-            }
+            
             model.ExchangeRate = exchangeRate;
             var response = await projectService.MergeProjectsAsync(model, userId);
             if (!response.Success)
@@ -749,21 +743,18 @@ namespace AIMS.APIs.Controllers
 
             decimal exchangeRate = 1;
             var dated = DateTime.Now;
-            var rates = await ratesService.GetCurrencyRatesForDate(dated);
-            if (rates.Rates == null)
+            exchangeRate = ratesService.GetCurrencyRateForDate(dated, project.ProjectCurrency);
+            if (exchangeRate == 0)
             {
                 string apiKey = ratesService.GetAPIKeyForOpenExchange();
-                rates = await ratesHttpService.GetRatesAsync(apiKey);
+                var rates = await ratesHttpService.GetRatesAsync(apiKey);
                 if (rates.Rates != null)
                 {
                     await ratesService.SaveCurrencyRatesAsync(rates.Rates, project.StartDate);
                     exchangeRate = projectService.GetExchangeRateForCurrency(project.ProjectCurrency, rates.Rates);
                 }
             }
-            else
-            {
-                exchangeRate = projectService.GetExchangeRateForCurrency(project.ProjectCurrency, rates.Rates);
-            }
+            
             project.ExchangeRate = exchangeRate;
             var response = await projectService.UpdateAsync(id, project);
             if (!response.Success)
