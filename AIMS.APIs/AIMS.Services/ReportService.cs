@@ -2169,7 +2169,26 @@ namespace AIMS.Services
                     List<int> sectorIds = new List<int>();
                     if (model.SectorIds.Count > 0)
                     {
-                        projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains(p.SectorId) || model.SectorIds.Contains((int)p.Sector.ParentSectorId), new string[] { "Sector" });
+                        if (model.SectorLevel == SectorLevels.Parent)
+                        {
+                            if (model.SectorIds.Count == 1)
+                            {
+                                var parentSectorId = model.SectorIds[0];
+                                var requiredIds = unitWork.SectorRepository.GetProjection(s => s.ParentSectorId == parentSectorId, s => new { Id = s.Id });
+                                var ids = (from id in requiredIds
+                                           select id.Id).ToList<int>();
+                                projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => ids.Contains(p.SectorId), new string[] { "Sector" });
+                            }
+                            else
+                            {
+                                projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains((int)p.Sector.ParentSectorId), new string[] { "Sector" });
+                            }
+                        }
+                        else
+                        {
+                            projectSectors = unitWork.ProjectSectorsRepository.GetWithInclude(p => model.SectorIds.Contains(p.SectorId), new string[] { "Sector" });
+                        }
+                        
                         List<int> projectIdsList = (from s in projectSectors
                                          select s.ProjectId).ToList<int>();
 
