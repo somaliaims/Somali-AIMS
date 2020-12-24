@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.CodeAnalysis;
+using System.Net;
 
 namespace AIMS.Services
 {
@@ -2233,38 +2234,159 @@ namespace AIMS.Services
                         }
                     }
 
-                    if (model.MarkerId != 0 || model.MarkerId1 != 0)
+                    if (model.MarkerId != 0 || model.MarkerId2 != 0)
                     {
                         List<int> projectIds = new List<int>();
                         List<int> markerIds = new List<int>();
                         var values = model.MarkerValues;
-                        var values1 = model.MarkerValues1;
+                        var values2 = model.MarkerValues2;
+
+                        for(int v = 0; v < values.Count; v++)
+                        {
+                            values[v] = WebUtility.UrlDecode(values[v]);
+                        }
+                        for (int v = 0; v < values2.Count; v++)
+                        {
+                            values2[v] = WebUtility.UrlDecode(values2[v]);
+                        }
+
                         if (model.MarkerId > 0)
                         {
                             markerIds.Add(model.MarkerId);
                         }
-                        if (model.MarkerId1 > 0)
+                        if (model.MarkerId2 > 0)
                         {
-                            markerIds.Add(model.MarkerId1);
+                            markerIds.Add(model.MarkerId2);
                         }
-                        var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => markerIds.Contains(model.MarkerId));
+
+                        List<int> filterProjectIds = new List<int>();
+                        if (projectProfileList != null)
+                        {
+                            filterProjectIds = (from p in projectProfileList
+                                                select p.Id).ToList<int>(); 
+                        }
+
+                        IQueryable<EFProjectMarkers> projectMarkers = null;
+                        if (filterProjectIds.Count > 0)
+                        {
+                            projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => filterProjectIds.Contains(m.ProjectId) && markerIds.Contains(model.MarkerId));
+                        }
+                        else
+                        {
+                            projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => markerIds.Contains(model.MarkerId));
+                        }
+                        
                         var projectIdsForMarkers = (from p in projectMarkers
                                           select p.ProjectId).ToList();
-                        if (values.Count > 0 || values1.Count > 0)
+                        projectMarkers = (from p in projectMarkers
+                                          orderby p.ProjectId
+                                          select p);
+
+                        bool isMatch1 = false, isMatch2 = false;
+                        UtilityHelper utilityHelper = new UtilityHelper();
+                        int currentProjectId = 0;
+                        foreach (var projectMarker in projectMarkers)
+                        {
+                            if (currentProjectId != 0 && currentProjectId != projectMarker.ProjectId)
+                            {
+                                if (isMatch1 && isMatch2)
+                                {
+                                    projectIds.Add(currentProjectId);
+                                }    
+                                isMatch1 = (model.MarkerId == 0) ? true : false;
+                                isMatch2 = (model.MarkerId2 == 0) ? true : false;
+                            }
+
+                            if (projectMarker.MarkerId == model.MarkerId)
+                            {
+                                if (values.Count() > 0)
+                                {
+                                    var markerValues = utilityHelper.ParseAndExtractIfJson(projectMarker.Values);
+                                    if (markerValues != null && markerValues.Any())
+                                    {
+                                        MarkerValues valueMatch = (from v in markerValues
+                                                                   where values.Contains(v.Value, StringComparer.OrdinalIgnoreCase)
+                                                                   select v).FirstOrDefault();
+                                        if (valueMatch != null)
+                                        {
+                                            isMatch1 = true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (values.Contains(projectMarker.Values, StringComparer.OrdinalIgnoreCase))
+                                        {
+                                            isMatch1 = true;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    isMatch1 = true;
+                                }
+                            }
+                            else
+                            {
+                                isMatch1 = true;
+                            }
+
+                            if (projectMarker.MarkerId == model.MarkerId2)
+                            {
+                                if (values2.Count() > 0)
+                                {
+                                    var markerValues = utilityHelper.ParseAndExtractIfJson(projectMarker.Values);
+                                    if (markerValues != null && markerValues.Any())
+                                    {
+                                        MarkerValues valueMatch = (from v in markerValues
+                                                                   where values2.Contains(v.Value, StringComparer.OrdinalIgnoreCase)
+                                                                   select v).FirstOrDefault();
+                                        if (valueMatch != null)
+                                        {
+                                            isMatch2 = true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (values2.Contains(projectMarker.Values, StringComparer.OrdinalIgnoreCase))
+                                        {
+                                            isMatch2 = true;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    isMatch2 = true;
+                                }
+                            }
+                            currentProjectId = projectMarker.ProjectId;
+                        }
+
+                        if (isMatch1 && isMatch2 && currentProjectId != 0)
+                        {
+                            projectIds.Add(currentProjectId);
+                            projectIds = projectIds.Distinct().ToList();
+                        }
+
+                        if (values.Count == 0 && values2.Count == 0)
+                        {
+                                projectIds = (from p in projectMarkers
+                                              select p.ProjectId).Distinct().ToList();
+                        }
+                        
+                        /*if (values.Count > 0 || values2.Count > 0)
                         {
                             UtilityHelper utilityHelper = new UtilityHelper();
                             
                             foreach (var id in projectIdsForMarkers)
                             {
-                                bool isMatch1 = true, isMatch2 = true;
-                                if (values.Count > 0)
+                                bool isMatch1 = false, isMatch2 = false;
+                                var projectMarker = (from p in projectMarkers
+                                                     where p.ProjectId == id
+                                                     && p.MarkerId == model.MarkerId
+                                                     select p).FirstOrDefault();
+                                
+                                if (projectMarker != null && values.Count > 0)
                                 {
-                                    isMatch1 = false;
-                                    var projectMarker = (from p in projectMarkers
-                                                        where p.ProjectId == id
-                                                        && p.MarkerId == model.MarkerId
-                                                        select p).FirstOrDefault();
-
                                     var markerValues = utilityHelper.ParseAndExtractIfJson(projectMarker.Values);
                                     if (markerValues != null && markerValues.Any())
                                     {
@@ -2284,20 +2406,25 @@ namespace AIMS.Services
                                         }
                                     }
                                 }
-                                else if (values1.Count > 0)
+                                else if (projectMarker != null)
                                 {
-                                    var projectMarker = (from p in projectMarkers
-                                                         where p.ProjectId == id
-                                                         && p.MarkerId == model.MarkerId1
-                                                         select p).FirstOrDefault();
+                                    isMatch1 = true;
+                                }
 
+                                projectMarker = (from p in projectMarkers
+                                                 where p.ProjectId == id
+                                                 && p.MarkerId == model.MarkerId2
+                                                 select p).FirstOrDefault();
+
+                                if (projectMarker != null && values2.Count > 0)
+                                {
                                     if (projectMarker != null)
                                     {
                                         var markerValues = utilityHelper.ParseAndExtractIfJson(projectMarker.Values);
                                         if (markerValues != null && markerValues.Any())
                                         {
                                             MarkerValues valueMatch = (from v in markerValues
-                                                                       where values.Contains(v.Value, StringComparer.OrdinalIgnoreCase)
+                                                                       where values2.Contains(v.Value, StringComparer.OrdinalIgnoreCase)
                                                                        select v).FirstOrDefault();
                                             if (valueMatch == null)
                                             {
@@ -2306,51 +2433,55 @@ namespace AIMS.Services
                                         }
                                         else
                                         {
-                                            if (!values.Contains(projectMarker.Values, StringComparer.OrdinalIgnoreCase))
+                                            if (!values2.Contains(projectMarker.Values, StringComparer.OrdinalIgnoreCase))
                                             {
                                                 isMatch2 = false;
                                             }
                                         }
                                     }
                                 }
+                                else if (projectMarker != null)
+                                {
+                                    isMatch2 = true;
+                                }
 
                                 if (isMatch1 && isMatch2)
                                 {
                                     projectIds.Add(id);
                                 }
-                            }
-                            /*foreach (var marker in projectMarkers)
-                            {
-                                var markerValues = utilityHelper.ParseAndExtractIfJson(marker.Values);
-                                if (markerValues != null && markerValues.Any())
-                                {
-                                    MarkerValues valueMatch = null;
-                                    if (marker.MarkerId == model.MarkerId && values.Count > 0)
-                                    {
-                                        valueMatch = (from v in markerValues
-                                                      where values.Contains(v.Value, StringComparer.OrdinalIgnoreCase)
-                                                      select v).FirstOrDefault();
-                                    }
-                                    
-                                    if (valueMatch != null)
-                                    {
-                                        projectIds.Add(marker.ProjectId);
-                                    }
-                                }
-                                else 
-                                {
-                                    if (values.Contains(marker.Values, StringComparer.OrdinalIgnoreCase))
-                                    {
-                                        projectIds.Add(marker.ProjectId);
-                                    }
-                                }
                             }*/
-                        }
-                        else
+                        /*foreach (var marker in projectMarkers)
                         {
-                            projectIds = (from p in projectMarkers
-                                          select p.ProjectId).ToList();
+                            var markerValues = utilityHelper.ParseAndExtractIfJson(marker.Values);
+                            if (markerValues != null && markerValues.Any())
+                            {
+                                MarkerValues valueMatch = null;
+                                if (marker.MarkerId == model.MarkerId && values.Count > 0)
+                                {
+                                    valueMatch = (from v in markerValues
+                                                  where values.Contains(v.Value, StringComparer.OrdinalIgnoreCase)
+                                                  select v).FirstOrDefault();
+                                }
+
+                                if (valueMatch != null)
+                                {
+                                    projectIds.Add(marker.ProjectId);
+                                }
+                            }
+                            else 
+                            {
+                                if (values.Contains(marker.Values, StringComparer.OrdinalIgnoreCase))
+                                {
+                                    projectIds.Add(marker.ProjectId);
+                                }
+                            }
                         }
+                    }
+                    else
+                    {
+                        projectIds = (from p in projectMarkers
+                                      select p.ProjectId).ToList();
+                    }*/
 
                         if (projectProfileList == null)
                         {

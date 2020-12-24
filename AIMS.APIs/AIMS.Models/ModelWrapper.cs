@@ -1986,8 +1986,8 @@ namespace AIMS.Models
         public int ChartType { get; set; } = 0;
         public int MarkerId { get; set; } = 0;
         public List<string> MarkerValues { get; set; } = new List<string>();
-        public int MarkerId1 { get; set; } = 0;
-        public List<string> MarkerValues1 { get; set; } = new List<string>();
+        public int MarkerId2 { get; set; } = 0;
+        public List<string> MarkerValues2 { get; set; } = new List<string>();
         public NoSectorOptions SectorOption { get; set; } = NoSectorOptions.ProjectsWithSectors;
     }
 
