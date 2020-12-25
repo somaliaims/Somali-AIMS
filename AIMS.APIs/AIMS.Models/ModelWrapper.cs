@@ -2011,6 +2011,8 @@ namespace AIMS.Models
         public int SectorId { get; set; } = 0;
         public int MarkerId { get; set; } = 0;
         public List<string> MarkerValues { get; set; } = new List<string>();
+        public int MarkerId2 { get; set; }
+        public List<string> MarkerValues2 { get; set; } = new List<string>();
         public int ChartType { get; set; } = 0;
         public NoLocationOptions LocationOption { get; set; } = NoLocationOptions.ProjectsWithLocations;
     }

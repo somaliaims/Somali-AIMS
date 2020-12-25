@@ -198,6 +198,20 @@ namespace AIMS.Services.Helpers
                 }
                 queryString += ("&mvalue=" + string.Join(",", model.MarkerValues));
             }
+
+            if (model.MarkerId2 > 0)
+            {
+                queryString += ("&mid2=" + model.MarkerId2);
+            }
+
+            if (model.MarkerValues2.Count > 0)
+            {
+                for (int m = 0; m < model.MarkerValues2.Count; m++)
+                {
+                    model.MarkerValues2[m] = WebUtility.UrlEncode(model.MarkerValues2[m]);
+                }
+                queryString += ("&mvalue2=" + string.Join(",", model.MarkerValues2));
+            }
             return queryString;
         }
 
