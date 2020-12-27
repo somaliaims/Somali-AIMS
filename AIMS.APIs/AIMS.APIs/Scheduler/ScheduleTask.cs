@@ -113,6 +113,7 @@ namespace AIMS.APIs.Scheduler
                     IDataBackupService backupService = new DataBackupService(dbContext);
                     IContactMessageService contactService = new ContactMessageService(dbContext, imapper);
                     IEmailService emailService = new EmailService(dbContext);
+                    IProjectDeletionService projectDeletionService = new ProjectDeletionService(dbContext, imapper);
                     backupService.SetDirectoryPath(hostingEnvironment.WebRootPath);
                     IFinancialYearTransitionService financialYearTransitionService = new FinancialYearTransitionService(dbContext);
 
@@ -218,9 +219,6 @@ namespace AIMS.APIs.Scheduler
                         orgMergeService.MergeOrganizationsAuto(requests).GetAwaiter().GetResult();
                     }
                     var pendingContactMessages = contactService.GetUnRepliedMessages();
-                    //List<EmailAddress> emailAddresses = (from message in pendingContactMessages
-                      //                                   select new EmailAddress() { Email = message.SenderEmail }).ToList();
-
                     foreach(var message in pendingContactMessages)
                     {
                         EmailModel emailModel = new EmailModel()
@@ -233,6 +231,8 @@ namespace AIMS.APIs.Scheduler
                         emailService.SendEmailForPendingMessages(emailModel, message.SenderName, message.SenderEmail, message.ProjectTitle);
                     }
                     contactService.SetMessagesNotifiedAsync().GetAwaiter().GetResult();
+
+                    projectDeletionService.SendPendingDeletionRequestsToManagement();
                 }
 
                 //File cleanup

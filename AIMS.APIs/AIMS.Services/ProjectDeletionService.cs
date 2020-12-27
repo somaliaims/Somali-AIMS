@@ -99,8 +99,8 @@ namespace AIMS.Services
                 }
                 else if (uType == UserTypes.Manager || uType == UserTypes.SuperAdmin)
                 {
-                    //projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn <= DateTime.Now.AddDays(-7) && d.Status == ProjectDeletionStatus.Requested && d.RequestedBy.Id != userId) || (projectIds.Contains(d.ProjectId) && userId != d.RequestedBy.Id)), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
-                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(d => userId != d.RequestedBy.Id, new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
+                    projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn <= DateTime.Now.AddDays(-7) && d.Status == ProjectDeletionStatus.Requested && d.RequestedBy.Id != userId) || (projectIds.Contains(d.ProjectId) && userId != d.RequestedBy.Id)), new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
+                    //projectRequests = unitWork.ProjectDeletionRepository.GetWithInclude(d => userId != d.RequestedBy.Id, new string[] { "RequestedBy", "Project", "RequestedBy.Organization" });
                 }
                 return mapper.Map<List<ProjectDeletionRequestView>>(projectRequests);
             }
@@ -543,8 +543,10 @@ namespace AIMS.Services
             ActionResponse response = new ActionResponse();
             var unitWork = new UnitOfWork(context);
             var pendingDeletionRequests = unitWork.ProjectDeletionRepository.GetWithInclude(d => d.Status == ProjectDeletionStatus.Requested &&
-                                            d.RequestedOn <= DateTime.Now.AddDays(-7), new string[] { "Project", "RequestedBy" });
-                var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager, u => u.Email);
+                                            d.RequestedOn <= DateTime.Now.AddDays(-7) && !d.IsNotifiedToManager, new string[] { "Project", "RequestedBy" });
+                var users = unitWork.UserRepository.GetWithInclude(u => u.UserType == UserTypes.Manager, new string[] { "Organization" });
+                var adminEmails = (from u in users
+                               select u.Email);
                 List<EmailAddress> usersEmailList = new List<EmailAddress>();
                 foreach (var email in adminEmails)
                 {
@@ -571,9 +573,11 @@ namespace AIMS.Services
 
                 foreach (var request in pendingDeletionRequests)
                 {
+                    var receiversEmails = (from e in usersEmailList
+                                          where e.Email != request.RequestedBy.Email
+                                          select e).ToList();
                     string message = "", subject = "", footerMessage = "";
                     string projectTitle = "<h5>Project title: " + request.Project.Title + "</h5>";
-                    //string requestedBy = "<h5>Requested by: " + request.RequestedBy.Email + " (" + user.Organization.OrganizationName + ")</h5>";
                     string requestedBy = "<h5>Requested by: " + request.RequestedBy.Email + "</h5>";
                     var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectDeletionRequest);
                     if (emailMessage != null)
@@ -583,10 +587,8 @@ namespace AIMS.Services
                         footerMessage = emailMessage.FooterMessage;
                     }
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
-                    emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
+                    emailHelper.SendEmailToUsers(receiversEmails, subject, "", message, footerMessage);
                 }
-
-                //}
             }
             return response;
         }

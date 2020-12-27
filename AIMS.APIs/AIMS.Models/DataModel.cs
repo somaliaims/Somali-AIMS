@@ -671,6 +671,7 @@ namespace AIMS.Models
         public DateTime RequestedOn { get; set; }
         public DateTime StatusUpdatedOn { get; set; }
         public ProjectDeletionStatus Status { get; set; }
+        public bool IsNotifiedToManager { get; set; } = true;
     }
 
     public class EFIATICountryCodes
