@@ -53,6 +53,12 @@ namespace AIMS.Services
         /// <param name="userId"></param>
         /// <returns></returns>
         ActionResponse DeleteProject(int projectId, int userId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        ActionResponse SendPendingDeletionRequestsToManagement();
     }
 
     public class ProjectDeletionService : IProjectDeletionService
@@ -171,11 +177,11 @@ namespace AIMS.Services
                 }
 
                 var userEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Standard && orgIds.Contains(u.OrganizationId) && u.Id != user.Id, u => u.Email);
-                var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager && u.Id != user.Id, u => u.Email);
-                var allEmails = userEmails.Union(adminEmails);
+                //var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager && u.Id != user.Id, u => u.Email);
+                //var allEmails = userEmails.Union(adminEmails);
 
                 List<EmailAddress> usersEmailList = new List<EmailAddress>();
-                foreach(var email in allEmails)
+                foreach(var email in userEmails)
                 {
                     usersEmailList.Add(new EmailAddress() { Email = email });
                 }
@@ -530,6 +536,59 @@ namespace AIMS.Services
                 }
                 return response;
             }
+        }
+
+        public ActionResponse SendPendingDeletionRequestsToManagement()
+        {
+            ActionResponse response = new ActionResponse();
+            var unitWork = new UnitOfWork(context);
+            var pendingDeletionRequests = unitWork.ProjectDeletionRepository.GetWithInclude(d => d.Status == ProjectDeletionStatus.Requested &&
+                                            d.RequestedOn <= DateTime.Now.AddDays(-7), new string[] { "Project", "RequestedBy" });
+                var adminEmails = unitWork.UserRepository.GetProjection(u => u.UserType == UserTypes.Manager, u => u.Email);
+                List<EmailAddress> usersEmailList = new List<EmailAddress>();
+                foreach (var email in adminEmails)
+                {
+                    usersEmailList.Add(new EmailAddress() { Email = email });
+                }
+
+                if (usersEmailList.Count > 0)
+                {
+                    ISMTPSettingsService smtpService = new SMTPSettingsService(context);
+                    var smtpSettings = smtpService.GetPrivate();
+                    SMTPSettingsModel smtpSettingsModel = new SMTPSettingsModel();
+                    if (smtpSettings != null)
+                    {
+                        smtpSettingsModel.Host = smtpSettings.Host;
+                        smtpSettingsModel.Port = smtpSettings.Port;
+                        smtpSettingsModel.Username = smtpSettings.Username;
+                        smtpSettingsModel.Password = smtpSettings.Password;
+                        smtpSettingsModel.AdminEmail = smtpSettings.AdminEmail;
+                        smtpSettingsModel.SenderName = smtpSettings.SenderName;
+                    }
+
+                var projectIds = (from p in pendingDeletionRequests
+                                  select p.ProjectId).ToList<int>();
+
+                foreach (var request in pendingDeletionRequests)
+                {
+                    string message = "", subject = "", footerMessage = "";
+                    string projectTitle = "<h5>Project title: " + request.Project.Title + "</h5>";
+                    //string requestedBy = "<h5>Requested by: " + request.RequestedBy.Email + " (" + user.Organization.OrganizationName + ")</h5>";
+                    string requestedBy = "<h5>Requested by: " + request.RequestedBy.Email + "</h5>";
+                    var emailMessage = unitWork.EmailMessagesRepository.GetOne(m => m.MessageType == EmailMessageType.ProjectDeletionRequest);
+                    if (emailMessage != null)
+                    {
+                        subject = emailMessage.Subject;
+                        message = projectTitle + requestedBy + emailMessage.Message;
+                        footerMessage = emailMessage.FooterMessage;
+                    }
+                    IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
+                    emailHelper.SendEmailToUsers(usersEmailList, subject, "", message, footerMessage);
+                }
+
+                //}
+            }
+            return response;
         }
     }
 }

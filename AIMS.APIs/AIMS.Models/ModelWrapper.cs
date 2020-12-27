@@ -2028,6 +2028,8 @@ namespace AIMS.Models
         public List<int> SubLocationIds { get; set; }
         public int MarkerId { get; set; } = 0;
         public List<string> MarkerValues { get; set; } = new List<string>();
+        public int MarkerId2 { get; set; }
+        public List<string> MarkerValues2 { get; set; } = new List<string>();
         public List<int> SectorIds { get; set; } = new List<int>();
     }
 
