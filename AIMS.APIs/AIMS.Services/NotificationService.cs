@@ -136,8 +136,8 @@ namespace AIMS.Services
                 }
                 else if (uType == UserTypes.Manager || uType == UserTypes.SuperAdmin)
                 {
-                    //deletionsCount = unitWork.ProjectDeletionRepository.GetProjectionCount(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn <= DateTime.Now.AddDays(-7) && d.Status == ProjectDeletionStatus.Requested && d.RequestedById != userId) || (projectIds.Contains(d.ProjectId) && userId != d.RequestedById)), d => d.ProjectId);
-                    deletionsCount = unitWork.ProjectDeletionRepository.GetProjectionCount(d => (userId != d.RequestedById), d => d.ProjectId);
+                    deletionsCount = unitWork.ProjectDeletionRepository.GetProjectionCount(d => (d.Status == ProjectDeletionStatus.Approved || (d.RequestedOn.Date <= DateTime.Now.AddDays(-7).Date && d.Status == ProjectDeletionStatus.Requested && d.RequestedById != userId)), d => d.ProjectId);
+                    //deletionsCount = unitWork.ProjectDeletionRepository.GetProjectionCount(d => (userId != d.RequestedById), d => d.ProjectId);
                 }
                 var orgsInRequests = unitWork.OrganizationMergeRequestsRepository.GetProjection(r => r.RequestedById != userId, r => r.Id);
                 var userRelatedRequests = unitWork.OrganizationsToMergeRepository.GetProjection(o => orgsInRequests.Contains(o.RequestId) && o.OrganizationId == organizationId, o => o.OrganizationId);

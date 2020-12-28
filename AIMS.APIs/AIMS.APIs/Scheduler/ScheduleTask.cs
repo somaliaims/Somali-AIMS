@@ -61,8 +61,8 @@ namespace AIMS.APIs.Scheduler
             string financeTypesPath = Path.Combine(sWebRootFolder, "IATIFinanceTypes.json");
             string sectorsVocabPath = Path.Combine(sWebRootFolder, "IATISectorVocabulary.json");
             string xml = "", sectorsXml = "", json = "", transactionTypesJson = "", financeTypesJson = "", sectorsVocabJson = "",
-                organizationTypesJson = "", countriesJson = "", errorsFile = "errors.txt", errorsFilePath = "";
-
+                organizationTypesJson = "", errorsFile = "errors.txt", errorsFilePath = "";
+            //, countriesJson = ""
             try
             {
                 using (var client = new WebClient())
@@ -70,10 +70,10 @@ namespace AIMS.APIs.Scheduler
                     json = client.DownloadString(currencyUrl);
                 }
 
-                using (var client = new WebClient())
+                /*using (var client = new WebClient())
                 {
                     countriesJson = client.DownloadString(countriesUrl);
-                }
+                }*/
 
                 using (var client = new WebClient())
                 {
