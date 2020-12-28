@@ -133,6 +133,13 @@ namespace AIMS.APIs.Scheduler
                     }
                     File.WriteAllText(filePath, xml);
 
+                    /*using (CustomWebClient webClient = new CustomWebClient())
+                    {
+                        webClient.Timeout = 1000; // Five seconds
+                        xml = webClient.DownloadString(url);
+                    }
+                    File.WriteAllText(filePath, xml);*/
+
                     var sectorTypesSources = sectorTypeService.GetSectorSources();
                     if (sectorTypesSources.Count() > 0)
                     {
