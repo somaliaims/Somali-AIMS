@@ -41,6 +41,13 @@ namespace AIMS.Services
         Task<IEnumerable<ProjectAbstractView>> GetAllDetailAsync();
 
         /// <summary>
+        /// Gets projects list with detail for the provided organization
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<IEnumerable<ProjectAbstractView>> GetAllDetailForOrganizationAsync(int id);
+
+        /// <summary>
         /// Gets project details for the provided id
         /// </summary>
         /// <param name="id"></param>
@@ -614,6 +621,126 @@ namespace AIMS.Services
                     var sectors = unitWork.SectorRepository.GetManyQueryable(s => s.Id != 0);
                     var locations = unitWork.LocationRepository.GetManyQueryable(l => l.Id != 0);
                     var markers = unitWork.MarkerRepository.GetManyQueryable(m => m.Id != 0);
+                    var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => !string.IsNullOrEmpty(m.Values));
+                    var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Locations", "Funders", "Implementers" });
+
+                    foreach (var project in projects)
+                    {
+                        IEnumerable<int> funderIds = (from o in project.Funders
+                                                      select o.FunderId);
+                        IEnumerable<int> implementerIds = (from i in project.Implementers
+                                                           select i.ImplementerId);
+                        IEnumerable<string> funderNames = (from f in allOrganizations
+                                                           where funderIds.Contains(f.Id)
+                                                           select f.OrganizationName);
+                        IEnumerable<string> implementerNames = (from i in allOrganizations
+                                                                where implementerIds.Contains(i.Id)
+                                                                select i.OrganizationName);
+                        IEnumerable<string> organizations = funderNames.Union(implementerNames);
+
+                        List<LocationAbstractView> locationsList = new List<LocationAbstractView>();
+                        List<SectorAbstractView> sectorsList = new List<SectorAbstractView>();
+                        List<MarkerMiniView> markersList = new List<MarkerMiniView>();
+
+                        foreach (var location in project.Locations)
+                        {
+                            locationsList.Add(new LocationAbstractView()
+                            {
+                                Name = (from l in locations
+                                        where l.Id == location.LocationId
+                                        select l.Location).FirstOrDefault(),
+                                FundsPercentage = location.FundsPercentage
+                            });
+                        }
+
+                        foreach (var sector in project.Sectors)
+                        {
+                            sectorsList.Add(new SectorAbstractView()
+                            {
+                                Name = (from s in sectors
+                                        where s.Id.Equals(sector.SectorId)
+                                        select s.SectorName).FirstOrDefault(),
+                                FundsPercentage = sector.FundsPercentage
+                            });
+                        }
+
+                        UtilityHelper utilityHelper = new UtilityHelper();
+                        var markerForProjects = (from m in projectMarkers
+                                                 where m.ProjectId == project.Id
+                                                 select m);
+                        foreach (var marker in markerForProjects)
+                        {
+                            string markerValuesStr = "";
+                            if (!string.IsNullOrEmpty(marker.Values))
+                            {
+                                var markerValues = utilityHelper.ParseAndExtractIfJson(marker.Values);
+                                if (markerValues.Any())
+                                {
+                                    markerValuesStr = String.Join(",", (from value in markerValues
+                                                                        select value.Value));
+                                }
+                                else
+                                {
+                                    markerValuesStr = marker.Values;
+                                }
+                            }
+
+                            markersList.Add(new MarkerMiniView()
+                            {
+                                MarkerId = marker.MarkerId,
+                                Marker = (from m in markers
+                                          where m.Id.Equals(marker.MarkerId)
+                                          select m.FieldTitle).FirstOrDefault(),
+                                Values = markerValuesStr
+                            });
+                        }
+
+                        List<OrganizationAbstractView> organizationsList = new List<OrganizationAbstractView>();
+                        foreach (string org in organizations)
+                        {
+                            organizationsList.Add(new OrganizationAbstractView()
+                            {
+                                Name = org
+                            });
+                        }
+                        projectsList.Add(new ProjectAbstractView()
+                        {
+                            Id = project.Id,
+                            Title = project.Title,
+                            Description = project.Description,
+                            ProjectValue = project.ProjectValue,
+                            ProjectCurrency = project.ProjectCurrency,
+                            StartDate = project.StartDate.ToShortDateString(),
+                            EndDate = project.EndDate.ToShortDateString(),
+                            DateUpdated = project.DateUpdated.ToShortDateString(),
+                            StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
+                            EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
+                            Organizations = organizationsList,
+                            Locations = locationsList,
+                            Sectors = sectorsList,
+                            Markers = markersList
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    string message = ex.Message;
+                }
+                return await Task<IEnumerable<ProjectAbstractView>>.Run(() => projectsList).ConfigureAwait(false);
+            }
+        }
+
+        /*public async Task<IEnumerable<ProjectAbstractView>> GetAllDetailAsync()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<ProjectAbstractView> projectsList = new List<ProjectAbstractView>();
+                try
+                {
+                    var allOrganizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
+                    var sectors = unitWork.SectorRepository.GetManyQueryable(s => s.Id != 0);
+                    var locations = unitWork.LocationRepository.GetManyQueryable(l => l.Id != 0);
+                    var markers = unitWork.MarkerRepository.GetManyQueryable(m => m.Id != 0);
                     var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Locations", "Funders", "Implementers", "Markers" });
                     
                     foreach (var project in projects)
@@ -712,6 +839,122 @@ namespace AIMS.Services
                     }
                 }
                 catch(Exception ex)
+                {
+                    string message = ex.Message;
+                }
+                return await Task<IEnumerable<ProjectAbstractView>>.Run(() => projectsList).ConfigureAwait(false);
+            }
+        }*/
+
+        public async Task<IEnumerable<ProjectAbstractView>> GetAllDetailForOrganizationAsync(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                List<ProjectAbstractView> projectsList = new List<ProjectAbstractView>();
+                try
+                {
+                    var allOrganizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
+                    var sectors = unitWork.SectorRepository.GetManyQueryable(s => s.Id != 0);
+                    var locations = unitWork.LocationRepository.GetManyQueryable(l => l.Id != 0);
+                    var markers = unitWork.MarkerRepository.GetManyQueryable(m => m.Id != 0);
+                    var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Locations", "Funders", "Implementers", "Markers" });
+
+                    foreach (var project in projects)
+                    {
+                        IEnumerable<int> funderIds = (from o in project.Funders
+                                                      select o.FunderId);
+                        IEnumerable<int> implementerIds = (from i in project.Implementers
+                                                           select i.ImplementerId);
+                        IEnumerable<string> funderNames = (from f in allOrganizations
+                                                           where funderIds.Contains(f.Id)
+                                                           select f.OrganizationName);
+                        IEnumerable<string> implementerNames = (from i in allOrganizations
+                                                                where implementerIds.Contains(i.Id)
+                                                                select i.OrganizationName);
+                        IEnumerable<string> organizations = funderNames.Union(implementerNames);
+
+                        List<LocationAbstractView> locationsList = new List<LocationAbstractView>();
+                        List<SectorAbstractView> sectorsList = new List<SectorAbstractView>();
+                        List<MarkerMiniView> markersList = new List<MarkerMiniView>();
+
+                        foreach (var location in project.Locations)
+                        {
+                            locationsList.Add(new LocationAbstractView()
+                            {
+                                Name = (from l in locations
+                                        where l.Id == location.LocationId
+                                        select l.Location).FirstOrDefault(),
+                                FundsPercentage = location.FundsPercentage
+                            });
+                        }
+
+                        foreach (var sector in project.Sectors)
+                        {
+                            sectorsList.Add(new SectorAbstractView()
+                            {
+                                Name = (from s in sectors
+                                        where s.Id.Equals(sector.SectorId)
+                                        select s.SectorName).FirstOrDefault(),
+                                FundsPercentage = sector.FundsPercentage
+                            });
+                        }
+
+                        UtilityHelper utilityHelper = new UtilityHelper();
+                        foreach (var marker in project.Markers)
+                        {
+                            string markerValuesStr = "";
+                            if (!string.IsNullOrEmpty(marker.Values))
+                            {
+                                var markerValues = utilityHelper.ParseAndExtractIfJson(marker.Values);
+                                if (markerValues.Any())
+                                {
+                                    markerValuesStr = String.Join(",", (from value in markerValues
+                                                                        select value.Value));
+                                }
+                                else
+                                {
+                                    markerValuesStr = marker.Values;
+                                }
+                            }
+
+                            markersList.Add(new MarkerMiniView()
+                            {
+                                MarkerId = marker.MarkerId,
+                                Marker = (from m in markers
+                                          where m.Id.Equals(marker.MarkerId)
+                                          select m.FieldTitle).FirstOrDefault(),
+                                Values = markerValuesStr
+                            });
+                        }
+
+                        List<OrganizationAbstractView> organizationsList = new List<OrganizationAbstractView>();
+                        foreach (string org in organizations)
+                        {
+                            organizationsList.Add(new OrganizationAbstractView()
+                            {
+                                Name = org
+                            });
+                        }
+                        projectsList.Add(new ProjectAbstractView()
+                        {
+                            Id = project.Id,
+                            Title = project.Title,
+                            Description = project.Description,
+                            ProjectValue = project.ProjectValue,
+                            ProjectCurrency = project.ProjectCurrency,
+                            StartDate = project.StartDate.ToShortDateString(),
+                            EndDate = project.EndDate.ToShortDateString(),
+                            DateUpdated = project.DateUpdated.ToShortDateString(),
+                            StartingFinancialYear = project.StartingFinancialYear.FinancialYear.ToString(),
+                            EndingFinancialYear = project.EndingFinancialYear.FinancialYear.ToString(),
+                            Organizations = organizationsList,
+                            Locations = locationsList,
+                            Sectors = sectorsList,
+                            Markers = markersList
+                        });
+                    }
+                }
+                catch (Exception ex)
                 {
                     string message = ex.Message;
                 }

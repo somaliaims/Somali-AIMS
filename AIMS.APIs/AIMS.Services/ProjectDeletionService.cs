@@ -588,6 +588,12 @@ namespace AIMS.Services
                     }
                     IEmailHelper emailHelper = new EmailHelper(smtpSettingsModel.AdminEmail, smtpSettings.SenderName, smtpSettingsModel);
                     emailHelper.SendEmailToUsers(receiversEmails, subject, "", message, footerMessage);
+                    request.IsNotifiedToManager = true;
+                    unitWork.ProjectDeletionRepository.Update(request);
+                }
+                if (pendingDeletionRequests.Any())
+                {
+                    unitWork.Save();
                 }
             }
             return response;
