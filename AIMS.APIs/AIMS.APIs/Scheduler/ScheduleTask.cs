@@ -203,20 +203,20 @@ namespace AIMS.APIs.Scheduler
                         fyDay = fySettings.Day;
                     }
 
-                    /*var financialTransitionForYear = financialYearTransitionService.IsFinancialTransitionApplied();
+                    var financialTransitionForYear = financialYearTransitionService.IsFinancialTransitionApplied();
                     if ((fyMonth == currentMonth && fyDay == currentDay) || financialTransitionForYear.Exists == false)
                     {
                         int year = 0;
                         if (!financialTransitionForYear.Exists)
                         {
                             year = financialTransitionForYear.Year;
+                            var backup = backupService.BackupData(connectionString);
+                            var response = projectService.AdjustDisbursementsForProjectsAsync(null, year, true).GetAwaiter().GetResult();
+                            if (response.Success)
+                            {
+                            }
                         }
-                        var backup = backupService.BackupData(connectionString);
-                        var response = projectService.AdjustDisbursementsForProjectsAsync(null, year, true).GetAwaiter().GetResult();
-                        if (response.Success)
-                        {
-                        }
-                    }*/
+                    }
 
                     var pendingOrgMergeRequests = orgMergeService.GetTwoWeeksOlderRequests();
                     if (pendingOrgMergeRequests.Any())

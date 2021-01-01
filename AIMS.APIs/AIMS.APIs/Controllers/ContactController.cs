@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AIMS.APIs.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     [ApiController]
     public class ContactController : ControllerBase
