@@ -220,6 +220,7 @@ namespace AIMS.Services
                                 foreach (var project in projects)
                                 {
                                     project.ExchangeRate = averageRate;
+                                    project.DateUpdated = DateTime.Now;
                                     unitWork.ProjectRepository.Update(project);
                                 }
                                 await unitWork.SaveAsync();

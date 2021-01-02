@@ -1136,6 +1136,10 @@ namespace AIMS.Services
                             projectDisbursements = (from d in project.Disbursements
                                                     orderby d.Year.FinancialYear, d.DisbursementType ascending
                                                     select d);
+                            foreach(var disbursement in projectDisbursements)
+                            {
+                                disbursement.ExchangeRate = project.ExchangeRate;
+                            }
                         }
                         if (project.Locations.Count > 0)
                         {
@@ -2125,12 +2129,17 @@ namespace AIMS.Services
             using (var unitWork = new UnitOfWork(context))
             {
                 List<ProjectDisbursementView> disbursementsList = new List<ProjectDisbursementView>();
+                decimal exchangeRate = unitWork.ProjectRepository.GetProjection(p => p.Id == id, p => p.ExchangeRate).FirstOrDefault();
                 var disbursements = await unitWork.ProjectDisbursementsRepository.GetWithIncludeAsync(d => d.ProjectId == id, new string[] { "Year" });
                 if (disbursements.Any())
                 {
                     disbursements = (from d in disbursements
                                      orderby d.Year.FinancialYear, d.DisbursementType
                                      select d);
+                    foreach(var disbursement in disbursements)
+                    {
+                        disbursement.ExchangeRate = exchangeRate;
+                    }
                 }
                 return mapper.Map<List<ProjectDisbursementView>>(disbursements);
             }

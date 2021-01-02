@@ -550,6 +550,14 @@ namespace AIMS.Services
                         Name = org
                     });
                 }
+
+                if (project.Disbursements.Any())
+                {
+                    foreach(var disbursement in project.Disbursements)
+                    {
+                        disbursement.ExchangeRate = project.ExchangeRate;
+                    }
+                }
                 projectsList.Add(new ProjectDetailView()
                 {
                     Id = project.Id,
