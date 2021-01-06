@@ -277,8 +277,9 @@ namespace AIMS.Services
             string url = dataFilePath;
             XmlReader xReader = XmlReader.Create(url);
             XDocument xDoc = XDocument.Load(xReader);
-            var activity = (from el in xDoc.Descendants("iati-activity")
-                            select el.FirstAttribute).FirstOrDefault();
+            var activity = (from el in xDoc.Descendants("iati-activities")
+                            where el.HasAttributes && el.Attribute("version") != null
+                            select el.Attribute("version")).FirstOrDefault();
 
             //var transactionTypes = await this.GetTransactionTypes(tTypeFilePath);
             var transactionTypes = JsonConvert.DeserializeObject<List<IATITransactionTypes>>(File.ReadAllText(tTypeFilePath));
@@ -487,8 +488,9 @@ namespace AIMS.Services
             string url = dataFilePath;
             XmlReader xReader = XmlReader.Create(url);
             XDocument xDoc = XDocument.Load(xReader);
-            var activity = (from el in xDoc.Descendants("iati-activity")
-                            select el.FirstAttribute).FirstOrDefault();
+            var activity = (from el in xDoc.Descendants("iati-activities")
+                            where el.HasAttributes && el.Attribute("version") != null
+                            select el.Attribute("version")).FirstOrDefault();
 
             IParser parser;
             string version = "";

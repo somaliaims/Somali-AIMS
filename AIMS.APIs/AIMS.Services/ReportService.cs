@@ -557,7 +557,11 @@ namespace AIMS.Services
                     {
                         disbursement.ExchangeRate = project.ExchangeRate;
                     }
+                    project.Disbursements = (from d in project.Disbursements
+                                             orderby d.Year.FinancialYear, d.DisbursementType
+                                             select d).ToList();
                 }
+
                 projectsList.Add(new ProjectDetailView()
                 {
                     Id = project.Id,

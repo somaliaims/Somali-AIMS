@@ -48,7 +48,7 @@ namespace AIMS.IATILib.Parsers
             this.ParseAndFillProjects(activities, projectsList);
 
             activities = (from activity in xmlDoc.Descendants("iati-activity")
-                          where activity.Element("title") != null
+                          where activity.Element("title").Element("narrative") != null
                           select activity);
 
             this.ParseAndFillProjects(activities, projectsList);
@@ -820,20 +820,21 @@ namespace AIMS.IATILib.Parsers
                         {
                             foreach (var budget in budgets)
                             {
+                                var budgetValue = budget.Element("value") == null ? 0 : Convert.ToDecimal(budget.Element("value").Value);
                                 if (budget.HasAttributes && budget.Attribute("type") != null)
                                 {
                                     if (budget.Attribute("type").Value.Equals("1"))
                                     {
-                                        projectValueTypeOne += Convert.ToDecimal(budget.Value);
+                                        projectValueTypeOne += budgetValue;
                                     }
                                     else if (budget.Attribute("type").Value.Equals("2"))
                                     {
-                                        projectValueTypeTwo += Convert.ToDecimal(budget.Value);
+                                        projectValueTypeTwo += budgetValue;
                                     }
                                 }
                                 else
                                 {
-                                    projectValueTypeOne = Convert.ToDecimal(budget.Value);
+                                    projectValueTypeOne = budgetValue;
                                 }
                             }
                         }

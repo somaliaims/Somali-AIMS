@@ -19,11 +19,11 @@ namespace AIMS.IATILib.Parsers
         {
             List<IATIActivity> activityList = new List<IATIActivity>();
             //Pick up all narratives
-            var activities = from activity in xmlDoc.Descendants("iati-activity")
+            /*var activities = from activity in xmlDoc.Descendants("iati-activity")
                              where activity.Element("title").Element("narrative") != null &&
                              activity.Element("title").Element("narrative").Value.Contains(criteria, StringComparison.OrdinalIgnoreCase)
                              select activity;
-            this.ParseIATIAndFillList(activities, activityList, transactionTypes);
+            this.ParseIATIAndFillList(activities, activityList, transactionTypes);*/
 
             //Pick up all titles
             var titleActivities = from activity in xmlDoc.Descendants("iati-activity")
@@ -39,7 +39,7 @@ namespace AIMS.IATILib.Parsers
             List<IATIActivity> activityList = new List<IATIActivity>();
             //Pick up all narratives
             var activities = from activity in xmlDoc.Descendants("iati-activity")
-                             where activity.Element("title").Element("narrative") != null &&
+                             where activity.Element("title") != null &&
                              Ids.Contains(activity.Element("iati-identifier").Value)
                              select activity;
             this.ParseIATIAndFillList(activities, activityList, transactionTypes);
@@ -51,16 +51,16 @@ namespace AIMS.IATILib.Parsers
             List<IATIProject> projectsList = new List<IATIProject>();
             //Pick up all narratives
             var activities = (from activity in xmlDoc.Descendants("iati-activity")
-                              where activity.Element("title").Element("narrative") != null
+                              where activity.Element("title") != null
                               select activity);
 
             this.ParseAndFillProjects(activities, projectsList);
 
-            activities = (from activity in xmlDoc.Descendants("iati-activity")
+            /*activities = (from activity in xmlDoc.Descendants("iati-activity")
                           where activity.Element("title") != null
                           select activity);
 
-            this.ParseAndFillProjects(activities, projectsList);
+            this.ParseAndFillProjects(activities, projectsList);*/
             return projectsList;
         }
 
@@ -68,8 +68,7 @@ namespace AIMS.IATILib.Parsers
         {
             List<IATISectorModel> sectorsList = new List<IATISectorModel>();
             var activities = from activity in xmlDoc.Descendants("iati-activity")
-                             where activity.Element("title").Element("narrative") != null ||
-                             activity.Element("title") != null
+                             where activity.Element("title") != null
                              select activity;
 
             this.ParseAndFillSectors(activities, sectorsList);
@@ -105,8 +104,7 @@ namespace AIMS.IATILib.Parsers
         {
             List<IATIOrganizationModel> organizationsList = new List<IATIOrganizationModel>();
             var activities = from activity in xmlDoc.Descendants("iati-activity")
-                             where activity.Element("title").Element("narrative") != null ||
-                             activity.Element("title") != null
+                             where activity.Element("title") != null
                              select activity;
 
             this.ParseAndFillOrganizations(activities, organizationsList);
@@ -117,8 +115,7 @@ namespace AIMS.IATILib.Parsers
         {
             List<IATILocation> locationsList = new List<IATILocation>();
             var activities = from activity in xmlDoc.Descendants("iati-activity")
-                             where activity.Element("title").Element("narrative") != null ||
-                             activity.Element("title") != null
+                             where activity.Element("title") != null
                              select activity;
 
             this.ParseAndFillLocations(activities, locationsList);
@@ -482,7 +479,6 @@ namespace AIMS.IATILib.Parsers
                             }
                         }
 
-
                         var recipientCountries = activity.Elements("recipient-country");
                         List<IATICountry> countries = new List<IATICountry>();
                         if (recipientCountries.Any())
@@ -800,11 +796,6 @@ namespace AIMS.IATILib.Parsers
                                               where p.TrimmedTitle.Contains(trimmedTitle, StringComparison.OrdinalIgnoreCase)
                                               select p).FirstOrDefault();
 
-                        /*if (isProjectAdded != null)
-                        {
-                            continue;
-                        }*/
-
                         var financeType = activity.Element("default-finance-type");
                         if (financeType != null)
                         {
@@ -829,20 +820,21 @@ namespace AIMS.IATILib.Parsers
                         {
                             foreach (var budget in budgets)
                             {
+                                var budgetValue = budget.Element("value") == null ? 0 : Convert.ToDecimal(budget.Element("value").Value);
                                 if (budget.HasAttributes && budget.Attribute("type") != null)
                                 {
                                     if (budget.Attribute("type").Value.Equals("1"))
                                     {
-                                        projectValueTypeOne += Convert.ToDecimal(budget.Value);
+                                        projectValueTypeOne += budgetValue;
                                     }
                                     else if (budget.Attribute("type").Value.Equals("2"))
                                     {
-                                        projectValueTypeTwo += Convert.ToDecimal(budget.Value);
+                                        projectValueTypeTwo += budgetValue;
                                     }
                                 }
                                 else
                                 {
-                                    projectValueTypeOne = Convert.ToDecimal(budget.Value);
+                                    projectValueTypeOne = budgetValue;
                                 }
                             }
                         }
@@ -904,118 +896,7 @@ namespace AIMS.IATILib.Parsers
                                 }
                             }
                         }
-                        /*var organizations = activity.Elements("participating-org");
-                        List<IATIOrganizationView> organizationList = new List<IATIOrganizationView>();
-                        if (organizations.Any())
-                        {
-                            foreach (var organization in organizations)
-                            {
-                                if (organization.HasAttributes && organization.Attribute("role") != null)
-                                {
-                                    var narratives = organization.Elements("narrative");
-                                    string organizationName = "";
-                                    int code = 0;
-
-                                    if (organization.Attribute("type") != null)
-                                    {
-                                        int.TryParse(organization.Attribute("type")?.Value, out code);
-                                    }
-
-                                    if (narratives.Count() > 0)
-                                    {
-                                        if (narratives.FirstOrDefault().HasAttributes)
-                                        {
-                                            organizationName = (from n in narratives
-                                                                where n.FirstAttribute.Value == "en"
-                                                                select n.Value).FirstOrDefault();
-                                        }
-                                        else
-                                        {
-                                            if (organization.HasElements && organization.Element("narrative") != null)
-                                            {
-                                                organizationName = organization.Element("narrative")?.Value;
-                                                organizationName = organizationName != null ? organizationName.Trim() : organizationName;
-                                            }
-                                        }
-                                    }
-
-                                    if (!string.IsNullOrEmpty(organizationName))
-                                    {
-                                        var isOrganizationExists = (from o in organizationList
-                                                                    where o.Name.ToLower() == organizationName.ToLower()
-                                                                    select o).FirstOrDefault();
-
-                                        if (isOrganizationExists == null && !string.IsNullOrEmpty(organizationName))
-                                        {
-                                            organizationList.Add(new IATIOrganizationView()
-                                            {
-                                                Id = orgCounter,
-                                                Code = code,
-                                                Name = organizationName,
-                                            });
-                                        }
-                                        ++orgCounter;
-                                    }
-                                }
-                            }
-                        }*/
-                        /*if (organizations.Any())
-                        {
-                            foreach (var organization in organizations)
-                            {
-                                if (organization.HasAttributes)
-                                {
-                                    var narratives = organization.Elements("narrative");
-                                    string organizationName = "";
-                                    int code = 0;
-
-                                    if (organization.Attribute("type") != null)
-                                    {
-                                        int.TryParse(organization.Attribute("type")?.Value, out code);
-                                    }
-
-                                    if (narratives != null)
-                                    {
-                                        if (narratives.Count() > 0)
-                                        {
-                                            if (narratives.FirstOrDefault().HasAttributes)
-                                            {
-                                                organizationName = (from n in narratives
-                                                                    where n.FirstAttribute.Value == "en"
-                                                                    select n.Value).FirstOrDefault();
-                                            }
-                                            else
-                                            {
-                                                if (organization.HasElements && organization.Element("narrative") != null)
-                                                {
-                                                    organizationName = organization.Element("narrative")?.Value;
-                                                    organizationName = organizationName != null ? organizationName.Trim() : organizationName;
-                                                }
-                                            }
-                                        }
-
-                                        if (!string.IsNullOrEmpty(organizationName))
-                                        {
-                                            var isOrganizationExists = (from o in organizationList
-                                                                        where o.Name.ToLower() == organizationName.ToLower()
-                                                                        select o).FirstOrDefault();
-
-                                            if (isOrganizationExists == null && !string.IsNullOrEmpty(organizationName))
-                                            {
-                                                organizationList.Add(new IATIOrganizationView()
-                                                {
-                                                    Id = orgCounter,
-                                                    Code = code,
-                                                    Name = organizationName,
-                                                });
-                                            }
-                                            ++orgCounter;
-                                        }
-                                    }
-                                }
-                            }
-                        }*/
-
+                        
                         var aSectors = activity.Elements("sector");
                         List<IATISectorView> sectors = new List<IATISectorView>();
                         if (aSectors.Any())
