@@ -205,8 +205,9 @@ namespace AIMS.Services
             string url = dataFilePath;
             XmlReader xReader = XmlReader.Create(url);
             XDocument xDoc = XDocument.Load(xReader);
-            var activity = (from el in xDoc.Descendants("iati-activity")
-                            select el.FirstAttribute).FirstOrDefault();
+            var activity = (from el in xDoc.Descendants("iati-activities")
+                            where el.HasAttributes && el.Attribute("version") != null
+                            select el.Attribute("version")).FirstOrDefault();
 
             IParser parser;
             ICollection<IATIActivity> activityList = new List<IATIActivity>();
@@ -221,6 +222,8 @@ namespace AIMS.Services
                     break;
 
                 case "2.01":
+                case "2.02":
+                case "2.03":
                     parser = new ParserIATIVersion21();
                     activityList = parser.ExtractAcitivities(xDoc, criteria);
                     break;
@@ -281,7 +284,6 @@ namespace AIMS.Services
                             where el.HasAttributes && el.Attribute("version") != null
                             select el.Attribute("version")).FirstOrDefault();
 
-            //var transactionTypes = await this.GetTransactionTypes(tTypeFilePath);
             var transactionTypes = JsonConvert.DeserializeObject<List<IATITransactionTypes>>(File.ReadAllText(tTypeFilePath));
             var financeTypes = JsonConvert.DeserializeObject<List<IATIFinanceTypes>>(File.ReadAllText(fTypeFilePath));
 
@@ -300,10 +302,7 @@ namespace AIMS.Services
                     break;
 
                 case "2.01":
-                    parser = new ParserIATIVersion21();
-                    activityList = parser.ExtractAcitivitiesForIds(xDoc, ids, transactionTypes, financeTypes);
-                    break;
-
+                case "2.02":
                 case "2.03":
                     parser = new ParserIATIVersion21();
                     activityList = parser.ExtractAcitivitiesForIds(xDoc, ids, transactionTypes, financeTypes);
@@ -565,8 +564,9 @@ namespace AIMS.Services
             {
                 XmlReader xReader = XmlReader.Create(url);
                 XDocument xDoc = XDocument.Load(xReader);
-                var activity = (from el in xDoc.Descendants("iati-activity")
-                                select el.FirstAttribute).FirstOrDefault();
+                var activity = (from el in xDoc.Descendants("iati-activities")
+                                where el.HasAttributes && el.Attribute("version") != null
+                                select el.Attribute("version")).FirstOrDefault();
 
                 IParser parser;
                 ICollection<IATIActivity> activityList = new List<IATIActivity>();
@@ -581,12 +581,9 @@ namespace AIMS.Services
                         break;
 
                     case "2.01":
-                        parser = new ParserIATIVersion21();
-                        organizations = parser.ExtractOrganizations(xDoc);
-                        break;
-
+                    case "2.02":
                     case "2.03":
-                        parser = new ParserIATIVersion23();
+                        parser = new ParserIATIVersion21();
                         organizations = parser.ExtractOrganizations(xDoc);
                         break;
                 }
@@ -719,8 +716,9 @@ namespace AIMS.Services
             {
                 XmlReader xReader = XmlReader.Create(url);
                 XDocument xDoc = XDocument.Load(xReader);
-                var activity = (from el in xDoc.Descendants("iati-activity")
-                                select el.FirstAttribute).FirstOrDefault();
+                var activity = (from el in xDoc.Descendants("iati-activities")
+                                where el.HasAttributes && el.Attribute("version") != null
+                                select el.Attribute("version")).FirstOrDefault();
 
                 IParser parser;
                 ICollection<IATIActivity> activityList = new List<IATIActivity>();
@@ -735,6 +733,8 @@ namespace AIMS.Services
                         break;
 
                     case "2.01":
+                    case "2.02":
+                    case "2.03":
                         parser = new ParserIATIVersion21();
                         locations = parser.ExtractLocations(xDoc);
                         break;
@@ -873,8 +873,9 @@ namespace AIMS.Services
             {
                 XmlReader xReader = XmlReader.Create(url);
                 XDocument xDoc = XDocument.Load(xReader);
-                var activity = (from el in xDoc.Descendants("iati-activity")
-                                select el.FirstAttribute).FirstOrDefault();
+                var activity = (from el in xDoc.Descendants("iati-activities")
+                                where el.HasAttributes && el.Attribute("version") != null
+                                select el.Attribute("version")).FirstOrDefault();
 
                 IParser parser;
                 string version = "";
@@ -887,6 +888,8 @@ namespace AIMS.Services
                         break;
 
                     case "2.01":
+                    case "2.02":
+                    case "2.03":
                         parser = new ParserIATIVersion21();
                         iatiSectors = parser.ExtractSectors(xDoc);
                         break;
@@ -1171,8 +1174,10 @@ namespace AIMS.Services
                 {
                     XmlReader xReader = XmlReader.Create(dataFilePath);
                     XDocument xDoc = XDocument.Load(xReader);
-                    var activity = (from el in xDoc.Descendants("iati-activity")
-                                    select el.FirstAttribute).FirstOrDefault();
+                    var activity = (from el in xDoc.Descendants("iati-activities")
+                                    where el.HasAttributes && el.Attribute("version") != null
+                                    select el.Attribute("version")).FirstOrDefault();
+
                     IParser parser = new ParserIATIVersion21();
                     var organizations = parser.ExtractOrganizations(xDoc);
                     /*List<EFIATIOrganization> iatiOrgsToDelete = new List<EFIATIOrganization>();
