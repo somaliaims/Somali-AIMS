@@ -1126,20 +1126,35 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
-                    var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.Id != 0);
-                    if (iatiSettings != null)
+                    var iatiSettingsList = unitWork.IATISettingsRepository.GetManyQueryable(i => i.Id != 0);
+                    var isIatiSettingExists = (from i in iatiSettingsList
+                                               where i.Id == model.SettingId
+                                               select i).FirstOrDefault();
+
+                    if (isIatiSettingExists != null)
                     {
-                        iatiSettings.BaseUrl = model.BaseUrl;
-                        unitWork.Save();
+                        isIatiSettingExists.BaseUrl = model.BaseUrl;
+                        isIatiSettingExists.HelpText = model.HelpText;
                     }
                     else
                     {
                         unitWork.IATISettingsRepository.Insert(new EFIATISettings()
                         {
                             BaseUrl = model.BaseUrl,
+                            HelpText = model.HelpText,
+                            IsActive = model.IsActive
                         });
-                        unitWork.Save();
                     }
+                    
+                    var iatiSettingToUpdate = (from i in iatiSettingsList
+                                               where i.Id != model.SettingId
+                                               select i).FirstOrDefault();
+                    
+                    if (iatiSettingToUpdate != null)
+                    {
+                        iatiSettingToUpdate.IsActive = !model.IsActive;
+                    }
+                    unitWork.Save();
                 }
                 catch (Exception ex)
                 {

@@ -1660,7 +1660,11 @@ namespace AIMS.Models
 
     public class IATISettings
     {
+        public int SettingId { get; set; }
         public string BaseUrl { get; set; }
+        public IATISourceType SourceType { get; set; }
+        public bool IsActive { get; set; }
+        public string HelpText { get; set; }
     }
 
     public class IATICountryModel

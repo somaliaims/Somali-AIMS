@@ -33,6 +33,12 @@ namespace AIMS.Models
         User = 2
     }
 
+    public enum IATISourceType
+    {
+        Old = 1,
+        New = 2
+    }
+
     public enum FieldTypes
     {
         DropDown = 1,
@@ -589,7 +595,9 @@ namespace AIMS.Models
         [Key]
         public int Id { get; set; }
         public string BaseUrl { get; set; }
-        public string TransactionTypesJson { get; set; }
+        public bool IsActive { get; set; } = false;
+        public string HelpText { get; set; } = null;
+        public string TransactionTypesJson { get; set; } = null;
     }
 
     public class EFDropboxSettings
