@@ -17,7 +17,7 @@ namespace AIMS.IATILib.Parsers
         public ICollection<IATIActivity> ExtractAcitivities(XDocument xmlDoc, string criteria, List<IATITransactionTypes> transactionTypes = null, List<IATIFinanceTypes> financeTypes = null)
         {
             List<IATIActivity> activityList = new List<IATIActivity>();
-            var titleActivities = from activity in xmlDoc.Descendants("iati-activity")
+            var titleActivities = from activity in xmlDoc.Descendants("iati-activities")
                                   where activity.Element("title") != null &&
                                   activity.Element("title").Value.Contains(criteria, StringComparison.OrdinalIgnoreCase)
                                   select activity;
@@ -29,7 +29,7 @@ namespace AIMS.IATILib.Parsers
         {
             List<IATIActivity> activityList = new List<IATIActivity>();
             //Pick up all narratives
-            var activities = from activity in xmlDoc.Descendants("iati-activity")
+            var activities = from activity in xmlDoc.Descendants("iati-activities")
                              where activity.Element("title") != null &&
                              Ids.Contains(activity.Element("iati-identifier").Value)
                              select activity;
@@ -41,13 +41,13 @@ namespace AIMS.IATILib.Parsers
         {
             List<IATIProject> projectsList = new List<IATIProject>();
             //Pick up all narratives
-            var activities = (from activity in xmlDoc.Descendants("iati-activity")
+            var activities = (from activity in xmlDoc.Descendants("iati-activities")
                               where activity.Element("title") != null
                               select activity);
 
             this.ParseAndFillProjects(activities, projectsList);
 
-            activities = (from activity in xmlDoc.Descendants("iati-activity")
+            activities = (from activity in xmlDoc.Descendants("iati-activities")
                           where activity.Element("title").Element("narrative") != null
                           select activity);
 
@@ -58,7 +58,7 @@ namespace AIMS.IATILib.Parsers
         public ICollection<IATISectorModel> ExtractSectors(XDocument xmlDoc)
         {
             List<IATISectorModel> sectorsList = new List<IATISectorModel>();
-            var activities = from activity in xmlDoc.Descendants("iati-activity")
+            var activities = from activity in xmlDoc.Descendants("iati-activities")
                              where
                              activity.Element("title") != null
                              select activity;
@@ -95,7 +95,7 @@ namespace AIMS.IATILib.Parsers
         public ICollection<IATIOrganizationModel> ExtractOrganizations(XDocument xmlDoc)
         {
             List<IATIOrganizationModel> organizationsList = new List<IATIOrganizationModel>();
-            var activities = from activity in xmlDoc.Descendants("iati-activity")
+            var activities = from activity in xmlDoc.Descendants("iati-activities")
                              where 
                              activity.Element("title") != null
                              select activity;
@@ -107,7 +107,7 @@ namespace AIMS.IATILib.Parsers
         public ICollection<IATILocation> ExtractLocations(XDocument xmlDoc)
         {
             List<IATILocation> locationsList = new List<IATILocation>();
-            var activities = from activity in xmlDoc.Descendants("iati-activity")
+            var activities = from activity in xmlDoc.Descendants("iati-activities")
                              where 
                              activity.Element("title") != null
                              select activity;

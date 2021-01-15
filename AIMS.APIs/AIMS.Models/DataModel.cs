@@ -596,6 +596,7 @@ namespace AIMS.Models
         public int Id { get; set; }
         public string BaseUrl { get; set; }
         public bool IsActive { get; set; } = false;
+        public IATISourceType SourceType { get; set; } = IATISourceType.New;
         public string HelpText { get; set; } = null;
         public string TransactionTypesJson { get; set; } = null;
     }

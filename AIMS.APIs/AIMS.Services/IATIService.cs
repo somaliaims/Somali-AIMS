@@ -194,10 +194,12 @@ namespace AIMS.Services
     public class IATIService : IIATIService
     {
         AIMSDbContext context;
+        IATISourceType sourceType = IATISourceType.Old;
 
         public IATIService(AIMSDbContext cntxt)
         {
             context = cntxt;
+            this.GetIATISettings();
         }
 
         public ICollection<IATIActivity> GetMatchingIATIActivities(string dataFilePath, string criteria)
@@ -224,7 +226,14 @@ namespace AIMS.Services
                 case "2.01":
                 case "2.02":
                 case "2.03":
-                    parser = new ParserIATIVersion21();
+                    if (this.sourceType == IATISourceType.Old)
+                    {
+                        parser = new ParserIATIVersion21();
+                    }
+                    else
+                    {
+                        parser = new ParserIATIVersion21New();
+                    }
                     activityList = parser.ExtractAcitivities(xDoc, criteria);
                     break;
             }
@@ -304,7 +313,14 @@ namespace AIMS.Services
                 case "2.01":
                 case "2.02":
                 case "2.03":
-                    parser = new ParserIATIVersion21();
+                    if (this.sourceType == IATISourceType.Old)
+                    {
+                        parser = new ParserIATIVersion21();
+                    }
+                    else
+                    {
+                        parser = new ParserIATIVersion21New();
+                    }
                     activityList = parser.ExtractAcitivitiesForIds(xDoc, ids, transactionTypes, financeTypes);
                     break;
             }
@@ -504,7 +520,14 @@ namespace AIMS.Services
                 case "2.01":
                 case "2.02":
                 case "2.03":
-                    parser = new ParserIATIVersion21();
+                    if (this.sourceType == IATISourceType.Old)
+                    {
+                        parser = new ParserIATIVersion21();
+                    }
+                    else
+                    {
+                        parser = new ParserIATIVersion21New();
+                    }
                     iatiProjects = parser.ExtractProjects(xDoc);
                     break;
             }
@@ -583,7 +606,14 @@ namespace AIMS.Services
                     case "2.01":
                     case "2.02":
                     case "2.03":
-                        parser = new ParserIATIVersion21();
+                        if (this.sourceType == IATISourceType.Old)
+                        {
+                            parser = new ParserIATIVersion21();
+                        }
+                        else
+                        {
+                            parser = new ParserIATIVersion21New();
+                        }
                         organizations = parser.ExtractOrganizations(xDoc);
                         break;
                 }
@@ -735,7 +765,14 @@ namespace AIMS.Services
                     case "2.01":
                     case "2.02":
                     case "2.03":
-                        parser = new ParserIATIVersion21();
+                        if (this.sourceType == IATISourceType.Old)
+                        {
+                            parser = new ParserIATIVersion21();
+                        }
+                        else
+                        {
+                            parser = new ParserIATIVersion21New();
+                        }
                         locations = parser.ExtractLocations(xDoc);
                         break;
                 }
@@ -890,7 +927,14 @@ namespace AIMS.Services
                     case "2.01":
                     case "2.02":
                     case "2.03":
-                        parser = new ParserIATIVersion21();
+                        if (this.sourceType == IATISourceType.Old)
+                        {
+                            parser = new ParserIATIVersion21();
+                        }
+                        else
+                        {
+                            parser = new ParserIATIVersion21New();
+                        }
                         iatiSectors = parser.ExtractSectors(xDoc);
                         break;
                 }
@@ -1045,10 +1089,12 @@ namespace AIMS.Services
         {
             var unitWork = new UnitOfWork(context);
             IATISettings settings = new IATISettings();
-            var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.Id != 0);
+            var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.IsActive == true);
             if (iatiSettings != null)
             {
                 settings.BaseUrl = iatiSettings.BaseUrl;
+                settings.SourceType = iatiSettings.SourceType;
+                this.sourceType = iatiSettings.SourceType;
             }
             return settings;
         }
@@ -1134,6 +1180,7 @@ namespace AIMS.Services
                     if (isIatiSettingExists != null)
                     {
                         isIatiSettingExists.BaseUrl = model.BaseUrl;
+                        isIatiSettingExists.SourceType = model.SourceType;
                         isIatiSettingExists.HelpText = model.HelpText;
                     }
                     else
@@ -1142,6 +1189,7 @@ namespace AIMS.Services
                         {
                             BaseUrl = model.BaseUrl,
                             HelpText = model.HelpText,
+                            SourceType = model.SourceType,
                             IsActive = model.IsActive
                         });
                     }
