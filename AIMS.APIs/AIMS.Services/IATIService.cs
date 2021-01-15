@@ -42,6 +42,12 @@ namespace AIMS.Services
         IATISettings GetIATISettings();
 
         /// <summary>
+        /// Gets all available iati settings
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<IATISettings> GetIATISettingsList();
+
+        /// <summary>
         /// Downloads the latest IATI into a file
         /// </summary>
         /// <param name="url"></param>
@@ -1099,6 +1105,25 @@ namespace AIMS.Services
             return settings;
         }
 
+        public IEnumerable<IATISettings> GetIATISettingsList()
+        {
+            var unitWork = new UnitOfWork(context);
+            List<IATISettings> settingsList = new List<IATISettings>();
+            var iatiSettingsList = unitWork.IATISettingsRepository.GetManyQueryable(i => i.Id != 0);
+            foreach(var setting in iatiSettingsList)
+            {
+                settingsList.Add(new IATISettings()
+                {
+                    SettingId = setting.Id,
+                    BaseUrl = setting.BaseUrl,
+                    HelpText = setting.HelpText,
+                    SourceType = setting.SourceType,
+                    IsActive= setting.IsActive
+                });
+            }
+            return settingsList;
+        }
+
         public ICollection<IATIOrganization> GetOrganizations()
         {
             using (var unitWork = new UnitOfWork(context))
@@ -1243,28 +1268,6 @@ namespace AIMS.Services
 
                     IParser parser = new ParserIATIVersion21();
                     var organizations = parser.ExtractOrganizations(xDoc);
-                    /*List<EFIATIOrganization> iatiOrgsToDelete = new List<EFIATIOrganization>();
-                    var organizationsList = unitWork.IATIOrganizationRepository.GetManyQueryable(o => o.Id != 0);
-                    foreach (var org in organizationsList)
-                    {
-                        var isOrgInIATI = (from o in organizations
-                                           where o.Name.Trim().Equals(org.OrganizationName.Trim(), StringComparison.OrdinalIgnoreCase)
-                                           select o).FirstOrDefault();
-
-                        if (isOrgInIATI == null)
-                        {
-                            iatiOrgsToDelete.Add(org);
-                        }
-                    }
-
-                    if (iatiOrgsToDelete.Count > 0)
-                    {
-                        foreach (var org in iatiOrgsToDelete)
-                        {
-                            unitWork.IATIOrganizationRepository.Delete(org);
-                        }
-                        unitWork.Save();
-                    }*/
                     var organizationsToDelete = unitWork.IATIOrganizationRepository.GetManyQueryable(o => o.Id != 0);
                     foreach(var org in organizationsToDelete)
                     {
@@ -1299,21 +1302,6 @@ namespace AIMS.Services
             }
             return orgTypesList;
         }
-
-        /*private async Task<List<IATITransactionTypes>> GetTransactionTypes(string url)
-        {
-            HttpClient client = new HttpClient();
-            List<IATITransactionTypes> list = new List<IATITransactionTypes>();
-            try
-            {
-                var httpResponse = await client.GetAsync(url);
-                string json = await httpResponse.Content.ReadAsStringAsync();
-                list = JsonConvert.DeserializeObject<List<IATITransactionTypes>>(json);
-            }
-            catch (Exception)
-            {
-            }
-            return list;
-        }*/
+        
     }
 }

@@ -140,6 +140,13 @@ namespace AIMS.APIs.Controllers
             return Ok(settings);
         }
 
+        [HttpGet]
+        [Route("GetIATISettingsList")]
+        public IActionResult GetIATISettingsList()
+        {
+            return Ok(iatiService.GetIATISettingsList());
+        }
+
         [HttpPost("FixInactiveOrganizations")]  
         public IActionResult FixInactiveOrganizations()
         {
