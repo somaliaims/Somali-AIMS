@@ -509,9 +509,20 @@ namespace AIMS.Services
             string url = dataFilePath;
             XmlReader xReader = XmlReader.Create(url);
             XDocument xDoc = XDocument.Load(xReader);
-            var activity = (from el in xDoc.Descendants("iati-activities")
+            XAttribute activity = null;
+
+            if (this.sourceType == IATISourceType.New)
+            {
+                activity = (from el in xDoc.Descendants("iati-activities")
                             where el.HasAttributes && el.Attribute("version") != null
                             select el.Attribute("version")).FirstOrDefault();
+            }
+            else if (this.sourceType == IATISourceType.Old)
+            {
+                activity = (from el in xDoc.Descendants("iati-activity")
+                            where el.HasAttributes && el.Attribute("version") != null
+                            select el.Attribute("version")).FirstOrDefault();
+            }
 
             IParser parser;
             string version = "";
@@ -1207,6 +1218,7 @@ namespace AIMS.Services
                         isIatiSettingExists.BaseUrl = model.BaseUrl;
                         isIatiSettingExists.SourceType = model.SourceType;
                         isIatiSettingExists.HelpText = model.HelpText;
+                        isIatiSettingExists.IsActive = model.IsActive;
                     }
                     else
                     {
