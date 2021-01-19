@@ -213,9 +213,20 @@ namespace AIMS.Services
             string url = dataFilePath;
             XmlReader xReader = XmlReader.Create(url);
             XDocument xDoc = XDocument.Load(xReader);
-            var activity = (from el in xDoc.Descendants("iati-activities")
+            XAttribute activity = null;
+
+            if (this.sourceType == IATISourceType.New)
+            {
+                activity = (from el in xDoc.Descendants("iati-activities")
                             where el.HasAttributes && el.Attribute("version") != null
                             select el.Attribute("version")).FirstOrDefault();
+            }
+            else if (this.sourceType == IATISourceType.Old)
+            {
+                activity = (from el in xDoc.Descendants("iati-activity")
+                            where el.HasAttributes && el.FirstAttribute != null
+                            select el.FirstAttribute).FirstOrDefault();
+            }
 
             IParser parser;
             ICollection<IATIActivity> activityList = new List<IATIActivity>();
@@ -295,9 +306,20 @@ namespace AIMS.Services
             string url = dataFilePath;
             XmlReader xReader = XmlReader.Create(url);
             XDocument xDoc = XDocument.Load(xReader);
-            var activity = (from el in xDoc.Descendants("iati-activities")
+            XAttribute activity = null;
+
+            if (this.sourceType == IATISourceType.New)
+            {
+                activity = (from el in xDoc.Descendants("iati-activities")
                             where el.HasAttributes && el.Attribute("version") != null
                             select el.Attribute("version")).FirstOrDefault();
+            }
+            else if (this.sourceType == IATISourceType.Old)
+            {
+                activity = (from el in xDoc.Descendants("iati-activity")
+                            where el.HasAttributes && el.FirstAttribute != null
+                            select el.FirstAttribute).FirstOrDefault();
+            }
 
             var transactionTypes = JsonConvert.DeserializeObject<List<IATITransactionTypes>>(File.ReadAllText(tTypeFilePath));
             var financeTypes = JsonConvert.DeserializeObject<List<IATIFinanceTypes>>(File.ReadAllText(fTypeFilePath));
@@ -520,8 +542,8 @@ namespace AIMS.Services
             else if (this.sourceType == IATISourceType.Old)
             {
                 activity = (from el in xDoc.Descendants("iati-activity")
-                            where el.HasAttributes && el.Attribute("version") != null
-                            select el.Attribute("version")).FirstOrDefault();
+                            where el.HasAttributes && el.FirstAttribute != null
+                            select el.FirstAttribute).FirstOrDefault();
             }
 
             IParser parser;
@@ -604,9 +626,20 @@ namespace AIMS.Services
             {
                 XmlReader xReader = XmlReader.Create(url);
                 XDocument xDoc = XDocument.Load(xReader);
-                var activity = (from el in xDoc.Descendants("iati-activities")
+                XAttribute activity = null;
+
+                if (this.sourceType == IATISourceType.New)
+                {
+                    activity = (from el in xDoc.Descendants("iati-activities")
                                 where el.HasAttributes && el.Attribute("version") != null
                                 select el.Attribute("version")).FirstOrDefault();
+                }
+                else if (this.sourceType == IATISourceType.Old)
+                {
+                    activity = (from el in xDoc.Descendants("iati-activity")
+                                where el.HasAttributes && el.FirstAttribute != null
+                                select el.FirstAttribute).FirstOrDefault();
+                }
 
                 IParser parser;
                 ICollection<IATIActivity> activityList = new List<IATIActivity>();
@@ -763,9 +796,20 @@ namespace AIMS.Services
             {
                 XmlReader xReader = XmlReader.Create(url);
                 XDocument xDoc = XDocument.Load(xReader);
-                var activity = (from el in xDoc.Descendants("iati-activities")
+                XAttribute activity = null;
+
+                if (this.sourceType == IATISourceType.New)
+                {
+                    activity = (from el in xDoc.Descendants("iati-activities")
                                 where el.HasAttributes && el.Attribute("version") != null
                                 select el.Attribute("version")).FirstOrDefault();
+                }
+                else if (this.sourceType == IATISourceType.Old)
+                {
+                    activity = (from el in xDoc.Descendants("iati-activity")
+                                where el.HasAttributes && el.FirstAttribute != null
+                                select el.FirstAttribute).FirstOrDefault();
+                }
 
                 IParser parser;
                 ICollection<IATIActivity> activityList = new List<IATIActivity>();
@@ -927,9 +971,20 @@ namespace AIMS.Services
             {
                 XmlReader xReader = XmlReader.Create(url);
                 XDocument xDoc = XDocument.Load(xReader);
-                var activity = (from el in xDoc.Descendants("iati-activities")
+                XAttribute activity = null;
+
+                if (this.sourceType == IATISourceType.New)
+                {
+                    activity = (from el in xDoc.Descendants("iati-activities")
                                 where el.HasAttributes && el.Attribute("version") != null
                                 select el.Attribute("version")).FirstOrDefault();
+                }
+                else if (this.sourceType == IATISourceType.Old)
+                {
+                    activity = (from el in xDoc.Descendants("iati-activity")
+                                where el.HasAttributes && el.FirstAttribute != null
+                                select el.FirstAttribute).FirstOrDefault();
+                }
 
                 IParser parser;
                 string version = "";
@@ -1240,6 +1295,14 @@ namespace AIMS.Services
                         iatiSettingToUpdate.IsActive = !model.IsActive;
                     }
                     unitWork.Save();
+                    string baseUrl = (model.IsActive) ? model.BaseUrl : iatiSettingToUpdate.BaseUrl;
+                    string xml = "";
+                    using (var client = new WebClient())
+                    {
+                        xml = client.DownloadString(baseUrl);
+                    }
+                    //IHostingEnvironment hostingEnvironment = new Hos
+                    //File.WriteAllText(filePath, xml);
                 }
                 catch (Exception ex)
                 {
@@ -1274,9 +1337,20 @@ namespace AIMS.Services
                 {
                     XmlReader xReader = XmlReader.Create(dataFilePath);
                     XDocument xDoc = XDocument.Load(xReader);
-                    var activity = (from el in xDoc.Descendants("iati-activities")
+                    XAttribute activity = null;
+
+                    if (this.sourceType == IATISourceType.New)
+                    {
+                        activity = (from el in xDoc.Descendants("iati-activities")
                                     where el.HasAttributes && el.Attribute("version") != null
                                     select el.Attribute("version")).FirstOrDefault();
+                    }
+                    else if (this.sourceType == IATISourceType.Old)
+                    {
+                        activity = (from el in xDoc.Descendants("iati-activity")
+                                    where el.HasAttributes && el.FirstAttribute != null
+                                    select el.FirstAttribute).FirstOrDefault();
+                    }
 
                     IParser parser = new ParserIATIVersion21();
                     var organizations = parser.ExtractOrganizations(xDoc);
