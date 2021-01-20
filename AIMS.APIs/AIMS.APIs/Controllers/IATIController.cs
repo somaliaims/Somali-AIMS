@@ -54,7 +54,6 @@ namespace AIMS.APIs.Controllers
             var iatiSettings = iatiService.GetIATISettings();
             if (iatiSettings != null)
             {
-                //string iatiUrl = configuration.GetValue<string>("IATI:Url");
                 string iatiUrl = iatiSettings.BaseUrl;
                 var response = await iatiService.DownloadIATIFromUrl(iatiUrl, iatiFilePath);
                 response = iatiService.ExtractAndSaveIATISectors(iatiFilePath, sectorVocabPath);
@@ -172,7 +171,7 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(response.Message);
             }
-            return Ok(response.Success);
+            return Ok(response);
         }
 
         [HttpPost]

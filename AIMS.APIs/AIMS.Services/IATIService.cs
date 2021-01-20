@@ -195,6 +195,13 @@ namespace AIMS.Services
         /// <param name="dataFilePath"></param>
         /// <returns></returns>
         ActionResponse DeleteInActiveOrganizations(string dataFilePath);
+
+        /// <summary>
+        /// Downloads latest IATI
+        /// </summary>
+        /// <param name="dataFilePath"></param>
+        /// <returns></returns>
+        Task<ActionResponse> DownloadLatestIATIAsync(string dataFilePath);
     }
 
     public class IATIService : IIATIService
@@ -1263,6 +1270,7 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 try
                 {
+                    bool isActiveSourceUpdated = false;
                     var iatiSettingsList = unitWork.IATISettingsRepository.GetManyQueryable(i => i.Id != 0);
                     var isIatiSettingExists = (from i in iatiSettingsList
                                                where i.Id == model.SettingId
@@ -1270,6 +1278,10 @@ namespace AIMS.Services
 
                     if (isIatiSettingExists != null)
                     {
+                        if (model.IsActive != isIatiSettingExists.IsActive)
+                        {
+                            isActiveSourceUpdated = true;
+                        }
                         isIatiSettingExists.BaseUrl = model.BaseUrl;
                         isIatiSettingExists.SourceType = model.SourceType;
                         isIatiSettingExists.HelpText = model.HelpText;
@@ -1284,6 +1296,10 @@ namespace AIMS.Services
                             SourceType = model.SourceType,
                             IsActive = model.IsActive
                         });
+                        if (model.IsActive)
+                        {
+                            isActiveSourceUpdated = true;
+                        }
                     }
                     
                     var iatiSettingToUpdate = (from i in iatiSettingsList
@@ -1295,14 +1311,7 @@ namespace AIMS.Services
                         iatiSettingToUpdate.IsActive = !model.IsActive;
                     }
                     unitWork.Save();
-                    string baseUrl = (model.IsActive) ? model.BaseUrl : iatiSettingToUpdate.BaseUrl;
-                    string xml = "";
-                    using (var client = new WebClient())
-                    {
-                        xml = client.DownloadString(baseUrl);
-                    }
-                    //IHostingEnvironment hostingEnvironment = new Hos
-                    //File.WriteAllText(filePath, xml);
+                    
                 }
                 catch (Exception ex)
                 {
@@ -1310,6 +1319,34 @@ namespace AIMS.Services
                     response.Success = false;
                 }
                 return response;
+            }
+        }
+
+        public async Task<ActionResponse> DownloadLatestIATIAsync(string dataFilePath)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.IsActive == true);
+                    if (iatiSettings != null)
+                    {
+                        string baseUrl = iatiSettings.BaseUrl;
+                        string xml = "";
+                        using (var client = new WebClient())
+                        {
+                            xml = client.DownloadString(baseUrl);
+                        }
+                        File.WriteAllText(dataFilePath, xml);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                }
+                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
         }
 
