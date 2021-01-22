@@ -51,15 +51,13 @@ namespace AIMS.APIs.Controllers
         {
             string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
             string sectorVocabPath = hostingEnvironment.WebRootPath + "/IATISectorVocabulary.json";
-            var iatiSettings = iatiService.GetIATISettings();
-            if (iatiSettings != null)
+            var response = await iatiService.DownloadLatestIATIAsync(iatiFilePath);
+            response = iatiService.ExtractAndSaveIATISectors(iatiFilePath, sectorVocabPath);
+            if (!response.Success)
             {
-                string iatiUrl = iatiSettings.BaseUrl;
-                var response = await iatiService.DownloadIATIFromUrl(iatiUrl, iatiFilePath);
-                response = iatiService.ExtractAndSaveIATISectors(iatiFilePath, sectorVocabPath);
-                return Ok(response);
+                return BadRequest(response.Message);
             }
-            return Ok(null);
+            return Ok(response);
         }
 
         [HttpGet]

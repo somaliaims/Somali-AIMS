@@ -14,6 +14,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Security.Permissions;
 using System.Threading.Tasks;
 using System.Xml;
@@ -132,6 +134,14 @@ namespace AIMS.APIs.Scheduler
                         xml = client.DownloadString(url);
                     }
                     File.WriteAllText(filePath, xml);
+                    //var hClient = new HttpClient();
+                    //hClient.DefaultRequestHeaders.Accept.Clear();
+                    //hClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaTypeNames.Text.Xml));
+                    //Pass in the full URL and the json string content
+                    //xml = hClient.GetStringAsync(url).GetAwaiter().GetResult();
+                    //It would be better to make sure this request actually made it through
+                    //xml = hResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    //File.WriteAllText(filePath, xml);
 
                     var sectorTypesSources = sectorTypeService.GetSectorSources();
                     if (sectorTypesSources.Count() > 0)

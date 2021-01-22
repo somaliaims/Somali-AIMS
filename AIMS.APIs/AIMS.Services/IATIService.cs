@@ -1306,12 +1306,13 @@ namespace AIMS.Services
                                                where i.Id != model.SettingId
                                                select i).FirstOrDefault();
                     
-                    if (iatiSettingToUpdate != null)
+                    if (iatiSettingToUpdate != null && isActiveSourceUpdated)
                     {
                         iatiSettingToUpdate.IsActive = !model.IsActive;
                     }
                     unitWork.Save();
-                    
+                    response.ReturnedId = (isActiveSourceUpdated) ? 1 : 2;
+                    response.Message = (isActiveSourceUpdated) ? "Active source updated" : "Active source not updated";
                 }
                 catch (Exception ex)
                 {
@@ -1324,30 +1325,28 @@ namespace AIMS.Services
 
         public async Task<ActionResponse> DownloadLatestIATIAsync(string dataFilePath)
         {
-            using (var unitWork = new UnitOfWork(context))
+            var unitWork = new UnitOfWork(context);
+            ActionResponse response = new ActionResponse();
+            try
             {
-                ActionResponse response = new ActionResponse();
-                try
+                var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.IsActive == true);
+                if (iatiSettings != null)
                 {
-                    var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.IsActive == true);
-                    if (iatiSettings != null)
+                    string baseUrl = iatiSettings.BaseUrl;
+                    string xml = "";
+                    using (var client = new WebClient())
                     {
-                        string baseUrl = iatiSettings.BaseUrl;
-                        string xml = "";
-                        using (var client = new WebClient())
-                        {
-                            xml = client.DownloadString(baseUrl);
-                        }
-                        File.WriteAllText(dataFilePath, xml);
+                        xml = client.DownloadString(baseUrl);
                     }
+                    File.WriteAllText(dataFilePath, xml);
                 }
-                catch(Exception ex)
-                {
-                    response.Success = false;
-                    response.Message = ex.Message;
-                }
-                return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = ex.Message;
+            }
+            return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
         }
 
         public ActionResponse Delete(DateTime dated)
