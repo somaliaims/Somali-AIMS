@@ -29,7 +29,7 @@ namespace AIMS.APIs.Scheduler
         IWebHostEnvironment hostingEnvironment;
         private readonly IServiceScopeFactory scopeFactory;
 
-        public ScheduleTask(IServiceScopeFactory serviceScopeFactory, IConfiguration config, 
+        public ScheduleTask(IServiceScopeFactory serviceScopeFactory, IConfiguration config,
             IServiceScopeFactory _scopeFactory, IWebHostEnvironment _hostingEnvironment) : base(serviceScopeFactory)
         {
             configuration = config;
@@ -65,60 +65,56 @@ namespace AIMS.APIs.Scheduler
             string xml = "", sectorsXml = "", json = "", transactionTypesJson = "", financeTypesJson = "", sectorsVocabJson = "",
                 organizationTypesJson = "", errorsFile = "errors.txt", errorsFilePath = "";
             //, countriesJson = ""
-            try
+
+            using (var scope = scopeFactory.CreateScope())
             {
-                using (var client = new WebClient())
-                {
-                    json = client.DownloadString(currencyUrl);
-                }
+                HttpClient httpClient = new HttpClient();
+                IWebHostEnvironment hostingEnvironment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+                ExchangeRateHttpService httpService = new ExchangeRateHttpService(httpClient);
+                AIMSDbContext dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
+                IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                IUserService userService = new UserService(dbContext, imapper);
+                INotificationService notificationService = new NotificationService(dbContext, imapper);
+                IATIService service = new IATIService(dbContext);
+                IFinancialYearSettingsService fySettingsService = new FinancialYearSettingsService(dbContext);
+                ISectorTypesService sectorTypeService = new SectorTypesService(dbContext, imapper);
+                IProjectService projectService = new ProjectService(dbContext, imapper);
+                IOrganizationMergeService orgMergeService = new OrganizationMergeService(dbContext);
+                IDataBackupService backupService = new DataBackupService(dbContext);
+                IContactMessageService contactService = new ContactMessageService(dbContext, imapper);
+                IEmailService emailService = new EmailService(dbContext);
+                IProjectDeletionService projectDeletionService = new ProjectDeletionService(dbContext, imapper);
+                backupService.SetDirectoryPath(hostingEnvironment.WebRootPath);
+                IFinancialYearTransitionService financialYearTransitionService = new FinancialYearTransitionService(dbContext);
 
-                /*using (var client = new WebClient())
+                try
                 {
-                    countriesJson = client.DownloadString(countriesUrl);
-                }*/
+                    using (var client = new WebClient())
+                    {
+                        json = client.DownloadString(currencyUrl);
+                    }
 
-                using (var client = new WebClient())
-                {
-                    organizationTypesJson = client.DownloadString(organizationTypesUrl);
-                }
+                    using (var client = new WebClient())
+                    {
+                        organizationTypesJson = client.DownloadString(organizationTypesUrl);
+                    }
 
-                using (var client = new WebClient())
-                {
-                    transactionTypesJson = client.DownloadString(transactionTypesUrl);
-                }
+                    using (var client = new WebClient())
+                    {
+                        transactionTypesJson = client.DownloadString(transactionTypesUrl);
+                    }
 
-                using (var client = new WebClient())
-                {
-                    financeTypesJson = client.DownloadString(financeTypesUrl);
-                }
+                    using (var client = new WebClient())
+                    {
+                        financeTypesJson = client.DownloadString(financeTypesUrl);
+                    }
 
-                using (var client = new WebClient())
-                {
-                    sectorsVocabJson = client.DownloadString(sectorVocabularyUrl);
-                }
+                    using (var client = new WebClient())
+                    {
+                        sectorsVocabJson = client.DownloadString(sectorVocabularyUrl);
+                    }
 
-                //Save sectors to db
-                using (var scope = scopeFactory.CreateScope())
-                {
-                    HttpClient httpClient = new HttpClient();
-                    IWebHostEnvironment hostingEnvironment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
-                    ExchangeRateHttpService httpService = new ExchangeRateHttpService(httpClient);
-                    AIMSDbContext dbContext = scope.ServiceProvider.GetRequiredService<AIMSDbContext>();
-                    IMapper imapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                    IUserService userService = new UserService(dbContext, imapper);
-                    INotificationService notificationService = new NotificationService(dbContext, imapper);
-                    IATIService service = new IATIService(dbContext);
-                    IFinancialYearSettingsService fySettingsService = new FinancialYearSettingsService(dbContext);
-                    ISectorTypesService sectorTypeService = new SectorTypesService(dbContext, imapper);
-                    IProjectService projectService = new ProjectService(dbContext, imapper);
-                    IOrganizationMergeService orgMergeService = new OrganizationMergeService(dbContext);
-                    IDataBackupService backupService = new DataBackupService(dbContext);
-                    IContactMessageService contactService = new ContactMessageService(dbContext, imapper);
-                    IEmailService emailService = new EmailService(dbContext);
-                    IProjectDeletionService projectDeletionService = new ProjectDeletionService(dbContext, imapper);
-                    backupService.SetDirectoryPath(hostingEnvironment.WebRootPath);
-                    IFinancialYearTransitionService financialYearTransitionService = new FinancialYearTransitionService(dbContext);
-
+                    //Save sectors to db
                     var iatiSettings = service.GetIATISettings();
                     if (iatiSettings != null)
                     {
@@ -131,17 +127,11 @@ namespace AIMS.APIs.Scheduler
                     //Download latest iati
                     using (var client = new WebClient())
                     {
+                        service.SetIATIDownloading();
                         xml = client.DownloadString(url);
                     }
                     File.WriteAllText(filePath, xml);
-                    //var hClient = new HttpClient();
-                    //hClient.DefaultRequestHeaders.Accept.Clear();
-                    //hClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaTypeNames.Text.Xml));
-                    //Pass in the full URL and the json string content
-                    //xml = hClient.GetStringAsync(url).GetAwaiter().GetResult();
-                    //It would be better to make sure this request actually made it through
-                    //xml = hResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                    //File.WriteAllText(filePath, xml);
+                    service.SetIATIDownloaded();
 
                     var sectorTypesSources = sectorTypeService.GetSectorSources();
                     if (sectorTypesSources.Count() > 0)
@@ -149,7 +139,7 @@ namespace AIMS.APIs.Scheduler
                         using (var client = new WebClient())
                         {
                             int fileCounter = 1;
-                            foreach(var stype in sectorTypesSources)
+                            foreach (var stype in sectorTypesSources)
                             {
                                 if (!string.IsNullOrEmpty(stype.SourceUrl))
                                 {
@@ -177,7 +167,7 @@ namespace AIMS.APIs.Scheduler
                     var sectorResponse = service.ExtractAndSaveIATISectors(filePath, sectorsVocabPath);
                     if (sectorTypesSources.Count() > 0)
                     {
-                        foreach(var stype in sectorTypesSources)
+                        foreach (var stype in sectorTypesSources)
                         {
                             if (!string.IsNullOrEmpty(stype.FilePath))
                             {
@@ -185,7 +175,7 @@ namespace AIMS.APIs.Scheduler
                             }
                         }
                     }
-                    
+
                     service.ExtractAndSaveLocations(filePath);
                     var orgResponse = service.ExtractAndSaveOrganizations(filePath, cleanedOrgTypesVocabJson);
                     notificationService.SendNotificationsForNewSectors(sectorResponse.ReturnedId);
@@ -225,11 +215,11 @@ namespace AIMS.APIs.Scheduler
                     if (pendingOrgMergeRequests.Any())
                     {
                         var requests = (from r in pendingOrgMergeRequests
-                                          select r.RequestId).ToList();
+                                        select r.RequestId).ToList();
                         orgMergeService.MergeOrganizationsAuto(requests).GetAwaiter().GetResult();
                     }
                     var pendingContactMessages = contactService.GetUnRepliedMessages();
-                    foreach(var message in pendingContactMessages)
+                    foreach (var message in pendingContactMessages)
                     {
                         EmailModel emailModel = new EmailModel()
                         {
@@ -243,44 +233,47 @@ namespace AIMS.APIs.Scheduler
                     contactService.SetMessagesNotifiedAsync().GetAwaiter().GetResult();
 
                     projectDeletionService.SendPendingDeletionRequestsToManagement();
-                }
 
-                //File cleanup
-                string excelFiles = Path.Combine(sWebRootFolder, "ExcelFiles");
-                var directory = Directory.CreateDirectory(excelFiles);
+                    //File cleanup
+                    string excelFiles = Path.Combine(sWebRootFolder, "ExcelFiles");
+                    var directory = Directory.CreateDirectory(excelFiles);
 
-                if (directory.GetFiles().Any())
-                {
-                    string[] files = Directory.GetFiles(excelFiles);
-
-                    if (files.Length > 0)
+                    if (directory.GetFiles().Any())
                     {
-                        foreach (string file in files)
+                        string[] files = Directory.GetFiles(excelFiles);
+
+                        if (files.Length > 0)
                         {
-                            FileInfo fi = new FileInfo(file);
-                            if (fi.LastAccessTime < DateTime.Now.AddMinutes(-120))
+                            foreach (string file in files)
                             {
-                                fi.Delete();
+                                FileInfo fi = new FileInfo(file);
+                                if (fi.LastAccessTime < DateTime.Now.AddMinutes(-120))
+                                {
+                                    fi.Delete();
+                                }
                             }
                         }
                     }
                 }
-            }
-            catch(Exception ex)
-            {
-                errorsFilePath = Path.Combine(sWebRootFolder, errorsFile);
-                if (!File.Exists(errorsFilePath))
+
+                catch (Exception ex)
                 {
-                    File.Create(errorsFilePath);
-                    FileIOPermission fp = new FileIOPermission(FileIOPermissionAccess.AllAccess, errorsFilePath);
+                    service.SetIATIDownloaded();
+                    errorsFilePath = Path.Combine(sWebRootFolder, errorsFile);
+                    if (!File.Exists(errorsFilePath))
+                    {
+                        File.Create(errorsFilePath);
+                        FileIOPermission fp = new FileIOPermission(FileIOPermissionAccess.AllAccess, errorsFilePath);
+                    }
+                    string errorMessage = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        errorMessage = ex.InnerException.Message;
+                    }
+                    File.AppendAllText(errorsFilePath, errorMessage);
                 }
-                string errorMessage = ex.Message;
-                if (ex.InnerException != null)
-                {
-                    errorMessage = ex.InnerException.Message;
-                }
-                File.AppendAllText(errorsFilePath, errorMessage);
             }
+
             return Task.CompletedTask;
         }
     }

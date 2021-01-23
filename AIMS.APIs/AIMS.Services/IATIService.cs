@@ -4,6 +4,7 @@ using AIMS.IATILib.Parsers;
 using AIMS.Models;
 using AIMS.Services.Helpers;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -33,7 +34,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse SaveIATISettings(IATISettings model);
+        Task<ActionResponse> SaveIATISettingsAsync(IATISettings model);
 
         /// <summary>
         /// Gets IATI Settings
@@ -202,12 +203,25 @@ namespace AIMS.Services
         /// <param name="dataFilePath"></param>
         /// <returns></returns>
         Task<ActionResponse> DownloadLatestIATIAsync(string dataFilePath);
+
+        /// <summary>
+        /// Sets IATI downloading
+        /// </summary>
+        /// <returns></returns>
+        ActionResponse SetIATIDownloading();
+
+        /// <summary>
+        /// Sets IATI downloaded
+        /// </summary>
+        /// <returns></returns>
+        ActionResponse SetIATIDownloaded();
     }
 
     public class IATIService : IIATIService
     {
         AIMSDbContext context;
         IATISourceType sourceType = IATISourceType.Old;
+        string baseUrl = "";
 
         public IATIService(AIMSDbContext cntxt)
         {
@@ -1174,6 +1188,7 @@ namespace AIMS.Services
                 settings.BaseUrl = iatiSettings.BaseUrl;
                 settings.SourceType = iatiSettings.SourceType;
                 this.sourceType = iatiSettings.SourceType;
+                this.baseUrl = settings.BaseUrl;
             }
             return settings;
         }
@@ -1195,6 +1210,34 @@ namespace AIMS.Services
                 });
             }
             return settingsList;
+        }
+
+        public ActionResponse SetIATIDownloading()
+        {
+            ActionResponse response = new ActionResponse();
+            var unitWork = new UnitOfWork(context);
+            var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.IsActive == true);
+            if (iatiSettings != null)
+            {
+                iatiSettings.IsDownloading = true;
+                unitWork.IATISettingsRepository.Update(iatiSettings);
+                unitWork.Save();
+            }
+            return response;
+        }
+
+        public ActionResponse SetIATIDownloaded()
+        {
+            ActionResponse response = new ActionResponse();
+            var unitWork = new UnitOfWork(context);
+            var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.IsActive == true);
+            if (iatiSettings != null)
+            {
+                iatiSettings.IsDownloading = false;
+                unitWork.IATISettingsRepository.Update(iatiSettings);
+                unitWork.Save();
+            }
+            return response;
         }
 
         public ICollection<IATIOrganization> GetOrganizations()
@@ -1263,56 +1306,87 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse SaveIATISettings(IATISettings model)
+        public async Task<ActionResponse> SaveIATISettingsAsync(IATISettings model)
         {
             using (var unitWork = new UnitOfWork(context))
             {
                 ActionResponse response = new ActionResponse();
                 try
                 {
+                    IMessageHelper mHelper;
                     bool isActiveSourceUpdated = false;
                     var iatiSettingsList = unitWork.IATISettingsRepository.GetManyQueryable(i => i.Id != 0);
-                    var isIatiSettingExists = (from i in iatiSettingsList
-                                               where i.Id == model.SettingId
-                                               select i).FirstOrDefault();
+                    var isIATIDownloading = (from i in iatiSettingsList
+                                             where i.IsDownloading == true
+                                             select i).FirstOrDefault();
+                    if (isIATIDownloading != null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetIATIDownloadInProgressMessage();
+                        return response;
+                    }
 
-                    if (isIatiSettingExists != null)
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        if (model.IsActive != isIatiSettingExists.IsActive)
+                        using (var transaction = context.Database.BeginTransaction())
                         {
-                            isActiveSourceUpdated = true;
+                            var isIatiSettingExists = (from i in iatiSettingsList
+                                                       where i.Id == model.SettingId
+                                                       select i).FirstOrDefault();
+
+                            if (isIatiSettingExists != null)
+                            {
+                                if (model.IsActive != isIatiSettingExists.IsActive)
+                                {
+                                    isActiveSourceUpdated = true;
+                                }
+                                isIatiSettingExists.BaseUrl = model.BaseUrl;
+                                isIatiSettingExists.SourceType = model.SourceType;
+                                isIatiSettingExists.HelpText = model.HelpText;
+                                isIatiSettingExists.IsActive = model.IsActive;
+                            }
+                            else
+                            {
+                                unitWork.IATISettingsRepository.Insert(new EFIATISettings()
+                                {
+                                    BaseUrl = model.BaseUrl,
+                                    HelpText = model.HelpText,
+                                    SourceType = model.SourceType,
+                                    IsActive = model.IsActive
+                                });
+                                if (model.IsActive)
+                                {
+                                    isActiveSourceUpdated = true;
+                                }
+                            }
+
+                            var iatiSettingToUpdate = (from i in iatiSettingsList
+                                                       where i.Id != model.SettingId
+                                                       select i).FirstOrDefault();
+
+                            if (iatiSettingToUpdate != null && isActiveSourceUpdated)
+                            {
+                                iatiSettingToUpdate.IsActive = !model.IsActive;
+                            }
+                            await unitWork.SaveAsync();
+
+                            if (!string.IsNullOrEmpty(model.IATIFilePath))
+                            {
+                                string xml = "";
+                                using (var client = new WebClient())
+                                {
+                                    xml = client.DownloadString(this.baseUrl);
+                                }
+                                File.WriteAllText(model.IATIFilePath, xml);
+                            }
+
+                            transaction.Commit();
+                            response.ReturnedId = (isActiveSourceUpdated) ? 1 : 2;
+                            response.Message = (isActiveSourceUpdated) ? "Active source updated" : "Active source not updated";
                         }
-                        isIatiSettingExists.BaseUrl = model.BaseUrl;
-                        isIatiSettingExists.SourceType = model.SourceType;
-                        isIatiSettingExists.HelpText = model.HelpText;
-                        isIatiSettingExists.IsActive = model.IsActive;
-                    }
-                    else
-                    {
-                        unitWork.IATISettingsRepository.Insert(new EFIATISettings()
-                        {
-                            BaseUrl = model.BaseUrl,
-                            HelpText = model.HelpText,
-                            SourceType = model.SourceType,
-                            IsActive = model.IsActive
-                        });
-                        if (model.IsActive)
-                        {
-                            isActiveSourceUpdated = true;
-                        }
-                    }
-                    
-                    var iatiSettingToUpdate = (from i in iatiSettingsList
-                                               where i.Id != model.SettingId
-                                               select i).FirstOrDefault();
-                    
-                    if (iatiSettingToUpdate != null && isActiveSourceUpdated)
-                    {
-                        iatiSettingToUpdate.IsActive = !model.IsActive;
-                    }
-                    unitWork.Save();
-                    response.ReturnedId = (isActiveSourceUpdated) ? 1 : 2;
-                    response.Message = (isActiveSourceUpdated) ? "Active source updated" : "Active source not updated";
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -1325,18 +1399,15 @@ namespace AIMS.Services
 
         public async Task<ActionResponse> DownloadLatestIATIAsync(string dataFilePath)
         {
-            var unitWork = new UnitOfWork(context);
             ActionResponse response = new ActionResponse();
             try
             {
-                var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.IsActive == true);
-                if (iatiSettings != null)
+                if (!string.IsNullOrEmpty(this.baseUrl))
                 {
-                    string baseUrl = iatiSettings.BaseUrl;
                     string xml = "";
                     using (var client = new WebClient())
                     {
-                        xml = client.DownloadString(baseUrl);
+                        xml = client.DownloadString(this.baseUrl);
                     }
                     File.WriteAllText(dataFilePath, xml);
                 }
@@ -1345,6 +1416,10 @@ namespace AIMS.Services
             {
                 response.Success = false;
                 response.Message = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    response.Message = ex.InnerException.Message;
+                }
             }
             return await Task<ActionResponse>.Run(() => response).ConfigureAwait(false);
         }

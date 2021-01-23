@@ -52,7 +52,7 @@ namespace AIMS.APIs.Controllers
             string iatiFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
             string sectorVocabPath = hostingEnvironment.WebRootPath + "/IATISectorVocabulary.json";
             var response = await iatiService.DownloadLatestIATIAsync(iatiFilePath);
-            response = iatiService.ExtractAndSaveIATISectors(iatiFilePath, sectorVocabPath);
+            //response = iatiService.ExtractAndSaveIATISectors(iatiFilePath, sectorVocabPath);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -158,13 +158,14 @@ namespace AIMS.APIs.Controllers
 
         [HttpPost]
         [Route("SetIATISettings")]
-        public IActionResult SetIATISettings([FromBody] IATISettings model)
+        public async Task<IActionResult> SetIATISettings([FromBody] IATISettings model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var response = iatiService.SaveIATISettings(model);
+            model.IATIFilePath = hostingEnvironment.WebRootPath + "/IATISomali.xml";
+            var response = await iatiService.SaveIATISettingsAsync(model);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

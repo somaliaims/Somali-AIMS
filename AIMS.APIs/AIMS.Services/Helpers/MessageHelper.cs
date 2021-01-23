@@ -409,6 +409,12 @@ namespace AIMS.Services.Helpers
         /// </summary>
         /// <returns></returns>
         string GetDependentProjectsForSublocationMessage();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        string GetIATIDownloadInProgressMessage();
     }
 
     public class MessageHelper : IMessageHelper
@@ -455,6 +461,7 @@ namespace AIMS.Services.Helpers
         private readonly string MANAGER_ACCOUNT_CANNOT_BE_DEMOTED = "There must be at least one manager account available all the times in AIMS. Account cannot be demoted.";
         private readonly string SECTORS_DIFFERENT_FROM_MAPPINGS = "Sectors provided in mappings are different from sectors provided for the project";
         private readonly string DEPENDENT_PROJECTS_FOR_SUBPLOCATION = "Dependent projects found for the selected sub-location. Please this sub-location from the referenced project before deletion.";
+        private readonly string IATI_DOWNLOAD_IN_PROGRESS = "There is another IATI download in progress. You can change the settings, once the IATI is downloaded in progress.";
 
         public string GetNotFound(string entity)
         {
@@ -791,6 +798,11 @@ namespace AIMS.Services.Helpers
         public string ProjectPermissionDenied(string project)
         {
             return ("<h4>Project name: </h4><p>" + project + "</p>");
+        }
+
+        public string GetIATIDownloadInProgressMessage()
+        {
+            return (IATI_DOWNLOAD_IN_PROGRESS);
         }
 
         public string ChangedMappingAffectedProjectsMessage(List<string> affectedProjects, string oldSector, string newSector)

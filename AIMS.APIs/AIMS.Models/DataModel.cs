@@ -598,6 +598,7 @@ namespace AIMS.Models
         public bool IsActive { get; set; } = false;
         public IATISourceType SourceType { get; set; } = IATISourceType.New;
         public string HelpText { get; set; } = null;
+        public bool IsDownloading { get; set; } = false;
         public string TransactionTypesJson { get; set; } = null;
     }
 
