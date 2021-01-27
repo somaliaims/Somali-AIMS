@@ -68,6 +68,7 @@ namespace AIMS.APIs.Scheduler
 
             using (var scope = scopeFactory.CreateScope())
             {
+                bool isIATIDownloading = false;
                 HttpClient httpClient = new HttpClient();
                 IWebHostEnvironment hostingEnvironment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
                 ExchangeRateHttpService httpService = new ExchangeRateHttpService(httpClient);
@@ -121,17 +122,21 @@ namespace AIMS.APIs.Scheduler
                         if (!string.IsNullOrEmpty(iatiSettings.BaseUrl))
                         {
                             url = iatiSettings.BaseUrl;
+                            isIATIDownloading = iatiSettings.IsDownloading;
                         }
                     }
 
-                    //Download latest iati
-                    using (var client = new WebClient())
+                    if (!isIATIDownloading)
                     {
-                        service.SetIATIDownloading();
-                        xml = client.DownloadString(url);
+                        //Download latest iati
+                        using (var client = new WebClient())
+                        {
+                            service.SetIATIDownloading();
+                            xml = client.DownloadString(url);
+                        }
+                        File.WriteAllText(filePath, xml);
+                        service.SetIATIDownloaded();
                     }
-                    File.WriteAllText(filePath, xml);
-                    service.SetIATIDownloaded();
 
                     var sectorTypesSources = sectorTypeService.GetSectorSources();
                     if (sectorTypesSources.Count() > 0)
@@ -258,7 +263,10 @@ namespace AIMS.APIs.Scheduler
 
                 catch (Exception ex)
                 {
-                    service.SetIATIDownloaded();
+                    if (!isIATIDownloading)
+                    {
+                        service.SetIATIDownloaded();
+                    }
                     errorsFilePath = Path.Combine(sWebRootFolder, errorsFile);
                     if (!File.Exists(errorsFilePath))
                     {

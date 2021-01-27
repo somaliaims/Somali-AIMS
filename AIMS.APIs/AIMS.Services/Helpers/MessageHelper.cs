@@ -461,7 +461,7 @@ namespace AIMS.Services.Helpers
         private readonly string MANAGER_ACCOUNT_CANNOT_BE_DEMOTED = "There must be at least one manager account available all the times in AIMS. Account cannot be demoted.";
         private readonly string SECTORS_DIFFERENT_FROM_MAPPINGS = "Sectors provided in mappings are different from sectors provided for the project";
         private readonly string DEPENDENT_PROJECTS_FOR_SUBPLOCATION = "Dependent projects found for the selected sub-location. Please this sub-location from the referenced project before deletion.";
-        private readonly string IATI_DOWNLOAD_IN_PROGRESS = "There is another IATI download in progress. You can change the settings, once the IATI is downloaded in progress.";
+        private readonly string IATI_DOWNLOAD_IN_PROGRESS = "There is another IATI download in progress. You can only change the settings when another IATI downloaded is completed.";
 
         public string GetNotFound(string entity)
         {

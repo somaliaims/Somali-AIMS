@@ -1182,11 +1182,25 @@ namespace AIMS.Services
         {
             var unitWork = new UnitOfWork(context);
             IATISettings settings = new IATISettings();
-            var iatiSettings = unitWork.IATISettingsRepository.GetOne(i => i.IsActive == true);
+            var iatiSettingsList = unitWork.IATISettingsRepository.GetManyQueryable(i => i.Id != 0);
+            var iatiSettings = (from s in iatiSettingsList
+                                where s.IsActive == true
+                                select s).FirstOrDefault();
+            var downloadingIATI = (from s in iatiSettingsList
+                                  where s.IsDownloading == true
+                                  select s).FirstOrDefault();
+
+            bool isDownloading = false;
+            if (downloadingIATI != null)
+            {
+                isDownloading = true;
+            }
+
             if (iatiSettings != null)
             {
                 settings.BaseUrl = iatiSettings.BaseUrl;
                 settings.SourceType = iatiSettings.SourceType;
+                settings.IsDownloading = isDownloading;
                 this.sourceType = iatiSettings.SourceType;
                 this.baseUrl = settings.BaseUrl;
             }
@@ -1317,7 +1331,7 @@ namespace AIMS.Services
                     bool isActiveSourceUpdated = false;
                     var iatiSettingsList = unitWork.IATISettingsRepository.GetManyQueryable(i => i.Id != 0);
                     var isIATIDownloading = (from i in iatiSettingsList
-                                             where i.IsDownloading == true
+                                             where i.IsActive == true && i.IsDownloading == true
                                              select i).FirstOrDefault();
                     if (isIATIDownloading != null)
                     {
@@ -1327,39 +1341,49 @@ namespace AIMS.Services
                         return response;
                     }
 
+                    var isIatiSettingExists = (from i in iatiSettingsList
+                                               where i.Id == model.SettingId
+                                               select i).FirstOrDefault();
+                    if (isIatiSettingExists != null)
+                    {
+                        if (model.IsActive != isIatiSettingExists.IsActive)
+                        {
+                            isActiveSourceUpdated = true;
+                            isIatiSettingExists.IsDownloading = true;
+                            unitWork.Save();
+                        }
+                    }
+                    
                     var strategy = context.Database.CreateExecutionStrategy();
                     await strategy.ExecuteAsync(async () =>
                     {
                         using (var transaction = context.Database.BeginTransaction())
                         {
-                            var isIatiSettingExists = (from i in iatiSettingsList
-                                                       where i.Id == model.SettingId
-                                                       select i).FirstOrDefault();
-
                             if (isIatiSettingExists != null)
                             {
-                                if (model.IsActive != isIatiSettingExists.IsActive)
-                                {
-                                    isActiveSourceUpdated = true;
-                                }
                                 isIatiSettingExists.BaseUrl = model.BaseUrl;
                                 isIatiSettingExists.SourceType = model.SourceType;
                                 isIatiSettingExists.HelpText = model.HelpText;
                                 isIatiSettingExists.IsActive = model.IsActive;
+                                await unitWork.SaveAsync();
                             }
                             else
                             {
-                                unitWork.IATISettingsRepository.Insert(new EFIATISettings()
+                                bool newSourceDownloading = false;
+                                if (model.IsActive)
+                                {
+                                    isActiveSourceUpdated = true;
+                                    newSourceDownloading = true;
+                                }
+                                isIatiSettingExists = unitWork.IATISettingsRepository.Insert(new EFIATISettings()
                                 {
                                     BaseUrl = model.BaseUrl,
                                     HelpText = model.HelpText,
                                     SourceType = model.SourceType,
-                                    IsActive = model.IsActive
+                                    IsActive = model.IsActive,
+                                    IsDownloading = newSourceDownloading
                                 });
-                                if (model.IsActive)
-                                {
-                                    isActiveSourceUpdated = true;
-                                }
+                                await unitWork.SaveAsync();
                             }
 
                             var iatiSettingToUpdate = (from i in iatiSettingsList
@@ -1372,17 +1396,21 @@ namespace AIMS.Services
                             }
                             await unitWork.SaveAsync();
 
-                            if (!string.IsNullOrEmpty(model.IATIFilePath))
+                            if (!string.IsNullOrEmpty(model.IATIFilePath) && isActiveSourceUpdated)
                             {
                                 string xml = "";
                                 using (var client = new WebClient())
                                 {
-                                    xml = client.DownloadString(this.baseUrl);
+                                    xml = client.DownloadString(model.BaseUrl);
                                 }
                                 File.WriteAllText(model.IATIFilePath, xml);
                             }
 
+                            isIatiSettingExists.IsDownloading = false;
+                            unitWork.IATISettingsRepository.Update(isIatiSettingExists);
+                            await unitWork.SaveAsync();
                             transaction.Commit();
+
                             response.ReturnedId = (isActiveSourceUpdated) ? 1 : 2;
                             response.Message = (isActiveSourceUpdated) ? "Active source updated" : "Active source not updated";
                         }

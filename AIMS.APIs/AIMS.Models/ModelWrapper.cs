@@ -1665,6 +1665,7 @@ namespace AIMS.Models
         public IATISourceType SourceType { get; set; }
         public bool IsActive { get; set; }
         public string HelpText { get; set; }
+        public bool IsDownloading { get; set; }
         public string IATIFilePath { get; set; } = null;
     }
 

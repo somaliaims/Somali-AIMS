@@ -1035,7 +1035,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                int fyMonth = 1, fyDay = 1;
+                /*int fyMonth = 1, fyDay = 1;
                 var fySettings = unitWork.FinancialYearSettingsRepository.GetOne(fy => fy.Id != 0);
                 if (fySettings != null)
                 {
@@ -1081,8 +1081,10 @@ namespace AIMS.Services
                     {
                         ++projectsCount;
                     }
-                }
-                return projectsCount;
+                }*/
+                ///Temporarily put this logic to show the number of active projects, need to remove this line
+                return unitWork.ProjectRepository.GetProjection(p => p.Id != 0, p => new { p.Id }).Count();
+                //return projectsCount;
             }
         }
 
