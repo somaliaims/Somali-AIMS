@@ -82,12 +82,11 @@ namespace AIMS.APIs.Controllers
             return Ok(await projectService.GetAllDetailAsync());
         }
 
-        //We will need to remove this, it is temporarily kept if a use case discovered
-        /*[HttpGet("FixProjectCurrencyInDisbursements")]
-        public async Task<IActionResult> FixProjectCurrencyInDisbursements()
+        [HttpGet("[action]")]
+        public async Task<IActionResult> FixDecimalValuesForProjects()
         {
-            return Ok(await projectService.FixProjectCurrencyInDisbursements());
-        }*/
+            return Ok(await projectService.FixDecimalPointsInAmounts());
+        }
 
         [HttpGet("GetProjectTitles")]
         public IActionResult GetProjectTitles()

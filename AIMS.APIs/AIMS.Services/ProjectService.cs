@@ -5537,26 +5537,54 @@ namespace AIMS.Services
                 ActionResponse response = new ActionResponse();
                 var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "Disbursements" });
 
-                var strategy = context.Database.CreateExecutionStrategy();
-                await strategy.ExecuteAsync(async () =>
+                try
                 {
-                    using (var transaction = context.Database.BeginTransaction())
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
                     {
-                        foreach(var project in projects)
+                        using (var transaction = context.Database.BeginTransaction())
                         {
-                            decimal projectValue = Math.Abs(project.ProjectValue);
-
-                            decimal totalDisbursements = 0;
-                            foreach(var disbursement in project.Disbursements)
+                            foreach (var project in projects)
                             {
-                                disbursement.Amount = Math.Abs(disbursement.Amount);
-                                totalDisbursements += disbursement.Amount;
-                                unitWork.ProjectDisbursementsRepository.Update(disbursement);
+                                decimal projectValue = Math.Abs(project.ProjectValue);
+
+                                decimal totalDisbursements = 0;
+                                int count = 0;
+                                foreach (var disbursement in project.Disbursements)
+                                {
+                                    disbursement.Amount = Math.Abs(disbursement.Amount);
+                                    totalDisbursements += disbursement.Amount;
+                                    ++count;
+                                    if (count == project.Disbursements.Count)
+                                    {
+                                        if (totalDisbursements > projectValue)
+                                        {
+                                            projectValue = totalDisbursements;
+                                        }
+                                        else if (projectValue > totalDisbursements)
+                                        {
+                                            decimal difference = projectValue - totalDisbursements;
+                                            disbursement.Amount += difference;
+                                        }
+                                    }
+                                    unitWork.ProjectDisbursementsRepository.Update(disbursement);
+                                }
+                                unitWork.ProjectRepository.Update(project);
+                                await unitWork.SaveAsync();
                             }
-                            await unitWork.SaveAsync();
+                            transaction.Commit();
                         }
+                    });
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
+                    response.Message = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        response.Message = ex.InnerException.Message;
                     }
-                });
+                }
                 return response;
             }
         }
