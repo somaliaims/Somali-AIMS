@@ -409,6 +409,12 @@ namespace AIMS.Services
         /// </summary>
         /// <returns></returns>
         Task<ActionResponse> FixProjectCurrencyInDisbursements();
+
+        /// <summary>
+        /// Fixes decimal points in amounts
+        /// </summary>
+        /// <returns></returns>
+        Task<ActionResponse> FixDecimalPointsInAmounts();
     }
 
     public class ProjectService : IProjectService
@@ -620,7 +626,7 @@ namespace AIMS.Services
                     var allOrganizations = unitWork.OrganizationRepository.GetManyQueryable(o => o.Id != 0);
                     var sectors = unitWork.SectorRepository.GetManyQueryable(s => s.Id != 0);
                     var locations = unitWork.LocationRepository.GetManyQueryable(l => l.Id != 0);
-                    var markers = unitWork.MarkerRepository.GetManyQueryable(m => m.Id != 0);
+                    //var markers = unitWork.MarkerRepository.GetManyQueryable(m => m.Id != 0);
                     var projectMarkers = unitWork.ProjectMarkersRepository.GetManyQueryable(m => !string.IsNullOrEmpty(m.Values));
                     var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Locations", "Funders", "Implementers" });
 
@@ -664,7 +670,7 @@ namespace AIMS.Services
                             });
                         }
 
-                        UtilityHelper utilityHelper = new UtilityHelper();
+                        /*UtilityHelper utilityHelper = new UtilityHelper();
                         var markerForProjects = (from m in projectMarkers
                                                  where m.ProjectId == project.Id
                                                  select m);
@@ -693,7 +699,7 @@ namespace AIMS.Services
                                           select m.FieldTitle).FirstOrDefault(),
                                 Values = markerValuesStr
                             });
-                        }
+                        }*/
 
                         List<OrganizationAbstractView> organizationsList = new List<OrganizationAbstractView>();
                         foreach (string org in organizations)
@@ -5518,6 +5524,37 @@ namespace AIMS.Services
                         }
                         unitWork.Save();
                         transaction.Commit();
+                    }
+                });
+                return response;
+            }
+        }
+
+        public async Task<ActionResponse> FixDecimalPointsInAmounts()
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                var projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id != 0, new string[] { "Disbursements" });
+
+                var strategy = context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        foreach(var project in projects)
+                        {
+                            decimal projectValue = Math.Abs(project.ProjectValue);
+
+                            decimal totalDisbursements = 0;
+                            foreach(var disbursement in project.Disbursements)
+                            {
+                                disbursement.Amount = Math.Abs(disbursement.Amount);
+                                totalDisbursements += disbursement.Amount;
+                                unitWork.ProjectDisbursementsRepository.Update(disbursement);
+                            }
+                            await unitWork.SaveAsync();
+                        }
                     }
                 });
                 return response;
