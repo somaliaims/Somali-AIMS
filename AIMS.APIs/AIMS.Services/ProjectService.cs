@@ -5546,22 +5546,18 @@ namespace AIMS.Services
                         {
                             foreach (var project in projects)
                             {
-                                decimal projectValue = Math.Abs(project.ProjectValue);
+                                decimal projectValue = Decimal.Truncate(project.ProjectValue);
 
                                 decimal totalDisbursements = 0;
                                 int count = 0;
                                 foreach (var disbursement in project.Disbursements)
                                 {
-                                    disbursement.Amount = Math.Abs(disbursement.Amount);
+                                    disbursement.Amount = Decimal.Truncate(disbursement.Amount);
                                     totalDisbursements += disbursement.Amount;
                                     ++count;
                                     if (count == project.Disbursements.Count)
                                     {
-                                        if (totalDisbursements > projectValue)
-                                        {
-                                            projectValue = totalDisbursements;
-                                        }
-                                        else if (projectValue > totalDisbursements)
+                                        if (projectValue > totalDisbursements)
                                         {
                                             decimal difference = projectValue - totalDisbursements;
                                             disbursement.Amount += difference;
@@ -5569,6 +5565,8 @@ namespace AIMS.Services
                                     }
                                     unitWork.ProjectDisbursementsRepository.Update(disbursement);
                                 }
+                                await unitWork.SaveAsync();
+                                project.ProjectValue = projectValue;
                                 unitWork.ProjectRepository.Update(project);
                                 await unitWork.SaveAsync();
                             }
