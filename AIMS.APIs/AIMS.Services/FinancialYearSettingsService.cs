@@ -39,7 +39,9 @@ namespace AIMS.Services
         public FinancialYearSettingView Get()
         {
             var unitWork = new UnitOfWork(context);
-            int currentYear = DateTime.Now.Year, previousYear = (DateTime.Now.Year - 1),
+            int currentYear = DateTime.Now.Year, 
+                secondPreviousYear = (DateTime.Now.Year - 2),
+                previousYear = (DateTime.Now.Year - 1),
                 nextYear = (DateTime.Now.Year + 1),
                 currentMonth = DateTime.Now.Month,
                 currentDay = DateTime.Now.Day;
@@ -53,12 +55,14 @@ namespace AIMS.Services
 
                 if (currentMonth < settingsMonth)
                 {
+                    --secondPreviousYear;
                     --previousYear;
                     --currentYear;
                     --nextYear;
                 }
                 else if (currentMonth == settingsMonth && currentDay < settingsDay)
                 {
+                    --secondPreviousYear;
                     --previousYear;
                     --currentYear;
                     --nextYear;
@@ -67,6 +71,10 @@ namespace AIMS.Services
             bool isSimilarToCalendarYear = ((settings.Month == 1 && settings.Day == 1)) ? true : false;
             var financialYears = unitWork.FinancialYearRepository.GetManyQueryable(y => (y.FinancialYear == previousYear) ||
                 (y.FinancialYear == currentYear) || (y.FinancialYear == nextYear));
+
+            var secondPreviousFinancialYear = (from y in financialYears
+                                               where y.FinancialYear == secondPreviousYear
+                                               select y).FirstOrDefault();
 
             var previousFinancialYear = (from y in financialYears
                                         where y.FinancialYear == previousYear
@@ -79,6 +87,17 @@ namespace AIMS.Services
             var nextFinancialYear = (from y in financialYears
                                         where y.FinancialYear == nextYear
                                         select y).FirstOrDefault();
+
+            if (secondPreviousFinancialYear == null)
+            {
+                string label = (isSimilarToCalendarYear) ? "FY " + secondPreviousYear : "FY " + (secondPreviousYear) + "/" + (previousYear + 1);
+                secondPreviousFinancialYear = unitWork.FinancialYearRepository.Insert(new EFFinancialYears()
+                {
+                    FinancialYear = secondPreviousYear,
+                    Label = label
+                });
+                unitWork.Save();
+            }
 
             if (previousFinancialYear == null)
             {
@@ -115,6 +134,8 @@ namespace AIMS.Services
 
             view.Day = settingsDay;
             view.Month = settingsMonth;
+            view.SecondPreviousFinancialYear = secondPreviousFinancialYear.FinancialYear;
+            view.SecondPreviousFinancialYearLabel = secondPreviousFinancialYear.Label;
             view.PreviousFinancialYear = previousFinancialYear.FinancialYear;
             view.PreviousFinancialYearLabel = previousFinancialYear.Label;
             view.CurrentFinancialYear = currentFinancialYear.FinancialYear;

@@ -144,7 +144,7 @@ namespace AIMS.Services
                     }
                 }
                 
-                int previousYear = (currentYear - 1), nextYear = (currentYear + 1);
+                int previousYear = (currentYear - 2), nextYear = (currentYear + 1);
                 var years = unitWork.FinancialYearRepository.GetManyQueryable(y => y.FinancialYear >= previousYear && y.FinancialYear <= nextYear).ToList();
                 var previousFinancialYear = (from y in years
                                             where y.FinancialYear == previousYear

@@ -1510,6 +1510,8 @@ namespace AIMS.Models
 
     public class FinancialYearSettingView
     {
+        public int SecondPreviousFinancialYear { get; set; }
+        public string SecondPreviousFinancialYearLabel { get; set; }
         public int PreviousFinancialYear { get; set; }
         public string PreviousFinancialYearLabel { get; set; }
         public int CurrentFinancialYear { get; set; }
