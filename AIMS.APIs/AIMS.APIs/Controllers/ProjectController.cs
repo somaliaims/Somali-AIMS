@@ -429,7 +429,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = await projectService.AddProjectLocation(model);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = await projectService.AddProjectLocation(model, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -447,7 +457,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = await projectService.AddProjectSector(model);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = await projectService.AddProjectSector(model, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -465,6 +485,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+
             int organizationId = 0;
             var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
             if (!string.IsNullOrEmpty(organizationIdVal))
@@ -472,7 +503,7 @@ namespace AIMS.APIs.Controllers
                 organizationId = Convert.ToInt32(organizationIdVal);
             }
             model.ProjectUrl = projectUrl;
-            var response = projectService.AddProjectFunder(model, organizationId);
+            var response = projectService.AddProjectFunder(model, organizationId, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -490,13 +521,24 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+
             int organizationId = 0;
             var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
             if (!string.IsNullOrEmpty(organizationIdVal))
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
             }
-            var response = projectService.AddProjectFunderFromSource(model, organizationId);
+            var response = projectService.AddProjectFunderFromSource(model, organizationId, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -514,13 +556,24 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+
             int organizationId = 0;
             var organizationIdVal = User.FindFirst(ClaimTypes.Country)?.Value;
             if (!string.IsNullOrEmpty(organizationIdVal))
             {
                 organizationId = Convert.ToInt32(organizationIdVal);
             }
-            var response = projectService.AddProjectImplementerFromSource(model, organizationId);
+            var response = projectService.AddProjectImplementerFromSource(model, organizationId, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -538,8 +591,19 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+
             model.ProjectUrl = projectUrl;
-            var response = projectService.AddProjectImplementer(model);
+            var response = projectService.AddProjectImplementer(model, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -592,7 +656,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = await projectService.AddProjectDisbursement(model);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = await projectService.AddProjectDisbursement(model, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -610,7 +684,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = projectService.AddProjectDocument(model);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = projectService.AddProjectDocument(model, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -628,7 +712,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = projectService.AddUpdateProjectMarker(model);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = projectService.AddUpdateProjectMarker(model, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -646,7 +740,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
-            var response = projectService.AddUpdateProjectMarker(model);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = projectService.AddUpdateProjectMarker(model, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -742,6 +846,16 @@ namespace AIMS.APIs.Controllers
                 return BadRequest(ModelState);
             }
 
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
             decimal exchangeRate = 1;
             var dated = DateTime.Now;
             exchangeRate = ratesService.GetCurrencyRateForDate(dated, project.ProjectCurrency);
@@ -759,7 +873,7 @@ namespace AIMS.APIs.Controllers
             }
             
             project.ExchangeRate = exchangeRate;
-            var response = await projectService.UpdateAsync(id, project);
+            var response = await projectService.UpdateAsync(id, project, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -777,7 +891,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid Ids provided");
             }
 
-            var response = await projectService.DeleteProjectLocationAsync(projectId, locationId);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = await projectService.DeleteProjectLocationAsync(projectId, locationId, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -795,7 +919,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid Ids provided");
             }
 
-            var response = await projectService.DeleteProjectSectorAsync(projectId, sectorId);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = await projectService.DeleteProjectSectorAsync(projectId, sectorId, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -813,7 +947,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid Ids provided");
             }
 
-            var response  = projectService.DeleteProjectFunder(projectId, funderId);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response  = projectService.DeleteProjectFunder(projectId, funderId, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -830,7 +974,18 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Invalid Ids provided");
             }
-            var response = projectService.DeleteProjectImplementer(projectId, implementerId);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+
+            var response = projectService.DeleteProjectImplementer(projectId, implementerId, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -848,7 +1003,17 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid Ids provided");
             }
 
-            var response = projectService.DeleteProjectMarker(projectId, customFieldId);
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = projectService.DeleteProjectMarker(projectId, customFieldId, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -865,7 +1030,18 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Invalid Id provided");
             }
-            var response = projectService.DeleteProjectDisbursement(id);
+
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = projectService.DeleteProjectDisbursement(id, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);
@@ -882,7 +1058,18 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest("Invalid Id provided");
             }
-            var response = projectService.DeleteProjectDocument(id);
+
+            string userIdVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = 0;
+            if (!string.IsNullOrEmpty(userIdVal))
+            {
+                userId = Convert.ToInt32(userIdVal);
+            }
+            if (userId == 0)
+            {
+                return BadRequest("Unauthorized user access to api");
+            }
+            var response = projectService.DeleteProjectDocument(id, userId);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

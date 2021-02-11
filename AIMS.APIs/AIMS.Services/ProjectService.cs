@@ -139,7 +139,7 @@ namespace AIMS.Services
         /// </summary>
         /// <param name="project"></param>
         /// <returns></returns>
-        Task<ActionResponse> UpdateAsync(int id, ProjectModel model);
+        Task<ActionResponse> UpdateAsync(int id, ProjectModel model, int userId);
 
         /// <summary>
         /// Gets locations for the provided project id
@@ -167,21 +167,21 @@ namespace AIMS.Services
         /// </summary>
         /// <param name=""></param>
         /// <returns></returns>
-        Task<ActionResponse> AddProjectLocation(ProjectLocationModel model);
+        Task<ActionResponse> AddProjectLocation(ProjectLocationModel model, int userId);
 
         /// <summary>
         /// Adds sector to a project
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ActionResponse> AddProjectSector(ProjectSectorModel model);
+        Task<ActionResponse> AddProjectSector(ProjectSectorModel model, int userId);
 
         /// <summary>
         /// Adds funder to a project
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse AddProjectFunder(ProjectFunderModel model, int userOrganizationId);
+        ActionResponse AddProjectFunder(ProjectFunderModel model, int userOrganizationId, int userId);
 
         /// <summary>
         /// Adds funder to a project with the logic from source
@@ -189,7 +189,7 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <param name="userOrganizationId"></param>
         /// <returns></returns>
-        ActionResponse AddProjectFunderFromSource(ProjectFunderSourceModel model, int userOrganizationId);
+        ActionResponse AddProjectFunderFromSource(ProjectFunderSourceModel model, int userOrganizationId, int userId);
 
         /// <summary>
         /// Adds implementer to a project with the logic from souce
@@ -197,35 +197,35 @@ namespace AIMS.Services
         /// <param name="model"></param>
         /// <param name="userOrganizationId"></param>
         /// <returns></returns>
-        ActionResponse AddProjectImplementerFromSource(ProjectImplementerSourceModel model, int userOrganizationId);
+        ActionResponse AddProjectImplementerFromSource(ProjectImplementerSourceModel model, int userOrganizationId, int userId);
 
         /// <summary>
         /// Adds implementer to a project
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse AddProjectImplementer(ProjectImplementerModel model);
+        ActionResponse AddProjectImplementer(ProjectImplementerModel model, int userId);
 
         /// <summary>
         /// Adds disbursement to a project
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Task<ActionResponse> AddProjectDisbursement(ProjectDisbursementModel model);
+        Task<ActionResponse> AddProjectDisbursement(ProjectDisbursementModel model, int userId);
 
         /// <summary>
         /// Adds document to a project
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse AddProjectDocument(ProjectDocumentModel model);
+        ActionResponse AddProjectDocument(ProjectDocumentModel model, int userId);
 
         /// <summary>
         /// Adds custom field to project
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ActionResponse AddUpdateProjectMarker(ProjectMarkerModel model);
+        ActionResponse AddUpdateProjectMarker(ProjectMarkerModel model, int userId);
 
         /// <summary>
         /// Gets funders for the provided project id
@@ -317,7 +317,7 @@ namespace AIMS.Services
         /// <param name="projectId"></param>
         /// <param name="locationId"></param>
         /// <returns></returns>
-        Task<ActionResponse> DeleteProjectLocationAsync(int projectId, int locationId);
+        Task<ActionResponse> DeleteProjectLocationAsync(int projectId, int locationId, int userId);
 
         /// <summary>
         /// Deletes project sector
@@ -325,7 +325,7 @@ namespace AIMS.Services
         /// <param name="projectId"></param>
         /// <param name="locationId"></param>
         /// <returns></returns>
-        Task<ActionResponse> DeleteProjectSectorAsync(int projectId, int locationId);
+        Task<ActionResponse> DeleteProjectSectorAsync(int projectId, int locationId, int userId);
 
         /// <summary>
         /// Deletes project funder
@@ -333,7 +333,7 @@ namespace AIMS.Services
         /// <param name="projectId"></param>
         /// <param name="funderId"></param>
         /// <returns></returns>
-        ActionResponse DeleteProjectFunder(int projectId, int funderId);
+        ActionResponse DeleteProjectFunder(int projectId, int funderId, int userId);
 
         /// <summary>
         /// Deletes project implementer
@@ -341,7 +341,7 @@ namespace AIMS.Services
         /// <param name="projectId"></param>
         /// <param name="implementerId"></param>
         /// <returns></returns>
-        ActionResponse DeleteProjectImplementer(int projectId, int implementerId);
+        ActionResponse DeleteProjectImplementer(int projectId, int implementerId, int userId);
 
         /// <summary>
         /// Deletes project custom field id
@@ -349,21 +349,21 @@ namespace AIMS.Services
         /// <param name="projectId"></param>
         /// <param name="customFieldId"></param>
         /// <returns></returns>
-        ActionResponse DeleteProjectMarker(int projectId, int customFieldId);
+        ActionResponse DeleteProjectMarker(int projectId, int customFieldId, int userId);
 
         /// <summary>
         /// Deletes the disbursement with the provided id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ActionResponse DeleteProjectDisbursement(int id);
+        ActionResponse DeleteProjectDisbursement(int id, int userId);
 
         /// <summary>
         /// Deletes a document for the provided id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ActionResponse DeleteProjectDocument(int id);
+        ActionResponse DeleteProjectDocument(int id, int userId);
 
         /// <summary>
         /// Merges the provided projects and their relevant data
@@ -1032,7 +1032,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == id, new string[] { "StartingFinancialYear", "EndingFinancialYear" }).FirstOrDefault();
+                var project = unitWork.ProjectRepository.GetWithInclude(p => p.Id == id, new string[] { "StartingFinancialYear", "EndingFinancialYear", "UpdatedByOrganization" }).FirstOrDefault();
                 return mapper.Map<ProjectModelView>(project);
             }
         }
@@ -2090,6 +2090,13 @@ namespace AIMS.Services
                                         unitWork.Save();
                                         deletedPlannedDisbursements = 0;
                                     }
+                                    else
+                                    {
+                                        plannedDisbursement.Amount += deletedPlannedDisbursements;
+                                        unitWork.ProjectDisbursementsRepository.Update(plannedDisbursement);
+                                        unitWork.Save();
+                                        deletedPlannedDisbursements = 0;
+                                    }
                                 }
                                 else if (yr > currentActiveYear)
                                 {
@@ -2110,6 +2117,16 @@ namespace AIMS.Services
                                         });
                                         unitWork.Save();
                                         deletedPlannedDisbursements = 0;
+                                    }
+                                    else
+                                    {
+                                        if (deletedPlannedDisbursements > 0)
+                                        {
+                                            disbursement.Amount += deletedPlannedDisbursements;
+                                            unitWork.ProjectDisbursementsRepository.Update(disbursement);
+                                            unitWork.Save();
+                                            deletedPlannedDisbursements = 0;
+                                        }
                                     }
                                 }
                             }
@@ -2304,7 +2321,9 @@ namespace AIMS.Services
                                 ExchangeRate = model.ExchangeRate,
                                 ProjectCurrency = model.ProjectCurrency,
                                 DateUpdated = DateTime.Now,
-                                CreatedBy = createdBy
+                                CreatedBy = createdBy,
+                                UpdatedByOrganizationId = createdBy.OrganizationId,
+                                UpdatedBy = createdBy
                             });
                             await unitWork.SaveAsync();
                             //Add user organization to valid funders
@@ -2319,46 +2338,6 @@ namespace AIMS.Services
                             });
                             await unitWork.SaveAsync();
                             response.ReturnedId = newProject.Id;
-
-                            /*var unattributedLocation = unitWork.LocationRepository.GetOne(l => l.Location.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase));
-                            if (unattributedLocation == null)
-                            {
-                                unattributedLocation = unitWork.LocationRepository.Insert(new EFLocation()
-                                {
-                                    Location = UNATTRIBUTED,
-                                    Longitude = 0,
-                                    Latitude = 0,
-                                    IsUnAttributed = true
-                                });
-                                unitWork.Save();
-                            }
-                            unitWork.ProjectLocationsRepository.Insert(new EFProjectLocations()
-                            {
-                                Project = newProject,
-                                Location = unattributedLocation,
-                                FundsPercentage = 100
-                            });
-                            unitWork.Save();
-                           
-                            var unattributedSector = unitWork.SectorRepository.GetOne(s => s.SectorName.Equals(UNATTRIBUTED, StringComparison.OrdinalIgnoreCase));
-                            if (unattributedSector == null)
-                            {
-                                unattributedSector = unitWork.SectorRepository.Insert(new EFSector()
-                                {
-                                    SectorName = UNATTRIBUTED,
-                                    SectorType = primarySectorType,
-                                    ParentSector = null,
-                                    IsUnAttributed = true
-                                });
-                                unitWork.Save();
-                            }
-                            unitWork.ProjectSectorsRepository.Insert(new EFProjectSectors()
-                            {
-                                Project = newProject,
-                                Sector = unattributedSector,
-                                FundsPercentage = 100
-                            });
-                            unitWork.Save();*/
                             transaction.Commit();
                         }
                     });
@@ -2434,7 +2413,9 @@ namespace AIMS.Services
                                                          where (disbursement.Year.FinancialYear < startingYear) ||
                                                          (disbursement.Year.FinancialYear > endingYear) ||
                                                          (disbursement.Year.FinancialYear > currentActiveYear &&
-                                                            disbursement.DisbursementType == DisbursementTypes.Actual)
+                                                            disbursement.DisbursementType == DisbursementTypes.Actual) ||
+                                                         (disbursement.Year.FinancialYear < currentActiveYear &&
+                                                            disbursement.DisbursementType == DisbursementTypes.Planned)
                                                          select disbursement);
                             bool isDeleted = false;
                             decimal deletedActualDisbursements = 0, deletedPlannedDisbursements = 0;
@@ -2500,6 +2481,7 @@ namespace AIMS.Services
                                 actualDisbursementCurrentYear.Amount += deletedActualDisbursements;
                                 unitWork.ProjectDisbursementsRepository.Update(actualDisbursementCurrentYear);
                                 await unitWork.SaveAsync();
+                                deletedActualDisbursements = 0;
                             }
                             if (plannedDisbursementCurrentYear == null)
                             {
@@ -2519,6 +2501,7 @@ namespace AIMS.Services
                                 plannedDisbursementCurrentYear.Amount += deletedPlannedDisbursements;
                                 unitWork.ProjectDisbursementsRepository.Update(plannedDisbursementCurrentYear);
                                 await unitWork.SaveAsync();
+                                deletedPlannedDisbursements = 0;
                             }
 
                             if (endingYear >= (currentActiveYear + 1))
@@ -3391,7 +3374,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> AddProjectLocation(ProjectLocationModel model)
+        public async Task<ActionResponse> AddProjectLocation(ProjectLocationModel model, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -3407,6 +3390,15 @@ namespace AIMS.Services
                         response.Message = mHelper.GetNotFound("Project");
                         response.Success = false;
                     }
+
+                    var user = unitWork.UserRepository.GetByID(userId);
+                    if (user == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("User");
+                        response.Success = false;
+                    }
+
                     var locationIds = (from l in model.ProjectLocations
                                        select l.LocationId).ToList<int>();
                     var locations = unitWork.LocationRepository.GetManyQueryable(l => locationIds.Contains(l.Id));
@@ -3470,6 +3462,8 @@ namespace AIMS.Services
                                 await unitWork.SaveAsync();
                             }
                             project.DateUpdated = DateTime.Now;
+                            project.UpdatedByOrganizationId = user.OrganizationId;
+                            project.UpdatedById = user.Id;
                             unitWork.ProjectRepository.Update(project);
                             await unitWork.SaveAsync();
 
@@ -3535,7 +3529,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> AddProjectSector(ProjectSectorModel model)
+        public async Task<ActionResponse> AddProjectSector(ProjectSectorModel model, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -3551,6 +3545,14 @@ namespace AIMS.Services
                     {
                         mHelper = new MessageHelper();
                         response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                    }
+
+                    var user = unitWork.UserRepository.GetByID(userId);
+                    if (user == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("User");
                         response.Success = false;
                     }
 
@@ -3778,6 +3780,8 @@ namespace AIMS.Services
                                 }
                             }
                             project.DateUpdated = DateTime.Now;
+                            project.UpdatedByOrganizationId = user.OrganizationId;
+                            project.UpdatedById = user.Id;
                             unitWork.ProjectRepository.Update(project);
                             await unitWork.SaveAsync();
                             transaction.Commit();
@@ -3794,7 +3798,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddProjectFunderFromSource(ProjectFunderSourceModel model, int userOrganizationId)
+        public ActionResponse AddProjectFunderFromSource(ProjectFunderSourceModel model, int userOrganizationId, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -3809,6 +3813,15 @@ namespace AIMS.Services
                         mHelper = new MessageHelper();
                         response.Success = false;
                         response.Message = mHelper.GetNotFound("Project");
+                        return response;
+                    }
+
+                    var user = unitWork.UserRepository.GetByID(userId);
+                    if (user == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.GetNotFound("User");
                         return response;
                     }
 
@@ -3867,7 +3880,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddProjectImplementerFromSource(ProjectImplementerSourceModel model, int userOrganizationId)
+        public ActionResponse AddProjectImplementerFromSource(ProjectImplementerSourceModel model, int userOrganizationId, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -3940,7 +3953,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddProjectFunder(ProjectFunderModel model, int userOrganizationId)
+        public ActionResponse AddProjectFunder(ProjectFunderModel model, int userOrganizationId, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -3958,6 +3971,14 @@ namespace AIMS.Services
                         response.Success = false;
                         return response;
                     }
+                    var user = unitWork.UserRepository.GetByID(userId);
+                    if (user == null)
+                    {
+                        response.Message = mHelper.GetNotFound("User");
+                        response.Success = false;
+                        return response;
+                    }
+
                     var funders = unitWork.OrganizationRepository.GetManyQueryable(o => model.FunderIds.Contains(o.Id));
                     if (funders.Count() < model.FunderIds.Count())
                     {
@@ -4015,6 +4036,8 @@ namespace AIMS.Services
                         unitWork.Save();
                     }
                     project.DateUpdated = DateTime.Now;
+                    project.UpdatedByOrganizationId = user.OrganizationId;
+                    project.UpdatedById = user.Id;
                     unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
 
@@ -4026,11 +4049,11 @@ namespace AIMS.Services
                     var updatedOrganizationNames = (from o in funders
                                                     where updatedFunderIds.Contains(o.Id)
                                                     select o.OrganizationName).ToList<string>();
-                    foreach (var user in users)
+                    foreach (var usr in users)
                     {
                         emailAddresses.Add(new EmailAddress()
                         {
-                            Email = user.Email
+                            Email = usr.Email
                         });
                     }
 
@@ -4072,7 +4095,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddProjectImplementer(ProjectImplementerModel model)
+        public ActionResponse AddProjectImplementer(ProjectImplementerModel model, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -4087,6 +4110,14 @@ namespace AIMS.Services
                     {
                         mHelper = new MessageHelper();
                         response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                    }
+
+                    var user = unitWork.UserRepository.GetByID(userId);
+                    if (user == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("User");
                         response.Success = false;
                     }
 
@@ -4148,6 +4179,8 @@ namespace AIMS.Services
                         unitWork.Save();
                     }
                     project.DateUpdated = DateTime.Now;
+                    project.UpdatedByOrganizationId = user.OrganizationId;
+                    project.UpdatedById = user.Id;
                     unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
 
@@ -4159,11 +4192,11 @@ namespace AIMS.Services
                     var updatedOrganizationNames = (from i in implementers
                                                     where updatedImplementerIds.Contains(i.Id)
                                                     select i.OrganizationName).ToList<string>();
-                    foreach (var user in users)
+                    foreach (var usr in users)
                     {
                         emailAddresses.Add(new EmailAddress()
                         {
-                            Email = user.Email
+                            Email = usr.Email
                         });
                     }
 
@@ -4207,7 +4240,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> AddProjectDisbursement(ProjectDisbursementModel model)
+        public async Task<ActionResponse> AddProjectDisbursement(ProjectDisbursementModel model, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -4231,6 +4264,15 @@ namespace AIMS.Services
                     {
                         mHelper = new MessageHelper();
                         response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                        return response;
+                    }
+
+                    var user = unitWork.UserRepository.GetByID(userId);
+                    if (user == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("User");
                         response.Success = false;
                         return response;
                     }
@@ -4359,6 +4401,11 @@ namespace AIMS.Services
                             {
                                 await unitWork.SaveAsync();
                             }
+
+                            project.UpdatedById = user.Id;
+                            project.UpdatedByOrganizationId = user.OrganizationId;
+                            project.DateUpdated = DateTime.Now;
+                            await unitWork.SaveAsync();
                             transaction.Commit();
                         }
                     });
@@ -4372,7 +4419,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddProjectDocument(ProjectDocumentModel model)
+        public ActionResponse AddProjectDocument(ProjectDocumentModel model, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -4386,6 +4433,14 @@ namespace AIMS.Services
                     {
                         mHelper = new MessageHelper();
                         response.Message = mHelper.GetNotFound("Project");
+                        response.Success = false;
+                    }
+
+                    var user = unitWork.UserRepository.GetByID(userId);
+                    if (user == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("User");
                         response.Success = false;
                     }
 
@@ -4430,6 +4485,8 @@ namespace AIMS.Services
                     }
 
                     project.DateUpdated = DateTime.Now;
+                    project.UpdatedByOrganizationId = user.OrganizationId;
+                    project.UpdatedById = user.Id;
                     unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
                 }
@@ -4442,7 +4499,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse AddUpdateProjectMarker(ProjectMarkerModel model)
+        public ActionResponse AddUpdateProjectMarker(ProjectMarkerModel model, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -4458,6 +4515,15 @@ namespace AIMS.Services
                         response.Success = false;
                         return response;
                     }
+                    var user = unitWork.UserRepository.GetByID(userId);
+                    if (user == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("User");
+                        response.Success = false;
+                        return response;
+                    }
+
                     var customField = unitWork.ProjectMarkersRepository.GetOne(p => p.ProjectId == model.ProjectId && p.MarkerId == model.MarkerId);
                     if (customField != null)
                     {
@@ -4474,6 +4540,8 @@ namespace AIMS.Services
                         });
                     }
                     project.DateUpdated = DateTime.Now;
+                    project.UpdatedByOrganizationId = user.OrganizationId;
+                    project.UpdatedById = user.Id;
                     unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
                 }
@@ -4487,7 +4555,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> UpdateAsync(int id, ProjectModel model)
+        public async Task<ActionResponse> UpdateAsync(int id, ProjectModel model, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -4499,6 +4567,15 @@ namespace AIMS.Services
                     mHelper = new MessageHelper();
                     response.Success = false;
                     response.Message = mHelper.GetNotFound("Project");
+                    return response;
+                }
+
+                var user = unitWork.UserRepository.GetByID(userId);
+                if (user == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Success = false;
+                    response.Message = mHelper.GetNotFound("User");
                     return response;
                 }
 
@@ -4610,6 +4687,8 @@ namespace AIMS.Services
                             project.ExchangeRate = model.ExchangeRate;
                             project.ProjectCurrency = model.ProjectCurrency;
                             project.DateUpdated = DateTime.Now;
+                            project.UpdatedById = user.Id;
+                            project.UpdatedByOrganizationId = user.OrganizationId;
                             unitWork.ProjectRepository.Update(project);
                             await unitWork.SaveAsync();
 
@@ -4658,7 +4737,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> DeleteProjectLocationAsync(int projectId, int locationId)
+        public async Task<ActionResponse> DeleteProjectLocationAsync(int projectId, int locationId, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -4678,6 +4757,15 @@ namespace AIMS.Services
                 {
                     mHelper = new MessageHelper();
                     response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
+                var user = unitWork.UserRepository.GetByID(userId);
+                if (user == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("User");
                     response.Success = false;
                     return response;
                 }
@@ -4736,6 +4824,8 @@ namespace AIMS.Services
                             }
                         }
                         project.DateUpdated = DateTime.Now;
+                        project.UpdatedById = user.Id;
+                        project.UpdatedByOrganizationId = user.OrganizationId;
                         unitWork.ProjectRepository.Update(project);
                         await unitWork.SaveAsync();
                         transaction.Commit();
@@ -4745,7 +4835,7 @@ namespace AIMS.Services
             }
         }
 
-        public async Task<ActionResponse> DeleteProjectSectorAsync(int projectId, int sectorId)
+        public async Task<ActionResponse> DeleteProjectSectorAsync(int projectId, int sectorId, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -4766,6 +4856,15 @@ namespace AIMS.Services
                 {
                     mHelper = new MessageHelper();
                     response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
+                var user = unitWork.UserRepository.GetByID(userId);
+                if (user == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("User");
                     response.Success = false;
                     return response;
                 }
@@ -4830,6 +4929,8 @@ namespace AIMS.Services
                             }
                         }
                         project.DateUpdated = DateTime.Now;
+                        project.UpdatedById = user.Id;
+                        project.UpdatedByOrganizationId = user.OrganizationId;
                         unitWork.ProjectRepository.Update(project);
                         await unitWork.SaveAsync();
                         transaction.Commit();
@@ -4839,7 +4940,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse DeleteProjectFunder(int projectId, int funderId)
+        public ActionResponse DeleteProjectFunder(int projectId, int funderId, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -4851,6 +4952,15 @@ namespace AIMS.Services
                 {
                     mHelper = new MessageHelper();
                     response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
+                var user = unitWork.UserRepository.GetByID(userId);
+                if (user == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("User");
                     response.Success = false;
                     return response;
                 }
@@ -4869,13 +4979,15 @@ namespace AIMS.Services
                 unitWork.Save();
 
                 project.DateUpdated = DateTime.Now;
+                project.UpdatedById = user.Id;
+                project.UpdatedByOrganizationId = user.OrganizationId;
                 unitWork.ProjectRepository.Update(project);
                 unitWork.Save();
                 return response;
             }
         }
 
-        public ActionResponse DeleteProjectImplementer(int projectId, int implementerId)
+        public ActionResponse DeleteProjectImplementer(int projectId, int implementerId, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -4887,6 +4999,15 @@ namespace AIMS.Services
                 {
                     mHelper = new MessageHelper();
                     response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
+                var user = unitWork.UserRepository.GetByID(userId);
+                if (user == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("User");
                     response.Success = false;
                     return response;
                 }
@@ -4904,13 +5025,15 @@ namespace AIMS.Services
                 unitWork.Save();
 
                 project.DateUpdated = DateTime.Now;
+                project.UpdatedById = user.Id;
+                project.UpdatedByOrganizationId = user.OrganizationId;
                 unitWork.ProjectRepository.Update(project);
                 unitWork.Save();
                 return response;
             }
         }
 
-        public ActionResponse DeleteProjectMarker(int projectId, int customFieldId)
+        public ActionResponse DeleteProjectMarker(int projectId, int customFieldId, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -4922,6 +5045,15 @@ namespace AIMS.Services
                 {
                     mHelper = new MessageHelper();
                     response.Message = mHelper.GetNotFound("Project");
+                    response.Success = false;
+                    return response;
+                }
+
+                var user = unitWork.UserRepository.GetByID(userId);
+                if (user == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("User");
                     response.Success = false;
                     return response;
                 }
@@ -4939,13 +5071,15 @@ namespace AIMS.Services
                 unitWork.Save();
 
                 project.DateUpdated = DateTime.Now;
+                project.UpdatedById = user.Id;
+                project.UpdatedByOrganizationId = user.OrganizationId;
                 unitWork.ProjectRepository.Update(project);
                 unitWork.Save();
                 return response;
             }
         }
 
-        public ActionResponse DeleteProjectDisbursement(int id)
+        public ActionResponse DeleteProjectDisbursement(int id, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -4971,10 +5105,21 @@ namespace AIMS.Services
                         return response;
                     }
 
+                    var user = unitWork.UserRepository.GetByID(userId);
+                    if (user == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("User");
+                        response.Success = false;
+                        return response;
+                    }
+
                     unitWork.ProjectDisbursementsRepository.Delete(projectDisbursement);
                     unitWork.Save();
 
                     project.DateUpdated = DateTime.Now;
+                    project.UpdatedById = user.Id;
+                    project.UpdatedByOrganizationId = user.OrganizationId;
                     unitWork.ProjectRepository.Update(project);
                     unitWork.Save();
                 }
@@ -4987,7 +5132,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse DeleteProjectDocument(int id)
+        public ActionResponse DeleteProjectDocument(int id, int userId)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -5012,10 +5157,21 @@ namespace AIMS.Services
                     return response;
                 }
 
+                var user = unitWork.UserRepository.GetByID(userId);
+                if (user == null)
+                {
+                    mHelper = new MessageHelper();
+                    response.Message = mHelper.GetNotFound("User");
+                    response.Success = false;
+                    return response;
+                }
+
                 unitWork.ProjectDocumentRepository.Delete(projectDocument);
                 unitWork.Save();
 
                 project.DateUpdated = DateTime.Now;
+                project.UpdatedById = user.Id;
+                project.UpdatedByOrganizationId = user.OrganizationId;
                 unitWork.ProjectRepository.Update(project);
                 unitWork.Save();
                 return response;
@@ -5186,7 +5342,9 @@ namespace AIMS.Services
                                 ExchangeRate = model.ExchangeRate,
                                 FundingType = fundingType,
                                 DateUpdated = DateTime.Now,
-                                CreatedBy = createdBy
+                                CreatedBy = createdBy,
+                                UpdatedBy = createdBy,
+                                UpdatedByOrganizationId = createdBy.OrganizationId
                             });
                             await unitWork.SaveAsync();
 

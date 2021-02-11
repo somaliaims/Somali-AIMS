@@ -444,6 +444,7 @@ namespace AIMS.Services
                 }
             }
 
+            var organizationsList = unitWork.OrganizationRepository.GetProjection(o => o.Id != 0, o => new { o.Id, o.OrganizationName });
             var locations = unitWork.LocationRepository.GetProjection(l => l.Id != 0, l => new { l.Id, l.Location });
             var markers = unitWork.MarkerRepository.GetProjection(m => m.Id != 0, m => new { m.Id, m.FieldTitle });
             projects = await unitWork.ProjectRepository.GetWithIncludeAsync(p => p.Id == id, new string[] { "StartingFinancialYear", "EndingFinancialYear", "Sectors", "Sectors.Sector", "Disbursements", "Disbursements.Year", "Locations", "Locations.Location", "Funders", "Funders.Funder", "Implementers", "Implementers.Implementer", "Documents", "Markers", "Markers.Marker" });
@@ -562,6 +563,14 @@ namespace AIMS.Services
                                              select d).ToList();
                 }
 
+                string updatedByOrganization = "";
+                if (project.UpdatedByOrganizationId != null)
+                {
+                    updatedByOrganization = (from org in organizationsList
+                                             where org.Id.Equals(project.UpdatedByOrganizationId)
+                                             select org.OrganizationName).FirstOrDefault();
+                }
+
                 projectsList.Add(new ProjectDetailView()
                 {
                     Id = project.Id,
@@ -573,6 +582,7 @@ namespace AIMS.Services
                     StartDate = project.StartDate.Date.ToString(),
                     EndDate = project.EndDate.Date.ToString(),
                     DateUpdated = project.DateUpdated.Date.ToString(),
+                    LastUpdatedByOrganization = updatedByOrganization,
                     StartingFinancialYear = project.StartingFinancialYear.FinancialYear,
                     EndingFinancialYear = project.EndingFinancialYear.FinancialYear,
                     Funders = fundersList,

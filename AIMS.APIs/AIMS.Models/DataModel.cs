@@ -279,6 +279,11 @@ namespace AIMS.Models
         public DateTime DateUpdated { get; set; }
         public int? CreatedById { get; set; }
         public EFUser CreatedBy { get; set; } = null;
+        [ForeignKey("UpdatedByOrganization")]
+        public int? UpdatedByOrganizationId { get; set; }
+        public EFOrganization UpdatedByOrganization { get; set; } = null;
+        public int? UpdatedById { get; set; }
+        public EFUser UpdatedBy { get; set; } = null;
     }
 
     public class EFEnvelopeTypes
