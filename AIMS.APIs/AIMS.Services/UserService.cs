@@ -111,7 +111,7 @@ namespace AIMS.Services
         /// <param name="userId"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        ActionResponse Delete(int userId, string password);
+        Task<ActionResponse> DeleteAsync(int userId, string password);
 
         /// <summary>
         /// Activates account for the provided user
@@ -1066,7 +1066,7 @@ namespace AIMS.Services
             }
         }
 
-        public ActionResponse Delete(int userId, string password)
+        public async Task<ActionResponse> DeleteAsync(int userId, string password)
         {
             using (var unitWork = new UnitOfWork(context))
             {
@@ -1075,28 +1075,72 @@ namespace AIMS.Services
                 string passwordHash = sHelper.GetPasswordHash(password);
                 var user = unitWork.UserRepository.Get(u => u.Id.Equals(userId) && u.Password.Equals(passwordHash));
 
-                IMessageHelper mHelper;
-                if (user == null)
+                try
                 {
-                    mHelper = new MessageHelper();
-                    response.Success = false;
-                    response.Message = mHelper.IncorrectAccountInformation();
-                    return response;
-                }
+                    IMessageHelper mHelper;
+                    if (user == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.IncorrectAccountInformation();
+                        return response;
+                    }
 
-                if (user.UserType == UserTypes.SuperAdmin || user.UserType == UserTypes.Manager)
+                    if (user.UserType == UserTypes.SuperAdmin || user.UserType == UserTypes.Manager)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Success = false;
+                        response.Message = mHelper.InvalidAccountDeletionAttempt();
+                        return response;
+                    }
+
+                    var strategy = context.Database.CreateExecutionStrategy();
+                    await strategy.ExecuteAsync(async () =>
+                    {
+                        using (var transaction = context.Database.BeginTransaction())
+                        {
+                            var userProjects = unitWork.ProjectRepository.GetManyQueryable(p => p.CreatedById == userId || p.UpdatedById == userId);
+                            if (userProjects.Any())
+                            {
+                                foreach (var project in userProjects)
+                                {
+                                    project.CreatedById = null;
+                                    project.UpdatedById = null;
+                                    unitWork.ProjectRepository.Update(project);
+                                }
+                                await unitWork.SaveAsync();
+                            }
+
+                            var orgMergeRequests = unitWork.OrganizationMergeRequestsRepository.GetManyQueryable(r => r.RequestedById == userId);
+                            if (orgMergeRequests.Any())
+                            {
+                                foreach(var request in orgMergeRequests)
+                                {
+                                    unitWork.OrganizationMergeRequestsRepository.Delete(request);
+                                }
+                                await unitWork.SaveAsync();
+                            }
+
+                            ///Need to work on this, how to tackle this against the user applied for deletion
+                            var userNotifications = unitWork.NotificationsRepository.GetManyQueryable(n => n.TreatmentId == userId);
+                            if (userNotifications.Any())
+                            {
+
+                            }
+                            unitWork.UserRepository.Delete(user);
+                            await unitWork.SaveAsync();
+                        }
+                    });
+                }
+                catch(Exception ex)
                 {
-                    mHelper = new MessageHelper();
                     response.Success = false;
-                    response.Message = mHelper.InvalidAccountDeletionAttempt();
-                    return response;
+                    response.Message = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        response.Message = ex.InnerException.Message;
+                    }
                 }
-                //user.ApprovedBy = null;
-                unitWork.UserRepository.Update(user);
-                unitWork.Save();
-
-                unitWork.UserRepository.Delete(user);
-                unitWork.Save();
                 return response;
             }
         }

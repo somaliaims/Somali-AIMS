@@ -126,7 +126,7 @@ namespace AIMS.APIs.Scheduler
                         }
                     }
 
-                    /*if (!isIATIDownloading)
+                    if (!isIATIDownloading)
                     {
                         //Download latest iati
                         using (var client = new WebClient())
@@ -136,7 +136,7 @@ namespace AIMS.APIs.Scheduler
                         }
                         File.WriteAllText(filePath, xml);
                         service.SetIATIDownloaded();
-                    }*/
+                    }
 
                     var sectorTypesSources = sectorTypeService.GetSectorSources();
                     if (sectorTypesSources.Count() > 0)

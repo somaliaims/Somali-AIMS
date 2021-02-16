@@ -2001,12 +2001,13 @@ namespace AIMS.Services
                                 if (disbursement.DisbursementType == DisbursementTypes.Actual && disbursement.Year.FinancialYear > currentActiveYear)
                                 {
                                     deletedActualDisbursements += disbursement.Amount;
+                                    unitWork.ProjectDisbursementsRepository.Delete(disbursement);
                                 }
-                                else if (disbursement.DisbursementType == DisbursementTypes.Planned && disbursement.Year.FinancialYear < currentActiveYear)
+                                else if (disbursement.DisbursementType == DisbursementTypes.Planned && disbursement.Year.FinancialYear < currentActiveYear && project.EndingFinancialYear.FinancialYear > (currentActiveYear - 1))
                                 {
                                     deletedPlannedDisbursements += disbursement.Amount;
+                                    unitWork.ProjectDisbursementsRepository.Delete(disbursement);
                                 }
-                                unitWork.ProjectDisbursementsRepository.Delete(disbursement);
                             }
                             if (disbursementsToDelete.Any())
                             {
@@ -2427,7 +2428,7 @@ namespace AIMS.Services
                                     deletedActualDisbursements += disbursement.Amount;
                                     unitWork.ProjectDisbursementsRepository.Delete(disbursement);
                                 }
-                                else if (disbursement.DisbursementType == DisbursementTypes.Planned && (disbursement.Year.FinancialYear < currentActiveYear || disbursement.Year.FinancialYear > endingYear))
+                                else if (disbursement.DisbursementType == DisbursementTypes.Planned && (disbursement.Year.FinancialYear < currentActiveYear || disbursement.Year.FinancialYear > endingYear) && project.EndingFinancialYear.FinancialYear > (currentActiveYear - 1))
                                 {
                                     deletedPlannedDisbursements += disbursement.Amount;
                                     unitWork.ProjectDisbursementsRepository.Delete(disbursement);

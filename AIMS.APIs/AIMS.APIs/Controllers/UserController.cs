@@ -270,6 +270,7 @@ namespace AIMS.APIs.Controllers
             return Ok(response);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("EditUserOrganization")]
         public IActionResult EditUserOrganization([FromBody] EditUserOrganization model)
@@ -386,9 +387,10 @@ namespace AIMS.APIs.Controllers
             return Ok(response.Success);
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [HttpPost]
         [Route("DeleteAccount")]
-        public IActionResult Delete(DeleteAccountModel model)
+        public async Task<IActionResult> Delete(DeleteAccountModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -401,7 +403,7 @@ namespace AIMS.APIs.Controllers
                 return BadRequest("Invalid attempt");
             }
             int userId = Convert.ToInt32(userIdVal);
-            var response = userService.Delete(userId, model.Password);
+            var response = await userService.DeleteAsync(userId, model.Password);
             if (!response.Success)
             {
                 return BadRequest(response.Message);

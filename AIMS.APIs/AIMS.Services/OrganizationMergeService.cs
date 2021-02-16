@@ -483,6 +483,17 @@ namespace AIMS.Services
                             await unitWork.SaveAsync();
                         }
 
+                        var updateProjectUpdatedByOrgs = unitWork.ProjectRepository.GetManyQueryable(p => p.UpdatedByOrganizationId != null && orgIds.Contains((int)p.UpdatedByOrganizationId));
+                        if (updateProjectUpdatedByOrgs.Any())
+                        {
+                            foreach (var proj in updateProjectUpdatedByOrgs)
+                            {
+                                proj.UpdatedByOrganizationId = newOrganization.Id;
+                                unitWork.ProjectRepository.Update(proj);
+                            }
+                            await unitWork.SaveAsync();
+                        }
+
                         var orgIdsToDelete = (from o in organizations
                                       select o.Id).ToList<int>();
                         var deleteRequestsForDeleted = unitWork.OrganizationMergeRequestsRepository.GetManyQueryable(r => r.EnvelopeOrganizationId != null && orgIdsToDelete.Contains((int)r.EnvelopeOrganizationId));
