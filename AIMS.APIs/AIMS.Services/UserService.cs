@@ -1125,10 +1125,15 @@ namespace AIMS.Services
                             var userNotifications = unitWork.NotificationsRepository.GetManyQueryable(n => n.TreatmentId == userId);
                             if (userNotifications.Any())
                             {
-
+                                foreach(var notification in userNotifications)
+                                {
+                                    unitWork.NotificationsRepository.Delete(notification);
+                                }
+                                await unitWork.SaveAsync();
                             }
                             unitWork.UserRepository.Delete(user);
                             await unitWork.SaveAsync();
+                            transaction.Commit();
                         }
                     });
                 }
