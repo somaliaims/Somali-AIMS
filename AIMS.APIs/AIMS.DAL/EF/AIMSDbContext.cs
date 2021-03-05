@@ -101,6 +101,7 @@ namespace AIMS.DAL.EF
             modelBuilder.Entity<EFSubLocation>()
                 .HasIndex(s => new { s.SubLocation })
                 .IsUnique();
+
         }
 
         //Creating DB Tables for the Objects
@@ -155,6 +156,7 @@ namespace AIMS.DAL.EF
         public DbSet<EFFinancialYearTransition> FinancialTransitions { get; set; }
         public DbSet<EFDocumentLinks> DocumentLinks { get; set; }
         public DbSet<EFContactMessages> ContactMessages { get; set; }
+        public DbSet<EFSponsorLogos> SponsorLogos { get; set; }
 
         //Overridden SaveChanges to catch full exception details about
         //EntityValidation Exceptions instead of attaching debugger everytime

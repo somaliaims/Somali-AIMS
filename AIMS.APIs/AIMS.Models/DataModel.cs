@@ -376,6 +376,14 @@ namespace AIMS.Models
         public decimal FundsPercentage { get; set; }
     }
 
+    public class EFSponsorLogos
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string LogoPath { get; set; }
+    }
+
    /*public class EFProjectSubLocations
     {
         [ForeignKey("Project")]
