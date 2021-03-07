@@ -178,6 +178,8 @@ namespace AIMS.APIs.AutoMapper
 
             CreateMap<EFSubLocation, SubLocationView>();
 
+            CreateMap<EFSponsorLogos, SponsorsLogosView>();
+
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -1684,6 +1685,25 @@ namespace AIMS.Models
     {
         [Required]
         public string Password { get; set; }
+    }
+
+    public class SponsorsLogosListView
+    {
+        public string HttpPath { get; set; }
+        public List<SponsorsLogosView> SponsorLogos { get; set; }
+    }
+
+    public class SponsorsLogosView
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string LogoPath { get; set; }
+    }
+
+    public class SponsorLogoModel
+    {
+        public string Title { get; set; }
+        public IFormFile Logo { get; set; }
     }
 
     /// <summary>

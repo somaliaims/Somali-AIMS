@@ -64,6 +64,7 @@ namespace AIMS.DAL.UnitOfWork
         private GenericRepository<EFFinancialYearTransition> financialYearTransitionRepository;
         private GenericRepository<EFDocumentLinks> documentLinksRepository;
         private GenericRepository<EFContactMessages> contactMessagesRepository;
+        private GenericRepository<EFSponsorLogos> sponsorLogosRepository;
 
         public UnitOfWork(AIMSDbContext dbContext)
         {
@@ -568,6 +569,16 @@ namespace AIMS.DAL.UnitOfWork
                 if (this.documentLinksRepository == null)
                     this.documentLinksRepository = new GenericRepository<EFDocumentLinks>(context);
                 return this.documentLinksRepository;
+            }
+        }
+
+        public GenericRepository<EFSponsorLogos> SponsorLogosRepository
+        {
+            get
+            {
+                if (this.sponsorLogosRepository == null)
+                    this.sponsorLogosRepository = new GenericRepository<EFSponsorLogos>(context);
+                return this.sponsorLogosRepository;
             }
         }
 
