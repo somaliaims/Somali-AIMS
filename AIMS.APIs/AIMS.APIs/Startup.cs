@@ -165,6 +165,7 @@ namespace AIMS.APIs
             services.AddScoped<IFinancialYearTransitionService, FinancialYearTransitionService>();
             services.AddScoped<IDocumentLinkService, DocumentLinkService>();
             services.AddScoped<IContactMessageService, ContactMessageService>();
+            services.AddScoped<ISponsorLogoService, SponsorLogoService>();
             services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddHttpClient();

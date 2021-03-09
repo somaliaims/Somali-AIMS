@@ -32,37 +32,24 @@ namespace AIMS.APIs.Controllers
         }
 
         [HttpPost, DisableRequestSizeLimit]
-        public IActionResult Post([FromBody]SponsorLogoModel model)
+        public IActionResult Post([FromForm]SponsorLogoModel model)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                string webRoot =  hostEnvironment.WebRootPath;
-                service.SetLogoDirectoryPath(webRoot);
-                string logoDirectory = service.GetLogoDirectoryPath();
-                string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Logo.FileName;
-                var file = Request.Form.Files[0];
-
-                if (file.Length > 0)
-                {
-                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-                    var fullPath = Path.Combine(logoDirectory, fileName);
-
-                    using (var stream = new FileStream(fullPath, FileMode.Create))
-                    {
-                        file.CopyTo(stream);
-                    }
-
-                    return Ok();
-                }
-                else
-                {
-                    return BadRequest();
-                }
+                return BadRequest(ModelState);
             }
-            catch (Exception ex)
+
+            string webRoot =  hostEnvironment.WebRootPath;
+            service.SetLogoDirectoryPath(webRoot);
+            string logoDirectory = service.GetLogoDirectoryPath();
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Logo.FileName;
+            var file = Request.Form.Files[0];
+            var response = service.SaveLogo(file, model.Title, uniqueFileName);
+            if (!response.Success)
             {
-                return StatusCode(500, $"Internal server error: {ex}");
+                return BadRequest(response.Message);
             }
+            return Ok(response.ReturnedId);
         }
     }
 }

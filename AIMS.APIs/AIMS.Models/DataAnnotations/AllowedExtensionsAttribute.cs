@@ -9,7 +9,7 @@ namespace AIMS.Models.DataAnnotations
 {
     public class AllowedExtensionsAttribute : ValidationAttribute
     {
-        private readonly List<string> extensions;
+        private List<string> extensions = new List<string>();
         public AllowedExtensionsAttribute(string[] exts)
         {
             foreach(var ext in exts)
@@ -36,7 +36,7 @@ namespace AIMS.Models.DataAnnotations
 
         public string GetErrorMessage()
         {
-            return $"This photo extension is not allowed!";
+            return $"This image extension is not allowed! valid extensions are (.jpg, .gif, .png)";
         }
     }
 }

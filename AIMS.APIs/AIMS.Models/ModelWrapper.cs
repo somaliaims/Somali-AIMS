@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AIMS.Models.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -1703,10 +1704,10 @@ namespace AIMS.Models
     public class SponsorLogoModel
     {
         public string Title { get; set; }
-        [Required(ErrorMessage = "Please select a file.")]
+        [Required(ErrorMessage = "Please provide the logo file.")]
         [DataType(DataType.Upload)]
         [MaxFileSize(5 * 1024 * 1024)]
-        [AllowedExtensions(new string[] { ".jpg", ".png" })]
+        [AllowedExtensions(new string[] { ".jpg", ".jpeg", ".png", ".gif" })]
         public IFormFile Logo { get; set; }
     }
 
