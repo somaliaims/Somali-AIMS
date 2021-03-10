@@ -51,5 +51,20 @@ namespace AIMS.APIs.Controllers
             }
             return Ok(response.ReturnedId);
         }
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid Id provided for sponsor");
+            }
+            var response = service.Delete(id);
+            if (!response.Success)
+            {
+                return BadRequest(response.Message);
+            }
+            return Ok(true);
+        }
     }
 }

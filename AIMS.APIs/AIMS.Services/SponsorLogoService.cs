@@ -1,6 +1,7 @@
 ﻿using AIMS.DAL.EF;
 using AIMS.DAL.UnitOfWork;
 using AIMS.Models;
+using AIMS.Services.Helpers;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -32,6 +33,13 @@ namespace AIMS.Services
         /// <param name="title"></param>
         /// <returns></returns>
         ActionResponse SaveLogo(IFormFile file, string title, string fileName);
+
+        /// <summary>
+        /// Deletes a logo
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ActionResponse Delete(int id);
 
         /// <summary>
         /// Gets logo directory path
@@ -106,6 +114,42 @@ namespace AIMS.Services
                 }
                 catch(Exception ex)
                 {
+                    response.Message = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        response.Message = ex.InnerException.Message;
+                    }
+                }
+                return response;
+            }
+        }
+
+        public ActionResponse Delete(int id)
+        {
+            using (var unitWork = new UnitOfWork(context))
+            {
+                ActionResponse response = new ActionResponse();
+                try
+                {
+                    IMessageHelper mHelper;
+                    var sponsor = unitWork.SponsorLogosRepository.GetByID(id);
+                    if (sponsor == null)
+                    {
+                        mHelper = new MessageHelper();
+                        response.Message = mHelper.GetNotFound("Sponsor");
+                        response.Success = false;
+                        return response;
+                    }
+
+                    string fileToDelete = Path.Combine(sWebRootFolder, sponsor.LogoPath);
+                    unitWork.SponsorLogosRepository.Delete(sponsor);
+                    unitWork.Save();
+
+                    File.Delete(fileToDelete);
+                }
+                catch(Exception ex)
+                {
+                    response.Success = false;
                     response.Message = ex.Message;
                     if (ex.InnerException != null)
                     {
