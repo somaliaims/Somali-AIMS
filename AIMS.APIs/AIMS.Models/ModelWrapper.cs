@@ -1690,7 +1690,7 @@ namespace AIMS.Models
 
     public class SponsorsLogosListView
     {
-        public string HttpPath { get; set; }
+        public string HttpBaseUrl { get; set; }
         public List<SponsorsLogosView> SponsorLogos { get; set; }
     }
 

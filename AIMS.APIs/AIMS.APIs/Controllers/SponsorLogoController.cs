@@ -23,11 +23,14 @@ namespace AIMS.APIs.Controllers
         {
             hostEnvironment = hostingEnvironment;
             service = logoService;
+            string webRoot = hostEnvironment.WebRootPath;
+            service.SetLogoDirectoryPath(webRoot);
         }
 
         [HttpGet]
         public IActionResult Get()
         {
+
             return Ok(service.GetAll());
         }
 
@@ -38,9 +41,6 @@ namespace AIMS.APIs.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            string webRoot =  hostEnvironment.WebRootPath;
-            service.SetLogoDirectoryPath(webRoot);
             string logoDirectory = service.GetLogoDirectoryPath();
             string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Logo.FileName;
             var file = Request.Form.Files[0];

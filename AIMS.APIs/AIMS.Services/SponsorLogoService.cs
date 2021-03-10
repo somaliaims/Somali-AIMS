@@ -71,7 +71,7 @@ namespace AIMS.Services
         {
             using (var unitWork = new UnitOfWork(context))
             {
-                SponsorsLogosListView logos = new SponsorsLogosListView() { HttpPath = sWebRootFolder };
+                SponsorsLogosListView logos = new SponsorsLogosListView() { HttpBaseUrl = sWebRootFolder };
                 logos.SponsorLogos = mapper.Map<List<SponsorsLogosView>>(unitWork.SponsorLogosRepository.GetManyQueryable(l => l.Id != 0));
                 return logos;
             }
