@@ -1157,7 +1157,7 @@ namespace AIMS.Services
 
             try
             {
-                var todaysDate = DateTime.Now;
+                /*var todaysDate = DateTime.Now;
                 var dateForDeletion = todaysDate.AddDays(-365);
                 var dateForInactive = todaysDate.AddDays(-350);
                 IMessageHelper mHelper = new MessageHelper();
@@ -1195,7 +1195,7 @@ namespace AIMS.Services
                 {
                     unitWork.NotificationsRepository.InsertMultiple(notificationsList);
                     unitWork.Save();
-                }
+                }*/
             }
             catch (Exception ex)
             {

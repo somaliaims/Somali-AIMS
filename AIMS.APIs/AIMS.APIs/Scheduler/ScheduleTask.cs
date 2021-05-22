@@ -168,7 +168,7 @@ namespace AIMS.APIs.Scheduler
                     File.WriteAllText(sectorsVocabPath, cleanedSectorVocabJson);
                     File.WriteAllText(organizationTypesPath, cleanedOrgTypesVocabJson);
 
-                    userService.SetNotificationsForUsers();
+                    //userService.SetNotificationsForUsers();
                     var sectorResponse = service.ExtractAndSaveIATISectors(filePath, sectorsVocabPath);
                     if (sectorTypesSources.Count() > 0)
                     {
@@ -236,7 +236,6 @@ namespace AIMS.APIs.Scheduler
                         emailService.SendEmailForPendingMessages(emailModel, message.SenderName, message.SenderEmail, message.ProjectTitle);
                     }
                     contactService.SetMessagesNotifiedAsync().GetAwaiter().GetResult();
-
                     projectDeletionService.SendPendingDeletionRequestsToManagement();
 
                     //File cleanup
@@ -263,10 +262,7 @@ namespace AIMS.APIs.Scheduler
 
                 catch (Exception ex)
                 {
-                    if (!isIATIDownloading)
-                    {
-                        service.SetIATIDownloaded();
-                    }
+                    service.SetIATIDownloaded();
                     errorsFilePath = Path.Combine(sWebRootFolder, errorsFile);
                     if (!File.Exists(errorsFilePath))
                     {

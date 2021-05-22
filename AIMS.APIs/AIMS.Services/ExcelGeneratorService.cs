@@ -120,6 +120,7 @@ namespace AIMS.Services
 
                     IWorkbook workbook;
                     workbook = new XSSFWorkbook();
+                    Thread.CurrentThread.CurrentCulture = new CultureInfo("en-Us");
                     ISheet excelSheet = workbook.CreateSheet("Report");
 
                     ICellStyle titleStyle = workbook.CreateCellStyle();
@@ -207,6 +208,12 @@ namespace AIMS.Services
                         if (year.FinancialYear < projectsReport.CurrentFinancialYear)
                         {
                             yearCell.SetCellValue("Actual disbursements " + year.Label);
+                            if (projectsReport.PreviousPlannedYears.Contains(year.FinancialYear))
+                            {
+                                yearCell.CellStyle = headerStyle;
+                                yearCell = row.CreateCell(++colIndex);
+                                yearCell.SetCellValue("Planned disbursements " + year.Label);
+                            }
                         }
                         else if (year.FinancialYear == projectsReport.CurrentFinancialYear)
                         {
@@ -270,11 +277,11 @@ namespace AIMS.Services
 
                         var startYearCell = row.CreateCell(++col);
                         startYearCell.SetCellValue(project.StartingFinancialYear.ToString());
-                        startYearCell.CellStyle = dataCellStyle;
+                        startYearCell.CellStyle = numericCellStyle;
 
                         var endYearCell = row.CreateCell(++col);
                         endYearCell.SetCellValue(project.EndingFinancialYear.ToString());
-                        endYearCell.CellStyle = dataCellStyle;
+                        endYearCell.CellStyle = numericCellStyle;
 
                         var funderNames = string.Join(", ", (from f in project.Funders
                                                        select f.Name));
@@ -324,6 +331,24 @@ namespace AIMS.Services
                                     disbursementCell.SetCellValue(Convert.ToDouble(actualDisbursement.Disbursement));
                                 }
                                 disbursementCell.CellStyle = numericCellStyle;
+
+                                if (yr < projectsReport.CurrentFinancialYear && projectsReport.PreviousPlannedYears.Contains(yr))
+                                {
+                                    plannedDisbursement = (from disb in disbursements
+                                                          where disb.Year == yr && disb.DisbursementType == "Planned"
+                                                          select disb).FirstOrDefault();
+
+                                    var disbursementCellPlanned = row.CreateCell(++col, CellType.Numeric);
+                                    if (plannedDisbursement == null)
+                                    {
+                                        disbursementCellPlanned.SetCellValue("0");
+                                    }
+                                    else
+                                    {
+                                        disbursementCellPlanned.SetCellValue(Convert.ToDouble(plannedDisbursement.Disbursement));
+                                    }
+                                    disbursementCellPlanned.CellStyle = numericCellStyle;
+                                }
                             }
                             
 
@@ -344,7 +369,6 @@ namespace AIMS.Services
                                 }
                                 plannedDisbursementCell.CellStyle = numericCellStyle;
                             }
-
                         }
 
                         var projectSectors = project.Sectors;
@@ -354,14 +378,14 @@ namespace AIMS.Services
                             var retrieveSector = (from s in projectSectors
                                                   where s.Name.Equals(sector.Sector, StringComparison.OrdinalIgnoreCase)
                                                   select s).FirstOrDefault();
-
                             if (retrieveSector != null)
                             {
-                                projectSectorCell.SetCellValue(retrieveSector.FundsPercentage.ToString());
+                                double sectorPercentage = Convert.ToDouble(retrieveSector.FundsPercentage);
+                                projectSectorCell.SetCellValue(sectorPercentage);
                             }
                             else
                             {
-                                projectSectorCell.SetCellValue("0");
+                                projectSectorCell.SetCellValue(0);
                             }
                             projectSectorCell.CellStyle = numericCellStyle;
                         }
@@ -373,14 +397,14 @@ namespace AIMS.Services
                             var retrieveLocation = (from l in projectLocations
                                                     where l.Name.Equals(location.Location, StringComparison.OrdinalIgnoreCase)
                                                     select l).FirstOrDefault();
-
                             if (retrieveLocation != null)
                             {
-                                projectLocationCell.SetCellValue(retrieveLocation.FundsPercentage.ToString());
+                                double locationPercentage = Convert.ToDouble(retrieveLocation.FundsPercentage);
+                                projectLocationCell.SetCellValue(locationPercentage);
                             }
                             else
                             {
-                                projectLocationCell.SetCellValue("0");
+                                projectLocationCell.SetCellValue(0);
                             }
                             projectLocationCell.CellStyle = numericCellStyle;
                         }

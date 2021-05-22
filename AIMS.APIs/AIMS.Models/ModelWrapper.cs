@@ -910,6 +910,7 @@ namespace AIMS.Models
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public bool UseDefaultCurrency { get; set; }
+        public List<int> PreviousPlannedYears { get; set; }
         public List<FinancialYearMiniView> FinancialYears { get; set; }
         public List<ProjectDetailSectorView> Sectors { get; set; }
         public List<ProjectDetailLocationView> Locations { get; set; }

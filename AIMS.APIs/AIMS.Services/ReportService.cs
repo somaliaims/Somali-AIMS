@@ -178,6 +178,7 @@ namespace AIMS.Services
             ProjectReportView projectsReport = new ProjectReportView();
             List<ProjectDetailView> projectsList = new List<ProjectDetailView>();
             List<ProjectDetailSectorView> sectorsList = new List<ProjectDetailSectorView>();
+            List<int> previousPlannedYears = new List<int>();
             IQueryable<EFProject> projects;
             string defaultCurrency = "", projectCurrency = "";
             decimal defaultCurrencyExchangeRate = 1, projectValue = 0;
@@ -190,7 +191,7 @@ namespace AIMS.Services
                 {
                     defaultCurrency = currency.Currency;
                 }
-                var exchangeRate = unitWork.ManualRatesRepository.GetOne(r => r.Year == DateTime.Now.Year);
+                var exchangeRate = unitWork.ManualRatesRepository.GetOne(r => r.Currency == defaultCurrency && r.Year == DateTime.Now.Year);
                 if (exchangeRate != null)
                 {
                     defaultCurrencyExchangeRate = exchangeRate.ExchangeRate;
@@ -361,11 +362,24 @@ namespace AIMS.Services
                 {
                     projectCurrency = defaultCurrency;
                     var calculatedExchangeRate = (defaultCurrencyExchangeRate / project.ExchangeRate);
-                    projectValue = (calculatedExchangeRate * projectValue);
+                    projectValue = Math.Round(calculatedExchangeRate * projectValue, 2);
                     
                     foreach(var disbursement in project.Disbursements)
                     {
-                        disbursement.Amount = (defaultCurrencyExchangeRate * disbursement.Amount);
+                        disbursement.Amount = Math.Round(calculatedExchangeRate * disbursement.Amount, 2);
+                    }
+                }
+
+                var plannedYears = (from y in project.Disbursements
+                                    where y.DisbursementType == DisbursementTypes.Planned &&
+                                    y.Year.FinancialYear < currentActiveYear
+                                    select y.Year.FinancialYear);
+               
+                foreach(int yr in plannedYears)
+                {
+                    if (!previousPlannedYears.Contains(yr))
+                    {
+                        previousPlannedYears.Add(yr);
                     }
                 }
 
@@ -401,6 +415,7 @@ namespace AIMS.Services
             projectsReport.FinancialYears = yearsView;
             projectsReport.StartingFinancialYear = startingFinancialYear;
             projectsReport.EndingFinancialYear = endingFinancialYear;
+            projectsReport.PreviousPlannedYears = previousPlannedYears;
             projectsReport.Markers = markersList;
             projectsReport.Locations = locationsList;
             projectsReport.Sectors = sectorsList;
@@ -595,6 +610,7 @@ namespace AIMS.Services
                 });
             }
             projectsReport.FinancialYears = yearsView;
+            projectsReport.PreviousPlannedYears = new List<int>();
             projectsReport.CurrentFinancialYear = currentActiveYear;
             projectsReport.StartingFinancialYear = startingFinancialYear;
             projectsReport.EndingFinancialYear = endingFinancialYear;

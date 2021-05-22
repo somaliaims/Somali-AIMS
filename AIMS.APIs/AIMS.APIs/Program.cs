@@ -45,6 +45,7 @@ namespace AIMS.APIs
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
             .UseContentRoot(Directory.GetCurrentDirectory())
+            .UseWebRoot("wwwroot")
             .ConfigureAppConfiguration((builderContext, config) =>
             {
                 IWebHostEnvironment env = builderContext.HostingEnvironment;
