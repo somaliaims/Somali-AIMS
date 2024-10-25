@@ -141,7 +141,7 @@ namespace AIMS.Services
                         {
                             AIMSTitle = "AIMS",
                             AIMSTitleBarText = "AIMS",
-                            IntroductionHeading = "Introduction",
+                            IntroductionHeading = "Introduction - Website is under construction",
                             IntroductionText = "Welcome to AIMS",
                             FaviconPath = fileName
                         });
