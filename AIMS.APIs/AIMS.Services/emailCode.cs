@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+
+using System;
 using System.Net.Mail;
 using System.Net;
 using System.Configuration;
@@ -6,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace AIMS.Services
 {
-    internal class emailCode // Or EmailService if you prefer
+    internal class EmailCode // Correct class name: EmailCode
     {
         private string _smtpServer;
         private int _smtpPort;
         private string _smtpUser;
         private string _smtpPassword;
 
-        public emailCode() // Constructor to read config
+        public EmailCode() // Constructor to read config
         {
             try
             {
